@@ -34,31 +34,47 @@ You can install R packages using the following syntax:
 install.packages("INSERT_PACKAGE_NAME_HERE")
 ```
 
-For instance, you can use the following code to install the `nflfastR` package:
+For instance, you can use the following code to install the `nflreadr` package:
 
 ```{r}
 #| eval: false
 
-install.packages("nflfastR")
+install.packages("nflreadr")
 ```
 
 ## Load Packages {#sec-loadPackages}
 
 ```{r}
+library("nflreadr")
 library("nflfastR")
+library("progressr")
 library("tidyverse")
 ```
 
 ## Download Football Data {#sec-downloadFootballData}
 
+### Player Info {#sec-downloadPlayerInfo}
+
 ### Play-By-Play Data {#sec-downloadPlayByPlay}
 
-To download play-by-play data from prior weeks and seasons, we can use the `load_pbp()` function of the `nflfastR` package:
+To download play-by-play data from prior weeks and seasons, we can use the `load_pbp()` function of the `nflreadr` package.
+We add a progress bar using the `with_progress()` function from the `progressr` package because it takes a while to run.
+
+::: {#nte-downloadPlayByPlay .callout-note title="Downloading play-by-play data"}
+Note: the following code takes a while to run.
+:::
 
 ```{r}
 #| eval: false
 
-nfl_pbp <- nflfastR::load_pbp(seasons = TRUE)
+nfl_pbp <- progressr::with_progress(
+  nflreadr::load_pbp(seasons = TRUE))
+```
+
+```{r}
+#| include: false
+
+nfl_pbp <- nflreadr::load_pbp(seasons = TRUE)
 ```
 
 ```{r}
@@ -76,54 +92,182 @@ save(
 ```{r}
 #| include: false
 
-library("here")
-
 load(file = here("data", "nfl_pbp.RData"))
 ```
 
-### Player Info {#sec-downloadPlayerInfo}
+### Historical Weekly Actual Player Statistics {#sec-downloadActualStats}
+
+We can download historical week-by-week actual player statistics using the `load_player_stats()` function from the `nflreadr` package:
+
+```{r}
+#| eval: false
+
+nfl_actualStats_offense_weekly <- progressr::with_progress(
+  nflreadr::load_player_stats(
+    seasons = TRUE,
+    stat_type = "offense"))
+
+nfl_actualStats_defense_weekly <- progressr::with_progress(
+  nflreadr::load_player_stats(
+    seasons = TRUE,
+    stat_type = "defense"))
+
+nfl_actualStats_kicking_weekly <- progressr::with_progress(
+  nflreadr::load_player_stats(
+    seasons = TRUE,
+    stat_type = "kicking"))
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+save(
+  nfl_actualStats_offense_weekly, nfl_actualStats_defense_weekly, nfl_actualStats_kicking_weekly,
+  file = here("data", "nfl_actualStats_weekly.RData")
+)
+```
+
+```{r}
+#| include: false
+
+load(file = here("data", "nfl_actualStats_weekly.RData"))
+```
 
 ## Calculations {#sec-calculations}
 
 ### Historical Actual Player Statistics {#sec-calculateActualStats}
 
-TODO: compute player stats for defenses (`calculate_player_stats_def()`) and kickers (`calculate_player_stats_kicking()`).
+In addition to week-by-week actual player statistics, we can also compute historical actual player statistics as a function of different timeframes, including season-by-season and career statistics.
 
-Note: The following code takes a while to run.
+#### Career Statistics {#sec-calculateActualCareerStats}
 
-First, subset the data by year:
+First, we can compute the players' career statistics using the `calculate_player_stats()`, `calculate_player_stats_def()`, and `calculate_player_stats_kicking()` functions from the `nflfastR` package for offensive players, defensive players, and kickers, respectively.
+
+::: {#nte-calculateActualCareerStats .callout-note title="Calculating players' career statistics"}
+Note: the following code takes a while to run.
+:::
 
 ```{r}
 #| eval: false
 
-nfl_pbp_1999 <- nfl_pbp %>% filter(season == 1999)
-nfl_pbp_2000 <- nfl_pbp %>% filter(season == 2000)
-nfl_pbp_2001 <- nfl_pbp %>% filter(season == 2001)
-nfl_pbp_2002 <- nfl_pbp %>% filter(season == 2002)
-nfl_pbp_2003 <- nfl_pbp %>% filter(season == 2003)
-nfl_pbp_2004 <- nfl_pbp %>% filter(season == 2004)
-nfl_pbp_2005 <- nfl_pbp %>% filter(season == 2005)
-nfl_pbp_2006 <- nfl_pbp %>% filter(season == 2006)
-nfl_pbp_2007 <- nfl_pbp %>% filter(season == 2007)
-nfl_pbp_2008 <- nfl_pbp %>% filter(season == 2008)
-nfl_pbp_2009 <- nfl_pbp %>% filter(season == 2009)
-nfl_pbp_2010 <- nfl_pbp %>% filter(season == 2010)
-nfl_pbp_2011 <- nfl_pbp %>% filter(season == 2011)
-nfl_pbp_2012 <- nfl_pbp %>% filter(season == 2012)
-nfl_pbp_2013 <- nfl_pbp %>% filter(season == 2013)
-nfl_pbp_2014 <- nfl_pbp %>% filter(season == 2014)
-nfl_pbp_2015 <- nfl_pbp %>% filter(season == 2015)
-nfl_pbp_2016 <- nfl_pbp %>% filter(season == 2016)
-nfl_pbp_2017 <- nfl_pbp %>% filter(season == 2017)
-nfl_pbp_2018 <- nfl_pbp %>% filter(season == 2018)
-nfl_pbp_2019 <- nfl_pbp %>% filter(season == 2019)
-nfl_pbp_2020 <- nfl_pbp %>% filter(season == 2020)
-nfl_pbp_2021 <- nfl_pbp %>% filter(season == 2021)
-nfl_pbp_2022 <- nfl_pbp %>% filter(season == 2022)
-nfl_pbp_2023 <- nfl_pbp %>% filter(season == 2023)
+nfl_actualStats_offense_career <- nflfastR::calculate_player_stats(
+  nfl_pbp,
+  weekly = FALSE)
+
+nfl_actualStats_defense_career <- nflfastR::calculate_player_stats_def(
+  nfl_pbp,
+  weekly = FALSE)
+
+nfl_actualStats_kicking_career <- nflfastR::calculate_player_stats_kicking(
+  nfl_pbp,
+  weekly = FALSE)
 ```
 
-Second, compute the weekly stats:
+```{r}
+#| eval: false
+#| include: false
+
+save(
+  nfl_actualStats_offense_career, nfl_actualStats_defense_career, nfl_actualStats_kicking_career,
+  file = here("data", "nfl_actualStats_career.RData")
+)
+```
+
+```{r}
+#| include: false
+
+load(file = here("data", "nfl_actualStats_career.RData"))
+```
+
+#### Season-by-Season Statistics {#sec-calculateActualSeasonalStats}
+
+Second, we can compute the players' season-by-season statistics.
+
+```{r}
+seasons <- unique(nfl_pbp$season)
+
+nfl_pbp_seasonalList <- list()
+nfl_actualStats_offense_seasonalList <- list()
+nfl_actualStats_defense_seasonalList <- list()
+nfl_actualStats_kicking_seasonalList <- list()
+```
+
+::: {#nte-calculateActualSeasonalStats .callout-note title="Calculating players' season-by-season statistics"}
+Note: the following code takes a while to run.
+:::
+
+```{r}
+#| eval: false
+
+pb <- txtProgressBar(
+  min = 0,
+  max = length(seasons),
+  style = 3)
+
+for(i in 1:length(seasons)){
+  # Subset play-by-play data by season
+  nfl_pbp_seasonalList[[i]] <- nfl_pbp %>% 
+    filter(season == seasons[i])
+  
+  # Compute actual statistics by season
+  nfl_actualStats_offense_seasonalList[[i]] <- 
+    nflfastR::calculate_player_stats(
+      nfl_pbp_seasonalList[[i]],
+      weekly = FALSE)
+
+  nfl_actualStats_defense_seasonalList[[i]] <- 
+    nflfastR::calculate_player_stats_def(
+      nfl_pbp_seasonalList[[i]],
+      weekly = FALSE)
+
+  nfl_actualStats_kicking_seasonalList[[i]] <- 
+    nflfastR::calculate_player_stats_kicking(
+      nfl_pbp_seasonalList[[i]],
+      weekly = FALSE)
+
+  nfl_actualStats_offense_seasonalList[[i]]$season <- seasons[i]
+  nfl_actualStats_defense_seasonalList[[i]]$season <- seasons[i]
+  nfl_actualStats_kicking_seasonalList[[i]]$season <- seasons[i]
+  
+  print(
+    paste("Completed computing projections for season: ", seasons[i], sep = ""))
+
+  # Update the progress bar
+  setTxtProgressBar(pb, i)
+}
+
+# Close the progress bar
+close(pb)
+
+nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonalList %>% 
+  bind_rows()
+nfl_actualStats_defense_seasonal <- nfl_actualStats_defense_seasonalList %>% 
+  bind_rows()
+nfl_actualStats_kicking_seasonal <- nfl_actualStats_kicking_seasonalList %>% 
+  bind_rows()
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+save(
+  nfl_actualStats_offense_seasonal, nfl_actualStats_defense_seasonal, nfl_actualStats_kicking_seasonal,
+  file = here("data", "nfl_actualStats_seasonal.RData")
+)
+```
+
+```{r}
+#| include: false
+
+load(file = here("data", "nfl_actualStats_seasonal.RData"))
+```
+
+#### Week-by-Week Statistics {#sec-calculateActualWeeklyStats}
+
+We already load players' week-by-week statistics [above](#downloadActualStats).
+Nevertheless, we could compute players' weekly statistics from the play-by-play data using the following syntax:
 
 ```{r}
 #| eval: false
@@ -133,213 +277,4 @@ nfl_actualStats_weekly <- nflfastR::calculate_player_stats(
   weekly = TRUE)
 ```
 
-```{r}
-#| eval: false
-#| include: false
-
-save(
-  nfl_actualStats_weekly,
-  file = here("data", "nfl_actualStats_weekly.RData")
-)
-```
-
-```{r}
-#| include: false
-
-library("here")
-
-load(file = here("data", "nfl_actualStats_weekly.RData"))
-```
-
-Third, compute the career stats:
-
-```{r}
-#| eval: false
-
-nfl_actualStats_career <- nflfastR::calculate_player_stats(
-  nfl_pbp,
-  weekly = FALSE)
-```
-
-```{r}
-#| eval: false
-#| include: false
-
-save(
-  nfl_actualStats_career,
-  file = here("data", "nfl_actualStats_career.RData")
-)
-```
-
-```{r}
-#| include: false
-
-library("here")
-
-load(file = here("data", "nfl_actualStats_career.RData"))
-```
-
-Fourth, compute seasonal stats by year:
-
-```{r}
-#| eval: false
-
-nfl_actualStats_seasonal_1999 <- nflfastR::calculate_player_stats(
-  nfl_pbp_1999,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2000 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2000,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2001 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2001,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2002 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2002,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2003 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2003,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2004 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2004,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2005 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2005,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2006 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2006,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2007 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2007,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2008 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2008,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2009 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2009,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2010 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2010,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2011 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2011,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2012 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2012,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2013 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2013,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2014 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2014,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2015 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2015,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2016 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2016,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2017 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2017,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2018 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2018,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2019 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2019,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2020 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2020,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2021 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2021,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2022 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2022,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal_2023 <- nflfastR::calculate_player_stats(
-  nfl_pbp_2023,
-  weekly = FALSE)
-
-nfl_actualStats_seasonal <- bind_rows(
-  nfl_actualStats_seasonal_1999,
-  nfl_actualStats_seasonal_2000,
-  nfl_actualStats_seasonal_2001,
-  nfl_actualStats_seasonal_2002,
-  nfl_actualStats_seasonal_2003,
-  nfl_actualStats_seasonal_2004,
-  nfl_actualStats_seasonal_2005,
-  nfl_actualStats_seasonal_2006,
-  nfl_actualStats_seasonal_2007,
-  nfl_actualStats_seasonal_2008,
-  nfl_actualStats_seasonal_2009,
-  nfl_actualStats_seasonal_2010,
-  nfl_actualStats_seasonal_2011,
-  nfl_actualStats_seasonal_2012,
-  nfl_actualStats_seasonal_2013,
-  nfl_actualStats_seasonal_2014,
-  nfl_actualStats_seasonal_2015,
-  nfl_actualStats_seasonal_2016,
-  nfl_actualStats_seasonal_2017,
-  nfl_actualStats_seasonal_2018,
-  nfl_actualStats_seasonal_2019,
-  nfl_actualStats_seasonal_2020,
-  nfl_actualStats_seasonal_2021,
-  nfl_actualStats_seasonal_2022,
-  nfl_actualStats_seasonal_2023,
-  .id = "id"
-)
-
-nfl_actualStats_seasonal$season <- NA
-
-nfl_actualStats_seasonal$id <- as.integer(nfl_actualStats_seasonal$id)
-
-for(i in 1:max(nfl_actualStats_seasonal$id)){
-  nfl_actualStats_seasonal$season[which(nfl_actualStats_seasonal$id == i)] <- 
-    1998 + i
-}
-```
-
-```{r}
-#| eval: false
-#| include: false
-
-save(
-  nfl_actualStats_seasonal,
-  file = here("data", "nfl_actualStats_seasonal.RData")
-)
-```
-
-```{r}
-#| include: false
-
-library("here")
-
-load(file = here("data", "nfl_actualStats_seasonal.RData"))
-```
-
 ### Historical Actual Fantasy Points {#sec-calculateActualPoints}
-
