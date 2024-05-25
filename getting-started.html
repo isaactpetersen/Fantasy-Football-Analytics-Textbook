@@ -233,6 +233,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
   </ul>
 </li>
   <li><a href="#sec-calculateActualPoints" id="toc-sec-calculateActualPoints" class="nav-link" data-scroll-target="#sec-calculateActualPoints"><span class="header-section-number">3.6.2</span> Historical Actual Fantasy Points</a></li>
+  <li><a href="#sec-calculateActualPoints" id="toc-sec-calculateActualPoints" class="nav-link" data-scroll-target="#sec-calculateActualPoints"><span class="header-section-number">3.6.3</span> Player Age</a></li>
   </ul>
 </li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/getting-started.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -332,7 +333,8 @@ Note&nbsp;3.1: If you are in Dr.&nbsp;Petersen’s class
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">library</span>(<span class="st">"nflreadr"</span>)</span>
 <span id="cb4-2"><a href="#cb4-2"></a><span class="fu">library</span>(<span class="st">"nflfastR"</span>)</span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="fu">library</span>(<span class="st">"progressr"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="fu">library</span>(<span class="st">"lubridate"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="sec-downloadFootballData" class="level2" data-number="3.4"><h2 data-number="3.4" class="anchored" data-anchor-id="sec-downloadFootballData">
@@ -782,6 +784,185 @@ Note&nbsp;3.4: Calculating players’ season-by-season statistics
 </div>
 </section></section><section id="sec-calculateActualPoints" class="level3" data-number="3.6.2"><h3 data-number="3.6.2" class="anchored" data-anchor-id="sec-calculateActualPoints">
 <span class="header-section-number">3.6.2</span> Historical Actual Fantasy Points</h3>
+</section><section id="sec-calculateActualPoints" class="level3" data-number="3.6.3"><h3 data-number="3.6.3" class="anchored" data-anchor-id="sec-calculateActualPoints">
+<span class="header-section-number">3.6.3</span> Player Age</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># Reshape from wide to long format</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a>nfl_actualStats_offense_weekly_long <span class="ot">&lt;-</span> nfl_actualStats_offense_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb29-3"><a href="#cb29-3"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb29-4"><a href="#cb29-4"></a>    <span class="at">cols =</span> <span class="fu">c</span>(recent_team, opponent_team),</span>
+<span id="cb29-5"><a href="#cb29-5"></a>    <span class="at">names_to =</span> <span class="st">"role"</span>,</span>
+<span id="cb29-6"><a href="#cb29-6"></a>    <span class="at">values_to =</span> <span class="st">"team"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7"></a></span>
+<span id="cb29-8"><a href="#cb29-8"></a><span class="co"># Perform separate inner join operations for the home_team and away_team</span></span>
+<span id="cb29-9"><a href="#cb29-9"></a>nfl_actualStats_offense_weekly_home <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb29-10"><a href="#cb29-10"></a>  nfl_actualStats_offense_weekly_long,</span>
+<span id="cb29-11"><a href="#cb29-11"></a>  nfl_schedules,</span>
+<span id="cb29-12"><a href="#cb29-12"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"team"</span> <span class="ot">=</span> <span class="st">"home_team"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-13"><a href="#cb29-13"></a>  <span class="fu">mutate</span>(<span class="at">home_away =</span> <span class="st">"home_team"</span>)</span>
+<span id="cb29-14"><a href="#cb29-14"></a></span>
+<span id="cb29-15"><a href="#cb29-15"></a>nfl_actualStats_offense_weekly_away <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb29-16"><a href="#cb29-16"></a>  nfl_actualStats_offense_weekly_long,</span>
+<span id="cb29-17"><a href="#cb29-17"></a>  nfl_schedules,</span>
+<span id="cb29-18"><a href="#cb29-18"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"team"</span> <span class="ot">=</span> <span class="st">"away_team"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-19"><a href="#cb29-19"></a>  <span class="fu">mutate</span>(<span class="at">home_away =</span> <span class="st">"away_team"</span>)</span>
+<span id="cb29-20"><a href="#cb29-20"></a></span>
+<span id="cb29-21"><a href="#cb29-21"></a>nfl_actualStats_defense_weekly_home <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb29-22"><a href="#cb29-22"></a>  nfl_actualStats_defense_weekly,</span>
+<span id="cb29-23"><a href="#cb29-23"></a>  nfl_schedules,</span>
+<span id="cb29-24"><a href="#cb29-24"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"team"</span> <span class="ot">=</span> <span class="st">"home_team"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-25"><a href="#cb29-25"></a>  <span class="fu">mutate</span>(<span class="at">home_away =</span> <span class="st">"home_team"</span>)</span>
+<span id="cb29-26"><a href="#cb29-26"></a></span>
+<span id="cb29-27"><a href="#cb29-27"></a>nfl_actualStats_defense_weekly_away <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb29-28"><a href="#cb29-28"></a>  nfl_actualStats_defense_weekly,</span>
+<span id="cb29-29"><a href="#cb29-29"></a>  nfl_schedules,</span>
+<span id="cb29-30"><a href="#cb29-30"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"team"</span> <span class="ot">=</span> <span class="st">"away_team"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-31"><a href="#cb29-31"></a>  <span class="fu">mutate</span>(<span class="at">home_away =</span> <span class="st">"away_team"</span>)</span>
+<span id="cb29-32"><a href="#cb29-32"></a></span>
+<span id="cb29-33"><a href="#cb29-33"></a>nfl_actualStats_kicking_weekly_home <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb29-34"><a href="#cb29-34"></a>  nfl_actualStats_kicking_weekly,</span>
+<span id="cb29-35"><a href="#cb29-35"></a>  nfl_schedules,</span>
+<span id="cb29-36"><a href="#cb29-36"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"team"</span> <span class="ot">=</span> <span class="st">"home_team"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-37"><a href="#cb29-37"></a>  <span class="fu">mutate</span>(<span class="at">home_away =</span> <span class="st">"home_team"</span>)</span>
+<span id="cb29-38"><a href="#cb29-38"></a></span>
+<span id="cb29-39"><a href="#cb29-39"></a>nfl_actualStats_kicking_weekly_away <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb29-40"><a href="#cb29-40"></a>  nfl_actualStats_kicking_weekly,</span>
+<span id="cb29-41"><a href="#cb29-41"></a>  nfl_schedules,</span>
+<span id="cb29-42"><a href="#cb29-42"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"team"</span> <span class="ot">=</span> <span class="st">"away_team"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-43"><a href="#cb29-43"></a>  <span class="fu">mutate</span>(<span class="at">home_away =</span> <span class="st">"away_team"</span>)</span>
+<span id="cb29-44"><a href="#cb29-44"></a></span>
+<span id="cb29-45"><a href="#cb29-45"></a><span class="co"># Combine the results of the join operations</span></span>
+<span id="cb29-46"><a href="#cb29-46"></a>nfl_actualStats_offense_weekly_schedules_long <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb29-47"><a href="#cb29-47"></a>  nfl_actualStats_offense_weekly_home,</span>
+<span id="cb29-48"><a href="#cb29-48"></a>  nfl_actualStats_offense_weekly_away)</span>
+<span id="cb29-49"><a href="#cb29-49"></a></span>
+<span id="cb29-50"><a href="#cb29-50"></a>nfl_actualStats_defense_weekly_schedules_long <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb29-51"><a href="#cb29-51"></a>  nfl_actualStats_defense_weekly_home,</span>
+<span id="cb29-52"><a href="#cb29-52"></a>  nfl_actualStats_defense_weekly_away)</span>
+<span id="cb29-53"><a href="#cb29-53"></a></span>
+<span id="cb29-54"><a href="#cb29-54"></a>nfl_actualStats_kicking_weekly_schedules_long <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb29-55"><a href="#cb29-55"></a>  nfl_actualStats_kicking_weekly_home,</span>
+<span id="cb29-56"><a href="#cb29-56"></a>  nfl_actualStats_kicking_weekly_away)</span>
+<span id="cb29-57"><a href="#cb29-57"></a></span>
+<span id="cb29-58"><a href="#cb29-58"></a><span class="co"># Reshape from long to wide</span></span>
+<span id="cb29-59"><a href="#cb29-59"></a>player_game_gameday_offense <span class="ot">&lt;-</span> nfl_actualStats_offense_weekly_schedules_long <span class="sc">%&gt;%</span></span>
+<span id="cb29-60"><a href="#cb29-60"></a>  <span class="fu">distinct</span>(player_id, season, week, game_id, home_away, team, gameday) <span class="sc">%&gt;%</span> <span class="co">#, .keep_all = TRUE</span></span>
+<span id="cb29-61"><a href="#cb29-61"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb29-62"><a href="#cb29-62"></a>    <span class="at">names_from =</span> home_away,</span>
+<span id="cb29-63"><a href="#cb29-63"></a>    <span class="at">values_from =</span> team)</span>
+<span id="cb29-64"><a href="#cb29-64"></a></span>
+<span id="cb29-65"><a href="#cb29-65"></a>player_game_gameday_defense <span class="ot">&lt;-</span> nfl_actualStats_defense_weekly_schedules_long <span class="sc">%&gt;%</span></span>
+<span id="cb29-66"><a href="#cb29-66"></a>  <span class="fu">distinct</span>(player_id, season, week, game_id, home_away, team, gameday) <span class="sc">%&gt;%</span> <span class="co">#, .keep_all = TRUE</span></span>
+<span id="cb29-67"><a href="#cb29-67"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb29-68"><a href="#cb29-68"></a>    <span class="at">names_from =</span> home_away,</span>
+<span id="cb29-69"><a href="#cb29-69"></a>    <span class="at">values_from =</span> team)</span>
+<span id="cb29-70"><a href="#cb29-70"></a></span>
+<span id="cb29-71"><a href="#cb29-71"></a>player_game_gameday_kicking <span class="ot">&lt;-</span> nfl_actualStats_kicking_weekly_schedules_long <span class="sc">%&gt;%</span></span>
+<span id="cb29-72"><a href="#cb29-72"></a>  <span class="fu">distinct</span>(player_id, season, week, game_id, home_away, team, gameday) <span class="sc">%&gt;%</span> <span class="co">#, .keep_all = TRUE</span></span>
+<span id="cb29-73"><a href="#cb29-73"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb29-74"><a href="#cb29-74"></a>    <span class="at">names_from =</span> home_away,</span>
+<span id="cb29-75"><a href="#cb29-75"></a>    <span class="at">values_from =</span> team)</span>
+<span id="cb29-76"><a href="#cb29-76"></a></span>
+<span id="cb29-77"><a href="#cb29-77"></a><span class="co"># Merge player birthdate and the game date</span></span>
+<span id="cb29-78"><a href="#cb29-78"></a>player_game_birthdate_gameday_offense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-79"><a href="#cb29-79"></a>  player_game_gameday_offense,</span>
+<span id="cb29-80"><a href="#cb29-80"></a>  <span class="fu">unique</span>(nfl_players[,<span class="fu">c</span>(<span class="st">"gsis_id"</span>,<span class="st">"birth_date"</span>)]),</span>
+<span id="cb29-81"><a href="#cb29-81"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb29-82"><a href="#cb29-82"></a>)</span>
+<span id="cb29-83"><a href="#cb29-83"></a></span>
+<span id="cb29-84"><a href="#cb29-84"></a>player_game_birthdate_gameday_defense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-85"><a href="#cb29-85"></a>  player_game_gameday_defense,</span>
+<span id="cb29-86"><a href="#cb29-86"></a>  <span class="fu">unique</span>(nfl_players[,<span class="fu">c</span>(<span class="st">"gsis_id"</span>,<span class="st">"birth_date"</span>)]),</span>
+<span id="cb29-87"><a href="#cb29-87"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb29-88"><a href="#cb29-88"></a>)</span>
+<span id="cb29-89"><a href="#cb29-89"></a></span>
+<span id="cb29-90"><a href="#cb29-90"></a>player_game_birthdate_gameday_kicking <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-91"><a href="#cb29-91"></a>  player_game_gameday_kicking,</span>
+<span id="cb29-92"><a href="#cb29-92"></a>  <span class="fu">unique</span>(nfl_players[,<span class="fu">c</span>(<span class="st">"gsis_id"</span>,<span class="st">"birth_date"</span>)]),</span>
+<span id="cb29-93"><a href="#cb29-93"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb29-94"><a href="#cb29-94"></a>)</span>
+<span id="cb29-95"><a href="#cb29-95"></a></span>
+<span id="cb29-96"><a href="#cb29-96"></a>player_game_birthdate_gameday_offense<span class="sc">$</span>birth_date <span class="ot">&lt;-</span> <span class="fu">ymd</span>(player_game_birthdate_gameday_offense<span class="sc">$</span>birth_date)</span>
+<span id="cb29-97"><a href="#cb29-97"></a>player_game_birthdate_gameday_offense<span class="sc">$</span>gameday <span class="ot">&lt;-</span> <span class="fu">ymd</span>(player_game_birthdate_gameday_offense<span class="sc">$</span>gameday)</span>
+<span id="cb29-98"><a href="#cb29-98"></a></span>
+<span id="cb29-99"><a href="#cb29-99"></a>player_game_birthdate_gameday_defense<span class="sc">$</span>birth_date <span class="ot">&lt;-</span> <span class="fu">ymd</span>(player_game_birthdate_gameday_defense<span class="sc">$</span>birth_date)</span>
+<span id="cb29-100"><a href="#cb29-100"></a>player_game_birthdate_gameday_defense<span class="sc">$</span>gameday <span class="ot">&lt;-</span> <span class="fu">ymd</span>(player_game_birthdate_gameday_defense<span class="sc">$</span>gameday)</span>
+<span id="cb29-101"><a href="#cb29-101"></a></span>
+<span id="cb29-102"><a href="#cb29-102"></a>player_game_birthdate_gameday_kicking<span class="sc">$</span>birth_date <span class="ot">&lt;-</span> <span class="fu">ymd</span>(player_game_birthdate_gameday_kicking<span class="sc">$</span>birth_date)</span>
+<span id="cb29-103"><a href="#cb29-103"></a>player_game_birthdate_gameday_kicking<span class="sc">$</span>gameday <span class="ot">&lt;-</span> <span class="fu">ymd</span>(player_game_birthdate_gameday_kicking<span class="sc">$</span>gameday)</span>
+<span id="cb29-104"><a href="#cb29-104"></a></span>
+<span id="cb29-105"><a href="#cb29-105"></a><span class="co"># Calculate player's age for a given week as the difference between their birthdate and the game date</span></span>
+<span id="cb29-106"><a href="#cb29-106"></a>player_game_birthdate_gameday_offense<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">interval</span>(</span>
+<span id="cb29-107"><a href="#cb29-107"></a>  <span class="at">start =</span> player_game_birthdate_gameday_offense<span class="sc">$</span>birth_date,</span>
+<span id="cb29-108"><a href="#cb29-108"></a>  <span class="at">end =</span> player_game_birthdate_gameday_offense<span class="sc">$</span>gameday</span>
+<span id="cb29-109"><a href="#cb29-109"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-110"><a href="#cb29-110"></a>  <span class="fu">time_length</span>(<span class="at">unit =</span> <span class="st">"years"</span>)</span>
+<span id="cb29-111"><a href="#cb29-111"></a></span>
+<span id="cb29-112"><a href="#cb29-112"></a>player_game_birthdate_gameday_defense<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">interval</span>(</span>
+<span id="cb29-113"><a href="#cb29-113"></a>  <span class="at">start =</span> player_game_birthdate_gameday_defense<span class="sc">$</span>birth_date,</span>
+<span id="cb29-114"><a href="#cb29-114"></a>  <span class="at">end =</span> player_game_birthdate_gameday_defense<span class="sc">$</span>gameday</span>
+<span id="cb29-115"><a href="#cb29-115"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-116"><a href="#cb29-116"></a>  <span class="fu">time_length</span>(<span class="at">unit =</span> <span class="st">"years"</span>)</span>
+<span id="cb29-117"><a href="#cb29-117"></a></span>
+<span id="cb29-118"><a href="#cb29-118"></a>player_game_birthdate_gameday_kicking<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">interval</span>(</span>
+<span id="cb29-119"><a href="#cb29-119"></a>  <span class="at">start =</span> player_game_birthdate_gameday_kicking<span class="sc">$</span>birth_date,</span>
+<span id="cb29-120"><a href="#cb29-120"></a>  <span class="at">end =</span> player_game_birthdate_gameday_kicking<span class="sc">$</span>gameday</span>
+<span id="cb29-121"><a href="#cb29-121"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-122"><a href="#cb29-122"></a>  <span class="fu">time_length</span>(<span class="at">unit =</span> <span class="st">"years"</span>)</span>
+<span id="cb29-123"><a href="#cb29-123"></a></span>
+<span id="cb29-124"><a href="#cb29-124"></a><span class="co"># Merge with player info</span></span>
+<span id="cb29-125"><a href="#cb29-125"></a>player_age_offense <span class="ot">&lt;-</span>  <span class="fu">left_join</span>(</span>
+<span id="cb29-126"><a href="#cb29-126"></a>  player_game_birthdate_gameday_offense,</span>
+<span id="cb29-127"><a href="#cb29-127"></a>  nfl_players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>birth_date),</span>
+<span id="cb29-128"><a href="#cb29-128"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>))</span>
+<span id="cb29-129"><a href="#cb29-129"></a></span>
+<span id="cb29-130"><a href="#cb29-130"></a>player_age_defense <span class="ot">&lt;-</span>  <span class="fu">left_join</span>(</span>
+<span id="cb29-131"><a href="#cb29-131"></a>  player_game_birthdate_gameday_defense,</span>
+<span id="cb29-132"><a href="#cb29-132"></a>  nfl_players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>birth_date),</span>
+<span id="cb29-133"><a href="#cb29-133"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>))</span>
+<span id="cb29-134"><a href="#cb29-134"></a></span>
+<span id="cb29-135"><a href="#cb29-135"></a>player_age_kicking <span class="ot">&lt;-</span>  <span class="fu">left_join</span>(</span>
+<span id="cb29-136"><a href="#cb29-136"></a>  player_game_birthdate_gameday_kicking,</span>
+<span id="cb29-137"><a href="#cb29-137"></a>  nfl_players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>birth_date),</span>
+<span id="cb29-138"><a href="#cb29-138"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>))</span>
+<span id="cb29-139"><a href="#cb29-139"></a></span>
+<span id="cb29-140"><a href="#cb29-140"></a><span class="co"># Add game_id to weekly stats to facilitate merging</span></span>
+<span id="cb29-141"><a href="#cb29-141"></a>nfl_actualStats_game_offense_weekly <span class="ot">&lt;-</span> nfl_actualStats_offense_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb29-142"><a href="#cb29-142"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb29-143"><a href="#cb29-143"></a>    player_age_offense[,<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)],</span>
+<span id="cb29-144"><a href="#cb29-144"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>))</span>
+<span id="cb29-145"><a href="#cb29-145"></a></span>
+<span id="cb29-146"><a href="#cb29-146"></a>nfl_actualStats_game_defense_weekly <span class="ot">&lt;-</span> nfl_actualStats_defense_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb29-147"><a href="#cb29-147"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb29-148"><a href="#cb29-148"></a>    player_age_offense[,<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)],</span>
+<span id="cb29-149"><a href="#cb29-149"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>))</span>
+<span id="cb29-150"><a href="#cb29-150"></a></span>
+<span id="cb29-151"><a href="#cb29-151"></a>nfl_actualStats_game_kicking_weekly <span class="ot">&lt;-</span> nfl_actualStats_kicking_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb29-152"><a href="#cb29-152"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb29-153"><a href="#cb29-153"></a>    player_age_offense[,<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)],</span>
+<span id="cb29-154"><a href="#cb29-154"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>))</span>
+<span id="cb29-155"><a href="#cb29-155"></a></span>
+<span id="cb29-156"><a href="#cb29-156"></a><span class="co"># Merge with player weekly stats</span></span>
+<span id="cb29-157"><a href="#cb29-157"></a>player_age_stats_offense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-158"><a href="#cb29-158"></a>  player_age_offense,</span>
+<span id="cb29-159"><a href="#cb29-159"></a>  nfl_actualStats_game_offense_weekly,</span>
+<span id="cb29-160"><a href="#cb29-160"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)))</span>
+<span id="cb29-161"><a href="#cb29-161"></a></span>
+<span id="cb29-162"><a href="#cb29-162"></a>player_age_stats_defense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-163"><a href="#cb29-163"></a>  player_age_defense,</span>
+<span id="cb29-164"><a href="#cb29-164"></a>  nfl_actualStats_game_defense_weekly,</span>
+<span id="cb29-165"><a href="#cb29-165"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)))</span>
+<span id="cb29-166"><a href="#cb29-166"></a></span>
+<span id="cb29-167"><a href="#cb29-167"></a>player_age_stats_kicking <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-168"><a href="#cb29-168"></a>  player_age_kicking,</span>
+<span id="cb29-169"><a href="#cb29-169"></a>  nfl_actualStats_game_kicking_weekly,</span>
+<span id="cb29-170"><a href="#cb29-170"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)))</span>
+<span id="cb29-171"><a href="#cb29-171"></a></span>
+<span id="cb29-172"><a href="#cb29-172"></a>player_age_stats_offense<span class="sc">$</span>years_of_experience <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(player_age_stats_offense<span class="sc">$</span>years_of_experience)</span>
+<span id="cb29-173"><a href="#cb29-173"></a>player_age_stats_defense<span class="sc">$</span>years_of_experience <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(player_age_stats_defense<span class="sc">$</span>years_of_experience)</span>
+<span id="cb29-174"><a href="#cb29-174"></a>player_age_stats_kicking<span class="sc">$</span>years_of_experience <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(player_age_stats_kicking<span class="sc">$</span>years_of_experience)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 
 
 </section></section></main><!-- /main --><div id="disqus_thread"></div>
