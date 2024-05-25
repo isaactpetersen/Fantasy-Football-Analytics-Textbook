@@ -48,10 +48,41 @@ install.packages("nflreadr")
 library("nflreadr")
 library("nflfastR")
 library("progressr")
+library("lubridate")
 library("tidyverse")
 ```
 
 ## Download Football Data {#sec-downloadFootballData}
+
+```{r}
+#| eval: false
+#| include: false
+
+library("here")
+
+load(file = here("data", "nfl_players.RData"))
+load(file = here("data", "nfl_teams.RData"))
+load(file = here("data", "nfl_rosters.RData"))
+load(file = here("data", "nfl_rosters_weekly.RData"))
+load(file = here("data", "nfl_schedules.RData"))
+load(file = here("data", "nfl_combine.RData"))
+load(file = here("data", "nfl_draftPicks.RData"))
+load(file = here("data", "nfl_depthCharts.RData"))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
+load(file = here("data", "nfl_actualStats_weekly.RData"))
+load(file = here("data", "nfl_injuries.RData"))
+load(file = here("data", "nfl_snapCounts.RData"))
+load(file = here("data", "nfl_espnQBR.RData"))
+load(file = here("data", "nfl_nextGenStats_weekly.RData"))
+load(file = here("data", "nfl_advancedStatsPFR.RData"))
+load(file = here("data", "nfl_playerContracts.RData"))
+load(file = here("data", "nfl_ftnCharting.RData"))
+load(file = here("data", "nfl_playerIDs.RData"))
+load(file = here("data", "nfl_rankings.RData"))
+load(file = here("data", "nfl_expectedFantasyPoints_weekly.RData"))
+load(file = here("data", "nfl_expectedFantasyPoints_offense.RData"))
+```
 
 ### Players {#sec-downloadPlayers}
 
@@ -74,8 +105,6 @@ save(
 
 ```{r}
 #| include: false
-
-library("here")
 
 load(file = here("data", "nfl_players.RData"))
 ```
@@ -138,8 +167,6 @@ save(
 
 ```{r}
 #| include: false
-
-library("here")
 
 load(file = here("data", "nfl_rosters.RData"))
 load(file = here("data", "nfl_rosters_weekly.RData"))
@@ -759,7 +786,6 @@ save(
 #| include: false
 
 load(file = here("data", "nfl_expectedFantasyPoints_weekly.RData"))
-
 load(file = here("data", "nfl_expectedFantasyPoints_offense.RData"))
 ```
 
@@ -920,3 +946,83 @@ nfl_actualStats_kicking_weekly <- nflfastR::calculate_player_stats_kicking(
 ```
 
 ### Historical Actual Fantasy Points {#sec-calculateActualPoints}
+
+### Player Age {#sec-calculateActualPoints}
+
+```{r}
+# Reshape from wide to long format
+nfl_actualStats_offense_weekly_long <- nfl_actualStats_offense_weekly %>% 
+  pivot_longer(
+    cols = c(recent_team, opponent_team),
+    names_to = "role",
+    values_to = "team")
+
+# Reshape from wide to long format
+nfl_schedules_long <- nfl_schedules %>% 
+  pivot_longer(
+    cols = c(home_team, away_team),
+    names_to = "role",
+    values_to = "team")
+
+# Perform separate inner join operations for the home_team and away_team
+nfl_actualStats_offense_weekly_home <- inner_join(
+  nfl_actualStats_offense_weekly_long,
+  nfl_schedules,
+  by = c("season","week","team" = "home_team")) %>% 
+  mutate(home_away = "home_team")
+
+nfl_actualStats_offense_weekly_away <- inner_join(
+  nfl_actualStats_offense_weekly_long,
+  nfl_schedules,
+  by = c("season","week","team" = "away_team")) %>% 
+  mutate(home_away = "away_team")
+
+# Combine the results of the join operations
+nfl_actualStats_offense_weekly_schedules_long <- bind_rows(
+  nfl_actualStats_offense_weekly_home,
+  nfl_actualStats_offense_weekly_away)
+
+# Reshape from long to wide
+nfl_actualStats_offense_weekly_schedules <- nfl_actualStats_offense_weekly_schedules_long %>%
+  distinct(player_id, season, week, game_id, home_away, team, gameday) %>% #, .keep_all = TRUE
+  pivot_wider(
+    names_from = home_away,
+    values_from = team)
+
+# Merge player birthdate and the game date
+player_birthdate_gameday <- left_join(
+  nfl_actualStats_offense_weekly_schedules,
+  unique(nfl_players[,c("gsis_id","birth_date")]),
+  by = c("player_id" = "gsis_id")
+)
+
+player_birthdate_gameday$birth_date <- ymd(player_birthdate_gameday$birth_date)
+player_birthdate_gameday$gameday <- ymd(player_birthdate_gameday$gameday)
+
+# Calculate player's age for a given week as the difference between their birthdate and the game date
+player_birthdate_gameday$age <- interval(
+  start = player_birthdate_gameday$birth_date,
+  end = player_birthdate_gameday$gameday
+) %>% 
+  time_length(unit = "years")
+
+# Merge with player info
+player_age <-  left_join(
+  player_birthdate_gameday,
+  nfl_players %>% select(-birth_date),
+  by = c("season", "player_id" = "gsis_id"))
+
+# Add game_id to weekly stats to facilitate merging
+nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly %>% 
+  left_join(
+    player_age[,c("season","week","player_id","game_id")],
+    by = c("season","week","player_id"))
+
+# Merge with player weekly stats
+player_age_stats <- left_join(
+  player_age,
+  nfl_actualStats_offense_weekly,
+  by = c(c("season","week","player_id","game_id")))
+
+player_age_stats$years_of_experience <- as.integer(player_age_stats$years_of_experience)
+```
