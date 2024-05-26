@@ -990,6 +990,8 @@ To subset particular columns/variables, use the following syntax:
 #### Base `R` {#sec-subsetParticularColumnsBaseR}
 
 ```{r}
+#| eval: false
+
 subsetVars <- c("status","display_name","college_name")
 
 nfl_players[,c(1,2,9)]
@@ -1000,6 +1002,8 @@ nfl_players[,subsetVars]
 Or, to drop columns:
 
 ```{r}
+#| eval: false
+
 dropVars <- c("status","college_name")
 
 nfl_players[,-c(1,9)]
@@ -1010,6 +1014,8 @@ nfl_players[,!(names(nfl_players) %in% dropVars)]
 #### Tidyverse {#sec-subsetParticularColumnsTidyverse}
 
 ```{r}
+#| eval: false
+
 nfl_players %>%
   select(status, display_name, college_name)
 
@@ -1023,6 +1029,8 @@ nfl_players %>%
 Or, to drop columns:
 
 ```{r}
+#| eval: false
+
 nfl_players %>%
   select(-status, -college_name)
 
@@ -1040,6 +1048,8 @@ To subset particular rows, use the following syntax:
 #### Base `R` {#sec-subsetParticularRowsBaseR}
 
 ```{r}
+#| eval: false
+
 subsetRows <- c(1,3,5)
 
 nfl_players[c(1,3,5),]
@@ -1050,6 +1060,8 @@ nfl_players[which(nfl_players$position_group == "RB"),]
 #### Tidyverse {#sec-subsetParticularRowsTidyverse}
 
 ```{r}
+#| eval: false
+
 nfl_players %>%
   filter(position_group == "RB")
 
@@ -1067,6 +1079,8 @@ To subset particular rows and columns, use the following syntax:
 #### Base `R` {#sec-subsetParticularRowsAndColumnsBaseR}
 
 ```{r}
+#| eval: false
+
 nfl_players[c(1,3,5), c(1,2,3)]
 nfl_players[subsetRows, subsetVars]
 nfl_players[which(nfl_players$position_group == "RB"), subsetVars]
@@ -1075,6 +1089,8 @@ nfl_players[which(nfl_players$position_group == "RB"), subsetVars]
 #### Tidyverse {#sec-subsetParticularRowsAndColumnsTidyverse}
 
 ```{r}
+#| eval: false
+
 nfl_players %>%
   filter(position_group == "RB") %>%
   select(all_of(subsetVars))
@@ -1276,8 +1292,6 @@ However, as described above, you should include it as a key ***only*** if it uni
 Here are the data in the `nfl_actualStats_offense_weekly` object:
 
 ```{r}
-nfl_actualStats_offense_weekly
-
 dim(nfl_actualStats_offense_weekly)
 
 dim(distinct(nfl_actualStats_offense_weekly, player_id, season, week, .keep_all = TRUE))
@@ -1289,8 +1303,6 @@ That is, every row in the dataset is uniquely identified by the variables, `play
 Here are the data in the `nfl_expectedFantasyPoints_weekly` object:
 
 ```{r}
-nfl_players
-
 dim(nfl_players)
 
 dim(distinct(nfl_players, gsis_id, .keep_all = TRUE))
@@ -1317,12 +1329,13 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using a full outer join (i.e., "full join"):
 
 ```{r}
+#| eval: false
+
 fullJoinData <- full_join(
   nfl_actualStats_offense_weekly,
   nfl_players,
   by = c("player_id" = "gsis_id"))
 
-fullJoinData
 dim(fullJoinData)
 ```
 
@@ -1333,12 +1346,13 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using a left outer join ("left join"):
 
 ```{r}
+#| eval: false
+
 leftJoinData <- left_join(
   nfl_actualStats_offense_weekly,
   nfl_players,
   by = c("player_id" = "gsis_id"))
 
-leftJoinData
 dim(leftJoinData)
 ```
 
@@ -1349,12 +1363,13 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using a right outer join ("right join"):
 
 ```{r}
+#| eval: false
+
 rightJoinData <- right_join(
   nfl_actualStats_offense_weekly,
   nfl_players,
   by = c("player_id" = "gsis_id"))
 
-rightJoinData
 dim(rightJoinData)
 ```
 
@@ -1366,12 +1381,13 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using an inner join:
 
 ```{r}
+#| eval: false
+
 innerJoinData <- inner_join(
   nfl_actualStats_offense_weekly,
   nfl_players,
   by = c("player_id" = "gsis_id"))
 
-innerJoinData
 dim(innerJoinData)
 ```
 
@@ -1384,12 +1400,13 @@ Unlike an [inner join](#innerJoin), a left semi join will never duplicate rows o
 Here is how to merge two data frames using a left semi join:
 
 ```{r}
+#| eval: false
+
 semiJoinData <- semi_join(
   nfl_actualStats_offense_weekly,
   nfl_players,
   by = c("player_id" = "gsis_id"))
 
-semiJoinData
 dim(semiJoinData)
 ```
 
@@ -1402,12 +1419,13 @@ It returns columns from only $x$ (not from $y$).
 Here is how to merge two data frames using a left anti join:
 
 ```{r}
+#| eval: false
+
 antiJoinData <- anti_join(
   nfl_actualStats_offense_weekly,
   nfl_players,
   by = c("player_id" = "gsis_id"))
 
-antiJoinData
 dim(antiJoinData)
 ```
 
@@ -1416,6 +1434,8 @@ dim(antiJoinData)
 A cross join combines each row in $x$ with each row in $y$.
 
 ```{r}
+#| eval: false
+
 crossJoinData <- cross_join(
   unique(nfl_actualStats_offense_weekly[,c("player_id","player_display_name")]),
   data.frame(season = 2020:2024))
@@ -1429,26 +1449,26 @@ dim(crossJoinData)
 Original data:
 
 ```{r}
+#| eval: false
+
 dataLong <- nfl_actualStats_offense_weekly %>% 
   select(player_id, player_display_name, season, week, fantasy_points)
 
-dataLong
+dim(dataLong)
 ```
 
 Data widened by two variable (`season` and `week`), using `tidyverse`: 
 
 ```{r}
-dataLong %>% 
-  pivot_wider(
-    names_from = week,
-    names_glue = "{.value}_week{week}",
-    values_from = fantasy_points)
+#| eval: false
 
-dataLong %>% 
+dataWide <- dataLong %>% 
   pivot_wider(
     names_from = c(season, week),
     names_glue = "{.value}_{season}_week{week}",
     values_from = fantasy_points)
+
+dim(dataWide)
 ```
 
 ## Transform Data from Wide to Long {#sec-wideToLong}
@@ -1456,20 +1476,26 @@ dataLong %>%
 Original data:
 
 ```{r}
+#| eval: false
+
 dataWide <- nfl_actualStats_offense_weekly %>% 
   select(player_id, player_display_name, season, week, recent_team, opponent_team)
 
-dataWide
+dim(dataWide)
 ```
 
 Data in long form, transformed from wide form using `tidyverse`:
 
 ```{r}
-dataWide %>% 
+#| eval: false
+
+dataLong <- dataWide %>% 
   pivot_longer(
     cols = c(recent_team, opponent_team),
     names_to = "role",
     values_to = "team")
+
+dim(dataLong)
 ```
 
 ## Calculations {#sec-calculations}
@@ -1990,4 +2016,3 @@ ggplot2::ggplot(
   ggplot2::theme_classic() +
   ggplot2::scale_y_reverse()
 ```
-
