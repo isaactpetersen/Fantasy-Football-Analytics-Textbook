@@ -1397,6 +1397,54 @@ crossJoinData
 dim(crossJoinData)
 ```
 
+## Transform Data from Long to Wide {#sec-longToWide}
+
+Original data:
+
+```{r}
+dataLong <- nfl_actualStats_offense_weekly %>% 
+  select(player_id, player_display_name, season, week, fantasy_points)
+
+dataLong
+```
+
+Data widened by two variable (`season` and `week`), using `tidyverse`: 
+
+```{r}
+dataLong %>% 
+  pivot_wider(
+    names_from = week,
+    names_glue = "{.value}_week{week}",
+    values_from = fantasy_points)
+
+dataLong %>% 
+  pivot_wider(
+    names_from = c(season, week),
+    names_glue = "{.value}_{season}_week{week}",
+    values_from = fantasy_points)
+```
+
+## Transform Data from Wide to Long {#sec-wideToLong}
+
+Original data:
+
+```{r}
+dataWide <- nfl_actualStats_offense_weekly %>% 
+  select(player_id, player_display_name, season, week, recent_team, opponent_team)
+
+dataWide
+```
+
+Data in long form, transformed from wide form using `tidyverse`:
+
+```{r}
+dataWide %>% 
+  pivot_longer(
+    cols = c(recent_team, opponent_team),
+    names_to = "role",
+    values_to = "team")
+```
+
 ## Calculations {#sec-calculations}
 
 ### Historical Actual Player Statistics {#sec-calculateActualStats}
