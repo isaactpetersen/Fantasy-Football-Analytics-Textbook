@@ -1,1 +1,40 @@
 # Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test {#sec-mythbusters}
+
+## Do Players Score More Points in their Contract Year? {#sec-contractYear}
+
+```{r}
+nfl_playerContracts_subset %>% 
+  filter(player == "Aaron Rodgers") %>% 
+  select(player:years, contractYear, next_contract_start, played_in_contract_year)
+
+nfl_playerContracts_subset %>% 
+  filter(player %in% c("Jared Allen", "Aaron Rodgers")) %>% 
+  select(player:years, contractYear, next_contract_start, played_in_contract_year)
+
+# Subset to remove players without a year signed
+nfl_playerContracts_subset <- nfl_playerContracts %>% 
+  filter(!is.na(year_signed) & year_signed != 0)
+
+# Determine the contract year for a given contract
+nfl_playerContracts_subset$contractYear <- nfl_playerContracts_subset$year_signed + nfl_playerContracts_subset$years - 1
+
+# Arrange contracts by player and year_signed
+nfl_playerContracts_subset <- nfl_playerContracts_subset %>%
+  group_by(player, position) %>% 
+  arrange(player, position, -year_signed) %>% 
+  ungroup()
+
+# Determine if the player played in the original contract year
+nfl_playerContracts_subset <- nfl_playerContracts_subset %>%
+  group_by(player, position) %>%
+  mutate(
+    next_contract_start = lag(year_signed)) %>%
+  ungroup() %>%
+  mutate(
+    played_in_contract_year = ifelse(
+      is.na(next_contract_start) | contractYear < next_contract_start,
+      TRUE,
+      FALSE))
+
+# Merge with seasonal fantasy points data
+```
