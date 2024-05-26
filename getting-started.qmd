@@ -47,6 +47,7 @@ install.packages("nflreadr")
 ```{r}
 library("nflreadr")
 library("nflfastR")
+library("nflplotR")
 library("progressr")
 library("lubridate")
 library("tidyverse")
@@ -1127,3 +1128,51 @@ player_age_stats_offense$years_of_experience <- as.integer(player_age_stats_offe
 player_age_stats_defense$years_of_experience <- as.integer(player_age_stats_defense$years_of_experience)
 player_age_stats_kicking$years_of_experience <- as.integer(player_age_stats_kicking$years_of_experience)
 ```
+
+## Plotting {#sec-plotting}
+
+### Defensive and Offensive EPA per Play {#sec-plotDefOffEPA}
+
+Expected points added (EPA) per play by the team with possession.
+
+```{r}
+pbp_regularSeason <- nfl_pbp %>% 
+  dplyr::filter(
+    season == 2023,
+    season_type == "REG") %>%
+  dplyr::filter(!is.na(posteam) & (rush == 1 | pass == 1))
+
+epa_offense <- pbp_regularSeason %>%
+  dplyr::group_by(team = posteam) %>%
+  dplyr::summarise(off_epa = mean(epa, na.rm = TRUE))
+
+epa_defense <- pbp_regularSeason %>%
+  dplyr::group_by(team = defteam) %>%
+  dplyr::summarise(def_epa = mean(epa, na.rm = TRUE))
+
+epa_combined <- epa_offense %>%
+  dplyr::inner_join(epa_defense, by = "team")
+
+ggplot2::ggplot(
+  data = epa_combined,
+  ggplot2::aes(
+    x = off_epa,
+    y = def_epa)) +
+  nflplotR::geom_mean_lines(
+    ggplot2::aes(
+      x0 = off_epa ,
+      y0 = def_epa)) +
+  nflplotR::geom_nfl_logos(
+    ggplot2::aes(
+      team_abbr = team),
+      width = 0.065,
+      alpha = 0.7) +
+  ggplot2::labs(
+    x = "Offense EPA/play",
+    y = "Defense EPA/play",
+    title = "2023 NFL Offensive and Defensive EPA per Play"
+  ) +
+  ggplot2::theme_classic() +
+  ggplot2::scale_y_reverse()
+```
+
