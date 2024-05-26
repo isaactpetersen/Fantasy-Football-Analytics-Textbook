@@ -1221,6 +1221,184 @@ mydata %>%
   mutate(across(where(is.factor), as.character))
 ```
 
+## Merging/Joins {#sec-merging}
+
+### Overview {#sec-mergingOverview}
+
+Merging (also called joining) merges two data objects using a shared set of variables called "keys."
+The keys are the variable(s) that uniquely identify each row (i.e., they account for the levels of nesting).
+In some data objects, the key might be the participant's ID (e.g., `participantID`).
+However, some data objects have multiple keys.
+For instance, in long form data objects, each participant may have multiple rows corresponding to multiple timepoints.
+In this case, the keys are `participantID` and `timepoint`.
+If a participant has multiple rows corresponding to timepoints and measures, the keys are `participantID`, `timepoint`, and `measure`.
+In general, each row should have a value on each of the keys; there should be no missingness in the keys.
+
+To merge two objects, the keys must be present in both objects.
+The keys are used to merge the variables in object 1 (`x`) with the variables in object 2 (`y`).
+Different merge types select different rows to merge.
+
+Note: if the two objects include variables with the same name (apart from the keys), `R` will not know how you want each to appear in the merged object.
+So, it will add a suffix (e.g., `.x`, `.y`) to each common variable to indicate which object (i.e., object `x` or object `y`) the variable came from, where object `x` is the first object—i.e., the object to which object `y` (the second object) is merged.
+In general, apart from the keys, you should not include variables with the same name in two objects to be merged.
+To prevent this, either remove or rename the shared variable in one of the objects, or include the shared variable as a key.
+However, as described above, you should include it as a key ***only*** if it uniquely identifies each row in terms of levels of nesting.
+
+### Data Before Merging {#sec-mergingData}
+
+Here are the data in the `nfl_actualStats_offense_weekly` object:
+
+```{r}
+nfl_actualStats_offense_weekly
+
+dim(nfl_actualStats_offense_weekly)
+
+dim(distinct(nfl_actualStats_offense_weekly, player_id, season, week, .keep_all = TRUE))
+
+str(nfl_actualStats_offense_weekly[,c("player_id", "season", "week")])
+```
+
+The data are structured in player-season-week form.
+That is, every row in the dataset is uniquely identified by the variables, `player_id`, `season`, and `week`.
+
+Here are the data in the `nfl_expectedFantasyPoints_weekly` object:
+
+```{r}
+nfl_players
+
+dim(nfl_players)
+
+dim(distinct(nfl_players, gsis_id, .keep_all = TRUE))
+```
+
+### Types of Joins {#sec-mergeTypes}
+
+#### Visual Overview of Join Types {#sec-mergeTypesVisual}
+
+Below is a visual that depicts various types of merges/joins.
+Object `x` is the circle labeled as `x`.
+Object `y` is the circle labeled as `y`.
+The area of overlap in the Venn diagram indicates the rows on the keys that are shared between the two objects (e.g., the same `player_id`, `season`, and `week`).
+The non-overlapping area indicates the rows on the keys that are unique to each object.
+The shaded blue area indicates which rows (on the keys) are kept in the merged object from each of the two objects, when using each of the merge types.
+For instance, a left outer join keeps the shared rows and the rows that are unique to object `x`, but it drops the rows that are unique to object `y`.
+
+![Types of merges/joins](images/joinTypes.png)
+
+#### Full Outer Join {#sec-fullJoin}
+
+A full outer join includes all rows in $x$ **or** $y$.
+It returns columns from $x$ and $y$.
+Here is how to merge two data frames using a full outer join (i.e., "full join"):
+
+```{r}
+fullJoinData <- full_join(
+  nfl_actualStats_offense_weekly,
+  nfl_players,
+  by = c("player_id" = "gsis_id"))
+
+fullJoinData
+dim(fullJoinData)
+```
+
+#### Left Outer Join {#sec-leftJoin}
+
+A left outer join includes all rows in $x$.
+It returns columns from $x$ and $y$.
+Here is how to merge two data frames using a left outer join ("left join"):
+
+```{r}
+leftJoinData <- left_join(
+  nfl_actualStats_offense_weekly,
+  nfl_players,
+  by = c("player_id" = "gsis_id"))
+
+leftJoinData
+dim(leftJoinData)
+```
+
+#### Right Outer Join {#sec-rightJoin}
+
+A right outer join includes all rows in $y$.
+It returns columns from $x$ and $y$.
+Here is how to merge two data frames using a right outer join ("right join"):
+
+```{r}
+rightJoinData <- right_join(
+  nfl_actualStats_offense_weekly,
+  nfl_players,
+  by = c("player_id" = "gsis_id"))
+
+rightJoinData
+dim(rightJoinData)
+```
+
+#### Inner Join {#sec-innerJoin}
+
+An inner join includes all rows that are in **both** $x$ **and** $y$.
+An inner join will return one row of $x$ for each matching row of $y$, and can duplicate values of records on either side (left or right) if $x$ and $y$ have more than one matching record.
+It returns columns from $x$ and $y$.
+Here is how to merge two data frames using an inner join:
+
+```{r}
+innerJoinData <- inner_join(
+  nfl_actualStats_offense_weekly,
+  nfl_players,
+  by = c("player_id" = "gsis_id"))
+
+innerJoinData
+dim(innerJoinData)
+```
+
+#### Semi Join {#sec-semiJoin}
+
+A semi join is a filter.
+A left semi join returns all rows from $x$ **with** a match in $y$.
+That is, it filters out records from $x$ that are not in $y$.
+Unlike an [inner join](#innerJoin), a left semi join will never duplicate rows of $x$, and it includes columns from only $x$ (not from $y$). 
+Here is how to merge two data frames using a left semi join:
+
+```{r}
+semiJoinData <- semi_join(
+  nfl_actualStats_offense_weekly,
+  nfl_players,
+  by = c("player_id" = "gsis_id"))
+
+semiJoinData
+dim(semiJoinData)
+```
+
+#### Anti Join {#sec-antiJoin}
+
+An anti join is a filter.
+A left anti join returns all rows from $x$ **without** a match in $y$.
+That is, it filters out records from $x$ that are in $y$.
+It returns columns from only $x$ (not from $y$).
+Here is how to merge two data frames using a left anti join:
+
+```{r}
+antiJoinData <- anti_join(
+  nfl_actualStats_offense_weekly,
+  nfl_players,
+  by = c("player_id" = "gsis_id"))
+
+antiJoinData
+dim(antiJoinData)
+```
+
+#### Cross Join {#sec-crossJoin}
+
+A cross join combines each row in $x$ with each row in $y$.
+
+```{r}
+crossJoinData <- cross_join(
+  unique(nfl_actualStats_offense_weekly[,c("player_id","player_display_name")]),
+  data.frame(season = 2020:2024))
+
+crossJoinData
+dim(crossJoinData)
+```
+
 ## Calculations {#sec-calculations}
 
 ### Historical Actual Player Statistics {#sec-calculateActualStats}
