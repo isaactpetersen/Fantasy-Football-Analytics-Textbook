@@ -61,6 +61,7 @@ library("tidyverse")
 
 library("here")
 
+# Downloaded Data
 load(file = here("data", "nfl_players.RData"))
 load(file = here("data", "nfl_teams.RData"))
 load(file = here("data", "nfl_rosters.RData"))
@@ -83,6 +84,10 @@ load(file = here("data", "nfl_playerIDs.RData"))
 load(file = here("data", "nfl_rankings.RData"))
 load(file = here("data", "nfl_expectedFantasyPoints_weekly.RData"))
 load(file = here("data", "nfl_expectedFantasyPoints_offense.RData"))
+
+# Calculated Data
+load(file = here("data", "nfl_actualStats_career.RData"))
+load(file = here("data", "nfl_actualStats_seasonal.RData"))
 ```
 
 ### Players {#sec-downloadPlayers}
@@ -1110,26 +1115,163 @@ nfl_actualStats_game_kicking_weekly <- nfl_actualStats_kicking_weekly %>%
 
 # Merge with player weekly stats
 player_age_stats_offense <- left_join(
-  player_age_offense,
+  player_age_offense %>% select(-position, -position_group),
   nfl_actualStats_game_offense_weekly,
   by = c(c("season","week","player_id","game_id")))
 
 player_age_stats_defense <- left_join(
-  player_age_defense,
+  player_age_defense %>% select(-position, -position_group),
   nfl_actualStats_game_defense_weekly,
   by = c(c("season","week","player_id","game_id")))
 
 player_age_stats_kicking <- left_join(
-  player_age_kicking,
+  player_age_kicking %>% select(-position, -position_group),
   nfl_actualStats_game_kicking_weekly,
   by = c(c("season","week","player_id","game_id")))
 
 player_age_stats_offense$years_of_experience <- as.integer(player_age_stats_offense$years_of_experience)
 player_age_stats_defense$years_of_experience <- as.integer(player_age_stats_defense$years_of_experience)
 player_age_stats_kicking$years_of_experience <- as.integer(player_age_stats_kicking$years_of_experience)
+
+# Merge player info with seasonal stats
+player_seasonal_offense <- left_join(
+  nfl_actualStats_offense_seasonal,
+  nfl_players %>% select(-position, -position_group, -season),
+  by = c("player_id" = "gsis_id")
+)
+
+player_seasonal_defense <- left_join(
+  nfl_actualStats_defense_seasonal,
+  nfl_players %>% select(-position, -position_group, -season),
+  by = c("player_id" = "gsis_id")
+)
+
+player_seasonal_kicking <- left_join(
+  nfl_actualStats_kicking_seasonal,
+  nfl_players %>% select(-position, -position_group, -season),
+  by = c("player_id" = "gsis_id")
+)
+
+# Calculate age
+season_startdate <- nfl_schedules %>% 
+  group_by(season) %>% 
+  summarise(startdate = min(gameday, na.rm = TRUE))
+
+player_seasonal_offense <- player_seasonal_offense %>% 
+  left_join(
+    season_startdate,
+    by = "season"
+  )
+
+player_seasonal_defense <- player_seasonal_defense %>% 
+  left_join(
+    season_startdate,
+    by = "season"
+  )
+
+player_seasonal_kicking <- player_seasonal_kicking %>% 
+  left_join(
+    season_startdate,
+    by = "season"
+  )
+
+player_seasonal_offense$age <- interval(
+  start = player_seasonal_offense$birth_date,
+  end = player_seasonal_offense$startdate
+) %>% 
+  time_length(unit = "years")
+
+player_seasonal_defense$age <- interval(
+  start = player_seasonal_defense$birth_date,
+  end = player_seasonal_defense$startdate
+) %>% 
+  time_length(unit = "years")
+
+player_seasonal_kicking$age <- interval(
+  start = player_seasonal_kicking$birth_date,
+  end = player_seasonal_kicking$startdate
+) %>% 
+  time_length(unit = "years")
 ```
 
 ## Plotting {#sec-plotting}
+
+### Rushing Yards per Carry By Player Age {#sec-plotRushEPAbyAge}
+
+```{r}
+# Prepare Data
+rushing_attempts <- nfl_pbp %>% 
+  dplyr::filter(
+    season_type == "REG") %>% 
+    filter(
+      rush == 1,
+      rush_attempt == 1,
+      qb_scramble == 0,
+      qb_dropback == 0,
+      !is.na(rushing_yards))
+
+rb_yardsPerCarry <- rushing_attempts %>% 
+  group_by(rusher_id, season) %>% 
+  summarise(
+    ypc = mean(rushing_yards, na.rm = TRUE),
+    rush_attempts = n(),
+    .groups = "drop") %>% 
+  ungroup() %>% 
+  left_join(
+    nfl_players %>% select(-season),
+    by = c("rusher_id" = "gsis_id")
+  ) %>% 
+  filter(
+    position_group == "RB",
+    rush_attempts >= 50) %>% 
+  left_join(
+    season_startdate,
+    by = "season"
+  )
+
+rb_yardsPerCarry$age <- interval(
+  start = rb_yardsPerCarry$birth_date,
+  end = rb_yardsPerCarry$startdate
+) %>% 
+  time_length(unit = "years")
+
+# Create Plot
+ggplot2::ggplot(
+  data = rb_yardsPerCarry,
+  ggplot2::aes(
+    x = age,
+    y = ypc)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_smooth() +
+  ggplot2::labs(
+    x = "Rushing Back Age (years)",
+    y = "Rushing Yards per Carry/season",
+    title = "2023 NFL Rushing Yards Per Carry per Season by Player Age",
+    subtitle = "(minimum 50 rushing attempts)"
+  ) +
+  ggplot2::theme_classic()
+```
+
+```{r}
+# Subset Data
+rb_seasonal <- player_seasonal_offense %>% 
+  filter(position_group == "RB")
+
+# Create Plot
+ggplot2::ggplot(
+  data = rb_seasonal,
+  ggplot2::aes(
+    x = age,
+    y = rushing_epa)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_smooth() +
+  ggplot2::labs(
+    x = "Rushing Back Age (years)",
+    y = "Rushing EPA/season",
+    title = "2023 NFL Rushing EPA per Season by Player Age"
+  ) +
+  ggplot2::theme_classic()
+```
 
 ### Defensive and Offensive EPA per Play {#sec-plotDefOffEPA}
 
