@@ -239,7 +239,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
   <li>
 <a href="#sec-plotting" id="toc-sec-plotting" class="nav-link" data-scroll-target="#sec-plotting"><span class="header-section-number">3.7</span> Plotting</a>
   <ul>
-<li><a href="#sec-plotDefOffEPA" id="toc-sec-plotDefOffEPA" class="nav-link" data-scroll-target="#sec-plotDefOffEPA"><span class="header-section-number">3.7.1</span> Defensive and Offensive EPA per Play</a></li>
+<li><a href="#sec-plotRushEPAbyAge" id="toc-sec-plotRushEPAbyAge" class="nav-link" data-scroll-target="#sec-plotRushEPAbyAge"><span class="header-section-number">3.7.1</span> Rushing Yards per Carry By Player Age</a></li>
+  <li><a href="#sec-plotDefOffEPA" id="toc-sec-plotDefOffEPA" class="nav-link" data-scroll-target="#sec-plotDefOffEPA"><span class="header-section-number">3.7.2</span> Defensive and Offensive EPA per Play</a></li>
   </ul>
 </li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/getting-started.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -951,69 +952,216 @@ Note&nbsp;3.4: Calculating players’ season-by-season statistics
 <span id="cb29-155"><a href="#cb29-155"></a></span>
 <span id="cb29-156"><a href="#cb29-156"></a><span class="co"># Merge with player weekly stats</span></span>
 <span id="cb29-157"><a href="#cb29-157"></a>player_age_stats_offense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
-<span id="cb29-158"><a href="#cb29-158"></a>  player_age_offense,</span>
+<span id="cb29-158"><a href="#cb29-158"></a>  player_age_offense <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>position, <span class="sc">-</span>position_group),</span>
 <span id="cb29-159"><a href="#cb29-159"></a>  nfl_actualStats_game_offense_weekly,</span>
 <span id="cb29-160"><a href="#cb29-160"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)))</span>
 <span id="cb29-161"><a href="#cb29-161"></a></span>
 <span id="cb29-162"><a href="#cb29-162"></a>player_age_stats_defense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
-<span id="cb29-163"><a href="#cb29-163"></a>  player_age_defense,</span>
+<span id="cb29-163"><a href="#cb29-163"></a>  player_age_defense <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>position, <span class="sc">-</span>position_group),</span>
 <span id="cb29-164"><a href="#cb29-164"></a>  nfl_actualStats_game_defense_weekly,</span>
 <span id="cb29-165"><a href="#cb29-165"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)))</span>
 <span id="cb29-166"><a href="#cb29-166"></a></span>
 <span id="cb29-167"><a href="#cb29-167"></a>player_age_stats_kicking <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
-<span id="cb29-168"><a href="#cb29-168"></a>  player_age_kicking,</span>
+<span id="cb29-168"><a href="#cb29-168"></a>  player_age_kicking <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>position, <span class="sc">-</span>position_group),</span>
 <span id="cb29-169"><a href="#cb29-169"></a>  nfl_actualStats_game_kicking_weekly,</span>
 <span id="cb29-170"><a href="#cb29-170"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="st">"season"</span>,<span class="st">"week"</span>,<span class="st">"player_id"</span>,<span class="st">"game_id"</span>)))</span>
 <span id="cb29-171"><a href="#cb29-171"></a></span>
 <span id="cb29-172"><a href="#cb29-172"></a>player_age_stats_offense<span class="sc">$</span>years_of_experience <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(player_age_stats_offense<span class="sc">$</span>years_of_experience)</span>
 <span id="cb29-173"><a href="#cb29-173"></a>player_age_stats_defense<span class="sc">$</span>years_of_experience <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(player_age_stats_defense<span class="sc">$</span>years_of_experience)</span>
-<span id="cb29-174"><a href="#cb29-174"></a>player_age_stats_kicking<span class="sc">$</span>years_of_experience <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(player_age_stats_kicking<span class="sc">$</span>years_of_experience)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-174"><a href="#cb29-174"></a>player_age_stats_kicking<span class="sc">$</span>years_of_experience <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(player_age_stats_kicking<span class="sc">$</span>years_of_experience)</span>
+<span id="cb29-175"><a href="#cb29-175"></a></span>
+<span id="cb29-176"><a href="#cb29-176"></a><span class="co"># Merge player info with seasonal stats</span></span>
+<span id="cb29-177"><a href="#cb29-177"></a>player_seasonal_offense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-178"><a href="#cb29-178"></a>  nfl_actualStats_offense_seasonal,</span>
+<span id="cb29-179"><a href="#cb29-179"></a>  nfl_players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>position, <span class="sc">-</span>position_group, <span class="sc">-</span>season),</span>
+<span id="cb29-180"><a href="#cb29-180"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb29-181"><a href="#cb29-181"></a>)</span>
+<span id="cb29-182"><a href="#cb29-182"></a></span>
+<span id="cb29-183"><a href="#cb29-183"></a>player_seasonal_defense <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-184"><a href="#cb29-184"></a>  nfl_actualStats_defense_seasonal,</span>
+<span id="cb29-185"><a href="#cb29-185"></a>  nfl_players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>position, <span class="sc">-</span>position_group, <span class="sc">-</span>season),</span>
+<span id="cb29-186"><a href="#cb29-186"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb29-187"><a href="#cb29-187"></a>)</span>
+<span id="cb29-188"><a href="#cb29-188"></a></span>
+<span id="cb29-189"><a href="#cb29-189"></a>player_seasonal_kicking <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb29-190"><a href="#cb29-190"></a>  nfl_actualStats_kicking_seasonal,</span>
+<span id="cb29-191"><a href="#cb29-191"></a>  nfl_players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>position, <span class="sc">-</span>position_group, <span class="sc">-</span>season),</span>
+<span id="cb29-192"><a href="#cb29-192"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb29-193"><a href="#cb29-193"></a>)</span>
+<span id="cb29-194"><a href="#cb29-194"></a></span>
+<span id="cb29-195"><a href="#cb29-195"></a><span class="co"># Calculate age</span></span>
+<span id="cb29-196"><a href="#cb29-196"></a>season_startdate <span class="ot">&lt;-</span> nfl_schedules <span class="sc">%&gt;%</span> </span>
+<span id="cb29-197"><a href="#cb29-197"></a>  <span class="fu">group_by</span>(season) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-198"><a href="#cb29-198"></a>  <span class="fu">summarise</span>(<span class="at">startdate =</span> <span class="fu">min</span>(gameday, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb29-199"><a href="#cb29-199"></a></span>
+<span id="cb29-200"><a href="#cb29-200"></a>player_seasonal_offense <span class="ot">&lt;-</span> player_seasonal_offense <span class="sc">%&gt;%</span> </span>
+<span id="cb29-201"><a href="#cb29-201"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb29-202"><a href="#cb29-202"></a>    season_startdate,</span>
+<span id="cb29-203"><a href="#cb29-203"></a>    <span class="at">by =</span> <span class="st">"season"</span></span>
+<span id="cb29-204"><a href="#cb29-204"></a>  )</span>
+<span id="cb29-205"><a href="#cb29-205"></a></span>
+<span id="cb29-206"><a href="#cb29-206"></a>player_seasonal_defense <span class="ot">&lt;-</span> player_seasonal_defense <span class="sc">%&gt;%</span> </span>
+<span id="cb29-207"><a href="#cb29-207"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb29-208"><a href="#cb29-208"></a>    season_startdate,</span>
+<span id="cb29-209"><a href="#cb29-209"></a>    <span class="at">by =</span> <span class="st">"season"</span></span>
+<span id="cb29-210"><a href="#cb29-210"></a>  )</span>
+<span id="cb29-211"><a href="#cb29-211"></a></span>
+<span id="cb29-212"><a href="#cb29-212"></a>player_seasonal_kicking <span class="ot">&lt;-</span> player_seasonal_kicking <span class="sc">%&gt;%</span> </span>
+<span id="cb29-213"><a href="#cb29-213"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb29-214"><a href="#cb29-214"></a>    season_startdate,</span>
+<span id="cb29-215"><a href="#cb29-215"></a>    <span class="at">by =</span> <span class="st">"season"</span></span>
+<span id="cb29-216"><a href="#cb29-216"></a>  )</span>
+<span id="cb29-217"><a href="#cb29-217"></a></span>
+<span id="cb29-218"><a href="#cb29-218"></a>player_seasonal_offense<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">interval</span>(</span>
+<span id="cb29-219"><a href="#cb29-219"></a>  <span class="at">start =</span> player_seasonal_offense<span class="sc">$</span>birth_date,</span>
+<span id="cb29-220"><a href="#cb29-220"></a>  <span class="at">end =</span> player_seasonal_offense<span class="sc">$</span>startdate</span>
+<span id="cb29-221"><a href="#cb29-221"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-222"><a href="#cb29-222"></a>  <span class="fu">time_length</span>(<span class="at">unit =</span> <span class="st">"years"</span>)</span>
+<span id="cb29-223"><a href="#cb29-223"></a></span>
+<span id="cb29-224"><a href="#cb29-224"></a>player_seasonal_defense<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">interval</span>(</span>
+<span id="cb29-225"><a href="#cb29-225"></a>  <span class="at">start =</span> player_seasonal_defense<span class="sc">$</span>birth_date,</span>
+<span id="cb29-226"><a href="#cb29-226"></a>  <span class="at">end =</span> player_seasonal_defense<span class="sc">$</span>startdate</span>
+<span id="cb29-227"><a href="#cb29-227"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-228"><a href="#cb29-228"></a>  <span class="fu">time_length</span>(<span class="at">unit =</span> <span class="st">"years"</span>)</span>
+<span id="cb29-229"><a href="#cb29-229"></a></span>
+<span id="cb29-230"><a href="#cb29-230"></a>player_seasonal_kicking<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">interval</span>(</span>
+<span id="cb29-231"><a href="#cb29-231"></a>  <span class="at">start =</span> player_seasonal_kicking<span class="sc">$</span>birth_date,</span>
+<span id="cb29-232"><a href="#cb29-232"></a>  <span class="at">end =</span> player_seasonal_kicking<span class="sc">$</span>startdate</span>
+<span id="cb29-233"><a href="#cb29-233"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-234"><a href="#cb29-234"></a>  <span class="fu">time_length</span>(<span class="at">unit =</span> <span class="st">"years"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-plotting" class="level2" data-number="3.7"><h2 data-number="3.7" class="anchored" data-anchor-id="sec-plotting">
 <span class="header-section-number">3.7</span> Plotting</h2>
-<section id="sec-plotDefOffEPA" class="level3" data-number="3.7.1"><h3 data-number="3.7.1" class="anchored" data-anchor-id="sec-plotDefOffEPA">
-<span class="header-section-number">3.7.1</span> Defensive and Offensive EPA per Play</h3>
+<section id="sec-plotRushEPAbyAge" class="level3" data-number="3.7.1"><h3 data-number="3.7.1" class="anchored" data-anchor-id="sec-plotRushEPAbyAge">
+<span class="header-section-number">3.7.1</span> Rushing Yards per Carry By Player Age</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="co"># Prepare Data</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a>rushing_attempts <span class="ot">&lt;-</span> nfl_pbp <span class="sc">%&gt;%</span> </span>
+<span id="cb30-3"><a href="#cb30-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb30-4"><a href="#cb30-4"></a>    season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-5"><a href="#cb30-5"></a>    <span class="fu">filter</span>(</span>
+<span id="cb30-6"><a href="#cb30-6"></a>      rush <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb30-7"><a href="#cb30-7"></a>      rush_attempt <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb30-8"><a href="#cb30-8"></a>      qb_scramble <span class="sc">==</span> <span class="dv">0</span>,</span>
+<span id="cb30-9"><a href="#cb30-9"></a>      qb_dropback <span class="sc">==</span> <span class="dv">0</span>,</span>
+<span id="cb30-10"><a href="#cb30-10"></a>      <span class="sc">!</span><span class="fu">is.na</span>(rushing_yards))</span>
+<span id="cb30-11"><a href="#cb30-11"></a></span>
+<span id="cb30-12"><a href="#cb30-12"></a>rb_yardsPerCarry <span class="ot">&lt;-</span> rushing_attempts <span class="sc">%&gt;%</span> </span>
+<span id="cb30-13"><a href="#cb30-13"></a>  <span class="fu">group_by</span>(rusher_id, season) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-14"><a href="#cb30-14"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb30-15"><a href="#cb30-15"></a>    <span class="at">ypc =</span> <span class="fu">mean</span>(rushing_yards, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb30-16"><a href="#cb30-16"></a>    <span class="at">rush_attempts =</span> <span class="fu">n</span>(),</span>
+<span id="cb30-17"><a href="#cb30-17"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-18"><a href="#cb30-18"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb30-19"><a href="#cb30-19"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb30-20"><a href="#cb30-20"></a>    nfl_players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>season),</span>
+<span id="cb30-21"><a href="#cb30-21"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"rusher_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb30-22"><a href="#cb30-22"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-23"><a href="#cb30-23"></a>  <span class="fu">filter</span>(</span>
+<span id="cb30-24"><a href="#cb30-24"></a>    position_group <span class="sc">==</span> <span class="st">"RB"</span>,</span>
+<span id="cb30-25"><a href="#cb30-25"></a>    rush_attempts <span class="sc">&gt;=</span> <span class="dv">50</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-26"><a href="#cb30-26"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb30-27"><a href="#cb30-27"></a>    season_startdate,</span>
+<span id="cb30-28"><a href="#cb30-28"></a>    <span class="at">by =</span> <span class="st">"season"</span></span>
+<span id="cb30-29"><a href="#cb30-29"></a>  )</span>
+<span id="cb30-30"><a href="#cb30-30"></a></span>
+<span id="cb30-31"><a href="#cb30-31"></a>rb_yardsPerCarry<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">interval</span>(</span>
+<span id="cb30-32"><a href="#cb30-32"></a>  <span class="at">start =</span> rb_yardsPerCarry<span class="sc">$</span>birth_date,</span>
+<span id="cb30-33"><a href="#cb30-33"></a>  <span class="at">end =</span> rb_yardsPerCarry<span class="sc">$</span>startdate</span>
+<span id="cb30-34"><a href="#cb30-34"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-35"><a href="#cb30-35"></a>  <span class="fu">time_length</span>(<span class="at">unit =</span> <span class="st">"years"</span>)</span>
+<span id="cb30-36"><a href="#cb30-36"></a></span>
+<span id="cb30-37"><a href="#cb30-37"></a><span class="co"># Create Plot</span></span>
+<span id="cb30-38"><a href="#cb30-38"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb30-39"><a href="#cb30-39"></a>  <span class="at">data =</span> rb_yardsPerCarry,</span>
+<span id="cb30-40"><a href="#cb30-40"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb30-41"><a href="#cb30-41"></a>    <span class="at">x =</span> age,</span>
+<span id="cb30-42"><a href="#cb30-42"></a>    <span class="at">y =</span> ypc)) <span class="sc">+</span></span>
+<span id="cb30-43"><a href="#cb30-43"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb30-44"><a href="#cb30-44"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_smooth</span>() <span class="sc">+</span></span>
+<span id="cb30-45"><a href="#cb30-45"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb30-46"><a href="#cb30-46"></a>    <span class="at">x =</span> <span class="st">"Rushing Back Age (years)"</span>,</span>
+<span id="cb30-47"><a href="#cb30-47"></a>    <span class="at">y =</span> <span class="st">"Rushing Yards per Carry/season"</span>,</span>
+<span id="cb30-48"><a href="#cb30-48"></a>    <span class="at">title =</span> <span class="st">"2023 NFL Rushing Yards Per Carry per Season by Player Age"</span>,</span>
+<span id="cb30-49"><a href="#cb30-49"></a>    <span class="at">subtitle =</span> <span class="st">"(minimum 50 rushing attempts)"</span></span>
+<span id="cb30-50"><a href="#cb30-50"></a>  ) <span class="sc">+</span></span>
+<span id="cb30-51"><a href="#cb30-51"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="getting-started_files/figure-html/unnamed-chunk-76-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a><span class="co"># Subset Data</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a>rb_seasonal <span class="ot">&lt;-</span> player_seasonal_offense <span class="sc">%&gt;%</span> </span>
+<span id="cb31-3"><a href="#cb31-3"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"RB"</span>)</span>
+<span id="cb31-4"><a href="#cb31-4"></a></span>
+<span id="cb31-5"><a href="#cb31-5"></a><span class="co"># Create Plot</span></span>
+<span id="cb31-6"><a href="#cb31-6"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb31-7"><a href="#cb31-7"></a>  <span class="at">data =</span> rb_seasonal,</span>
+<span id="cb31-8"><a href="#cb31-8"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb31-9"><a href="#cb31-9"></a>    <span class="at">x =</span> age,</span>
+<span id="cb31-10"><a href="#cb31-10"></a>    <span class="at">y =</span> rushing_epa)) <span class="sc">+</span></span>
+<span id="cb31-11"><a href="#cb31-11"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb31-12"><a href="#cb31-12"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_smooth</span>() <span class="sc">+</span></span>
+<span id="cb31-13"><a href="#cb31-13"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb31-14"><a href="#cb31-14"></a>    <span class="at">x =</span> <span class="st">"Rushing Back Age (years)"</span>,</span>
+<span id="cb31-15"><a href="#cb31-15"></a>    <span class="at">y =</span> <span class="st">"Rushing EPA/season"</span>,</span>
+<span id="cb31-16"><a href="#cb31-16"></a>    <span class="at">title =</span> <span class="st">"2023 NFL Rushing EPA per Season by Player Age"</span></span>
+<span id="cb31-17"><a href="#cb31-17"></a>  ) <span class="sc">+</span></span>
+<span id="cb31-18"><a href="#cb31-18"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="getting-started_files/figure-html/unnamed-chunk-77-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-plotDefOffEPA" class="level3" data-number="3.7.2"><h3 data-number="3.7.2" class="anchored" data-anchor-id="sec-plotDefOffEPA">
+<span class="header-section-number">3.7.2</span> Defensive and Offensive EPA per Play</h3>
 <p>Expected points added (EPA) per play by the team with possession.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>pbp_regularSeason <span class="ot">&lt;-</span> nfl_pbp <span class="sc">%&gt;%</span> </span>
-<span id="cb30-2"><a href="#cb30-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
-<span id="cb30-3"><a href="#cb30-3"></a>    season <span class="sc">==</span> <span class="dv">2023</span>,</span>
-<span id="cb30-4"><a href="#cb30-4"></a>    season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb30-5"><a href="#cb30-5"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(posteam) <span class="sc">&amp;</span> (rush <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> pass <span class="sc">==</span> <span class="dv">1</span>))</span>
-<span id="cb30-6"><a href="#cb30-6"></a></span>
-<span id="cb30-7"><a href="#cb30-7"></a>epa_offense <span class="ot">&lt;-</span> pbp_regularSeason <span class="sc">%&gt;%</span></span>
-<span id="cb30-8"><a href="#cb30-8"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(<span class="at">team =</span> posteam) <span class="sc">%&gt;%</span></span>
-<span id="cb30-9"><a href="#cb30-9"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">off_epa =</span> <span class="fu">mean</span>(epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb30-10"><a href="#cb30-10"></a></span>
-<span id="cb30-11"><a href="#cb30-11"></a>epa_defense <span class="ot">&lt;-</span> pbp_regularSeason <span class="sc">%&gt;%</span></span>
-<span id="cb30-12"><a href="#cb30-12"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(<span class="at">team =</span> defteam) <span class="sc">%&gt;%</span></span>
-<span id="cb30-13"><a href="#cb30-13"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">def_epa =</span> <span class="fu">mean</span>(epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb30-14"><a href="#cb30-14"></a></span>
-<span id="cb30-15"><a href="#cb30-15"></a>epa_combined <span class="ot">&lt;-</span> epa_offense <span class="sc">%&gt;%</span></span>
-<span id="cb30-16"><a href="#cb30-16"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(epa_defense, <span class="at">by =</span> <span class="st">"team"</span>)</span>
-<span id="cb30-17"><a href="#cb30-17"></a></span>
-<span id="cb30-18"><a href="#cb30-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
-<span id="cb30-19"><a href="#cb30-19"></a>  <span class="at">data =</span> epa_combined,</span>
-<span id="cb30-20"><a href="#cb30-20"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
-<span id="cb30-21"><a href="#cb30-21"></a>    <span class="at">x =</span> off_epa,</span>
-<span id="cb30-22"><a href="#cb30-22"></a>    <span class="at">y =</span> def_epa)) <span class="sc">+</span></span>
-<span id="cb30-23"><a href="#cb30-23"></a>  nflplotR<span class="sc">::</span><span class="fu">geom_mean_lines</span>(</span>
-<span id="cb30-24"><a href="#cb30-24"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
-<span id="cb30-25"><a href="#cb30-25"></a>      <span class="at">x0 =</span> off_epa ,</span>
-<span id="cb30-26"><a href="#cb30-26"></a>      <span class="at">y0 =</span> def_epa)) <span class="sc">+</span></span>
-<span id="cb30-27"><a href="#cb30-27"></a>  nflplotR<span class="sc">::</span><span class="fu">geom_nfl_logos</span>(</span>
-<span id="cb30-28"><a href="#cb30-28"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
-<span id="cb30-29"><a href="#cb30-29"></a>      <span class="at">team_abbr =</span> team),</span>
-<span id="cb30-30"><a href="#cb30-30"></a>      <span class="at">width =</span> <span class="fl">0.065</span>,</span>
-<span id="cb30-31"><a href="#cb30-31"></a>      <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb30-32"><a href="#cb30-32"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
-<span id="cb30-33"><a href="#cb30-33"></a>    <span class="at">x =</span> <span class="st">"Offense EPA/play"</span>,</span>
-<span id="cb30-34"><a href="#cb30-34"></a>    <span class="at">y =</span> <span class="st">"Defense EPA/play"</span>,</span>
-<span id="cb30-35"><a href="#cb30-35"></a>    <span class="at">title =</span> <span class="st">"2023 NFL Offensive and Defensive EPA per Play"</span></span>
-<span id="cb30-36"><a href="#cb30-36"></a>  ) <span class="sc">+</span></span>
-<span id="cb30-37"><a href="#cb30-37"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb30-38"><a href="#cb30-38"></a>  ggplot2<span class="sc">::</span><span class="fu">scale_y_reverse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>pbp_regularSeason <span class="ot">&lt;-</span> nfl_pbp <span class="sc">%&gt;%</span> </span>
+<span id="cb32-2"><a href="#cb32-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb32-3"><a href="#cb32-3"></a>    season <span class="sc">==</span> <span class="dv">2023</span>,</span>
+<span id="cb32-4"><a href="#cb32-4"></a>    season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-5"><a href="#cb32-5"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(posteam) <span class="sc">&amp;</span> (rush <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> pass <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb32-6"><a href="#cb32-6"></a></span>
+<span id="cb32-7"><a href="#cb32-7"></a>epa_offense <span class="ot">&lt;-</span> pbp_regularSeason <span class="sc">%&gt;%</span></span>
+<span id="cb32-8"><a href="#cb32-8"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(<span class="at">team =</span> posteam) <span class="sc">%&gt;%</span></span>
+<span id="cb32-9"><a href="#cb32-9"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">off_epa =</span> <span class="fu">mean</span>(epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb32-10"><a href="#cb32-10"></a></span>
+<span id="cb32-11"><a href="#cb32-11"></a>epa_defense <span class="ot">&lt;-</span> pbp_regularSeason <span class="sc">%&gt;%</span></span>
+<span id="cb32-12"><a href="#cb32-12"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(<span class="at">team =</span> defteam) <span class="sc">%&gt;%</span></span>
+<span id="cb32-13"><a href="#cb32-13"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">def_epa =</span> <span class="fu">mean</span>(epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb32-14"><a href="#cb32-14"></a></span>
+<span id="cb32-15"><a href="#cb32-15"></a>epa_combined <span class="ot">&lt;-</span> epa_offense <span class="sc">%&gt;%</span></span>
+<span id="cb32-16"><a href="#cb32-16"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(epa_defense, <span class="at">by =</span> <span class="st">"team"</span>)</span>
+<span id="cb32-17"><a href="#cb32-17"></a></span>
+<span id="cb32-18"><a href="#cb32-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb32-19"><a href="#cb32-19"></a>  <span class="at">data =</span> epa_combined,</span>
+<span id="cb32-20"><a href="#cb32-20"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb32-21"><a href="#cb32-21"></a>    <span class="at">x =</span> off_epa,</span>
+<span id="cb32-22"><a href="#cb32-22"></a>    <span class="at">y =</span> def_epa)) <span class="sc">+</span></span>
+<span id="cb32-23"><a href="#cb32-23"></a>  nflplotR<span class="sc">::</span><span class="fu">geom_mean_lines</span>(</span>
+<span id="cb32-24"><a href="#cb32-24"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb32-25"><a href="#cb32-25"></a>      <span class="at">x0 =</span> off_epa ,</span>
+<span id="cb32-26"><a href="#cb32-26"></a>      <span class="at">y0 =</span> def_epa)) <span class="sc">+</span></span>
+<span id="cb32-27"><a href="#cb32-27"></a>  nflplotR<span class="sc">::</span><span class="fu">geom_nfl_logos</span>(</span>
+<span id="cb32-28"><a href="#cb32-28"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb32-29"><a href="#cb32-29"></a>      <span class="at">team_abbr =</span> team),</span>
+<span id="cb32-30"><a href="#cb32-30"></a>      <span class="at">width =</span> <span class="fl">0.065</span>,</span>
+<span id="cb32-31"><a href="#cb32-31"></a>      <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb32-32"><a href="#cb32-32"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb32-33"><a href="#cb32-33"></a>    <span class="at">x =</span> <span class="st">"Offense EPA/play"</span>,</span>
+<span id="cb32-34"><a href="#cb32-34"></a>    <span class="at">y =</span> <span class="st">"Defense EPA/play"</span>,</span>
+<span id="cb32-35"><a href="#cb32-35"></a>    <span class="at">title =</span> <span class="st">"2023 NFL Offensive and Defensive EPA per Play"</span></span>
+<span id="cb32-36"><a href="#cb32-36"></a>  ) <span class="sc">+</span></span>
+<span id="cb32-37"><a href="#cb32-37"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb32-38"><a href="#cb32-38"></a>  ggplot2<span class="sc">::</span><span class="fu">scale_y_reverse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-plotDefOffEPA" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-plotDefOffEPA-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
