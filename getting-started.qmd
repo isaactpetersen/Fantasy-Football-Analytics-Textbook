@@ -815,72 +815,96 @@ names(nfl_players)
 ### Is Equal To: `==` {#sec-logicalOperatorEqual}
 
 ```{r}
+#| eval: false
+
 nfl_players$position_group == "RB"
 ```
 
 ### Is Not Equal To: `!=` {#sec-logicalOperatorNotEqual}
 
 ```{r}
+#| eval: false
+
 nfl_players$position_group != "RB"
 ```
 
 ### Is Greater Than: `>` {#sec-logicalOperatorGreaterThan}
 
 ```{r}
+#| eval: false
+
 nfl_players$weight > 300
 ```
 
 ### Is Less Than: `<` {#sec-logicalOperatorLessThan}
 
 ```{r}
+#| eval: false
+
 nfl_players$weight < 300
 ```
 
 ### Is Greater Than or Equal To: `>=` {#sec-logicalOperatorGreaterThanEqual}
 
 ```{r}
+#| eval: false
+
 nfl_players$weight >= 300
 ```
 
 ### Is Less Than or Equal To: `<=` {#sec-logicalOperatorLessThanEqual}
 
 ```{r}
+#| eval: false
+
 nfl_players$weight <= 300
 ```
 
 ### Is In a Value of Another Vector: `%in%` {#sec-logicalOperatorInVector}
 
 ```{r}
+#| eval: false
+
 nfl_players$position_group %in% c("QB","RB","WR")
 ```
 
 ### Is Not In a Value of Another Vector: `!(%in%)` {#sec-logicalOperatorNotInVector}
 
 ```{r}
+#| eval: false
+
 !(nfl_players$position_group %in% c("QB","RB","WR"))
 ```
 
 ### Is Missing: `is.na()` {#sec-logicalOperatorMissing}
 
 ```{r}
+#| eval: false
+
 is.na(nfl_players$college_name)
 ```
 
 ### Is Not Missing: `!is.na()` {#sec-logicalOperatorNotMissing}
 
 ```{r}
+#| eval: false
+
 !is.na(nfl_players$college_name)
 ```
 
 ### And: `&`{#sec-logicalOperatorAnd}
 
 ```{r}
+#| eval: false
+
 nfl_players$position_group == "RB" & nfl_players$weight > 230
 ```
 
 ### Or: `|` {#sec-logicalOperatorOr}
 
 ```{r}
+#| eval: false
+
 nfl_players$position_group == "RB" | nfl_players$weight > 230
 ```
 
@@ -888,7 +912,9 @@ nfl_players$position_group == "RB" | nfl_players$weight > 230
 
 To subset a data frame, use brackets to specify the subset of rows and columns to keep, where the value/vector before the comma specifies the rows to keep, and the value/vector after the comma specifies the columns to keep:
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
+
 dataframe[rowsToKeep, columnsToKeep]
 ```
 
@@ -903,6 +929,8 @@ You can subset by using any of the following:
 To subset one variable, use the following syntax:
 
 ```{r}
+#| eval: false
+
 nfl_players$display_name
 ```
 
@@ -917,6 +945,8 @@ nfl_players[,"display_name"]
 To subset one variable, use the following syntax:
 
 ```{r}
+#| eval: false
+
 nfl_players$display_name[which(nfl_players$position_group == "RB")]
 ```
 
@@ -1021,6 +1051,174 @@ nfl_players[which(nfl_players$position_group == "RB"), subsetVars]
 nfl_players %>%
   filter(position_group == "RB") %>%
   select(all_of(subsetVars))
+```
+
+## View Data {#sec-viewData}
+
+### All Data {#sec-viewDataAll}
+
+To view data, use the following syntax:
+
+```{r}
+#| eval: false
+
+View(nfl_players)
+```
+
+### First 6 Rows/Elements {#sec-viewDataHead}
+
+To view only the first six rows (if a data frame) or elements (if a vector), use the following syntax:
+
+```{r}
+head(nfl_players)
+head(nfl_players$display_name)
+```
+
+## Data Characteristics {#sec-dataCharacteristics}
+
+### Data Structure {#sec-dataCharacteristicsStructure}
+
+```{r}
+str(nfl_players)
+```
+
+### Data Dimensions {#sec-dataCharacteristicsDimensions}
+
+Number of rows and columns:
+
+```{r}
+dim(nfl_players)
+```
+
+### Number of Elements {#sec-dataCharacteristicsLength}
+
+```{r}
+length(nfl_players$display_name)
+```
+
+### Number of Missing Elements {#sec-dataCharacteristicsMissingElements}
+
+```{r}
+length(nfl_players$college_name[which(is.na(nfl_players$college_name))])
+```
+
+### Number of Non-Missing Elements {#sec-dataCharacteristicsNonMissingElements}
+
+```{r}
+length(nfl_players$college_name[which(!is.na(nfl_players$college_name))])
+length(na.omit(nfl_players$college_name))
+```
+
+## Create New Variables {#sec-createNewVars}
+
+To create a new variable, use the following syntax:
+
+```{r}
+nfl_players$newVar <- NA
+```
+
+Here is an example of creating a new variable:
+
+```{r}
+nfl_players$newVar <- 1:nrow(nfl_players)
+```
+
+```{r}
+#| include: false
+
+nfl_players$newVar <- NULL
+```
+
+## Create a Data Frame {#sec-createDF}
+
+Here is an example of creating a data frame:
+
+```{r}
+mydata <- data.frame(
+  ID = c(1:5, 1047:1051),
+  cat = sample(
+    0:1,
+    10,
+    replace = TRUE)
+)
+
+mydata
+```
+
+## Recode Variables {#sec-recodeVars}
+
+Here is an example of recoding a variable:
+
+```{r}
+mydata$oldVar1 <- NA
+mydata$oldVar1[which(mydata$cat == 0)] <- "dog"
+mydata$oldVar1[which(mydata$cat == 1)] <- "cat"
+
+mydata$oldVar2 <- NA
+mydata$oldVar2[which(mydata$cat == 0)] <- "no"
+mydata$oldVar2[which(mydata$cat == 1)] <- "yes"
+```
+
+Recode multiple variables:
+
+```{r}
+mydata %>%
+  mutate(across(c(
+    oldVar1:oldVar2),
+    ~ case_match(
+      .,
+      c("dog","no") ~ 0,
+      c("cat","yes") ~ 1)))
+```
+
+## Rename Variables {#renameVars}
+
+```{r}
+mydata <- mydata %>% 
+  rename(
+    newVar1 = oldVar1,
+    newVar2 = oldVar2)
+```
+
+Using a vector of variable names:
+
+```{r}
+#| eval: false
+
+varNamesFrom <- c("oldVar1","oldVar2")
+varNamesTo <- c("newVar1","newVar2")
+
+mydata <- mydata %>% 
+  rename_with(~ varNamesTo, all_of(varNamesFrom))
+```
+
+## Convert the Types of Variables {#convertVarTypes}
+
+One variable:
+
+```{r}
+mydata$factorVar <- factor(mydata$ID)
+mydata$numericVar <- as.numeric(mydata$cat)
+mydata$integerVar <- as.integer(mydata$cat)
+mydata$characterVar <- as.character(mydata$newVar1)
+```
+
+Multiple variables:
+
+```{r}
+mydata %>%
+  mutate(across(c(
+    ID,
+    cat),
+    as.numeric))
+
+mydata %>%
+  mutate(across(
+    ID:cat,
+    as.numeric))
+
+mydata %>%
+  mutate(across(where(is.factor), as.character))
 ```
 
 ## Calculations {#sec-calculations}
