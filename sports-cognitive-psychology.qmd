@@ -89,3 +89,55 @@ ggplot2::ggplot(
   ) +
   ggplot2::theme_classic()
 ```
+
+Adapted from Ben Baldwin: https://www.nfl4th.com/articles/4th-down-research.html
+
+```{r}
+# labels on the plot
+text_df <- tibble(
+  label = c("NFL coaches<br>in <span style='color:#00BFC4'>**2023**</span>", "NFL coaches<br>in <span style='color:#F8766D'>**2014**</span>"),
+  x = c(6, 8.2),
+  y = c(80, 37),
+  angle = c(10, 10),
+  color = c("black", "black")
+)
+
+nfl_4thdown %>%
+  filter(vegas_wp > .2, between(go_boost, -10, 10), season %in% c(2014, 2023)) %>%
+  ggplot(aes(go_boost, go, color = as.factor(season))) + 
+  geom_richtext(data = text_df,   
+                aes(x, y, label = label, angle = angle), 
+                color = "black", fill = NA, label.color = NA, size = 5) + 
+  geom_vline(xintercept = 0) +
+  stat_smooth(method = "gam", method.args = list(gamma = 1), formula = y ~ s(x, bs = "cs", k = 10), show.legend = F, se = F, linewidth = 4) +
+  # this is just to get the plot to draw the full 0 to 100 range
+  geom_hline(yintercept = 100, alpha = 0) +
+  geom_hline(yintercept = 0, alpha = 0) +
+  ggplot2::theme_classic() +
+  labs(x = "Gain in win probability by going for it",
+       y = "Go-for-it percentage",
+       subtitle = "4th down decisions in 2023 versus 2014, win prob. > 20%",
+       title = glue::glue("How <span style='color:red'>math</span> is changing football")) +
+  theme(
+    legend.position = "none",
+    plot.title = element_markdown(size = 22, hjust = 0.5),
+    plot.subtitle = element_markdown(size = 14, hjust = 0.5),
+    axis.title.x = element_text(size = 14, face="bold"),
+    axis.title.y = element_text(size = 14, face="bold")
+  ) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 4), limits = c(0, 100), expand = c(0,0)) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10), limits = c(-10, 10), expand = c(0,0)) +
+  annotate("text", x= -1.2, y= 70, label = "Should\nkick", color="black", size = 5) +
+  annotate("text", x= 1.2, y= 70, label = "Should\ngo for it", color="black", size = 5) +
+  geom_segment(
+    aes(x = -.1, y = 80, xend = -2, yend = 80),
+    arrow = arrow(length = unit(0.05, "npc")),
+    color = "black", size = 2
+    ) +
+  geom_segment(
+    aes(x = .1, y = 80, xend = 2, yend = 80),
+    arrow = arrow(length = unit(0.05, "npc")),
+    color = "black", size = 2
+  )
+```
+
