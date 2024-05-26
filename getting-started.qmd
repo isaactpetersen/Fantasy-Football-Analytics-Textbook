@@ -884,6 +884,145 @@ nfl_players$position_group == "RB" & nfl_players$weight > 230
 nfl_players$position_group == "RB" | nfl_players$weight > 230
 ```
 
+## Subset {#sec-subset}
+
+To subset a data frame, use brackets to specify the subset of rows and columns to keep, where the value/vector before the comma specifies the rows to keep, and the value/vector after the comma specifies the columns to keep:
+
+```{r, eval = FALSE}
+dataframe[rowsToKeep, columnsToKeep]
+```
+
+You can subset by using any of the following:
+
+- numeric indices of the rows/columns to keep (or drop)
+- names of the rows/columns to keep (or drop)
+- values of `TRUE` and `FALSE` corresponding to which rows/columns to keep
+
+### One Variable {#sec-subsetOneVariable}
+
+To subset one variable, use the following syntax:
+
+```{r}
+nfl_players$display_name
+```
+
+or:
+
+```{r}
+nfl_players[,"display_name"]
+```
+
+### Particular Rows of One Variable {#sec-subsetParticularRowsOneVariable}
+
+To subset one variable, use the following syntax:
+
+```{r}
+nfl_players$display_name[which(nfl_players$position_group == "RB")]
+```
+
+or:
+
+```{r}
+nfl_players[which(nfl_players$position_group == "RB"), "display_name"]
+```
+
+### Particular Columns (Variables) {#sec-subsetParticularColumns}
+
+To subset particular columns/variables, use the following syntax:
+
+#### Base `R` {#sec-subsetParticularColumnsBaseR}
+
+```{r}
+subsetVars <- c("status","display_name","college_name")
+
+nfl_players[,c(1,2,9)]
+nfl_players[,c("status","display_name","college_name")]
+nfl_players[,subsetVars]
+```
+
+Or, to drop columns:
+
+```{r}
+dropVars <- c("status","college_name")
+
+nfl_players[,-c(1,9)]
+nfl_players[,!(names(nfl_players) %in% c("status","college_name"))]
+nfl_players[,!(names(nfl_players) %in% dropVars)]
+```
+
+#### Tidyverse {#sec-subsetParticularColumnsTidyverse}
+
+```{r}
+nfl_players %>%
+  select(status, display_name, college_name)
+
+nfl_players %>%
+  select(status:college_name)
+
+nfl_players %>%
+  select(all_of(subsetVars))
+```
+
+Or, to drop columns:
+
+```{r}
+nfl_players %>%
+  select(-status, -college_name)
+
+nfl_players %>%
+  select(-c(status:college_name))
+
+nfl_players %>%
+  select(-all_of(dropVars))
+```
+
+### Particular Rows {#sec-subsetParticularRows}
+
+To subset particular rows, use the following syntax:
+
+#### Base `R` {#sec-subsetParticularRowsBaseR}
+
+```{r}
+subsetRows <- c(1,3,5)
+
+nfl_players[c(1,3,5),]
+nfl_players[subsetRows,]
+nfl_players[which(nfl_players$position_group == "RB"),]
+```
+
+#### Tidyverse {#sec-subsetParticularRowsTidyverse}
+
+```{r}
+nfl_players %>%
+  filter(position_group == "RB")
+
+nfl_players %>%
+  filter(position_group == "RB", weight <= 250)
+
+nfl_players %>%
+  filter(position_group == "RB" | weight >= 250)
+```
+
+### Particular Rows and Columns {#sec-subsetParticularRowsAndColumns}
+
+To subset particular rows and columns, use the following syntax:
+
+#### Base `R` {#sec-subsetParticularRowsAndColumnsBaseR}
+
+```{r}
+nfl_players[c(1,3,5), c(1,2,3)]
+nfl_players[subsetRows, subsetVars]
+nfl_players[which(nfl_players$position_group == "RB"), subsetVars]
+```
+
+#### Tidyverse {#sec-subsetParticularRowsAndColumnsTidyverse}
+
+```{r}
+nfl_players %>%
+  filter(position_group == "RB") %>%
+  select(all_of(subsetVars))
+```
+
 ## Calculations {#sec-calculations}
 
 ### Historical Actual Player Statistics {#sec-calculateActualStats}
