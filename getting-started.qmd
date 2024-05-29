@@ -830,12 +830,44 @@ load(file = here("data", "nfl_expectedFantasyPoints_offense.RData"))
 Data Dictionaries are metadata that describe the meaning of the variables in a datset.
 You can find Data Dictionaries for the various NFL datasets at the following link: <https://nflreadr.nflverse.com/articles/index.html>.
 
+## Create a Data Frame {#sec-createDF}
+
+Here is an example of creating a data frame:
+
+```{r}
+players <- data.frame(
+  ID = 1:10,
+  name = c(
+    "Ken Cussion",
+    "Ben Sacked",
+    "Justin Time",
+    "Lionel Scrimmage",
+    "Drew Blood",
+    "Hugo Long",
+    "Chase Emdown",
+    "Name8",
+    "Name9",
+    "Name10"),
+  position = c("QB","QB","RB","RB","WR","WR","WR","WR","TE","TE"),
+  age = c(40, 30, 20, 18, 23, 27, 32, 26, 23, NA)
+  )
+
+fantasyPoints <- data.frame(
+  ID = c(2, 6, 11, 12),
+  fantasyPoints = c(250, 170, 65, 15)
+)
+```
+
 ## Variable Names {#sec-variableNames}
 
 To see the names of variables in a data frame, use the following syntax:
 
 ```{r}
 names(nfl_players)
+
+names(players)
+
+names(fantasyPoints)
 ```
 
 ## Logical Operators {#sec-logicalOperators}
@@ -843,97 +875,73 @@ names(nfl_players)
 ### Is Equal To: `==` {#sec-logicalOperatorEqual}
 
 ```{r}
-#| eval: false
-
-nfl_players$position_group == "RB"
+players$position == "RB"
 ```
 
 ### Is Not Equal To: `!=` {#sec-logicalOperatorNotEqual}
 
 ```{r}
-#| eval: false
-
-nfl_players$position_group != "RB"
+players$position != "RB"
 ```
 
 ### Is Greater Than: `>` {#sec-logicalOperatorGreaterThan}
 
 ```{r}
-#| eval: false
-
-nfl_players$weight > 300
+players$age > 30
 ```
 
 ### Is Less Than: `<` {#sec-logicalOperatorLessThan}
 
 ```{r}
-#| eval: false
-
-nfl_players$weight < 300
+players$age < 30
 ```
 
 ### Is Greater Than or Equal To: `>=` {#sec-logicalOperatorGreaterThanEqual}
 
 ```{r}
-#| eval: false
-
-nfl_players$weight >= 300
+players$age >= 30
 ```
 
 ### Is Less Than or Equal To: `<=` {#sec-logicalOperatorLessThanEqual}
 
 ```{r}
-#| eval: false
-
-nfl_players$weight <= 300
+players$age <= 30
 ```
 
 ### Is In a Value of Another Vector: `%in%` {#sec-logicalOperatorInVector}
 
 ```{r}
-#| eval: false
-
-nfl_players$position_group %in% c("QB","RB","WR")
+players$position %in% c("RB","WR")
 ```
 
 ### Is Not In a Value of Another Vector: `!(%in%)` {#sec-logicalOperatorNotInVector}
 
 ```{r}
-#| eval: false
-
-!(nfl_players$position_group %in% c("QB","RB","WR"))
+!(players$position %in% c("RB","WR"))
 ```
 
 ### Is Missing: `is.na()` {#sec-logicalOperatorMissing}
 
 ```{r}
-#| eval: false
-
-is.na(nfl_players$college_name)
+is.na(players$age)
 ```
 
 ### Is Not Missing: `!is.na()` {#sec-logicalOperatorNotMissing}
 
 ```{r}
-#| eval: false
-
-!is.na(nfl_players$college_name)
+!is.na(players$age)
 ```
 
 ### And: `&`{#sec-logicalOperatorAnd}
 
 ```{r}
-#| eval: false
-
-nfl_players$position_group == "RB" & nfl_players$weight > 230
+players$position == "WR" & players$age > 26
 ```
 
 ### Or: `|` {#sec-logicalOperatorOr}
 
 ```{r}
-#| eval: false
-
-nfl_players$position_group == "RB" | nfl_players$weight > 230
+players$position == "WR" | players$age > 23
 ```
 
 ## Subset {#sec-subset}
@@ -957,15 +965,13 @@ You can subset by using any of the following:
 To subset one variable, use the following syntax:
 
 ```{r}
-#| eval: false
-
-nfl_players$display_name
+players$name
 ```
 
 or:
 
 ```{r}
-nfl_players[,"display_name"]
+players[,"name"]
 ```
 
 ### Particular Rows of One Variable {#sec-subsetParticularRowsOneVariable}
@@ -973,15 +979,13 @@ nfl_players[,"display_name"]
 To subset one variable, use the following syntax:
 
 ```{r}
-#| eval: false
-
-nfl_players$display_name[which(nfl_players$position_group == "RB")]
+players$name[which(players$position == "RB")]
 ```
 
 or:
 
 ```{r}
-nfl_players[which(nfl_players$position_group == "RB"), "display_name"]
+players[which(players$position == "RB"), "name"]
 ```
 
 ### Particular Columns (Variables) {#sec-subsetParticularColumns}
@@ -991,54 +995,46 @@ To subset particular columns/variables, use the following syntax:
 #### Base `R` {#sec-subsetParticularColumnsBaseR}
 
 ```{r}
-#| eval: false
+subsetVars <- c("name","age")
 
-subsetVars <- c("status","display_name","college_name")
-
-nfl_players[,c(1,2,9)]
-nfl_players[,c("status","display_name","college_name")]
-nfl_players[,subsetVars]
+players[,c(2,3)]
+players[,c("name","age")]
+players[,subsetVars]
 ```
 
 Or, to drop columns:
 
 ```{r}
-#| eval: false
+dropVars <- c("name","age")
 
-dropVars <- c("status","college_name")
-
-nfl_players[,-c(1,9)]
-nfl_players[,!(names(nfl_players) %in% c("status","college_name"))]
-nfl_players[,!(names(nfl_players) %in% dropVars)]
+players[,-c(2,3)]
+players[,!(names(players) %in% c("name","age"))]
+players[,!(names(players) %in% dropVars)]
 ```
 
 #### Tidyverse {#sec-subsetParticularColumnsTidyverse}
 
 ```{r}
-#| eval: false
+players %>%
+  select(name, age)
 
-nfl_players %>%
-  select(status, display_name, college_name)
+players %>%
+  select(name:age)
 
-nfl_players %>%
-  select(status:college_name)
-
-nfl_players %>%
+players %>%
   select(all_of(subsetVars))
 ```
 
 Or, to drop columns:
 
 ```{r}
-#| eval: false
+players %>%
+  select(-name, -age)
 
-nfl_players %>%
-  select(-status, -college_name)
+players %>%
+  select(-c(position:age))
 
-nfl_players %>%
-  select(-c(status:college_name))
-
-nfl_players %>%
+players %>%
   select(-all_of(dropVars))
 ```
 
@@ -1049,28 +1045,24 @@ To subset particular rows, use the following syntax:
 #### Base `R` {#sec-subsetParticularRowsBaseR}
 
 ```{r}
-#| eval: false
+subsetRows <- c(3,4)
 
-subsetRows <- c(1,3,5)
-
-nfl_players[c(1,3,5),]
-nfl_players[subsetRows,]
-nfl_players[which(nfl_players$position_group == "RB"),]
+players[c(3,4),]
+players[subsetRows,]
+players[which(players$position == "RB"),]
 ```
 
 #### Tidyverse {#sec-subsetParticularRowsTidyverse}
 
 ```{r}
-#| eval: false
+players %>%
+  filter(position == "WR")
 
-nfl_players %>%
-  filter(position_group == "RB")
+players %>%
+  filter(position == "WR", age <= 26)
 
-nfl_players %>%
-  filter(position_group == "RB", weight <= 250)
-
-nfl_players %>%
-  filter(position_group == "RB" | weight >= 250)
+players %>%
+  filter(position == "WR" | age >= 26)
 ```
 
 ### Particular Rows and Columns {#sec-subsetParticularRowsAndColumns}
@@ -1080,20 +1072,16 @@ To subset particular rows and columns, use the following syntax:
 #### Base `R` {#sec-subsetParticularRowsAndColumnsBaseR}
 
 ```{r}
-#| eval: false
-
-nfl_players[c(1,3,5), c(1,2,3)]
-nfl_players[subsetRows, subsetVars]
-nfl_players[which(nfl_players$position_group == "RB"), subsetVars]
+players[c(3,4), c(2,4)]
+players[subsetRows, subsetVars]
+players[which(players$position == "RB"), subsetVars]
 ```
 
 #### Tidyverse {#sec-subsetParticularRowsAndColumnsTidyverse}
 
 ```{r}
-#| eval: false
-
-nfl_players %>%
-  filter(position_group == "RB") %>%
+players %>%
+  filter(position == "RB") %>%
   select(all_of(subsetVars))
 ```
 
@@ -1106,7 +1094,7 @@ To view data, use the following syntax:
 ```{r}
 #| eval: false
 
-View(nfl_players)
+View(players)
 ```
 
 ### First 6 Rows/Elements {#sec-viewDataHead}
@@ -1158,35 +1146,19 @@ length(na.omit(nfl_players$college_name))
 To create a new variable, use the following syntax:
 
 ```{r}
-nfl_players$newVar <- NA
+players$newVar <- NA
 ```
 
 Here is an example of creating a new variable:
 
 ```{r}
-nfl_players$newVar <- 1:nrow(nfl_players)
+players$newVar <- 1:nrow(players)
 ```
 
 ```{r}
 #| include: false
 
-nfl_players$newVar <- NULL
-```
-
-## Create a Data Frame {#sec-createDF}
-
-Here is an example of creating a data frame:
-
-```{r}
-mydata <- data.frame(
-  ID = c(1:5, 1047:1051),
-  cat = sample(
-    0:1,
-    10,
-    replace = TRUE)
-)
-
-mydata
+players$newVar <- NULL
 ```
 
 ## Recode Variables {#sec-recodeVars}
@@ -1194,31 +1166,33 @@ mydata
 Here is an example of recoding a variable:
 
 ```{r}
-mydata$oldVar1 <- NA
-mydata$oldVar1[which(mydata$cat == 0)] <- "dog"
-mydata$oldVar1[which(mydata$cat == 1)] <- "cat"
+players$oldVar1 <- NA
+players$oldVar1[which(players$position == "QB")] <- "quarterback"
+players$oldVar1[which(players$position == "RB")] <- "running back"
+players$oldVar1[which(players$position == "WR")] <- "wide receiver"
+players$oldVar1[which(players$position == "TE")] <- "tight end"
 
-mydata$oldVar2 <- NA
-mydata$oldVar2[which(mydata$cat == 0)] <- "no"
-mydata$oldVar2[which(mydata$cat == 1)] <- "yes"
+players$oldVar2 <- NA
+players$oldVar2[which(players$age < 30)] <- "young"
+players$oldVar2[which(players$age >= 30)] <- "old"
 ```
 
 Recode multiple variables:
 
 ```{r}
-mydata %>%
+players %>%
   mutate(across(c(
     oldVar1:oldVar2),
     ~ case_match(
       .,
-      c("dog","no") ~ 0,
-      c("cat","yes") ~ 1)))
+      c("quarterback","old","running back") ~ 0,
+      c("wide receiver","tight end","young") ~ 1)))
 ```
 
 ## Rename Variables {#renameVars}
 
 ```{r}
-mydata <- mydata %>% 
+players <- players %>% 
   rename(
     newVar1 = oldVar1,
     newVar2 = oldVar2)
@@ -1232,7 +1206,7 @@ Using a vector of variable names:
 varNamesFrom <- c("oldVar1","oldVar2")
 varNamesTo <- c("newVar1","newVar2")
 
-mydata <- mydata %>% 
+players <- players %>% 
   rename_with(~ varNamesTo, all_of(varNamesFrom))
 ```
 
@@ -1241,27 +1215,27 @@ mydata <- mydata %>%
 One variable:
 
 ```{r}
-mydata$factorVar <- factor(mydata$ID)
-mydata$numericVar <- as.numeric(mydata$cat)
-mydata$integerVar <- as.integer(mydata$cat)
-mydata$characterVar <- as.character(mydata$newVar1)
+players$factorVar <- factor(players$ID)
+players$numericVar <- as.numeric(players$age)
+players$integerVar <- as.integer(players$newVar)
+players$characterVar <- as.character(players$newVar1)
 ```
 
 Multiple variables:
 
 ```{r}
-mydata %>%
+players %>%
   mutate(across(c(
     ID,
-    cat),
+    age),
     as.numeric))
 
-mydata %>%
+players %>%
   mutate(across(
-    ID:cat,
-    as.numeric))
+    age:newVar1,
+    as.character))
 
-mydata %>%
+players %>%
   mutate(across(where(is.factor), as.character))
 ```
 
@@ -1290,23 +1264,23 @@ However, as described above, you should include it as a key ***only*** if it uni
 
 ### Data Before Merging {#sec-mergingData}
 
-Here are the data in the `nfl_actualStats_offense_weekly` object:
+Here are the data in the `players` object:
 
 ```{r}
-dim(nfl_actualStats_offense_weekly)
+players
 
-dim(distinct(nfl_actualStats_offense_weekly, player_id, season, week, .keep_all = TRUE))
+dim(players)
 ```
 
-The data are structured in player-season-week form.
-That is, every row in the dataset is uniquely identified by the variables, `player_id`, `season`, and `week`.
+The data are structured in ID form.
+That is, every row in the dataset is uniquely identified by the variable, `ID`.
 
-Here are the data in the `nfl_expectedFantasyPoints_weekly` object:
+Here are the data in the `fantasyPoints` object:
 
 ```{r}
-dim(nfl_players)
+fantasyPoints
 
-dim(distinct(nfl_players, gsis_id, .keep_all = TRUE))
+dim(fantasyPoints)
 ```
 
 ### Types of Joins {#sec-mergeTypes}
@@ -1330,12 +1304,12 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using a full outer join (i.e., "full join"):
 
 ```{r}
-#| eval: false
-
 fullJoinData <- full_join(
-  nfl_actualStats_offense_weekly,
-  nfl_players,
-  by = c("player_id" = "gsis_id"))
+  players,
+  fantasyPoints,
+  by = "ID")
+
+fullJoinData
 
 dim(fullJoinData)
 ```
@@ -1347,12 +1321,12 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using a left outer join ("left join"):
 
 ```{r}
-#| eval: false
-
 leftJoinData <- left_join(
-  nfl_actualStats_offense_weekly,
-  nfl_players,
-  by = c("player_id" = "gsis_id"))
+  players,
+  fantasyPoints,
+  by = "ID")
+
+leftJoinData
 
 dim(leftJoinData)
 ```
@@ -1364,12 +1338,12 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using a right outer join ("right join"):
 
 ```{r}
-#| eval: false
-
 rightJoinData <- right_join(
-  nfl_actualStats_offense_weekly,
-  nfl_players,
-  by = c("player_id" = "gsis_id"))
+  players,
+  fantasyPoints,
+  by = "ID")
+
+rightJoinData
 
 dim(rightJoinData)
 ```
@@ -1382,12 +1356,12 @@ It returns columns from $x$ and $y$.
 Here is how to merge two data frames using an inner join:
 
 ```{r}
-#| eval: false
-
 innerJoinData <- inner_join(
-  nfl_actualStats_offense_weekly,
-  nfl_players,
-  by = c("player_id" = "gsis_id"))
+  players,
+  fantasyPoints,
+  by = "ID")
+
+innerJoinData
 
 dim(innerJoinData)
 ```
@@ -1401,12 +1375,12 @@ Unlike an [inner join](#innerJoin), a left semi join will never duplicate rows o
 Here is how to merge two data frames using a left semi join:
 
 ```{r}
-#| eval: false
-
 semiJoinData <- semi_join(
-  nfl_actualStats_offense_weekly,
-  nfl_players,
-  by = c("player_id" = "gsis_id"))
+  players,
+  fantasyPoints,
+  by = "ID")
+
+semiJoinData
 
 dim(semiJoinData)
 ```
@@ -1420,12 +1394,12 @@ It returns columns from only $x$ (not from $y$).
 Here is how to merge two data frames using a left anti join:
 
 ```{r}
-#| eval: false
-
 antiJoinData <- anti_join(
-  nfl_actualStats_offense_weekly,
-  nfl_players,
-  by = c("player_id" = "gsis_id"))
+  players,
+  fantasyPoints,
+  by = "ID")
+
+antiJoinData
 
 dim(antiJoinData)
 ```
@@ -1435,34 +1409,33 @@ dim(antiJoinData)
 A cross join combines each row in $x$ with each row in $y$.
 
 ```{r}
-#| eval: false
-
 crossJoinData <- cross_join(
-  unique(nfl_actualStats_offense_weekly[,c("player_id","player_display_name")]),
-  data.frame(season = 2020:2024))
+  players,
+  fantasyPoints)
 
 crossJoinData
+
 dim(crossJoinData)
 ```
 
 ## Transform Data from Long to Wide {#sec-longToWide}
 
+Here are the data in the `nfl_actualStats_offense_weekly` object.
+The data are structured in player-season-week form.
+That is, every row in the dataset is uniquely identified by the variables, `player_id`, `season`, and `week`.
+
 Original data:
 
 ```{r}
-#| eval: false
-
 dataLong <- nfl_actualStats_offense_weekly %>% 
   select(player_id, player_display_name, season, week, fantasy_points)
 
 dim(dataLong)
 ```
 
-Data widened by two variable (`season` and `week`), using `tidyverse`: 
+Below, we widen the data widened by two variables (`season` and `week`), using `tidyverse`, so that the data are now in player form (where each row is uniquely identified by the `player_id` variable): 
 
 ```{r}
-#| eval: false
-
 dataWide <- dataLong %>% 
   pivot_wider(
     names_from = c(season, week),
@@ -1477,8 +1450,6 @@ dim(dataWide)
 Original data:
 
 ```{r}
-#| eval: false
-
 dataWide <- nfl_actualStats_offense_weekly %>% 
   select(player_id, player_display_name, season, week, recent_team, opponent_team)
 
@@ -1488,8 +1459,6 @@ dim(dataWide)
 Data in long form, transformed from wide form using `tidyverse`:
 
 ```{r}
-#| eval: false
-
 dataLong <- dataWide %>% 
   pivot_longer(
     cols = c(recent_team, opponent_team),
