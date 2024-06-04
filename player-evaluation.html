@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.5.40">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
 <meta name="author" content="Isaac T. Petersen">
 <meta name="dcterms.date" content="today">
-
 <title>Fantasy Football Analytics – 4&nbsp; Player Evaluation</title>
 <style>
 code{white-space: pre-wrap;}
@@ -22,8 +19,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
-
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
@@ -43,8 +73,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -70,38 +99,53 @@ ul.task-list li input[type="checkbox"] {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script>
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-C3SNF7Y0PJ"></script>
-
-<script type="text/javascript">
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-C3SNF7Y0PJ"></script><script type="text/javascript">
 
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
-</script>
-<script type="application/json" class="js-hypothesis-config">
+</script><script type="application/json" class="js-hypothesis-config">
 {
   "theme": "clean",
   "openSidebar": false
 }
-</script>
-<script async="" src="https://hypothes.is/embed.js"></script>
-<script>
+</script><script async="" src="https://hypothes.is/embed.js"></script><script>
   window.document.addEventListener("DOMContentLoaded", function (_event) {
     document.body.classList.add('hypothesis-enabled');
   });
+</script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
 </script>
-
-
 </head>
-
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
@@ -112,13 +156,9 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
         <i class="bi bi-search"></i>
       </button>
     </div>
-  </nav>
-</header>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Fantasy Football Analytics</a> 
         <div class="sidebar-tools-main">
@@ -138,7 +178,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
@@ -181,29 +221,26 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
   </div>
 </li>
     </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-evalAthleticProfile" id="toc-sec-evalAthleticProfile" class="nav-link active" data-scroll-target="#sec-evalAthleticProfile"><span class="header-section-number">4.1</span> Athletic Profile</a></li>
+<li><a href="#sec-evalAthleticProfile" id="toc-sec-evalAthleticProfile" class="nav-link active" data-scroll-target="#sec-evalAthleticProfile"><span class="header-section-number">4.1</span> Athletic Profile</a></li>
   <li><a href="#sec-evalHistoricalPerformance" id="toc-sec-evalHistoricalPerformance" class="nav-link" data-scroll-target="#sec-evalHistoricalPerformance"><span class="header-section-number">4.2</span> Historical Performance</a></li>
   <li><a href="#sec-evalHealth" id="toc-sec-evalHealth" class="nav-link" data-scroll-target="#sec-evalHealth"><span class="header-section-number">4.3</span> Health</a></li>
   <li><a href="#sec-evalAgeCareerStage" id="toc-sec-evalAgeCareerStage" class="nav-link" data-scroll-target="#sec-evalAgeCareerStage"><span class="header-section-number">4.4</span> Age and Career Stage</a></li>
   <li><a href="#sec-evalSituation" id="toc-sec-evalSituation" class="nav-link" data-scroll-target="#sec-evalSituation"><span class="header-section-number">4.5</span> Situational Factors</a></li>
   <li><a href="#sec-evalMatchups" id="toc-sec-evalMatchups" class="nav-link" data-scroll-target="#sec-evalMatchups"><span class="header-section-number">4.6</span> Matchups</a></li>
   <li><a href="#sec-evalCogMotivational" id="toc-sec-evalCogMotivational" class="nav-link" data-scroll-target="#sec-evalCogMotivational"><span class="header-section-number">4.7</span> Cognitive and Motivational Factors</a></li>
-  <li><a href="#sec-evalIntegration" id="toc-sec-evalIntegration" class="nav-link" data-scroll-target="#sec-evalIntegration"><span class="header-section-number">4.8</span> Putting it Altogether</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/player-evaluation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+  <li><a href="#sec-fantasyValue" id="toc-sec-fantasyValue" class="nav-link" data-scroll-target="#sec-fantasyValue"><span class="header-section-number">4.8</span> Fantasy Value</a></li>
+  <li><a href="#sec-evalIntegration" id="toc-sec-evalIntegration" class="nav-link" data-scroll-target="#sec-evalIntegration"><span class="header-section-number">4.9</span> Putting it Altogether</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/player-evaluation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-<div class="alert alert-info hints-alert">
+<main class="content" id="quarto-document-content"><div class="alert alert-info hints-alert">
   <div class="hints-icon">
     <i class="fa fa-comments-o"></i>
   </div>
@@ -222,21 +259,16 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
       <img style="display: inline;" src="https://hypothes.is/organizations/__default__/logo" alt="Hypothesis">
       Adding an annotation using <a href="https://hypothes.is">hypothes.is</a>.
       To add an annotation, <span style="background-color: #3297FD; color: white">select some text</span> and then click the
-      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class="annotator-adder-actions__icon">
-      <path fill="currentColor" fill-rule="nonzero" d="M15 0c.27 0 .505.099.703.297A.961.961 0 0116 1v15l-4-3H1a.974.974 0 01-.703-.29A.953.953 0 010 12V1C0 .719.096.482.29.29A.966.966 0 011 0h14zM7 3l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C4.156 5.229 4 6 4 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188C4.729 8.854 5.082 9 5.5 9c.417 0 .77-.146 1.063-.438C6.854 8.271 7 7.918 7 7.5c0-.417-.146-.77-.438-1.063A1.447 1.447 0 005.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L7 4V3zm5 0l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C9.156 5.229 9 6 9 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188c.291.291.645.437 1.062.437.417 0 .77-.146 1.063-.438.291-.291.437-.645.437-1.062 0-.417-.146-.77-.438-1.063A1.447 1.447 0 0010.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L12 4V3z"></path>
-    </svg>
-    </span>
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class="annotator-adder-actions__icon"><path fill="currentColor" fill-rule="nonzero" d="M15 0c.27 0 .505.099.703.297A.961.961 0 0116 1v15l-4-3H1a.974.974 0 01-.703-.29A.953.953 0 010 12V1C0 .719.096.482.29.29A.966.966 0 011 0h14zM7 3l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C4.156 5.229 4 6 4 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188C4.729 8.854 5.082 9 5.5 9c.417 0 .77-.146 1.063-.438C6.854 8.271 7 7.918 7 7.5c0-.417-.146-.77-.438-1.063A1.447 1.447 0 005.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L7 4V3zm5 0l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C9.156 5.229 9 6 9 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188c.291.291.645.437 1.062.437.417 0 .77-.146 1.063-.438.291-.291.437-.645.437-1.062 0-.417-.146-.77-.438-1.063A1.447 1.447 0 0010.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L12 4V3z"></path></svg></span>
       symbol on the pop-up menu.
       To see the annotations of others, click the
-      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class=""><g fill-rule="evenodd"><rect fill="none" stroke="none" x="0" y="0" width="16" height="16"></rect><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12L6 8l4-4"></path></g></svg>
-</span>
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class=""><g fill-rule="evenodd"><rect fill="none" stroke="none" x="0" y="0" width="16" height="16"></rect><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12L6 8l4-4"></path></g></svg></span>
       symbol in the upper right-hand corner of the page.
     </p>
   </div>
 </div>
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
+<header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title"><span id="sec-playerEvaluation" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Player Evaluation</span></span></h1>
 </div>
 
@@ -251,10 +283,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
   
 
 
-</header>
-
-
-<p>Evaluating players for fantasy football could be thought of as similar to the process of evaluating companies when picking stocks to buy. You want to evaluate and compare various assets so that you get the assets with the best value.</p>
+</header><p>Evaluating players for fantasy football could be thought of as similar to the process of evaluating companies when picking stocks to buy. You want to evaluate and compare various assets so that you get the assets with the best value.</p>
 <p>There are various domains of criteria we can consider when evaluating a football player’s fantasy prospects. Potential domains to consider include:</p>
 <ul>
 <li>athletic profile</li>
@@ -264,10 +293,11 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <li>situational factors</li>
 <li>matchups</li>
 <li>cognitive and motivational factors</li>
+<li>fantasy value</li>
 </ul>
 <p>The discussion that follows is based on my and others’ <em>impressions</em> of some of the characteristics that may be valuable to consider when evaluating players. However, the extent to which any factor is actually relevant for predicting future performance is an empirical question and should be evaluated empirically.</p>
-<section id="sec-evalAthleticProfile" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="sec-evalAthleticProfile"><span class="header-section-number">4.1</span> Athletic Profile</h2>
+<section id="sec-evalAthleticProfile" class="level2" data-number="4.1"><h2 data-number="4.1" class="anchored" data-anchor-id="sec-evalAthleticProfile">
+<span class="header-section-number">4.1</span> Athletic Profile</h2>
 <p>Factors related to a player’s athletic profile include factors such as:</p>
 <ul>
 <li>body shape
@@ -275,7 +305,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <li>height</li>
 <li>weight</li>
 <li>hand size</li>
-</ul></li>
+</ul>
+</li>
 <li>body function
 <ul>
 <li>agility</li>
@@ -283,14 +314,14 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <li>speed</li>
 <li>acceleration/explosiveness</li>
 <li>jumping ability</li>
-</ul></li>
+</ul>
+</li>
 </ul>
 <p>In terms of body shape, we might consider a player’s height, weight, and hand size. Height allows players to see over opponents and to reach balls higher in the air. Thus, greater height is particularly valuable for Quarterbacks and Wide Receivers. Heavier players are tougher to budge and to tackle. Greater weight is particularly valuable for Linemen, Fullbacks, and Tight Ends, but it can also be valuable—to a deree—for Quarterbacks, Running Backs, and Wide Receivers. Hand size is particularly valuable for people catching the ball; thus, a larger hand size is particularly valuable for Wide Receivers and Tight Ends.</p>
 <p>In terms of body function, we can consider a player’s agility, strength, speed, acceleration/explosiveness, and jumping ability. For Wide Receivers, speed, explosiveness, and jumping ability are particularly valuable. For Running Backs, agility, strength, speed, and explosiveness are particularly valuable.</p>
 <p>Many aspects of a player’s athletic profile are available from the National Football League (NFL) Combine, which is especially relevant for evaluating rookies. We demonstrate how to import data from the NFL Combine in Section <a href="getting-started.html#sec-combine" class="quarto-xref"><span>Section 3.4.6</span></a>.</p>
-</section>
-<section id="sec-evalHistoricalPerformance" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="sec-evalHistoricalPerformance"><span class="header-section-number">4.2</span> Historical Performance</h2>
+</section><section id="sec-evalHistoricalPerformance" class="level2" data-number="4.2"><h2 data-number="4.2" class="anchored" data-anchor-id="sec-evalHistoricalPerformance">
+<span class="header-section-number">4.2</span> Historical Performance</h2>
 <blockquote class="blockquote">
 <p>“The best predictor of future behavior is past behavior.” – Unknown</p>
 </blockquote>
@@ -302,7 +333,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <li>performance in college
 <ul>
 <li>draft position</li>
-</ul></li>
+</ul>
+</li>
 <li>performance in the NFL</li>
 <li>efficiency</li>
 <li>consistency</li>
@@ -310,10 +342,15 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <p>It is important to consider a player’s past performance. However, the extent to which historical performance may predict future performance may depend on many factors such as (a) the similarity of the prior situation to the current situation, (b) how long ago the prior situation was, and (c) the extent to which the player (or situation) has changed in the interim. For rookies, the player does not have prior seasons of performance in the NFL to draw upon. Thus, when evaluating rookies, it can be helpful to consider their performance in college or in their prior leagues. However, there are large differences between the situation in college and the situation in the NFL, so prior success in college may not portend future success in the NFL. An indicator that intends to be prognostic of future performance, and that accounts for past performance, is a player’s draft position—that is, how early (or late) was a player selected in the NFL Draft. The earlier a player was selected in the NFL Draft, the greater likelihood that the player will perform well.</p>
 <p>For players who have played in the NFL, past performance becomes more relevant because, presumably, the prior situation is more similar (than was their situation in college) to their current situation. Nevertheless, lots of things change from game to game and season to season: injuries, coaches, coaching strategies, teammates, etc. So just because a player performed well or poorly in a given game or season does not necessarily mean that they will perform similarly in subsequent games/seasons. Nevertheless, historical performance is one of the best indicators we have.</p>
 <p>We demonstrate how to import historical player statistics in Section <a href="getting-started.html#sec-downloadActualStats" class="quarto-xref"><span>Section 3.4.12</span></a>. We demonstrate how to calculate historical player statistics in Section <a href="getting-started.html#sec-calculateActualStats" class="quarto-xref"><span>Section 3.19.1</span></a>. We demonstrate how to calculate historical fantasy points in Section <a href="getting-started.html#sec-calculateActualPoints" class="quarto-xref"><span>Section 3.19.2</span></a>.</p>
-<p>In addition to how many fantasy points a player scores in terms of historical performance, we also care about efficiency. How efficient were they given the number of opportunities they had? If they were relatively more efficient, they will likely score more points than many of their peers when given more opportunities. If they were relativelly inefficient, their capacity to score fantasy points may be more dependent on touches/opportunities. Efficiency might be operationalized by indicators such as yards per passing attempt, yards per rushing attempt, yards per target, yards per reception, etc.</p>
-</section>
-<section id="sec-evalHealth" class="level2" data-number="4.3">
-<h2 data-number="4.3" class="anchored" data-anchor-id="sec-evalHealth"><span class="header-section-number">4.3</span> Health</h2>
+<p>In addition to how many fantasy points a player scores in terms of historical performance, we also care about efficiency and consistency. How efficient were they given the number of opportunities they had? If they were relatively more efficient, they will likely score more points than many of their peers when given more opportunities. If they were relativelly inefficient, their capacity to score fantasy points may be more dependent on touches/opportunities. Efficiency might be operationalized by indicators such as yards per passing attempt, yards per rushing attempt, yards per target, yards per reception, etc.</p>
+<p>In terms of consistency, how consistent was the player they from game to game and from season to season? For instance, we could examine the standard deviations of players’ fantasy points across games in a given season. However, the standard deviation tends to be upwardly biased as the mean increases. So, we can account for the player’s mean fantasy points per game by dividing their game-to-game standard deviation of fantasy points by their mean fantasy points across games. This is known as the coefficient of variation (CV):</p>
+<p><span class="math display">\[
+CV = \frac{\sigma}{\mu}
+\]</span></p>
+<p>Players with a lower standard deviation and a lower coefficient of variation (of fantasy points across games) are more consistent.</p>
+<p>[ADD EXAMPLE]</p>
+</section><section id="sec-evalHealth" class="level2" data-number="4.3"><h2 data-number="4.3" class="anchored" data-anchor-id="sec-evalHealth">
+<span class="header-section-number">4.3</span> Health</h2>
 <p>Health-related factors to consider include:</p>
 <ul>
 <li>current injury status</li>
@@ -321,9 +358,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </ul>
 <p>It is also important to consider a player’s past and current health status. In terms of a player’s current health status, it is important to consider whether they are injured or are playing at less than 100% of their typical health. In terms of a player’s prior health status, one can consider their injury history, including the frequency and severity of injuries and their prognosis.</p>
 <p>We demonstrate how to import injury reports in Section <a href="getting-started.html#sec-injuries" class="quarto-xref"><span>Section 3.4.13</span></a>.</p>
-</section>
-<section id="sec-evalAgeCareerStage" class="level2" data-number="4.4">
-<h2 data-number="4.4" class="anchored" data-anchor-id="sec-evalAgeCareerStage"><span class="header-section-number">4.4</span> Age and Career Stage</h2>
+</section><section id="sec-evalAgeCareerStage" class="level2" data-number="4.4"><h2 data-number="4.4" class="anchored" data-anchor-id="sec-evalAgeCareerStage">
+<span class="header-section-number">4.4</span> Age and Career Stage</h2>
 <p>Age and career stage-related factors include:</p>
 <ul>
 <li>age</li>
@@ -331,9 +367,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <li>touches</li>
 </ul>
 <p>A player’s age is relevant because of important age-related changes in a player’s speed, ability to recover from injury, etc. A player’s experience is relevant because players develop knowledge and skills with greater experience. A player’s prior touches/usage is also relevant, because it speaks to how many hits a player may have taken. For players who take more hits, it may be more likely that their bodies “break down” sooner.</p>
-</section>
-<section id="sec-evalSituation" class="level2" data-number="4.5">
-<h2 data-number="4.5" class="anchored" data-anchor-id="sec-evalSituation"><span class="header-section-number">4.5</span> Situational Factors</h2>
+</section><section id="sec-evalSituation" class="level2" data-number="4.5"><h2 data-number="4.5" class="anchored" data-anchor-id="sec-evalSituation">
+<span class="header-section-number">4.5</span> Situational Factors</h2>
 <p>Situational factors one could consider include:</p>
 <ul>
 <li>team quality</li>
@@ -344,23 +379,22 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <li>snap count</li>
 <li>touches/targets</li>
 <li>red zone usage</li>
-</ul></li>
+</ul>
+</li>
 </ul>
 <p>Football is a team sport. A player is embedded within a broader team context; it is important to consider the strength of their team context insofar as it may support— or detract from—a player’s performance. For instance, for a Quarterback, it is important to consider how strong the pass blocking is from the Offensive Line. Will they have enough time to throw the ball, or will they be constantly under pressure to be sacked? It is also important to consider the strength of the pass catchers—the Wide Receivers and Tight Ends. For a Running Back, it is important to consider how strong the run blocking is from the Offensive Line. For a Wide Receiver, it is important to consider how strong the pass blocking is, and how strong the Quarterback is.</p>
 <p>It is also important to consider a player’s role on the team. Is the player a starter or a backup? Related to this, it is important to consider the strength of one’s teammates. For a given Running Back, if a teammate is better at running the ball, this may take away from how much the player sees the field. For a given Wide Receiver, if a teammate is better at catching the ball, this may take some targets away from the player. However, the team’s top defensive back is often matched up against the team’s top Wide Receiver. So, if the team’s top Wide Receiver is matched up against a particularly strong Defensive Back, the second- and third-best Wide Receivers may more targets than usual.</p>
 <p>It is also important to consider a player’s opportunity and usage, which are influenced by many factors, including the skill of the player, the skill of their teammates, the role of the player on the team, the coaching style, the strategy of the opposing team, game scripts, etc. In terms of the player’s opportunity and usage, how many snaps do they get? How many touches and/or targets do they receive? Being on the field for more snaps and receiving more touches and/or targets means that the player has more opportunities to score fantasy points. Are they targeted in the red zone? Red zone targets are more likely to lead to touchdown scoring opportunities, which are particularly valuable in fantasy football.</p>
-</section>
-<section id="sec-evalMatchups" class="level2" data-number="4.6">
-<h2 data-number="4.6" class="anchored" data-anchor-id="sec-evalMatchups"><span class="header-section-number">4.6</span> Matchups</h2>
+</section><section id="sec-evalMatchups" class="level2" data-number="4.6"><h2 data-number="4.6" class="anchored" data-anchor-id="sec-evalMatchups">
+<span class="header-section-number">4.6</span> Matchups</h2>
 <p>Matchup-related factors to consider include:</p>
 <ul>
 <li>strength of schedule</li>
 <li>weekly matchup</li>
 </ul>
 <p>Another aspect to consider is how challenging their matchup(s) and strength of schedule is. For a Quarterback, it is valuable to consider how strong the oppenent’s passing defense is. For a Running Back, how strong is the running defense? For a Wide Receiver, how strong is the passing defense and the Defensive Back that is likely to be assigned to guard them?</p>
-</section>
-<section id="sec-evalCogMotivational" class="level2" data-number="4.7">
-<h2 data-number="4.7" class="anchored" data-anchor-id="sec-evalCogMotivational"><span class="header-section-number">4.7</span> Cognitive and Motivational Factors</h2>
+</section><section id="sec-evalCogMotivational" class="level2" data-number="4.7"><h2 data-number="4.7" class="anchored" data-anchor-id="sec-evalCogMotivational">
+<span class="header-section-number">4.7</span> Cognitive and Motivational Factors</h2>
 <p>Other factors to consider include cognitive and motivational factors. Some coaches refer to these as the “X Factor” or “the intangibles.” However, just as any other construct in psychology, we can devise ways to operationalize them.</p>
 <p>Cognitive and motivational factors one could consider include:</p>
 <ul>
@@ -371,20 +405,82 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <ul>
 <li>contract performance incentives</li>
 <li>whether they are in a contract year</li>
-</ul></li>
+</ul>
+</li>
 </ul>
 <p>A player’s knowledge, intelligence, and reaction time can help them gain an upper-hand even when they may not be the fastest or strongest. A player’s work ethic and mental toughness may help them be resilient and persevere in the face of challenges. Contact-related incentives may lead a player to put forth greater effort. For instance, a contract may have a performance incentive that provides a player greater compensation if they achieve a particular performance milestone (e.g., receiving yards). Another potential incentive is if a player is in what is called their “contract year” (i.e., the last year of their current contract). If a player is in the last year of their current contract, they have an incentive to perform well so they can get re-signed to a new contract.</p>
-</section>
-<section id="sec-evalIntegration" class="level2" data-number="4.8">
-<h2 data-number="4.8" class="anchored" data-anchor-id="sec-evalIntegration"><span class="header-section-number">4.8</span> Putting it Altogether</h2>
-<p>After performing an evaluation of the relevant domain(s) for a given player, then one must integrate the evaluation information across domains to make a judgment about a player’s overall value. When thinking about a player’s value, it can be worth thinking of a player’s upside (or ceiling) and a player’s downside (or flow). Player that are more consistent may show higher downside but a lower upside. Younger, less experienced players may show a higher upside but a lower downside.</p>
+</section><section id="sec-fantasyValue" class="level2" data-number="4.8"><h2 data-number="4.8" class="anchored" data-anchor-id="sec-fantasyValue">
+<span class="header-section-number">4.8</span> Fantasy Value</h2>
+<p>There are several sources that one can draw upon to evaluate a player’s fantasy value:</p>
+<ul>
+<li>expert or aggregated rankings</li>
+<li>players’ Average Draft Position (ADP) in other league drafts</li>
+<li>players’ Average Auction Value (AAV) in other league drafts</li>
+<li>expert or aggregated projections</li>
+</ul>
+<p>[ADD LINKS TO SOURCES OF RANKINGS/PROJECTIONS/ADP/AAV, ETC]</p>
+<p>It is important to keep in mind that rankings, average draft position (ADP), and average auction values (AAV) are specific to roster and scoring settings of a particular league. For instance, [DESCRIBE] Thus, if using rankings, ADP, or AAV, it is important to find ones from leagues that mirror—as closely as possible—your league settings.</p>
+<p>Projected statistics (e.g., projected passing touchdowns) are agnostic to league settings and can thus be used to generate league-specific fantasy projections and rankings. Thus, projected statisitics may be more useful than rankings because they can be used to generate rankings for your particular league settings. For instance, if you know how many touchdowns, yards, and interceptions a Quarterback is a projected to throw (in addition to any other relevant categories for the player, e.g., rushing yards and touchdowns), you can calculate how many fantasy points the Quarterback is expected to gain in your league (or in any league). Thus, you can calculate ranking from projections, but you cannot reverse engineer projections from rankings.</p>
+<p>There are many potential indices that can be worthwhile to consider, including a player’s:</p>
+<ul>
+<li>dropoff</li>
+<li>value over replacement player (VORP)</li>
+<li>uncertainty</li>
+</ul>
+<p>A player’s <em>dropoff</em>, is the difference between (a) the player’s projected points and (b) the projected points of the next-best player at that position. We can also consider a player’s value over a typical replacement player at that position (shortened to “value over replacement player”). A player’s <em>value over a replacement player</em> (VORP) is the difference between (a) a player’s projected fantasy points and (b) the fantasy points that you would be expected to get from a typical bench player at that position.</p>
+<p>A player’s <em>uncertainty</em> is how much variability there is in projections or rankings for a given player across sources. For instance, consider a scenario where three experts provide ratings about two players, Player A and Player B. Player A is projected to score 300, 310, and 290 points by experts 1, 2, and 3, respectively. Player B is projected to score 400, 300, and 200 points by experts 1, 2, and 3, respectively. In this case, both players are (on average) projected to score the same number of points (300).</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>exampleData <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-2"><a href="#cb1-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"A"</span>, <span class="dv">3</span>), <span class="fu">rep</span>(<span class="st">"B"</span>, <span class="dv">3</span>)),</span>
+<span id="cb1-3"><a href="#cb1-3"></a>  <span class="at">expert =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>),</span>
+<span id="cb1-4"><a href="#cb1-4"></a>  <span class="at">projectedPoints =</span> <span class="fu">c</span>(<span class="dv">300</span>, <span class="dv">310</span>, <span class="dv">290</span>, <span class="dv">400</span>, <span class="dv">300</span>, <span class="dv">200</span>)</span>
+<span id="cb1-5"><a href="#cb1-5"></a>)</span>
+<span id="cb1-6"><a href="#cb1-6"></a></span>
+<span id="cb1-7"><a href="#cb1-7"></a>playerA_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"A"</span>)])</span>
+<span id="cb1-8"><a href="#cb1-8"></a>playerB_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"B"</span>)])</span>
+<span id="cb1-9"><a href="#cb1-9"></a></span>
+<span id="cb1-10"><a href="#cb1-10"></a>playerA_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 300</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>playerB_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 300</code></pre>
+</div>
+</div>
+<p>However, the players differ considerably in their uncertainty (i.e., the source-to-source variability in their projections), as operationalized with the standard deviation and coefficient variation of projected points across sources for a given player.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>playerA_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"A"</span>)])</span>
+<span id="cb5-2"><a href="#cb5-2"></a>playerb_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"B"</span>)])</span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a>playerA_cv <span class="ot">&lt;-</span> playerA_mean <span class="sc">/</span> playerA_sd</span>
+<span id="cb5-5"><a href="#cb5-5"></a>playerB_cv <span class="ot">&lt;-</span> playerB_mean <span class="sc">/</span> playerb_sd</span>
+<span id="cb5-6"><a href="#cb5-6"></a></span>
+<span id="cb5-7"><a href="#cb5-7"></a>playerA_sd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 10</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>playerb_sd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 100</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>playerA_cv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 30</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>playerB_cv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 3</code></pre>
+</div>
+</div>
+<p>Uncertainty is not necessarily a bad. It just means we have less confidence about how they may be expected to perform. Thus, players with greater uncertainty are risky and tend to have a higher upside (or ceiling) and a lower downside (or floor).</p>
+</section><section id="sec-evalIntegration" class="level2" data-number="4.9"><h2 data-number="4.9" class="anchored" data-anchor-id="sec-evalIntegration">
+<span class="header-section-number">4.9</span> Putting it Altogether</h2>
+<p>After performing an evaluation of the relevant domain(s) for a given player, then one must integrate the evaluation information across domains to make a judgment about a player’s overall value. When thinking about a player’s value, it can be worth thinking of a player’s upside and a player’s downside. Player that are more consistent may show higher downside but a lower upside. Younger, less experienced players may show a higher upside but a lower downside.</p>
 <p>The extent to which you prioritize a higher upside versus a higher downside may depend on many factors. For instance, when drafting players, you may prioritize drafting players with the highest downside (i.e., the safest players), whereas you may draft sleepers (i.e., players with higher upside) for your bench. When choosing which players to start in a given week, if you are predicted to beat a team handily, it may make sense to start the players with the highest downside. By contrast, if you are predicted to lose to a team by a good margin, it may make sense to start the players with the highest upside.</p>
 
 
-</section>
-
-</main> <!-- /main -->
-<div id="disqus_thread"></div>
+</section></main><!-- /main --><div id="disqus_thread"></div>
 <script>
     /**
     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
@@ -401,8 +497,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
     s.setAttribute('data-timestamp', +new Date());
     (d.head || d.body).appendChild(s);
     })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</script><noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
 <h3>Feedback</h3>
 
 <div class="feedback">
@@ -415,12 +511,10 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 
 <div class="rmdsale">
 The online version of this book will remain open access. If you want to know when the print version of the book is for sale, enter your email below so I can let you know.
-<br>
-<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSccMKaTBXzMBmcy4myCNQnL8mCgRczh0Eg_Pw3c15bork7-xQ/viewform?embedded=true" width="640" height="750" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
-<br>
+<br><iframe src="https://docs.google.com/forms/d/e/1FAIpQLSccMKaTBXzMBmcy4myCNQnL8mCgRczh0Eg_Pw3c15bork7-xQ/viewform?embedded=true" width="640" height="750" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+
 </div>
-<script id="dsq-count-scr" src="//fantasyfootballanalytics.disqus.com/count.js" async=""></script>
-<script id="quarto-html-after-body" type="application/javascript">
+<script id="dsq-count-scr" src="//fantasyfootballanalytics.disqus.com/count.js" async=""></script><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -844,9 +938,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
       <a href="./getting-started.html" class="pagination-link" aria-label="Getting Started with `R` for Data Analysis">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started with <code>R</code> for Data Analysis</span></span>
       </a>          
@@ -858,8 +950,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   </div>
 </nav>
 </div> <!-- /content -->
-<footer class="footer">
-  <div class="nav-footer">
+<footer class="footer"><div class="nav-footer">
     <div class="nav-footer-left">
 <p>Fantasy Football Analytics was written by <a href="https://psychology.uiowa.edu/people/isaac-petersen">Isaac T. Petersen</a>.</p>
 </div>   
@@ -871,8 +962,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div>
   </div>
 </footer>
-
-
 
 
 </body></html>
