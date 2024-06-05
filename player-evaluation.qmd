@@ -271,6 +271,49 @@ playerA_cv
 playerB_cv
 ```
 
+Here is a depiction of a density plot of projected points for a player with a low, medium, and high uncertainty:
+
+```{r}
+#| label: fig-playerUncertainty
+#| fig-cap: "Density Plot of Projected Points for Three Players"
+
+playerA <- rnorm(1000000, mean = 150, sd = 5)
+playerB <- rnorm(1000000, mean = 150, sd = 15)
+playerC <- rnorm(1000000, mean = 150, sd = 30)
+
+mydata <- data.frame(playerA, playerB, playerC)
+
+mydata_long <- mydata %>% 
+  pivot_longer(
+    cols = everything(),
+    names_to = "player",
+    values_to = "points"
+  ) %>% 
+  mutate(
+    name = case_match(
+      player,
+      "playerA" ~ "Player A",
+      "playerB" ~ "Player B",
+      "playerC" ~ "Player C",
+    )
+  )
+
+ggplot2::ggplot(
+  data = mydata_long,
+  ggplot2::aes(
+    x = points,
+    fill = name
+  )
+) +
+  ggplot2::geom_density(alpha = .3) + 
+  ggplot2::labs(
+    x = "Players' Projected Points",
+    title = "Density Plot of Projected Points for Three Players"
+  ) +
+  ggplot2::theme_classic() +
+  ggplot2::theme(legend.title = element_blank())
+```
+
 Uncertainty is not necessarily a bad characteristic of a player's projected points.
 It just means we have less confidence about how the player may be expected to perform.
 Thus, players with greater uncertainty are risky and tend to have a higher upside (or ceiling) and a lower downside (or floor).
