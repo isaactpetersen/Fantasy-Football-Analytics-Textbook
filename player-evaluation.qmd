@@ -107,8 +107,37 @@ CV = \frac{\sigma}{\mu}
 $$
 
 Players with a lower standard deviation and a lower coefficient of variation (of fantasy points across games) are more consistent.
+In the example below, Player 2 might be preferable to Player 1 because Player 2 is more consistent; Player 1 is more "boom-or-bust."
+Despite showing a similar mean of fantasy points across weeks, Player 2 shows a smaller week-to-week standard deviation and coefficient of variation.
 
-[ADD EXAMPLE]
+```{r}
+set.seed(1)
+
+playerScoresByWeek <- data.frame(
+  player1_scores = rnorm(17, mean = 20, sd = 7),
+  player2_scores = rnorm(17, mean = 20, sd = 4),
+  player3_scores = rnorm(17, mean = 10, sd = 4),
+  player4_scores = rnorm(17, mean = 10, sd = 1)
+)
+
+consistencyData <- data.frame(t(playerScoresByWeek))
+
+weekNames <- paste("week", 1:17, sep = "")
+
+names(consistencyData) <- weekNames
+row.names(consistencyData) <- NULL
+
+consistencyData$mean <- rowMeans(consistencyData[,weekNames])
+consistencyData$sd <- apply(consistencyData, 1, sd)
+consistencyData$cv <- consistencyData$sd / consistencyData$mean
+
+consistencyData$player <- c(1, 2, 3, 4)
+
+consistencyData <- consistencyData %>% 
+  select(player, mean, sd, cv, week1:week17)
+
+round(consistencyData, 2)
+```
 
 ## Health {#sec-evalHealth}
 
