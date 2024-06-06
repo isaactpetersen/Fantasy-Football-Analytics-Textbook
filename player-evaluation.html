@@ -365,8 +365,42 @@ window.Quarto = {
 <p><span class="math display">\[
 CV = \frac{\sigma}{\mu}
 \]</span></p>
-<p>Players with a lower standard deviation and a lower coefficient of variation (of fantasy points across games) are more consistent.</p>
-<p>[ADD EXAMPLE]</p>
+<p>Players with a lower standard deviation and a lower coefficient of variation (of fantasy points across games) are more consistent. In the example below, Player 2 might be preferable to Player 1 because Player 2 is more consistent; Player 1 is more “boom-or-bust.” Despite showing a similar mean of fantasy points across weeks, Player 2 shows a smaller week-to-week standard deviation and coefficient of variation.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a>playerScoresByWeek <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-4"><a href="#cb2-4"></a>  <span class="at">player1_scores =</span> <span class="fu">rnorm</span>(<span class="dv">17</span>, <span class="at">mean =</span> <span class="dv">20</span>, <span class="at">sd =</span> <span class="dv">7</span>),</span>
+<span id="cb2-5"><a href="#cb2-5"></a>  <span class="at">player2_scores =</span> <span class="fu">rnorm</span>(<span class="dv">17</span>, <span class="at">mean =</span> <span class="dv">20</span>, <span class="at">sd =</span> <span class="dv">4</span>),</span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="at">player3_scores =</span> <span class="fu">rnorm</span>(<span class="dv">17</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">4</span>),</span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="at">player4_scores =</span> <span class="fu">rnorm</span>(<span class="dv">17</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb2-8"><a href="#cb2-8"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9"></a></span>
+<span id="cb2-10"><a href="#cb2-10"></a>consistencyData <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">t</span>(playerScoresByWeek))</span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a>weekNames <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"week"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">17</span>, <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="fu">names</span>(consistencyData) <span class="ot">&lt;-</span> weekNames</span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="fu">row.names</span>(consistencyData) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a></span>
+<span id="cb2-17"><a href="#cb2-17"></a>consistencyData<span class="sc">$</span>mean <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(consistencyData[,weekNames])</span>
+<span id="cb2-18"><a href="#cb2-18"></a>consistencyData<span class="sc">$</span>sd <span class="ot">&lt;-</span> <span class="fu">apply</span>(consistencyData, <span class="dv">1</span>, sd)</span>
+<span id="cb2-19"><a href="#cb2-19"></a>consistencyData<span class="sc">$</span>cv <span class="ot">&lt;-</span> consistencyData<span class="sc">$</span>sd <span class="sc">/</span> consistencyData<span class="sc">$</span>mean</span>
+<span id="cb2-20"><a href="#cb2-20"></a></span>
+<span id="cb2-21"><a href="#cb2-21"></a>consistencyData<span class="sc">$</span>player <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb2-22"><a href="#cb2-22"></a></span>
+<span id="cb2-23"><a href="#cb2-23"></a>consistencyData <span class="ot">&lt;-</span> consistencyData <span class="sc">%&gt;%</span> </span>
+<span id="cb2-24"><a href="#cb2-24"></a>  <span class="fu">select</span>(player, mean, sd, cv, week1<span class="sc">:</span>week17)</span>
+<span id="cb2-25"><a href="#cb2-25"></a></span>
+<span id="cb2-26"><a href="#cb2-26"></a><span class="fu">round</span>(consistencyData, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["player"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["mean"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["sd"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["cv"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["week1"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["week2"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["week3"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["week4"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["week5"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["week6"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["week7"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["week8"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["week9"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["week10"],"name":[14],"type":["dbl"],"align":["right"]},{"label":["week11"],"name":[15],"type":["dbl"],"align":["right"]},{"label":["week12"],"name":[16],"type":["dbl"],"align":["right"]},{"label":["week13"],"name":[17],"type":["dbl"],"align":["right"]},{"label":["week14"],"name":[18],"type":["dbl"],"align":["right"]},{"label":["week15"],"name":[19],"type":["dbl"],"align":["right"]},{"label":["week16"],"name":[20],"type":["dbl"],"align":["right"]},{"label":["week17"],"name":[21],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"20.60","3":"6.47","4":"0.31","5":"15.61","6":"21.29","7":"14.15","8":"31.17","9":"22.31","10":"14.26","11":"23.41","12":"25.17","13":"24.03","14":"17.86","15":"30.58","16":"22.73","17":"15.65","18":"4.50","19":"27.87","20":"19.69","21":"19.89"},{"1":"2","2":"20.61","3":"3.35","4":"0.16","5":"23.78","6":"23.28","7":"22.38","8":"23.68","9":"23.13","10":"20.30","11":"12.04","12":"22.48","13":"19.78","14":"19.38","15":"14.12","16":"18.09","17":"21.67","18":"25.43","19":"19.59","20":"21.55","21":"19.78"},{"1":"3","2":"10.32","3":"2.65","4":"0.26","5":"4.49","6":"8.34","7":"8.42","8":"9.76","9":"14.40","10":"13.05","11":"9.34","12":"8.99","13":"12.79","14":"12.23","15":"7.24","16":"7.17","17":"11.46","18":"13.07","19":"9.55","20":"13.52","21":"11.59"},{"1":"4","2":"10.19","3":"1.11","4":"0.11","5":"9.39","6":"10.34","7":"8.87","8":"11.43","9":"11.98","10":"9.63","11":"8.96","12":"10.57","13":"9.86","14":"12.40","15":"9.96","16":"10.69","17":"10.03","18":"9.26","19":"10.19","20":"8.20","21":"11.47"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
 </section><section id="sec-evalHealth" class="level2" data-number="4.5"><h2 data-number="4.5" class="anchored" data-anchor-id="sec-evalHealth">
 <span class="header-section-number">4.5</span> Health</h2>
 <p>Health-related factors to consider include:</p>
@@ -451,86 +485,86 @@ CV = \frac{\sigma}{\mu}
 <p>Because players from some positions (e.g., Quarterbacks) tend to score more points than players from other positions (e.g., Wide Receivers), it would be inadvisable to compare players across different positions based on projected points. In order to more fairly compare players across positions, we can consider a player’s value over a typical replacement player at that position (shortened to “value over replacement player”). A player’s <em>value over a replacement player</em> (VORP) is the difference between (a) a player’s projected fantasy points and (b) the fantasy points that you would be expected to get from a typical bench player at that position. Thus, VORP provides an index of how much added value a player provides.</p>
 <p>A player’s <em>uncertainty</em> is how much variability there is in projections or rankings for a given player across sources. For instance, consider a scenario where three experts provide ratings about two players, Player A and Player B. Player A is projected to score 300, 310, and 290 points by experts 1, 2, and 3, respectively. Player B is projected to score 400, 300, and 200 points by experts 1, 2, and 3, respectively. In this case, both players are (on average) projected to score the same number of points (300).</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>exampleData <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb2-2"><a href="#cb2-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"A"</span>, <span class="dv">3</span>), <span class="fu">rep</span>(<span class="st">"B"</span>, <span class="dv">3</span>)),</span>
-<span id="cb2-3"><a href="#cb2-3"></a>  <span class="at">expert =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>),</span>
-<span id="cb2-4"><a href="#cb2-4"></a>  <span class="at">projectedPoints =</span> <span class="fu">c</span>(<span class="dv">300</span>, <span class="dv">310</span>, <span class="dv">290</span>, <span class="dv">400</span>, <span class="dv">300</span>, <span class="dv">200</span>)</span>
-<span id="cb2-5"><a href="#cb2-5"></a>)</span>
-<span id="cb2-6"><a href="#cb2-6"></a></span>
-<span id="cb2-7"><a href="#cb2-7"></a>playerA_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"A"</span>)])</span>
-<span id="cb2-8"><a href="#cb2-8"></a>playerB_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"B"</span>)])</span>
-<span id="cb2-9"><a href="#cb2-9"></a></span>
-<span id="cb2-10"><a href="#cb2-10"></a>playerA_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>exampleData <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-2"><a href="#cb3-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"A"</span>, <span class="dv">3</span>), <span class="fu">rep</span>(<span class="st">"B"</span>, <span class="dv">3</span>)),</span>
+<span id="cb3-3"><a href="#cb3-3"></a>  <span class="at">expert =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>),</span>
+<span id="cb3-4"><a href="#cb3-4"></a>  <span class="at">projectedPoints =</span> <span class="fu">c</span>(<span class="dv">300</span>, <span class="dv">310</span>, <span class="dv">290</span>, <span class="dv">400</span>, <span class="dv">300</span>, <span class="dv">200</span>)</span>
+<span id="cb3-5"><a href="#cb3-5"></a>)</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a>playerA_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"A"</span>)])</span>
+<span id="cb3-8"><a href="#cb3-8"></a>playerB_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"B"</span>)])</span>
+<span id="cb3-9"><a href="#cb3-9"></a></span>
+<span id="cb3-10"><a href="#cb3-10"></a>playerA_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 300</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>playerB_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>playerB_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 300</code></pre>
 </div>
 </div>
 <p>However, the players differ considerably in their uncertainty (i.e., the source-to-source variability in their projections), as operationalized with the standard deviation and coefficient variation of projected points across sources for a given player.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>playerA_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"A"</span>)])</span>
-<span id="cb6-2"><a href="#cb6-2"></a>playerb_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"B"</span>)])</span>
-<span id="cb6-3"><a href="#cb6-3"></a></span>
-<span id="cb6-4"><a href="#cb6-4"></a>playerA_cv <span class="ot">&lt;-</span> playerA_mean <span class="sc">/</span> playerA_sd</span>
-<span id="cb6-5"><a href="#cb6-5"></a>playerB_cv <span class="ot">&lt;-</span> playerB_mean <span class="sc">/</span> playerb_sd</span>
-<span id="cb6-6"><a href="#cb6-6"></a></span>
-<span id="cb6-7"><a href="#cb6-7"></a>playerA_sd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>playerA_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"A"</span>)])</span>
+<span id="cb7-2"><a href="#cb7-2"></a>playerb_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(exampleData<span class="sc">$</span>projectedPoints[<span class="fu">which</span>(exampleData<span class="sc">$</span>player <span class="sc">==</span> <span class="st">"B"</span>)])</span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a>playerA_cv <span class="ot">&lt;-</span> playerA_mean <span class="sc">/</span> playerA_sd</span>
+<span id="cb7-5"><a href="#cb7-5"></a>playerB_cv <span class="ot">&lt;-</span> playerB_mean <span class="sc">/</span> playerb_sd</span>
+<span id="cb7-6"><a href="#cb7-6"></a></span>
+<span id="cb7-7"><a href="#cb7-7"></a>playerA_sd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 10</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>playerb_sd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>playerb_sd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 100</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>playerA_cv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>playerA_cv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 30</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>playerB_cv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>playerB_cv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 3</code></pre>
 </div>
 </div>
 <p>Here is a depiction of a density plot of projected points for a player with a low, medium, and high uncertainty:</p>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>playerA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">mean =</span> <span class="dv">150</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
-<span id="cb14-2"><a href="#cb14-2"></a>playerB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">mean =</span> <span class="dv">150</span>, <span class="at">sd =</span> <span class="dv">15</span>)</span>
-<span id="cb14-3"><a href="#cb14-3"></a>playerC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">mean =</span> <span class="dv">150</span>, <span class="at">sd =</span> <span class="dv">30</span>)</span>
-<span id="cb14-4"><a href="#cb14-4"></a></span>
-<span id="cb14-5"><a href="#cb14-5"></a>mydata <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(playerA, playerB, playerC)</span>
-<span id="cb14-6"><a href="#cb14-6"></a></span>
-<span id="cb14-7"><a href="#cb14-7"></a>mydata_long <span class="ot">&lt;-</span> mydata <span class="sc">%&gt;%</span> </span>
-<span id="cb14-8"><a href="#cb14-8"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb14-9"><a href="#cb14-9"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(),</span>
-<span id="cb14-10"><a href="#cb14-10"></a>    <span class="at">names_to =</span> <span class="st">"player"</span>,</span>
-<span id="cb14-11"><a href="#cb14-11"></a>    <span class="at">values_to =</span> <span class="st">"points"</span></span>
-<span id="cb14-12"><a href="#cb14-12"></a>  ) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-13"><a href="#cb14-13"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb14-14"><a href="#cb14-14"></a>    <span class="at">name =</span> <span class="fu">case_match</span>(</span>
-<span id="cb14-15"><a href="#cb14-15"></a>      player,</span>
-<span id="cb14-16"><a href="#cb14-16"></a>      <span class="st">"playerA"</span> <span class="sc">~</span> <span class="st">"Player A"</span>,</span>
-<span id="cb14-17"><a href="#cb14-17"></a>      <span class="st">"playerB"</span> <span class="sc">~</span> <span class="st">"Player B"</span>,</span>
-<span id="cb14-18"><a href="#cb14-18"></a>      <span class="st">"playerC"</span> <span class="sc">~</span> <span class="st">"Player C"</span>,</span>
-<span id="cb14-19"><a href="#cb14-19"></a>    )</span>
-<span id="cb14-20"><a href="#cb14-20"></a>  )</span>
-<span id="cb14-21"><a href="#cb14-21"></a></span>
-<span id="cb14-22"><a href="#cb14-22"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
-<span id="cb14-23"><a href="#cb14-23"></a>  <span class="at">data =</span> mydata_long,</span>
-<span id="cb14-24"><a href="#cb14-24"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
-<span id="cb14-25"><a href="#cb14-25"></a>    <span class="at">x =</span> points,</span>
-<span id="cb14-26"><a href="#cb14-26"></a>    <span class="at">fill =</span> name</span>
-<span id="cb14-27"><a href="#cb14-27"></a>  )</span>
-<span id="cb14-28"><a href="#cb14-28"></a>) <span class="sc">+</span></span>
-<span id="cb14-29"><a href="#cb14-29"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_density</span>(<span class="at">alpha =</span> .<span class="dv">3</span>) <span class="sc">+</span> </span>
-<span id="cb14-30"><a href="#cb14-30"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
-<span id="cb14-31"><a href="#cb14-31"></a>    <span class="at">x =</span> <span class="st">"Players' Projected Points"</span>,</span>
-<span id="cb14-32"><a href="#cb14-32"></a>    <span class="at">title =</span> <span class="st">"Density Plot of Projected Points for Three Players"</span></span>
-<span id="cb14-33"><a href="#cb14-33"></a>  ) <span class="sc">+</span></span>
-<span id="cb14-34"><a href="#cb14-34"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb14-35"><a href="#cb14-35"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(<span class="at">legend.title =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>playerA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">mean =</span> <span class="dv">150</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb15-2"><a href="#cb15-2"></a>playerB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">mean =</span> <span class="dv">150</span>, <span class="at">sd =</span> <span class="dv">15</span>)</span>
+<span id="cb15-3"><a href="#cb15-3"></a>playerC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">mean =</span> <span class="dv">150</span>, <span class="at">sd =</span> <span class="dv">30</span>)</span>
+<span id="cb15-4"><a href="#cb15-4"></a></span>
+<span id="cb15-5"><a href="#cb15-5"></a>mydata <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(playerA, playerB, playerC)</span>
+<span id="cb15-6"><a href="#cb15-6"></a></span>
+<span id="cb15-7"><a href="#cb15-7"></a>mydata_long <span class="ot">&lt;-</span> mydata <span class="sc">%&gt;%</span> </span>
+<span id="cb15-8"><a href="#cb15-8"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb15-9"><a href="#cb15-9"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(),</span>
+<span id="cb15-10"><a href="#cb15-10"></a>    <span class="at">names_to =</span> <span class="st">"player"</span>,</span>
+<span id="cb15-11"><a href="#cb15-11"></a>    <span class="at">values_to =</span> <span class="st">"points"</span></span>
+<span id="cb15-12"><a href="#cb15-12"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-13"><a href="#cb15-13"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-14"><a href="#cb15-14"></a>    <span class="at">name =</span> <span class="fu">case_match</span>(</span>
+<span id="cb15-15"><a href="#cb15-15"></a>      player,</span>
+<span id="cb15-16"><a href="#cb15-16"></a>      <span class="st">"playerA"</span> <span class="sc">~</span> <span class="st">"Player A"</span>,</span>
+<span id="cb15-17"><a href="#cb15-17"></a>      <span class="st">"playerB"</span> <span class="sc">~</span> <span class="st">"Player B"</span>,</span>
+<span id="cb15-18"><a href="#cb15-18"></a>      <span class="st">"playerC"</span> <span class="sc">~</span> <span class="st">"Player C"</span>,</span>
+<span id="cb15-19"><a href="#cb15-19"></a>    )</span>
+<span id="cb15-20"><a href="#cb15-20"></a>  )</span>
+<span id="cb15-21"><a href="#cb15-21"></a></span>
+<span id="cb15-22"><a href="#cb15-22"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb15-23"><a href="#cb15-23"></a>  <span class="at">data =</span> mydata_long,</span>
+<span id="cb15-24"><a href="#cb15-24"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb15-25"><a href="#cb15-25"></a>    <span class="at">x =</span> points,</span>
+<span id="cb15-26"><a href="#cb15-26"></a>    <span class="at">fill =</span> name</span>
+<span id="cb15-27"><a href="#cb15-27"></a>  )</span>
+<span id="cb15-28"><a href="#cb15-28"></a>) <span class="sc">+</span></span>
+<span id="cb15-29"><a href="#cb15-29"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_density</span>(<span class="at">alpha =</span> .<span class="dv">3</span>) <span class="sc">+</span> </span>
+<span id="cb15-30"><a href="#cb15-30"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb15-31"><a href="#cb15-31"></a>    <span class="at">x =</span> <span class="st">"Players' Projected Points"</span>,</span>
+<span id="cb15-32"><a href="#cb15-32"></a>    <span class="at">title =</span> <span class="st">"Density Plot of Projected Points for Three Players"</span></span>
+<span id="cb15-33"><a href="#cb15-33"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-34"><a href="#cb15-34"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb15-35"><a href="#cb15-35"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(<span class="at">legend.title =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-playerUncertainty" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-playerUncertainty-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
