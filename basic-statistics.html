@@ -337,7 +337,8 @@ window.Quarto = {
 <span class="header-section-number">7.1.1</span> Load Packages</h3>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"petersenlab"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"grid"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-descriptiveStatistics" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-descriptiveStatistics">
@@ -481,6 +482,105 @@ p\text{-value} = 2 \times Pr(T \ge |t| | H_0)
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nhstConfusionMatrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.1: A Two-by-Two Confusion Matrix for Null-Hypothesis Significance Testing.
 </figcaption></figure>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>m1 <span class="ot">&lt;-</span> <span class="dv">0</span>  <span class="co"># mu H0</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>sd1 <span class="ot">&lt;-</span> <span class="fl">1.5</span> <span class="co"># sigma H0</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>m2 <span class="ot">&lt;-</span> <span class="fl">3.5</span> <span class="co"># mu HA</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a>sd2 <span class="ot">&lt;-</span> <span class="fl">1.5</span> <span class="co"># sigma HA</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a> </span>
+<span id="cb3-6"><a href="#cb3-6"></a>z_crit <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span><span class="sc">-</span>(<span class="fl">0.05</span><span class="sc">/</span><span class="dv">2</span>), m1, sd1)</span>
+<span id="cb3-7"><a href="#cb3-7"></a> </span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="co"># set length of tails</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>min1 <span class="ot">&lt;-</span> m1<span class="sc">-</span>sd1<span class="sc">*</span><span class="dv">4</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a>max1 <span class="ot">&lt;-</span> m1<span class="sc">+</span>sd1<span class="sc">*</span><span class="dv">4</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a>min2 <span class="ot">&lt;-</span> m2<span class="sc">-</span>sd2<span class="sc">*</span><span class="dv">4</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a>max2 <span class="ot">&lt;-</span> m2<span class="sc">+</span>sd2<span class="sc">*</span><span class="dv">4</span>          </span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="co"># create x sequence</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">min</span>(min1,min2), <span class="fu">max</span>(max1, max2), .<span class="dv">01</span>)</span>
+<span id="cb3-15"><a href="#cb3-15"></a><span class="co"># generate normal dist #1</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a>y1 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x, m1, sd1)</span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="co"># put in data frame</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"x"</span> <span class="ot">=</span> x, <span class="st">"y"</span> <span class="ot">=</span> y1)</span>
+<span id="cb3-19"><a href="#cb3-19"></a><span class="co"># generate normal dist #2</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a>y2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x, m2, sd2)</span>
+<span id="cb3-21"><a href="#cb3-21"></a><span class="co"># put in data frame</span></span>
+<span id="cb3-22"><a href="#cb3-22"></a>df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"x"</span> <span class="ot">=</span> x, <span class="st">"y"</span> <span class="ot">=</span> y2)</span>
+<span id="cb3-23"><a href="#cb3-23"></a> </span>
+<span id="cb3-24"><a href="#cb3-24"></a><span class="co"># Alpha polygon</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a>y.poly <span class="ot">&lt;-</span> <span class="fu">pmin</span>(y1,y2)</span>
+<span id="cb3-26"><a href="#cb3-26"></a>poly1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x=</span>x, <span class="at">y=</span>y.poly)</span>
+<span id="cb3-27"><a href="#cb3-27"></a>poly1 <span class="ot">&lt;-</span> poly1[poly1<span class="sc">$</span>x <span class="sc">&gt;=</span> z_crit, ] </span>
+<span id="cb3-28"><a href="#cb3-28"></a>poly1<span class="ot">&lt;-</span><span class="fu">rbind</span>(poly1, <span class="fu">c</span>(z_crit, <span class="dv">0</span>))  <span class="co"># add lower-left corner</span></span>
+<span id="cb3-29"><a href="#cb3-29"></a> </span>
+<span id="cb3-30"><a href="#cb3-30"></a><span class="co"># Beta polygon</span></span>
+<span id="cb3-31"><a href="#cb3-31"></a>poly2 <span class="ot">&lt;-</span> df2</span>
+<span id="cb3-32"><a href="#cb3-32"></a>poly2 <span class="ot">&lt;-</span> poly2[poly2<span class="sc">$</span>x <span class="sc">&lt;=</span> z_crit,] </span>
+<span id="cb3-33"><a href="#cb3-33"></a>poly2<span class="ot">&lt;-</span><span class="fu">rbind</span>(poly2, <span class="fu">c</span>(z_crit, <span class="dv">0</span>))  <span class="co"># add lower-left corner</span></span>
+<span id="cb3-34"><a href="#cb3-34"></a> </span>
+<span id="cb3-35"><a href="#cb3-35"></a><span class="co"># power polygon; 1-beta</span></span>
+<span id="cb3-36"><a href="#cb3-36"></a>poly3 <span class="ot">&lt;-</span> df2</span>
+<span id="cb3-37"><a href="#cb3-37"></a>poly3 <span class="ot">&lt;-</span> poly3[poly3<span class="sc">$</span>x <span class="sc">&gt;=</span> z_crit,] </span>
+<span id="cb3-38"><a href="#cb3-38"></a>poly3 <span class="ot">&lt;-</span><span class="fu">rbind</span>(poly3, <span class="fu">c</span>(z_crit, <span class="dv">0</span>))  <span class="co"># add lower-left corner</span></span>
+<span id="cb3-39"><a href="#cb3-39"></a> </span>
+<span id="cb3-40"><a href="#cb3-40"></a><span class="co"># combine polygons. </span></span>
+<span id="cb3-41"><a href="#cb3-41"></a>poly1<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="co"># alpha, give it the highest number to make it the top layer</span></span>
+<span id="cb3-42"><a href="#cb3-42"></a>poly2<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># beta</span></span>
+<span id="cb3-43"><a href="#cb3-43"></a>poly3<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># power; 1 - beta</span></span>
+<span id="cb3-44"><a href="#cb3-44"></a>poly <span class="ot">&lt;-</span> <span class="fu">rbind</span>(poly1, poly2, poly3)</span>
+<span id="cb3-45"><a href="#cb3-45"></a>poly<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">factor</span>(poly<span class="sc">$</span>id,  <span class="at">labels=</span><span class="fu">c</span>(<span class="st">"power"</span>,<span class="st">"beta"</span>,<span class="st">"alpha"</span>))</span>
+<span id="cb3-46"><a href="#cb3-46"></a></span>
+<span id="cb3-47"><a href="#cb3-47"></a><span class="co"># plot with ggplot2</span></span>
+<span id="cb3-48"><a href="#cb3-48"></a><span class="fu">ggplot</span>(poly, <span class="fu">aes</span>(x,y, <span class="at">fill=</span>id, <span class="at">group=</span>id)) <span class="sc">+</span></span>
+<span id="cb3-49"><a href="#cb3-49"></a>  <span class="fu">geom_polygon</span>(<span class="at">show.legend=</span>F, <span class="at">alpha=</span><span class="fu">I</span>(<span class="dv">8</span><span class="sc">/</span><span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb3-50"><a href="#cb3-50"></a>  <span class="co"># add line for treatment group</span></span>
+<span id="cb3-51"><a href="#cb3-51"></a>  <span class="fu">geom_line</span>(<span class="at">data=</span>df1, <span class="fu">aes</span>(x,y, <span class="at">color=</span><span class="st">"H0"</span>, <span class="at">group=</span><span class="cn">NULL</span>, <span class="at">fill=</span><span class="cn">NULL</span>), <span class="at">linewidth=</span><span class="fl">1.5</span>, <span class="at">show_guide=</span>F) <span class="sc">+</span> </span>
+<span id="cb3-52"><a href="#cb3-52"></a>  <span class="co"># add line for treatment group. These lines could be combined into one dataframe.</span></span>
+<span id="cb3-53"><a href="#cb3-53"></a>  <span class="fu">geom_line</span>(<span class="at">data=</span>df2, <span class="fu">aes</span>(<span class="at">color=</span><span class="st">"HA"</span>, <span class="at">group=</span><span class="cn">NULL</span>, <span class="at">fill=</span><span class="cn">NULL</span>),<span class="at">linewidth=</span><span class="fl">1.5</span>, <span class="at">show_guide=</span>F) <span class="sc">+</span></span>
+<span id="cb3-54"><a href="#cb3-54"></a>  <span class="co"># add vlines for z_crit</span></span>
+<span id="cb3-55"><a href="#cb3-55"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> z_crit, <span class="at">linewidth=</span><span class="dv">1</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb3-56"><a href="#cb3-56"></a>  <span class="co"># change colors </span></span>
+<span id="cb3-57"><a href="#cb3-57"></a>  <span class="fu">scale_color_manual</span>(<span class="st">"Group"</span>, </span>
+<span id="cb3-58"><a href="#cb3-58"></a>                     <span class="at">values=</span> <span class="fu">c</span>(<span class="st">"HA"</span> <span class="ot">=</span> <span class="st">"#981e0b"</span>,<span class="st">"H0"</span> <span class="ot">=</span> <span class="st">"black"</span>)) <span class="sc">+</span></span>
+<span id="cb3-59"><a href="#cb3-59"></a>  <span class="fu">scale_fill_manual</span>(<span class="st">"test"</span>, <span class="at">values=</span> <span class="fu">c</span>(<span class="st">"alpha"</span> <span class="ot">=</span> <span class="st">"#0d6374"</span>,<span class="st">"beta"</span> <span class="ot">=</span> <span class="st">"#be805e"</span>,<span class="st">"power"</span><span class="ot">=</span><span class="st">"#7cecee"</span>)) <span class="sc">+</span></span>
+<span id="cb3-60"><a href="#cb3-60"></a>  <span class="co"># beta arrow</span></span>
+<span id="cb3-61"><a href="#cb3-61"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x=</span><span class="fl">0.1</span>, <span class="at">y=</span><span class="fl">0.045</span>, <span class="at">xend=</span><span class="fl">1.3</span>, <span class="at">yend=</span><span class="fl">0.01</span>, <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.3</span>, <span class="st">"cm"</span>)), <span class="at">linewidth=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-62"><a href="#cb3-62"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">label=</span><span class="st">"beta"</span>, <span class="at">x=</span><span class="dv">0</span>, <span class="at">y=</span><span class="fl">0.05</span>, <span class="at">parse=</span>T, <span class="at">size=</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb3-63"><a href="#cb3-63"></a>  <span class="co"># alpha arrow</span></span>
+<span id="cb3-64"><a href="#cb3-64"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x=</span><span class="dv">4</span>, <span class="at">y=</span><span class="fl">0.043</span>, <span class="at">xend=</span><span class="fl">3.4</span>, <span class="at">yend=</span><span class="fl">0.01</span>, <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.3</span>, <span class="st">"cm"</span>)), <span class="at">linewidth=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-65"><a href="#cb3-65"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">label=</span><span class="st">"frac(alpha,2)"</span>, <span class="at">x=</span><span class="fl">4.2</span>, <span class="at">y=</span><span class="fl">0.05</span>, <span class="at">parse=</span>T, <span class="at">size=</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb3-66"><a href="#cb3-66"></a>  <span class="co"># power arrow</span></span>
+<span id="cb3-67"><a href="#cb3-67"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x=</span><span class="dv">6</span>, <span class="at">y=</span><span class="fl">0.2</span>, <span class="at">xend=</span><span class="fl">4.5</span>, <span class="at">yend=</span><span class="fl">0.15</span>, <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.3</span>, <span class="st">"cm"</span>)), <span class="at">linewidth=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-68"><a href="#cb3-68"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">label=</span><span class="fu">expression</span>(<span class="fu">paste</span>(<span class="dv">1</span><span class="sc">-</span>beta, <span class="st">"  (</span><span class="sc">\"</span><span class="st">power</span><span class="sc">\"</span><span class="st">)"</span>)), <span class="at">x=</span><span class="fl">6.1</span>, <span class="at">y=</span><span class="fl">0.21</span>, <span class="at">parse=</span>T, <span class="at">size=</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb3-69"><a href="#cb3-69"></a>  <span class="co"># H_0 title</span></span>
+<span id="cb3-70"><a href="#cb3-70"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">label=</span><span class="st">"H[0]"</span>, <span class="at">x=</span>m1, <span class="at">y=</span><span class="fl">0.28</span>, <span class="at">parse=</span>T, <span class="at">size=</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb3-71"><a href="#cb3-71"></a>  <span class="co"># H_a title</span></span>
+<span id="cb3-72"><a href="#cb3-72"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">label=</span><span class="st">"H[1]"</span>, <span class="at">x=</span>m2, <span class="at">y=</span><span class="fl">0.28</span>, <span class="at">parse=</span>T, <span class="at">size=</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb3-73"><a href="#cb3-73"></a>  <span class="fu">ggtitle</span>(<span class="st">"Statistical Power"</span>) <span class="sc">+</span></span>
+<span id="cb3-74"><a href="#cb3-74"></a>  <span class="co"># remove some elements</span></span>
+<span id="cb3-75"><a href="#cb3-75"></a>  <span class="fu">theme</span>(</span>
+<span id="cb3-76"><a href="#cb3-76"></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-77"><a href="#cb3-77"></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-78"><a href="#cb3-78"></a>    <span class="at">panel.background =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-79"><a href="#cb3-79"></a>    <span class="at">plot.background =</span> <span class="fu">element_rect</span>(<span class="at">fill=</span><span class="st">"white"</span>),</span>
+<span id="cb3-80"><a href="#cb3-80"></a>    <span class="at">panel.border =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-81"><a href="#cb3-81"></a>    <span class="at">axis.line =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-82"><a href="#cb3-82"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-83"><a href="#cb3-83"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-84"><a href="#cb3-84"></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-85"><a href="#cb3-85"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-86"><a href="#cb3-86"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-87"><a href="#cb3-87"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">22</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-nhst" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-nhst-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="basic-statistics_files/figure-html/fig-nhst-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nhst-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.2: Statistical Power (Adapted from Kristoffer Magnusson): <a href="https://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics" class="uri">https://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics</a> (archived at <a href="https://perma.cc/FG3J-85L6" class="uri">https://perma.cc/FG3J-85L6</a>).
+</figcaption></figure>
+</div>
+</div>
 </div>
 <p>Interactive visualizations by Kristoffer Magnusson on <em>p</em>-values and null-hypothesis significance testing are below:</p>
 <ul>
@@ -639,13 +739,13 @@ Table&nbsp;7.2: Effect Size Thresholds for Small, Medium, and Large Effect Sizes
 </div>
 </section></section><section id="sec-statisticalDecisionTree" class="level2" data-number="7.4"><h2 data-number="7.4" class="anchored" data-anchor-id="sec-statisticalDecisionTree">
 <span class="header-section-number">7.4</span> Statistical Decision Tree</h2>
-<p>An example statistical decision tree is depicted in <a href="#fig-statisticalDecisionTree" class="quarto-xref">Figure&nbsp;<span>7.2</span></a>.</p>
+<p>An example statistical decision tree is depicted in <a href="#fig-statisticalDecisionTree" class="quarto-xref">Figure&nbsp;<span>7.3</span></a>.</p>
 <div id="fig-statisticalDecisionTree" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-statisticalDecisionTree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/statisticalDecisionTree.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-statisticalDecisionTree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7.2: A Statistical Decision Tree For Choosing an Appropriate Statistical Procedure. Adapted from: <a href="https://commons.wikimedia.org/wiki/File:InferentialStatisticalDecisionMakingTrees.pdf" class="uri">https://commons.wikimedia.org/wiki/File:InferentialStatisticalDecisionMakingTrees.pdf</a>. The original source is: Corston, R. &amp; Colman, A. M. (2000). <em>A crash course in SPSS for Windows</em>. Wiley-Blackwell. Changes were made to the original, including the addition of several statistical tests.
+Figure&nbsp;7.3: A Statistical Decision Tree For Choosing an Appropriate Statistical Procedure. Adapted from: <a href="https://commons.wikimedia.org/wiki/File:InferentialStatisticalDecisionMakingTrees.pdf" class="uri">https://commons.wikimedia.org/wiki/File:InferentialStatisticalDecisionMakingTrees.pdf</a>. The original source is: Corston, R. &amp; Colman, A. M. (2000). <em>A crash course in SPSS for Windows</em>. Wiley-Blackwell. Changes were made to the original, including the addition of several statistical tests.
 </figcaption></figure>
 </div>
 <p>For an online, interactive statistical decision tree to help you decide which statistical analysis to use, see here: <a href="https://www.statsflowchart.co.uk" class="uri">https://www.statsflowchart.co.uk</a></p>
