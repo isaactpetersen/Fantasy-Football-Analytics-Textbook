@@ -351,6 +351,13 @@ window.Quarto = {
 <li>median</li>
 <li>mode</li>
 </ul>
+<p>The mean of <span class="math inline">\(X\)</span> (<span class="math inline">\(\bar{X}\)</span>) is calculated as:</p>
+<p><span id="eq-IQR"><span class="math display">\[
+\bar{X} = \frac{\sum X_i}{n} = \frac{x_1 + x_2 + ... + x_n}{n}
+\tag{7.1}\]</span></span></p>
+<p>That is, to compute the mean, sum all of the values and divide by the number of values (<span class="math inline">\(n\)</span>).</p>
+<p>The median is determined as the value at the 50th percentile (i.e., the value that is higher than 50% of the values and is lower than the other 50% of values).</p>
+<p>The mode is the most common value.</p>
 <p>Below is R code to estimate each:</p>
 </section><section id="sec-descriptiveStatisticsSpread" class="level3" data-number="7.2.2"><h3 data-number="7.2.2" class="anchored" data-anchor-id="sec-descriptiveStatisticsSpread">
 <span class="header-section-number">7.2.2</span> Spread</h3>
@@ -360,7 +367,25 @@ window.Quarto = {
 <li>variance</li>
 <li>range</li>
 <li>minimum and maximum</li>
+<li>interquartile range (IQR)</li>
 </ul>
+<p>The (sample) variance of <span class="math inline">\(X\)</span> (<span class="math inline">\(s^2\)</span>) is calculated as:</p>
+<p><span id="eq-variance"><span class="math display">\[
+s^2 = \frac{\sum (X_i - \bar{X})^2}{n-1}
+\tag{7.2}\]</span></span></p>
+<p>The (sample) standard deviation of <span class="math inline">\(X\)</span> (<span class="math inline">\(s\)</span>) is calculated as:</p>
+<p><span id="eq-sd"><span class="math display">\[
+s = \sqrt{\frac{\sum (X_i - \bar{X})^2}{n-1}}
+\tag{7.3}\]</span></span></p>
+<p>The range is calculated of <span class="math inline">\(X\)</span> is calculated as:</p>
+<p><span id="eq-range"><span class="math display">\[
+\text{range} = \text{maximum} - \text{minimum}
+\tag{7.4}\]</span></span></p>
+<p>The interquartile range (IQR) is calculated as:</p>
+<p><span id="eq-IQR"><span class="math display">\[
+\text{IQR} = Q_3 - Q_1
+\tag{7.5}\]</span></span></p>
+<p>where <span class="math inline">\(Q_3\)</span> is the score at the third quartile (i.e., 75th percentile), and <span class="math inline">\(Q_1\)</span> is the score at the first quartile (i.e., 25th percentile).</p>
 <p>Below is R code to estimate each:</p>
 </section><section id="sec-descriptiveStatisticsShape" class="level3" data-number="7.2.3"><h3 data-number="7.2.3" class="anchored" data-anchor-id="sec-descriptiveStatisticsShape">
 <span class="header-section-number">7.2.3</span> Shape</h3>
@@ -387,18 +412,19 @@ window.Quarto = {
 <span id="cb2-11"><a href="#cb2-11"></a><span class="co">#        min = ~ min(., na.rm = TRUE),</span></span>
 <span id="cb2-12"><a href="#cb2-12"></a><span class="co">#        max = ~ max(., na.rm = TRUE),</span></span>
 <span id="cb2-13"><a href="#cb2-13"></a><span class="co">#        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),</span></span>
-<span id="cb2-14"><a href="#cb2-14"></a><span class="co">#        median = ~ median(., na.rm = TRUE),</span></span>
-<span id="cb2-15"><a href="#cb2-15"></a><span class="co">#        mode = ~ petersenlab::Mode(., multipleModes = "mean"),</span></span>
-<span id="cb2-16"><a href="#cb2-16"></a><span class="co">#        skewness = ~ psych::skew(., na.rm = TRUE),</span></span>
-<span id="cb2-17"><a href="#cb2-17"></a><span class="co">#        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),</span></span>
-<span id="cb2-18"><a href="#cb2-18"></a><span class="co">#      .names = "{.col}.{.fn}")) %&gt;%</span></span>
-<span id="cb2-19"><a href="#cb2-19"></a><span class="co">#    pivot_longer(</span></span>
-<span id="cb2-20"><a href="#cb2-20"></a><span class="co">#      cols = everything(),</span></span>
-<span id="cb2-21"><a href="#cb2-21"></a><span class="co">#      names_to = c("variable","index"),</span></span>
-<span id="cb2-22"><a href="#cb2-22"></a><span class="co">#      names_sep = "\\.") %&gt;% </span></span>
-<span id="cb2-23"><a href="#cb2-23"></a><span class="co">#    pivot_wider(</span></span>
-<span id="cb2-24"><a href="#cb2-24"></a><span class="co">#      names_from = index,</span></span>
-<span id="cb2-25"><a href="#cb2-25"></a><span class="co">#      values_from = value)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="co">#        IQR = ~ IQR(., na.rm = TRUE),</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="co">#        median = ~ median(., na.rm = TRUE),</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="co">#        mode = ~ petersenlab::Mode(., multipleModes = "mean"),</span></span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="co">#        skewness = ~ psych::skew(., na.rm = TRUE),</span></span>
+<span id="cb2-18"><a href="#cb2-18"></a><span class="co">#        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),</span></span>
+<span id="cb2-19"><a href="#cb2-19"></a><span class="co">#      .names = "{.col}.{.fn}")) %&gt;%</span></span>
+<span id="cb2-20"><a href="#cb2-20"></a><span class="co">#    pivot_longer(</span></span>
+<span id="cb2-21"><a href="#cb2-21"></a><span class="co">#      cols = everything(),</span></span>
+<span id="cb2-22"><a href="#cb2-22"></a><span class="co">#      names_to = c("variable","index"),</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a><span class="co">#      names_sep = "\\.") %&gt;% </span></span>
+<span id="cb2-24"><a href="#cb2-24"></a><span class="co">#    pivot_wider(</span></span>
+<span id="cb2-25"><a href="#cb2-25"></a><span class="co">#      names_from = index,</span></span>
+<span id="cb2-26"><a href="#cb2-26"></a><span class="co">#      values_from = value)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-inferentialStatistics" class="level2" data-number="7.3"><h2 data-number="7.3" class="anchored" data-anchor-id="sec-inferentialStatistics">
@@ -424,24 +450,24 @@ window.Quarto = {
 <span class="header-section-number">7.3.3</span> Statistical Significance</h3>
 <p>In science, statistical significance is evaluated with the <em>p</em>-value. The <em>p</em>-value does not represent the probability that you observed the result by chance. The <em>p</em>-value represents a conditional probability—it examines the probability of one event given another event. In particular, the <em>p</em>-value evaluates the likelihood that you would detect a result as at least as extreme as the one observed (in terms of the magnitude of the difference or of the association) given that the null hypothesis (<span class="math inline">\(H_0\)</span>) is true.</p>
 <p>This can be expressed in conditional probability notation, <span class="math inline">\(Pr(A | B)\)</span>, which is the probability (likelihood) of event A occurring given that event B occurred (or given condition B).</p>
-<p>The conditional probability notation for a left-tailed directional test (i.e., Quarterbacks have <u>shorter</u> careers than Running Backs; or number of carries is <u>negatively</u> associated with injury likelihood) is in <a href="#eq-pvalueLeftTailed" class="quarto-xref">Equation&nbsp;<span>7.1</span></a>.</p>
+<p>The conditional probability notation for a left-tailed directional test (i.e., Quarterbacks have <u>shorter</u> careers than Running Backs; or number of carries is <u>negatively</u> associated with injury likelihood) is in <a href="#eq-pvalueLeftTailed" class="quarto-xref">Equation&nbsp;<span>7.6</span></a>.</p>
 <p><span id="eq-pvalueLeftTailed"><span class="math display">\[
 p\text{-value} = Pr(T \le t | H_0)
-\tag{7.1}\]</span></span></p>
+\tag{7.6}\]</span></span></p>
 <p>where <span class="math inline">\(T\)</span> is the test statistic of interest (e.g., the distribution of <span class="math inline">\(t\)</span>-, <span class="math inline">\(r-\)</span>, or <span class="math inline">\(F\)</span> values, depending on the test) and <span class="math inline">\(t\)</span> is the observed test statistic (e.g., <span class="math inline">\(t\)</span>-, <span class="math inline">\(r-\)</span>, or <span class="math inline">\(F\)</span>-coefficient, depending on the test).</p>
-<p>The conditional probability notation for a right-tailed directional test (i.e., Quarterbacks have <u>longer</u> careers than Running Backs; or number of carries is <u>positively</u> associated with injury likelihood) is in <a href="#eq-pvalueRightTailed" class="quarto-xref">Equation&nbsp;<span>7.2</span></a>.</p>
+<p>The conditional probability notation for a right-tailed directional test (i.e., Quarterbacks have <u>longer</u> careers than Running Backs; or number of carries is <u>positively</u> associated with injury likelihood) is in <a href="#eq-pvalueRightTailed" class="quarto-xref">Equation&nbsp;<span>7.7</span></a>.</p>
 <p><span id="eq-pvalueRightTailed"><span class="math display">\[
 p\text{-value} = Pr(T \ge t | H_0)
-\tag{7.2}\]</span></span></p>
-<p>The conditional probability notation for a two-tailed non-directional test (i.e., Quarterbacks <u>differ</u> in the length of their careers compared to Running Backs; or number of carries is <u>associated</u> with injury likelihood) is in <a href="#eq-pvalueTwoTailed" class="quarto-xref">Equation&nbsp;<span>7.3</span></a>.</p>
+\tag{7.7}\]</span></span></p>
+<p>The conditional probability notation for a two-tailed non-directional test (i.e., Quarterbacks <u>differ</u> in the length of their careers compared to Running Backs; or number of carries is <u>associated</u> with injury likelihood) is in <a href="#eq-pvalueTwoTailed" class="quarto-xref">Equation&nbsp;<span>7.8</span></a>.</p>
 <p><span id="eq-pvalueTwoTailed"><span class="math display">\[
 p\text{-value} = 2 \times \text{min}(Pr(T \le t | H_0), Pr(T \ge t | H_0))
-\tag{7.3}\]</span></span></p>
+\tag{7.8}\]</span></span></p>
 <p>where <code>min(a, b)</code> is the smaller number of <code>a</code> and <code>b</code>.</p>
-<p>If the distribution of the test statistic is symmetric around zero, the <em>p</em>-value for the two-tailed non-directional test simplifies to <a href="#eq-pvalueTwoTailedSimple" class="quarto-xref">Equation&nbsp;<span>7.4</span></a>.</p>
+<p>If the distribution of the test statistic is symmetric around zero, the <em>p</em>-value for the two-tailed non-directional test simplifies to <a href="#eq-pvalueTwoTailedSimple" class="quarto-xref">Equation&nbsp;<span>7.9</span></a>.</p>
 <p><span id="eq-pvalueTwoTailedSimple"><span class="math display">\[
 p\text{-value} = 2 \times Pr(T \ge |t| | H_0)
-\tag{7.4}\]</span></span></p>
+\tag{7.9}\]</span></span></p>
 <p>That is, for a test of group differences, the <em>p</em>-value evaluates the likelihood that you would observe a difference as large or larger than the one you observed between the groups if there were no systematic difference between the groups. For instance, when evaluating whether Quarterbacks have <u>longer</u> careers than Running Backs, and you observed a mean difference of 0.03 years, the <em>p</em>-value evaluates the likelihood that you would observe a difference as larger or larger than 0.03 years between the groups if Quarterbacks do not differ from Running Backs in terms of the length of their career.</p>
 <p>That is, for a test of whether two variables are associated, the <em>p</em>-value evaluates the likelihood that you would observe an association as strong or stronger than the one you observed between the groups if there were no association between the variables. For instance, when evaluating whether number of carries is <u>positively</u> associated with injury likelihood, and you observed a correlation coefficient of <span class="math inline">\(r = .25\)</span> between number of carries and injury likelihood, the <em>p</em>-value evaluates the likelihood that you would observe a correlation as strong or stronger than <span class="math inline">\(r = .25\)</span> between the variables if number of carries is not associated with injury likelihood.</p>
 <p>In science, we typically consider an effect to be <em>statistically significant</em> if the <em>p</em>-value is less than .05. That is, there is a small chance (5%; or 1 in 20 times) that we would observe an effect at least as extreme as the effect observed, if the null hypothesis were true. Statistical significance involves the <em>consistency</em> of an effect/association/difference; it suggests that the association/difference is reliably non-zero. However, just because something is statistically significant does not mean that it is important. In addition to statistical significance, it is also important to consider practical significance.</p>
