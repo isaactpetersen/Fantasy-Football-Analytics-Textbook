@@ -6,6 +6,7 @@
 
 ```{r}
 library("petersenlab")
+library("pwr")
 library("grid")
 library("tidyverse")
 ```
@@ -403,6 +404,15 @@ Effect size can be quantified in various ways including:
 - Eta squared ($\eta^2$)
 - Partial eta squared ($\eta_p^2$)
 
+Cohen's $d$ is calculated as in @eq-cohensD:
+
+$$
+\begin{aligned}
+  d &= \frac{\text{mean difference}}{\text{pooled standard deviation}} \\
+   &= \frac{M_2 - M_1}{\text{pooled standard deviation}} \\
+\end{aligned}
+$$ {#eq-cohensD}
+
 Effect size thresholds [@McGrath2006] for small, medium, and large effect sizes are in @tbl-effectSizeThresholds.
 
 | Effect Size Index                                   | Small       | Medium      | Large       |
@@ -573,7 +583,7 @@ where $p$ is the number of [predictor variables](#sec-correlationalStudy).
 The null hypothesis is that the the [predictor variable(s)](#sec-correlationalStudy) are not associated with the [outcome variable](#sec-correlationalStudy).
 The alternative hypothesis is that the [predictor variable(s)](#sec-correlationalStudy) are associated with the [outcome variable](#sec-correlationalStudy).
 
-### Chi-Square Tests {#sec-chisquare}
+### Chi-Square Test {#sec-chisquare}
 
 There are two primary types of chi-square tests:
 
@@ -935,3 +945,140 @@ Two-tailed test:
 ```{r}
 qchisq(1 - alpha/2, df_chisquareAssociation)
 ```
+
+### Statistical Power {#sec-statisticalPower}
+
+As described above, *statistical power* is the probability of detecting an effect, if, in fact, the effect exists.
+Statistical power for a given test can be calculated based on three factors:
+
+- [effect size](#sec-practicalSignificance)
+- sample size
+- [alpha level](#sec-statisticalSignificance)
+
+Knowing any three of the following, you can calculate the fourth: statistical power, effect size, sample size, and alpha level.
+
+```{r}
+power <- .8
+effectSize_d <- .5
+effectSize_r <- .24
+```
+
+#### One-Sample *t*-Test {#sec-statisticalPowerOneSampleTtest}
+
+Solving for statistical power achieved (given effect size, sample size, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  n = N,
+  d = effectSize_d,
+  sig.level = alpha,
+  type = "one.sample",
+  alternative = "two.sided")
+```
+
+Solving for sample size needed (given effect size, power, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  d = effectSize_d,
+  power = power,
+  sig.level = alpha,
+  type = "one.sample",
+  alternative = "two.sided")
+```
+
+Solving for minimum effect size needed to detect (given sample size, power, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  n = N,
+  power = power,
+  sig.level = alpha,
+  type = "one.sample",
+  alternative = "two.sided")
+```
+
+#### Independent-Samples *t*-Test {#sec-statisticalPowerIndependentSamplesTtest}
+
+Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  n = N,
+  d = effectSize_d,
+  sig.level = alpha,
+  type = "two.sample",
+  alternative = "two.sided")
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  d = effectSize_d,
+  power = power,
+  sig.level = alpha,
+  type = "two.sample",
+  alternative = "two.sided")
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  n = N,
+  power = power,
+  sig.level = alpha,
+  type = "two.sample",
+  alternative = "two.sided")
+```
+
+#### Paired-Samples *t*-Test {#sec-statisticalPowerPairedSamplesTtest}
+
+Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  n = N,
+  d = effectSize_d,
+  sig.level = alpha,
+  type = "paired",
+  alternative = "two.sided")
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  d = effectSize_d,
+  power = power,
+  sig.level = alpha,
+  type = "paired",
+  alternative = "two.sided")
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+pwr::pwr.t.test(
+  n = N,
+  power = power,
+  sig.level = alpha,
+  type = "paired",
+  alternative = "two.sided")
+```
+
+#### One-Way ANOVA {#sec-statisticalPowerOneWayANOVA}
+
+#### Factorial ANOVA {#sec-statisticalPowerFactorialANOVA}
+
+#### Repeated Measures ANOVA {#sec-statisticalPowerRepeatedMeasuresANOVA}
+
+#### Correlation {#sec-statisticalPowerCorrelation}
+
+#### Multiple Regression {#sec-statisticalPowerMultipleRegression}
+
+#### Chi-Square Goodness-of-Fit Test {#sec-statisticalPowerChiSquareGOF}
+
+#### Chi-Square Test for Association {#sec-statisticalPowerChiSquareAssociation}
+
