@@ -492,6 +492,63 @@ $$ {#eq-regression}
 
 where $y$ is the [outcome variable](#sec-correlationalStudy), $B_0$ is the intercept, $B_1$ is the slope, $x_1$ is the [predictor variable](#sec-correlationalStudy), and $\epsilon$ is the error term.
 
+```{r}
+#| include: false
+#| eval: false
+
+set.seed(52242)
+regression <- data.frame(outcome = rnorm(40, mean = 5, sd = 2))
+
+regression$predictor <- complement(regression$outcome, .5)
+regression$predictor <- regression$predictor + abs(min(regression$predictor))
+
+lm(
+  outcome ~ predictor,
+  data = regression)
+
+ggplot2::ggplot(
+  data = regression,
+  ggplot2::aes(
+    x = predictor,
+    y = outcome,
+  )
+) +
+  ggplot2::geom_point() +
+  ggplot2::geom_smooth(
+    method = "lm",
+    linewidth = 2,
+    se = FALSE,
+    fullrange = TRUE) +
+  ggplot2::scale_x_continuous(
+    lim = c(0,8),
+    breaks = seq(from = 0, to = 8, by = 2),
+    expand = c(0,0)
+  ) +
+  ggplot2::scale_y_continuous(
+    lim = c(0,8),
+    breaks = seq(from = 0, to = 8, by = 2),
+    expand = c(0,0)
+  ) +
+  ggplot2::labs(
+    x = "Predictor Variable",
+    y = "Outcome Variable",
+    title = "Regression Best-Fit Line"
+  ) +
+  ggplot2::theme_classic(
+    base_size = 16) +
+  ggplot2::theme(legend.title = element_blank())
+
+ggsave("./images/regression.pdf", width = 6, height = 6)
+```
+
+A regression line is depicted in @fig-regression.
+
+::: {#fig-regression}
+![](images/regression.png)
+
+A Regression Best-Fit Line.
+:::
+
 Regression with multiple predictors—i.e., multiple regression—takes the form of @eq-multipleRegression:
 
 $$
