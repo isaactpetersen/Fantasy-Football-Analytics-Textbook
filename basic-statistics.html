@@ -1297,7 +1297,9 @@ df = (r - 1) \times (c - 1)
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a>power <span class="ot">&lt;-</span> .<span class="dv">8</span></span>
 <span id="cb63-2"><a href="#cb63-2"></a>effectSize_d <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
-<span id="cb63-3"><a href="#cb63-3"></a>effectSize_r <span class="ot">&lt;-</span> .<span class="dv">24</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb63-3"><a href="#cb63-3"></a>effectSize_r <span class="ot">&lt;-</span> .<span class="dv">24</span></span>
+<span id="cb63-4"><a href="#cb63-4"></a>effectSize_f <span class="ot">&lt;-</span> .<span class="dv">25</span></span>
+<span id="cb63-5"><a href="#cb63-5"></a>effectSize_fSquared <span class="ot">&lt;-</span> .<span class="dv">06</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="sec-statisticalPowerOneSampleTtest" class="level4" data-number="7.5.8.1"><h4 data-number="7.5.8.1" class="anchored" data-anchor-id="sec-statisticalPowerOneSampleTtest">
@@ -1555,18 +1557,204 @@ NOTE: n is number of *pairs*</code></pre>
 </div>
 </section><section id="sec-statisticalPowerOneWayANOVA" class="level4" data-number="7.5.8.4"><h4 data-number="7.5.8.4" class="anchored" data-anchor-id="sec-statisticalPowerOneWayANOVA">
 <span class="header-section-number">7.5.8.4</span> One-Way ANOVA</h4>
+<p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb88"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.anova.test</span>(</span>
+<span id="cb88-2"><a href="#cb88-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb88-3"><a href="#cb88-3"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb88-4"><a href="#cb88-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb88-5"><a href="#cb88-5"></a>  <span class="at">k =</span> numGroups)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     Balanced one-way analysis of variance power calculation 
+
+              k = 4
+              n = 200
+              f = 0.25
+      sig.level = 0.05
+          power = 0.9999962
+
+NOTE: n is number in each group</code></pre>
+</div>
+</div>
+<p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb90"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.anova.test</span>(</span>
+<span id="cb90-2"><a href="#cb90-2"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb90-3"><a href="#cb90-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb90-4"><a href="#cb90-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb90-5"><a href="#cb90-5"></a>  <span class="at">k =</span> numGroups)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     Balanced one-way analysis of variance power calculation 
+
+              k = 4
+              n = 44.59927
+              f = 0.25
+      sig.level = 0.05
+          power = 0.8
+
+NOTE: n is number in each group</code></pre>
+</div>
+</div>
+<p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb92"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.anova.test</span>(</span>
+<span id="cb92-2"><a href="#cb92-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb92-3"><a href="#cb92-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb92-4"><a href="#cb92-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb92-5"><a href="#cb92-5"></a>  <span class="at">k =</span> numGroups)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     Balanced one-way analysis of variance power calculation 
+
+              k = 4
+              n = 200
+              f = 0.117038
+      sig.level = 0.05
+          power = 0.8
+
+NOTE: n is number in each group</code></pre>
+</div>
+</div>
 </section><section id="sec-statisticalPowerFactorialANOVA" class="level4" data-number="7.5.8.5"><h4 data-number="7.5.8.5" class="anchored" data-anchor-id="sec-statisticalPowerFactorialANOVA">
 <span class="header-section-number">7.5.8.5</span> Factorial ANOVA</h4>
+<p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
+<p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
+<p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
 </section><section id="sec-statisticalPowerRepeatedMeasuresANOVA" class="level4" data-number="7.5.8.6"><h4 data-number="7.5.8.6" class="anchored" data-anchor-id="sec-statisticalPowerRepeatedMeasuresANOVA">
 <span class="header-section-number">7.5.8.6</span> Repeated Measures ANOVA</h4>
+<p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
+<p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
+<p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
 </section><section id="sec-statisticalPowerCorrelation" class="level4" data-number="7.5.8.7"><h4 data-number="7.5.8.7" class="anchored" data-anchor-id="sec-statisticalPowerCorrelation">
 <span class="header-section-number">7.5.8.7</span> Correlation</h4>
+<p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
+<span id="cb94-2"><a href="#cb94-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb94-3"><a href="#cb94-3"></a>  <span class="at">r =</span> effectSize_r,</span>
+<span id="cb94-4"><a href="#cb94-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb94-5"><a href="#cb94-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     approximate correlation power calculation (arctangh transformation) 
+
+              n = 200
+              r = 0.24
+      sig.level = 0.05
+          power = 0.9310138
+    alternative = two.sided</code></pre>
+</div>
+</div>
+<p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb96"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
+<span id="cb96-2"><a href="#cb96-2"></a>  <span class="at">r =</span> effectSize_r,</span>
+<span id="cb96-3"><a href="#cb96-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb96-4"><a href="#cb96-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb96-5"><a href="#cb96-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     approximate correlation power calculation (arctangh transformation) 
+
+              n = 133.1299
+              r = 0.24
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided</code></pre>
+</div>
+</div>
+<p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
+<span id="cb98-2"><a href="#cb98-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb98-3"><a href="#cb98-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb98-4"><a href="#cb98-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb98-5"><a href="#cb98-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     approximate correlation power calculation (arctangh transformation) 
+
+              n = 200
+              r = 0.1965767
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided</code></pre>
+</div>
+</div>
 </section><section id="sec-statisticalPowerMultipleRegression" class="level4" data-number="7.5.8.8"><h4 data-number="7.5.8.8" class="anchored" data-anchor-id="sec-statisticalPowerMultipleRegression">
 <span class="header-section-number">7.5.8.8</span> Multiple Regression</h4>
+<p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb100"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
+<span id="cb100-2"><a href="#cb100-2"></a>  <span class="at">f2 =</span> effectSize_fSquared,</span>
+<span id="cb100-3"><a href="#cb100-3"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb100-4"><a href="#cb100-4"></a>  <span class="at">u =</span> numPredictors,</span>
+<span id="cb100-5"><a href="#cb100-5"></a>  <span class="at">v =</span> N <span class="sc">-</span> numPredictors <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     Multiple regression power calculation 
+
+              u = 5
+              v = 194
+             f2 = 0.06
+      sig.level = 0.05
+          power = 0.7548031</code></pre>
+</div>
+</div>
+<p>Solving for sample size per group needed (given effect size, power, and alpha)—<span class="math inline">\(v = N - \text{numberOfPredictors} - 1\)</span>; thus, <span class="math inline">\(N = v + \text{numberOfPredictors} + 1\)</span>:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1"></a>multipleRegressionSampleSizeModel <span class="ot">&lt;-</span> pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
+<span id="cb102-2"><a href="#cb102-2"></a>  <span class="at">f2 =</span> effectSize_fSquared,</span>
+<span id="cb102-3"><a href="#cb102-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb102-4"><a href="#cb102-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb102-5"><a href="#cb102-5"></a>  <span class="at">u =</span> numPredictors)</span>
+<span id="cb102-6"><a href="#cb102-6"></a></span>
+<span id="cb102-7"><a href="#cb102-7"></a>multipleRegressionSampleSizeModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     Multiple regression power calculation 
+
+              u = 5
+              v = 213.3947
+             f2 = 0.06
+      sig.level = 0.05
+          power = 0.8</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1"></a>vNeeded <span class="ot">&lt;-</span> multipleRegressionSampleSizeModel<span class="sc">$</span>v</span>
+<span id="cb104-2"><a href="#cb104-2"></a>sampleSizeNeeded <span class="ot">&lt;-</span> vNeeded <span class="sc">+</span> numPredictors <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb104-3"><a href="#cb104-3"></a>sampleSizeNeeded</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 219.3947</code></pre>
+</div>
+</div>
+<p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
+<span id="cb106-2"><a href="#cb106-2"></a>  <span class="at">power =</span> power,</span>
+<span id="cb106-3"><a href="#cb106-3"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb106-4"><a href="#cb106-4"></a>  <span class="at">u =</span> numPredictors,</span>
+<span id="cb106-5"><a href="#cb106-5"></a>  <span class="at">v =</span> N <span class="sc">-</span> numPredictors <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+     Multiple regression power calculation 
+
+              u = 5
+              v = 194
+             f2 = 0.06597765
+      sig.level = 0.05
+          power = 0.8</code></pre>
+</div>
+</div>
 </section><section id="sec-statisticalPowerChiSquareGOF" class="level4" data-number="7.5.8.9"><h4 data-number="7.5.8.9" class="anchored" data-anchor-id="sec-statisticalPowerChiSquareGOF">
 <span class="header-section-number">7.5.8.9</span> Chi-Square Goodness-of-Fit Test</h4>
+<p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
+<p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
 </section><section id="sec-statisticalPowerChiSquareAssociation" class="level4" data-number="7.5.8.10"><h4 data-number="7.5.8.10" class="anchored" data-anchor-id="sec-statisticalPowerChiSquareAssociation">
 <span class="header-section-number">7.5.8.10</span> Chi-Square Test for Association</h4>
+<p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
+<p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
