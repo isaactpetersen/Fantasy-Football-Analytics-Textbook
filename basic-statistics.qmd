@@ -1010,6 +1010,8 @@ Knowing any three of the following, you can calculate the fourth: statistical po
 power <- .8
 effectSize_d <- .5
 effectSize_r <- .24
+effectSize_f <- .25
+effectSize_fSquared <- .06
 ```
 
 #### One-Sample *t*-Test {#sec-statisticalPowerOneSampleTtest}
@@ -1156,15 +1158,178 @@ pwr::pwr.t.test(
 
 #### One-Way ANOVA {#sec-statisticalPowerOneWayANOVA}
 
+Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+
+```{r}
+pwr::pwr.anova.test(
+  n = N,
+  f = effectSize_f,
+  sig.level = alpha,
+  k = numGroups)
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+pwr::pwr.anova.test(
+  f = effectSize_f,
+  power = power,
+  sig.level = alpha,
+  k = numGroups)
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+pwr::pwr.anova.test(
+  n = N,
+  power = power,
+  sig.level = alpha,
+  k = numGroups)
+```
+
 #### Factorial ANOVA {#sec-statisticalPowerFactorialANOVA}
+
+Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+
+```{r}
+
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+
+```
 
 #### Repeated Measures ANOVA {#sec-statisticalPowerRepeatedMeasuresANOVA}
 
+Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+
+```{r}
+
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+
+```
+
 #### Correlation {#sec-statisticalPowerCorrelation}
+
+Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+
+```{r}
+pwr::pwr.r.test(
+  n = N,
+  r = effectSize_r,
+  sig.level = alpha,
+  alternative = "two.sided")
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+pwr::pwr.r.test(
+  r = effectSize_r,
+  power = power,
+  sig.level = alpha,
+  alternative = "two.sided")
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+pwr::pwr.r.test(
+  n = N,
+  power = power,
+  sig.level = alpha,
+  alternative = "two.sided")
+```
 
 #### Multiple Regression {#sec-statisticalPowerMultipleRegression}
 
+Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+
+```{r}
+pwr::pwr.f2.test(
+  f2 = effectSize_fSquared,
+  sig.level = alpha,
+  u = numPredictors,
+  v = N - numPredictors - 1)
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha)—$v = N - \text{numberOfPredictors} - 1$; thus, $N = v + \text{numberOfPredictors} + 1$:
+
+```{r}
+multipleRegressionSampleSizeModel <- pwr::pwr.f2.test(
+  f2 = effectSize_fSquared,
+  power = power,
+  sig.level = alpha,
+  u = numPredictors)
+
+multipleRegressionSampleSizeModel
+
+vNeeded <- multipleRegressionSampleSizeModel$v
+sampleSizeNeeded <- vNeeded + numPredictors + 1
+sampleSizeNeeded
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+pwr::pwr.f2.test(
+  power = power,
+  sig.level = alpha,
+  u = numPredictors,
+  v = N - numPredictors - 1)
+```
+
 #### Chi-Square Goodness-of-Fit Test {#sec-statisticalPowerChiSquareGOF}
+
+```{r}
+
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+
+```
 
 #### Chi-Square Test for Association {#sec-statisticalPowerChiSquareAssociation}
 
+```{r}
+
+```
+
+Solving for sample size per group needed (given effect size, power, and alpha):
+
+```{r}
+
+```
+
+Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+
+```{r}
+
+```
