@@ -7,6 +7,7 @@
 ```{r}
 library("petersenlab")
 library("pwr")
+library("WebPower")
 library("grid")
 library("tidyverse")
 ```
@@ -445,7 +446,8 @@ $$
 \begin{aligned}
   R^2 &= 1 - \frac{\sum (Y_i - \hat{Y}_i)^2}{\sum (Y_i - \bar{Y})^2} \\
       &= 1 - \frac{SS_{\text{residual}}}{SS_{\text{total}}} \\
-      &= 1 - \frac{\text{sum of squared residuals}}{\text{total sum of squares}}
+      &= 1 - \frac{\text{sum of squared residuals}}{\text{total sum of squares}} \\
+      &= \frac{f^2}{1 + f^2}
 \end{aligned}
 $$ {#eq-rSquared}
 
@@ -684,7 +686,7 @@ nGroup2 <- 150
 numGroups <- 4
 numLevelsFactorA <- 3
 numLevelsFactorB <- 4
-numTimepoints <- 4
+numMeasurements <- 4
 numPredictors <- 5
 numCategories <- 6
 numRows <- 5
@@ -868,11 +870,11 @@ $$
 \end{aligned}
 $$ {#eq-dfRepeatedMeasuresANOVA}
 
-where $N$ is sample size and $T$ is the number of timepoints (or conditions).
+where $N$ is sample size and $T$ is the number of measurements (i.e., the number of levels of the within-person factor: e.g., timepoints or conditions).
 
 ```{r}
-df1_RMANOVA <- numTimepoints - 1
-df2_RMANOVA <- (numTimepoints - 1) * (N - 1)
+df1_RMANOVA <- numMeasurements - 1
+df2_RMANOVA <- (numMeasurements - 1) * (N - 1)
 ```
 
 One-tailed test:
@@ -1215,19 +1217,85 @@ Solving for minimum effect size needed to detect (given sample size per group, p
 Solving for statistical power achieved (given effect size, sample size per group, and alpha):
 
 ```{r}
+wp.rmanova(
+  n = N,
+  ng = numGroups,
+  nm = numMeasurements,
+  f = effectSize_f,
+  alpha = alpha,
+  type = 0)
 
+wp.rmanova(
+  n = N,
+  ng = numGroups,
+  nm = numMeasurements,
+  f = effectSize_f,
+  alpha = alpha,
+  type = 1)
+
+wp.rmanova(
+  n = N,
+  ng = numGroups,
+  nm = numMeasurements,
+  f = effectSize_f,
+  alpha = alpha,
+  type = 2)
 ```
 
 Solving for sample size per group needed (given effect size, power, and alpha):
 
 ```{r}
+wp.rmanova(
+  power = power,
+  ng = numGroups,
+  nm = numMeasurements,
+  f = effectSize_f,
+  alpha = alpha,
+  type = 0)
 
+wp.rmanova(
+  power = power,
+  ng = numGroups,
+  nm = numMeasurements,
+  f = effectSize_f,
+  alpha = alpha,
+  type = 1)
+
+wp.rmanova(
+  power = power,
+  ng = numGroups,
+  nm = numMeasurements,
+  f = effectSize_f,
+  alpha = alpha,
+  type = 2)
 ```
 
 Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
 
 ```{r}
+wp.rmanova(
+  n = N,
+  ng = numGroups,
+  nm = numMeasurements,
+  power = power,
+  alpha = alpha,
+  type = 0)
 
+wp.rmanova(
+  n = N,
+  ng = numGroups,
+  nm = numMeasurements,
+  power = power,
+  alpha = alpha,
+  type = 1)
+
+wp.rmanova(
+  n = N,
+  ng = numGroups,
+  nm = numMeasurements,
+  power = power,
+  alpha = alpha,
+  type = 2)
 ```
 
 #### Correlation {#sec-statisticalPowerCorrelation}
