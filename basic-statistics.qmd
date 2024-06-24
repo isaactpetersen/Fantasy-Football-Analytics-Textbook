@@ -589,6 +589,7 @@ $$ {#eq-coefficientOfDetermination}
 
 The critical value is the test value for a given test, above which the effect is considered to be [statistically significant](#sec-statisticalSignificance).
 The critical value for [statistical significance](#sec-statisticalSignificance) for each test can be determined based on the degrees of freedom and alpha level.
+The degrees of freedom (*df*) refer to the number of values in the calculation of a test statistic that are free to vary.
 
 ```{r}
 alpha <- .05
@@ -598,10 +599,19 @@ nGroup2 <- 150
 numGroups <- 4
 numLevelsFactorA <- 3
 numLevelsFactorB <- 4
+numTimepoints <- 4
 numPredictors <- 5
 ```
 
 #### One-Sample *t*-Test {#sec-statisticalTestsCriticalValueOneSampleTtest}
+
+For a one-sample *t*-test, the degrees of freedom is in @eq-dfOneSampleTtest:
+
+$$
+df = N - 1
+$$ {#eq-dfOneSampleTtest}
+
+where $N$ is sample size.
 
 ```{r}
 df_oneSampleTtest <- N - 1
@@ -621,6 +631,14 @@ qt(1 - alpha/2, df_oneSampleTtest)
 
 #### Independent-Samples *t*-Test {#sec-statisticalTestsCriticalValueIndependentSamplesTtest}
 
+For an independent-samples *t*-test, the degrees of freedom is in @eq-dfIndependentSamplesTtest:
+
+$$
+df = n_1 + n_2 - 2
+$$ {#eq-dfIndependentSamplesTtest}
+
+where $n_1$ is the sample size of group 1 and $n_2$ is the sample size of group 2.
+
 ```{r}
 df_independentSamplesTtest <- nGroup1 + nGroup2 - 2
 ```
@@ -638,6 +656,14 @@ qt(1 - alpha/2, df_independentSamplesTtest)
 ```
 
 #### Paired-Samples *t*-Test {#sec-statisticalTestsCriticalValuePairedSamplesTtest}
+
+For a paired-samples *t*-test, the degrees of freedom is in @eq-dfPairedSamplesTtest:
+
+$$
+df = N - 1
+$$ {#eq-dfPairedSamplesTtest}
+
+where $N$ is sample size (i.e., the number of paired observations).
 
 ```{r}
 df_pairedSamplesTtest <- N - 1
@@ -657,6 +683,15 @@ qt(1 - alpha/2, df_pairedSamplesTtest)
 
 #### One-Way ANOVA {#sec-statisticalTestsCriticalValueOneWayANOVA}
 
+For a one-way ANOVA, the degrees of freedom is in @eq-dfOneWayANOVA:
+
+$$
+df_\text{between} = g - 1
+df_\text{within} = N - g
+$$ {#eq-dfOneWayANOVA}
+
+where $N$ is sample size and $g$ is the number of groups.
+
 ```{r}
 df_betweenOneWayANOVA <- numGroups - 1
 df_withinOneWayANOVA <- N - numGroups
@@ -675,6 +710,17 @@ qf(1 - alpha/2, df_betweenOneWayANOVA, df_withinOneWayANOVA)
 ```
 
 #### Factorial ANOVA {#sec-statisticalTestsCriticalValueFactorialANOVA}
+
+For a factorial two-way ANOVA, the degrees of freedom is in @eq-dfFactorialANOVA:
+
+$$
+df_\text{Factor A} = a - 1
+df_\text{Factor B} = b - 1
+df_\text{Interaction} = (a - 1)(b - 1)
+df_\text{error} = a * b * (N - 1)
+$$ {#eq-dfFactorialANOVA}
+
+where $N$ is sample size, $a$ is the number of levels for factor A, and $b$ is the number of levels for factor B.
 
 ```{r}
 df_factorA <- numLevelsFactorA - 1
@@ -721,9 +767,18 @@ qf(1 - alpha/2, df_interaction, df_error)
 
 #### Repeated Measures ANOVA {#sec-statisticalTestsCriticalValueRMANOVA}
 
+For a repeated measures ANOVA, the degrees of freedom is in @eq-dfRepeatedMeasuresANOVA:
+
+$$
+df_1 = T - 1
+df_2 = (T - 1)(N - 1)
+$$ {#eq-dfRepeatedMeasuresANOVA}
+
+where $N$ is sample size and $T$ is the number of timepoints.
+
 ```{r}
-df1_RMANOVA <- numGroups - 1
-df2_RMANOVA <- (numGroups - 1) * (N - 1)
+df1_RMANOVA <- numTimepoints - 1
+df2_RMANOVA <- (numTimepoints - 1) * (N - 1)
 ```
 
 One-tailed test:
@@ -739,6 +794,14 @@ qf(1 - alpha/2, df1_RMANOVA, df2_RMANOVA)
 ```
 
 #### Correlation {#sec-statisticalTestsCriticalValueCorrelation}
+
+For a correlation, the degrees of freedom is in @eq-dfCorrelation:
+
+$$
+df = N - 2
+$$ {#eq-dfCorrelation}
+
+where $N$ is sample size.
 
 ```{r}
 df_correlation <- N - 2
@@ -757,6 +820,15 @@ qt(1 - alpha/2, df_correlation)
 ```
 
 #### Multiple Regression {#sec-statisticalTestsCriticalValueMultipleRegression}
+
+For multiple regression, the degrees of freedom is in @eq-dfMultipleRegression:
+
+$$
+df_1 = p
+df_2 = N - p - 1
+$$ {#eq-dfMultipleRegression}
+
+where $N$ is sample size and $p$ is the number of predictors.
 
 ```{r}
 df1_regression <- numPredictors
