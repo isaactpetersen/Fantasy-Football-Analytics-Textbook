@@ -448,6 +448,8 @@ There are several *t*-tests:
     - paired samples *t*-test
 
 A one-sample *t*-test is used to evaluate whether a sample mean differs systematically from a particular value.
+The null hypothesis is that the sample mean does not differ systematically from the pre-specified value.
+The alternative hypothesis is that the sample mean differs systematically from the pre-specified value.
 For instance, let's say you want to test out a new draft strategy.
 You could participate in a mock draft and draft players using the new strategy.
 Then, you could use a one-sample *t*-test to evaluate whether your new draft strategy yields players with more projected points than the average of players' projected points for other teams.
@@ -455,6 +457,8 @@ Then, you could use a one-sample *t*-test to evaluate whether your new draft str
 Two-samples *t*-tests are used to test for differences between scores of two groups.
 If the two groups are independent, the independent samples *t*-test is used.
 If the two groups involve paired samples, the paired samples *t*-test is used.
+The null hypothesis is that the mean of group 1 does not differ systematically from the mean of group 2.
+The alternative hypothesis is that the mean of group 1 differs systematically from the mean of group 2.
 For instance, you could use an independent-samples *t*-test if you want to examine whether Quarterbacks tend to have have longer careers than Running Backs.
 By contrast, you could use a paired samples *t*-test if you want to examine whether Quarterbacks tend to score more points in the second year of their contract compared to their rookie year, because the same subjects were assessed twice (i.e., a [within-subject design](#sec-withinSubject)).
 
@@ -470,6 +474,8 @@ There are multiple variants of ANOVA:
 
 Like two-samples *t*-tests, ANOVA allows examining whether groups differ as a function of an [independent variable](#sec-experiment).
 However, unlike a *t*-test, ANOVA allows examining multiple multiple [independent variables](#sec-experiment) and more than two groups.
+The null hypothesis is that the the groups' mean value does not differ systematically.
+The alternative hypothesis is that the groups' mean value differs systematically.
 
 A one-way ANOVA examines whether two or more groups differ as a function of an [independent variable](#sec-experiment).
 For instance, you could use a one-way ANOVA to evaluate if you want to evaluate whether multiple positions differ in their length of career.
@@ -483,6 +489,8 @@ For instance, you could use MANOVA to evaluate whether one's contract length and
 ### Correlation {#sec-correlation}
 
 Correlation examines the association between a [predictor](#sec-correlationalStudy) and [outcome](#sec-correlationalStudy) variable.
+The null hypothesis is that the the two variables are not associated.
+The alternative hypothesis is that the two variables are associated.
 
 ### (Multiple) Regression {#sec-regression}
 
@@ -562,6 +570,24 @@ $$ {#eq-multipleRegression}
 
 where $p$ is the number of [predictor variables](#sec-correlationalStudy).
 
+The null hypothesis is that the the [predictor variable(s)](#sec-correlationalStudy) are not associated with the [outcome variable](#sec-correlationalStudy).
+The alternative hypothesis is that the [predictor variable(s)](#sec-correlationalStudy) are associated with the [outcome variable](#sec-correlationalStudy).
+
+### Chi-Square Tests {#sec-chisquare}
+
+There are two primary types of chi-square tests:
+
+- chi-square goodness-of-fit test
+- chi-square test for association (aka test of independence)
+
+The chi-square goodness-of-fit test evaluates whether a set of categorical data came from a specified distribution.
+The null hypothesis is that the data came from the specified distribution.
+The alternative hypothesis is that the data did not come from the specified distribution.
+
+The chi-square test for association evaluates whether two categorical variables are associated.
+The null hypothesis is that the two variables are not associated.
+The alternative hypothesis is that the two variables are associated.
+
 ### Formulating Statistical Tests in Terms of Partitioned Variance {#sec-statisticalTestsPartitionedVariance}
 
 Many statistical tests can be formulated in terms of partitioned variance.
@@ -601,6 +627,9 @@ numLevelsFactorA <- 3
 numLevelsFactorB <- 4
 numTimepoints <- 4
 numPredictors <- 5
+numCategories <- 6
+numRows <- 5
+numColumns <- 2
 ```
 
 #### One-Sample *t*-Test {#sec-statisticalTestsCriticalValueOneSampleTtest}
@@ -853,4 +882,56 @@ Two-tailed test:
 
 ```{r}
 qf(1 - alpha/2, df1_regression, df2_regression)
+```
+
+#### Chi-Square Goodness-of-Fit Test {#sec-statisticalTestsCriticalValueChiSquareGOF}
+
+For the chi-square goodness-of-fit test, the degrees of freedom is in @eq-dfChiSquareGOF:
+
+$$
+df = c - 1
+$$ {#eq-dfChiSquareGOF}
+
+where $c$ is the number of categories.
+
+```{r}
+df_chisquareGOF <- numCategories - 1
+```
+
+One-tailed test:
+
+```{r}
+qchisq(1 - alpha, df_chisquareGOF)
+```
+
+Two-tailed test:
+
+```{r}
+qchisq(1 - alpha/2, df_chisquareGOF)
+```
+
+#### Chi-Square Test for Association {#sec-statisticalTestsCriticalValueChiSquareAssociation}
+
+For the chi-square test for association, the degrees of freedom is in @eq-dfChiSquareAssociation:
+
+$$
+df = (r - 1) \times (c - 1)
+$$ {#eq-dfChiSquareAssociation}
+
+where $r$ is the number of rows in the contingency table and $c$ is the number of columns in the contingency table.
+
+```{r}
+df_chisquareAssociation <- (numRows - 1) * (numColumns - 1)
+```
+
+One-tailed test:
+
+```{r}
+qchisq(1 - alpha, df_chisquareAssociation)
+```
+
+Two-tailed test:
+
+```{r}
+qchisq(1 - alpha/2, df_chisquareAssociation)
 ```
