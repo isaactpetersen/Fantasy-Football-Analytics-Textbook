@@ -387,8 +387,9 @@ window.Quarto = {
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"petersenlab"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"pwr"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"grid"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"WebPower"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"grid"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-descriptiveStatistics" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-descriptiveStatistics">
@@ -790,7 +791,8 @@ s = \sqrt{\frac{(n_1 - 1)s_1^2 + (n_2 - 1)s_2^2}{n_1 + n_2 - 2}}
 \begin{aligned}
   R^2 &amp;= 1 - \frac{\sum (Y_i - \hat{Y}_i)^2}{\sum (Y_i - \bar{Y})^2} \\
       &amp;= 1 - \frac{SS_{\text{residual}}}{SS_{\text{total}}} \\
-      &amp;= 1 - \frac{\text{sum of squared residuals}}{\text{total sum of squares}}
+      &amp;= 1 - \frac{\text{sum of squared residuals}}{\text{total sum of squares}} \\
+      &amp;= \frac{f^2}{1 + f^2}
 \end{aligned}
 \tag{7.14}\]</span></span></p>
 <p>where <span class="math inline">\(Y_i\)</span> is the observed value of the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> for the <span class="math inline">\(i\)</span>th observation, <span class="math inline">\(\hat{Y}_i\)</span> is the model predicted value for the <span class="math inline">\(i\)</span>th observation, <span class="math inline">\(\bar{Y}\)</span> is the mean of the observed values of the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a>. The total sum of squares is an index of the total variation in the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a>.</p>
@@ -983,7 +985,7 @@ R^2 = \frac{\text{variance explained in the outcome variable}}{\text{total varia
 <span id="cb4-5"><a href="#cb4-5"></a>numGroups <span class="ot">&lt;-</span> <span class="dv">4</span></span>
 <span id="cb4-6"><a href="#cb4-6"></a>numLevelsFactorA <span class="ot">&lt;-</span> <span class="dv">3</span></span>
 <span id="cb4-7"><a href="#cb4-7"></a>numLevelsFactorB <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a>numTimepoints <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>numMeasurements <span class="ot">&lt;-</span> <span class="dv">4</span></span>
 <span id="cb4-9"><a href="#cb4-9"></a>numPredictors <span class="ot">&lt;-</span> <span class="dv">5</span></span>
 <span id="cb4-10"><a href="#cb4-10"></a>numCategories <span class="ot">&lt;-</span> <span class="dv">6</span></span>
 <span id="cb4-11"><a href="#cb4-11"></a>numRows <span class="ot">&lt;-</span> <span class="dv">5</span></span>
@@ -1164,10 +1166,10 @@ df = N - 1
   df_2 &amp;= (T - 1)(N - 1)
 \end{aligned}
 \tag{7.26}\]</span></span></p>
-<p>where <span class="math inline">\(N\)</span> is sample size and <span class="math inline">\(T\)</span> is the number of timepoints (or conditions).</p>
+<p>where <span class="math inline">\(N\)</span> is sample size and <span class="math inline">\(T\)</span> is the number of measurements (i.e., the number of levels of the within-person factor: e.g., timepoints or conditions).</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>df1_RMANOVA <span class="ot">&lt;-</span> numTimepoints <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb38-2"><a href="#cb38-2"></a>df2_RMANOVA <span class="ot">&lt;-</span> (numTimepoints <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> (N <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>df1_RMANOVA <span class="ot">&lt;-</span> numMeasurements <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a>df2_RMANOVA <span class="ot">&lt;-</span> (numMeasurements <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> (N <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>One-tailed test:</p>
@@ -1628,17 +1630,167 @@ NOTE: n is number in each group</code></pre>
 </section><section id="sec-statisticalPowerRepeatedMeasuresANOVA" class="level4" data-number="7.5.8.6"><h4 data-number="7.5.8.6" class="anchored" data-anchor-id="sec-statisticalPowerRepeatedMeasuresANOVA">
 <span class="header-section-number">7.5.8.6</span> Repeated Measures ANOVA</h4>
 <p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb94-2"><a href="#cb94-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb94-3"><a href="#cb94-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb94-4"><a href="#cb94-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb94-5"><a href="#cb94-5"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb94-6"><a href="#cb94-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb94-7"><a href="#cb94-7"></a>  <span class="at">type =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+      n    f ng nm nscor alpha     power
+    200 0.25  4  4     1  0.05 0.8484718
+
+NOTE: Power analysis for between-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb96"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb96-2"><a href="#cb96-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb96-3"><a href="#cb96-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb96-4"><a href="#cb96-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb96-5"><a href="#cb96-5"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb96-6"><a href="#cb96-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb96-7"><a href="#cb96-7"></a>  <span class="at">type =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+      n    f ng nm nscor alpha     power
+    200 0.25  4  4     1  0.05 0.8536292
+
+NOTE: Power analysis for within-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb98-2"><a href="#cb98-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb98-3"><a href="#cb98-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb98-4"><a href="#cb98-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb98-5"><a href="#cb98-5"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb98-6"><a href="#cb98-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb98-7"><a href="#cb98-7"></a>  <span class="at">type =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+      n    f ng nm nscor alpha     power
+    200 0.25  4  4     1  0.05 0.6756298
+
+NOTE: Power analysis for interaction-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+</div>
 <p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb100"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb100-2"><a href="#cb100-2"></a>  <span class="at">power =</span> power,</span>
+<span id="cb100-3"><a href="#cb100-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb100-4"><a href="#cb100-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb100-5"><a href="#cb100-5"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb100-6"><a href="#cb100-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb100-7"><a href="#cb100-7"></a>  <span class="at">type =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+           n    f ng nm nscor alpha power
+    178.3971 0.25  4  4     1  0.05   0.8
+
+NOTE: Power analysis for between-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb102-2"><a href="#cb102-2"></a>  <span class="at">power =</span> power,</span>
+<span id="cb102-3"><a href="#cb102-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb102-4"><a href="#cb102-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb102-5"><a href="#cb102-5"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb102-6"><a href="#cb102-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb102-7"><a href="#cb102-7"></a>  <span class="at">type =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+           n    f ng nm nscor alpha power
+    175.7692 0.25  4  4     1  0.05   0.8
+
+NOTE: Power analysis for within-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb104-2"><a href="#cb104-2"></a>  <span class="at">power =</span> power,</span>
+<span id="cb104-3"><a href="#cb104-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb104-4"><a href="#cb104-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb104-5"><a href="#cb104-5"></a>  <span class="at">f =</span> effectSize_f,</span>
+<span id="cb104-6"><a href="#cb104-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb104-7"><a href="#cb104-7"></a>  <span class="at">type =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+           n    f ng nm nscor alpha power
+    253.2369 0.25  4  4     1  0.05   0.8
+
+NOTE: Power analysis for interaction-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+</div>
 <p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb106-2"><a href="#cb106-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb106-3"><a href="#cb106-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb106-4"><a href="#cb106-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb106-5"><a href="#cb106-5"></a>  <span class="at">power =</span> power,</span>
+<span id="cb106-6"><a href="#cb106-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb106-7"><a href="#cb106-7"></a>  <span class="at">type =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+      n         f ng nm nscor alpha power
+    200 0.2358259  4  4     1  0.05   0.8
+
+NOTE: Power analysis for between-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb108-2"><a href="#cb108-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb108-3"><a href="#cb108-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb108-4"><a href="#cb108-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb108-5"><a href="#cb108-5"></a>  <span class="at">power =</span> power,</span>
+<span id="cb108-6"><a href="#cb108-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb108-7"><a href="#cb108-7"></a>  <span class="at">type =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+      n         f ng nm nscor alpha power
+    200 0.2342726  4  4     1  0.05   0.8
+
+NOTE: Power analysis for within-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb110"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1"></a><span class="fu">wp.rmanova</span>(</span>
+<span id="cb110-2"><a href="#cb110-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb110-3"><a href="#cb110-3"></a>  <span class="at">ng =</span> numGroups,</span>
+<span id="cb110-4"><a href="#cb110-4"></a>  <span class="at">nm =</span> numMeasurements,</span>
+<span id="cb110-5"><a href="#cb110-5"></a>  <span class="at">power =</span> power,</span>
+<span id="cb110-6"><a href="#cb110-6"></a>  <span class="at">alpha =</span> alpha,</span>
+<span id="cb110-7"><a href="#cb110-7"></a>  <span class="at">type =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Repeated-measures ANOVA analysis
+
+      n         f ng nm nscor alpha power
+    200 0.2817486  4  4     1  0.05   0.8
+
+NOTE: Power analysis for interaction-effect test
+URL: http://psychstat.org/rmanova</code></pre>
+</div>
+</div>
 </section><section id="sec-statisticalPowerCorrelation" class="level4" data-number="7.5.8.7"><h4 data-number="7.5.8.7" class="anchored" data-anchor-id="sec-statisticalPowerCorrelation">
 <span class="header-section-number">7.5.8.7</span> Correlation</h4>
 <p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
-<span id="cb94-2"><a href="#cb94-2"></a>  <span class="at">n =</span> N,</span>
-<span id="cb94-3"><a href="#cb94-3"></a>  <span class="at">r =</span> effectSize_r,</span>
-<span id="cb94-4"><a href="#cb94-4"></a>  <span class="at">sig.level =</span> alpha,</span>
-<span id="cb94-5"><a href="#cb94-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb112"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
+<span id="cb112-2"><a href="#cb112-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb112-3"><a href="#cb112-3"></a>  <span class="at">r =</span> effectSize_r,</span>
+<span id="cb112-4"><a href="#cb112-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb112-5"><a href="#cb112-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
      approximate correlation power calculation (arctangh transformation) 
@@ -1652,11 +1804,11 @@ NOTE: n is number in each group</code></pre>
 </div>
 <p>Solving for sample size per group needed (given effect size, power, and alpha):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb96"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
-<span id="cb96-2"><a href="#cb96-2"></a>  <span class="at">r =</span> effectSize_r,</span>
-<span id="cb96-3"><a href="#cb96-3"></a>  <span class="at">power =</span> power,</span>
-<span id="cb96-4"><a href="#cb96-4"></a>  <span class="at">sig.level =</span> alpha,</span>
-<span id="cb96-5"><a href="#cb96-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb114"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
+<span id="cb114-2"><a href="#cb114-2"></a>  <span class="at">r =</span> effectSize_r,</span>
+<span id="cb114-3"><a href="#cb114-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb114-4"><a href="#cb114-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb114-5"><a href="#cb114-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
      approximate correlation power calculation (arctangh transformation) 
@@ -1670,11 +1822,11 @@ NOTE: n is number in each group</code></pre>
 </div>
 <p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
-<span id="cb98-2"><a href="#cb98-2"></a>  <span class="at">n =</span> N,</span>
-<span id="cb98-3"><a href="#cb98-3"></a>  <span class="at">power =</span> power,</span>
-<span id="cb98-4"><a href="#cb98-4"></a>  <span class="at">sig.level =</span> alpha,</span>
-<span id="cb98-5"><a href="#cb98-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb116"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.r.test</span>(</span>
+<span id="cb116-2"><a href="#cb116-2"></a>  <span class="at">n =</span> N,</span>
+<span id="cb116-3"><a href="#cb116-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb116-4"><a href="#cb116-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb116-5"><a href="#cb116-5"></a>  <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
      approximate correlation power calculation (arctangh transformation) 
@@ -1690,11 +1842,11 @@ NOTE: n is number in each group</code></pre>
 <span class="header-section-number">7.5.8.8</span> Multiple Regression</h4>
 <p>Solving for statistical power achieved (given effect size, sample size per group, and alpha):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb100"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
-<span id="cb100-2"><a href="#cb100-2"></a>  <span class="at">f2 =</span> effectSize_fSquared,</span>
-<span id="cb100-3"><a href="#cb100-3"></a>  <span class="at">sig.level =</span> alpha,</span>
-<span id="cb100-4"><a href="#cb100-4"></a>  <span class="at">u =</span> numPredictors,</span>
-<span id="cb100-5"><a href="#cb100-5"></a>  <span class="at">v =</span> N <span class="sc">-</span> numPredictors <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb118"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
+<span id="cb118-2"><a href="#cb118-2"></a>  <span class="at">f2 =</span> effectSize_fSquared,</span>
+<span id="cb118-3"><a href="#cb118-3"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb118-4"><a href="#cb118-4"></a>  <span class="at">u =</span> numPredictors,</span>
+<span id="cb118-5"><a href="#cb118-5"></a>  <span class="at">v =</span> N <span class="sc">-</span> numPredictors <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
      Multiple regression power calculation 
@@ -1708,13 +1860,13 @@ NOTE: n is number in each group</code></pre>
 </div>
 <p>Solving for sample size per group needed (given effect size, power, and alpha)—<span class="math inline">\(v = N - \text{numberOfPredictors} - 1\)</span>; thus, <span class="math inline">\(N = v + \text{numberOfPredictors} + 1\)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1"></a>multipleRegressionSampleSizeModel <span class="ot">&lt;-</span> pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
-<span id="cb102-2"><a href="#cb102-2"></a>  <span class="at">f2 =</span> effectSize_fSquared,</span>
-<span id="cb102-3"><a href="#cb102-3"></a>  <span class="at">power =</span> power,</span>
-<span id="cb102-4"><a href="#cb102-4"></a>  <span class="at">sig.level =</span> alpha,</span>
-<span id="cb102-5"><a href="#cb102-5"></a>  <span class="at">u =</span> numPredictors)</span>
-<span id="cb102-6"><a href="#cb102-6"></a></span>
-<span id="cb102-7"><a href="#cb102-7"></a>multipleRegressionSampleSizeModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb120"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1"></a>multipleRegressionSampleSizeModel <span class="ot">&lt;-</span> pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
+<span id="cb120-2"><a href="#cb120-2"></a>  <span class="at">f2 =</span> effectSize_fSquared,</span>
+<span id="cb120-3"><a href="#cb120-3"></a>  <span class="at">power =</span> power,</span>
+<span id="cb120-4"><a href="#cb120-4"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb120-5"><a href="#cb120-5"></a>  <span class="at">u =</span> numPredictors)</span>
+<span id="cb120-6"><a href="#cb120-6"></a></span>
+<span id="cb120-7"><a href="#cb120-7"></a>multipleRegressionSampleSizeModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
      Multiple regression power calculation 
@@ -1725,20 +1877,20 @@ NOTE: n is number in each group</code></pre>
       sig.level = 0.05
           power = 0.8</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1"></a>vNeeded <span class="ot">&lt;-</span> multipleRegressionSampleSizeModel<span class="sc">$</span>v</span>
-<span id="cb104-2"><a href="#cb104-2"></a>sampleSizeNeeded <span class="ot">&lt;-</span> vNeeded <span class="sc">+</span> numPredictors <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb104-3"><a href="#cb104-3"></a>sampleSizeNeeded</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb122"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1"></a>vNeeded <span class="ot">&lt;-</span> multipleRegressionSampleSizeModel<span class="sc">$</span>v</span>
+<span id="cb122-2"><a href="#cb122-2"></a>sampleSizeNeeded <span class="ot">&lt;-</span> vNeeded <span class="sc">+</span> numPredictors <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb122-3"><a href="#cb122-3"></a>sampleSizeNeeded</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 219.3947</code></pre>
 </div>
 </div>
 <p>Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
-<span id="cb106-2"><a href="#cb106-2"></a>  <span class="at">power =</span> power,</span>
-<span id="cb106-3"><a href="#cb106-3"></a>  <span class="at">sig.level =</span> alpha,</span>
-<span id="cb106-4"><a href="#cb106-4"></a>  <span class="at">u =</span> numPredictors,</span>
-<span id="cb106-5"><a href="#cb106-5"></a>  <span class="at">v =</span> N <span class="sc">-</span> numPredictors <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1"></a>pwr<span class="sc">::</span><span class="fu">pwr.f2.test</span>(</span>
+<span id="cb124-2"><a href="#cb124-2"></a>  <span class="at">power =</span> power,</span>
+<span id="cb124-3"><a href="#cb124-3"></a>  <span class="at">sig.level =</span> alpha,</span>
+<span id="cb124-4"><a href="#cb124-4"></a>  <span class="at">u =</span> numPredictors,</span>
+<span id="cb124-5"><a href="#cb124-5"></a>  <span class="at">v =</span> N <span class="sc">-</span> numPredictors <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
      Multiple regression power calculation 
