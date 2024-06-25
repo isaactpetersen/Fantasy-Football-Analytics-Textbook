@@ -1273,7 +1273,56 @@ pwr::pwr.anova.test(
   k = numGroups)
 ```
 
+The power analysis code above assumes the groups are of equal size (i.e., a balanced design).
+If the design is unbalanced (i.e., there are different numbers of participants in each group), it may be necessary to conduct a power analysis via a simulation.
+Below is an example of evaluating the statistical power for detecting an effect unbalanced designs via simulation:
+
+```{r}
+nSim <- 1000 # number of simulations
+
+# Function to generate data and perform ANOVA
+simulate_anova <- function(nGroup1, nGroup2, f, alpha) {
+  # Means for each group
+  mean1 <- 0
+  mean2 <- f * sqrt((nGroup1 + nGroup2) / 2)
+  
+  # Generate data
+  group1 <- rnorm(nGroup1, mean = mean1, sd = 1)
+  group2 <- rnorm(nGroup2, mean = mean2, sd = 1)
+  
+  # Combine data
+  data <- data.frame(
+    value = c(group1, group2),
+    group = factor(rep(c("Group1", "Group2"), c(nGroup1, nGroup2)))
+  )
+  
+  # Perform ANOVA
+  aov_result <- aov(value ~ group, data = data)
+  p_value <- summary(aov_result)[[1]][["Pr(>F)"]][1]
+  
+  # Check if p-value is less than alpha
+  return(p_value < alpha)
+}
+
+# Run simulations
+set.seed(52242) # for reproducibility
+powerSimulationOneWayAnova <- replicate(
+  nSim,
+  simulate_anova(
+    nGroup1 = 10,
+    nGroup2 = 25,
+    f = effectSize_f,
+    alpha = alpha))
+
+# Estimate power
+mean(powerSimulationOneWayAnova)
+```
+
 #### Factorial ANOVA {#sec-statisticalPowerFactorialANOVA}
+
+The power analysis code below assumes the groups are of equal size (i.e., a balanced design).
+If the design is unbalanced (i.e., there are different numbers of participants in each group), it may be necessary to conduct a power analysis via a simulation.
+See @sec-statisticalPowerOneWayANOVA for an example power analysis simulation for one-way ANOVA.
 
 Solving for statistical power achieved (given effect size, sample size per group, and alpha):
 
