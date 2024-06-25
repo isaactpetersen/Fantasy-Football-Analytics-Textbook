@@ -7,6 +7,7 @@
 ```{r}
 library("petersenlab")
 library("pwr")
+library("pwrss")
 library("WebPower")
 library("grid")
 library("tidyverse")
@@ -473,6 +474,17 @@ $$
 \end{aligned}
 $$ {#eq-cohensFsquared}
 
+To calculate the effect size of a particular predictor, you can calculate $\Delta f^2$ as in @eq-deltaCohensFsquared:
+
+$$
+\begin{aligned}
+  \Delta f^2 &= \frac{R^2_{\text{model}} - R^2_{\text{reduced}}}{1 - R^2_{\text{model}}} \\
+             &= \frac{\eta^2_{\text{model}} - \eta^2_{\text{reduced}}}{1 - \eta^2_{\text{model}}}
+\end{aligned}
+$$ {#eq-deltaCohensFsquared}
+
+where $R^2_{\text{model}$ is the $R^2$ of the model with the [predictor variable](#sec-correlationalStudy) of interest and R^2_{\text{reduced}} is the $R^2$ of the model without the [predictor variable](#sec-correlationalStudy) of interest.
+
 #### Coefficient of Determination ($R^2$) {#sec-rSquared}
 
 The coefficient of determination ($R^2$) reflects the proportion of variance in the [outcome variable](#sec-correlationalStudy) that is explained by the [predictor variable(s)](#sec-correlationalStudy).
@@ -512,7 +524,7 @@ Partial eta squared ($\eta_p^2$) reflects the proportion of variance in the [dep
 $\eta_p^2$ is commonly used in ANOVA, and is calculated as in @eq-partialEtaSquared:
 
 $$
-\eta_p^2 = = \frac{SS_{\text{effect}}}{SS_{\text{effect}} + SS_{\text{error}}}
+\eta_p^2 = \frac{SS_{\text{effect}}}{SS_{\text{effect}} + SS_{\text{error}}}
 $$ {#eq-partialEtaSquared}
 
 where $SS_{\text{effect}}$ is the sum of squares for the effect of interest and SS_{\text{error}} is the sum of squares for the residual error term.
@@ -1085,6 +1097,7 @@ For free point-and-click software for calculating statistical power, see G\*Powe
 power <- .8
 effectSize_d <- .5
 effectSize_r <- .24
+effectSize_beta <- .24
 effectSize_f <- .25
 effectSize_fSquared <- .06
 effectSize_omega <- .3
@@ -1107,8 +1120,8 @@ Solving for sample size needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.t.test(
-  d = effectSize_d,
   power = power,
+  d = effectSize_d,
   sig.level = alpha,
   type = "one.sample",
   alternative = "two.sided")
@@ -1118,8 +1131,8 @@ Solving for minimum effect size needed to detect (given sample size, power, and 
 
 ```{r}
 pwr::pwr.t.test(
-  n = N,
   power = power,
+  n = N,
   sig.level = alpha,
   type = "one.sample",
   alternative = "two.sided")
@@ -1144,8 +1157,8 @@ Solving for sample size per group needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.t.test(
-  d = effectSize_d,
   power = power,
+  d = effectSize_d,
   sig.level = alpha,
   type = "two.sample",
   alternative = "two.sided")
@@ -1155,8 +1168,8 @@ Solving for minimum effect size needed to detect (given sample size per group, p
 
 ```{r}
 pwr::pwr.t.test(
-  n = N,
   power = power,
+  n = N,
   sig.level = alpha,
   type = "two.sample",
   alternative = "two.sided")
@@ -1179,9 +1192,9 @@ Solving for sample size per group needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.t2n.test(
+  power = power,
   n1 = nGroup1,
   d = effectSize_d,
-  power = power,
   sig.level = alpha,
   alternative = "two.sided")
 ```
@@ -1190,9 +1203,9 @@ Solving for minimum effect size needed to detect (given sample size per group, p
 
 ```{r}
 pwr::pwr.t2n.test(
+  power = power,
   n1 = nGroup1,
   n2 = nGroup2,
-  power = power,
   sig.level = alpha,
   alternative = "two.sided")
 ```
@@ -1214,8 +1227,8 @@ Solving for sample size per group needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.t.test(
-  d = effectSize_d,
   power = power,
+  d = effectSize_d,
   sig.level = alpha,
   type = "paired",
   alternative = "two.sided")
@@ -1225,8 +1238,8 @@ Solving for minimum effect size needed to detect (given sample size per group, p
 
 ```{r}
 pwr::pwr.t.test(
-  n = N,
   power = power,
+  n = N,
   sig.level = alpha,
   type = "paired",
   alternative = "two.sided")
@@ -1248,8 +1261,8 @@ Solving for sample size per group needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.anova.test(
-  f = effectSize_f,
   power = power,
+  f = effectSize_f,
   sig.level = alpha,
   k = numGroups)
 ```
@@ -1258,8 +1271,8 @@ Solving for minimum effect size needed to detect (given sample size per group, p
 
 ```{r}
 pwr::pwr.anova.test(
-  n = N,
   power = power,
+  n = N,
   sig.level = alpha,
   k = numGroups)
 ```
@@ -1289,7 +1302,7 @@ Solving for minimum effect size needed to detect (given sample size per group, p
 Solving for statistical power achieved (given effect size, sample size per group, and alpha):
 
 ```{r}
-wp.rmanova(
+WebPower::wp.rmanova(
   n = N,
   ng = numGroups,
   nm = numMeasurements,
@@ -1297,7 +1310,7 @@ wp.rmanova(
   alpha = alpha,
   type = 0)
 
-wp.rmanova(
+WebPower::wp.rmanova(
   n = N,
   ng = numGroups,
   nm = numMeasurements,
@@ -1305,7 +1318,7 @@ wp.rmanova(
   alpha = alpha,
   type = 1)
 
-wp.rmanova(
+WebPower::wp.rmanova(
   n = N,
   ng = numGroups,
   nm = numMeasurements,
@@ -1317,7 +1330,7 @@ wp.rmanova(
 Solving for sample size per group needed (given effect size, power, and alpha):
 
 ```{r}
-wp.rmanova(
+WebPower::wp.rmanova(
   power = power,
   ng = numGroups,
   nm = numMeasurements,
@@ -1325,7 +1338,7 @@ wp.rmanova(
   alpha = alpha,
   type = 0)
 
-wp.rmanova(
+WebPower::wp.rmanova(
   power = power,
   ng = numGroups,
   nm = numMeasurements,
@@ -1333,7 +1346,7 @@ wp.rmanova(
   alpha = alpha,
   type = 1)
 
-wp.rmanova(
+WebPower::wp.rmanova(
   power = power,
   ng = numGroups,
   nm = numMeasurements,
@@ -1345,27 +1358,27 @@ wp.rmanova(
 Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
 
 ```{r}
-wp.rmanova(
+WebPower::wp.rmanova(
+  power = power,
   n = N,
   ng = numGroups,
   nm = numMeasurements,
-  power = power,
   alpha = alpha,
   type = 0)
 
-wp.rmanova(
+WebPower::wp.rmanova(
+  power = power,
   n = N,
   ng = numGroups,
   nm = numMeasurements,
-  power = power,
   alpha = alpha,
   type = 1)
 
-wp.rmanova(
+WebPower::wp.rmanova(
+  power = power,
   n = N,
   ng = numGroups,
   nm = numMeasurements,
-  power = power,
   alpha = alpha,
   type = 2)
 ```
@@ -1386,8 +1399,8 @@ Solving for sample size per group needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.r.test(
-  r = effectSize_r,
   power = power,
+  r = effectSize_r,
   sig.level = alpha,
   alternative = "two.sided")
 ```
@@ -1396,15 +1409,15 @@ Solving for minimum effect size needed to detect (given sample size per group, p
 
 ```{r}
 pwr::pwr.r.test(
-  n = N,
   power = power,
+  n = N,
   sig.level = alpha,
   alternative = "two.sided")
 ```
 
 #### Multiple Regression {#sec-statisticalPowerMultipleRegression}
 
-Solving for statistical power achieved (given effect size, sample size per group, and alpha):
+Solving for statistical power achieved (given effect size, sample size, and alpha):
 
 ```{r}
 pwr::pwr.f2.test(
@@ -1412,14 +1425,21 @@ pwr::pwr.f2.test(
   sig.level = alpha,
   u = numPredictors,
   v = N - numPredictors - 1)
+
+pwrss::pwrss.t.reg(
+  n = N,
+  beta1 = effectSize_beta,
+  k = numPredictors,
+  alpha = alpha,
+  alternative = "not equal")
 ```
 
-Solving for sample size per group needed (given effect size, power, and alpha)—$v = N - \text{numberOfPredictors} - 1$; thus, $N = v + \text{numberOfPredictors} + 1$:
+Solving for sample size needed (given effect size, power, and alpha)—$v = N - \text{numberOfPredictors} - 1$; thus, $N = v + \text{numberOfPredictors} + 1$:
 
 ```{r}
 multipleRegressionSampleSizeModel <- pwr::pwr.f2.test(
-  f2 = effectSize_fSquared,
   power = power,
+  f2 = effectSize_fSquared,
   sig.level = alpha,
   u = numPredictors)
 
@@ -1428,9 +1448,16 @@ multipleRegressionSampleSizeModel
 vNeeded <- multipleRegressionSampleSizeModel$v
 sampleSizeNeeded <- vNeeded + numPredictors + 1
 sampleSizeNeeded
+
+pwrss::pwrss.t.reg(
+  power = power,
+  beta1 = effectSize_beta,
+  k = numPredictors,
+  alpha = alpha,
+  alternative = "not equal")
 ```
 
-Solving for minimum effect size needed to detect (given sample size per group, power, and alpha):
+Solving for minimum effect size needed to detect (given sample size, power, and alpha):
 
 ```{r}
 pwr::pwr.f2.test(
@@ -1456,8 +1483,8 @@ Solving for sample size needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.chisq.test(
-  w = effectSize_omega,
   power = power,
+  w = effectSize_omega,
   df = numCategories - 1,
   sig.level = alpha)
 ```
@@ -1466,8 +1493,8 @@ Solving for minimum effect size needed to detect (given sample size, power, and 
 
 ```{r}
 pwr::pwr.chisq.test(
-  N = N,
   power = power,
+  N = N,
   df = numCategories - 1,
   sig.level = alpha)
 ```
@@ -1488,8 +1515,8 @@ Solving for sample size needed (given effect size, power, and alpha):
 
 ```{r}
 pwr::pwr.chisq.test(
-  w = effectSize_omega,
   power = power,
+  w = effectSize_omega,
   df = (numRows - 1)*(numColumns - 1),
   sig.level = alpha)
 ```
@@ -1498,8 +1525,8 @@ Solving for minimum effect size needed to detect (given sample size, power, and 
 
 ```{r}
 pwr::pwr.chisq.test(
-  N = N,
   power = power,
+  N = N,
   df = (numRows - 1)*(numColumns - 1),
   sig.level = alpha)
 ```
