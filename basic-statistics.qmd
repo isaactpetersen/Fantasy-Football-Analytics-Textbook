@@ -211,8 +211,67 @@ Nevertheless, to be conservative (i.e., to avoid false positive/Type I errors), 
 For a test of group differences, the *p*-value evaluates the likelihood that you would observe a difference as large or larger than the one you observed between the groups if there were no systematic difference between the groups.
 For instance, when evaluating whether Quarterbacks have <u>longer</u> careers than Running Backs, and you observed a mean difference of 0.03 years, the *p*-value evaluates the likelihood that you would observe a difference as larger or larger than 0.03 years between the groups if Quarterbacks do not differ from Running Backs in terms of the length of their career.
 
-For a test of whether two variables are associated, the *p*-value evaluates the likelihood that you would observe an association as strong or stronger than the one you observed between the groups if there were no association between the variables.
+For a test of whether two variables are associated, the *p*-value evaluates the likelihood that you would observe an association as strong or stronger than the one you observed between the groups if there were no association between the variables, as depicted in @fig-pValues.
 For instance, when evaluating whether number of carries is <u>positively</u> associated with injury likelihood, and you observed a correlation coefficient of $r = .25$ between number of carries and injury likelihood, the *p*-value evaluates the likelihood that you would observe a correlation as strong or stronger than $r = .25$ between the variables if number of carries is not associated with injury likelihood.
+
+```{r}
+#| layout-ncol: 2
+#| fig-cap: "*p*-Values"
+#| fig-subcap: 
+#|   - "What is the probability my data would look like this..."
+#|   - "...if in the population the association was really this?"
+#| label: fig-pValues
+#| code-fold: true
+
+set.seed(52242)
+correlations <- data.frame(criterion = rnorm(100))
+correlations$sample <- complement(correlations$criterion, .95)
+correlations$population <- complement(correlations$criterion, 0)
+
+ggplot2::ggplot(
+  data = correlations,
+  mapping = aes(
+    x = sample,
+    y = criterion
+  )
+) +
+  geom_point() +
+  ggplot2::labs(
+    x = "Predictor Variable",
+    y = "Outcome Variable",
+    title = "What is the probability my data would look like this..."
+  ) +
+  ggplot2::theme_classic(
+    base_size = 16) +
+  ggplot2::theme(
+    legend.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank())
+
+ggplot2::ggplot(
+  data = correlations,
+  mapping = aes(
+    x = population,
+    y = criterion
+  )
+) +
+  geom_point() +
+  ggplot2::labs(
+    x = "Predictor Variable",
+    y = "Outcome Variable",
+    title = "...if in the population, the association was really this:"
+  ) +
+  ggplot2::theme_classic(
+    base_size = 16) +
+  ggplot2::theme(
+    legend.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank())
+```
 
 Using what is called null-hypothesis significance testing (NHST), we consider an effect to be *statistically significant* if the *p*-value is less than some threshold, called the *alpha level*.
 In science, we typically want to be conservative because a false positive (i.e., Type I error) is considered more problematic than a false negative (i.e., Type II error).
