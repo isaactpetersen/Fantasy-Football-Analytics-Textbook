@@ -540,53 +540,60 @@ p\text{-value} = 2 \times Pr(T \ge |t| | H_0)
 <p>For a test of group differences, the <em>p</em>-value evaluates the likelihood that you would observe a difference as large or larger than the one you observed between the groups if there were no systematic difference between the groups. For instance, when evaluating whether Quarterbacks have <u>longer</u> careers than Running Backs, and you observed a mean difference of 0.03 years, the <em>p</em>-value evaluates the likelihood that you would observe a difference as larger or larger than 0.03 years between the groups if Quarterbacks do not differ from Running Backs in terms of the length of their career.</p>
 <p>For a test of whether two variables are associated, the <em>p</em>-value evaluates the likelihood that you would observe an association as strong or stronger than the one you observed between the groups if there were no association between the variables, as depicted in <a href="#fig-pValues" class="quarto-xref">Figure&nbsp;<span>7.1</span></a>. For instance, when evaluating whether number of carries is <u>positively</u> associated with injury likelihood, and you observed a correlation coefficient of <span class="math inline">\(r = .25\)</span> between number of carries and injury likelihood, the <em>p</em>-value evaluates the likelihood that you would observe a correlation as strong or stronger than <span class="math inline">\(r = .25\)</span> between the variables if number of carries is not associated with injury likelihood.</p>
 <details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
-<span id="cb3-2"><a href="#cb3-2"></a>correlations <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">criterion =</span> <span class="fu">rnorm</span>(<span class="dv">100</span>))</span>
-<span id="cb3-3"><a href="#cb3-3"></a>correlations<span class="sc">$</span>sample <span class="ot">&lt;-</span> <span class="fu">complement</span>(correlations<span class="sc">$</span>criterion, .<span class="dv">95</span>)</span>
-<span id="cb3-4"><a href="#cb3-4"></a>correlations<span class="sc">$</span>population <span class="ot">&lt;-</span> <span class="fu">complement</span>(correlations<span class="sc">$</span>criterion, <span class="dv">0</span>)</span>
-<span id="cb3-5"><a href="#cb3-5"></a></span>
-<span id="cb3-6"><a href="#cb3-6"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
-<span id="cb3-7"><a href="#cb3-7"></a>  <span class="at">data =</span> correlations,</span>
-<span id="cb3-8"><a href="#cb3-8"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
-<span id="cb3-9"><a href="#cb3-9"></a>    <span class="at">x =</span> sample,</span>
-<span id="cb3-10"><a href="#cb3-10"></a>    <span class="at">y =</span> criterion</span>
-<span id="cb3-11"><a href="#cb3-11"></a>  )</span>
-<span id="cb3-12"><a href="#cb3-12"></a>) <span class="sc">+</span></span>
-<span id="cb3-13"><a href="#cb3-13"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb3-14"><a href="#cb3-14"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
-<span id="cb3-15"><a href="#cb3-15"></a>    <span class="at">x =</span> <span class="st">"Predictor Variable"</span>,</span>
-<span id="cb3-16"><a href="#cb3-16"></a>    <span class="at">y =</span> <span class="st">"Outcome Variable"</span>,</span>
-<span id="cb3-17"><a href="#cb3-17"></a>    <span class="at">title =</span> <span class="st">"What is the probability my data would look like this..."</span></span>
-<span id="cb3-18"><a href="#cb3-18"></a>  ) <span class="sc">+</span></span>
-<span id="cb3-19"><a href="#cb3-19"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>(</span>
-<span id="cb3-20"><a href="#cb3-20"></a>    <span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
-<span id="cb3-21"><a href="#cb3-21"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
-<span id="cb3-22"><a href="#cb3-22"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-23"><a href="#cb3-23"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-24"><a href="#cb3-24"></a>    <span class="at">axis.ticks.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-25"><a href="#cb3-25"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-26"><a href="#cb3-26"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb3-27"><a href="#cb3-27"></a></span>
-<span id="cb3-28"><a href="#cb3-28"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
-<span id="cb3-29"><a href="#cb3-29"></a>  <span class="at">data =</span> correlations,</span>
-<span id="cb3-30"><a href="#cb3-30"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
-<span id="cb3-31"><a href="#cb3-31"></a>    <span class="at">x =</span> population,</span>
-<span id="cb3-32"><a href="#cb3-32"></a>    <span class="at">y =</span> criterion</span>
-<span id="cb3-33"><a href="#cb3-33"></a>  )</span>
-<span id="cb3-34"><a href="#cb3-34"></a>) <span class="sc">+</span></span>
-<span id="cb3-35"><a href="#cb3-35"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb3-36"><a href="#cb3-36"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
-<span id="cb3-37"><a href="#cb3-37"></a>    <span class="at">x =</span> <span class="st">"Predictor Variable"</span>,</span>
-<span id="cb3-38"><a href="#cb3-38"></a>    <span class="at">y =</span> <span class="st">"Outcome Variable"</span>,</span>
-<span id="cb3-39"><a href="#cb3-39"></a>    <span class="at">title =</span> <span class="st">"...if in the population, the association was really this:"</span></span>
-<span id="cb3-40"><a href="#cb3-40"></a>  ) <span class="sc">+</span></span>
-<span id="cb3-41"><a href="#cb3-41"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>(</span>
-<span id="cb3-42"><a href="#cb3-42"></a>    <span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
-<span id="cb3-43"><a href="#cb3-43"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
-<span id="cb3-44"><a href="#cb3-44"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-45"><a href="#cb3-45"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-46"><a href="#cb3-46"></a>    <span class="at">axis.ticks.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-47"><a href="#cb3-47"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb3-48"><a href="#cb3-48"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2"></a>correlations <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">criterion =</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>))</span>
+<span id="cb3-3"><a href="#cb3-3"></a>correlations<span class="sc">$</span>sample <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a>correlations<span class="sc">$</span>sample[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>] <span class="ot">&lt;-</span> <span class="fu">complement</span>(correlations<span class="sc">$</span>criterion[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>], .<span class="dv">9</span>)</span>
+<span id="cb3-5"><a href="#cb3-5"></a>correlations<span class="sc">$</span>population <span class="ot">&lt;-</span> <span class="fu">complement</span>(correlations<span class="sc">$</span>criterion, <span class="dv">0</span>)</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb3-8"><a href="#cb3-8"></a>  <span class="at">data =</span> correlations,</span>
+<span id="cb3-9"><a href="#cb3-9"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb3-10"><a href="#cb3-10"></a>    <span class="at">x =</span> sample,</span>
+<span id="cb3-11"><a href="#cb3-11"></a>    <span class="at">y =</span> criterion</span>
+<span id="cb3-12"><a href="#cb3-12"></a>  )</span>
+<span id="cb3-13"><a href="#cb3-13"></a>) <span class="sc">+</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb3-16"><a href="#cb3-16"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.5</span>,<span class="dv">3</span>)</span>
+<span id="cb3-17"><a href="#cb3-17"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb3-19"><a href="#cb3-19"></a>    <span class="at">x =</span> <span class="st">"Predictor Variable"</span>,</span>
+<span id="cb3-20"><a href="#cb3-20"></a>    <span class="at">y =</span> <span class="st">"Outcome Variable"</span>,</span>
+<span id="cb3-21"><a href="#cb3-21"></a>    <span class="at">title =</span> <span class="st">"What is the probability my data would look like this..."</span></span>
+<span id="cb3-22"><a href="#cb3-22"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-23"><a href="#cb3-23"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>(</span>
+<span id="cb3-24"><a href="#cb3-24"></a>    <span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
+<span id="cb3-26"><a href="#cb3-26"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-27"><a href="#cb3-27"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-28"><a href="#cb3-28"></a>    <span class="at">axis.ticks.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-29"><a href="#cb3-29"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-30"><a href="#cb3-30"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb3-31"><a href="#cb3-31"></a></span>
+<span id="cb3-32"><a href="#cb3-32"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb3-33"><a href="#cb3-33"></a>  <span class="at">data =</span> correlations,</span>
+<span id="cb3-34"><a href="#cb3-34"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb3-35"><a href="#cb3-35"></a>    <span class="at">x =</span> population,</span>
+<span id="cb3-36"><a href="#cb3-36"></a>    <span class="at">y =</span> criterion</span>
+<span id="cb3-37"><a href="#cb3-37"></a>  )</span>
+<span id="cb3-38"><a href="#cb3-38"></a>) <span class="sc">+</span></span>
+<span id="cb3-39"><a href="#cb3-39"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb3-40"><a href="#cb3-40"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb3-41"><a href="#cb3-41"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>,<span class="fl">2.5</span>)</span>
+<span id="cb3-42"><a href="#cb3-42"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-43"><a href="#cb3-43"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb3-44"><a href="#cb3-44"></a>    <span class="at">x =</span> <span class="st">"Predictor Variable"</span>,</span>
+<span id="cb3-45"><a href="#cb3-45"></a>    <span class="at">y =</span> <span class="st">"Outcome Variable"</span>,</span>
+<span id="cb3-46"><a href="#cb3-46"></a>    <span class="at">title =</span> <span class="st">"...if in the population, the association was really this:"</span></span>
+<span id="cb3-47"><a href="#cb3-47"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-48"><a href="#cb3-48"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_classic</span>(</span>
+<span id="cb3-49"><a href="#cb3-49"></a>    <span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb3-50"><a href="#cb3-50"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
+<span id="cb3-51"><a href="#cb3-51"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-52"><a href="#cb3-52"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-53"><a href="#cb3-53"></a>    <span class="at">axis.ticks.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-54"><a href="#cb3-54"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-55"><a href="#cb3-55"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div id="fig-pValues" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pValues-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
