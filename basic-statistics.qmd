@@ -133,6 +133,139 @@ To estimate multiple indices of center, spread, and shape of the data, you can u
 #      values_from = value)
 ```
 
+## Scores and Scales {#sec-scoresAndScales}
+
+There are many different types of scores and scales.
+This book focuses on [raw scores](#sec-rawScores) and [*z*-scores](#sec-zScores).
+For information on other scores and scales, including percentile ranks, *T*-scores, standard scores, scaled scores, and stanine scores, see here: <https://isaactpetersen.github.io/Principles-Psychological-Assessment/scoresScales.html#scoreTransformation> [@PetersenPrinciplesPsychAssessment].
+
+### Raw Scores {#sec-rawScores}
+
+*Raw scores* are the original data on the original metric.
+Thus, raw scores are considered *unstandardized*.
+For example, raw scores that represent the players' age may range from 20 to 40.
+Raw scores depend on the construct and unit; thus raw scores may not be comparable across variables.
+
+### *z* Scores {#sec-zScores}
+
+*z* scores have a mean of zero and a standard deviation of one.
+*z* scores are frequently used to render scores across variables more comparable.
+Thus, *z* scores are considered a form of a *standardized* score.
+
+*z* scores are calculated using @eq-zScore:
+
+$$
+z = \frac{X - \bar{X}}{\sigma}
+$$ {#eq-zScore}
+
+where $X$ is the observed score, $\bar{X}$ is the mean observed score, and $\sigma$ is the standard deviation of the observed scores.
+
+You can easily convert a variable to a *z* score using the `scale()` function:
+
+```{r}
+#| eval: false
+
+scale(variable)
+```
+
+With a standard normal curve, 68% of scores fall within one standard deviation of the mean.
+95% of scores fall within two standard deviations of the mean.
+99.7% of scores fall within three standard deviations of the mean.
+
+The area under a normal curve within one standard deviation of the mean is calculated below using the `pnorm()` function, which calculates the cumulative density function for a normal curve.
+
+```{r}
+stdDeviations <- 1
+
+pnorm(stdDeviations) - pnorm(stdDeviations * -1)
+```
+
+The area under a normal curve within one standard deviation of the mean is depicted in @fig-zScoreDensity1SD.
+
+```{r}
+#| fig.cap: "Density of Standard Normal Distribution. The blue region represents the area within one standard deviation of the mean."
+#| fig.scap: "Density of Standard Normal Distribution: One Standard Deviation of the Mean."
+#| label: fig-zScoreDensity1SD
+#| code-fold: true
+
+x <- seq(-4, 4, length = 200)
+y <- dnorm(x, mean = 0, sd = 1)
+plot(x, y, type = "l",
+     xlab = "z Score",
+     ylab = "Normal Density")
+
+x <- seq(stdDeviations * -1, stdDeviations, length = 100)
+y <- dnorm(x, mean = 0, sd = 1)
+polygon(c(stdDeviations * -1, x, stdDeviations),
+        c(0, y, 0),
+        col = "blue")
+```
+
+The area under a normal curve within two standard deviations of the mean is calculated below:
+
+```{r}
+stdDeviations <- 2
+
+pnorm(stdDeviations) - pnorm(stdDeviations * -1)
+```
+
+The area under a normal curve within two standard deviations of the mean is depicted in @fig-zScoreDensity2SD.
+
+```{r}
+#| fig.cap: "Density of Standard Normal Distribution. The blue region represents the area within two standard deviations of the mean."
+#| fig.scap: "Density of Standard Normal Distribution: Two Standard Deviations of the Mean."
+#| label: fig-zScoreDensity2SD
+#| code-fold: true
+
+x <- seq(-4, 4, length = 200)
+y <- dnorm(x, mean = 0, sd = 1)
+plot(x, y, type = "l",
+     xlab = "z Score",
+     ylab = "Normal Density")
+
+x <- seq(stdDeviations * -1, stdDeviations, length = 100)
+y <- dnorm(x, mean = 0, sd = 1)
+polygon(c(stdDeviations * -1, x, stdDeviations),
+        c(0, y, 0),
+        col = "blue")
+```
+
+The area under a normal curve within three standard deviations of the mean is calculated below:
+
+```{r}
+stdDeviations <- 3
+
+pnorm(stdDeviations) - pnorm(stdDeviations * -1)
+```
+
+The area under a normal curve within three standard deviations of the mean is depicted in @fig-zScoreDensity3SD.
+
+```{r}
+#| fig.cap: "Density of Standard Normal Distribution. The blue region represents the area within three standard deviations of the mean."
+#| fig.scap: "Density of Standard Normal Distribution: Three Standard Deviations of the Mean."
+#| label: fig-zScoreDensity3SD
+#| code-fold: true
+
+x <- seq(-4, 4, length = 200)
+y <- dnorm(x, mean = 0, sd = 1)
+plot(x, y, type = "l",
+     xlab = "z Score",
+     ylab = "Normal Density")
+
+x <- seq(stdDeviations * -1, stdDeviations, length = 100)
+y <- dnorm(x, mean = 0, sd = 1)
+polygon(c(stdDeviations * -1, x, stdDeviations),
+        c(0, y, 0),
+        col = "blue")
+```
+
+If you want to determine the *z* score associated with a particular percentile in a normal distribution, you can use the `qnorm()` function.
+For instance, the *z* score associated with the 37th percentile is:
+
+```{r}
+qnorm(.37)
+```
+
 ## Inferential Statistics {#sec-inferentialStatistics}
 
 Inferential statistics are used to draw inferences regarding whether there is (a) a difference in level on variable across groups or (b) an association between variables.
@@ -710,78 +843,9 @@ where $X$ is the [predictor variable](#sec-correlationalStudy) and $Y$ is the [o
 Regression, like correlation, examines the association between a [predictor](#sec-correlationalStudy) and [outcome](#sec-correlationalStudy) variable.
 However, unlike correlation, regression allows multiple [predictor variables](#sec-correlationalStudy).
 
-Regression with one predictor takes the form of @eq-regression:
-
-$$
-y = \beta_0 + \beta_1x_1 + \epsilon
-$$ {#eq-regression}
-
-where $y$ is the [outcome variable](#sec-correlationalStudy), $\beta_0$ is the intercept, $\beta_1$ is the slope, $x_1$ is the [predictor variable](#sec-correlationalStudy), and $\epsilon$ is the error term.
-
-```{r}
-#| include: false
-#| eval: false
-
-set.seed(52242)
-regression <- data.frame(outcome = rnorm(40, mean = 5, sd = 2))
-
-regression$predictor <- complement(regression$outcome, .5)
-regression$predictor <- regression$predictor + abs(min(regression$predictor))
-
-lm(
-  outcome ~ predictor,
-  data = regression)
-
-ggplot2::ggplot(
-  data = regression,
-  ggplot2::aes(
-    x = predictor,
-    y = outcome,
-  )
-) +
-  ggplot2::geom_point() +
-  ggplot2::geom_smooth(
-    method = "lm",
-    linewidth = 2,
-    se = FALSE,
-    fullrange = TRUE) +
-  ggplot2::scale_x_continuous(
-    lim = c(0,8),
-    breaks = seq(from = 0, to = 8, by = 2),
-    expand = c(0,0)
-  ) +
-  ggplot2::scale_y_continuous(
-    lim = c(0,8),
-    breaks = seq(from = 0, to = 8, by = 2),
-    expand = c(0,0)
-  ) +
-  ggplot2::labs(
-    x = "Predictor Variable",
-    y = "Outcome Variable",
-    title = "Regression Best-Fit Line"
-  ) +
-  ggplot2::theme_classic(
-    base_size = 16) +
-  ggplot2::theme(legend.title = element_blank())
-
-ggsave("./images/regression.pdf", width = 6, height = 6)
-```
-
+Regression with a single predictor takes the form in @eq-regression.
 A regression line is depicted in @fig-regression.
-
-::: {#fig-regression}
-![](images/regression.png)
-
-A Regression Best-Fit Line.
-:::
-
-Regression with multiple predictors—i.e., multiple regression—takes the form of @eq-multipleRegression:
-
-$$
-y = \beta_0 + \beta_1x_1 + \beta_2x_2 + ... + \beta_px_p + \epsilon
-$$ {#eq-multipleRegression}
-
-where $p$ is the number of [predictor variables](#sec-correlationalStudy).
+Multiple regression (i.e., regression with multiple predictors) takes the form in @eq-multipleRegression.
 
 The null hypothesis is that the the [predictor variable(s)](#sec-correlationalStudy) are not associated with the [outcome variable](#sec-correlationalStudy).
 The alternative hypothesis is that the [predictor variable(s)](#sec-correlationalStudy) are associated with the [outcome variable](#sec-correlationalStudy).
