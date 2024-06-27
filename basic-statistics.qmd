@@ -346,7 +346,7 @@ For instance, when evaluating whether Quarterbacks have <u>longer</u> careers th
 
 ```{r}
 #| layout-ncol: 2
-#| fig-cap: "Interpretation of *p*-Values When Examining The Differences Between Groups."
+#| fig-cap: "Interpretation of *p*-Values When Examining The Differences Between Groups. The vertical black lines reflect the group means."
 #| fig-subcap: 
 #|   - "What is the probability my data would look like this..."
 #|   - "...if in the population, the groups were really this?"
@@ -436,9 +436,12 @@ For instance, when evaluating whether number of carries is <u>positively</u> ass
 #| code-fold: true
 
 set.seed(52242)
+
+observedCorrelation <- 0.9
+
 correlations <- data.frame(criterion = rnorm(2000))
 correlations$sample <- NA
-correlations$sample[1:100] <- complement(correlations$criterion[1:100], .9)
+correlations$sample[1:100] <- complement(correlations$criterion[1:100], observedCorrelation)
 correlations$population <- complement(correlations$criterion, 0)
 
 ggplot2::ggplot(
@@ -449,9 +452,17 @@ ggplot2::ggplot(
   )
 ) +
   geom_point() +
+  geom_smooth(method = "lm") +
   scale_x_continuous(
     limits = c(-3.5,3)
   ) +
+  annotate(
+    x = 0,
+    y = 4,
+    label = paste("italic(r) != ", 0, sep = ""),
+    parse = TRUE,
+    geom = "text",
+    size = 7) + 
   ggplot2::labs(
     x = "Predictor Variable",
     y = "Outcome Variable",
@@ -474,9 +485,19 @@ ggplot2::ggplot(
   )
 ) +
   geom_point() +
+  geom_smooth(
+    method = "lm",
+    se = FALSE) +
   scale_x_continuous(
     limits = c(-2.5,2.5)
   ) +
+  annotate(
+    x = 0,
+    y = 4,
+    label = paste("italic(r) == '", "0.00", "'", sep = ""),
+    parse = TRUE,
+    geom = "text",
+    size = 7) + 
   ggplot2::labs(
     x = "Predictor Variable",
     y = "Outcome Variable",
