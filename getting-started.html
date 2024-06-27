@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.49">
+<meta name="generator" content="quarto-1.5.50">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Isaac T. Petersen">
 <meta name="dcterms.date" content="today">
@@ -422,6 +422,7 @@ window.Quarto = {
   <li><a href="#sec-plotDefOffEPA" id="toc-sec-plotDefOffEPA" class="nav-link" data-scroll-target="#sec-plotDefOffEPA"><span class="header-section-number">3.20.2</span> Defensive and Offensive EPA per Play</a></li>
   </ul>
 </li>
+  <li><a href="#sec-gettingStartedSessionInfo" id="toc-sec-gettingStartedSessionInfo" class="nav-link" data-scroll-target="#sec-gettingStartedSessionInfo"><span class="header-section-number">3.21</span> Session Info</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/getting-started.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -2587,6 +2588,68 @@ Figure&nbsp;3.3: 2023 NFL Offensive and Defensive EPA per Play
 </div>
 </div>
 </div>
+</section></section><section id="sec-gettingStartedSessionInfo" class="level2" data-number="3.21"><h2 data-number="3.21" class="anchored" data-anchor-id="sec-gettingStartedSessionInfo">
+<span class="header-section-number">3.21</span> Session Info</h2>
+<p>At the end of each chapter in which <code>R</code> code is used, I provide the session information, which describes the system and operating system the code was run on and the versions of each package. That way, if you get different results from me, you can see which differ, to help with reproducibility. If you run the (all of) the exact same code as is provided in the text, in the exact same order, with the exact same setup (platform, operating system, package versions, etc.), you should get the exact same answer as is in the text. That is the idea of reproducibility—getting the exact same result with the exact same inputs. Reproducibility is crucial for studies to achieve greater confidence in their findings and to ensure better replicability of findings across studies.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb165"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1"></a>sessionInfo</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>function (package = NULL) 
+{
+    z &lt;- list()
+    z$R.version &lt;- R.Version()
+    z$platform &lt;- z$R.version$platform
+    if (nzchar(.Platform$r_arch)) 
+        z$platform &lt;- paste(z$platform, .Platform$r_arch, sep = "/")
+    sp &lt;- 8 * .Machine$sizeof.pointer
+    if (sp != 64) 
+        z$platform &lt;- paste0(z$platform, " (", sp, "-bit)")
+    z$locale &lt;- Sys.getlocale()
+    z$tzone &lt;- Sys.timezone()
+    z$tzcode_type &lt;- .Call(C_tzcode_type)
+    z$running &lt;- osVersion
+    z$RNGkind &lt;- RNGkind()
+    if (is.null(package)) {
+        package &lt;- grep("^package:", search(), value = TRUE)
+        keep &lt;- vapply(package, function(x) x == "package:base" || 
+            !is.null(attr(as.environment(x), "path")), NA)
+        package &lt;- .rmpkg(package[keep])
+    }
+    pkgDesc &lt;- lapply(package, packageDescription, encoding = NA)
+    if (length(package) == 0) 
+        stop("no valid packages were specified")
+    basePkgs &lt;- sapply(pkgDesc, function(x) !is.null(x$Priority) &amp;&amp; 
+        x$Priority == "base")
+    z$basePkgs &lt;- package[basePkgs]
+    if (any(!basePkgs)) {
+        z$otherPkgs &lt;- pkgDesc[!basePkgs]
+        names(z$otherPkgs) &lt;- package[!basePkgs]
+    }
+    loadedOnly &lt;- loadedNamespaces()
+    loadedOnly &lt;- loadedOnly[!(loadedOnly %in% package)]
+    if (length(loadedOnly)) {
+        names(loadedOnly) &lt;- loadedOnly
+        pkgDesc &lt;- c(pkgDesc, lapply(loadedOnly, packageDescription, 
+            encoding = NA))
+        z$loadedOnly &lt;- pkgDesc[loadedOnly]
+    }
+    z$matprod &lt;- as.character(options("matprod"))
+    es &lt;- extSoftVersion()
+    z$BLAS &lt;- es[["BLAS"]]
+    z$LAPACK &lt;- La_library()
+    z$LA_version &lt;- La_version()
+    l10n &lt;- l10n_info()
+    if (!is.null(l10n[["system.codepage"]])) 
+        z$system.codepage &lt;- l10n[["system.codepage"]]
+    if (!is.null(l10n[["codepage"]])) 
+        z$codepage &lt;- l10n[["codepage"]]
+    class(z) &lt;- "sessionInfo"
+    z
+}
+&lt;bytecode: 0x55a219e18e18&gt;
+&lt;environment: namespace:utils&gt;</code></pre>
+</div>
+</div>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
@@ -2594,7 +2657,7 @@ Figure&nbsp;3.3: 2023 NFL Offensive and Defensive EPA per Play
 Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for windows</em>. Wiley-Blackwell.
 </div>
 </div>
-</section></section></main><!-- /main --><div id="disqus_thread"></div>
+</section></main><!-- /main --><div id="disqus_thread"></div>
 <script>
     /**
     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
