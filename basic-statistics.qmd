@@ -341,19 +341,98 @@ $$ {#eq-pvalueTwoTailedSimple}
 
 Nevertheless, to be conservative (i.e., to avoid false positive/Type I errors), many researchers use two-tailed *p*-values regardless whether their hypothesis is one- or two-tailed.
 
-For a test of group differences, the *p*-value evaluates the likelihood that you would observe a difference as large or larger than the one you observed between the groups if there were no systematic difference between the groups.
+For a test of group differences, the *p*-value evaluates the likelihood that you would observe a difference as large or larger than the one you observed between the groups if there were no systematic difference between the groups, as depicted in @fig-pValuesDifference.
 For instance, when evaluating whether Quarterbacks have <u>longer</u> careers than Running Backs, and you observed a mean difference of 0.03 years, the *p*-value evaluates the likelihood that you would observe a difference as larger or larger than 0.03 years between the groups if Quarterbacks do not differ from Running Backs in terms of the length of their career.
 
-For a test of whether two variables are associated, the *p*-value evaluates the likelihood that you would observe an association as strong or stronger than the one you observed between the groups if there were no association between the variables, as depicted in @fig-pValues.
+```{r}
+#| layout-ncol: 2
+#| fig-cap: "Interpretation of *p*-Values When Examining The Differences Between Groups."
+#| fig-subcap: 
+#|   - "What is the probability my data would look like this..."
+#|   - "...if in the population, the groups were really this?"
+#| label: fig-pValuesDifference
+#| code-fold: true
+
+set.seed(52242)
+
+nObserved <- 1000
+nPopulation <- 1000000
+
+observedGroups <- data.frame(
+  score = c(rnorm(nObserved, mean = 47, sd = 3), rnorm(nObserved, mean = 52, sd = 3)),
+  group = as.factor(c(rep("Group 1", nObserved), rep("Group 2", nObserved)))
+)
+
+populationGroups <- data.frame(
+  score = c(rnorm(nPopulation, mean = 50, sd = 3.03), rnorm(nPopulation, mean = 50, sd = 3)),
+  group = as.factor(c(rep("Group 1", nPopulation), rep("Group 2", nPopulation)))
+)
+
+ggplot2::ggplot(
+  data = observedGroups,
+  mapping = aes(
+    x = score,
+    fill = group,
+    color = group
+  )
+) +
+  geom_density(alpha = 0.5) +
+  scale_color_manual(values = c("red", "blue")) +
+  scale_fill_manual(values = c("red","blue")) +
+  geom_vline(xintercept = mean(observedGroups$score[which(observedGroups$group == "Group 1")])) +
+  geom_vline(xintercept = mean(observedGroups$score[which(observedGroups$group == "Group 2")])) +
+  ggplot2::labs(
+    x = "Score",
+    y = "Frequency",
+    title = "What is the probability my data would look like this..."
+  ) +
+  ggplot2::theme_classic(
+    base_size = 16) +
+  ggplot2::theme(
+    legend.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank())
+
+ggplot2::ggplot(
+  data = populationGroups,
+  mapping = aes(
+    x = score,
+    fill = group,
+    color = group
+  )
+) +
+  geom_density(alpha = 0.5) +
+  scale_color_manual(values = c("red", "blue")) +
+  scale_fill_manual(values = c("red","blue")) +
+  geom_vline(xintercept = mean(populationGroups$score[which(populationGroups$group == "Group 1")])) +
+  geom_vline(xintercept = mean(populationGroups$score[which(populationGroups$group == "Group 2")])) +
+  ggplot2::labs(
+    x = "Score",
+    y = "Frequency",
+    title = "...if in the population, the groups were really this:"
+  ) +
+  ggplot2::theme_classic(
+    base_size = 16) +
+  ggplot2::theme(
+    legend.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank())
+```
+
+For a test of whether two variables are associated, the *p*-value evaluates the likelihood that you would observe an association as strong or stronger than the one you observed between the groups if there were no association between the variables, as depicted in @fig-pValuesAssociation.
 For instance, when evaluating whether number of carries is <u>positively</u> associated with injury likelihood, and you observed a correlation coefficient of $r = .25$ between number of carries and injury likelihood, the *p*-value evaluates the likelihood that you would observe a correlation as strong or stronger than $r = .25$ between the variables if number of carries is not associated with injury likelihood.
 
 ```{r}
 #| layout-ncol: 2
-#| fig-cap: "*p*-Values"
+#| fig-cap: "Interpretation of *p*-Values When Examining The Association Between Variables."
 #| fig-subcap: 
 #|   - "What is the probability my data would look like this..."
-#|   - "...if in the population the association was really this?"
-#| label: fig-pValues
+#|   - "...if in the population, the association was really this?"
+#| label: fig-pValuesAssociation
 #| code-fold: true
 
 set.seed(52242)
