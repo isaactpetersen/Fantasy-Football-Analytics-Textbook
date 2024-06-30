@@ -5,7 +5,7 @@
 ### Load Packages {#sec-causalInferenceLoadPackages}
 
 ```{r}
-
+library("dagitty")
 ```
 
 ## Correlation Does Not Imply Causality {#sec-correlationCausality}
@@ -48,6 +48,34 @@ To meet the third criterion of causality, we need to remove the possibility that
 There are multiple approaches to meeting the third criterion of causality, such as by use of [experiments](#sec-causalInferenceExperiment), [longitudinal designs](#sec-causalInferenceLongitudinal), [control variables](#sec-causalInferenceControlVariables), [within-subject designs](#sec-causalInferenceWithinSubject), and [genetically informed designs](#sec-causalInferenceGeneticallyInformed), as described in @sec-approachesCausalInference.
 
 ## Causal Diagrams {#sec-causalDiagrams}
+
+A key tool when describing a research question or hypothesis is to create a conceptual depiction of the hypothesized causal processes.
+A causal diagram depicts the hypothesized causal processes that link two or more variables.
+A common form of causal diagrams is the directed acyclic graph (DAG).
+DAGs provide a helpful tool to communicate about causal questions and help identify how to avoid bias (i.e., over-estimation) in associations between variables due to confounding (i.e., common causes) [@Digitale2022].
+You can use the `R` package `dagitty` [@Textor2017] or the associated browser-based extension, DAGitty: https://dagitty.net (archived at https://perma.cc/U9BY-VZE2) to create DAGs.
+
+```{r}
+XCausesY <- dagitty::dagitty("dag{
+  X -> Y
+}")
+
+plot(dagitty::graphLayout(XCausesY))
+
+YCausesX <- dagitty::dagitty("dag{
+  Y -> X
+}")
+
+plot(dagitty::graphLayout(YCausesX))
+
+ZCausesXandY <- dagitty::dagitty("dag{
+  Z -> Y
+  Z -> X
+  X <-> Y
+}")
+
+plot(dagitty::graphLayout(ZCausesXandY))
+```
 
 ## Approaches for Causal Inference {#sec-approachesCausalInference}
 
