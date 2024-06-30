@@ -10,7 +10,7 @@
 
 ## Overview of Multiple Regression {#sec-multipleRegressionOverview}
 
-Multiple regression examines the association between multiple predictor variables and one outcome variable.
+Multiple regression examines the association between multiple [predictor variables](#sec-correlationalStudy) and one [outcome variable](#sec-correlationalStudy).
 It allows obtaining a more accurate estimate of the unique contribution of a given predictor, by controlling for other variables ([covariates](#sec-covariates)).
 
 Regression with one predictor takes the form of @eq-regression:
@@ -92,7 +92,7 @@ where $p$ is the number of [predictor variables](#sec-correlationalStudy).
 - $\beta$ (beta) = standardized coefficient: direction and magnitude of the estimate (standard deviation scale)
 - $SE$ = standard error: uncertainty of unstandardized estimate
 
-The unstandardized regression coefficient ($B$) is interpreted such that, for every unit change in the [predictor variable](#sec-correlationalStudy), there is a __ unit change in the outcome variable.
+The unstandardized regression coefficient ($B$) is interpreted such that, for every unit change in the [predictor variable](#sec-correlationalStudy), there is a __ unit change in the [outcome variable](#sec-correlationalStudy).
 For instance, when examining the association between age and fantasy points, if the unstandardized regression coefficient is 2.3, players score on average 2.3 more points for each additional year of age.
 (In reality, we might expect a nonlinear, inverted-U-shaped association between age and fantasy points such that players tend to reach their peak in the middle of their careers.)
 Unstandardized regression coefficients are tied to the metric of the raw data.
@@ -100,7 +100,7 @@ Thus, a large unstandardized regression coefficient for two variables may mean c
 Holding the strength of the association constant, you tend to see larger unstandardized regression coefficients for variables with smaller units and smaller unstandardized regression coefficients for variables with larger units.
 
 Standardized regression coefficients can be obtained by standardizing the variables to [*z*-scores](#sec-zScores) so they all have a mean of zero and standard deviation of one.
-The standardized regression coefficient ($\beta$) is interpreted such that, for every standard deviation change in the [predictor variable](#sec-correlationalStudy), there is a __ standard deviation change in the outcome variable.
+The standardized regression coefficient ($\beta$) is interpreted such that, for every standard deviation change in the [predictor variable](#sec-correlationalStudy), there is a __ standard deviation change in the [outcome variable](#sec-correlationalStudy).
 For instance, when examining the association between age and fantasy points, if the standardized regression coefficient is 0.1, players score on average 0.1 standard deviation more points for each additional standard deviation of their year of age.
 Standardized regression coefficients—though not the case in all instances—tend to fall between [−1, 1].
 Thus, standardized regression coefficients tend to be more comparable across variables and models compared to unstandardized regression coefficients.
@@ -108,19 +108,117 @@ In this way, standardized regression coefficients provide a meaningful index of 
 
 ## Coefficient of Determination ($R^2$) {#sec-multipleRegressionRSquared}
 
+The coefficient of determination ($R^2$) reflects the proportion of variance in the [outcome (dependent) variable](#sec-correlationalStudy) that is explained by the model predictions: $R^2 = \frac{\text{variance explained in }Y}{\text{total variance in }Y}$.
+Various formulas for $R^2$ are in @eq-rSquared.
+Larger $R^2$ values indicate greater accuracy.
+Multiple regression can be conceptualized with overlapping circles (similar to a venn diagram), where the non-overlapping portions of the circles reflect nonshared variance and the overlapping portions of the circles reflect shared variance, as in @fig-regression.
+
 ::: {#fig-regression}
 ![](images/multipleRegressionRSquared.png){width=50%}
 
 Conceptual Depiction of Proportion of Variance Explained ($R^2$) in an Outcome Variable ($Y$) by Multiple Predictors ($X1$ and $X2$) in Multiple Regression. The size of each circle represents the variable's variance. The proportion of variance in $Y$ that is explained by the predictors is depicted by the areas in orange. The dark orange space ($G$) is where multiple predictors explain overlapping variance in the outcome. Overlapping variance that is explained in the outcome ($G$) will not be recovered in the regression coefficients when both predictors are included in the regression model. From @Petersen2024a and @PetersenPrinciplesPsychAssessment.
 :::
 
+One issue with $R^2$ is that it increases as the number of predictors increases, which can lead to [overfitting](#sec-overfitting) if using $R^2$ as an index to compare models for purposes of selecting the "best-fitting" model.
+Consider the following example (adapted from @PetersenPrinciplesPsychAssessment) in which you have one [predictor variable](#sec-correlationalStudy) and one [outcome variable](#sec-correlationalStudy), as shown in @tbl-regression1.
+
+```{r}
+#| echo: false
+library("apa")
+
+regression1 <- data.frame(
+  "y" = c(7, 13, 29, 10),
+  "x1" = c(1, 2, 7, 2))
+
+regression2 <- data.frame(
+  "y" = c(7, 13, 29, 10),
+  "x1" = c(1, 2, 7, 2),
+  "x2" = c(3, 5, 1, 2))
+
+regression1_model <- lm(
+  y ~ x1,
+  data = regression1)
+
+regression1_intercept <- regression1_model$coefficients[[1]]
+regression1_slope <- regression1_model$coefficients[[2]]
+regression1_rsquare <- summary(regression1_model)$r.squared
+
+regression2_model <- lm(y ~ x1 + x2, data = regression2)
+regression2_intercept <- regression2_model$coefficients[[1]]
+regression2_slope1 <- regression2_model$coefficients[[2]]
+regression2_slope2 <- regression2_model$coefficients[[3]]
+regression2_rsquare <- summary(regression2_model)$r.squared
+```
+
+```{r}
+#| label: tbl-regression1
+#| tbl-cap: "Example Data of Predictor (x1) and Outcome (y) Used for Regression Model."
+#| echo: false
+
+kable(regression1,
+      col.names = c("y","x1"),
+      booktabs = TRUE)
+```
+
+Using the data, the best fitting regression model is: $y = `r apa(regression1_intercept, decimals = 2)` + `r apa(regression1_slope, decimals = 2)` \cdot x_1$.
+In this example, the $R^2$ is $`r apa(regression1_rsquare, decimals = 2)`$.
+The equation is not a perfect prediction, but with a single [predictor variable](#sec-correlationalStudy), it captures the majority of the variance in the outcome.
+
+Now consider the following example where you add a second [predictor variable](#sec-correlationalStudy) to the data above, as shown in @tbl-regression2.
+
+```{r}
+#| label: tbl-regression2
+#| tbl-cap: "Example Data of Predictors (x1 and x2) and Outcome (y) Used for Regression Model."
+#| echo: false
+
+kable(regression2,
+      col.names = c("y","x1","x2"),
+      booktabs = TRUE)
+```
+
+With the second [predictor variable](#sec-correlationalStudy), the best fitting regression model is: $y = `r apa(regression2_intercept, decimals = 2)` + `r apa(regression2_slope1, decimals = 2)` \cdot x_1 + `r apa(regression2_slope2, decimals = 2)` \cdot x_2$.
+In this example, the $R^2$ is $`r apa(regression2_rsquare, decimals = 2)`$.
+The equation with the second [predictor variable](#sec-correlationalStudy) provides a perfect prediction of the outcome.
+
+Providing perfect prediction with the right set of [predictor variable](#sec-correlationalStudy)s is the dream of multiple regression.
+So, using multiple regression, we often add [predictor variables](#sec-correlationalStudy) to incrementally improve prediction.
+Knowing how much variance would be accounted for by random chance follows @eq-predictionByChance:
+
+$$
+E(R^2) = \frac{K}{n-1}
+$$ {#eq-predictionByChance}
+
+where $E(R^2)$ is the expected value of $R^2$ (the proportion of variance explained), $K$ is the number of [predictor variables](#sec-correlationalStudy), and $n$ is the sample size.
+The formula demonstrates that the more [predictor variables](#sec-correlationalStudy) in the regression model, the more variance will be accounted for by chance.
+With many [predictor variables](#sec-correlationalStudy) and a small sample, you can account for a large share of the variance merely by chance.
+
+As an example, consider that we have 13 [predictor variables](#sec-correlationalStudy) to predict fantasy performance for 43 players.
+Assume that, with 13 [predictor variables](#sec-correlationalStudy), we explain 38% of the variance ($R^2 = .38; r = .62$).
+We explained a lot of the variance in the outcome, but it is important to consider how much variance could have been explained by random chance: $E(R^2) = \frac{K}{n-1} = \frac{13}{43 - 1} = .31$.\
+We expect to explain 31% of the variance, by chance, in the outcome.
+So, 82% of the variance explained was likely spurious (i.e., $\frac{.31}{.38} = .82$).
+As the sample size increases, the spuriousness decreases.
+
+To account for the number of [predictor variables](#sec-correlationalStudy) in the model, we can use a modified version of $R^2$ called adjusted $R^2$ ($R^2_{adj}$).
+Adjusted $R^2$ ($R^2_{adj}$) accounts for the number of [predictor variables](#sec-correlationalStudy) in the model, based on how much would be expected to be accounted for by chance to penalize [overfitting](#sec-overfitting).
+Adjusted $R^2$ ($R^2_{adj}$) reflects the proportion of variance in the [outcome (dependent) variable](#sec-correlationalStudy) that is explained by the model predictions over and above what would be expected to be accounted for by chance, given the number of [predictor variables](#sec-correlationalStudy) in the model.
+The formula for adjusted $R^2$ ($R^2_{adj}$) is in @eq-adjustedRSquared:
+
+$$
+R^2_{adj} = 1 - (1 - R^2) \frac{n - 1}{n - p - 1}
+$$ {#eq-adjustedRSquared}
+
+where $p$ is the number of [predictor variables](#sec-correlationalStudy) in the model, and $n$ is the sample size.
+
+## Overfitting {#sec-overfitting}
+
 ## Covariates {#sec-covariates}
 
-Covariates are variables that you include in the statistical model to try to control for them so you can better isolate the unique contribution of the predictor variable(s) in relation to the outcome variable.
-Use of covariates examines the association between the predictor variable and the outcome variable when holding people's level constant on the covariates.
-Inclusion of confounds as covariates allows potentially gaining a more accurate estimate of the causal effect of the predictor variable on the outcome variable.
+Covariates are variables that you include in the statistical model to try to control for them so you can better isolate the unique contribution of the [predictor variable](#sec-correlationalStudy)(s) in relation to the [outcome variable](#sec-correlationalStudy).
+Use of covariates examines the association between the predictor variable and the [outcome variable](#sec-correlationalStudy) when holding people's level constant on the covariates.
+Inclusion of confounds as covariates allows potentially gaining a more accurate estimate of the causal effect of the [predictor variable](#sec-correlationalStudy) on the [outcome variable](#sec-correlationalStudy).
 Ideally, you want to include any and all confounds as covariates.
-As described in @sec-correlationCausation, confounds are third variables that influence both the predictor variable and the outcome variable and explain their association.
+As described in @sec-correlationCausation, confounds are third variables that influence both the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) and explain their association.
 Covariates are potentially (but not necessarily) confounds.
 For instance, you might include the player's age as a covariate in a model that examines whether a player's 40-yard dash time at the NFL Combine predicts their fantasy points in their rookie year, but it may not be a confound.
 
