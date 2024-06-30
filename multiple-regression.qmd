@@ -139,15 +139,15 @@ regression1_model <- lm(
   y ~ x1,
   data = regression1)
 
-regression1_intercept <- regression1_model$coefficients[[1]]
-regression1_slope <- regression1_model$coefficients[[2]]
-regression1_rsquare <- summary(regression1_model)$r.squared
+regression1_intercept <- apa(regression1_model$coefficients[[1]], decimals = 2)
+regression1_slope <- apa(regression1_model$coefficients[[2]], decimals = 2)
+regression1_rsquare <- apa(summary(regression1_model)$r.squared, decimals = 2)
 
 regression2_model <- lm(y ~ x1 + x2, data = regression2)
-regression2_intercept <- regression2_model$coefficients[[1]]
-regression2_slope1 <- regression2_model$coefficients[[2]]
-regression2_slope2 <- regression2_model$coefficients[[3]]
-regression2_rsquare <- summary(regression2_model)$r.squared
+regression2_intercept <- apa(regression2_model$coefficients[[1]], decimals = 2)
+regression2_slope1 <- apa(regression2_model$coefficients[[2]], decimals = 2)
+regression2_slope2 <- apa(regression2_model$coefficients[[3]], decimals = 2)
+regression2_rsquare <- apa(summary(regression2_model)$r.squared, decimals = 2)
 ```
 
 ```{r}
@@ -160,8 +160,8 @@ kable(regression1,
       booktabs = TRUE)
 ```
 
-Using the data, the best fitting regression model is: $y = `r apa(regression1_intercept, decimals = 2)` + `r apa(regression1_slope, decimals = 2)` \cdot x_1$.
-In this example, the $R^2$ is $`r apa(regression1_rsquare, decimals = 2)`$.
+Using the data, the best fitting regression model is: $y = `{r} regression1_intercept` + `{r} regression1_slope` \cdot x_1$.
+In this example, the $R^2$ is $`{r} regression1_rsquare`$.
 The equation is not a perfect prediction, but with a single [predictor variable](#sec-correlationalStudy), it captures the majority of the variance in the outcome.
 
 Now consider the following example where you add a second [predictor variable](#sec-correlationalStudy) to the data above, as shown in @tbl-regression2.
@@ -176,8 +176,8 @@ kable(regression2,
       booktabs = TRUE)
 ```
 
-With the second [predictor variable](#sec-correlationalStudy), the best fitting regression model is: $y = `r apa(regression2_intercept, decimals = 2)` + `r apa(regression2_slope1, decimals = 2)` \cdot x_1 + `r apa(regression2_slope2, decimals = 2)` \cdot x_2$.
-In this example, the $R^2$ is $`r apa(regression2_rsquare, decimals = 2)`$.
+With the second [predictor variable](#sec-correlationalStudy), the best fitting regression model is: $y = `{r} regression2_intercept` + `{r} regression2_slope1` \cdot x_1 + `{r} regression2_slope2` \cdot x_2$.
+In this example, the $R^2$ is $`{r} regression2_rsquare`$.
 The equation with the second [predictor variable](#sec-correlationalStudy) provides a perfect prediction of the outcome.
 
 Providing perfect prediction with the right set of [predictor variable](#sec-correlationalStudy)s is the dream of multiple regression.
@@ -194,7 +194,7 @@ With many [predictor variables](#sec-correlationalStudy) and a small sample, you
 
 As an example, consider that we have 13 [predictor variables](#sec-correlationalStudy) to predict fantasy performance for 43 players.
 Assume that, with 13 [predictor variables](#sec-correlationalStudy), we explain 38% of the variance ($R^2 = .38; r = .62$).
-We explained a lot of the variance in the outcome, but it is important to consider how much variance could have been explained by random chance: $E(R^2) = \frac{K}{n-1} = \frac{13}{43 - 1} = .31$.\
+We explained a lot of the variance in the outcome, but it is important to consider how much variance could have been explained by random chance: $E(R^2) = \frac{K}{n-1} = \frac{13}{43 - 1} = .31$.
 We expect to explain 31% of the variance, by chance, in the outcome.
 So, 82% of the variance explained was likely spurious (i.e., $\frac{.31}{.38} = .82$).
 As the sample size increases, the spuriousness decreases.
@@ -212,6 +212,44 @@ where $p$ is the number of [predictor variables](#sec-correlationalStudy) in the
 
 ## Overfitting {#sec-overfitting}
 
+Statistical models applied to big data (e.g., data with many [predictor variables](#sec-correlationalStudy)) can *over-fit* the data, which means that the statistical model accounts for error variance, which will not generalize to future samples.
+So, even though an over-fitting statistical model appears to be accurate because it is accounting for more variance, it is not actually that accurate—it will predict new data less accurately than how accurately it accounts for the data with which the model was built.
+In the case of fantasy football analytics, this is especially relevant because there are hundreds if not thousands of variables we could consider for inclusion and many, many players when considering historical data.
+
+Consider an example where you develop an algorithm to predict players' fantasy performance based on 2023 data using hundreds of [predictor variables](#sec-correlationalStudy).
+To some extent, these [predictor variables](#sec-correlationalStudy) will likely account for true variance (i.e., signal) and error variance (i.e., noise).
+If we were to apply the same algorithm based on the 2023 prediction model to 2024 data, the prediction model would likely predict less accurately than with 2023 data.
+The regression coefficients in the 
+
+In @fig-overfittingModel, the blue line represents the true distribution of the data, and the red line is an over-fitting model:
+
+```{r overfittingModel, echo = FALSE, out.width = "100%", fig.align = "center", fig.height = 8, fig.width = 8, fig.cap = "Over-fitting Model in Red Relative to the True Distribution of the Data in Blue."}
+#| label: fig-overfittingModel
+#| fig-cap: "Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From @PetersenPrinciplesPsychAssessment."
+#| echo: false
+#| fig.height: 8
+#| fig.width: 8
+
+sampleSize <- 200
+quadraticX <- rnorm(sampleSize)
+quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
+quadraticData <- cbind(quadraticX, quadraticY) %>%
+  data.frame %>%
+  arrange(quadraticX)
+
+quadraticModel <- lm(quadraticY ~ quadraticX + I(quadraticX ^ 2), data = quadraticData)
+quadraticNewData <- data.frame(quadraticX = seq(from = min(quadraticData$quadraticX), to = max(quadraticData$quadraticY), length.out = sampleSize))
+quadraticNewData$quadraticY <- predict(quadraticModel, newdata = quadraticNewData)
+
+loessFit <- loess(quadraticY ~ quadraticX, data = quadraticData, span = 0.01, degree = 1)
+loessNewData <- data.frame(quadraticX = seq(from = min(quadraticData$quadraticX), to = max(quadraticData$quadraticY), length.out = sampleSize))
+quadraticNewData$loessY <- predict(loessFit, newdata = quadraticNewData)
+
+plot(x = quadraticData$quadraticX, y = quadraticData$quadraticY, xlab = "", ylab = "")
+lines(quadraticNewData$quadraticY ~ quadraticNewData$quadraticX, lwd = 2, col = "blue")
+lines(quadraticNewData$loessY ~ quadraticNewData$quadraticX, lwd = 2, col = "red")
+```
+
 ## Covariates {#sec-covariates}
 
 Covariates are variables that you include in the statistical model to try to control for them so you can better isolate the unique contribution of the [predictor variable](#sec-correlationalStudy)(s) in relation to the [outcome variable](#sec-correlationalStudy).
@@ -224,11 +262,65 @@ For instance, you might include the player's age as a covariate in a model that 
 
 ## Multicollinearity {#sec-multipleRegressionMulticollinearity}
 
+*Multicollinearity* occurs when two or more [predictor variables](#sec-correlationalStudy) in a regression model are highly correlated.
+The problem of having multiple [predictor variables](#sec-correlationalStudy) that are highly correlated is that it makes it challenging to estimate the regression coefficients accurately.
+
+Multicollinearity in multiple regression is depicted conceptually in @fig-regression.
+
 ::: {#fig-regression}
 ![](images/multipleRegressionMulticollinearity.png){width=50%}
 
 Conceptual Depiction of Multicollinearity in Multiple Regression. From @Petersen2024a and @PetersenPrinciplesPsychAssessment.
 :::
+
+Consider the following example adapted from @PetersenPrinciplesPsychAssessment where you have two [predictor variables](#sec-correlationalStudy) and one [outcome variable](#sec-correlationalStudy), as shown in @tbl-regression3.
+
+```{r}
+#| echo: false
+
+regression3 <- data.frame(
+  "y" = c(9, 11, 17, 3, 21, 13),
+  "x1" = c(2, 3, 4, 1, 5, 3.5),
+  "x2" = c(4, 6, 8, 2, 10, 7))
+```
+
+```{r}
+#| label: tbl-regression3
+#| tbl-cap: "Example Data of Predictors (x1 and x2) and Outcome (y) Used for Regression Model."
+#| echo: false
+
+kable(regression3,
+      col.names = c("y","x1","x2"),
+      booktabs = TRUE)
+```
+
+The second [predictor variable](#sec-correlationalStudy) is not very good—it is exactly twice the value of the first [predictor variable](#sec-correlationalStudy); thus, the two [predictor variables](#sec-correlationalStudy) are perfectly correlated (i.e., $r = 1.0$).
+This means that there are different prediction equation possibilities that are equally good—see Equations in @eq-multicollinearity:
+
+$$
+\begin{aligned}
+  2x_2 &= y \\
+  0x_1 + 2x_2 &= y \\
+  4x_1 &= y \\
+  4x_1 + 0x_2 &= y \\
+  2x_1 + 1x_2 &= y \\
+  5x_1 - 0.5x_2 &= y \\
+  ...
+&= y
+\end{aligned}
+$$ {#eq-multicollinearity}
+
+Then, what are the regression coefficients?
+We do not know what are the correct regression coefficients because each of the possibilities fits the data equally well.
+Thus, when estimating the regression model, we could obtain arbitrary estimates of the regression coefficients with an enormous standard error around each estimate.
+In general, multicollinearity increases the uncertainty (i.e., standard errors and confidence intervals) around the parameter estimates.
+Any [predictor variables](#sec-correlationalStudy) that have a correlation above ~ $r = .30$ with each other could have an impact on the confidence interval of the regression coefficient.
+As the correlations among the [predictor variables](#sec-correlationalStudy) increase, the chance of getting an arbitrary answer increases, sometimes called "bouncing betas."
+So, it is important to examine a correlation matrix of the [predictor variables](#sec-correlationalStudy) before putting them in the same regression model.
+You can also examine indices such as variance inflation factor (VIF).
+
+To address multicollinearity, you can drop a redundant predictor or you can also use principal component analysis or factor analysis of the predictors to reduce the predictors down to a smaller number of meaningful predictors.
+For a meaningful answer in a regression framework that is precise and confident, you need a low level of intercorrelation among predictors, unless you have a very large sample size.
 
 ::: {.content-visible when-format="html"}
 
