@@ -353,6 +353,10 @@ window.Quarto = {
 <span class="header-section-number">10.1</span> Getting Started</h2>
 <section id="sec-causalInferenceLoadPackages" class="level3" data-number="10.1.1"><h3 data-number="10.1.1" class="anchored" data-anchor-id="sec-causalInferenceLoadPackages">
 <span class="header-section-number">10.1.1</span> Load Packages</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"dagitty"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section></section><section id="sec-correlationCausality" class="level2" data-number="10.2"><h2 data-number="10.2" class="anchored" data-anchor-id="sec-correlationCausality">
 <span class="header-section-number">10.2</span> Correlation Does Not Imply Causality</h2>
 <p>As described in <a href="research-methods.html#sec-correlationCausation" class="quarto-xref"><span>Section 6.3.2.1</span></a>, there are several reasons why two variables, <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, might be correlated:</p>
@@ -379,6 +383,44 @@ window.Quarto = {
 <p>The third criterion involves ruling out alternative reasons why the purported cause and effect may be related. As noted in <a href="#sec-correlationCausality" class="quarto-xref"><span>Section 10.2</span></a>, there are four reasons why <span class="math inline">\(X\)</span> may be correlated with <span class="math inline">\(Y\)</span>. If we meet the first criterion of causality, we have removed the possibility that <span class="math inline">\(Y\)</span> causes <span class="math inline">\(X\)</span> (i.e., reverse causality). To meet the third criterion of causality, we need to remove the possibility that the association reflects a third variable (confound) that influences both the cause and effect, and we need to remove the possibility that the association is spurious—the possibility that the association between the purported cause and effect is due to random chance. There are multiple approaches to meeting the third criterion of causality, such as by use of <a href="#sec-causalInferenceExperiment">experiments</a>, <a href="#sec-causalInferenceLongitudinal">longitudinal designs</a>, <a href="#sec-causalInferenceControlVariables">control variables</a>, <a href="#sec-causalInferenceWithinSubject">within-subject designs</a>, and <a href="#sec-causalInferenceGeneticallyInformed">genetically informed designs</a>, as described in <a href="#sec-approachesCausalInference" class="quarto-xref"><span>Section 10.5</span></a>.</p>
 </section><section id="sec-causalDiagrams" class="level2" data-number="10.4"><h2 data-number="10.4" class="anchored" data-anchor-id="sec-causalDiagrams">
 <span class="header-section-number">10.4</span> Causal Diagrams</h2>
+<p>A key tool when describing a research question or hypothesis is to create a conceptual depiction of the hypothesized causal processes. A causal diagram depicts the hypothesized causal processes that link two or more variables. A common form of causal diagrams is the directed acyclic graph (DAG). DAGs provide a helpful tool to communicate about causal questions and help identify how to avoid bias (i.e., over-estimation) in associations between variables due to confounding (i.e., common causes) <span class="citation" data-cites="Digitale2022">(<a href="references.html#ref-Digitale2022" role="doc-biblioref">Digitale et al., 2022</a>)</span>. You can use the <code>R</code> package <code>dagitty</code> <span class="citation" data-cites="Textor2017">(<a href="references.html#ref-Textor2017" role="doc-biblioref">Textor et al., 2017</a>)</span> or the associated browser-based extension, DAGitty: https://dagitty.net (archived at https://perma.cc/U9BY-VZE2) to create DAGs.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>XCausesY <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="st">  X -&gt; Y</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="st">}"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4"></a></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(XCausesY))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="causal-inference_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>YCausesX <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="st">  Y -&gt; X</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="st">}"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(YCausesX))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="causal-inference_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>ZCausesXandY <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="st">  Z -&gt; Y</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="st">  Z -&gt; X</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="st">  X &lt;-&gt; Y</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="st">}"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(ZCausesXandY))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="causal-inference_files/figure-html/unnamed-chunk-2-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section><section id="sec-approachesCausalInference" class="level2" data-number="10.5"><h2 data-number="10.5" class="anchored" data-anchor-id="sec-approachesCausalInference">
 <span class="header-section-number">10.5</span> Approaches for Causal Inference</h2>
 <section id="sec-causalInferenceExperiment" class="level3" data-number="10.5.1"><h3 data-number="10.5.1" class="anchored" data-anchor-id="sec-causalInferenceExperiment">
@@ -398,7 +440,7 @@ window.Quarto = {
 </section></section></section><section id="sec-causalInferenceSessionInfo" class="level2" data-number="10.6"><h2 data-number="10.6" class="anchored" data-anchor-id="sec-causalInferenceSessionInfo">
 <span class="header-section-number">10.6</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
@@ -420,11 +462,15 @@ tzcode source: system (glibc)
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
+other attached packages:
+[1] dagitty_0.3-4
+
 loaded via a namespace (and not attached):
- [1] htmlwidgets_1.6.4 compiler_4.4.1    fastmap_1.2.0     cli_3.6.3        
- [5] tools_4.4.1       htmltools_0.5.8.1 rmarkdown_2.27    knitr_1.47       
- [9] jsonlite_1.8.8    xfun_0.45         digest_0.6.36     rlang_1.1.4      
-[13] evaluate_0.24.0  </code></pre>
+ [1] digest_0.6.36     fastmap_1.2.0     xfun_0.45         knitr_1.47       
+ [5] htmltools_0.5.8.1 rmarkdown_2.27    cli_3.6.3         compiler_4.4.1   
+ [9] boot_1.3-30       tools_4.4.1       curl_5.2.1        evaluate_0.24.0  
+[13] Rcpp_1.0.12       rlang_1.1.4       jsonlite_1.8.8    V8_4.4.2         
+[17] htmlwidgets_1.6.4 MASS_7.3-60.2    </code></pre>
 </div>
 </div>
 
@@ -433,8 +479,14 @@ loaded via a namespace (and not attached):
 <div id="ref-Corston2000" class="csl-entry" role="listitem">
 Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for windows</em>. Wiley-Blackwell.
 </div>
+<div id="ref-Digitale2022" class="csl-entry" role="listitem">
+Digitale, J. C., Martin, J. N., &amp; Glymour, M. M. (2022). Tutorial on directed acyclic graphs. <em>Journal of Clinical Epidemiology</em>, <em>142</em>, 264–267. <a href="https://doi.org/10.1016/j.jclinepi.2021.08.001">https://doi.org/10.1016/j.jclinepi.2021.08.001</a>
+</div>
 <div id="ref-Shadish2002" class="csl-entry" role="listitem">
 Shadish, W. R., Cook, T. D., &amp; Campbell, D. T. (2002). <em>Experimental and quasi-experimental designs for generalized causal inference</em>. Houghton Mifflin.
+</div>
+<div id="ref-Textor2017" class="csl-entry" role="listitem">
+Textor, J., Zander, B. van der, Gilthorpe, M. S., Liśkiewicz, M., &amp; Ellison, G. T. (2017). Robust causal inference using directed acyclic graphs: The <span>R</span> package <span><span>“dagitty”</span></span>. <em>International Journal of Epidemiology</em>, <em>45</em>(6), 1887–1894. <a href="https://doi.org/10.1093/ije/dyw341">https://doi.org/10.1093/ije/dyw341</a>
 </div>
 </div>
 </section></main><!-- /main --><div id="disqus_thread"></div>
