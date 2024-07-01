@@ -546,7 +546,7 @@ Figure&nbsp;10.8: Causal Diagram (Directed Acyclic Graph) Depicting Reverse Caus
 <span id="cb5-3"><a href="#cb5-3"></a>)</span>
 <span id="cb5-4"><a href="#cb5-4"></a></span>
 <span id="cb5-5"><a href="#cb5-5"></a><span class="co">#plot(YCausesX_alt) # this creates the same plot as above</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a>ggdag<span class="sc">::</span><span class="fu">ggdag</span>(YCausesX_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-6"><a href="#cb5-6"></a>ggdag<span class="sc">::</span><span class="fu">ggdag</span>(YCausesX_alt) <span class="sc">+</span> <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-YCausesX2" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-YCausesX2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -586,7 +586,7 @@ Figure&nbsp;10.10: Causal Diagram (Directed Acyclic Graph) Depicting a Third Var
 <span id="cb7-5"><a href="#cb7-5"></a>)</span>
 <span id="cb7-6"><a href="#cb7-6"></a></span>
 <span id="cb7-7"><a href="#cb7-7"></a><span class="co">#plot(ZCausesXandY_alt) # this creates the same plot as above</span></span>
-<span id="cb7-8"><a href="#cb7-8"></a>ggdag<span class="sc">::</span><span class="fu">ggdag</span>(ZCausesXandY_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-8"><a href="#cb7-8"></a>ggdag<span class="sc">::</span><span class="fu">ggdag</span>(ZCausesXandY_alt) <span class="sc">+</span> <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-ZCausesXandY2" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ZCausesXandY2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -608,21 +608,8 @@ Figure&nbsp;10.11: Causal Diagram (Directed Acyclic Graph) Depicting a Third Var
 <span id="cb8-6"><a href="#cb8-6"></a><span class="st">  M1 &lt;-&gt; M2</span></span>
 <span id="cb8-7"><a href="#cb8-7"></a><span class="st">}"</span>)</span>
 <span id="cb8-8"><a href="#cb8-8"></a></span>
-<span id="cb8-9"><a href="#cb8-9"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(mediationDag))</span>
-<span id="cb8-10"><a href="#cb8-10"></a></span>
-<span id="cb8-11"><a href="#cb8-11"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(mediationDag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-stdout">
-<pre><code>X _||_ Y | M1, M2</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
-<span id="cb10-2"><a href="#cb10-2"></a>  mediationDag, </span>
-<span id="cb10-3"><a href="#cb10-3"></a>  <span class="at">exposure =</span> <span class="st">"M1"</span>,</span>
-<span id="cb10-4"><a href="#cb10-4"></a>  <span class="at">outcome =</span> <span class="st">"Y"</span>,</span>
-<span id="cb10-5"><a href="#cb10-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-stdout">
-<pre><code>{ M2 }</code></pre>
-</div>
-<div class="cell-output-display">
+<span id="cb8-9"><a href="#cb8-9"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(mediationDag))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
 <div id="fig-dag" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="causal-inference_files/figure-html/fig-dag-1.png" class="img-fluid figure-img" width="672">
@@ -633,20 +620,34 @@ Figure&nbsp;10.12: Causal Diagram (Directed Acyclic Graph).
 </div>
 </div>
 </div>
-<p>In this example, <code>X</code> influences <code>Y</code> via <code>M1</code> and <code>M2</code> (i.e., multiple mediatirs), and <code>M1</code> is also associated with <code>M2</code>. The <code><a href="https://rdrr.io/pkg/dagitty/man/impliedConditionalIndependencies.html">dagitty::impliedConditionalIndependencies()</a></code> function identifies variables in the causal diagram that are conditionally independent (i.e., uncorrelated) after controlling for other variables in the model. For this causal diagram, <code>X</code> is conditionally independent with <code>Y</code> because <code>X</code> is independent with <code>Y</code> when controlling for <code>M1</code> and <code>M2</code>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(mediationDag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>X _||_ Y | M1, M2</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
+<span id="cb11-2"><a href="#cb11-2"></a>  mediationDag, </span>
+<span id="cb11-3"><a href="#cb11-3"></a>  <span class="at">exposure =</span> <span class="st">"M1"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="at">outcome =</span> <span class="st">"Y"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>{ M2 }</code></pre>
+</div>
+</div>
+<p>In this example, <code>X</code> influences <code>Y</code> via <code>M1</code> and <code>M2</code> (i.e., multiple mediators), and <code>M1</code> is also associated with <code>M2</code>. The <code><a href="https://rdrr.io/pkg/dagitty/man/impliedConditionalIndependencies.html">dagitty::impliedConditionalIndependencies()</a></code> function identifies variables in the causal diagram that are conditionally independent (i.e., uncorrelated) after controlling for other variables in the model. For this causal diagram, <code>X</code> is conditionally independent with <code>Y</code> because <code>X</code> is independent with <code>Y</code> when controlling for <code>M1</code> and <code>M2</code>.</p>
 <p>The <code><a href="https://rdrr.io/pkg/dagitty/man/adjustmentSets.html">dagitty::adjustmentSets()</a></code> function identifies variables that would be necessary to control for (i.e., to include as covariates) in order to identify an unbiased estimate of the association (whether the total effect, i.e., <code>effect = "total"</code>; or the direct effect, i.e., <code>effect = "direct"</code>) between two variables (<code>exposure</code> and <code>outcome</code>). In this case, to identify the unbiased association between <code>M1</code> and <code>Y</code>, it is important to control for <code>M2.</code></p>
 <p>Here is an alternative way of specifying the same diagram (more similar to <code>lavaan</code> syntax):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>mediationDag_alt <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">dagify</span>(</span>
-<span id="cb12-2"><a href="#cb12-2"></a>  M1 <span class="sc">~</span> X,</span>
-<span id="cb12-3"><a href="#cb12-3"></a>  M2 <span class="sc">~</span> X,</span>
-<span id="cb12-4"><a href="#cb12-4"></a>  Y <span class="sc">~</span> M1,</span>
-<span id="cb12-5"><a href="#cb12-5"></a>  Y <span class="sc">~</span> M2,</span>
-<span id="cb12-6"><a href="#cb12-6"></a>  M1 <span class="sc">~</span><span class="er">~</span> M2</span>
-<span id="cb12-7"><a href="#cb12-7"></a>)</span>
-<span id="cb12-8"><a href="#cb12-8"></a></span>
-<span id="cb12-9"><a href="#cb12-9"></a><span class="co">#plot(mediationDag_alt) # this creates the same plot as above</span></span>
-<span id="cb12-10"><a href="#cb12-10"></a>ggdag<span class="sc">::</span><span class="fu">ggdag</span>(mediationDag_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>mediationDag_alt <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">dagify</span>(</span>
+<span id="cb13-2"><a href="#cb13-2"></a>  M1 <span class="sc">~</span> X,</span>
+<span id="cb13-3"><a href="#cb13-3"></a>  M2 <span class="sc">~</span> X,</span>
+<span id="cb13-4"><a href="#cb13-4"></a>  Y <span class="sc">~</span> M1,</span>
+<span id="cb13-5"><a href="#cb13-5"></a>  Y <span class="sc">~</span> M2,</span>
+<span id="cb13-6"><a href="#cb13-6"></a>  M1 <span class="sc">~</span><span class="er">~</span> M2</span>
+<span id="cb13-7"><a href="#cb13-7"></a>)</span>
+<span id="cb13-8"><a href="#cb13-8"></a></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="co">#plot(mediationDag_alt) # this creates the same plot as above</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a>ggdag<span class="sc">::</span><span class="fu">ggdag</span>(mediationDag_alt) <span class="sc">+</span> <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-dag2" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-dag2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -661,7 +662,7 @@ Figure&nbsp;10.13: Causal Diagram (Directed Acyclic Graph).
 </section><section id="sec-causalInferenceSessionInfo" class="level2" data-number="10.6"><h2 data-number="10.6" class="anchored" data-anchor-id="sec-causalInferenceSessionInfo">
 <span class="header-section-number">10.6</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
