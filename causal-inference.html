@@ -354,7 +354,8 @@ window.Quarto = {
 <section id="sec-causalInferenceLoadPackages" class="level3" data-number="10.1.1"><h3 data-number="10.1.1" class="anchored" data-anchor-id="sec-causalInferenceLoadPackages">
 <span class="header-section-number">10.1.1</span> Load Packages</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"dagitty"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"dagitty"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"ggdag"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-correlationCausality" class="level2" data-number="10.2"><h2 data-number="10.2" class="anchored" data-anchor-id="sec-correlationCausality">
@@ -389,7 +390,9 @@ window.Quarto = {
 <span id="cb2-2"><a href="#cb2-2"></a><span class="st">  X -&gt; Y</span></span>
 <span id="cb2-3"><a href="#cb2-3"></a><span class="st">}"</span>)</span>
 <span id="cb2-4"><a href="#cb2-4"></a></span>
-<span id="cb2-5"><a href="#cb2-5"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(XCausesY))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(XCausesY))</span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(XCausesY)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-XCausesY" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-XCausesY-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -402,11 +405,22 @@ Figure&nbsp;10.1: Causal Diagram (Directed Acyclic Graph) Depicting <em>X</em> C
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>YCausesX <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="st">  Y -&gt; X</span></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="st">}"</span>)</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>XCausesY_alt <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">dagify</span>(</span>
+<span id="cb3-2"><a href="#cb3-2"></a>  Y <span class="sc">~</span> X</span>
+<span id="cb3-3"><a href="#cb3-3"></a>)</span>
 <span id="cb3-4"><a href="#cb3-4"></a></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(YCausesX))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="fu">plot</span>(XCausesY_alt)</span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="fu">ggdag</span>(XCausesY_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>YCausesX <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="st">  Y -&gt; X</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="st">}"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(YCausesX))</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(YCausesX)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-YCausesX" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-YCausesX-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -419,13 +433,22 @@ Figure&nbsp;10.2: Causal Diagram (Directed Acyclic Graph) Depicting Reverse Caus
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>ZCausesXandY <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="st">  Z -&gt; Y</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="st">  Z -&gt; X</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="st">  X &lt;-&gt; Y</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a><span class="st">}"</span>)</span>
-<span id="cb4-6"><a href="#cb4-6"></a></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(ZCausesXandY))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>YCausesX_alt <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">dagify</span>(</span>
+<span id="cb5-2"><a href="#cb5-2"></a>  X <span class="sc">~</span> Y</span>
+<span id="cb5-3"><a href="#cb5-3"></a>)</span>
+<span id="cb5-4"><a href="#cb5-4"></a></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="fu">plot</span>(YCausesX_alt)</span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="fu">ggdag</span>(YCausesX_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>ZCausesXandY <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="st">  Z -&gt; Y</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="st">  Z -&gt; X</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="st">  X &lt;-&gt; Y</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="st">}"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(ZCausesXandY))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-ZCausesXandY" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ZCausesXandY-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -437,6 +460,71 @@ Figure&nbsp;10.3: Causal Diagram (Directed Acyclic Graph) Depicting a Third Vari
 </div>
 </div>
 </div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>ZCausesXandY_alt <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">dagify</span>(</span>
+<span id="cb7-2"><a href="#cb7-2"></a>  X <span class="sc">~</span> Z,</span>
+<span id="cb7-3"><a href="#cb7-3"></a>  Y <span class="sc">~</span> Z,</span>
+<span id="cb7-4"><a href="#cb7-4"></a>  X <span class="sc">~</span><span class="er">~</span> Y</span>
+<span id="cb7-5"><a href="#cb7-5"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6"></a></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="fu">plot</span>(ZCausesXandY_alt)</span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="fu">ggdag</span>(ZCausesXandY_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Consider another example in <a href="#fig-dag" class="quarto-xref">Figure&nbsp;<span>10.4</span></a>:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>mediationDag <span class="ot">&lt;-</span> dagitty<span class="sc">::</span><span class="fu">dagitty</span>(<span class="st">"dag{</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="st">  X -&gt; M</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="st">  X -&gt; A</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="st">  M -&gt; Y</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="st">  Y -&gt; Z</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="st">  A &lt;-&gt; M</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="st">}"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8"></a></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="fu">plot</span>(dagitty<span class="sc">::</span><span class="fu">graphLayout</span>(mediationDag))</span>
+<span id="cb8-10"><a href="#cb8-10"></a></span>
+<span id="cb8-11"><a href="#cb8-11"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(mediationDag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>A _||_ Y | M
+A _||_ Z | Y
+A _||_ Z | M
+M _||_ Z | Y
+X _||_ Y | M
+X _||_ Z | Y
+X _||_ Z | M</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
+<span id="cb10-2"><a href="#cb10-2"></a>  mediationDag, </span>
+<span id="cb10-3"><a href="#cb10-3"></a>  <span class="at">exposure =</span> <span class="st">"X"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4"></a>  <span class="at">outcome =</span> <span class="st">"Z"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code><a href="https://rdrr.io/r/base/Paren.html"> {}</a></code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-dag" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="causal-inference_files/figure-html/fig-dag-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.4: Causal Diagram (Directed Acyclic Graph).
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>mediationDag_alt <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">dagify</span>(</span>
+<span id="cb12-2"><a href="#cb12-2"></a>  M <span class="sc">~</span> X,</span>
+<span id="cb12-3"><a href="#cb12-3"></a>  Y <span class="sc">~</span> M,</span>
+<span id="cb12-4"><a href="#cb12-4"></a>  Z <span class="sc">~</span> Y,</span>
+<span id="cb12-5"><a href="#cb12-5"></a>  A <span class="sc">~</span> X,</span>
+<span id="cb12-6"><a href="#cb12-6"></a>  A <span class="sc">~</span><span class="er">~</span> M</span>
+<span id="cb12-7"><a href="#cb12-7"></a>)</span>
+<span id="cb12-8"><a href="#cb12-8"></a></span>
+<span id="cb12-9"><a href="#cb12-9"></a><span class="fu">plot</span>(mediationDag_alt)</span>
+<span id="cb12-10"><a href="#cb12-10"></a><span class="fu">ggdag</span>(mediationDag_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section><section id="sec-approachesCausalInference" class="level2" data-number="10.5"><h2 data-number="10.5" class="anchored" data-anchor-id="sec-approachesCausalInference">
 <span class="header-section-number">10.5</span> Approaches for Causal Inference</h2>
 <section id="sec-causalInferenceExperiment" class="level3" data-number="10.5.1"><h3 data-number="10.5.1" class="anchored" data-anchor-id="sec-causalInferenceExperiment">
@@ -447,40 +535,40 @@ Figure&nbsp;10.3: Causal Diagram (Directed Acyclic Graph) Depicting a Third Vari
 <p>Although <a href="#sec-causalInferenceExperiment">experimental designs</a> provide the strongest tests of causality, manytimes they are impossible, unethical, or impractical to conduct. For instance, it would likely not be practical to randomly assign National Football League (NFL) players to either consume or not consume sports drink before their games. Players have their pregame rituals and routines and many would likely not agree to participate in such a study. Thus, we often rely on quasi-experimental designs such as natural experiments and <a href="research-methods.html#sec-correlationalStudy">observational/correlational designs</a>.</p>
 <section id="sec-causalInferenceLongitudinal" class="level4" data-number="10.5.2.1"><h4 data-number="10.5.2.1" class="anchored" data-anchor-id="sec-causalInferenceLongitudinal">
 <span class="header-section-number">10.5.2.1</span> Longitudinal Designs</h4>
-<p>Research designs can be compared in terms of their <a href="research-methods.html#sec-internalValidity">internal validity</a>—the extent to which we can be confident about causal inferences. A cross-sectional association is depicted in <a href="#fig-crossSectional" class="quarto-xref">Figure&nbsp;<span>10.4</span></a>:</p>
+<p>Research designs can be compared in terms of their <a href="research-methods.html#sec-internalValidity">internal validity</a>—the extent to which we can be confident about causal inferences. A cross-sectional association is depicted in <a href="#fig-crossSectional" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>:</p>
 <div id="fig-crossSectional" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-crossSectional-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/Longitudinal-01.png" class="img-fluid figure-img" style="width:20.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-crossSectional-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.4: Cross-Sectional Association. T1 = Timepoint 1. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
+Figure&nbsp;10.5: Cross-Sectional Association. T1 = Timepoint 1. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
 </figcaption></figure>
 </div>
-<p>For instance, we might observe that sports drink consumptions is concurrently associated with better player performance. Among <a href="research-methods.html#sec-correlationalStudy">observational/correlational research designs</a>, <a href="research-methods.html#sec-crossSectional">cross-sectional designs</a> tend to have the weakest <a href="research-methods.html#sec-internalValidity">internal validity</a>. For the reasons described in <a href="#sec-correlationCausality" class="quarto-xref"><span>Section 10.2</span></a>, if we observe a cross-sectional association between <span class="math inline">\(X\)</span> (e.g., sports drink consumption) and <span class="math inline">\(Y\)</span> (e.g., player performance), we have little confidence that <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>. As a result, <a href="research-methods.html#sec-longitudinal">longitudinal designs</a> can be valuable for more closely approximating causality if an <a href="#sec-causalInferenceExperiment">experimental designs</a> is not possible. Consider a lagged association that might be observed in a <a href="research-methods.html#sec-longitudinal">longitudinal design</a>, as in <a href="#fig-laggedAssociation" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>, which is a slightly better approach than relying on cross-sectional associations:</p>
+<p>For instance, we might observe that sports drink consumptions is concurrently associated with better player performance. Among <a href="research-methods.html#sec-correlationalStudy">observational/correlational research designs</a>, <a href="research-methods.html#sec-crossSectional">cross-sectional designs</a> tend to have the weakest <a href="research-methods.html#sec-internalValidity">internal validity</a>. For the reasons described in <a href="#sec-correlationCausality" class="quarto-xref"><span>Section 10.2</span></a>, if we observe a cross-sectional association between <span class="math inline">\(X\)</span> (e.g., sports drink consumption) and <span class="math inline">\(Y\)</span> (e.g., player performance), we have little confidence that <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>. As a result, <a href="research-methods.html#sec-longitudinal">longitudinal designs</a> can be valuable for more closely approximating causality if an <a href="#sec-causalInferenceExperiment">experimental designs</a> is not possible. Consider a lagged association that might be observed in a <a href="research-methods.html#sec-longitudinal">longitudinal design</a>, as in <a href="#fig-laggedAssociation" class="quarto-xref">Figure&nbsp;<span>10.6</span></a>, which is a slightly better approach than relying on cross-sectional associations:</p>
 <div id="fig-laggedAssociation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-laggedAssociation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/Longitudinal-02.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laggedAssociation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.5: Lagged Association. T1 = Timepoint 1. T2 = Timepoint 2. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
+Figure&nbsp;10.6: Lagged Association. T1 = Timepoint 1. T2 = Timepoint 2. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
 </figcaption></figure>
 </div>
-<p>For instance, we might observe that sports drink performance <em>before</em> the game is associated with better player performance <em>during</em> the game. A lagged association has somewhat better <a href="research-methods.html#sec-internalValidity">internal validity</a> than a cross-sectional association because we have greater evidence of temporal precedence—that the influence of the predictor <em>precedes</em> the outcome because the predictor was assessed before the outcome and it shows a predictive association. However, part of the association between the predictor with later levels of the outcome could be due to prior levels of the outcome that are stable across time. That is, it could be that better player performance leads players to consume more sports drink and that player performance is relatively stable across time. In such a case, it may be observed that sports drink consumption predicts later player performance even though player performance influences sports drink consumption, rather than the other way around Thus, consider an even stronger alternative—a lagged association that controls for prior levels of the outcome, as in <a href="#fig-laggedAssociationControlPriorLevels" class="quarto-xref">Figure&nbsp;<span>10.6</span></a>:</p>
+<p>For instance, we might observe that sports drink performance <em>before</em> the game is associated with better player performance <em>during</em> the game. A lagged association has somewhat better <a href="research-methods.html#sec-internalValidity">internal validity</a> than a cross-sectional association because we have greater evidence of temporal precedence—that the influence of the predictor <em>precedes</em> the outcome because the predictor was assessed before the outcome and it shows a predictive association. However, part of the association between the predictor with later levels of the outcome could be due to prior levels of the outcome that are stable across time. That is, it could be that better player performance leads players to consume more sports drink and that player performance is relatively stable across time. In such a case, it may be observed that sports drink consumption predicts later player performance even though player performance influences sports drink consumption, rather than the other way around Thus, consider an even stronger alternative—a lagged association that controls for prior levels of the outcome, as in <a href="#fig-laggedAssociationControlPriorLevels" class="quarto-xref">Figure&nbsp;<span>10.7</span></a>:</p>
 <div id="fig-laggedAssociationControlPriorLevels" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-laggedAssociationControlPriorLevels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/Longitudinal-03.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laggedAssociationControlPriorLevels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.6: Lagged Association, Controlling for Prior Levels of the Outcome. T1 = Timepoint 1. T2 = Timepoint 2. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
+Figure&nbsp;10.7: Lagged Association, Controlling for Prior Levels of the Outcome. T1 = Timepoint 1. T2 = Timepoint 2. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
 </figcaption></figure>
 </div>
-<p>For instance, we might observe that sports drink performance <em>before</em> the game is associated with better player performance <em>during</em> the game, while controlling for prior player performance. A lagged association controlling for prior levels of the outcome has better <a href="research-methods.html#sec-internalValidity">internal validity</a> than a lagged association that does not control for prior levels of the outcome. A lagged association that controls for prior levels further reduces the likelihood that the association owes to the reverse direction of effect, because earlier levels of the outcome are controlled. However, consider an even stronger alternative—lagged associations that control for prior levels of the outcome and that simultaneously test each direction of effect, as depicted in <a href="#fig-crossLaggedPanelModel" class="quarto-xref">Figure&nbsp;<span>10.7</span></a>:</p>
+<p>For instance, we might observe that sports drink performance <em>before</em> the game is associated with better player performance <em>during</em> the game, while controlling for prior player performance. A lagged association controlling for prior levels of the outcome has better <a href="research-methods.html#sec-internalValidity">internal validity</a> than a lagged association that does not control for prior levels of the outcome. A lagged association that controls for prior levels further reduces the likelihood that the association owes to the reverse direction of effect, because earlier levels of the outcome are controlled. However, consider an even stronger alternative—lagged associations that control for prior levels of the outcome and that simultaneously test each direction of effect, as depicted in <a href="#fig-crossLaggedPanelModel" class="quarto-xref">Figure&nbsp;<span>10.8</span></a>:</p>
 <div id="fig-crossLaggedPanelModel" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-crossLaggedPanelModel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/Longitudinal-04.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-crossLaggedPanelModel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.7: Lagged Association, Controlling for Prior Levels of the Outcome, Simultaneously Testing Both Directions Of Effect. T1 = Timepoint 1. T2 = Timepoint 2. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
+Figure&nbsp;10.8: Lagged Association, Controlling for Prior Levels of the Outcome, Simultaneously Testing Both Directions Of Effect. T1 = Timepoint 1. T2 = Timepoint 2. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
 </figcaption></figure>
 </div>
 <p>Lagged associations that control for prior levels of the outcome and that simultaneously test each direction of effect provide the strongest <a href="research-methods.html#sec-internalValidity">internal validity</a> among <a href="research-methods.html#sec-correlationalStudy">observational/correlational designs</a>. Such a design can help better clarify which among the variables is the chicken and the egg—which variable is more likely to be the cause and which is more likely to be the effect. If there are bidirectional effects, such a design can also help clarify the magnitude of each direction of effect. For instance, we can simultaneously evaluate the extent to which sports drink predicts later player performance (while controlling for prior performance) and the reverse—player performance predicting later sports drink consumption (while contorlling for prior sports drink consumption).</p>
@@ -490,13 +578,13 @@ Figure&nbsp;10.7: Lagged Association, Controlling for Prior Levels of the Outcom
 </section><section id="sec-causalInferenceControlVariables" class="level4" data-number="10.5.2.3"><h4 data-number="10.5.2.3" class="anchored" data-anchor-id="sec-causalInferenceControlVariables">
 <span class="header-section-number">10.5.2.3</span> Control Variables</h4>
 <p>One of the plausible alternatives to the inference that <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span> is that there are third variable confounds that influence both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, thus explaining why <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are associated, as depicted in <a href="research-methods.html#fig-correlationAndCausation3" class="quarto-xref">Figure&nbsp;<span>6.3</span></a> and <a href="#fig-ZCausesXandY" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>. Thus, another approach that can help increase <a href="research-methods.html#sec-internalValidity">internal validity</a> is to include plausible confounds as control variables. For instance, if a third variable such as education level might be a confound that influences both sports drink consumption and player performance, you could include education level as a <a href="multiple-regression.html#sec-covariates">covariate</a> in the model. Inclusion of a <a href="multiple-regression.html#sec-covariates">covariate</a> attempts to control for the variable by examining the association between the <a href="research-methods.html#sec-correlationalStudy">predictor variable</a> and the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> while holding the <a href="multiple-regression.html#sec-covariates">covariate</a> variables constant. For instance, such a model would examine whether, when accounting for education level, there is an association between sports drink consumption and player performance.</p>
-<p>Failure to control for important third variables can lead to erroneous conclusions, as evidenced by the association depicted in <a href="#fig-simpsonParadox" class="quarto-xref">Figure&nbsp;<span>10.8</span></a>. In the example, if we did not control for gender, we would infer that there is a positive association between dosage and recovery probability. However, when we examine each men and women separately, we learn that the association between dosage and recovery probability is actually negative within each gender group. Thus, in this case, failure to control for gender would lead to false inferences about the association between dosage and recovery probability.</p>
+<p>Failure to control for important third variables can lead to erroneous conclusions, as evidenced by the association depicted in <a href="#fig-simpsonParadox" class="quarto-xref">Figure&nbsp;<span>10.9</span></a>. In the example, if we did not control for gender, we would infer that there is a positive association between dosage and recovery probability. However, when we examine each men and women separately, we learn that the association between dosage and recovery probability is actually negative within each gender group. Thus, in this case, failure to control for gender would lead to false inferences about the association between dosage and recovery probability.</p>
 <div id="fig-simpsonParadox" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-simpsonParadox-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/simpsonParadox.png" class="img-fluid figure-img" style="width:200.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-simpsonParadox-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.8: Example Where Failing to Control for a Variable (In This Case, Gender) Would Lead to False Inferences. In this example, the association between dosage and recovery probability is positive at the population level, but the association is negative among men and women separately. (Figure reprinted from <span class="citation" data-cites="Kievit2013">Kievit et al. (<a href="references.html#ref-Kievit2013" role="doc-biblioref">2013</a>)</span>, Figure 1, p.&nbsp;2. Kievit, R., Frankenhuis, W., Waldorp, L., &amp; Borsboom, D. (2013). Simpson’s paradox in psychological science: a practical guide. <em>Frontiers in Psychology</em>, <em>4</em>(513). <a href="https://doi.org/10.3389/fpsyg.2013.00513">https://doi.org/10.3389/fpsyg.2013.00513</a>)
+Figure&nbsp;10.9: Example Where Failing to Control for a Variable (In This Case, Gender) Would Lead to False Inferences. In this example, the association between dosage and recovery probability is positive at the population level, but the association is negative among men and women separately. (Figure reprinted from <span class="citation" data-cites="Kievit2013">Kievit et al. (<a href="references.html#ref-Kievit2013" role="doc-biblioref">2013</a>)</span>, Figure 1, p.&nbsp;2. Kievit, R., Frankenhuis, W., Waldorp, L., &amp; Borsboom, D. (2013). Simpson’s paradox in psychological science: a practical guide. <em>Frontiers in Psychology</em>, <em>4</em>(513). <a href="https://doi.org/10.3389/fpsyg.2013.00513">https://doi.org/10.3389/fpsyg.2013.00513</a>)
 </figcaption></figure>
 </div>
 </section><section id="sec-causalInferenceGeneticallyInformed" class="level4" data-number="10.5.2.4"><h4 data-number="10.5.2.4" class="anchored" data-anchor-id="sec-causalInferenceGeneticallyInformed">
@@ -562,7 +650,7 @@ Table&nbsp;10.1: Average Percent of Autosomal DNA Shared by Pairs of Relatives b
 </section></section></section><section id="sec-causalInferenceSessionInfo" class="level2" data-number="10.6"><h2 data-number="10.6" class="anchored" data-anchor-id="sec-causalInferenceSessionInfo">
 <span class="header-section-number">10.6</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
@@ -585,14 +673,20 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] dagitty_0.3-4
+[1] ggdag_0.2.12  dagitty_0.3-4
 
 loaded via a namespace (and not attached):
- [1] digest_0.6.36     fastmap_1.2.0     xfun_0.45         knitr_1.47       
- [5] htmltools_0.5.8.1 rmarkdown_2.27    cli_3.6.3         compiler_4.4.1   
- [9] boot_1.3-30       tools_4.4.1       curl_5.2.1        evaluate_0.24.0  
-[13] Rcpp_1.0.12       yaml_2.3.8        rlang_1.1.4       jsonlite_1.8.8   
-[17] V8_4.4.2          htmlwidgets_1.6.4 MASS_7.3-60.2    </code></pre>
+ [1] gtable_0.3.5      jsonlite_1.8.8    dplyr_1.1.4       compiler_4.4.1   
+ [5] tidyselect_1.2.1  Rcpp_1.0.12       tidyr_1.3.1       scales_1.3.0     
+ [9] boot_1.3-30       yaml_2.3.8        fastmap_1.2.0     ggplot2_3.5.1    
+[13] R6_2.5.1          generics_0.1.3    curl_5.2.1        igraph_2.0.3     
+[17] knitr_1.47        htmlwidgets_1.6.4 MASS_7.3-60.2     tibble_3.2.1     
+[21] munsell_0.5.1     pillar_1.9.0      rlang_1.1.4       utf8_1.2.4       
+[25] V8_4.4.2          xfun_0.45         cli_3.6.3         magrittr_2.0.3   
+[29] digest_0.6.36     grid_4.4.1        lifecycle_1.0.4   vctrs_0.6.5      
+[33] evaluate_0.24.0   glue_1.7.0        tidygraph_1.3.1   fansi_1.0.6      
+[37] colorspace_2.1-0  rmarkdown_2.27    purrr_1.0.2       tools_4.4.1      
+[41] pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
 </div>
 </div>
 
