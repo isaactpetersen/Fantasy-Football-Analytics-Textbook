@@ -6,6 +6,7 @@
 
 ```{r}
 library("dagitty")
+library("ggdag")
 ```
 
 ## Correlation Does Not Imply Causality {#sec-correlationCausality}
@@ -65,6 +66,19 @@ XCausesY <- dagitty::dagitty("dag{
 }")
 
 plot(dagitty::graphLayout(XCausesY))
+
+dagitty::impliedConditionalIndependencies(XCausesY)
+```
+
+```{r}
+#| eval: false
+
+XCausesY_alt <- ggdag::dagify(
+  Y ~ X
+)
+
+plot(XCausesY_alt)
+ggdag(XCausesY_alt)
 ```
 
 ```{r}
@@ -76,6 +90,19 @@ YCausesX <- dagitty::dagitty("dag{
 }")
 
 plot(dagitty::graphLayout(YCausesX))
+
+dagitty::impliedConditionalIndependencies(YCausesX)
+```
+
+```{r}
+#| eval: false
+
+YCausesX_alt <- ggdag::dagify(
+  X ~ Y
+)
+
+plot(YCausesX_alt)
+ggdag(YCausesX_alt)
 ```
 
 ```{r}
@@ -89,6 +116,59 @@ ZCausesXandY <- dagitty::dagitty("dag{
 }")
 
 plot(dagitty::graphLayout(ZCausesXandY))
+```
+
+```{r}
+#| eval: false
+
+ZCausesXandY_alt <- ggdag::dagify(
+  X ~ Z,
+  Y ~ Z,
+  X ~~ Y
+)
+
+plot(ZCausesXandY_alt)
+ggdag(ZCausesXandY_alt)
+```
+
+Consider another example in @fig-dag:
+
+```{r}
+#| label: fig-dag
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph)."
+
+mediationDag <- dagitty::dagitty("dag{
+  X -> M
+  X -> A
+  M -> Y
+  Y -> Z
+  A <-> M
+}")
+
+plot(dagitty::graphLayout(mediationDag))
+
+dagitty::impliedConditionalIndependencies(mediationDag)
+
+dagitty::adjustmentSets(
+  mediationDag, 
+  exposure = "X",
+  outcome = "Z",
+  effect = "total")
+```
+
+```{r}
+#| eval: false
+
+mediationDag_alt <- ggdag::dagify(
+  M ~ X,
+  Y ~ M,
+  Z ~ Y,
+  A ~ X,
+  A ~~ M
+)
+
+plot(mediationDag_alt)
+ggdag(mediationDag_alt)
 ```
 
 ## Approaches for Causal Inference {#sec-approachesCausalInference}
