@@ -325,7 +325,7 @@ ggdag::ggdag(mediationDag_alt) + theme_dag_blank()
 
 ### Confounding {#sec-causalDiagramConfounding}
 
-Confounding occurs when two variables have a spurious or noncausal association because both variables are caused by another variable(s) [@DOnofrio2020].
+Confounding occurs when two variables—that are both caused by another variable(s)—have a spurious or noncausal association [@DOnofrio2020].
 That is, two variables share a common cause, and the common cause leads the variables to be associated even though they are not causally related.
 The common cause—i.e., the variable that influences the two variables—is known as a confound (or confounder).
 An example of confounding is depicted in @fig-counfounding:
@@ -335,9 +335,9 @@ An example of confounding is depicted in @fig-counfounding:
 #| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Confounding."
 
 confounding <- ggdag::confounder_triangle(
-  x = "Training Intensity",
-  y = "Fantasy Points",
-  z = "Age") 
+  x = "Player Endurance",
+  y = "Field Goals Made",
+  z = "Stadium Altitude") 
 
 confounding %>%
   ggdag(
@@ -462,7 +462,7 @@ dagitty::adjustmentSets(
 #### M-Bias {#sec-causalDiagramMBias}
 
 Collider bias may also occur when neither variable of interest is a direct cause of the collider [@Lederer2019].
-M-bias is a form of collider bias that occurs when two variables that are not causally related, `A` and `B`, both influence a collider, `C`, and each (`A` and `B`) also influences a separate variable—e.g., `A` influences `D` and `B` influences `E`.
+M-bias is a form of collider bias that occurs when two variables that are not causally related, `A` and `B`, both influence a collider, `M`, and each (`A` and `B`) also influences a separate variable—e.g., `A` influences `X` and `B` influences `Y`.
 M-bias is so-named from the M-shape of the DAG.
 An example of M-bias is depicted in @fig-mBias:
 
@@ -494,10 +494,27 @@ dagitty::adjustmentSets(
   effect = "total")
 ```
 
-### Butterfly Bias {#sec-colliderBias}
+#### Butterfly Bias {#sec-colliderBias}
 
-Butterfly bias occurs when both confounding and M-bias are present.
+Butterfly bias occurs when both confounding and [M-bias](#sec-causalDiagramMBias) are present.
 Butterfly bias (aka bow-tie bias) is so-named from the butterfly shape of the DAG.
+In butterfly bias, the following criteria are met:
+
+- Two variables (`A` and `B`) influence a collider (`M`).
+- The collider influences two variables, `X` and `Y`.
+- `A` also influences `X`.
+- `B` also influences `Y`.
+- `A` and `B` are not causally related
+- `X` and `Y` are not causally related
+
+Or, more succinctly:
+
+- `A` influences `M` and `X`.
+- `B` influences `M` and `Y`.
+- `M` influences `X` and `Y`.
+
+In butterfly bias, the collider (`M`) is also a confound.
+That is, a variable is both influenced by two variables and influences two variables.
 An example of butterfly bias is depicted in @fig-butterflyBias:
 
 ```{r}
