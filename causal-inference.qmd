@@ -368,7 +368,7 @@ That is, to obtain an unbiased estimate of the causal association between player
 
 Mediation can be divided into two types: [full](#sec-causalDiagramMediationFull) and [partial](#sec-causalDiagramMediationPartial).
 In [full mediation](#sec-causalDiagramMediationFull), the mediator(s) fully account for the effect of the predictor variable on the outcome variable.
-In [partial mediation](#sec-causalDiagramMediationPartial), the mediator(s) partially but do not fully account for the the effect of the [predictor variable](#sec-correlationalStudy) on the [outcome variable](#sec-correlationalStudy).
+In [partial mediation](#sec-causalDiagramMediationPartial), the mediator(s) partially but do not fully account for the effect of the [predictor variable](#sec-correlationalStudy) on the [outcome variable](#sec-correlationalStudy).
 
 #### Full Mediation {#sec-causalDiagramMediationFull}
 
@@ -444,13 +444,11 @@ partial_mediation %>%
 dagitty::impliedConditionalIndependencies(partial_mediation)
 ```
 
-```{r}
-dagitty::adjustmentSets(
-  partial_mediation, 
-  exposure = "x",
-  outcome = "y",
-  effect = "total")
-```
+In partial mediation, `X` and `Y` are *not* conditionally independent when accounting for the mediator (`Z`).
+In this case, coaching quality (`X`) and fantasy points (`Y`) are still associated when accounting for player preparation (`M`).
+In other words, in this example, player preparation is a mechanism that partially but does not fully account for the effect of coaching quality on players' fantasy points.
+That is, there are likely other mechanisms, in addition to player preparation, that collectively account for the effect of coaching quality on fantasy points.
+For instance, coaching quality could also influence player fantasy points through better play-calling.
 
 ```{r}
 dagitty::adjustmentSets(
@@ -459,6 +457,19 @@ dagitty::adjustmentSets(
   outcome = "y",
   effect = "direct")
 ```
+
+As with [full mediation](#sec-causalDiagramMediationPartial), the output indicates that, to obtain an unbiased estimate of the *direct* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., the effect that is *not* mediated through intermediate processes), it is necessary to control for player preparation (`M`).
+
+```{r}
+dagitty::adjustmentSets(
+  partial_mediation, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+```
+
+However, as with [full mediation](#sec-causalDiagramMediationPartial), to obtain an unbiased estimate of the *total* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important *not* to control for player preparation (`M`).
+When the goal is to understand the (total) causal effect of coaching quality (`X`) and fantasy points (`Y`), controlling for a mediator (player preparation; `M`) would be inappropriate because doing so would remove the causal effect, thus artificially reducing the estimate of the association between coaching quality (`X`) and fantasy points (`Y`) [@Lederer2019].
 
 ### Collider Bias {#sec-colliderBias}
 
