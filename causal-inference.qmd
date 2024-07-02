@@ -147,7 +147,8 @@ Thus, in this case, failure to control for gender would lead to false inferences
 Example Where Failing to Control for a Variable (In This Case, Gender) Would Lead to False Inferences. In this example, the association between dosage and recovery probability is positive at the population level, but the association is negative among men and women separately. (Figure reprinted from @Kievit2013, Figure 1, p. 2. Kievit, R., Frankenhuis, W., Waldorp, L., & Borsboom, D. (2013). Simpson's paradox in psychological science: a practical guide. *Frontiers in Psychology*, *4*(513). [https://doi.org/10.3389/fpsyg.2013.00513](https://doi.org/10.3389/fpsyg.2013.00513))
 :::
 
-Which variables are important to be included as control variables can be informed by the use of [causal diagrams](#sec-causalDiagrams), as described in @sec-causalDiagrams.
+However, it can be problematic to control for variables indiscriminantly.
+The use of [causal diagrams](#sec-causalDiagrams) can inform which variables are important to be included as control variables, and—just as important—which variables not to include as control variables, as described in @sec-causalDiagrams.
 
 #### Genetically Informed Designs {#sec-causalInferenceGeneticallyInformed}
 
@@ -365,6 +366,12 @@ That is, to obtain an unbiased estimate of the causal association between player
 
 ### Mediation {#sec-causalDiagramMediation}
 
+Mediation can be divided into two types: [full](#sec-causalDiagramMediationFull) and [partial](#sec-causalDiagramMediationPartial).
+In [full mediation](#sec-causalDiagramMediationFull), the mediator(s) fully account for the effect of the predictor variable on the outcome variable.
+In [partial mediation](#sec-causalDiagramMediationPartial), the mediator(s) partially but do not fully account for the the effect of the [predictor variable](#sec-correlationalStudy) on the [outcome variable](#sec-correlationalStudy).
+
+#### Full Mediation {#sec-causalDiagramMediationFull}
+
 An example of full mediation is depicted in @fig-fullMediation:
 
 ```{r}
@@ -412,6 +419,8 @@ dagitty::adjustmentSets(
 However, to obtain an unbiased estimate of the *total* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important *not* to control for player preparation (`M`).
 When the goal is to understand the (total) causal effect of coaching quality (`X`) and fantasy points (`Y`), controlling for the mediator (player preparation; `M`) would be inappropriate because doing so would remove the causal effect, thus artificially reducing the estimate of the association between coaching quality (`X`) and fantasy points (`Y`) [@Lederer2019].
 
+#### Partial Mediation {#sec-causalDiagramMediationPartial}
+
 An example of partial mediation is depicted in @fig-partialMediation:
 
 ```{r}
@@ -433,13 +442,17 @@ partial_mediation %>%
 
 ```{r}
 dagitty::impliedConditionalIndependencies(partial_mediation)
+```
 
+```{r}
 dagitty::adjustmentSets(
   partial_mediation, 
   exposure = "x",
   outcome = "y",
   effect = "total")
+```
 
+```{r}
 dagitty::adjustmentSets(
   partial_mediation, 
   exposure = "x",
