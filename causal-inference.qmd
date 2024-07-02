@@ -348,13 +348,20 @@ confounding %>%
 
 ```{r}
 dagitty::impliedConditionalIndependencies(confounding)
+```
 
+The output indicates that player endurance (`X`) and field goals made (`Y`) are conditionally independent when accounting for stadium altitude (`Z`).
+
+```{r}
 dagitty::adjustmentSets(
   confounding, 
   exposure = "x",
   outcome = "y",
   effect = "total")
 ```
+
+The output indicates that, to obtain an unbiased estimate of the causal association between two variables, it is necessary to control for any confounding [@Lederer2019].
+That is, to obtain an unbiased estimate of the causal association between player endurance (`X`) and field goals made (`Y`), it is necessary to control for stadium altitude (`Z`).
 
 ### Mediation {#sec-causalDiagramMediation}
 
@@ -378,19 +385,32 @@ full_mediation %>%
 
 ```{r}
 dagitty::impliedConditionalIndependencies(full_mediation)
+```
 
-dagitty::adjustmentSets(
-  full_mediation, 
-  exposure = "x",
-  outcome = "y",
-  effect = "total")
+In full mediation, `X` and `Y` are conditionally independent when accounting for the mediator (`Z`).
+In this case, coaching quality (`X`) and fantasy points (`Y`) are conditionally independent when accounting for player preparation (`M`).
+In other words, in this example, player preparation is the mechanism that fully (i.e., 100%) accounts for the effect of coaching quality on players' fantasy points.
 
+```{r}
 dagitty::adjustmentSets(
   full_mediation, 
   exposure = "x",
   outcome = "y",
   effect = "direct")
 ```
+
+The output indicates that, to obtain an unbiased estimate of the *direct* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., the effect that is *not* mediated through intermediate processes), it is necessary to control for player preparation (`M`).
+
+```{r}
+dagitty::adjustmentSets(
+  full_mediation, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+```
+
+However, to obtain an unbiased estimate of the *total* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important *not* to control for player preparation (`M`).
+When the goal is to understand the (total) causal effect of coaching quality (`X`) and fantasy points (`Y`), controlling for the mediator (player preparation; `M`) would be inappropriate because doing so would remove the causal effect, thus artificially reducing the estimate of the association between coaching quality (`X`) and fantasy points (`Y`) [@Lederer2019].
 
 An example of partial mediation is depicted in @fig-partialMediation:
 
