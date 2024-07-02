@@ -178,6 +178,8 @@ Genetically informed designs are not as relevant for fantasy football analytics,
 
 ## Causal Diagrams {#sec-causalDiagrams}
 
+### Overview {#sec-causalDiagramsOverview}
+
 A key tool when describing a research question or hypothesis is to create a conceptual depiction of the hypothesized causal processes.
 A causal diagram depicts the hypothesized causal processes that link two or more variables.
 A common form of causal diagrams is the directed acyclic graph (DAG).
@@ -326,24 +328,205 @@ ggdag::ggdag(mediationDag_alt) + theme_dag_blank()
 Confounding occurs when two variables have a spurious or noncausal association because both variables are caused by another variable(s) [@DOnofrio2020].
 That is, two variables share a common cause, and the common cause leads the variables to be associated even though they are not causally related.
 The common cause—i.e., the variable that influences the two variables—is known as a confound (or confounder).
+An example of confounding is depicted in @fig-counfounding:
+
+```{r}
+#| label: fig-counfounding
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Confounding."
+
+confounding <- ggdag::confounder_triangle(
+  x = "Training Intensity",
+  y = "Fantasy Points",
+  z = "Age") 
+
+confounding %>%
+  ggdag(
+    text = FALSE,
+    use_labels = "label") + 
+  theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(confounding)
+
+dagitty::adjustmentSets(
+  confounding, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+```
 
 ### Mediation {#sec-causalDiagramMediation}
+
+An example of full mediation is depicted in @fig-fullMediation:
+
+```{r}
+#| label: fig-fullMediation
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Full Mediation."
+
+full_mediation <- ggdag::mediation_triangle(
+  x = "Coaching Quality",
+  y = "Fantasy Points",
+  m = "Player Preparation")
+
+full_mediation %>%
+  ggdag(
+    text = FALSE,
+    use_labels = "label") + 
+  theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(full_mediation)
+
+dagitty::adjustmentSets(
+  full_mediation, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+
+dagitty::adjustmentSets(
+  full_mediation, 
+  exposure = "x",
+  outcome = "y",
+  effect = "direct")
+```
+
+An example of partial mediation is depicted in @fig-partialMediation:
+
+```{r}
+#| label: fig-partialMediation
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Partial Mediation."
+
+partial_mediation <- ggdag::mediation_triangle(
+  x = "Coaching Quality",
+  y = "Fantasy Points",
+  m = "Player Preparation",
+  x_y_associated = TRUE)
+
+partial_mediation %>%
+  ggdag(
+    text = FALSE,
+    use_labels = "label") + 
+  theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(partial_mediation)
+
+dagitty::adjustmentSets(
+  partial_mediation, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+
+dagitty::adjustmentSets(
+  partial_mediation, 
+  exposure = "x",
+  outcome = "y",
+  effect = "direct")
+```
 
 ### Collider Bias {#sec-colliderBias}
 
 Collider bias occurs when two variables influence a third variable, the collider [@DOnofrio2020].
 That is, a collider is a variable that is caused by two other variables.
+An example of collider bias is depicted in @fig-colliderBias:
+
+```{r}
+#| label: fig-colliderBias
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Collider Bias."
+
+colliderBias <- ggdag::collider_triangle(
+  x = "Diet",
+  y = "Coaching Strategy",
+  m = "Injury Status")
+
+colliderBias %>% 
+  ggdag(
+    text = FALSE,
+    use_labels = "label") + 
+  theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(colliderBias)
+
+dagitty::adjustmentSets(
+  colliderBias, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+```
 
 #### M-Bias {#sec-causalDiagramMBias}
 
 Collider bias may also occur when neither variable of interest is a direct cause of the collider [@Lederer2019].
 M-bias is a form of collider bias that occurs when two variables that are not causally related, `A` and `B`, both influence a collider, `C`, and each (`A` and `B`) also influences a separate variable—e.g., `A` influences `D` and `B` influences `E`.
 M-bias is so-named from the M-shape of the DAG.
+An example of M-bias is depicted in @fig-mBias:
+
+```{r}
+#| label: fig-mBias
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of M-Bias."
+
+mBias <- ggdag::m_bias(
+  x = "Number of Media Articles About the Team",
+  y = "Fantasy Points",
+  a = "Team Record",
+  b = "Coaching Quality",
+  m = "Fan Attendance at Game")
+
+mBias %>% 
+  ggdag(
+    text = FALSE,
+    use_labels = "label") + 
+  theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(mBias)
+
+dagitty::adjustmentSets(
+  mBias, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+```
 
 ### Butterfly Bias {#sec-colliderBias}
 
 Butterfly bias occurs when both confounding and M-bias are present.
-Butterfly bias is so-named from the butterfly shape of the DAG.
+Butterfly bias (aka bow-tie bias) is so-named from the butterfly shape of the DAG.
+An example of butterfly bias is depicted in @fig-butterflyBias:
+
+```{r}
+#| label: fig-butterflyBias
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Butterfly Bias."
+
+butterflyBias <- ggdag::butterfly_bias(
+  x = "Off-field Behavior",
+  y = "Fantasy Points",
+  a = "Diet",
+  b = "Coaching Quality",
+  m = "Mental Health")
+
+butterflyBias %>% 
+  ggdag(
+    text = FALSE,
+    use_labels = "label") + 
+  theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(butterflyBias)
+
+dagitty::adjustmentSets(
+  butterflyBias, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+```
 
 ### Selection Bias {#sec-causalDiagramSelectionBias}
 
