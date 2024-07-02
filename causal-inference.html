@@ -707,6 +707,9 @@ Figure&nbsp;10.14: Causal Diagram (Directed Acyclic Graph) Example of Confoundin
 </details><div class="cell-output cell-output-stdout">
 <pre><code>x _||_ y | z</code></pre>
 </div>
+</div>
+<p>The output indicates that player endurance (<code>X</code>) and field goals made (<code>Y</code>) are conditionally independent when accounting for stadium altitude (<code>Z</code>).</p>
+<div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
 <span id="cb17-2"><a href="#cb17-2"></a>  confounding, </span>
 <span id="cb17-3"><a href="#cb17-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
@@ -716,6 +719,7 @@ Figure&nbsp;10.14: Causal Diagram (Directed Acyclic Graph) Example of Confoundin
 <pre><code>{ z }</code></pre>
 </div>
 </div>
+<p>The output indicates that, to obtain an unbiased estimate of the causal association between two variables, it is necessary to control for any confounding <span class="citation" data-cites="Lederer2019">(<a href="references.html#ref-Lederer2019" role="doc-biblioref">Lederer et al., 2019</a>)</span>. That is, to obtain an unbiased estimate of the causal association between player endurance (<code>X</code>) and field goals made (<code>Y</code>), it is necessary to control for stadium altitude (<code>Z</code>).</p>
 </section><section id="sec-causalDiagramMediation" class="level3" data-number="10.5.3"><h3 data-number="10.5.3" class="anchored" data-anchor-id="sec-causalDiagramMediation">
 <span class="header-section-number">10.5.3</span> Mediation</h3>
 <p>An example of full mediation is depicted in <a href="#fig-fullMediation" class="quarto-xref">Figure&nbsp;<span>10.15</span></a>:</p>
@@ -746,23 +750,30 @@ Figure&nbsp;10.15: Causal Diagram (Directed Acyclic Graph) Example of Full Media
 </details><div class="cell-output cell-output-stdout">
 <pre><code>x _||_ y | m</code></pre>
 </div>
+</div>
+<p>In full mediation, <code>X</code> and <code>Y</code> are conditionally independent when accounting for the mediator (<code>Z</code>). In this case, coaching quality (<code>X</code>) and fantasy points (<code>Y</code>) are conditionally independent when accounting for player preparation (<code>M</code>). In other words, in this example, player preparation is the mechanism that fully (i.e., 100%) accounts for the effect of coaching quality on players’ fantasy points.</p>
+<div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
 <span id="cb22-2"><a href="#cb22-2"></a>  full_mediation, </span>
 <span id="cb22-3"><a href="#cb22-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
 <span id="cb22-4"><a href="#cb22-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
-<span id="cb22-5"><a href="#cb22-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-stdout">
-<pre><code><a href="https://rdrr.io/r/base/Paren.html"> {}</a></code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
-<span id="cb24-2"><a href="#cb24-2"></a>  full_mediation, </span>
-<span id="cb24-3"><a href="#cb24-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
-<span id="cb24-4"><a href="#cb24-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
-<span id="cb24-5"><a href="#cb24-5"></a>  <span class="at">effect =</span> <span class="st">"direct"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-5"><a href="#cb22-5"></a>  <span class="at">effect =</span> <span class="st">"direct"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>{ m }</code></pre>
 </div>
 </div>
+<p>The output indicates that, to obtain an unbiased estimate of the <em>direct</em> causal association between coaching quality (<code>X</code>) and fantasy points (<code>Y</code>) (i.e., the effect that is <em>not</em> mediated through intermediate processes), it is necessary to control for player preparation (<code>M</code>).</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
+<span id="cb24-2"><a href="#cb24-2"></a>  full_mediation, </span>
+<span id="cb24-3"><a href="#cb24-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
+<span id="cb24-4"><a href="#cb24-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code><a href="https://rdrr.io/r/base/Paren.html"> {}</a></code></pre>
+</div>
+</div>
+<p>However, to obtain an unbiased estimate of the <em>total</em> causal association between coaching quality (<code>X</code>) and fantasy points (<code>Y</code>) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important <em>not</em> to control for player preparation (<code>M</code>). When the goal is to understand the (total) causal effect of coaching quality (<code>X</code>) and fantasy points (<code>Y</code>), controlling for the mediator (player preparation; <code>M</code>) would be inappropriate because doing so would remove the causal effect, thus artificially reducing the estimate of the association between coaching quality (<code>X</code>) and fantasy points (<code>Y</code>) <span class="citation" data-cites="Lederer2019">(<a href="references.html#ref-Lederer2019" role="doc-biblioref">Lederer et al., 2019</a>)</span>.</p>
 <p>An example of partial mediation is depicted in <a href="#fig-partialMediation" class="quarto-xref">Figure&nbsp;<span>10.16</span></a>:</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>partial_mediation <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">mediation_triangle</span>(</span>
