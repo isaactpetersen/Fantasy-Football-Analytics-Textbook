@@ -574,15 +574,27 @@ mBias %>%
   theme_dag_blank()
 ```
 
+In this example, fan attendance is the collider that is influenced separately by the team record and the coaching quality.
+This is a fictitious example for purposes of demonstration; in reality, coaching quality influences the team's record.
+
 ```{r}
 dagitty::impliedConditionalIndependencies(mBias)
+```
 
+As the output indicates, there are several conditional independencies.
+
+```{r}
 dagitty::adjustmentSets(
   mBias, 
   exposure = "x",
   outcome = "y",
   effect = "total")
 ```
+
+It is important not to control for the collider (fan attendance).
+If you control for the collider, you can induce an artificial association between team record and coaching quality.
+Moreover, because doing so induces an artificial association between team record and coaching quality, it can also induce an artifial association between the effects of team record and coaching quality: number of media articles about the team and fantasy points, respectively.
+That is, controlling for the collider can lead to an artificial association between `X` and `Y` that does not reflect a causal process.
 
 #### Butterfly Bias {#sec-colliderBias}
 
@@ -625,15 +637,25 @@ butterflyBias %>%
   theme_dag_blank()
 ```
 
+In this case, players' mental health is a collider of their diet and the quality of the coaching they receive.
+In addition, players' mental health is a confound of their off-field behavior and fantasy points.
+
 ```{r}
 dagitty::impliedConditionalIndependencies(butterflyBias)
+```
 
+As the output indicates, there are several conditional independencies.
+
+```{r}
 dagitty::adjustmentSets(
   butterflyBias, 
   exposure = "x",
   outcome = "y",
   effect = "total")
 ```
+
+When dealing with a collider that is also a confound, controlling for either set, `B` and `M` or `A` and `M`, will provide an unbiased estimate of the association between `X` and `Y`.
+In this case, controlling for either a) coaching quality and mental health or b) diet and mental health—but not both sets—will yield an unbiased estimate of the association between off-field behavior and fantasy points.
 
 ### Selection Bias {#sec-causalDiagramSelectionBias}
 
