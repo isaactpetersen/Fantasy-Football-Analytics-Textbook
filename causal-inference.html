@@ -714,7 +714,7 @@ Figure&nbsp;10.14: Causal Diagram (Directed Acyclic Graph) Example of Confoundin
 <pre><code>x _||_ y | z</code></pre>
 </div>
 </div>
-<p>The output indicates that player endurance (<code>X</code>) and field goals made (<code>Y</code>) are conditionally independent when accounting for stadium altitude (<code>Z</code>).</p>
+<p>The output indicates that player endurance (<code>X</code>) and field goals made (<code>Y</code>) are conditionally independent when accounting for stadium altitude (<code>Z</code>). <em>Conditional independence</em> refers to two variables being unassociated when controlling for other variables.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
 <span id="cb17-2"><a href="#cb17-2"></a>  confounding, </span>
@@ -838,36 +838,39 @@ Figure&nbsp;10.16: Causal Diagram (Directed Acyclic Graph) Example of Partial Me
 <p>However, as with <a href="#sec-causalDiagramMediationPartial">full mediation</a>, to obtain an unbiased estimate of the <em>total</em> causal association between coaching quality (<code>X</code>) and fantasy points (<code>Y</code>) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important <em>not</em> to control for player preparation (<code>M</code>). When the goal is to understand the (total) causal effect of coaching quality (<code>X</code>) and fantasy points (<code>Y</code>), controlling for a mediator (player preparation; <code>M</code>) would be inappropriate because doing so would remove the causal effect, thus artificially reducing the estimate of the association between coaching quality (<code>X</code>) and fantasy points (<code>Y</code>) <span class="citation" data-cites="Lederer2019">(<a href="references.html#ref-Lederer2019" role="doc-biblioref">Lederer et al., 2019</a>)</span>.</p>
 </section></section><section id="sec-colliderBias" class="level3" data-number="10.5.4"><h3 data-number="10.5.4" class="anchored" data-anchor-id="sec-colliderBias">
 <span class="header-section-number">10.5.4</span> Collider Bias</h3>
-<p>Collider bias occurs when two variables influence a third variable, the collider <span class="citation" data-cites="DOnofrio2020">(<a href="references.html#ref-DOnofrio2020" role="doc-biblioref">D’Onofrio et al., 2020</a>)</span>. That is, a collider is a variable that is caused by two other variables. An example of collider bias is depicted in <a href="#fig-colliderBias" class="quarto-xref">Figure&nbsp;<span>10.17</span></a>:</p>
+<p><em>Collision</em> occurs when two variables influence a third variable, the collider <span class="citation" data-cites="DOnofrio2020">(<a href="references.html#ref-DOnofrio2020" role="doc-biblioref">D’Onofrio et al., 2020</a>)</span>. That is, a collider is a variable that is caused by two other variables (i.e., a common effect). An example collision is depicted in <a href="#fig-colliderBias1" class="quarto-xref">Figure&nbsp;<span>10.17</span></a> and <a href="#fig-colliderBias2" class="quarto-xref">Figure&nbsp;<span>10.18</span></a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>colliderBias <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">collider_triangle</span>(</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>colliderBias1 <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">collider_triangle</span>(</span>
 <span id="cb32-2"><a href="#cb32-2"></a>  <span class="at">x =</span> <span class="st">"Diet"</span>,</span>
 <span id="cb32-3"><a href="#cb32-3"></a>  <span class="at">y =</span> <span class="st">"Coaching Strategy"</span>,</span>
 <span id="cb32-4"><a href="#cb32-4"></a>  <span class="at">m =</span> <span class="st">"Injury Status"</span>)</span>
 <span id="cb32-5"><a href="#cb32-5"></a></span>
-<span id="cb32-6"><a href="#cb32-6"></a>colliderBias <span class="sc">%&gt;%</span> </span>
+<span id="cb32-6"><a href="#cb32-6"></a>colliderBias1 <span class="sc">%&gt;%</span> </span>
 <span id="cb32-7"><a href="#cb32-7"></a>  <span class="fu">ggdag</span>(</span>
 <span id="cb32-8"><a href="#cb32-8"></a>    <span class="at">text =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb32-9"><a href="#cb32-9"></a>    <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span> </span>
 <span id="cb32-10"><a href="#cb32-10"></a>  <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<div id="fig-colliderBias" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-colliderBias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="causal-inference_files/figure-html/fig-colliderBias-1.png" class="img-fluid figure-img" width="672">
+<div id="fig-colliderBias1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-colliderBias1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="causal-inference_files/figure-html/fig-colliderBias1-1.png" class="img-fluid figure-img" width="672">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-colliderBias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.17: Causal Diagram (Directed Acyclic Graph) Example of Collider Bias.
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-colliderBias1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.17: Causal Diagram (Directed Acyclic Graph) Example of a Collision with a Collider (Injury Status).
 </figcaption></figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(colliderBias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(colliderBias1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>x _||_ y</code></pre>
 </div>
+</div>
+<p>In this example collision, diet (<code>X</code>) and coaching strategy (<code>Y</code>) are independent.</p>
+<div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
-<span id="cb35-2"><a href="#cb35-2"></a>  colliderBias, </span>
+<span id="cb35-2"><a href="#cb35-2"></a>  colliderBias1, </span>
 <span id="cb35-3"><a href="#cb35-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
 <span id="cb35-4"><a href="#cb35-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
 <span id="cb35-5"><a href="#cb35-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -875,35 +878,76 @@ Figure&nbsp;10.17: Causal Diagram (Directed Acyclic Graph) Example of Collider B
 <pre><code><a href="https://rdrr.io/r/base/Paren.html"> {}</a></code></pre>
 </div>
 </div>
+<p>As the output indicates, we should not control for the collider when examining the association between the two causes of the collider. That is, we should not control for injury status (<code>M</code>) when examining the association between diet (<code>X</code>) and coaching strategy. Controlling for the collider leads to confounding and can artificially induce an association between the two causes of the collider despite no causal association between them <span class="citation" data-cites="Lederer2019">(<a href="references.html#ref-Lederer2019" role="doc-biblioref">Lederer et al., 2019</a>)</span>. Obtaining a distorted or artificial association between two variables due to inappropriately controlling for a collider is known as <em>collider bias</em>.</p>
+<p>Consider another example:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>colliderBias2 <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">collider_triangle</span>(</span>
+<span id="cb37-2"><a href="#cb37-2"></a>  <span class="at">x =</span> <span class="st">"Coaching Quality"</span>,</span>
+<span id="cb37-3"><a href="#cb37-3"></a>  <span class="at">y =</span> <span class="st">"Player Preparation"</span>,</span>
+<span id="cb37-4"><a href="#cb37-4"></a>  <span class="at">m =</span> <span class="st">"Fantasy Points"</span>,</span>
+<span id="cb37-5"><a href="#cb37-5"></a>  <span class="at">x_y_associated =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb37-6"><a href="#cb37-6"></a></span>
+<span id="cb37-7"><a href="#cb37-7"></a>colliderBias2 <span class="sc">%&gt;%</span> </span>
+<span id="cb37-8"><a href="#cb37-8"></a>  <span class="fu">ggdag</span>(</span>
+<span id="cb37-9"><a href="#cb37-9"></a>    <span class="at">text =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb37-10"><a href="#cb37-10"></a>    <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span> </span>
+<span id="cb37-11"><a href="#cb37-11"></a>  <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-colliderBias2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-colliderBias2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="causal-inference_files/figure-html/fig-colliderBias2-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-colliderBias2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.18: Causal Diagram (Directed Acyclic Graph) Example of Collider Bias.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(colliderBias2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In this example of collider bias, there are no conditional independencies.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
+<span id="cb39-2"><a href="#cb39-2"></a>  colliderBias2, </span>
+<span id="cb39-3"><a href="#cb39-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
+<span id="cb39-4"><a href="#cb39-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
+<span id="cb39-5"><a href="#cb39-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code><a href="https://rdrr.io/r/base/Paren.html"> {}</a></code></pre>
+</div>
+</div>
+<p>Again, it would be important not to control for the collider, fantasy points (<code>M</code>), when examining the association between coaching quality (<code>X</code>) and player preparation (<code>Y</code>). In this case, controlling for the collider would remove some of the causal effect of coaching quality on player preparation and could lead to an artificially smaller estimate of the causal effect between coaching quality and player preparation.</p>
 <section id="sec-causalDiagramMBias" class="level4" data-number="10.5.4.1"><h4 data-number="10.5.4.1" class="anchored" data-anchor-id="sec-causalDiagramMBias">
 <span class="header-section-number">10.5.4.1</span> M-Bias</h4>
-<p>Collider bias may also occur when neither variable of interest is a direct cause of the collider <span class="citation" data-cites="Lederer2019">(<a href="references.html#ref-Lederer2019" role="doc-biblioref">Lederer et al., 2019</a>)</span>. M-bias is a form of collider bias that occurs when two variables that are not causally related, <code>A</code> and <code>B</code>, both influence a collider, <code>M</code>, and each (<code>A</code> and <code>B</code>) also influences a separate variable—e.g., <code>A</code> influences <code>X</code> and <code>B</code> influences <code>Y</code>. M-bias is so-named from the M-shape of the DAG. An example of M-bias is depicted in <a href="#fig-mBias" class="quarto-xref">Figure&nbsp;<span>10.18</span></a>:</p>
+<p>Collider bias may also occur when neither variable of interest is a direct cause of the collider <span class="citation" data-cites="Lederer2019">(<a href="references.html#ref-Lederer2019" role="doc-biblioref">Lederer et al., 2019</a>)</span>. M-bias is a form of collider bias that occurs when two variables that are not causally related, <code>A</code> and <code>B</code>, both influence a collider, <code>M</code>, and each (<code>A</code> and <code>B</code>) also influences a separate variable—e.g., <code>A</code> influences <code>X</code> and <code>B</code> influences <code>Y</code>. M-bias is so-named from the M-shape of the DAG. An example of M-bias is depicted in <a href="#fig-mBias" class="quarto-xref">Figure&nbsp;<span>10.19</span></a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>mBias <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">m_bias</span>(</span>
-<span id="cb37-2"><a href="#cb37-2"></a>  <span class="at">x =</span> <span class="st">"Number of Media Articles About the Team"</span>,</span>
-<span id="cb37-3"><a href="#cb37-3"></a>  <span class="at">y =</span> <span class="st">"Fantasy Points"</span>,</span>
-<span id="cb37-4"><a href="#cb37-4"></a>  <span class="at">a =</span> <span class="st">"Team Record"</span>,</span>
-<span id="cb37-5"><a href="#cb37-5"></a>  <span class="at">b =</span> <span class="st">"Coaching Quality"</span>,</span>
-<span id="cb37-6"><a href="#cb37-6"></a>  <span class="at">m =</span> <span class="st">"Fan Attendance at Game"</span>)</span>
-<span id="cb37-7"><a href="#cb37-7"></a></span>
-<span id="cb37-8"><a href="#cb37-8"></a>mBias <span class="sc">%&gt;%</span> </span>
-<span id="cb37-9"><a href="#cb37-9"></a>  <span class="fu">ggdag</span>(</span>
-<span id="cb37-10"><a href="#cb37-10"></a>    <span class="at">text =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb37-11"><a href="#cb37-11"></a>    <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span> </span>
-<span id="cb37-12"><a href="#cb37-12"></a>  <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>mBias <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">m_bias</span>(</span>
+<span id="cb41-2"><a href="#cb41-2"></a>  <span class="at">x =</span> <span class="st">"Number of Media Articles About the Team"</span>,</span>
+<span id="cb41-3"><a href="#cb41-3"></a>  <span class="at">y =</span> <span class="st">"Fantasy Points"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4"></a>  <span class="at">a =</span> <span class="st">"Team Record"</span>,</span>
+<span id="cb41-5"><a href="#cb41-5"></a>  <span class="at">b =</span> <span class="st">"Coaching Quality"</span>,</span>
+<span id="cb41-6"><a href="#cb41-6"></a>  <span class="at">m =</span> <span class="st">"Fan Attendance at Game"</span>)</span>
+<span id="cb41-7"><a href="#cb41-7"></a></span>
+<span id="cb41-8"><a href="#cb41-8"></a>mBias <span class="sc">%&gt;%</span> </span>
+<span id="cb41-9"><a href="#cb41-9"></a>  <span class="fu">ggdag</span>(</span>
+<span id="cb41-10"><a href="#cb41-10"></a>    <span class="at">text =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb41-11"><a href="#cb41-11"></a>    <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span> </span>
+<span id="cb41-12"><a href="#cb41-12"></a>  <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-mBias" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-mBias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="causal-inference_files/figure-html/fig-mBias-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mBias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.18: Causal Diagram (Directed Acyclic Graph) Example of M-Bias.
+Figure&nbsp;10.19: Causal Diagram (Directed Acyclic Graph) Example of M-Bias.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(mBias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(mBias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>a _||_ b
 a _||_ y
@@ -912,11 +956,11 @@ m _||_ x | a
 m _||_ y | b
 x _||_ y</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
-<span id="cb40-2"><a href="#cb40-2"></a>  mBias, </span>
-<span id="cb40-3"><a href="#cb40-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
-<span id="cb40-4"><a href="#cb40-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
-<span id="cb40-5"><a href="#cb40-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
+<span id="cb44-2"><a href="#cb44-2"></a>  mBias, </span>
+<span id="cb44-3"><a href="#cb44-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
+<span id="cb44-4"><a href="#cb44-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
+<span id="cb44-5"><a href="#cb44-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code><a href="https://rdrr.io/r/base/Paren.html"> {}</a></code></pre>
 </div>
@@ -945,33 +989,33 @@ x _||_ y</code></pre>
 <li>
 <code>M</code> influences <code>X</code> and <code>Y</code>.</li>
 </ul>
-<p>In butterfly bias, the collider (<code>M</code>) is also a confound. That is, a variable is both influenced by two variables and influences two variables. An example of butterfly bias is depicted in <a href="#fig-butterflyBias" class="quarto-xref">Figure&nbsp;<span>10.19</span></a>:</p>
+<p>In butterfly bias, the collider (<code>M</code>) is also a confound. That is, a variable is both influenced by two variables and influences two variables. An example of butterfly bias is depicted in <a href="#fig-butterflyBias" class="quarto-xref">Figure&nbsp;<span>10.20</span></a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>butterflyBias <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">butterfly_bias</span>(</span>
-<span id="cb42-2"><a href="#cb42-2"></a>  <span class="at">x =</span> <span class="st">"Off-field Behavior"</span>,</span>
-<span id="cb42-3"><a href="#cb42-3"></a>  <span class="at">y =</span> <span class="st">"Fantasy Points"</span>,</span>
-<span id="cb42-4"><a href="#cb42-4"></a>  <span class="at">a =</span> <span class="st">"Diet"</span>,</span>
-<span id="cb42-5"><a href="#cb42-5"></a>  <span class="at">b =</span> <span class="st">"Coaching Quality"</span>,</span>
-<span id="cb42-6"><a href="#cb42-6"></a>  <span class="at">m =</span> <span class="st">"Mental Health"</span>)</span>
-<span id="cb42-7"><a href="#cb42-7"></a></span>
-<span id="cb42-8"><a href="#cb42-8"></a>butterflyBias <span class="sc">%&gt;%</span> </span>
-<span id="cb42-9"><a href="#cb42-9"></a>  <span class="fu">ggdag</span>(</span>
-<span id="cb42-10"><a href="#cb42-10"></a>    <span class="at">text =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb42-11"><a href="#cb42-11"></a>    <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span> </span>
-<span id="cb42-12"><a href="#cb42-12"></a>  <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>butterflyBias <span class="ot">&lt;-</span> ggdag<span class="sc">::</span><span class="fu">butterfly_bias</span>(</span>
+<span id="cb46-2"><a href="#cb46-2"></a>  <span class="at">x =</span> <span class="st">"Off-field Behavior"</span>,</span>
+<span id="cb46-3"><a href="#cb46-3"></a>  <span class="at">y =</span> <span class="st">"Fantasy Points"</span>,</span>
+<span id="cb46-4"><a href="#cb46-4"></a>  <span class="at">a =</span> <span class="st">"Diet"</span>,</span>
+<span id="cb46-5"><a href="#cb46-5"></a>  <span class="at">b =</span> <span class="st">"Coaching Quality"</span>,</span>
+<span id="cb46-6"><a href="#cb46-6"></a>  <span class="at">m =</span> <span class="st">"Mental Health"</span>)</span>
+<span id="cb46-7"><a href="#cb46-7"></a></span>
+<span id="cb46-8"><a href="#cb46-8"></a>butterflyBias <span class="sc">%&gt;%</span> </span>
+<span id="cb46-9"><a href="#cb46-9"></a>  <span class="fu">ggdag</span>(</span>
+<span id="cb46-10"><a href="#cb46-10"></a>    <span class="at">text =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb46-11"><a href="#cb46-11"></a>    <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span> </span>
+<span id="cb46-12"><a href="#cb46-12"></a>  <span class="fu">theme_dag_blank</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-butterflyBias" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-butterflyBias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="causal-inference_files/figure-html/fig-butterflyBias-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-butterflyBias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.19: Causal Diagram (Directed Acyclic Graph) Example of Butterfly Bias.
+Figure&nbsp;10.20: Causal Diagram (Directed Acyclic Graph) Example of Butterfly Bias.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(butterflyBias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(butterflyBias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>a _||_ b
 a _||_ y | b, m
@@ -979,11 +1023,11 @@ b _||_ x | a, m
 x _||_ y | b, m
 x _||_ y | a, m</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
-<span id="cb45-2"><a href="#cb45-2"></a>  butterflyBias, </span>
-<span id="cb45-3"><a href="#cb45-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
-<span id="cb45-4"><a href="#cb45-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
-<span id="cb45-5"><a href="#cb45-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
+<span id="cb49-2"><a href="#cb49-2"></a>  butterflyBias, </span>
+<span id="cb49-3"><a href="#cb49-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
+<span id="cb49-4"><a href="#cb49-4"></a>  <span class="at">outcome =</span> <span class="st">"y"</span>,</span>
+<span id="cb49-5"><a href="#cb49-5"></a>  <span class="at">effect =</span> <span class="st">"total"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>{ b, m }
 { a, m }</code></pre>
@@ -995,7 +1039,7 @@ x _||_ y | a, m</code></pre>
 </section></section><section id="sec-causalInferenceSessionInfo" class="level2" data-number="10.6"><h2 data-number="10.6" class="anchored" data-anchor-id="sec-causalInferenceSessionInfo">
 <span class="header-section-number">10.6</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
