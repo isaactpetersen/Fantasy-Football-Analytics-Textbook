@@ -946,6 +946,7 @@ Figure&nbsp;10.19: Causal Diagram (Directed Acyclic Graph) Example of M-Bias.
 </div>
 </div>
 </div>
+<p>In this example, fan attendance is the collider that is influenced separately by the team record and the coaching quality. This is a fictitious example for purposes of demonstration; in reality, coaching quality influences the team’s record.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(mBias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
@@ -956,6 +957,9 @@ m _||_ x | a
 m _||_ y | b
 x _||_ y</code></pre>
 </div>
+</div>
+<p>As the output indicates, there are several conditional independencies.</p>
+<div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
 <span id="cb44-2"><a href="#cb44-2"></a>  mBias, </span>
 <span id="cb44-3"><a href="#cb44-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
@@ -965,6 +969,7 @@ x _||_ y</code></pre>
 <pre><code><a href="https://rdrr.io/r/base/Paren.html"> {}</a></code></pre>
 </div>
 </div>
+<p>It is important not to control for the collider (fan attendance). If you control for the collider, you can induce an artificial association between team record and coaching quality. Moreover, because doing so induces an artificial association between team record and coaching quality, it can also induce an artifial association between the effects of team record and coaching quality: number of media articles about the team and fantasy points, respectively. That is, controlling for the collider can lead to an artificial association between <code>X</code> and <code>Y</code> that does not reflect a causal process.</p>
 </section><section id="sec-colliderBias" class="level4" data-number="10.5.4.2"><h4 data-number="10.5.4.2" class="anchored" data-anchor-id="sec-colliderBias">
 <span class="header-section-number">10.5.4.2</span> Butterfly Bias</h4>
 <p>Butterfly bias occurs when both confounding and <a href="#sec-causalDiagramMBias">M-bias</a> are present. Butterfly bias (aka bow-tie bias) is so-named from the butterfly shape of the DAG. In butterfly bias, the following criteria are met:</p>
@@ -1014,6 +1019,7 @@ Figure&nbsp;10.20: Causal Diagram (Directed Acyclic Graph) Example of Butterfly 
 </div>
 </div>
 </div>
+<p>In this case, players’ mental health is a collider of their diet and the quality of the coaching they receive. In addition, players’ mental health is a confound of their off-field behavior and fantasy points.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>dagitty<span class="sc">::</span><span class="fu">impliedConditionalIndependencies</span>(butterflyBias)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
@@ -1023,6 +1029,9 @@ b _||_ x | a, m
 x _||_ y | b, m
 x _||_ y | a, m</code></pre>
 </div>
+</div>
+<p>As the output indicates, there are several conditional independencies.</p>
+<div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>dagitty<span class="sc">::</span><span class="fu">adjustmentSets</span>(</span>
 <span id="cb49-2"><a href="#cb49-2"></a>  butterflyBias, </span>
 <span id="cb49-3"><a href="#cb49-3"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
@@ -1033,6 +1042,7 @@ x _||_ y | a, m</code></pre>
 { a, m }</code></pre>
 </div>
 </div>
+<p>When dealing with a collider that is also a confound, controlling for either set, <code>B</code> and <code>M</code> or <code>A</code> and <code>M</code>, will provide an unbiased estimate of the association between <code>X</code> and <code>Y</code>. In this case, controlling for either a) coaching quality and mental health or b) diet and mental health—but not both sets—will yield an unbiased estimate of the association between off-field behavior and fantasy points.</p>
 </section></section><section id="sec-causalDiagramSelectionBias" class="level3" data-number="10.5.5"><h3 data-number="10.5.5" class="anchored" data-anchor-id="sec-causalDiagramSelectionBias">
 <span class="header-section-number">10.5.5</span> Selection Bias</h3>
 <p>Selection bias occurs when the selection of participants or their inclusion in analyses depends on the variables being studied.</p>
