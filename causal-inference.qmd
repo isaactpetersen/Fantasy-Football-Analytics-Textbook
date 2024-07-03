@@ -352,6 +352,7 @@ dagitty::impliedConditionalIndependencies(confounding)
 ```
 
 The output indicates that player endurance (`X`) and field goals made (`Y`) are conditionally independent when accounting for stadium altitude (`Z`).
+*Conditional independence* refers to two variables being unassociated when controlling for other variables.
 
 ```{r}
 dagitty::adjustmentSets(
@@ -473,20 +474,20 @@ When the goal is to understand the (total) causal effect of coaching quality (`X
 
 ### Collider Bias {#sec-colliderBias}
 
-Collider bias occurs when two variables influence a third variable, the collider [@DOnofrio2020].
-That is, a collider is a variable that is caused by two other variables.
-An example of collider bias is depicted in @fig-colliderBias:
+*Collision* occurs when two variables influence a third variable, the collider [@DOnofrio2020].
+That is, a collider is a variable that is caused by two other variables (i.e., a common effect).
+An example collision is depicted in @fig-colliderBias1 and @fig-colliderBias2:
 
 ```{r}
-#| label: fig-colliderBias
-#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Collider Bias."
+#| label: fig-colliderBias1
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of a Collision with a Collider (Injury Status)."
 
-colliderBias <- ggdag::collider_triangle(
+colliderBias1 <- ggdag::collider_triangle(
   x = "Diet",
   y = "Coaching Strategy",
   m = "Injury Status")
 
-colliderBias %>% 
+colliderBias1 %>% 
   ggdag(
     text = FALSE,
     use_labels = "label") + 
@@ -494,14 +495,59 @@ colliderBias %>%
 ```
 
 ```{r}
-dagitty::impliedConditionalIndependencies(colliderBias)
+dagitty::impliedConditionalIndependencies(colliderBias1)
+```
 
+In this example collision, diet (`X`) and coaching strategy (`Y`) are independent.
+
+```{r}
 dagitty::adjustmentSets(
-  colliderBias, 
+  colliderBias1, 
   exposure = "x",
   outcome = "y",
   effect = "total")
 ```
+
+As the output indicates, we should not control for the collider when examining the association between the two causes of the collider.
+That is, we should not control for injury status (`M`) when examining the association between diet (`X`) and coaching strategy.
+Controlling for the collider leads to confounding and can artificially induce an association between the two causes of the collider despite no causal association between them [@Lederer2019].
+Obtaining a distorted or artificial association between two variables due to inappropriately controlling for a collider is known as *collider bias*.
+
+Consider another example:
+
+```{r}
+#| label: fig-colliderBias2
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Collider Bias."
+
+colliderBias2 <- ggdag::collider_triangle(
+  x = "Coaching Quality",
+  y = "Player Preparation",
+  m = "Fantasy Points",
+  x_y_associated = TRUE)
+
+colliderBias2 %>% 
+  ggdag(
+    text = FALSE,
+    use_labels = "label") + 
+  theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(colliderBias2)
+```
+
+In this example of collider bias, there are no conditional independencies.
+
+```{r}
+dagitty::adjustmentSets(
+  colliderBias2, 
+  exposure = "x",
+  outcome = "y",
+  effect = "total")
+```
+
+Again, it would be important not to control for the collider, fantasy points (`M`), when examining the association between coaching quality (`X`) and player preparation (`Y`).
+In this case, controlling for the collider would remove some of the causal effect of coaching quality on player preparation and could lead to an artificially smaller estimate of the causal effect between coaching quality and player preparation.
 
 #### M-Bias {#sec-causalDiagramMBias}
 
