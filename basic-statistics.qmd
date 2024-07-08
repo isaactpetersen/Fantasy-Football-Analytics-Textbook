@@ -6,6 +6,7 @@
 
 ```{r}
 library("petersenlab")
+library("DescTools")
 library("pwr")
 library("pwrss")
 library("WebPower")
@@ -25,19 +26,53 @@ Indices to describe the *center* (central tendency) of a variable's data include
 
 - mean
 - median
+- Hodges-Lehmann statistic (aka pseudomedian)
 - mode
 
-The mean of $X$ (written as: $\bar{X}$) is calculated as:
+The mean of $X$ (written as: $\bar{X}$) is calculated as in @eq-IQR:
 
 $$
 \bar{X} = \frac{\sum X_i}{n} = \frac{X_1 + X_2 + ... + X_n}{n}
 $$ {#eq-IQR}
 
 That is, to compute the mean, sum all of the values and divide by the number of values ($n$).
+One issue with the mean is that it is sensitive to extreme (outlying) values.
+For instance, the mean of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_mean`.
+
+```{r}
+#| code-fold: true
+
+exampleValues <- c(0, 0, 10, 15, 20, 30, 1000)
+exampleValues_mean <- mean(exampleValues)
+```
 
 The median is determined as the value at the 50th percentile (i.e., the value that is higher than 50% of the values and is lower than the other 50% of values).
+Compared to the mean, the median is less influenced by outliers.
+The median of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_median`.
+
+```{r}
+#| code-fold: true
+
+exampleValues_median <- median(exampleValues)
+```
+
+The Hodges-Lehmann statistic (aka pseudomedian) is computed as the median of all pairwise means, and it is also robust to outliers.
+The pseudomedian of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_pseudomedian`.
+
+```{r}
+#| code-fold: true
+
+exampleValues_pseudomedian <- DescTools::HodgesLehmann(exampleValues)
+```
 
 The mode is the most common/frequent value.
+The mode of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_mode`.
+
+```{r}
+#| code-fold: true
+
+exampleValues_mode <- petersenlab::Mode(exampleValues)
+```
 
 Below is R code to estimate each:
 
@@ -54,32 +89,44 @@ Indices to describe the *spread* (variability) of a variable's data include:
 - range
 - minimum and maximum
 - interquartile range (IQR)
+- median absolute deviation
 
-The (sample) variance of $X$ (written as: $s^2$) is calculated as:
+The (sample) variance of $X$ (written as: $s^2$) is calculated as in @eq-variance:
 
 $$
 s^2 = \frac{\sum (X_i - \bar{X})^2}{n-1}
 $$ {#eq-variance}
 
-The (sample) standard deviation of $X$ (written as: $s$) is calculated as:
+where $X_i$ is each data point, $\bar{X}$ is the mean of $X$, and $n$ is the number of data points.
+
+The (sample) standard deviation of $X$ (written as: $s$) is calculated as in @eq-sd:
 
 $$
 s = \sqrt{\frac{\sum (X_i - \bar{X})^2}{n-1}}
 $$ {#eq-sd}
 
-The range is calculated of $X$ is calculated as:
+The range is calculated of $X$ is calculated as in @eq-range:
 
 $$
 \text{range} = \text{maximum} - \text{minimum}
 $$ {#eq-range}
 
-The interquartile range (IQR) is calculated as:
+The interquartile range (IQR) is calculated as in @eq-IQR:
 
 $$
 \text{IQR} = Q_3 - Q_1
 $$ {#eq-IQR}
 
 where $Q_3$ is the score at the third quartile (i.e., 75th percentile), and $Q_1$ is the score at the first quartile (i.e., 25th percentile).
+
+The median absolute deviation (MAD) is the median of all deviations from the median, and is calculated as in @eq-medianAbsoluteDeviation:
+
+$$
+\text{MAD} = \text{median}(|X_i - \tilde{X}|)
+$$ {#eq-medianAbsoluteDeviation}
+
+where $\tilde{X}$ is the median of `X`.
+Compared to the standard deviation, the median absolute deviation is more robust to outliers.
 
 Below is R code to estimate each:
 
@@ -119,7 +166,9 @@ To estimate multiple indices of center, spread, and shape of the data, you can u
 #        max = ~ max(., na.rm = TRUE),
 #        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
 #        IQR = ~ IQR(., na.rm = TRUE),
+#        mad = ~ mad(., na.rm = TRUE),
 #        median = ~ median(., na.rm = TRUE),
+#        pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
 #        mode = ~ petersenlab::Mode(., multipleModes = "mean"),
 #        skewness = ~ psych::skew(., na.rm = TRUE),
 #        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
