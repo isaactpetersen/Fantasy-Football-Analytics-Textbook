@@ -35,6 +35,13 @@ $$
 \bar{X} = \frac{\sum X_i}{n} = \frac{X_1 + X_2 + ... + X_n}{n}
 $$ {#eq-IQR}
 
+```{r}
+#| code-fold: true
+
+exampleValues <- c(0, 0, 10, 15, 20, 30, 1000)
+exampleValues_mean <- apa(mean(exampleValues), 2)
+```
+
 That is, to compute the mean, sum all of the values and divide by the number of values ($n$).
 One issue with the mean is that it is sensitive to extreme (outlying) values.
 For instance, the mean of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_mean`.
@@ -42,8 +49,7 @@ For instance, the mean of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} e
 ```{r}
 #| code-fold: true
 
-exampleValues <- c(0, 0, 10, 15, 20, 30, 1000)
-exampleValues_mean <- mean(exampleValues)
+exampleValues_median <- median(exampleValues)
 ```
 
 The median is determined as the value at the 50th percentile (i.e., the value that is higher than 50% of the values and is lower than the other 50% of values).
@@ -53,7 +59,7 @@ The median of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues
 ```{r}
 #| code-fold: true
 
-exampleValues_median <- median(exampleValues)
+exampleValues_pseudomedian <- DescTools::HodgesLehmann(exampleValues)
 ```
 
 The Hodges-Lehmann statistic (aka pseudomedian) is computed as the median of all pairwise means, and it is also robust to outliers.
@@ -62,17 +68,11 @@ The pseudomedian of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} example
 ```{r}
 #| code-fold: true
 
-exampleValues_pseudomedian <- DescTools::HodgesLehmann(exampleValues)
+exampleValues_mode <- petersenlab::Mode(exampleValues)
 ```
 
 The mode is the most common/frequent value.
 The mode of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_mode`.
-
-```{r}
-#| code-fold: true
-
-exampleValues_mode <- petersenlab::Mode(exampleValues)
-```
 
 Below is R code to estimate each:
 
@@ -166,7 +166,7 @@ To estimate multiple indices of center, spread, and shape of the data, you can u
 #        max = ~ max(., na.rm = TRUE),
 #        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
 #        IQR = ~ IQR(., na.rm = TRUE),
-#        mad = ~ mad(., na.rm = TRUE),
+#        MAD = ~ mad(., na.rm = TRUE),
 #        median = ~ median(., na.rm = TRUE),
 #        pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
 #        mode = ~ petersenlab::Mode(., multipleModes = "mean"),
