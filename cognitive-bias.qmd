@@ -5,7 +5,7 @@
 ### Load Packages {#sec-cognitiveBiasLoadPackages}
 
 ```{r}
-
+library("tidyverse")
 ```
 
 ## Overview {#sec-cognitiveBiasOverview}
@@ -291,7 +291,7 @@ The law of large numbers is a mathematical theorem that the average of a suffici
 For instance, if you flip a fair coin 1 million times, it is likely to land heads-up ~50% of the time.
 The law of *small* numbers (aka hasty generalization), by contrast, is an erroneous belief that small samples are representative of the populations from which they were drawn.
 For instance, if you flip a coin 10 times, belief in the law of small numbers would lead one to believe that the coin will flip heads-up exactly 5 times out of 10.
-However, in reality, the chance is less than 1 in 4 (24.6%) that exactly 5 of 10 coin flips turn up heads:
+However, in reality, the chance is less than 1 in 4 (24.6%) that exactly 5 of 10 coin flips turn up heads, as calculated below and as depicted in @fig-simulationOf10CoinFlips:
 
 ```{r}
 dbinom(
@@ -299,6 +299,64 @@ dbinom(
   size = 10, # how many times you flip a coin
   prob = 0.5 # probability of a coin flipping heads-up (i.e., fair coin = 50%)
 )
+```
+
+The `dbinom()` function in R provides the density of a binomial distribution.
+A binomial distribution is the probability of a particular number of successes (e.g., coins flipping heads-up) given a certain number of independent trials.
+
+```{r}
+#| fig-cap: "Histogram of number of coins that flip heads-up in a simulation of 10 coin flips (with 100,000 replications)."
+#| label: fig-simulationOf10CoinFlips
+#| code-fold: true
+
+set.seed(52242)
+
+numHeads <- rbinom(
+  n = 100000,
+  size = 10,
+  prob = .5
+)
+
+simulationOfFlipping10Coins <- data.frame(
+  numHeads = numHeads
+)
+
+simulationOfFlipping10Coins <- simulationOfFlipping10Coins %>% 
+  mutate(
+    highlight = ifelse(numHeads == 5, "yes", "no")
+  )
+
+ggplot(
+  data = simulationOfFlipping10Coins,
+  mapping = aes(
+    x = numHeads,
+    fill = highlight)
+) +
+  geom_histogram(
+    color = "#000000",
+    bins = 11
+  ) +
+  scale_x_continuous(
+    breaks = 0:10
+  ) +
+  scale_fill_manual(
+    values = c(
+      "yes" = "tomato",
+      "no" = "gray")
+  ) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+Although 5 is the modal count of coins that flip heads-up out of 10 flips (i.e., it was more common than any other number), it is less common than the aggregate probability of flipping any number of heads besides 5.
+The probability of getting any other number of coin flips turning up heads (other than 5) is:
+
+```{r}
+dbinom(
+  x = c(0:4, 6:10),
+  size = 10,
+  prob = 0.5
+) %>% sum()
 ```
 
 The *gambler's fallacy* is the erroneous belief that future probabilities are influenced by past events, even when the events are independent.
