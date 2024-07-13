@@ -8,11 +8,266 @@
 
 ```
 
-## Overview {#sec-baseRatesConclusion}
+## Overview {#sec-baseRatesOverview}
+
+Player performance is a complex prediction task.
+Performance is probabilistically influenced by many processes, including processes internal to the player in addition to external processes.
+Moreover, people's performance occurs in the context of a dynamic system with nonlinear, probabilistic, and cascading influences that change across time.
+The ever-changing system makes behavior challenging to predict.
+And, similar to chaos theory, one small change in the system can lead to large differences later on.
+
+Let's consider a prediction example, assuming the following probabilities:
+
+- The probability of contracting HIV is .3%
+- The probability of a positive test for HIV is 1%
+- The probability of a positive test if you have HIV is 95%
+
+What is the probability of HIV if you have a positive test?
+
+As we will see, the probability is: $\frac{95\% \times .3\%}{1\%} = 28.5\%$.
+So based on the above probabilities, if you have a positive test, the probability that you have HIV is 28.5%.
+Most people tend to vastly overestimate the likelihood that the person has HIV in this example.
+Why?
+Because they do not pay enough attention to the base rate (in this example, the base rate of HIV is .3%).
+
+## Issues Around Probability {#sec-probability}
+
+### Types of Probabilities {#sec-probabilityTypes}
+
+It is important to distinguish between different types of probabilities: marginal probabilities, joint probabilities, and conditional probabilities.
+
+#### Base Rate (Marginal Probability) {#sec-baseRate}
 
 The *base rate* is a marginal probability, which is the general probability of an event irrespective of other things.
 For instance, the base rate of HIV is the probability of developing HIV.
 In the U.S., [the prevalence rate of HIV is ~0.4% of the adult population](https://map.aidsvu.org/profiles/nation/usa/overview) (archived at <https://perma.cc/8GE6-GAPC>).
+
+For instance, we can consider the following marginal probabilities:
+
+$P(C_i)$ is the probability (i.e., base rate) of a classification, $C$, independent of other things.
+A base rate is often used as the "*prior probability*" in a Bayesian model.
+In our example above, $P(C_i)$ is the base rate (i.e., prevalence) of HIV in the population: $P(\text{HIV}) = .3\%$.
+$P(R_i)$ is the probability (base rate) of a response, $R$, independent of other things.
+In the example above, $P(R_i)$ is the base rate of a positive test for HIV: $P(\text{positive test}) = 1\%$.
+The base rate of a positive test is known as the *positivity rate* or *selection ratio*.
+
+#### Joint Probability {#sec-jointProbability}
+
+A *joint probability* is the probability of two (or more) events occurring simultaneously.
+For instance, the probability of events $A$ and $B$ both occurring together is $P(A, B)$.
+A joint probability can be calculated using the [marginal probability](#sec-baseRate) of each event, as in @eq-jointProbability:
+
+$$
+P(A, B) = P(A) \cdot P(B)
+$$ {#eq-jointProbability}
+
+Conversely (and rearranging the terms for the calculation of [conditional probability](#sec-conditionalProbability)), a [joint probability](#sec-jointProbability) can also be calculated using the [conditional probability](#sec-conditionalProbability) and [marginal probability](#sec-baseRate), as in @jointProbability2:
+
+$$
+P(A, B) = P(A | B) \cdot P(B)
+$$ {#eq-jointProbability2}
+
+#### Conditional Probability {#sec-conditionalProbability}
+
+A *conditional probability* is the probability of one event occurring given the occurrence of another event.
+Conditional probabilities are written as: $P(A | B)$.
+This is read as the probability that event $A$ occurs given that event $B$ occurred.
+For instance, we can consider the following conditional probabilities:
+
+$P(C | R)$ is the probability of a classification, $C$, given a response, $R$.
+In other words, $P(C | R)$ is the probability of having HIV given a positive test: $P(\text{HIV} | \text{positive test})$.
+$P(R | C)$ is the probability of a response, $R$, given a classification, $C$.
+In the example above, $P(R | C)$ is the probability of having a positive test given that a person has HIV: $P(\text{positive test} | \text{HIV}) = 95\%$.
+
+A conditional probability can be calculated using the [joint probability](#sec-jointProbability) and [marginal probability](#sec-baseRate) (base rate), as in @eq-conditionalProbability:
+
+$$
+P(A, B) = P(A | B) \cdot P(B)
+$$ {#eq-conditionalProbability}
+
+### Confusion of the Inverse {#sec-inverseFallacy}
+
+A [conditional probability](#sec-conditionalProbability) is not the same thing as its reverse (or inverse) [conditional probability](#sec-conditionalProbability).
+Unless the [base rate](#sec-baseRate) of the two events ($C$ and $R$) are the same, $P(C | R) \neq P(R | C)$.
+However, people frequently make the mistake of thinking that two inverse [conditional probabilities](#sec-conditionalProbability) are the same.
+This mistake is known as the "confusion of the inverse", or the "inverse fallacy", or the "conditional probability fallacy".
+The confusion of inverse probabilities is the logical error of representative thinking that leads people to assume that the probability of $C$ given $R$ is the same as the probability of $R$ given C, even though this is not true.
+As a few examples to demonstrate the logical fallacy, if 93% of breast cancers occur in high-risk women, this does not mean that 93% of high-risk women will eventually get breast cancer.
+As another example, if 77% of car accidents take place within 15 miles of a driver's home, this does not mean that you will get in an accident 77% of times you drive within 15 miles of your home.
+
+Which car is the most frequently stolen?
+It is often the Honda Accord or Honda Civic—probably because they are among the most popular/commonly available cars.
+The probability that the car is a Honda Accord given that a car was stolen ($p(\text{Honda Accord } | \text{ Stolen})$) is what the media reports and what the police care about.
+However, that is not what buyers and car insurance companies should care about.
+Instead, they care about the probability that the car will be stolen given that it is a Honda Accord ($p(\text{Stolen } | \text{ Honda Accord})$).
+
+Applied to fantasy football, the probability that a given player will be injured given that he is a Running Back ($p(\text{Injured } | \text{ RB})$) is not the same as the probability that a given player is a Running Back given that he is injured ($p(\text{RB } | \text{ Injured})$).
+
+### Bayes' Theorem {#sec-bayesTheorem}
+
+An alternative way of calculating a [conditional probability](#sec-conditionalProbability) is using the inverse [conditional probability](#sec-conditionalProbability) (instead of the [joint probability](#sec-jointProbability)).
+This is known as Bayes' theorem.
+Bayes' theorem can help us calculate a [conditional probability](#sec-conditionalProbability) of some classification, $C$, given some response, $R$, if we know the inverse [conditional probability](#sec-conditionalProbability) and the [base rate](#sec-baseRate) (marginal probability) of each.
+Bayes' theorem is in @eq-bayes1:
+
+$$
+\begin{aligned}
+  P(C | R) &= \frac{P(R | C) \cdot P(C_i)}{P(R_i)}
+\end{aligned}
+$$ {#eq-bayes1}
+
+Or, equivalently (rearranging the terms):
+
+$$
+\begin{aligned}
+  \frac{P(C | R)}{P(R | C)} = \frac{P(C_i)}{P(R_i)}
+\end{aligned}
+$$ {#eq-bayes2}
+
+Or, equivalently (rearranging the terms):
+
+$$
+\begin{aligned}
+  \frac{P(C | R)}{P(C_i)} = \frac{P(R | C)}{P(R_i)}
+\end{aligned}
+$$ {#eq-bayes3}
+
+More generally, Bayes' theorem has been described as:
+
+$$
+\begin{aligned}
+  P(H | E) &= \frac{P(E | H) \cdot P(H)}{P(E)} \\
+  \text{posterior probability} &= \frac{\text{likelihood} \times \text{prior probability}}{\text{model evidence}}
+\end{aligned}
+$$ {#eq-bayes6}
+
+where $H$ is the hypothesis, and $E$ is the evidence—the new information that was not used in computing the prior probability.
+
+In Bayesian terms, the *posterior probability* is the conditional probability of one event occurring given another event—it is the updated probability after the evidence is considered.
+In this case, the posterior probability is the probability of the classification occurring ($C$) given the response ($R$).
+The *likelihood* is the inverse conditional probability—the probability of the response ($R$) occurring given the classification ($C$).
+The *prior probability* is the marginal probability of the event (i.e., the classification) occurring, before we take into account any new information.
+The *model evidence* is the marginal probability of the other event occurring—i.e., the marginal probability of seeing the evidence.
+
+Bayes' theorem provides the foundation for a paradigm of statistics called Bayesian statistics, which (unlike frequentist statistics) does not use *p*-values.
+
+In the HIV example above, we can calculate the [conditional probability](#sec-conditionalProbability) of HIV given a positive test using three terms: the [conditional probability](#sec-conditionalProbability) of a positive test given HIV (i.e., the sensitivity of the test), the [base rate](#sec-baseRate) of HIV, and the [base rate](#sec-baseRate) of a positive test for HIV.
+The [conditional probability](#sec-conditionalProbability) of HIV given a positive test is in @eq-hivExample1:
+
+$$
+\begin{aligned}
+  P(C | R) &= \frac{P(R | C) \cdot P(C_i)}{P(R_i)} \\
+  P(\text{HIV} | \text{positive test}) &= \frac{P(\text{positive test} | \text{HIV}) \cdot P(\text{HIV})}{P(\text{positive test})} \\
+  &= \frac{\text{sensitivity of test} \times \text{base rate of HIV}}{\text{base rate of positive test}} \\
+  &= \frac{95\% \times .3\%}{1\%} = \frac{.95 \times .003}{.01}\\
+  &= 28.5\%
+\end{aligned}
+$$ {#eq-hivExample1}
+
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `pAgivenB()` function that estimates the probability of one event, $A$, given another event, $B$.
+
+```{r}
+petersenlab::pAgivenB(pBgivenA = .95, pA = .003, pB = .01)
+```
+
+Thus, assuming the probabilities in the example above, the [conditional probability](#conditionalProbability) of having HIV if a person has a positive test is 28.5%.
+Given a positive test, chances are higher than not that the person does not have HIV.
+
+Now let's see what happens if the person tests positive a second time.
+We would revise our "[prior probability](#sec-baseRate)" for HIV from the general prevalence in the population (0.3%) to be the "posterior probability" of HIV given a first positive test (28.5%).
+This is known as *Bayesian updating*.
+We would also update the "evidence" to be the [marginal probability](#sec-baseRate) of getting a second positive test.
+
+If we do not know a [marginal probability](#sec-baseRate) (i.e., base rate) of an event (e.g., getting a second positive test), we can calculate a [marginal probability](#sec-baseRate) with the *law of total probability* using [conditional probabilities](#sec-conditionalProbability) and the [marginal probability](#sec-baseRate) of another event (e.g., having HIV).
+According to the law of total probability, the probability of getting a positive test is the probability that a person with HIV gets a positive test (i.e., sensitivity) times the base rate of HIV plus the probability that a person without HIV gets a positive test (i.e., false positive rate) times the [base rate](#sec-baseRate) of not having HIV, as in @eq-lawOfTotalProbability:
+
+$$
+\begin{aligned}
+ P(\text{not } C_i) &= 1 - P(C_i) \\
+  P(R_i) &= P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i) \\
+  1\% &= 95\% \times .3\% + P(R | \text{not } C) \times 99.7\% \\
+\end{aligned}
+$$ {#eq-lawOfTotalProbability}
+
+In this case, we know the [marginal probability](#sec-baseRate) ($P(R_i)$), and we can use that to solve for the unknown [conditional probability](#sec-conditionalProbability) that reflects the [false positive rate](#sec-falsePositiveRate) ($P(R | \text{not } C)$), as in @eq-conditionalProbabilityRevised:
+
+$$
+\scriptsize
+\begin{aligned}
+  P(R_i) &= P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i) && \\
+  P(R_i) - [P(R | \text{not } C) \cdot P(\text{not } C_i)] &= P(R | C) \cdot P(C_i) && \text{Move } P(R | \text{not } C) \text{ to the left side} \\
+  - [P(R | \text{not } C) \cdot P(\text{not } C_i)] &= P(R | C) \cdot P(C_i) - P(R_i) && \text{Move } P(R_i) \text{ to the right side} \\
+  P(R | \text{not } C) \cdot P(\text{not } C_i) &= P(R_i) - [P(R | C) \cdot P(C_i)] && \text{Multiply by } -1 \\
+  P(R | \text{not } C) &= \frac{P(R_i) - [P(R | C) \cdot P(C_i)]}{P(\text{not } C_i)} && \text{Divide by } P(R | \text{not } C) \\
+  &= \frac{1\% - [95\% \times .3\%]}{99.7\%} = \frac{.01 - [.95 \times .003]}{.997}\\
+  &= .7171515\% \\
+\end{aligned}
+$$ {#eq-conditionalProbabilityRevised}
+
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `pBgivenNotA()` function that estimates the probability of one event, $B$, given that another event, $A$, did not occur.
+
+```{r}
+petersenlab::pBgivenNotA(pBgivenA = .95, pA = .003, pB = .01)
+```
+
+With this [conditional probability](#sec-conditionalProbability) ($P(R | \text{not } C)$), the updated [marginal probability](#sec-baseRate) of having HIV ($P(C_i)$), and the updated marginal probability of not having HIV ($P(\text{not } C_i)$), we can now calculate an updated estimate of the [marginal probability](#sec-baseRate) of getting a second positive test.
+The probability of getting a second positive test is the probability that a person with HIV gets a second positive test (i.e., sensitivity) times the updated probability of HIV plus the probability that a person without HIV gets a second positive test (i.e., false positive rate) times the updated probability of not having HIV, as in @eq-baseRateUpdated:
+
+$$
+\begin{aligned}
+  P(R_{i}) &= P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i) \\
+  &= 95\% \times 28.5\% + .7171515\% \times 71.5\% = .95 \times .285 + .007171515 \times .715 \\
+  &= 27.58776\%
+\end{aligned}
+$$ {#eq-baseRateUpdated}
+
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `pB()` function that estimates the marginal probability of one event, $B$.
+
+```{r}
+petersenlab::pB(pBgivenA = .95, pA = .285, pBgivenNotA = .007171515)
+```
+
+We then substitute the updated [marginal probability](#sec-baseRate) of HIV ($P(C_i)$) and the updated [marginal probability](#sec-baseRate) of getting a second positive test ($P(R_i)$) into Bayes' theorem to get the probability that the person has HIV if they have a second positive test (assuming the errors of each test are independent, i.e., uncorrelated), as in @eq-baseRateUpdated2:
+
+$$
+\begin{aligned}
+  P(C | R) &= \frac{P(R | C) \cdot P(C_i)}{P(R_i)} \\
+  P(\text{HIV} | \text{a second positive test}) &= \frac{P(\text{a second positive test} | \text{HIV}) \cdot P(\text{HIV})}{P(\text{a second positive test})} \\
+  &= \frac{\text{sensitivity of test} \times \text{updated base rate of HIV}}{\text{updated base rate of positive test}} \\
+  &= \frac{95\% \times 28.5\%}{27.58776\%} \\
+  &= 98.14\%
+\end{aligned}
+$$ {#eq-baseRateUpdated2}
+
+The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `pAgivenB()` function that estimates the probability of one event, $A$, given another event, $B$.
+
+```{r}
+pAgivenB(pBgivenA = .95, pA = .285, pB = .2758776)
+```
+
+Thus, a second positive test greatly increases the posterior probability that the person has HIV from 28.5% to over 98%.
+
+As seen in the rearranged formula in @eq-bayes2, the ratio of the [conditional probabilities](#sec-conditionalProbability) is equal to the ratio of the [base rates](#sec-baseRate).
+Thus, it is important to consider [base rates](#sec-baseRate).
+People have a strong tendency to ignore (or give insufficient weight to) [base rates](#sec-baseRate) when making predictions.
+The failure to consider the [base rate](#sec-baseRate) when making predictions when given specific information about a case is known as the [base-rate fallacy](#sec-fallaciesBaseRate) or as [base rate neglect](#sec-fallaciesBaseRate).
+For example, people tend to say that the probability of a rare event is more likely than it actually is given specific information.
+
+As seen in the rearranged formula in @eq-bayes3, the inverse [conditional probabilities](#sec-conditionalProbability) ($P(C | R)$ and $P(R | C)$) are not equal unless the [base rates](#sec-baseRate) of $C$ and $R$ are the same.
+If the [base rates](#sec-baseRate) are not equal, we are making at least some prediction errors.
+If $P(C_i) > P(R_i)$, our predictions must include some false negatives.
+If $P(R_i) > P(C_i)$, our predictions must include some false positives.
+
+In sum, the [marginal probability](#sec-baseRate), including the [prior probability](#sec-baseRate) or [base rate](#sec-baseRate), should be weighed heavily in predictions unless there are sufficient data to indicate otherwise, i.e., to update the posterior probability based on new evidence.
+Bayes' theorem provides a powerful tool to anchor predictions to the [base rate](#sec-baseRate) unless sufficient evidence changes the posterior probability (by updating the evidence and [prior probability](#sec-baseRate)).
+
+## Base Rate of Rookie Performance {#sec-baseRateRookiePerformance}
+
+### Quarterbacks {#sec-baseRateRookiePerformanceQBs}
+
+### Running Backs {#sec-baseRateRookiePerformanceRBs}
+
+## How to Account for Base Rates {#sec-accountForBaseRates}
 
 ## Conclusion {#sec-baseRatesConclusion}
 
