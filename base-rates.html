@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.54">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Isaac T. Petersen">
+<meta name="dcterms.date" content="today">
+<title>13&nbsp; Base Rates – Fantasy Football Analytics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./actuarial.html" rel="prev">
+<link href="./images/logo.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-C3SNF7Y0PJ"></script><script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
+</script><script type="application/json" class="js-hypothesis-config">
+{
+  "theme": "clean",
+  "openSidebar": false
+}
+</script><script async="" src="https://hypothes.is/embed.js"></script><script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./base-rates.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Base Rates</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Fantasy Football Analytics</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./fantasy-football.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Intro to Football and Fantasy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started with <code>R</code> for Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./player-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Player Evaluation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./draft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">The Fantasy Draft</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./research-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Research Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./basic-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Basic Statistics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Correlation Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Multiple Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cognitive-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Heuristics and Cognitive Biases in Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./actuarial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Judgment Versus Actuarial Approaches to Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./base-rates.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Base Rates</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#sec-baseRatesGettingStarted" id="toc-sec-baseRatesGettingStarted" class="nav-link active" data-scroll-target="#sec-baseRatesGettingStarted"><span class="header-section-number">13.1</span> Getting Started</a>
+  <ul>
+<li><a href="#sec-baseRatesLoadPackages" id="toc-sec-baseRatesLoadPackages" class="nav-link" data-scroll-target="#sec-baseRatesLoadPackages"><span class="header-section-number">13.1.1</span> Load Packages</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-baseRatesOverview" id="toc-sec-baseRatesOverview" class="nav-link" data-scroll-target="#sec-baseRatesOverview"><span class="header-section-number">13.2</span> Overview</a></li>
+  <li>
+<a href="#sec-probability" id="toc-sec-probability" class="nav-link" data-scroll-target="#sec-probability"><span class="header-section-number">13.3</span> Issues Around Probability</a>
+  <ul>
+<li>
+<a href="#sec-probabilityTypes" id="toc-sec-probabilityTypes" class="nav-link" data-scroll-target="#sec-probabilityTypes"><span class="header-section-number">13.3.1</span> Types of Probabilities</a>
+  <ul class="collapse">
+<li><a href="#sec-baseRate" id="toc-sec-baseRate" class="nav-link" data-scroll-target="#sec-baseRate"><span class="header-section-number">13.3.1.1</span> Base Rate (Marginal Probability)</a></li>
+  <li><a href="#sec-jointProbability" id="toc-sec-jointProbability" class="nav-link" data-scroll-target="#sec-jointProbability"><span class="header-section-number">13.3.1.2</span> Joint Probability</a></li>
+  <li><a href="#sec-conditionalProbability" id="toc-sec-conditionalProbability" class="nav-link" data-scroll-target="#sec-conditionalProbability"><span class="header-section-number">13.3.1.3</span> Conditional Probability</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-inverseFallacy" id="toc-sec-inverseFallacy" class="nav-link" data-scroll-target="#sec-inverseFallacy"><span class="header-section-number">13.3.2</span> Confusion of the Inverse</a></li>
+  <li><a href="#sec-bayesTheorem" id="toc-sec-bayesTheorem" class="nav-link" data-scroll-target="#sec-bayesTheorem"><span class="header-section-number">13.3.3</span> Bayes’ Theorem</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-baseRateRookiePerformance" id="toc-sec-baseRateRookiePerformance" class="nav-link" data-scroll-target="#sec-baseRateRookiePerformance"><span class="header-section-number">13.4</span> Base Rate of Rookie Performance</a>
+  <ul>
+<li><a href="#sec-baseRateRookiePerformanceQBs" id="toc-sec-baseRateRookiePerformanceQBs" class="nav-link" data-scroll-target="#sec-baseRateRookiePerformanceQBs"><span class="header-section-number">13.4.1</span> Quarterbacks</a></li>
+  <li><a href="#sec-baseRateRookiePerformanceRBs" id="toc-sec-baseRateRookiePerformanceRBs" class="nav-link" data-scroll-target="#sec-baseRateRookiePerformanceRBs"><span class="header-section-number">13.4.2</span> Running Backs</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-accountForBaseRates" id="toc-sec-accountForBaseRates" class="nav-link" data-scroll-target="#sec-accountForBaseRates"><span class="header-section-number">13.5</span> How to Account for Base Rates</a></li>
+  <li><a href="#sec-baseRatesConclusion" id="toc-sec-baseRatesConclusion" class="nav-link" data-scroll-target="#sec-baseRatesConclusion"><span class="header-section-number">13.6</span> Conclusion</a></li>
+  <li><a href="#sec-baseRatesSessionInfo" id="toc-sec-baseRatesSessionInfo" class="nav-link" data-scroll-target="#sec-baseRatesSessionInfo"><span class="header-section-number">13.7</span> Session Info</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/base-rates.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><div class="alert alert-info hints-alert">
+  <div class="hints-icon">
+    <i class="fa fa-comments-o"></i>
+  </div>
+  <div class="hints-container">
+    <b>I need your help!</b>
+    <p>
+    I want your feedback to make the book better for you and other readers. If you find typos, errors, or places where the text may be improved, please let me know.
+    The best ways to provide feedback are by <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">GitHub</a> or <a href="https://hypothes.is">hypothes.is</a> annotations.
+    </p>
+
+    <p>
+      <i class="fa fa-github"></i>
+      <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues">Opening an issue</a> or <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/pulls">submitting a pull request</a> on GitHub: <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook</a>
+    </p>
+    <p>
+      <img style="display: inline;" src="https://hypothes.is/organizations/__default__/logo" alt="Hypothesis">
+      Adding an annotation using <a href="https://hypothes.is">hypothes.is</a>.
+      To add an annotation, <span style="background-color: #3297FD; color: white">select some text</span> and then click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class="annotator-adder-actions__icon"><path fill="currentColor" fill-rule="nonzero" d="M15 0c.27 0 .505.099.703.297A.961.961 0 0116 1v15l-4-3H1a.974.974 0 01-.703-.29A.953.953 0 010 12V1C0 .719.096.482.29.29A.966.966 0 011 0h14zM7 3l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C4.156 5.229 4 6 4 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188C4.729 8.854 5.082 9 5.5 9c.417 0 .77-.146 1.063-.438C6.854 8.271 7 7.918 7 7.5c0-.417-.146-.77-.438-1.063A1.447 1.447 0 005.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L7 4V3zm5 0l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C9.156 5.229 9 6 9 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188c.291.291.645.437 1.062.437.417 0 .77-.146 1.063-.438.291-.291.437-.645.437-1.062 0-.417-.146-.77-.438-1.063A1.447 1.447 0 0010.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L12 4V3z"></path></svg></span>
+      symbol on the pop-up menu.
+      To see the annotations of others, click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class=""><g fill-rule="evenodd"><rect fill="none" stroke="none" x="0" y="0" width="16" height="16"></rect><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12L6 8l4-4"></path></g></svg></span>
+      symbol in the upper right-hand corner of the page.
+    </p>
+  </div>
+</div>
+
+<header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-baseRates" class="quarto-section-identifier"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Base Rates</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="sec-baseRatesGettingStarted" class="level2" data-number="13.1"><h2 data-number="13.1" class="anchored" data-anchor-id="sec-baseRatesGettingStarted">
+<span class="header-section-number">13.1</span> Getting Started</h2>
+<section id="sec-baseRatesLoadPackages" class="level3" data-number="13.1.1"><h3 data-number="13.1.1" class="anchored" data-anchor-id="sec-baseRatesLoadPackages">
+<span class="header-section-number">13.1.1</span> Load Packages</h3>
+</section></section><section id="sec-baseRatesOverview" class="level2" data-number="13.2"><h2 data-number="13.2" class="anchored" data-anchor-id="sec-baseRatesOverview">
+<span class="header-section-number">13.2</span> Overview</h2>
+<p>Player performance is a complex prediction task. Performance is probabilistically influenced by many processes, including processes internal to the player in addition to external processes. Moreover, people’s performance occurs in the context of a dynamic system with nonlinear, probabilistic, and cascading influences that change across time. The ever-changing system makes behavior challenging to predict. And, similar to chaos theory, one small change in the system can lead to large differences later on.</p>
+<p>Let’s consider a prediction example, assuming the following probabilities:</p>
+<ul>
+<li>The probability of contracting HIV is .3%</li>
+<li>The probability of a positive test for HIV is 1%</li>
+<li>The probability of a positive test if you have HIV is 95%</li>
+</ul>
+<p>What is the probability of HIV if you have a positive test?</p>
+<p>As we will see, the probability is: <span class="math inline">\(\frac{95\% \times .3\%}{1\%} = 28.5\%\)</span>. So based on the above probabilities, if you have a positive test, the probability that you have HIV is 28.5%. Most people tend to vastly overestimate the likelihood that the person has HIV in this example. Why? Because they do not pay enough attention to the base rate (in this example, the base rate of HIV is .3%).</p>
+</section><section id="sec-probability" class="level2" data-number="13.3"><h2 data-number="13.3" class="anchored" data-anchor-id="sec-probability">
+<span class="header-section-number">13.3</span> Issues Around Probability</h2>
+<section id="sec-probabilityTypes" class="level3" data-number="13.3.1"><h3 data-number="13.3.1" class="anchored" data-anchor-id="sec-probabilityTypes">
+<span class="header-section-number">13.3.1</span> Types of Probabilities</h3>
+<p>It is important to distinguish between different types of probabilities: marginal probabilities, joint probabilities, and conditional probabilities.</p>
+<section id="sec-baseRate" class="level4" data-number="13.3.1.1"><h4 data-number="13.3.1.1" class="anchored" data-anchor-id="sec-baseRate">
+<span class="header-section-number">13.3.1.1</span> Base Rate (Marginal Probability)</h4>
+<p>The <em>base rate</em> is a marginal probability, which is the general probability of an event irrespective of other things. For instance, the base rate of HIV is the probability of developing HIV. In the U.S., <a href="https://map.aidsvu.org/profiles/nation/usa/overview">the prevalence rate of HIV is ~0.4% of the adult population</a> (archived at <a href="https://perma.cc/8GE6-GAPC" class="uri">https://perma.cc/8GE6-GAPC</a>).</p>
+<p>For instance, we can consider the following marginal probabilities:</p>
+<p><span class="math inline">\(P(C_i)\)</span> is the probability (i.e., base rate) of a classification, <span class="math inline">\(C\)</span>, independent of other things. A base rate is often used as the “<em>prior probability</em>” in a Bayesian model. In our example above, <span class="math inline">\(P(C_i)\)</span> is the base rate (i.e., prevalence) of HIV in the population: <span class="math inline">\(P(\text{HIV}) = .3\%\)</span>. <span class="math inline">\(P(R_i)\)</span> is the probability (base rate) of a response, <span class="math inline">\(R\)</span>, independent of other things. In the example above, <span class="math inline">\(P(R_i)\)</span> is the base rate of a positive test for HIV: <span class="math inline">\(P(\text{positive test}) = 1\%\)</span>. The base rate of a positive test is known as the <em>positivity rate</em> or <em>selection ratio</em>.</p>
+</section><section id="sec-jointProbability" class="level4" data-number="13.3.1.2"><h4 data-number="13.3.1.2" class="anchored" data-anchor-id="sec-jointProbability">
+<span class="header-section-number">13.3.1.2</span> Joint Probability</h4>
+<p>A <em>joint probability</em> is the probability of two (or more) events occurring simultaneously. For instance, the probability of events <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> both occurring together is <span class="math inline">\(P(A, B)\)</span>. A joint probability can be calculated using the <a href="#sec-baseRate">marginal probability</a> of each event, as in <a href="#eq-jointProbability" class="quarto-xref">Equation&nbsp;<span>13.1</span></a>:</p>
+<p><span id="eq-jointProbability"><span class="math display">\[
+P(A, B) = P(A) \cdot P(B)
+\tag{13.1}\]</span></span></p>
+<p>Conversely (and rearranging the terms for the calculation of <a href="#sec-conditionalProbability">conditional probability</a>), a <a href="#sec-jointProbability">joint probability</a> can also be calculated using the <a href="#sec-conditionalProbability">conditional probability</a> and <a href="#sec-baseRate">marginal probability</a>, as in <span class="citation" data-cites="jointProbability2">(<a href="references.html#ref-jointProbability2" role="doc-biblioref"><strong>jointProbability2?</strong></a>)</span>:</p>
+<p><span id="eq-jointProbability2"><span class="math display">\[
+P(A, B) = P(A | B) \cdot P(B)
+\tag{13.2}\]</span></span></p>
+</section><section id="sec-conditionalProbability" class="level4" data-number="13.3.1.3"><h4 data-number="13.3.1.3" class="anchored" data-anchor-id="sec-conditionalProbability">
+<span class="header-section-number">13.3.1.3</span> Conditional Probability</h4>
+<p>A <em>conditional probability</em> is the probability of one event occurring given the occurrence of another event. Conditional probabilities are written as: <span class="math inline">\(P(A | B)\)</span>. This is read as the probability that event <span class="math inline">\(A\)</span> occurs given that event <span class="math inline">\(B\)</span> occurred. For instance, we can consider the following conditional probabilities:</p>
+<p><span class="math inline">\(P(C | R)\)</span> is the probability of a classification, <span class="math inline">\(C\)</span>, given a response, <span class="math inline">\(R\)</span>. In other words, <span class="math inline">\(P(C | R)\)</span> is the probability of having HIV given a positive test: <span class="math inline">\(P(\text{HIV} | \text{positive test})\)</span>. <span class="math inline">\(P(R | C)\)</span> is the probability of a response, <span class="math inline">\(R\)</span>, given a classification, <span class="math inline">\(C\)</span>. In the example above, <span class="math inline">\(P(R | C)\)</span> is the probability of having a positive test given that a person has HIV: <span class="math inline">\(P(\text{positive test} | \text{HIV}) = 95\%\)</span>.</p>
+<p>A conditional probability can be calculated using the <a href="#sec-jointProbability">joint probability</a> and <a href="#sec-baseRate">marginal probability</a> (base rate), as in <a href="#eq-conditionalProbability" class="quarto-xref">Equation&nbsp;<span>13.3</span></a>:</p>
+<p><span id="eq-conditionalProbability"><span class="math display">\[
+P(A, B) = P(A | B) \cdot P(B)
+\tag{13.3}\]</span></span></p>
+</section></section><section id="sec-inverseFallacy" class="level3" data-number="13.3.2"><h3 data-number="13.3.2" class="anchored" data-anchor-id="sec-inverseFallacy">
+<span class="header-section-number">13.3.2</span> Confusion of the Inverse</h3>
+<p>A <a href="#sec-conditionalProbability">conditional probability</a> is not the same thing as its reverse (or inverse) <a href="#sec-conditionalProbability">conditional probability</a>. Unless the <a href="#sec-baseRate">base rate</a> of the two events (<span class="math inline">\(C\)</span> and <span class="math inline">\(R\)</span>) are the same, <span class="math inline">\(P(C | R) \neq P(R | C)\)</span>. However, people frequently make the mistake of thinking that two inverse <a href="#sec-conditionalProbability">conditional probabilities</a> are the same. This mistake is known as the “confusion of the inverse”, or the “inverse fallacy”, or the “conditional probability fallacy”. The confusion of inverse probabilities is the logical error of representative thinking that leads people to assume that the probability of <span class="math inline">\(C\)</span> given <span class="math inline">\(R\)</span> is the same as the probability of <span class="math inline">\(R\)</span> given C, even though this is not true. As a few examples to demonstrate the logical fallacy, if 93% of breast cancers occur in high-risk women, this does not mean that 93% of high-risk women will eventually get breast cancer. As another example, if 77% of car accidents take place within 15 miles of a driver’s home, this does not mean that you will get in an accident 77% of times you drive within 15 miles of your home.</p>
+<p>Which car is the most frequently stolen? It is often the Honda Accord or Honda Civic—probably because they are among the most popular/commonly available cars. The probability that the car is a Honda Accord given that a car was stolen (<span class="math inline">\(p(\text{Honda Accord } | \text{ Stolen})\)</span>) is what the media reports and what the police care about. However, that is not what buyers and car insurance companies should care about. Instead, they care about the probability that the car will be stolen given that it is a Honda Accord (<span class="math inline">\(p(\text{Stolen } | \text{ Honda Accord})\)</span>).</p>
+<p>Applied to fantasy football, the probability that a given player will be injured given that he is a Running Back (<span class="math inline">\(p(\text{Injured } | \text{ RB})\)</span>) is not the same as the probability that a given player is a Running Back given that he is injured (<span class="math inline">\(p(\text{RB } | \text{ Injured})\)</span>).</p>
+</section><section id="sec-bayesTheorem" class="level3" data-number="13.3.3"><h3 data-number="13.3.3" class="anchored" data-anchor-id="sec-bayesTheorem">
+<span class="header-section-number">13.3.3</span> Bayes’ Theorem</h3>
+<p>An alternative way of calculating a <a href="#sec-conditionalProbability">conditional probability</a> is using the inverse <a href="#sec-conditionalProbability">conditional probability</a> (instead of the <a href="#sec-jointProbability">joint probability</a>). This is known as Bayes’ theorem. Bayes’ theorem can help us calculate a <a href="#sec-conditionalProbability">conditional probability</a> of some classification, <span class="math inline">\(C\)</span>, given some response, <span class="math inline">\(R\)</span>, if we know the inverse <a href="#sec-conditionalProbability">conditional probability</a> and the <a href="#sec-baseRate">base rate</a> (marginal probability) of each. Bayes’ theorem is in <a href="#eq-bayes1" class="quarto-xref">Equation&nbsp;<span>13.4</span></a>:</p>
+<p><span id="eq-bayes1"><span class="math display">\[
+\begin{aligned}
+  P(C | R) &amp;= \frac{P(R | C) \cdot P(C_i)}{P(R_i)}
+\end{aligned}
+\tag{13.4}\]</span></span></p>
+<p>Or, equivalently (rearranging the terms):</p>
+<p><span id="eq-bayes2"><span class="math display">\[
+\begin{aligned}
+  \frac{P(C | R)}{P(R | C)} = \frac{P(C_i)}{P(R_i)}
+\end{aligned}
+\tag{13.5}\]</span></span></p>
+<p>Or, equivalently (rearranging the terms):</p>
+<p><span id="eq-bayes3"><span class="math display">\[
+\begin{aligned}
+  \frac{P(C | R)}{P(C_i)} = \frac{P(R | C)}{P(R_i)}
+\end{aligned}
+\tag{13.6}\]</span></span></p>
+<p>More generally, Bayes’ theorem has been described as:</p>
+<p><span id="eq-bayes6"><span class="math display">\[
+\begin{aligned}
+  P(H | E) &amp;= \frac{P(E | H) \cdot P(H)}{P(E)} \\
+  \text{posterior probability} &amp;= \frac{\text{likelihood} \times \text{prior probability}}{\text{model evidence}}
+\end{aligned}
+\tag{13.7}\]</span></span></p>
+<p>where <span class="math inline">\(H\)</span> is the hypothesis, and <span class="math inline">\(E\)</span> is the evidence—the new information that was not used in computing the prior probability.</p>
+<p>In Bayesian terms, the <em>posterior probability</em> is the conditional probability of one event occurring given another event—it is the updated probability after the evidence is considered. In this case, the posterior probability is the probability of the classification occurring (<span class="math inline">\(C\)</span>) given the response (<span class="math inline">\(R\)</span>). The <em>likelihood</em> is the inverse conditional probability—the probability of the response (<span class="math inline">\(R\)</span>) occurring given the classification (<span class="math inline">\(C\)</span>). The <em>prior probability</em> is the marginal probability of the event (i.e., the classification) occurring, before we take into account any new information. The <em>model evidence</em> is the marginal probability of the other event occurring—i.e., the marginal probability of seeing the evidence.</p>
+<p>Bayes’ theorem provides the foundation for a paradigm of statistics called Bayesian statistics, which (unlike frequentist statistics) does not use <em>p</em>-values.</p>
+<p>In the HIV example above, we can calculate the <a href="#sec-conditionalProbability">conditional probability</a> of HIV given a positive test using three terms: the <a href="#sec-conditionalProbability">conditional probability</a> of a positive test given HIV (i.e., the sensitivity of the test), the <a href="#sec-baseRate">base rate</a> of HIV, and the <a href="#sec-baseRate">base rate</a> of a positive test for HIV. The <a href="#sec-conditionalProbability">conditional probability</a> of HIV given a positive test is in <a href="#eq-hivExample1" class="quarto-xref">Equation&nbsp;<span>13.8</span></a>:</p>
+<p><span id="eq-hivExample1"><span class="math display">\[
+\begin{aligned}
+  P(C | R) &amp;= \frac{P(R | C) \cdot P(C_i)}{P(R_i)} \\
+  P(\text{HIV} | \text{positive test}) &amp;= \frac{P(\text{positive test} | \text{HIV}) \cdot P(\text{HIV})}{P(\text{positive test})} \\
+  &amp;= \frac{\text{sensitivity of test} \times \text{base rate of HIV}}{\text{base rate of positive test}} \\
+  &amp;= \frac{95\% \times .3\%}{1\%} = \frac{.95 \times .003}{.01}\\
+  &amp;= 28.5\%
+\end{aligned}
+\tag{13.8}\]</span></span></p>
+<p>The <a href="https://cran.r-project.org/web/packages/petersenlab/index.html"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024</a>)</span> contains the <code>pAgivenB()</code> function that estimates the probability of one event, <span class="math inline">\(A\)</span>, given another event, <span class="math inline">\(B\)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>petersenlab<span class="sc">::</span><span class="fu">pAgivenB</span>(<span class="at">pBgivenA =</span> .<span class="dv">95</span>, <span class="at">pA =</span> .<span class="dv">003</span>, <span class="at">pB =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.285</code></pre>
+</div>
+</div>
+<p>Thus, assuming the probabilities in the example above, the <a href="#conditionalProbability">conditional probability</a> of having HIV if a person has a positive test is 28.5%. Given a positive test, chances are higher than not that the person does not have HIV.</p>
+<p>Now let’s see what happens if the person tests positive a second time. We would revise our “<a href="#sec-baseRate">prior probability</a>” for HIV from the general prevalence in the population (0.3%) to be the “posterior probability” of HIV given a first positive test (28.5%). This is known as <em>Bayesian updating</em>. We would also update the “evidence” to be the <a href="#sec-baseRate">marginal probability</a> of getting a second positive test.</p>
+<p>If we do not know a <a href="#sec-baseRate">marginal probability</a> (i.e., base rate) of an event (e.g., getting a second positive test), we can calculate a <a href="#sec-baseRate">marginal probability</a> with the <em>law of total probability</em> using <a href="#sec-conditionalProbability">conditional probabilities</a> and the <a href="#sec-baseRate">marginal probability</a> of another event (e.g., having HIV). According to the law of total probability, the probability of getting a positive test is the probability that a person with HIV gets a positive test (i.e., sensitivity) times the base rate of HIV plus the probability that a person without HIV gets a positive test (i.e., false positive rate) times the <a href="#sec-baseRate">base rate</a> of not having HIV, as in <a href="#eq-lawOfTotalProbability" class="quarto-xref">Equation&nbsp;<span>13.9</span></a>:</p>
+<p><span id="eq-lawOfTotalProbability"><span class="math display">\[
+\begin{aligned}
+P(\text{not } C_i) &amp;= 1 - P(C_i) \\
+  P(R_i) &amp;= P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i) \\
+  1\% &amp;= 95\% \times .3\% + P(R | \text{not } C) \times 99.7\% \\
+\end{aligned}
+\tag{13.9}\]</span></span></p>
+<p>In this case, we know the <a href="#sec-baseRate">marginal probability</a> (<span class="math inline">\(P(R_i)\)</span>), and we can use that to solve for the unknown <a href="#sec-conditionalProbability">conditional probability</a> that reflects the <a href="#sec-falsePositiveRate">false positive rate</a> (<span class="math inline">\(P(R | \text{not } C)\)</span>), as in <a href="#eq-conditionalProbabilityRevised" class="quarto-xref">Equation&nbsp;<span>13.10</span></a>:</p>
+<p><span id="eq-conditionalProbabilityRevised"><span class="math display">\[
+\scriptsize
+\begin{aligned}
+  P(R_i) &amp;= P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i) &amp;&amp; \\
+  P(R_i) - [P(R | \text{not } C) \cdot P(\text{not } C_i)] &amp;= P(R | C) \cdot P(C_i) &amp;&amp; \text{Move } P(R | \text{not } C) \text{ to the left side} \\
+  - [P(R | \text{not } C) \cdot P(\text{not } C_i)] &amp;= P(R | C) \cdot P(C_i) - P(R_i) &amp;&amp; \text{Move } P(R_i) \text{ to the right side} \\
+  P(R | \text{not } C) \cdot P(\text{not } C_i) &amp;= P(R_i) - [P(R | C) \cdot P(C_i)] &amp;&amp; \text{Multiply by } -1 \\
+  P(R | \text{not } C) &amp;= \frac{P(R_i) - [P(R | C) \cdot P(C_i)]}{P(\text{not } C_i)} &amp;&amp; \text{Divide by } P(R | \text{not } C) \\
+  &amp;= \frac{1\% - [95\% \times .3\%]}{99.7\%} = \frac{.01 - [.95 \times .003]}{.997}\\
+  &amp;= .7171515\% \\
+\end{aligned}
+\tag{13.10}\]</span></span></p>
+<p>The <a href="https://cran.r-project.org/web/packages/petersenlab/index.html"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024</a>)</span> contains the <code>pBgivenNotA()</code> function that estimates the probability of one event, <span class="math inline">\(B\)</span>, given that another event, <span class="math inline">\(A\)</span>, did not occur.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>petersenlab<span class="sc">::</span><span class="fu">pBgivenNotA</span>(<span class="at">pBgivenA =</span> .<span class="dv">95</span>, <span class="at">pA =</span> .<span class="dv">003</span>, <span class="at">pB =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.007171515</code></pre>
+</div>
+</div>
+<p>With this <a href="#sec-conditionalProbability">conditional probability</a> (<span class="math inline">\(P(R | \text{not } C)\)</span>), the updated <a href="#sec-baseRate">marginal probability</a> of having HIV (<span class="math inline">\(P(C_i)\)</span>), and the updated marginal probability of not having HIV (<span class="math inline">\(P(\text{not } C_i)\)</span>), we can now calculate an updated estimate of the <a href="#sec-baseRate">marginal probability</a> of getting a second positive test. The probability of getting a second positive test is the probability that a person with HIV gets a second positive test (i.e., sensitivity) times the updated probability of HIV plus the probability that a person without HIV gets a second positive test (i.e., false positive rate) times the updated probability of not having HIV, as in <a href="#eq-baseRateUpdated" class="quarto-xref">Equation&nbsp;<span>13.11</span></a>:</p>
+<p><span id="eq-baseRateUpdated"><span class="math display">\[
+\begin{aligned}
+  P(R_{i}) &amp;= P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i) \\
+  &amp;= 95\% \times 28.5\% + .7171515\% \times 71.5\% = .95 \times .285 + .007171515 \times .715 \\
+  &amp;= 27.58776\%
+\end{aligned}
+\tag{13.11}\]</span></span></p>
+<p>The <a href="https://cran.r-project.org/web/packages/petersenlab/index.html"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024</a>)</span> contains the <code>pB()</code> function that estimates the marginal probability of one event, <span class="math inline">\(B\)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>petersenlab<span class="sc">::</span><span class="fu">pB</span>(<span class="at">pBgivenA =</span> .<span class="dv">95</span>, <span class="at">pA =</span> .<span class="dv">285</span>, <span class="at">pBgivenNotA =</span> .<span class="dv">007171515</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2758776</code></pre>
+</div>
+</div>
+<p>We then substitute the updated <a href="#sec-baseRate">marginal probability</a> of HIV (<span class="math inline">\(P(C_i)\)</span>) and the updated <a href="#sec-baseRate">marginal probability</a> of getting a second positive test (<span class="math inline">\(P(R_i)\)</span>) into Bayes’ theorem to get the probability that the person has HIV if they have a second positive test (assuming the errors of each test are independent, i.e., uncorrelated), as in <a href="#eq-baseRateUpdated2" class="quarto-xref">Equation&nbsp;<span>13.12</span></a>:</p>
+<p><span id="eq-baseRateUpdated2"><span class="math display">\[
+\begin{aligned}
+  P(C | R) &amp;= \frac{P(R | C) \cdot P(C_i)}{P(R_i)} \\
+  P(\text{HIV} | \text{a second positive test}) &amp;= \frac{P(\text{a second positive test} | \text{HIV}) \cdot P(\text{HIV})}{P(\text{a second positive test})} \\
+  &amp;= \frac{\text{sensitivity of test} \times \text{updated base rate of HIV}}{\text{updated base rate of positive test}} \\
+  &amp;= \frac{95\% \times 28.5\%}{27.58776\%} \\
+  &amp;= 98.14\%
+\end{aligned}
+\tag{13.12}\]</span></span></p>
+<p>The <a href="https://github.com/DevPsyLab/petersenlab"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024</a>)</span> contains the <code>pAgivenB()</code> function that estimates the probability of one event, <span class="math inline">\(A\)</span>, given another event, <span class="math inline">\(B\)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">pAgivenB</span>(<span class="at">pBgivenA =</span> .<span class="dv">95</span>, <span class="at">pA =</span> .<span class="dv">285</span>, <span class="at">pB =</span> .<span class="dv">2758776</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error in pAgivenB(pBgivenA = 0.95, pA = 0.285, pB = 0.2758776): could not find function "pAgivenB"</code></pre>
+</div>
+</div>
+<p>Thus, a second positive test greatly increases the posterior probability that the person has HIV from 28.5% to over 98%.</p>
+<p>As seen in the rearranged formula in <a href="#eq-bayes2" class="quarto-xref">Equation&nbsp;<span>13.5</span></a>, the ratio of the <a href="#sec-conditionalProbability">conditional probabilities</a> is equal to the ratio of the <a href="#sec-baseRate">base rates</a>. Thus, it is important to consider <a href="#sec-baseRate">base rates</a>. People have a strong tendency to ignore (or give insufficient weight to) <a href="#sec-baseRate">base rates</a> when making predictions. The failure to consider the <a href="#sec-baseRate">base rate</a> when making predictions when given specific information about a case is known as the <a href="cognitive-bias.html#sec-fallaciesBaseRate">base-rate fallacy</a> or as <a href="cognitive-bias.html#sec-fallaciesBaseRate">base rate neglect</a>. For example, people tend to say that the probability of a rare event is more likely than it actually is given specific information.</p>
+<p>As seen in the rearranged formula in <a href="#eq-bayes3" class="quarto-xref">Equation&nbsp;<span>13.6</span></a>, the inverse <a href="#sec-conditionalProbability">conditional probabilities</a> (<span class="math inline">\(P(C | R)\)</span> and <span class="math inline">\(P(R | C)\)</span>) are not equal unless the <a href="#sec-baseRate">base rates</a> of <span class="math inline">\(C\)</span> and <span class="math inline">\(R\)</span> are the same. If the <a href="#sec-baseRate">base rates</a> are not equal, we are making at least some prediction errors. If <span class="math inline">\(P(C_i) &gt; P(R_i)\)</span>, our predictions must include some false negatives. If <span class="math inline">\(P(R_i) &gt; P(C_i)\)</span>, our predictions must include some false positives.</p>
+<p>In sum, the <a href="#sec-baseRate">marginal probability</a>, including the <a href="#sec-baseRate">prior probability</a> or <a href="#sec-baseRate">base rate</a>, should be weighed heavily in predictions unless there are sufficient data to indicate otherwise, i.e., to update the posterior probability based on new evidence. Bayes’ theorem provides a powerful tool to anchor predictions to the <a href="#sec-baseRate">base rate</a> unless sufficient evidence changes the posterior probability (by updating the evidence and <a href="#sec-baseRate">prior probability</a>).</p>
+</section></section><section id="sec-baseRateRookiePerformance" class="level2" data-number="13.4"><h2 data-number="13.4" class="anchored" data-anchor-id="sec-baseRateRookiePerformance">
+<span class="header-section-number">13.4</span> Base Rate of Rookie Performance</h2>
+<section id="sec-baseRateRookiePerformanceQBs" class="level3" data-number="13.4.1"><h3 data-number="13.4.1" class="anchored" data-anchor-id="sec-baseRateRookiePerformanceQBs">
+<span class="header-section-number">13.4.1</span> Quarterbacks</h3>
+</section><section id="sec-baseRateRookiePerformanceRBs" class="level3" data-number="13.4.2"><h3 data-number="13.4.2" class="anchored" data-anchor-id="sec-baseRateRookiePerformanceRBs">
+<span class="header-section-number">13.4.2</span> Running Backs</h3>
+</section></section><section id="sec-accountForBaseRates" class="level2" data-number="13.5"><h2 data-number="13.5" class="anchored" data-anchor-id="sec-accountForBaseRates">
+<span class="header-section-number">13.5</span> How to Account for Base Rates</h2>
+</section><section id="sec-baseRatesConclusion" class="level2" data-number="13.6"><h2 data-number="13.6" class="anchored" data-anchor-id="sec-baseRatesConclusion">
+<span class="header-section-number">13.6</span> Conclusion</h2>
+</section><section id="sec-baseRatesSessionInfo" class="level2" data-number="13.7"><h2 data-number="13.7" class="anchored" data-anchor-id="sec-baseRatesSessionInfo">
+<span class="header-section-number">13.7</span> Session Info</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.4 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: UTC
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] utf8_1.2.4         generics_0.1.3     petersenlab_1.0.2  lattice_0.22-6    
+ [5] stringi_1.8.4      digest_0.6.36      magrittr_2.0.3     evaluate_0.24.0   
+ [9] grid_4.4.1         RColorBrewer_1.1-3 mvtnorm_1.2-5      fastmap_1.2.0     
+[13] plyr_1.8.9         jsonlite_1.8.8     nnet_7.3-19        backports_1.5.0   
+[17] DBI_1.2.3          Formula_1.2-5      gridExtra_2.3      fansi_1.0.6       
+[21] viridisLite_0.4.2  scales_1.3.0       pbivnorm_0.6.0     mnormt_2.1.1      
+[25] cli_3.6.3          mitools_2.4        rlang_1.1.4        munsell_0.5.1     
+[29] Hmisc_5.1-3        base64enc_0.1-3    mix_1.0-12         parallel_4.4.1    
+[33] tools_4.4.1        reshape2_1.4.4     checkmate_2.3.1    htmlTable_2.4.2   
+[37] dplyr_1.1.4        colorspace_2.1-0   ggplot2_3.5.1      vctrs_0.6.5       
+[41] R6_2.5.1           rpart_4.1.23       stats4_4.4.1       lifecycle_1.0.4   
+[45] stringr_1.5.1      htmlwidgets_1.6.4  psych_2.4.6.26     foreign_0.8-86    
+[49] cluster_2.1.6      pkgconfig_2.0.3    pillar_1.9.0       gtable_0.3.5      
+[53] Rcpp_1.0.12        glue_1.7.0         data.table_1.15.4  xfun_0.45         
+[57] tibble_3.2.1       tidyselect_1.2.1   rstudioapi_0.16.0  knitr_1.48        
+[61] xtable_1.8-4       nlme_3.1-164       htmltools_0.5.8.1  rmarkdown_2.27    
+[65] lavaan_0.6-18      compiler_4.4.1     quadprog_1.5-8    </code></pre>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Corston2000" class="csl-entry" role="listitem">
+Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for windows</em>. Wiley-Blackwell.
+</div>
+<div id="ref-R-petersenlab" class="csl-entry" role="listitem">
+Petersen, I. T. (2024). <em><span class="nocase">petersenlab</span>: A collection of <span>R</span> functions by the <span>Petersen Lab</span></em>. <a href="https://doi.org/10.32614/CRAN.package.petersenlab">https://doi.org/10.32614/CRAN.package.petersenlab</a>
+</div>
+</div>
+</section></main><!-- /main --><div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://fantasyfootballanalytics.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script><noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<h3>Feedback</h3>
+
+<div class="feedback">
+    Please consider providing feedback about this textbook, so that I can make it as helpful as possible. You can provide feedback at the following link:
+    
+    <a href="https://forms.gle/LsnVKwqmS1VuxWD18">https://forms.gle/LsnVKwqmS1VuxWD18</a>
+</div>
+
+<h3>Email Notification</h3>
+
+<div class="rmdsale">
+The online version of this book will remain open access. If you want to know when the print version of the book is for sale, enter your email below so I can let you know.
+<br><iframe src="https://docs.google.com/forms/d/e/1FAIpQLSccMKaTBXzMBmcy4myCNQnL8mCgRczh0Eg_Pw3c15bork7-xQ/viewform?embedded=true" width="640" height="750" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+
+</div>
+<script id="dsq-count-scr" src="//fantasyfootballanalytics.disqus.com/count.js" async=""></script><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/isaactpetersen\.github\.io\/Fantasy-Football-Analytics-Textbook");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./actuarial.html" class="pagination-link" aria-label="Judgment Versus Actuarial Approaches to Prediction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Judgment Versus Actuarial Approaches to Prediction</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Fantasy Football Analytics was written by <a href="https://psychology.uiowa.edu/people/isaac-petersen">Isaac T. Petersen</a>.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/base-rates.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
