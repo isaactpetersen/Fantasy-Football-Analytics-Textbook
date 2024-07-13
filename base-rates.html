@@ -562,7 +562,7 @@ P(\text{not } C_i) &amp;= 1 - P(C_i) \\
 </section></section><section id="sec-accountForBaseRates" class="level2" data-number="13.5"><h2 data-number="13.5" class="anchored" data-anchor-id="sec-accountForBaseRates">
 <span class="header-section-number">13.5</span> How to Account for Base Rates</h2>
 <p>There are various ways to account for <a href="#sec-baseRate">base rates</a>. One approach is to use <a href="actuarial.html#sec-actuarialPrediction">actuarial formulas</a> (rather than human judgment) to make the predictions. <a href="actuarial.html#sec-actuarialPrediction">Actuarial formulas</a> based on <a href="multiple-regression.html">multiple regression</a> or <a href="#sec-machineLearning">machine learning</a> can account for the <a href="#sec-baseRate">base rate</a> of the event.</p>
-<p>Another approach is to leverage Bayes’ theorem, using Bayesian updating.</p>
+<p>Another approach is to leverage Bayes’ theorem, using Bayesian updating and the probability nomogram.</p>
 <section id="bayesianUpdating" class="level3" data-number="13.5.1"><h3 data-number="13.5.1" class="anchored" data-anchor-id="bayesianUpdating">
 <span class="header-section-number">13.5.1</span> Bayesian Updating</h3>
 <p>Bayesian updating involves comparing the relative probability of two outcomes, <span class="math inline">\(P(C | R)\)</span> versus <span class="math inline">\(P(\text{not } C | R)\)</span>. If we want to compare the relative probability of two outcomes, we can use the odds form of Bayes’ theorem, as in <a href="#eq-bayes5" class="quarto-xref">Equation&nbsp;<span>13.13</span></a>: <span id="eq-bayes5"><span class="math display">\[
@@ -578,13 +578,13 @@ P(\text{not } C_i) &amp;= 1 - P(C_i) \\
 <p>As presented in <a href="#eq-bayes5" class="quarto-xref">Equation&nbsp;<span>13.13</span></a>, the posttest (or posterior) odds are equal to the pretest odds multiplied by the likelihood ratio. Bayes’ theorem is discussed in <a href="#sec-bayesTheorem" class="quarto-xref"><span>Section 13.3.3</span></a>. Using this formula, and converting odds to probabilities, we can use a Fagan probability nomogram to determine the posttest probability following a test result. The calculation of posttest probability is described in INSERT. A <em>probability nomogram</em> is a way of visually applying <a href="#sec-bayesTheorem">Bayes’ theorem</a> to determine the posttest probability of having a condition based on the pretest (or prior) probability and likelihood ratio, as depicted in <a href="#fig-probabilityNomogram" class="quarto-xref">Figure&nbsp;<span>13.1</span></a>. To use a probability nomogram, connect the dots from the starting probability (left line) with the likelihood ratio (middle line) to see the updated probability. The updated (posttest) probability is where the connecting line crosses the third, right line.</p>
 <div id="fig-probabilityNomogram" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-probabilityNomogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="images/probabilityNomogram.png" class="img-fluid figure-img">
+<img src="images/probabilityNomogram.png" class="img-fluid figure-img" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-probabilityNomogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;13.1: Probability Nomogram. (Figure retrieved from <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png">https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png</a>).
 </figcaption></figure>
 </div>
-<p>For instance, if the starting probability is .5% and the likelihood ratio is 10 (e.g., sensitivity = .90, specificity = .91: <span class="math inline">\(\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10\)</span>), the updated probability is less than 5%, as depicted in <a href="#fig-probabilityNomogramLine" class="quarto-xref">Figure&nbsp;<span>13.2</span></a>. The <a href="https://github.com/DevPsyLab/petersenlab"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024a</a>)</span> contains the <code>posttestProbability()</code> function that estimates the posttest probability of an event, given the pretest probability and the likelihood ratio, or given the pretest probability and the sensitivity and specificity of the test.</p>
+<p>For instance, if the starting probability is 0.5% and the likelihood ratio is 10 (e.g., sensitivity = .90, specificity = .91: <span class="math inline">\(\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10\)</span>) from a positive test, the updated probability is less than 5%, as depicted in <a href="#fig-probabilityNomogramLine" class="quarto-xref">Figure&nbsp;<span>13.2</span></a>. The <a href="https://github.com/DevPsyLab/petersenlab"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024a</a>)</span> contains the <code>posttestProbability()</code> function that estimates the posttest probability of an event, given the pretest probability and the likelihood ratio, or given the pretest probability and the sensitivity and specificity of the test.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
 <span id="cb10-2"><a href="#cb10-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
@@ -608,54 +608,64 @@ Figure&nbsp;13.1: Probability Nomogram. (Figure retrieved from <a href="https://
 <pre><code>[1] 0.04784689</code></pre>
 </div>
 </div>
+<p>If the starting probability is 0.5% and the likelihood ratio is 0.11 from a negative test, the updated probability is essentially nearly indistinguishable from zero (0.05%).</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
+<span id="cb16-2"><a href="#cb16-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb16-3"><a href="#cb16-3"></a>  <span class="at">likelihoodRatio =</span> <span class="fl">0.11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0005524584</code></pre>
+</div>
+</div>
 <div id="fig-probabilityNomogramLine" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-probabilityNomogramLine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="images/probabilityNomogram.png" class="img-fluid figure-img">
+<img src="images/probabilityNomogramLine.png" class="img-fluid figure-img" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-probabilityNomogramLine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;13.2: Probability Nomogram Example. (Figure adapted from <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png">https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png</a>. Also provided in: <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024b</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024c</a>)</span>.)
 </figcaption></figure>
 </div>
-<p>A probability nomogram calculator can be found at the following link: <a href="http://araw.mede.uic.edu/cgi-bin/testcalc.pl">http://araw.mede.uic.edu/cgi-bin/testcalc.pl</a> (archived at https://perma.cc/X8TF-7YBX). The <a href="https://github.com/DevPsyLab/petersenlab"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024a</a>)</span> contains the <code>nomogrammer()</code> function that creates a nomogram plot, as adapted from https://github.com/achekroud/nomogrammer:</p>
+<p>A probability nomogram calculator can be found at the following link: <a href="http://araw.mede.uic.edu/cgi-bin/testcalc.pl">http://araw.mede.uic.edu/cgi-bin/testcalc.pl</a> (archived at <a href="https://perma.cc/X8TF-7YBX" class="uri">https://perma.cc/X8TF-7YBX</a>). The <a href="https://github.com/DevPsyLab/petersenlab"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2024a</a>)</span> contains the <code>nomogrammer()</code> function that creates a nomogram plot, as adapted from Adam Chekroud (<a href="https://github.com/achekroud/nomogrammer" class="uri">https://github.com/achekroud/nomogrammer</a>):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb16-2"><a href="#cb16-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
-<span id="cb16-3"><a href="#cb16-3"></a>  <span class="at">SN =</span> <span class="fl">0.90</span>,</span>
-<span id="cb16-4"><a href="#cb16-4"></a>  <span class="at">SP =</span> <span class="fl">0.91</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output-display">
-<div>
-<figure class="figure"><p><img src="base-rates_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb17-2"><a href="#cb17-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
-<span id="cb17-3"><a href="#cb17-3"></a>  <span class="at">PLR =</span> <span class="dv">10</span>,</span>
-<span id="cb17-4"><a href="#cb17-4"></a>  <span class="at">NLR =</span> <span class="fl">0.11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output-display">
-<div>
-<figure class="figure"><p><img src="base-rates_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb18-2"><a href="#cb18-2"></a>  <span class="at">TP =</span> <span class="dv">450</span>,</span>
-<span id="cb18-3"><a href="#cb18-3"></a>  <span class="at">TN =</span> <span class="dv">90545</span>,</span>
-<span id="cb18-4"><a href="#cb18-4"></a>  <span class="at">FP =</span> <span class="dv">8955</span>,</span>
-<span id="cb18-5"><a href="#cb18-5"></a>  <span class="at">FN =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-2"><a href="#cb18-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb18-3"><a href="#cb18-3"></a>  <span class="at">SN =</span> <span class="fl">0.90</span>,</span>
+<span id="cb18-4"><a href="#cb18-4"></a>  <span class="at">SP =</span> <span class="fl">0.91</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="base-rates_files/figure-html/unnamed-chunk-7-3.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><img src="base-rates_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb19-2"><a href="#cb19-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb19-3"><a href="#cb19-3"></a>  <span class="at">PLR =</span> <span class="dv">10</span>,</span>
+<span id="cb19-4"><a href="#cb19-4"></a>  <span class="at">NLR =</span> <span class="fl">0.11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="base-rates_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb20-2"><a href="#cb20-2"></a>  <span class="at">TP =</span> <span class="dv">450</span>,</span>
+<span id="cb20-3"><a href="#cb20-3"></a>  <span class="at">TN =</span> <span class="dv">90545</span>,</span>
+<span id="cb20-4"><a href="#cb20-4"></a>  <span class="at">FP =</span> <span class="dv">8955</span>,</span>
+<span id="cb20-5"><a href="#cb20-5"></a>  <span class="at">FN =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="base-rates_files/figure-html/unnamed-chunk-8-3.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>The blue line indicates the <a href="#posttestProbability">posterior probability</a> of the condition given a positive test. The pink line indicates the <a href="#posttestProbability">posterior probability</a> of the condition given a negative test.</p>
 </section></section><section id="sec-baseRatesConclusion" class="level2" data-number="13.6"><h2 data-number="13.6" class="anchored" data-anchor-id="sec-baseRatesConclusion">
 <span class="header-section-number">13.6</span> Conclusion</h2>
 </section><section id="sec-baseRatesSessionInfo" class="level2" data-number="13.7"><h2 data-number="13.7" class="anchored" data-anchor-id="sec-baseRatesSessionInfo">
 <span class="header-section-number">13.7</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
