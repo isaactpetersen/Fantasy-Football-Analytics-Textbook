@@ -285,7 +285,7 @@ One approach is to use [actuarial formulas](#sec-actuarialPrediction) (rather th
 
 Another approach is to leverage Bayes' theorem, using Bayesian updating and the probability nomogram.
 
-### Bayesian Updating {#bayesianUpdating}
+### Bayesian Updating {#sec-bayesianUpdating}
 
 Bayesian updating involves comparing the relative probability of two outcomes, $P(C | R)$ versus $P(\text{not } C | R)$.
 If we want to compare the relative probability of two outcomes, we can use the odds form of Bayes' theorem, as in @eq-bayes5:
@@ -300,12 +300,55 @@ $$
 \end{aligned}
 $$ {#eq-bayes5}
 
-As presented in @eq-bayes5, the posttest (or posterior) odds are equal to the pretest odds multiplied by the likelihood ratio.
-Bayes' theorem is discussed in @sec-bayesTheorem.
-Using this formula, and converting odds to probabilities, we can use a Fagan probability nomogram to determine the posttest probability following a test result.
+As presented in @eq-bayes5, the posttest (or posterior) odds are equal to the pretest odds multiplied by the [likelihood ratio](#sec-diagnosticLikelihoodRatio).
+Below, we describe the [likelihood ratio](#sec-diagnosticLikelihoodRatio).
+
+#### Diagnostic Likelihood Ratio {#sec-diagnosticLikelihoodRatio}
+
+A likelihood ratio is the ratio of two probabilities.
+It can be used to compare the likelihood of two possibilities.
+The diagnostic likelihood ratio is an index of the predictive validity of an instrument: it is the ratio of the probability that a test result is correct to the probability that the test result is incorrect.
+The diagnostic likelihood ratio is also called the risk ratio.
+There are two types of diagnostic likelihood ratios: the [positive likelihood ratio](#sec-positiveLikelihoodRatio) and the [negative likelihood ratio](#sec-negativeLikelihoodRatio).
+
+##### Positive Likelihood Ratio (LR+) {#sec-positiveLikelihoodRatio}
+
+The positive likelihood ratio (LR+) compares the true positive rate to the false positive rate.
+Positive likelihood ratio values range from 1 to infinity.
+Higher values reflect greater accuracy, because it indicates the degree to which a true positive is more likely than a false positive.
+The formula for calculating the positive likelihood ratio is in @eq-positiveLikelihoodRatio.
+
+$$
+\begin{aligned}
+  \text{positive likelihood ratio (LR+)} &= \frac{\text{TPR}}{\text{FPR}} \\
+  &= \frac{P(R|C)}{P(R|\text{not } C)} \\
+  &= \frac{P(R|C)}{1 - P(\text{not } R|\text{not } C)} \\
+  &= \frac{\text{sensitivity}}{1 - \text{specificity}}
+\end{aligned}
+$$ {#eq-positiveLikelihoodRatio}
+
+##### Negative Likelihood Ratio (LR−) {#sec-negativeLikelihoodRatio}
+
+The negative likelihood ratio (LR−) compares the false negative rate to the true negative rate.
+Negative likelihood ratio values range from 0 to 1.
+Smaller values reflect greater accuracy, because it indicates that a false negative is less likely than a true negative.
+The formula for calculating the negative likelihood ratio is in @negativeLikelihoodRatio.
+
+$$
+\begin{aligned}
+  \text{negative likelihood ratio } (\text{LR}-) &= \frac{\text{FNR}}{\text{TNR}} \\
+  &= \frac{P(\text{not } R|C)}{P(\text{not } R|\text{not } C)} \\
+  &= \frac{1 - P(R|C)}{P(\text{not } R|\text{not } C)} \\
+  &= \frac{1 - \text{sensitivity}}{\text{specificity}}
+\end{aligned}
+$$ {#eq-positiveLikelihoodRatio}
+
+#### Probability Nomogram {#sec-probabilityNomogram}
+
+Using [Bayes's theorem](#sec-bayesTheorem) (described in @sec-bayesTheorem), solving for posttest odds (based on pretest odds and the [likelihood ratio](#sec-diagnosticLikelihoodRatio), as in @eq-bayes5), and converting odds to probabilities, we can use a Fagan probability nomogram to determine the posttest probability following a test result.
 The calculation of posttest probability is described in INSERT.
-A *probability nomogram* is a way of visually applying [Bayes' theorem](#sec-bayesTheorem) to determine the posttest probability of having a condition based on the pretest (or prior) probability and likelihood ratio, as depicted in @fig-probabilityNomogram.
-To use a probability nomogram, connect the dots from the starting probability (left line) with the likelihood ratio (middle line) to see the updated probability.
+A *probability nomogram* is a way of visually applying [Bayes' theorem](#sec-bayesTheorem) to determine the posttest probability of having a condition based on the [pretest (or prior) probability](#sec-baseRate) and [likelihood ratio](#sec-diagnosticLikelihoodRatio), as depicted in @fig-probabilityNomogram.
+To use a probability nomogram, connect the dots from the starting probability (left line) with the [likelihood ratio](#sec-diagnosticLikelihoodRatio) (middle line) to see the updated probability.
 The updated (posttest) probability is where the connecting line crosses the third, right line.
 
 ::: {#fig-probabilityNomogram}
@@ -314,8 +357,8 @@ The updated (posttest) probability is where the connecting line crosses the thir
 Probability Nomogram. (Figure retrieved from [https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png](https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png)).
 :::
 
-For instance, if the starting probability is 0.5% and the likelihood ratio is 10 (e.g., sensitivity = .90, specificity = .91: $\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10$) from a positive test, the updated probability is less than 5%, as depicted in @fig-probabilityNomogramLine.
-The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `posttestProbability()` function that estimates the posttest probability of an event, given the pretest probability and the likelihood ratio, or given the pretest probability and the sensitivity and specificity of the test.
+For instance, if the starting probability is 0.5% and the [likelihood ratio](#sec-diagnosticLikelihoodRatio) is 10 (e.g., sensitivity = .90, specificity = .91: $\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10$) from a positive test (i.e., [positive likelihood ratio](#sec-positiveLikelihoodRatio)), the updated probability is less than 5%, as depicted in @fig-probabilityNomogramLine.
+The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `posttestProbability()` function that estimates the posttest probability of an event, given the [pretest probability](#sec-baseRate) and the [likelihood ratio](#sec-diagnosticLikelihoodRatio), or given the [pretest probability](#sec-baseRate) and the sensitivity (SN) and specificity (SP) of the test.
 
 ```{r}
 petersenlab::posttestProbability(
@@ -326,7 +369,11 @@ petersenlab::posttestProbability(
   pretestProb = .005,
   SN = .90,
   SP = .91)
+```
 
+The function can also estimate the posttest probability of an event given the number of true positives (TP), true negatives (TN), false positives (FP), and false negatives (FN):
+
+```{r}
 petersenlab::posttestProbability(
   TP = 450,
   TN = 90545,
@@ -334,7 +381,10 @@ petersenlab::posttestProbability(
   FN = 50)
 ```
 
-If the starting probability is 0.5% and the likelihood ratio is 0.11 from a negative test, the updated probability is essentially nearly indistinguishable from zero (0.05%).
+We discuss true positives (TP), true negatives (TN), false positives (FP), false negatives (FN), sensitivity (SN), and specificity (SP) in INSERT.
+
+If the starting probability is 0.5% and the [likelihood ratio](#sec-diagnosticLikelihoodRatio) is 0.11 from a negative test (i.e., [negative likelihood ratio](#sec-negativeLikelihoodRatio)), the updated probability is nearly indistinguishable from zero (0.05%).
+
 ```{r}
 petersenlab::posttestProbability(
   pretestProb = .005,
@@ -348,7 +398,7 @@ Probability Nomogram Example. (Figure adapted from [https://upload.wikimedia.org
 :::
 
 A probability nomogram calculator can be found at the following link: [http://araw.mede.uic.edu/cgi-bin/testcalc.pl](http://araw.mede.uic.edu/cgi-bin/testcalc.pl) (archived at <https://perma.cc/X8TF-7YBX>).
-The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `nomogrammer()` function that creates a nomogram plot, as adapted from Adam Chekroud (<https://github.com/achekroud/nomogrammer>):
+The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `nomogrammer()` function that creates a nomogram plot using the [positive](#sec-positiveLikelihoodRatio) and [negative](#sec-negativeLikelihoodRatio) [likelihood ratio](#sec-diagnosticLikelihoodRatio) or using the sensitivity (SN) and specificity (SP) of the test, as adapted from Adam Chekroud (<https://github.com/achekroud/nomogrammer>):
 
 ```{r}
 petersenlab::nomogrammer(
@@ -360,16 +410,20 @@ petersenlab::nomogrammer(
   pretestProb = .005,
   PLR = 10,
   NLR = 0.11)
+```
 
+The blue line indicates the [posterior probability](#posttestProbability) of the condition given a positive test.
+The pink line indicates the [posterior probability](#posttestProbability) of the condition given a negative test.
+
+The function can also create a nomogram plot using the true positives (TP), true negatives (TN), false positives (FP), and false negatives (FN):
+
+```{r}
 petersenlab::nomogrammer(
   TP = 450,
   TN = 90545,
   FP = 8955,
   FN = 50)
 ```
-
-The blue line indicates the [posterior probability](#posttestProbability) of the condition given a positive test.
-The pink line indicates the [posterior probability](#posttestProbability) of the condition given a negative test.
 
 ## Conclusion {#sec-baseRatesConclusion}
 
