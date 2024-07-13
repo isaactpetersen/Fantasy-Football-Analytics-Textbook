@@ -283,7 +283,7 @@ There are various ways to account for [base rates](#sec-baseRate).
 One approach is to use [actuarial formulas](#sec-actuarialPrediction) (rather than human judgment) to make the predictions.
 [Actuarial formulas](#sec-actuarialPrediction) based on [multiple regression](#sec-multipleRegression) or [machine learning](#sec-machineLearning) can account for the [base rate](#sec-baseRate) of the event.
 
-Another approach is to leverage Bayes' theorem, using Bayesian updating.
+Another approach is to leverage Bayes' theorem, using Bayesian updating and the probability nomogram.
 
 ### Bayesian Updating {#bayesianUpdating}
 
@@ -309,12 +309,12 @@ To use a probability nomogram, connect the dots from the starting probability (l
 The updated (posttest) probability is where the connecting line crosses the third, right line.
 
 ::: {#fig-probabilityNomogram}
-![](images/probabilityNomogram.png)
+![](images/probabilityNomogram.png){width=50%}
 
 Probability Nomogram. (Figure retrieved from [https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png](https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png)).
 :::
 
-For instance, if the starting probability is .5% and the likelihood ratio is 10 (e.g., sensitivity = .90, specificity = .91: $\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10$), the updated probability is less than 5%, as depicted in @fig-probabilityNomogramLine.
+For instance, if the starting probability is 0.5% and the likelihood ratio is 10 (e.g., sensitivity = .90, specificity = .91: $\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10$) from a positive test, the updated probability is less than 5%, as depicted in @fig-probabilityNomogramLine.
 The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `posttestProbability()` function that estimates the posttest probability of an event, given the pretest probability and the likelihood ratio, or given the pretest probability and the sensitivity and specificity of the test.
 
 ```{r}
@@ -334,14 +334,21 @@ petersenlab::posttestProbability(
   FN = 50)
 ```
 
+If the starting probability is 0.5% and the likelihood ratio is 0.11 from a negative test, the updated probability is essentially nearly indistinguishable from zero (0.05%).
+```{r}
+petersenlab::posttestProbability(
+  pretestProb = .005,
+  likelihoodRatio = 0.11)
+```
+
 ::: {#fig-probabilityNomogramLine}
-![](images/probabilityNomogram.png)
+![](images/probabilityNomogramLine.png){width=50%}
 
 Probability Nomogram Example. (Figure adapted from [https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png](https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png). Also provided in: @Petersen2024a and @PetersenPrinciplesPsychAssessment.)
 :::
 
-A probability nomogram calculator can be found at the following link: [http://araw.mede.uic.edu/cgi-bin/testcalc.pl](http://araw.mede.uic.edu/cgi-bin/testcalc.pl) (archived at https://perma.cc/X8TF-7YBX).
-The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `nomogrammer()` function that creates a nomogram plot, as adapted from https://github.com/achekroud/nomogrammer:
+A probability nomogram calculator can be found at the following link: [http://araw.mede.uic.edu/cgi-bin/testcalc.pl](http://araw.mede.uic.edu/cgi-bin/testcalc.pl) (archived at <https://perma.cc/X8TF-7YBX>).
+The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `nomogrammer()` function that creates a nomogram plot, as adapted from Adam Chekroud (<https://github.com/achekroud/nomogrammer>):
 
 ```{r}
 petersenlab::nomogrammer(
@@ -360,6 +367,9 @@ petersenlab::nomogrammer(
   FP = 8955,
   FN = 50)
 ```
+
+The blue line indicates the [posterior probability](#posttestProbability) of the condition given a positive test.
+The pink line indicates the [posterior probability](#posttestProbability) of the condition given a negative test.
 
 ## Conclusion {#sec-baseRatesConclusion}
 
