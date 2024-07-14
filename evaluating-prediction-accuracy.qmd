@@ -80,7 +80,7 @@ To determine what accuracy we could get by chance alone given the selection rati
 The probability of a given cell in the confusion matrix is a [joint probability](#sec-jointProbability)—the probability of two events occurring simultaneously.
 To calculate a [joint probability](#sec-jointProbability), we multiply the probability of each event.
 
-So, to get the chance expectancies of true positives, we would multiply the respective [marginal probabilities](#baseRate), as in Equation @eq-truePositivesByChanceExample:
+So, to get the chance expectancies of true positives, we would multiply the respective [marginal probabilities](#baseRate), as in @eq-truePositivesByChanceExample:
 
 $$
 \begin{aligned}
@@ -91,7 +91,7 @@ $$
 \end{aligned}
 $$ {#eq-truePositivesByChanceExample}
 
-To get the chance expectancies of true negatives, we would multiply the respective [marginal probabilities](#sec-baseRate), as in @trueNegativesByChanceExample:
+To get the chance expectancies of true negatives, we would multiply the respective [marginal probabilities](#sec-baseRate), as in @eq-trueNegativesByChanceExample:
 
 $$
 \begin{aligned}
@@ -206,9 +206,18 @@ Sensitivity, specificity, PPV, and NPV differ based on the cutoff (i.e., thresho
 Consider the following example.
 Aliens visit Earth, and they develop a test to determine whether a berry is edible or inedible.
 
+@fig-classificationDistributions depicts the distributions of scores by berry type.
+Note how there are clearly two distinct distributions.
+However, the distributions overlap to some degree.
+Thus, any cutoff will have at least some inaccurate classifications.
+The extent of overlap of the distributions reflects the amount of measurement error of the measure with respect to the characteristic of interest.
+
 ```{r}
+#| fig-cap: "Distribution of Test Scores by Berry Type."
+#| label: fig-classificationDistributions
 #| code-fold: true
 
+#No Cutoff
 sampleSize <- 1000
 
 edibleScores <- rnorm(sampleSize, 50, 15)
@@ -259,20 +268,7 @@ density_data$type <- factor(
     "inedible_TP",
     "edible_FP",
     "inedible_FN"))
-```
 
-@fig-classificationDistributions depicts the distributions of scores by berry type.
-Note how there are clearly two distinct distributions.
-However, the distributions overlap to some degree.
-Thus, any cutoff will have at least some inaccurate classifications.
-The extent of overlap of the distributions reflects the amount of measurement error of the measure with respect to the characteristic of interest.
-
-```{r}
-#| fig-cap: "Distribution of Test Scores by Berry Type."
-#| label: fig-classificationDistributions
-#| code-fold: true
-
-#No Cutoff
 ggplot(
   data = edibleData,
   aes(
@@ -570,6 +566,8 @@ That is, a measure can be useful to the extent that its ROC curve is above the d
 ```{r}
 #| fig-cap: "Receiver Operating Characteristic (ROC) Curves for Various Levels of Area Under The ROC Curve (AUC) for Various Measures."
 #| label: fig-aucRange
+#| fig-width: 8
+#| fig-height: 8
 #| code-fold: true
 
 set.seed(52242)
@@ -682,6 +680,8 @@ The various types of miscalibration are depicted in @fig-miscalibration:
 ```{r}
 #| label: fig-miscalibration
 #| fig-cap: "Types of Miscalibration. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."
+#| fig-width: 8
+#| fig-height: 8
 #| code-fold: true
 
 # Specify data
