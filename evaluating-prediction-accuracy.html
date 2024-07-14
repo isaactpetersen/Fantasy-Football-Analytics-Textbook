@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.54">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Isaac T. Petersen">
+<meta name="dcterms.date" content="today">
+<title>14&nbsp; Evaluation of Prediction/Forecasting Accuracy – Fantasy Football Analytics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./base-rates.html" rel="prev">
+<link href="./images/logo.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-C3SNF7Y0PJ"></script><script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
+</script><script type="application/json" class="js-hypothesis-config">
+{
+  "theme": "clean",
+  "openSidebar": false
+}
+</script><script async="" src="https://hypothes.is/embed.js"></script><script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./evaluating-prediction-accuracy.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Evaluation of Prediction/Forecasting Accuracy</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Fantasy Football Analytics</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./fantasy-football.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Intro to Football and Fantasy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started with <code>R</code> for Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./player-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Player Evaluation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./draft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">The Fantasy Draft</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./research-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Research Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./basic-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Basic Statistics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Correlation Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Multiple Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cognitive-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Heuristics and Cognitive Biases in Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./actuarial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Judgment Versus Actuarial Approaches to Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./base-rates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Base Rates</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./evaluating-prediction-accuracy.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Evaluation of Prediction/Forecasting Accuracy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#sec-predictionAccuracyGettingStarted" id="toc-sec-predictionAccuracyGettingStarted" class="nav-link active" data-scroll-target="#sec-predictionAccuracyGettingStarted"><span class="header-section-number">14.1</span> Getting Started</a>
+  <ul>
+<li><a href="#sec-predictionAccuracyLoadPackages" id="toc-sec-predictionAccuracyLoadPackages" class="nav-link" data-scroll-target="#sec-predictionAccuracyLoadPackages"><span class="header-section-number">14.1.1</span> Load Packages</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-predictionAccuracyOverview" id="toc-sec-predictionAccuracyOverview" class="nav-link" data-scroll-target="#sec-predictionAccuracyOverview"><span class="header-section-number">14.2</span> Overview</a></li>
+  <li>
+<a href="#sec-predictionCategorical" id="toc-sec-predictionCategorical" class="nav-link" data-scroll-target="#sec-predictionCategorical"><span class="header-section-number">14.3</span> Prediction of Categorical Outcomes</a>
+  <ul>
+<li><a href="#sec-decisionOutcomes" id="toc-sec-decisionOutcomes" class="nav-link" data-scroll-target="#sec-decisionOutcomes"><span class="header-section-number">14.3.1</span> Decision Outcomes</a></li>
+  <li><a href="#sec-percentAccuracyOverview" id="toc-sec-percentAccuracyOverview" class="nav-link" data-scroll-target="#sec-percentAccuracyOverview"><span class="header-section-number">14.3.2</span> Percent Accuracy</a></li>
+  <li><a href="#sec-accuracyByChance" id="toc-sec-accuracyByChance" class="nav-link" data-scroll-target="#sec-accuracyByChance"><span class="header-section-number">14.3.3</span> Percent Accuracy by Chance</a></li>
+  <li><a href="#sec-predictingFromBaseRate" id="toc-sec-predictingFromBaseRate" class="nav-link" data-scroll-target="#sec-predictingFromBaseRate"><span class="header-section-number">14.3.4</span> Predicting from the Base Rate</a></li>
+  <li><a href="#sec-differentErrorsDifferentCosts" id="toc-sec-differentErrorsDifferentCosts" class="nav-link" data-scroll-target="#sec-differentErrorsDifferentCosts"><span class="header-section-number">14.3.5</span> Different Kinds of Errors Have Different Costs</a></li>
+  <li>
+<a href="#sec-sensitivitySpecificityPPVnpv" id="toc-sec-sensitivitySpecificityPPVnpv" class="nav-link" data-scroll-target="#sec-sensitivitySpecificityPPVnpv"><span class="header-section-number">14.3.6</span> Sensitivity, Specificity, PPV, and NPV</a>
+  <ul class="collapse">
+<li><a href="#sec-accuracyCutoff" id="toc-sec-accuracyCutoff" class="nav-link" data-scroll-target="#sec-accuracyCutoff"><span class="header-section-number">14.3.6.1</span> Some Accuracy Estimates Depend on the Cutoff</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-sdt" id="toc-sec-sdt" class="nav-link" data-scroll-target="#sec-sdt"><span class="header-section-number">14.3.7</span> Signal Detection Theory</a>
+  <ul class="collapse">
+<li><a href="#sec-roc" id="toc-sec-roc" class="nav-link" data-scroll-target="#sec-roc"><span class="header-section-number">14.3.7.1</span> Receiver Operating Characteristic (ROC) Curve</a></li>
+  </ul>
+</li>
+  </ul>
+</li>
+  <li><a href="#sec-predictionCategorical" id="toc-sec-predictionCategorical" class="nav-link" data-scroll-target="#sec-predictionCategorical"><span class="header-section-number">14.4</span> Prediction of Continuous Outcomes</a></li>
+  <li>
+<a href="#sec-accuracyTypes" id="toc-sec-accuracyTypes" class="nav-link" data-scroll-target="#sec-accuracyTypes"><span class="header-section-number">14.5</span> Types of Accuracy</a>
+  <ul>
+<li><a href="#sec-discrimination" id="toc-sec-discrimination" class="nav-link" data-scroll-target="#sec-discrimination"><span class="header-section-number">14.5.1</span> Discrimination</a></li>
+  <li><a href="#sec-calibration" id="toc-sec-calibration" class="nav-link" data-scroll-target="#sec-calibration"><span class="header-section-number">14.5.2</span> Calibration</a></li>
+  <li><a href="#sec-generalAccuracy" id="toc-sec-generalAccuracy" class="nav-link" data-scroll-target="#sec-generalAccuracy"><span class="header-section-number">14.5.3</span> General Accuracy</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-predictionAccuracyConclusion" id="toc-sec-predictionAccuracyConclusion" class="nav-link" data-scroll-target="#sec-predictionAccuracyConclusion"><span class="header-section-number">14.6</span> Conclusion</a></li>
+  <li><a href="#sec-predictionAccuracySessionInfo" id="toc-sec-predictionAccuracySessionInfo" class="nav-link" data-scroll-target="#sec-predictionAccuracySessionInfo"><span class="header-section-number">14.7</span> Session Info</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/evaluating-prediction-accuracy.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><div class="alert alert-info hints-alert">
+  <div class="hints-icon">
+    <i class="fa fa-comments-o"></i>
+  </div>
+  <div class="hints-container">
+    <b>I need your help!</b>
+    <p>
+    I want your feedback to make the book better for you and other readers. If you find typos, errors, or places where the text may be improved, please let me know.
+    The best ways to provide feedback are by <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">GitHub</a> or <a href="https://hypothes.is">hypothes.is</a> annotations.
+    </p>
+
+    <p>
+      <i class="fa fa-github"></i>
+      <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues">Opening an issue</a> or <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/pulls">submitting a pull request</a> on GitHub: <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook</a>
+    </p>
+    <p>
+      <img style="display: inline;" src="https://hypothes.is/organizations/__default__/logo" alt="Hypothesis">
+      Adding an annotation using <a href="https://hypothes.is">hypothes.is</a>.
+      To add an annotation, <span style="background-color: #3297FD; color: white">select some text</span> and then click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class="annotator-adder-actions__icon"><path fill="currentColor" fill-rule="nonzero" d="M15 0c.27 0 .505.099.703.297A.961.961 0 0116 1v15l-4-3H1a.974.974 0 01-.703-.29A.953.953 0 010 12V1C0 .719.096.482.29.29A.966.966 0 011 0h14zM7 3l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C4.156 5.229 4 6 4 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188C4.729 8.854 5.082 9 5.5 9c.417 0 .77-.146 1.063-.438C6.854 8.271 7 7.918 7 7.5c0-.417-.146-.77-.438-1.063A1.447 1.447 0 005.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L7 4V3zm5 0l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C9.156 5.229 9 6 9 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188c.291.291.645.437 1.062.437.417 0 .77-.146 1.063-.438.291-.291.437-.645.437-1.062 0-.417-.146-.77-.438-1.063A1.447 1.447 0 0010.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L12 4V3z"></path></svg></span>
+      symbol on the pop-up menu.
+      To see the annotations of others, click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class=""><g fill-rule="evenodd"><rect fill="none" stroke="none" x="0" y="0" width="16" height="16"></rect><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12L6 8l4-4"></path></g></svg></span>
+      symbol in the upper right-hand corner of the page.
+    </p>
+  </div>
+</div>
+
+<header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-predictionAccuracy" class="quarto-section-identifier"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Evaluation of Prediction/Forecasting Accuracy</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="sec-predictionAccuracyGettingStarted" class="level2" data-number="14.1"><h2 data-number="14.1" class="anchored" data-anchor-id="sec-predictionAccuracyGettingStarted">
+<span class="header-section-number">14.1</span> Getting Started</h2>
+<section id="sec-predictionAccuracyLoadPackages" class="level3" data-number="14.1.1"><h3 data-number="14.1.1" class="anchored" data-anchor-id="sec-predictionAccuracyLoadPackages">
+<span class="header-section-number">14.1.1</span> Load Packages</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"petersenlab"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"pROC"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"magrittr"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(<span class="st">"viridis"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="sec-predictionAccuracyOverview" class="level2" data-number="14.2"><h2 data-number="14.2" class="anchored" data-anchor-id="sec-predictionAccuracyOverview">
+<span class="header-section-number">14.2</span> Overview</h2>
+<p>Predictions can come in different types. Some predictions involve categorical data, whereas other predictions involve continuous data. When dealing with a dichotomous (nominal data that are binary) predictor and outcome variable, we can evaluate predictions using a 2x2 table known as a confusion matrix (see INSERT), or with logistic regression models. When dealing with a continuous outcome variable (e.g., ordinal, interval, or ratio data), we can evaluate predictions using multiple regression or similar variants such as structural equation modeling and mixed models.</p>
+</section><section id="sec-predictionCategorical" class="level2" data-number="14.3"><h2 data-number="14.3" class="anchored" data-anchor-id="sec-predictionCategorical">
+<span class="header-section-number">14.3</span> Prediction of Categorical Outcomes</h2>
+<section id="sec-decisionOutcomes" class="level3" data-number="14.3.1"><h3 data-number="14.3.1" class="anchored" data-anchor-id="sec-decisionOutcomes">
+<span class="header-section-number">14.3.1</span> Decision Outcomes</h3>
+<p>To consider how we can evaluate the accuracy of predictions, consider an example adapted from <span class="citation" data-cites="Meehl1955">Meehl &amp; Rosen (<a href="references.html#ref-Meehl1955" role="doc-biblioref">1955</a>)</span>. The military conducts a test of its prospective members to screen out applicants who would likely fail basic training. To evaluate the accuracy of our predictions using the test, we can examine a confusion matrix. A confusion matrix is a matrix that presents the predicted outcome on one dimension and the actual outcome (truth) on the other dimension. If the predictions and outcomes are dichotomous, the confusion matrix is a 2x2 matrix with two rows and two columns that represent four possible predicted-actual combinations (decision outcomes): true positives (TP), true negatives (TN), false positives (FP), and false negatives (FN).</p>
+<p>When discussing the four decision outcomes, “true” means an accurate judgment, whereas “false” means an inaccurate judgment. “Positive” means that the judgment was that the person has the characteristic of interest, whereas “negative” means that the judgment was that the person does not have the characteristic of interest. A <em>true positive</em> is a correct judgment (or prediction) where the judgment was that the person has (or will have) the characteristic of interest, and, in truth, they actually have (or will have) the characteristic. A <em>true negative</em> is a correct judgment (or prediction) where the judgment was that the person does not have (or will not have) the characteristic of interest, and, in truth, they actually do not have (or will not have) the characteristic. A <em>false positive</em> is an incorrect judgment (or prediction) where the judgment was that the person has (or will have) the characteristic of interest, and, in truth, they actually do not have (or will not have) the characteristic. A <em>false negative</em> is an incorrect judgment (or prediction) where the judgment was that the person does not have (or will not have) the characteristic of interest, and, in truth, they actually do have (or will have) the characteristic.</p>
+<p>An example of a confusion matrix is in INSERT.</p>
+<p>With the information in the confusion matrix, we can calculate the marginal sums and the proportion of people in each cell (in parentheses), as depicted in INSERT.</p>
+<p>That is, we can sum across the rows and columns to identify how many people actually showed poor adjustment (<span class="math inline">\(n = 100\)</span>) versus good adjustment (<span class="math inline">\(n = 1,900\)</span>), and how many people were selected to reject (<span class="math inline">\(n = 508\)</span>) versus retain (<span class="math inline">\(n = 1,492\)</span>). If we sum the column of predicted marginal sums (<span class="math inline">\(508 + 1,492\)</span>) or the row of actual marginal sums (<span class="math inline">\(100 + 1,900\)</span>), we get the total number of people (<span class="math inline">\(N = 2,000\)</span>).</p>
+<p>Based on the marginal sums, we can compute the <a href="base-rates.html#sec-baseRate">marginal probabilities</a>, as depicted in INSERT.</p>
+<p>The <a href="base-rates.html#sec-baseRate">marginal probability</a> of the person having the characteristic of interest (i.e., showing poor adjustment) is called the <a href="#baseRate"><em>base rate</em></a> (BR). That is, the <a href="#baseRate">base rate</a> is the proportion of people who have the characteristic. It is calculated by dividing the number of people with poor adjustment (<span class="math inline">\(n = 100\)</span>) by the total number of people (<span class="math inline">\(N = 2,000\)</span>): <span class="math inline">\(BR = \frac{FN + TP}{N}\)</span>. Here, the <a href="#baseRate">base rate</a> reflects the prevalence of poor adjustment. In this case, the <a href="#baseRate">base rate</a> is .05, so there is a 5% chance that an applicant will be poorly adjusted. The <a href="#baseRate">marginal probability</a> of good adjustment is equal to 1 minus the <a href="#baseRate">base rate</a> of poor adjustment.</p>
+<p>The <a href="#baseRate">marginal probability</a> of predicting that a person has the characteristic (i.e., rejecting a person) is called the <em>selection ratio</em> (SR). The selection ratio is the proportion of people who will be selected (in this case, rejected rather than retained); i.e., the proportion of people who are identified as having the characteristic. The selection ratio is calculated by dividing the number of people selected to reject (<span class="math inline">\(n = 508\)</span>) by the total number of people (<span class="math inline">\(N = 2,000\)</span>): <span class="math inline">\(SR = \frac{TP + FP}{N}\)</span>. In this case, the selection ratio is .25, so 25% of people are rejected. The <a href="#baseRate">marginal probability</a> of not selecting someone to reject (i.e., the <a href="#baseRate">marginal probability</a> of retaining) is equal to 1 minus the selection ratio.</p>
+<p>The selection ratio might be something that the test dictates according to its cutoff score. Or, the selection ratio might be imposed by external factors that place limits on how many people you can assign a positive test value. For instance, when deciding whether to treat a client, the selection ratio may depend on how many therapists are available and how many cases can be treated.</p>
+</section><section id="sec-percentAccuracyOverview" class="level3" data-number="14.3.2"><h3 data-number="14.3.2" class="anchored" data-anchor-id="sec-percentAccuracyOverview">
+<span class="header-section-number">14.3.2</span> Percent Accuracy</h3>
+<p>Based on the confusion matrix, we can calculate the prediction accuracy based on the percent accuracy of the predictions. The percent accuracy is the number of correct predictions divided by the total number of predictions, and multiplied by 100. In the context of a confusion matrix, this is calculated as: <span class="math inline">\(100\% \times \frac{\text{TP} + \text{TN}}{N}\)</span>. In this case, our percent accuracy was 78%—that is, 78% of our predictions were accurate, and 22% of our predictions were inaccurate.</p>
+</section><section id="sec-accuracyByChance" class="level3" data-number="14.3.3"><h3 data-number="14.3.3" class="anchored" data-anchor-id="sec-accuracyByChance">
+<span class="header-section-number">14.3.3</span> Percent Accuracy by Chance</h3>
+<p>78% sounds pretty accurate. And it is much higher than 50%, so we are doing a pretty good job, right? Well, it is important to compare our accuracy to what accuracy we would expect to get by chance alone, if predictions were made by a random process rather than using a test’s scores. Our selection ratio was 25.4%. How accurate would we be if we randomly selected 25.4% of people to reject? To determine what accuracy we could get by chance alone given the selection ratio and the base rate, we can calculate the chance probability of true positives and the chance probability of true negatives. The probability of a given cell in the confusion matrix is a <a href="base-rates.html#sec-jointProbability">joint probability</a>—the probability of two events occurring simultaneously. To calculate a <a href="base-rates.html#sec-jointProbability">joint probability</a>, we multiply the probability of each event.</p>
+<p>So, to get the chance expectancies of true positives, we would multiply the respective <a href="#baseRate">marginal probabilities</a>, as in Equation <a href="#eq-truePositivesByChanceExample" class="quarto-xref">Equation&nbsp;<span>14.1</span></a>:</p>
+<p><span id="eq-truePositivesByChanceExample"><span class="math display">\[
+\begin{aligned}
+  P(TP) &amp;= P(\text{Poor adjustment}) \times P(\text{Reject})\\
+   &amp;= BR \times SR \\
+  &amp;= .05 \times .254 \\
+  &amp;= .0127
+\end{aligned}
+\tag{14.1}\]</span></span></p>
+<p>To get the chance expectancies of true negatives, we would multiply the respective <a href="base-rates.html#sec-baseRate">marginal probabilities</a>, as in <span class="citation" data-cites="trueNegativesByChanceExample">(<a href="references.html#ref-trueNegativesByChanceExample" role="doc-biblioref"><strong>trueNegativesByChanceExample?</strong></a>)</span>:</p>
+<p><span id="eq-trueNegativesByChanceExample"><span class="math display">\[
+\begin{aligned}
+  P(TN) &amp;= P(\text{Good adjustment}) \times P(\text{Retain})\\
+   &amp;= (1 - BR) \times (1 - SR) \\
+  &amp;= .95 \times .746 \\
+  &amp;= .7087
+\end{aligned}
+\tag{14.2}\]</span></span></p>
+<p>To get the percent accuracy by chance, we sum the chance expectancies for the correct predictions (TP and TN): <span class="math inline">\(.0127 + .7087 = .7214\)</span>. Thus, the percent accuracy you can get by chance alone is 72%. This is because most of our predictions are to retain people, and the <a href="base-rates.html#sec-baseRate">base rate</a> of poor adjustment is quite low (.05). Our measure with 78% accuracy provides only a 6% increment in correct predictions. Thus, you cannot judge how good your judgment or prediction is until you know how you would do by random chance.</p>
+<p>The chance expectancies for each cell of the confusion matrix are in INSERT</p>
+</section><section id="sec-predictingFromBaseRate" class="level3" data-number="14.3.4"><h3 data-number="14.3.4" class="anchored" data-anchor-id="sec-predictingFromBaseRate">
+<span class="header-section-number">14.3.4</span> Predicting from the Base Rate</h3>
+<p>Now, let us consider how well you would do if you were to predict from the <a href="base-rates.html#sec-baseRate">base rate</a>. Predicting from the <a href="base-rates.html#sec-baseRate">base rate</a> is also called “betting from the <a href="base-rates.html#sec-baseRate">base rate</a>”, and it involves setting the selection ratio by taking advantage of the <a href="base-rates.html#sec-baseRate">base rate</a> so that you go with the most likely outcome in every prediction. Because the <a href="base-rates.html#sec-baseRate">base rate</a> is quite low (.05), we could predict from the <a href="base-rates.html#sec-baseRate">base rate</a> by selecting no one to reject (i.e., setting the selection ratio at zero). Our percent accuracy by chance if we predict from the <a href="base-rates.html#sec-baseRate">base rate</a> would be calculated by multiplying the <a href="base-rates.html#sec-baseRate">marginal probabilities</a>, as we did above, but with a new selection ratio, as in <a href="#eq-predictingFromBaseRateExample" class="quarto-xref">Equation&nbsp;<span>14.3</span></a>:</p>
+<p><span id="eq-predictingFromBaseRateExample"><span class="math display">\[
+\begin{aligned}
+  P(TP) &amp;= P(\text{Poor adjustment}) \times P(\text{Reject})\\
+   &amp;= BR \times SR \\
+  &amp;= .05 \times 0 \\
+  &amp;= 0 \\ \\
+  P(TN) &amp;= P(\text{Good adjustment}) \times P(\text{Retain})\\
+   &amp;= (1 - BR) \times (1 - SR) \\
+  &amp;= .95 \times 1 \\
+  &amp;= .95
+\end{aligned}
+\tag{14.3}\]</span></span></p>
+<p>We sum the chance expectancies for the correct predictions (TP and TN): <span class="math inline">\(0 + .95 = .95\)</span>. Thus, our percent accuracy by predicting from the <a href="base-rates.html#sec-baseRate">base rate</a> is 95%. This is damning to our measure because it is a much higher accuracy than the accuracy of our measure. That is, we can be much more accurate than our measure simply by predicting from the <a href="base-rates.html#sec-baseRate">base rate</a> and selecting no one to reject.</p>
+<p>Going with the most likely outcome in every prediction (predicting from the <a href="base-rates.html#sec-baseRate">base rate</a>) can be highly accurate (in terms of percent accuracy) as noted by <span class="citation" data-cites="Meehl1955">Meehl &amp; Rosen (<a href="references.html#ref-Meehl1955" role="doc-biblioref">1955</a>)</span>, especially when the <a href="base-rates.html#sec-baseRate">base rate</a> is very low or very high. This should serve as an important reminder that we need to compare the accuracy of our measures to the accuracy by (1) random chance and (2) predicting from the <a href="base-rates.html#sec-baseRate">base rate</a>. There are several important implications of the impact of <a href="base-rates.html#sec-baseRate">base rates</a> on prediction accuracy. One implication is that using the same test in different settings with different <a href="base-rates.html#sec-baseRate">base rates</a> will markedly change the accuracy of the test. Oftentimes, using a test will actually <em>decrease</em> the predictive accuracy when the <a href="base-rates.html#sec-baseRate">base rate</a> deviates greatly from .50. But percent accuracy is not everything. Percent accuracy treats different kinds of errors as if they are equally important. However, the value we place on different kinds of errors may be different, as described next.</p>
+</section><section id="sec-differentErrorsDifferentCosts" class="level3" data-number="14.3.5"><h3 data-number="14.3.5" class="anchored" data-anchor-id="sec-differentErrorsDifferentCosts">
+<span class="header-section-number">14.3.5</span> Different Kinds of Errors Have Different Costs</h3>
+<p>Some errors have a high cost, and some errors have a low cost. Among the four decision outcomes, there are two types of errors: false positives and false negatives. The extent to which false positives and false negatives are costly depends on the prediction problem. So, even though you can often be most accurate by going with the <a href="base-rates.html#sec-baseRate">base rate</a>, it may be advantageous to use a screening instrument despite lower overall accuracy because of the huge difference in costs of false positives versus false negatives in some cases.</p>
+<p>Consider the example of a screening instrument for HIV. False positives would be cases where we said that someone is at high risk of HIV when they are not, whereas false negatives are cases where we said that someone is not at high risk when they actually are. The costs of false positives include a shortage of blood, some follow-up testing, and potentially some anxiety, but that is about it. The costs of false negatives may be people getting HIV. In this case, the costs of false negatives greatly outweigh the costs of false positives, so we use a screening instrument to try to identify the cases at high risk for HIV because of the important consequences of failing to do so, even though using the screening instrument will lower our overall accuracy level.</p>
+<p>Another example is when the Central Intelligence Agency (CIA) used a screen for protective typists during wartime to try to detect spies. False positives would be cases where the CIA believes that a person is a spy when they are not, and the CIA does not hire them. False negatives would be cases where the CIA believes that a person is not a spy when they actually are, and the CIA hires them. In this case, a false positive would be fine, but a false negative would be really bad.</p>
+<p>How you weigh the costs of different errors depends considerably on the domain and context. Possible costs of false positives to society include: unnecessary and costly treatment with side effects and sending an innocent person to jail (despite our presumption of innocence in the United States criminal justice system that a person is innocent until proven guilty). Possible costs of false negatives to society include: setting a guilty person free, failing to detect a bomb or tumor, and preventing someone from getting treatment who needs it.</p>
+<p>The differential costs of different errors also depend on how much flexibility you have in the selection ratio in being able to set a stringent versus loose selection ratio. Consider if there is a high cost of getting rid of people during the selection process. For example, if you must hire 100 people and only 100 people apply for the position, you cannot lose people, so you need to hire even high-risk people. However, if you do not need to hire many people, then you can hire more conservatively.</p>
+<p>Any time the selection ratio differs from the <a href="base-rates.html#sec-baseRate">base rate</a>, you will make errors. For example, if you reject 25% of applicants, and the <a href="base-rates.html#sec-baseRate">base rate</a> of poor adjustment is 5%, then you are making errors of over-rejecting (false positives). By contrast, if you reject 1% of applicants and the <a href="base-rates.html#sec-baseRate">base rate</a> of poor adjustment is 5%, then you are making errors of under-rejecting or over-accepting (false negatives).</p>
+<p>A low <a href="base-rates.html#sec-baseRate">base rate</a> makes it harder to make predictions, and tends to lead to less accurate predictions. For instance, it is very challenging to predict low <a href="base-rates.html#sec-baseRate">base rate</a> behaviors, including suicide <span class="citation" data-cites="Kessler2020">(<a href="references.html#ref-Kessler2020" role="doc-biblioref">Kessler et al., 2020</a>)</span>.</p>
+</section><section id="sec-sensitivitySpecificityPPVnpv" class="level3" data-number="14.3.6"><h3 data-number="14.3.6" class="anchored" data-anchor-id="sec-sensitivitySpecificityPPVnpv">
+<span class="header-section-number">14.3.6</span> Sensitivity, Specificity, PPV, and NPV</h3>
+<p>As described earlier, percent accuracy is not the only important aspect of accuracy. Percent accuracy can be misleading because it is highly influenced by <a href="base-rates.html#sec-baseRate">base rates</a>. You can have a high percent accuracy by predicting from the base rate and saying that no one has the condition (if the <a href="base-rates.html#sec-baseRate">base rate</a> is low) or that everyone has the condition (if the <a href="base-rates.html#sec-baseRate">base rate</a> is high). Thus, it is also important to consider other aspects of accuracy, including sensitivity (SN), specificity (SP), positive predictive value (PPV), and negative predictive value (NPV). We want our predictions to be sensitive to be able to detect the characteristic but also to be specific so that we classify only people actually with the characteristic as having the characteristic.</p>
+<p>Let us return to the confusion matrix in INSERT. If we know the frequency of each of the four predicted-actual combinations of the confusion matrix (TP, TN, FP, FN), we can calculate sensitivity, specificity, PPV, and NPV.</p>
+<p>Sensitivity is the proportion of those with the characteristic (<span class="math inline">\(\text{TP} + \text{FN}\)</span>) that we identified with our measure (<span class="math inline">\(\text{TP}\)</span>): <span class="math inline">\(\frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{86}{86 + 14} = .86\)</span>. Specificity is the proportion of those who do not have the characteristic (<span class="math inline">\(\text{TN} + \text{FP}\)</span>) that we correctly classify as not having the characteristic (<span class="math inline">\(\text{TN}\)</span>): <span class="math inline">\(\frac{\text{TN}}{\text{TN} + \text{FP}} = \frac{1,478}{1,478 + 422} = .78\)</span>. PPV is the proportion of those who we classify as having the characteristic (<span class="math inline">\(\text{TP} + \text{FP}\)</span>) who actually have the characteristic (<span class="math inline">\(\text{TP}\)</span>): <span class="math inline">\(\frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{86}{86 + 422} = .17\)</span> NPV is the proportion of those we classify as not having the characteristic (<span class="math inline">\(\text{TN} + \text{FN}\)</span>) who actually do not have the characteristic (<span class="math inline">\(\text{TN}\)</span>): <span class="math inline">\(\frac{\text{TN}}{\text{TN} + \text{FN}} = \frac{1,478}{1,478 + 14} = .99\)</span>.</p>
+<p>Sensitivity, specificity, PPV, and NPV are proportions, and their values therefore range from 0 to 1, where higher values reflect greater accuracy. With sensitivity, specificity, PPV, and NPV, we have a good snapshot of how accurate the measure is at a given cutoff. In our case, our measure is good at finding whom to reject (high sensitivity), but it is rejecting too many people who do not need to be rejected (lower PPV due to many FPs). Most people whom we classify as having the characteristic do not actually have the characteristic. However, the fact that we are over-rejecting could be okay depending on our goals, for instance, if we do not care about over-dropping (i.e., the PPV being low).</p>
+<section id="sec-accuracyCutoff" class="level4" data-number="14.3.6.1"><h4 data-number="14.3.6.1" class="anchored" data-anchor-id="sec-accuracyCutoff">
+<span class="header-section-number">14.3.6.1</span> Some Accuracy Estimates Depend on the Cutoff</h4>
+<p>Sensitivity, specificity, PPV, and NPV differ based on the cutoff (i.e., threshold) for classification. Consider the following example. Aliens visit Earth, and they develop a test to determine whether a berry is edible or inedible.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>sampleSize <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a>edibleScores <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(sampleSize, <span class="dv">50</span>, <span class="dv">15</span>)</span>
+<span id="cb2-4"><a href="#cb2-4"></a>inedibleScores <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(sampleSize, <span class="dv">100</span>, <span class="dv">15</span>)</span>
+<span id="cb2-5"><a href="#cb2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6"></a>edibleData <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="at">score =</span> <span class="fu">c</span>(</span>
+<span id="cb2-8"><a href="#cb2-8"></a>    edibleScores,</span>
+<span id="cb2-9"><a href="#cb2-9"></a>    inedibleScores),</span>
+<span id="cb2-10"><a href="#cb2-10"></a>  <span class="at">type =</span> <span class="fu">c</span>(</span>
+<span id="cb2-11"><a href="#cb2-11"></a>    <span class="fu">rep</span>(<span class="st">"edible"</span>, sampleSize),</span>
+<span id="cb2-12"><a href="#cb2-12"></a>    <span class="fu">rep</span>(<span class="st">"inedible"</span>, sampleSize)))</span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">75</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a></span>
+<span id="cb2-16"><a href="#cb2-16"></a>hist_edible <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb2-17"><a href="#cb2-17"></a>  edibleScores,</span>
+<span id="cb2-18"><a href="#cb2-18"></a>  <span class="at">from =</span> <span class="dv">0</span>,</span>
+<span id="cb2-19"><a href="#cb2-19"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># from magrittr package</span></span>
+<span id="cb2-20"><a href="#cb2-20"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb2-21"><a href="#cb2-21"></a>    <span class="at">x =</span> x,</span>
+<span id="cb2-22"><a href="#cb2-22"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&gt;=</span> cutoff)</span>
+<span id="cb2-24"><a href="#cb2-24"></a></span>
+<span id="cb2-25"><a href="#cb2-25"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_FP"</span></span>
+<span id="cb2-26"><a href="#cb2-26"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">FALSE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_TN"</span></span>
+<span id="cb2-27"><a href="#cb2-27"></a></span>
+<span id="cb2-28"><a href="#cb2-28"></a>hist_inedible <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb2-29"><a href="#cb2-29"></a>  inedibleScores,</span>
+<span id="cb2-30"><a href="#cb2-30"></a>  <span class="at">from =</span> <span class="dv">0</span>,</span>
+<span id="cb2-31"><a href="#cb2-31"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># from magrittr package</span></span>
+<span id="cb2-32"><a href="#cb2-32"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb2-33"><a href="#cb2-33"></a>    <span class="at">x =</span> x,</span>
+<span id="cb2-34"><a href="#cb2-34"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb2-35"><a href="#cb2-35"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&lt;</span> cutoff)</span>
+<span id="cb2-36"><a href="#cb2-36"></a></span>
+<span id="cb2-37"><a href="#cb2-37"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_FN"</span></span>
+<span id="cb2-38"><a href="#cb2-38"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">FALSE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_TP"</span></span>
+<span id="cb2-39"><a href="#cb2-39"></a></span>
+<span id="cb2-40"><a href="#cb2-40"></a>density_data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb2-41"><a href="#cb2-41"></a>  hist_edible,</span>
+<span id="cb2-42"><a href="#cb2-42"></a>  hist_inedible)</span>
+<span id="cb2-43"><a href="#cb2-43"></a></span>
+<span id="cb2-44"><a href="#cb2-44"></a>density_data<span class="sc">$</span>type <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb2-45"><a href="#cb2-45"></a>  density_data<span class="sc">$</span>type,</span>
+<span id="cb2-46"><a href="#cb2-46"></a>  <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb2-47"><a href="#cb2-47"></a>    <span class="st">"edible_TN"</span>,</span>
+<span id="cb2-48"><a href="#cb2-48"></a>    <span class="st">"inedible_TP"</span>,</span>
+<span id="cb2-49"><a href="#cb2-49"></a>    <span class="st">"edible_FP"</span>,</span>
+<span id="cb2-50"><a href="#cb2-50"></a>    <span class="st">"inedible_FN"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><a href="#fig-classificationDistributions" class="quarto-xref">Figure&nbsp;<span>14.1</span></a> depicts the distributions of scores by berry type. Note how there are clearly two distinct distributions. However, the distributions overlap to some degree. Thus, any cutoff will have at least some inaccurate classifications. The extent of overlap of the distributions reflects the amount of measurement error of the measure with respect to the characteristic of interest.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co">#No Cutoff</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="fu">ggplot</span>(</span>
+<span id="cb3-3"><a href="#cb3-3"></a>  <span class="at">data =</span> edibleData,</span>
+<span id="cb3-4"><a href="#cb3-4"></a>  <span class="fu">aes</span>(</span>
+<span id="cb3-5"><a href="#cb3-5"></a>    <span class="at">x =</span> score,</span>
+<span id="cb3-6"><a href="#cb3-6"></a>    <span class="at">ymin =</span> <span class="dv">0</span>,</span>
+<span id="cb3-7"><a href="#cb3-7"></a>    <span class="at">fill =</span> type)) <span class="sc">+</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> .<span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb3-10"><a href="#cb3-10"></a>    <span class="at">name =</span> <span class="st">"Berry Type"</span>,</span>
+<span id="cb3-11"><a href="#cb3-11"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb3-12"><a href="#cb3-12"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">2</span>)[<span class="dv">1</span>],</span>
+<span id="cb3-13"><a href="#cb3-13"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">2</span>)[<span class="dv">2</span>])) <span class="sc">+</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a>  <span class="fu">theme</span>(</span>
+<span id="cb3-17"><a href="#cb3-17"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-18"><a href="#cb3-18"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-classificationDistributions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-classificationDistributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="evaluating-prediction-accuracy_files/figure-html/fig-classificationDistributions-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-classificationDistributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.1: Distribution of Test Scores by Berry Type.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-classificationStandardCutoff" class="quarto-xref">Figure&nbsp;<span>14.2</span></a> depicts the distributions of scores by berry type with a cutoff. The red line indicates the cutoff—the level above which berries are classified by the test as inedible. There are errors on each side of the cutoff. Below the cutoff, there are some false negatives (blue): inedible berries that are inaccurately classified as edible. Above the cutoff, there are some false positives (green): edible berries that are inaccurately classified as inedible. Costs of false negatives could include sickness or death from eating the inedible berries. Costs of false positives could include taking longer to find food, finding insufficient food, and starvation.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">#Standard Cutoff</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="fu">ggplot</span>(</span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="at">data =</span> density_data,</span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">aes</span>(</span>
+<span id="cb4-5"><a href="#cb4-5"></a>    <span class="at">x =</span> x,</span>
+<span id="cb4-6"><a href="#cb4-6"></a>    <span class="at">ymin =</span> <span class="dv">0</span>,</span>
+<span id="cb4-7"><a href="#cb4-7"></a>    <span class="at">ymax =</span> y,</span>
+<span id="cb4-8"><a href="#cb4-8"></a>    <span class="at">fill =</span> type)) <span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">geom_ribbon</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb4-11"><a href="#cb4-11"></a>    <span class="at">name =</span> <span class="st">"Berry Type"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb4-13"><a href="#cb4-13"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">4</span>],</span>
+<span id="cb4-14"><a href="#cb4-14"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">1</span>],</span>
+<span id="cb4-15"><a href="#cb4-15"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">3</span>],</span>
+<span id="cb4-16"><a href="#cb4-16"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">2</span>]),</span>
+<span id="cb4-17"><a href="#cb4-17"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"edible_TN"</span>,<span class="st">"inedible_TP"</span>,<span class="st">"edible_FP"</span>,<span class="st">"inedible_FN"</span>),</span>
+<span id="cb4-18"><a href="#cb4-18"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Edible: TN"</span>,<span class="st">"Inedible: TP"</span>,<span class="st">"Edible: FP"</span>,<span class="st">"Inedible: FN"</span>)) <span class="sc">+</span></span>
+<span id="cb4-19"><a href="#cb4-19"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb4-20"><a href="#cb4-20"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb4-21"><a href="#cb4-21"></a>    <span class="at">xintercept =</span> cutoff,</span>
+<span id="cb4-22"><a href="#cb4-22"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb4-23"><a href="#cb4-23"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb4-24"><a href="#cb4-24"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">"score"</span>) <span class="sc">+</span></span>
+<span id="cb4-25"><a href="#cb4-25"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb4-26"><a href="#cb4-26"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb4-27"><a href="#cb4-27"></a>  <span class="fu">theme</span>(</span>
+<span id="cb4-28"><a href="#cb4-28"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-29"><a href="#cb4-29"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-classificationStandardCutoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-classificationStandardCutoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="evaluating-prediction-accuracy_files/figure-html/fig-classificationStandardCutoff-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-classificationStandardCutoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.2: Classifications Based on a Cutoff. Note that some true negatives and true positives are hidden behind the false positives and false negatives.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Based on our assessment goals, we might use a different selection ratio by changing the cutoff. <a href="#fig-classificationRaiseCutoff" class="quarto-xref">Figure&nbsp;<span>14.3</span></a> depicts the distributions of scores by berry type when we raise the cutoff. There are now more false negatives (blue) and fewer false positives (green). If we raise the cutoff (to be more conservative), the number of false negatives increases and the number of false positives decreases. Consequently, as the cutoff increases, sensitivity and NPV decrease (because we have more false negatives), whereas specificity and PPV increase (because we have fewer false positives). A higher cutoff could be optimal if the costs of false positives are considered greater than the costs of false negatives. For instance, if the aliens cannot risk eating the inedible berries because the berries are fatal, and there are sufficient edible berries that can be found to feed the alien colony.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">#Raise the cutoff</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">85</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a>hist_edible <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb5-5"><a href="#cb5-5"></a>  edibleScores,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>  <span class="at">from =</span> <span class="dv">0</span>,</span>
+<span id="cb5-7"><a href="#cb5-7"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># from magrittr package</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb5-9"><a href="#cb5-9"></a>    <span class="at">x =</span> x,</span>
+<span id="cb5-10"><a href="#cb5-10"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&gt;=</span> cutoff)</span>
+<span id="cb5-12"><a href="#cb5-12"></a></span>
+<span id="cb5-13"><a href="#cb5-13"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_FP"</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">FALSE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_TN"</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a></span>
+<span id="cb5-16"><a href="#cb5-16"></a>hist_inedible <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb5-17"><a href="#cb5-17"></a>  inedibleScores,</span>
+<span id="cb5-18"><a href="#cb5-18"></a>  <span class="at">from =</span> <span class="dv">0</span>,</span>
+<span id="cb5-19"><a href="#cb5-19"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># from magrittr package</span></span>
+<span id="cb5-20"><a href="#cb5-20"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb5-21"><a href="#cb5-21"></a>    <span class="at">x =</span> x,</span>
+<span id="cb5-22"><a href="#cb5-22"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb5-23"><a href="#cb5-23"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&lt;</span> cutoff)</span>
+<span id="cb5-24"><a href="#cb5-24"></a></span>
+<span id="cb5-25"><a href="#cb5-25"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_FN"</span></span>
+<span id="cb5-26"><a href="#cb5-26"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">FALSE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_TP"</span></span>
+<span id="cb5-27"><a href="#cb5-27"></a></span>
+<span id="cb5-28"><a href="#cb5-28"></a>density_data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb5-29"><a href="#cb5-29"></a>  hist_edible,</span>
+<span id="cb5-30"><a href="#cb5-30"></a>  hist_inedible)</span>
+<span id="cb5-31"><a href="#cb5-31"></a></span>
+<span id="cb5-32"><a href="#cb5-32"></a>density_data<span class="sc">$</span>type <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb5-33"><a href="#cb5-33"></a>  density_data<span class="sc">$</span>type,</span>
+<span id="cb5-34"><a href="#cb5-34"></a>  <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb5-35"><a href="#cb5-35"></a>    <span class="st">"edible_TN"</span>,</span>
+<span id="cb5-36"><a href="#cb5-36"></a>    <span class="st">"inedible_TP"</span>,</span>
+<span id="cb5-37"><a href="#cb5-37"></a>    <span class="st">"edible_FP"</span>,</span>
+<span id="cb5-38"><a href="#cb5-38"></a>    <span class="st">"inedible_FN"</span>))</span>
+<span id="cb5-39"><a href="#cb5-39"></a></span>
+<span id="cb5-40"><a href="#cb5-40"></a><span class="fu">ggplot</span>(</span>
+<span id="cb5-41"><a href="#cb5-41"></a>  <span class="at">data =</span> density_data,</span>
+<span id="cb5-42"><a href="#cb5-42"></a>  <span class="fu">aes</span>(</span>
+<span id="cb5-43"><a href="#cb5-43"></a>    <span class="at">x =</span> x,</span>
+<span id="cb5-44"><a href="#cb5-44"></a>    <span class="at">ymin =</span> <span class="dv">0</span>,</span>
+<span id="cb5-45"><a href="#cb5-45"></a>    <span class="at">ymax =</span> y,</span>
+<span id="cb5-46"><a href="#cb5-46"></a>    <span class="at">fill =</span> type)) <span class="sc">+</span></span>
+<span id="cb5-47"><a href="#cb5-47"></a>  <span class="fu">geom_ribbon</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb5-48"><a href="#cb5-48"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb5-49"><a href="#cb5-49"></a>    <span class="at">name =</span> <span class="st">"Berry Type"</span>,</span>
+<span id="cb5-50"><a href="#cb5-50"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb5-51"><a href="#cb5-51"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">4</span>],</span>
+<span id="cb5-52"><a href="#cb5-52"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">1</span>],</span>
+<span id="cb5-53"><a href="#cb5-53"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">3</span>],</span>
+<span id="cb5-54"><a href="#cb5-54"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">2</span>]),</span>
+<span id="cb5-55"><a href="#cb5-55"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"edible_TN"</span>,<span class="st">"inedible_TP"</span>,<span class="st">"edible_FP"</span>,<span class="st">"inedible_FN"</span>),</span>
+<span id="cb5-56"><a href="#cb5-56"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Edible: TN"</span>,<span class="st">"Inedible: TP"</span>,<span class="st">"Edible: FP"</span>,<span class="st">"Inedible: FN"</span>)) <span class="sc">+</span></span>
+<span id="cb5-57"><a href="#cb5-57"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb5-58"><a href="#cb5-58"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb5-59"><a href="#cb5-59"></a>    <span class="at">xintercept =</span> cutoff,</span>
+<span id="cb5-60"><a href="#cb5-60"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb5-61"><a href="#cb5-61"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb5-62"><a href="#cb5-62"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">"score"</span>) <span class="sc">+</span></span>
+<span id="cb5-63"><a href="#cb5-63"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb5-64"><a href="#cb5-64"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb5-65"><a href="#cb5-65"></a>  <span class="fu">theme</span>(</span>
+<span id="cb5-66"><a href="#cb5-66"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-67"><a href="#cb5-67"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-classificationRaiseCutoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-classificationRaiseCutoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="evaluating-prediction-accuracy_files/figure-html/fig-classificationRaiseCutoff-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-classificationRaiseCutoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.3: Classifications Based on Raising the Cutoff. Note that some true negatives and true positives are hidden behind the false positives and false negatives.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-classificationLowerCutoff" class="quarto-xref">Figure&nbsp;<span>14.4</span></a> depicts the distributions of scores by berry type when we lower the cutoff. There are now fewer false negatives (blue) and more false positives (green). If we lower the cutoff (to be more liberal), the number of false negatives decreases and the number of false positives increases. Consequently, as the cutoff decreases, sensitivity and NPV increase (because we have fewer false negatives), whereas specificity and PPV decrease (because we have more false positives). A lower cutoff could be optimal if the costs of false negatives are considered greater than the costs of false positives. For instance, if the aliens cannot risk missing edible berries because they are in short supply relative to the size of the alien colony, and eating the inedible berries would, at worst, lead to minor, temporary discomfort.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#Lower the cutoff</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">65</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a>hist_edible <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb6-5"><a href="#cb6-5"></a>  edibleScores,</span>
+<span id="cb6-6"><a href="#cb6-6"></a>  <span class="at">from =</span> <span class="dv">0</span>,</span>
+<span id="cb6-7"><a href="#cb6-7"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># from magrittr package</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb6-9"><a href="#cb6-9"></a>    <span class="at">x =</span> x,</span>
+<span id="cb6-10"><a href="#cb6-10"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&gt;=</span> cutoff)</span>
+<span id="cb6-12"><a href="#cb6-12"></a></span>
+<span id="cb6-13"><a href="#cb6-13"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_FP"</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">FALSE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_TN"</span></span>
+<span id="cb6-15"><a href="#cb6-15"></a></span>
+<span id="cb6-16"><a href="#cb6-16"></a>hist_inedible <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb6-17"><a href="#cb6-17"></a>  inedibleScores,</span>
+<span id="cb6-18"><a href="#cb6-18"></a>  <span class="at">from =</span> <span class="dv">0</span>,</span>
+<span id="cb6-19"><a href="#cb6-19"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># from magrittr package</span></span>
+<span id="cb6-20"><a href="#cb6-20"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb6-21"><a href="#cb6-21"></a>    <span class="at">x =</span> x,</span>
+<span id="cb6-22"><a href="#cb6-22"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb6-23"><a href="#cb6-23"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&lt;</span> cutoff)</span>
+<span id="cb6-24"><a href="#cb6-24"></a></span>
+<span id="cb6-25"><a href="#cb6-25"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_FN"</span></span>
+<span id="cb6-26"><a href="#cb6-26"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">FALSE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_TP"</span></span>
+<span id="cb6-27"><a href="#cb6-27"></a></span>
+<span id="cb6-28"><a href="#cb6-28"></a>density_data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb6-29"><a href="#cb6-29"></a>  hist_edible,</span>
+<span id="cb6-30"><a href="#cb6-30"></a>  hist_inedible)</span>
+<span id="cb6-31"><a href="#cb6-31"></a></span>
+<span id="cb6-32"><a href="#cb6-32"></a>density_data<span class="sc">$</span>type <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb6-33"><a href="#cb6-33"></a>  density_data<span class="sc">$</span>type,</span>
+<span id="cb6-34"><a href="#cb6-34"></a>  <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb6-35"><a href="#cb6-35"></a>    <span class="st">"edible_TN"</span>,</span>
+<span id="cb6-36"><a href="#cb6-36"></a>    <span class="st">"inedible_TP"</span>,</span>
+<span id="cb6-37"><a href="#cb6-37"></a>    <span class="st">"edible_FP"</span>,</span>
+<span id="cb6-38"><a href="#cb6-38"></a>    <span class="st">"inedible_FN"</span>))</span>
+<span id="cb6-39"><a href="#cb6-39"></a></span>
+<span id="cb6-40"><a href="#cb6-40"></a><span class="fu">ggplot</span>(</span>
+<span id="cb6-41"><a href="#cb6-41"></a>  <span class="at">data =</span> density_data,</span>
+<span id="cb6-42"><a href="#cb6-42"></a>  <span class="fu">aes</span>(</span>
+<span id="cb6-43"><a href="#cb6-43"></a>    <span class="at">x =</span> x,</span>
+<span id="cb6-44"><a href="#cb6-44"></a>    <span class="at">ymin =</span> <span class="dv">0</span>,</span>
+<span id="cb6-45"><a href="#cb6-45"></a>    <span class="at">ymax =</span> y,</span>
+<span id="cb6-46"><a href="#cb6-46"></a>    <span class="at">fill =</span> type)) <span class="sc">+</span></span>
+<span id="cb6-47"><a href="#cb6-47"></a>  <span class="fu">geom_ribbon</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb6-48"><a href="#cb6-48"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb6-49"><a href="#cb6-49"></a>    <span class="at">name =</span> <span class="st">"Berry Type"</span>,</span>
+<span id="cb6-50"><a href="#cb6-50"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb6-51"><a href="#cb6-51"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">4</span>],</span>
+<span id="cb6-52"><a href="#cb6-52"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">1</span>],</span>
+<span id="cb6-53"><a href="#cb6-53"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">3</span>],</span>
+<span id="cb6-54"><a href="#cb6-54"></a>      viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">2</span>]),</span>
+<span id="cb6-55"><a href="#cb6-55"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"edible_TN"</span>,<span class="st">"inedible_TP"</span>,<span class="st">"edible_FP"</span>,<span class="st">"inedible_FN"</span>),</span>
+<span id="cb6-56"><a href="#cb6-56"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Edible: TN"</span>,<span class="st">"Inedible: TP"</span>,<span class="st">"Edible: FP"</span>,<span class="st">"Inedible: FN"</span>)) <span class="sc">+</span></span>
+<span id="cb6-57"><a href="#cb6-57"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb6-58"><a href="#cb6-58"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb6-59"><a href="#cb6-59"></a>    <span class="at">xintercept =</span> cutoff,</span>
+<span id="cb6-60"><a href="#cb6-60"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb6-61"><a href="#cb6-61"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb6-62"><a href="#cb6-62"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">"score"</span>) <span class="sc">+</span></span>
+<span id="cb6-63"><a href="#cb6-63"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb6-64"><a href="#cb6-64"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb6-65"><a href="#cb6-65"></a>  <span class="fu">theme</span>(</span>
+<span id="cb6-66"><a href="#cb6-66"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb6-67"><a href="#cb6-67"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-classificationLowerCutoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-classificationLowerCutoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="evaluating-prediction-accuracy_files/figure-html/fig-classificationLowerCutoff-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-classificationLowerCutoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.4: Classifications Based on Lowering the Cutoff. Note that some true negatives and true positives are hidden behind the false positives and false negatives.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>In sum, sensitivity and specificity differ based on the cutoff for classification. if we raise the cutoff, sensitivity and PPV increase (due to fewer false positives), whereas sensitivity and NPV decrease (due to more false negatives). If we lower the cutoff, sensitivity and NPV increase (due to fewer false negatives), whereas specificity and PPV decrease (due to more false positives). Thus, the optimal cutoff depends on how costly each type of error is: false negatives and false positives. If false negatives are more costly than false positives, we would set a low cutoff. If false positives are more costly than false negatives, we would set a high cutoff.</p>
+</section></section><section id="sec-sdt" class="level3" data-number="14.3.7"><h3 data-number="14.3.7" class="anchored" data-anchor-id="sec-sdt">
+<span class="header-section-number">14.3.7</span> Signal Detection Theory</h3>
+<p>Signal detection theory (SDT) is a probability-based theory for the detection of a given stimulus (signal) from a stimulus set that includes non-target stimuli (noise). SDT arose through the development of radar (<strong>RA</strong>dio <strong>D</strong>etection <strong>A</strong>nd <strong>R</strong>anging) and sonar (<strong>SO</strong>und <strong>N</strong>avigation <strong>A</strong>nd <strong>R</strong>anging) in World War II based on research on sensory-perception research. The military wanted to determine which objects on radar/sonar were enemy aircraft/submarines, and which were noise (e.g., different object in the environment or even just the weather itself). SDT allowed determining how many errors operators made (how accurate they were) and decomposing errors into different kinds of errors. SDT distinguishes between sensitivity and bias. In SDT, <em>sensitivity</em> (or discriminability) is how well an assessment distinguishes between a target stimulus and non-target stimuli (i.e., how well the assessment detects the target stimulus amid non-target stimuli). <em>Bias</em> is the extent to which the probability of a selection decision from the assessment is higher or lower than the true rate of the target stimulus.</p>
+<p>Some radar/sonar operators were not as sensitive to the differences between signal and noise, due to factors such as age, ability to distinguish gradations of a signal, etc. People who showed low sensitivity (i.e., who were not as successful at distinguishing between signal and noise) were screened out because the military perceived sensitivity as a skill that was not easily taught. By contrast, other operators could distinguish signal from noise, but their threshold was too low or high—they could take in information, but their decisions tended to be wrong due to systematic bias or poor calibration. That is, they systematically over-rejected or under-rejected stimuli. Over-rejecting leads to many false negatives (i.e., saying that a stimulus is safe when it is not). Under-rejecting leads to many false positives (i.e., saying that a stimulus is harmful when it is not). A person who showed good sensitivity but systematic bias was considered more teach-able than a person who showed low sensitivity. Thus, radar and sonar operators were selected based on their sensitivity to distinguish signal from noise, and then were trained to improve the calibration so they reduce their systematic bias and do not systematically over- or under-reject.</p>
+<p>Although SDT was originally developed for use in World War II, it now plays an important role in many areas of science and medicine. A medical application of SDT is tumor detection in radiology. SDT also plays an important role in psychology, especially cognitive psychology. For instance, research on social perception of sexual interest has shown that men tend to show lack of sensitivity to differences in women’s affect—i.e., they have relative difficulties discriminating between friendliness and sexual interest <span class="citation" data-cites="Farris2008">(<a href="references.html#ref-Farris2008" role="doc-biblioref">Farris et al., 2008</a>)</span>. Men also tend to show systematic bias (poor calibration) such that they tend to over-estimate women’s sexual interest in them—i.e., men tend to have too low of a threshold for determining that a women is showing sexual interest in them <span class="citation" data-cites="Farris2006">(<a href="references.html#ref-Farris2006" role="doc-biblioref">Farris et al., 2006</a>)</span>.</p>
+<p>SDT metrics of sensitivity include <span class="math inline">\(d'\)</span> (“<span class="math inline">\(d\)</span>-prime”), <span class="math inline">\(A\)</span> (or <span class="math inline">\(A'\)</span>), and the area under the receiver operating characteristic (ROC) curve. SDT metrics of bias include <span class="math inline">\(\beta\)</span> (beta), <span class="math inline">\(c\)</span>, and <span class="math inline">\(b\)</span>.</p>
+<section id="sec-roc" class="level4" data-number="14.3.7.1"><h4 data-number="14.3.7.1" class="anchored" data-anchor-id="sec-roc">
+<span class="header-section-number">14.3.7.1</span> Receiver Operating Characteristic (ROC) Curve</h4>
+<p>The x-axis of the ROC curve is the false alarm rate or false positive rate (<span class="math inline">\(1 -\)</span> specificity). The y-axis is the hit rate or true positive rate (sensitivity). We can trace the ROC curve as the combination between sensitivity and specificity at every possible cutoff. At a cutoff of zero (top right of ROC curve), we calculate sensitivity (1.0) and specificity (0) and plot it. At a cutoff of zero, the assessment tells us to make an action for every stimulus (i.e., it is the most liberal). We then gradually increase the cutoff, and plot sensitivity and specificity at each cutoff. As the cutoff increases, sensitivity decreases and specificity increases. We end at the highest possible cutoff, where the sensitivity is 0 and the specificity is 1.0 (i.e., we never make an action; i.e., it is the most conservative). Each point on the ROC curve corresponds to a pair of hit and false alarm rates (sensitivity and specificity) resulting from a specific cutoff value. Then, we can draw lines or a curve to connect the points.</p>
+<p>INSERT depicts an empirical ROC plot where lines are drawn to connect the hit and false alarm rates.</p>
+<p>INSERT depicts an ROC curve where a smoothed and fitted curve is drawn to connect the hit and false alarm rates.</p>
+<section id="sec-auc" class="level5" data-number="14.3.7.1.1"><h5 data-number="14.3.7.1.1" class="anchored" data-anchor-id="sec-auc">
+<span class="header-section-number">14.3.7.1.1</span> Area Under the ROC Curve</h5>
+<p>ROC methods can be used to compare and compute the discriminative power of measurement devices free from the influence of selection ratios, base rates, and costs and benefits. An ROC analysis yields a quantitative index of how well an index predicts a signal of interest or can discriminate between different signals. ROC analysis can help tell us how often our assessment would be correct. If we randomly pick two observations, and we were right once and wrong once, we were 50% accurate. But this would be a useless measure because it reflects chance responding.</p>
+<p>The geometrical area under the ROC curve reflects the discriminative accuracy of the measure. The index is called the <strong>a</strong>rea <strong>u</strong>nder the <strong>c</strong>urve (AUC) of an ROC curve. AUC quantifies the discriminative power of an assessment. AUC is the probability that a randomly selected target and a randomly selected non-target is ranked correctly by the assessment method. AUC values range from 0.0 to 1.0, where chance accuracy is 0.5 as indicated by diagonal line in the ROC curve. That is, a measure can be useful to the extent that its ROC curve is above the diagonal line (i.e., its discriminative accuracy is above chance). <a href="#fig-aucRange" class="quarto-xref">Figure&nbsp;<span>14.5</span></a> depicts ROC curves with a range of AUC values.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a>auc60 <span class="ot">&lt;-</span> petersenlab<span class="sc">::</span><span class="fu">simulateAUC</span>(.<span class="dv">60</span>, <span class="dv">50000</span>)</span>
+<span id="cb7-4"><a href="#cb7-4"></a>auc70 <span class="ot">&lt;-</span> petersenlab<span class="sc">::</span><span class="fu">simulateAUC</span>(.<span class="dv">70</span>, <span class="dv">50000</span>)</span>
+<span id="cb7-5"><a href="#cb7-5"></a>auc80 <span class="ot">&lt;-</span> petersenlab<span class="sc">::</span><span class="fu">simulateAUC</span>(.<span class="dv">80</span>, <span class="dv">50000</span>)</span>
+<span id="cb7-6"><a href="#cb7-6"></a>auc90 <span class="ot">&lt;-</span> petersenlab<span class="sc">::</span><span class="fu">simulateAUC</span>(.<span class="dv">90</span>, <span class="dv">50000</span>)</span>
+<span id="cb7-7"><a href="#cb7-7"></a>auc95 <span class="ot">&lt;-</span> petersenlab<span class="sc">::</span><span class="fu">simulateAUC</span>(.<span class="dv">95</span>, <span class="dv">50000</span>)</span>
+<span id="cb7-8"><a href="#cb7-8"></a>auc99 <span class="ot">&lt;-</span> petersenlab<span class="sc">::</span><span class="fu">simulateAUC</span>(.<span class="dv">99</span>, <span class="dv">50000</span>)</span>
+<span id="cb7-9"><a href="#cb7-9"></a></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="fu">plot</span>(</span>
+<span id="cb7-11"><a href="#cb7-11"></a>  pROC<span class="sc">::</span><span class="fu">roc</span>(</span>
+<span id="cb7-12"><a href="#cb7-12"></a>    y <span class="sc">~</span> x,</span>
+<span id="cb7-13"><a href="#cb7-13"></a>    auc60,</span>
+<span id="cb7-14"><a href="#cb7-14"></a>    <span class="at">smooth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb7-15"><a href="#cb7-15"></a>  <span class="at">legacy.axes =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-16"><a href="#cb7-16"></a>  <span class="at">print.auc =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-17"><a href="#cb7-17"></a>  <span class="at">print.auc.x =</span> .<span class="dv">52</span>,</span>
+<span id="cb7-18"><a href="#cb7-18"></a>  <span class="at">print.auc.y =</span> .<span class="dv">61</span>,</span>
+<span id="cb7-19"><a href="#cb7-19"></a>  <span class="at">print.auc.pattern =</span> <span class="st">"%.2f"</span>)</span>
+<span id="cb7-20"><a href="#cb7-20"></a></span>
+<span id="cb7-21"><a href="#cb7-21"></a><span class="fu">plot</span>(</span>
+<span id="cb7-22"><a href="#cb7-22"></a>  pROC<span class="sc">::</span><span class="fu">roc</span>(</span>
+<span id="cb7-23"><a href="#cb7-23"></a>    y <span class="sc">~</span> x,</span>
+<span id="cb7-24"><a href="#cb7-24"></a>    auc70,</span>
+<span id="cb7-25"><a href="#cb7-25"></a>    <span class="at">smooth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb7-26"><a href="#cb7-26"></a>  <span class="at">legacy.axes =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-27"><a href="#cb7-27"></a>  <span class="at">print.auc =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-28"><a href="#cb7-28"></a>  <span class="at">print.auc.x =</span> .<span class="dv">6</span>,</span>
+<span id="cb7-29"><a href="#cb7-29"></a>  <span class="at">print.auc.y =</span> .<span class="dv">67</span>,</span>
+<span id="cb7-30"><a href="#cb7-30"></a>  <span class="at">print.auc.pattern =</span> <span class="st">"%.2f"</span>,</span>
+<span id="cb7-31"><a href="#cb7-31"></a>  <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-32"><a href="#cb7-32"></a></span>
+<span id="cb7-33"><a href="#cb7-33"></a><span class="fu">plot</span>(</span>
+<span id="cb7-34"><a href="#cb7-34"></a>  pROC<span class="sc">::</span><span class="fu">roc</span>(</span>
+<span id="cb7-35"><a href="#cb7-35"></a>    y <span class="sc">~</span> x,</span>
+<span id="cb7-36"><a href="#cb7-36"></a>    auc80,</span>
+<span id="cb7-37"><a href="#cb7-37"></a>    <span class="at">smooth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb7-38"><a href="#cb7-38"></a>  <span class="at">legacy.axes =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-39"><a href="#cb7-39"></a>  <span class="at">print.auc =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-40"><a href="#cb7-40"></a>  <span class="at">print.auc.x =</span> .<span class="dv">695</span>,</span>
+<span id="cb7-41"><a href="#cb7-41"></a>  <span class="at">print.auc.y =</span> .<span class="dv">735</span>,</span>
+<span id="cb7-42"><a href="#cb7-42"></a>  <span class="at">print.auc.pattern =</span> <span class="st">"%.2f"</span>,</span>
+<span id="cb7-43"><a href="#cb7-43"></a>  <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-44"><a href="#cb7-44"></a></span>
+<span id="cb7-45"><a href="#cb7-45"></a><span class="fu">plot</span>(</span>
+<span id="cb7-46"><a href="#cb7-46"></a>  pROC<span class="sc">::</span><span class="fu">roc</span>(</span>
+<span id="cb7-47"><a href="#cb7-47"></a>    y <span class="sc">~</span> x,</span>
+<span id="cb7-48"><a href="#cb7-48"></a>    auc90,</span>
+<span id="cb7-49"><a href="#cb7-49"></a>    <span class="at">smooth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb7-50"><a href="#cb7-50"></a>  <span class="at">legacy.axes =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-51"><a href="#cb7-51"></a>  <span class="at">print.auc =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-52"><a href="#cb7-52"></a>  <span class="at">print.auc.x =</span> .<span class="dv">805</span>,</span>
+<span id="cb7-53"><a href="#cb7-53"></a>  <span class="at">print.auc.y =</span> .<span class="dv">815</span>,</span>
+<span id="cb7-54"><a href="#cb7-54"></a>  <span class="at">print.auc.pattern =</span> <span class="st">"%.2f"</span>,</span>
+<span id="cb7-55"><a href="#cb7-55"></a>  <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-56"><a href="#cb7-56"></a></span>
+<span id="cb7-57"><a href="#cb7-57"></a><span class="fu">plot</span>(</span>
+<span id="cb7-58"><a href="#cb7-58"></a>  pROC<span class="sc">::</span><span class="fu">roc</span>(</span>
+<span id="cb7-59"><a href="#cb7-59"></a>    y <span class="sc">~</span> x,</span>
+<span id="cb7-60"><a href="#cb7-60"></a>    auc95,</span>
+<span id="cb7-61"><a href="#cb7-61"></a>    <span class="at">smooth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb7-62"><a href="#cb7-62"></a>  <span class="at">legacy.axes =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-63"><a href="#cb7-63"></a>  <span class="at">print.auc =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-64"><a href="#cb7-64"></a>  <span class="at">print.auc.x =</span> .<span class="dv">875</span>,</span>
+<span id="cb7-65"><a href="#cb7-65"></a>  <span class="at">print.auc.y =</span> .<span class="dv">865</span>,</span>
+<span id="cb7-66"><a href="#cb7-66"></a>  <span class="at">print.auc.pattern =</span> <span class="st">"%.2f"</span>,</span>
+<span id="cb7-67"><a href="#cb7-67"></a>  <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-68"><a href="#cb7-68"></a></span>
+<span id="cb7-69"><a href="#cb7-69"></a><span class="fu">plot</span>(</span>
+<span id="cb7-70"><a href="#cb7-70"></a>  pROC<span class="sc">::</span><span class="fu">roc</span>(</span>
+<span id="cb7-71"><a href="#cb7-71"></a>    y <span class="sc">~</span> x,</span>
+<span id="cb7-72"><a href="#cb7-72"></a>    auc99,</span>
+<span id="cb7-73"><a href="#cb7-73"></a>    <span class="at">smooth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb7-74"><a href="#cb7-74"></a>  <span class="at">legacy.axes =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-75"><a href="#cb7-75"></a>  <span class="at">print.auc =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-76"><a href="#cb7-76"></a>  <span class="at">print.auc.x =</span> .<span class="dv">94</span>,</span>
+<span id="cb7-77"><a href="#cb7-77"></a>  <span class="at">print.auc.y =</span> .<span class="dv">94</span>,</span>
+<span id="cb7-78"><a href="#cb7-78"></a>  <span class="at">print.auc.pattern =</span> <span class="st">"%.2f"</span>,</span>
+<span id="cb7-79"><a href="#cb7-79"></a>  <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-aucRange" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-aucRange-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="evaluating-prediction-accuracy_files/figure-html/fig-aucRange-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-aucRange-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.5: Receiver Operating Characteristic (ROC) Curves for Various Levels of Area Under The ROC Curve (AUC) for Various Measures.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>As an example, given an AUC of .75, this says that the overall score of an individual who has the characteristic in question will be higher 75% of the time than the overall score of an individual who does not have the characteristic. In lay terms, AUC provides the probability that we will classify correctly based on our instrument if we were to randomly pick one good and one bad outcome. AUC is a stronger index of accuracy than percent accuracy, because you can have high percent accuracy just by going with the base rate. AUC tells us how much better than chance a measure is at discriminating outcomes. AUC is useful as a measure of general discriminative accuracy, and it tells us how accurate a measure is at all possible cutoffs. Knowing the accuracy of a measure at all possible cutoffs can be helpful for selecting the optimal cutoff, given the goals of the assessment. In reality, however, we may not be interested in all cutoffs because not all errors are equal in their costs.</p>
+<p>If we lower the base rate, we would need a larger sample to get enough people to classify into each group. SDT/ROC methods are traditionally about dichotomous decisions (yes/no), not graded judgments. SDT/ROC methods can get messy with ordinal data that are more graded because you would have an AUC curve for each ordinal grouping.</p>
+</section></section></section></section><section id="sec-predictionCategorical" class="level2" data-number="14.4"><h2 data-number="14.4" class="anchored" data-anchor-id="sec-predictionCategorical">
+<span class="header-section-number">14.4</span> Prediction of Continuous Outcomes</h2>
+</section><section id="sec-accuracyTypes" class="level2" data-number="14.5"><h2 data-number="14.5" class="anchored" data-anchor-id="sec-accuracyTypes">
+<span class="header-section-number">14.5</span> Types of Accuracy</h2>
+<section id="sec-discrimination" class="level3" data-number="14.5.1"><h3 data-number="14.5.1" class="anchored" data-anchor-id="sec-discrimination">
+<span class="header-section-number">14.5.1</span> Discrimination</h3>
+<p>[Discuss options for discrete versus continuous data]</p>
+</section><section id="sec-calibration" class="level3" data-number="14.5.2"><h3 data-number="14.5.2" class="anchored" data-anchor-id="sec-calibration">
+<span class="header-section-number">14.5.2</span> Calibration</h3>
+<p>[Discuss options for discrete versus continuous data]</p>
+<p>The various types of miscalibration are depicted in <a href="#fig-miscalibration" class="quarto-xref">Figure&nbsp;<span>14.6</span></a>:</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Specify data</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>examplePredictions <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">0</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)</span>
+<span id="cb8-3"><a href="#cb8-3"></a>exampleOutcomes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">15</span>, .<span class="dv">3</span>, .<span class="dv">4</span>, .<span class="dv">45</span>, .<span class="dv">5</span>, .<span class="dv">55</span>, .<span class="dv">6</span>, .<span class="dv">7</span>, .<span class="dv">85</span>, <span class="dv">1</span>)</span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a>overPrediction <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">02</span>, .<span class="dv">05</span>, .<span class="dv">1</span>, .<span class="dv">15</span>, .<span class="dv">2</span>, .<span class="dv">3</span>, .<span class="dv">4</span>, .<span class="dv">5</span>, .<span class="dv">7</span>, <span class="dv">1</span>)</span>
+<span id="cb8-6"><a href="#cb8-6"></a>underPrediction <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">3</span>, .<span class="dv">5</span>, .<span class="dv">6</span>, .<span class="dv">7</span>, .<span class="dv">8</span>, .<span class="dv">85</span>, .<span class="dv">9</span>, .<span class="dv">95</span>, .<span class="dv">98</span>, <span class="dv">1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7"></a>overExtremity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">3</span>, .<span class="dv">38</span>, .<span class="dv">42</span>, .<span class="dv">47</span>, .<span class="dv">5</span>, .<span class="dv">53</span>, .<span class="dv">58</span>, .<span class="dv">62</span>, .<span class="dv">7</span>, <span class="dv">1</span>)</span>
+<span id="cb8-8"><a href="#cb8-8"></a>underExtremity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">05</span>, .<span class="dv">08</span>, .<span class="dv">11</span>, .<span class="dv">2</span>, .<span class="dv">5</span>, .<span class="dv">8</span>, .<span class="dv">89</span>, .<span class="dv">92</span>, .<span class="dv">95</span>, <span class="dv">1</span>)</span>
+<span id="cb8-9"><a href="#cb8-9"></a></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co"># Plot</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="fu">par</span>(</span>
+<span id="cb8-12"><a href="#cb8-12"></a>  <span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>),</span>
+<span id="cb8-13"><a href="#cb8-13"></a>  <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.1</span>) <span class="co">#margins: bottom, left, top, right</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="fu">plot</span>(</span>
+<span id="cb8-16"><a href="#cb8-16"></a>  examplePredictions,</span>
+<span id="cb8-17"><a href="#cb8-17"></a>  overExtremity,</span>
+<span id="cb8-18"><a href="#cb8-18"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-19"><a href="#cb8-19"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-20"><a href="#cb8-20"></a>  <span class="at">main =</span> <span class="st">"Overextremity"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb8-23"><a href="#cb8-23"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb8-24"><a href="#cb8-24"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb8-25"><a href="#cb8-25"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb8-27"><a href="#cb8-27"></a></span>
+<span id="cb8-28"><a href="#cb8-28"></a><span class="fu">lines</span>(</span>
+<span id="cb8-29"><a href="#cb8-29"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-30"><a href="#cb8-30"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-31"><a href="#cb8-31"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb8-32"><a href="#cb8-32"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
+<span id="cb8-33"><a href="#cb8-33"></a></span>
+<span id="cb8-34"><a href="#cb8-34"></a><span class="fu">plot</span>(</span>
+<span id="cb8-35"><a href="#cb8-35"></a>  examplePredictions,</span>
+<span id="cb8-36"><a href="#cb8-36"></a>  underExtremity,</span>
+<span id="cb8-37"><a href="#cb8-37"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-38"><a href="#cb8-38"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-39"><a href="#cb8-39"></a>  <span class="at">main =</span> <span class="st">"Underextremity"</span>,</span>
+<span id="cb8-40"><a href="#cb8-40"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb8-41"><a href="#cb8-41"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb8-42"><a href="#cb8-42"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb8-43"><a href="#cb8-43"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb8-44"><a href="#cb8-44"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb8-45"><a href="#cb8-45"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb8-46"><a href="#cb8-46"></a></span>
+<span id="cb8-47"><a href="#cb8-47"></a><span class="fu">lines</span>(</span>
+<span id="cb8-48"><a href="#cb8-48"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-49"><a href="#cb8-49"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-50"><a href="#cb8-50"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb8-51"><a href="#cb8-51"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
+<span id="cb8-52"><a href="#cb8-52"></a></span>
+<span id="cb8-53"><a href="#cb8-53"></a><span class="fu">plot</span>(</span>
+<span id="cb8-54"><a href="#cb8-54"></a>  examplePredictions,</span>
+<span id="cb8-55"><a href="#cb8-55"></a>  overPrediction,</span>
+<span id="cb8-56"><a href="#cb8-56"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-57"><a href="#cb8-57"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-58"><a href="#cb8-58"></a>  <span class="at">main =</span> <span class="st">"Overprediction"</span>,</span>
+<span id="cb8-59"><a href="#cb8-59"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb8-60"><a href="#cb8-60"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb8-61"><a href="#cb8-61"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb8-62"><a href="#cb8-62"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb8-63"><a href="#cb8-63"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb8-64"><a href="#cb8-64"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb8-65"><a href="#cb8-65"></a></span>
+<span id="cb8-66"><a href="#cb8-66"></a><span class="fu">lines</span>(</span>
+<span id="cb8-67"><a href="#cb8-67"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-68"><a href="#cb8-68"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-69"><a href="#cb8-69"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb8-70"><a href="#cb8-70"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
+<span id="cb8-71"><a href="#cb8-71"></a></span>
+<span id="cb8-72"><a href="#cb8-72"></a><span class="fu">plot</span>(</span>
+<span id="cb8-73"><a href="#cb8-73"></a>  examplePredictions,</span>
+<span id="cb8-74"><a href="#cb8-74"></a>  underPrediction,</span>
+<span id="cb8-75"><a href="#cb8-75"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-76"><a href="#cb8-76"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-77"><a href="#cb8-77"></a>  <span class="at">main =</span> <span class="st">"Underprediction"</span>,</span>
+<span id="cb8-78"><a href="#cb8-78"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb8-79"><a href="#cb8-79"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb8-80"><a href="#cb8-80"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb8-81"><a href="#cb8-81"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb8-82"><a href="#cb8-82"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb8-83"><a href="#cb8-83"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb8-84"><a href="#cb8-84"></a></span>
+<span id="cb8-85"><a href="#cb8-85"></a><span class="fu">lines</span>(</span>
+<span id="cb8-86"><a href="#cb8-86"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-87"><a href="#cb8-87"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb8-88"><a href="#cb8-88"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb8-89"><a href="#cb8-89"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-miscalibration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miscalibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="evaluating-prediction-accuracy_files/figure-html/fig-miscalibration-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-miscalibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.6: Types of Miscalibration. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="sec-generalAccuracy" class="level3" data-number="14.5.3"><h3 data-number="14.5.3" class="anchored" data-anchor-id="sec-generalAccuracy">
+<span class="header-section-number">14.5.3</span> General Accuracy</h3>
+<p>[Discuss options for discrete versus continuous data]</p>
+</section></section><section id="sec-predictionAccuracyConclusion" class="level2" data-number="14.6"><h2 data-number="14.6" class="anchored" data-anchor-id="sec-predictionAccuracyConclusion">
+<span class="header-section-number">14.6</span> Conclusion</h2>
+</section><section id="sec-predictionAccuracySessionInfo" class="level2" data-number="14.7"><h2 data-number="14.7" class="anchored" data-anchor-id="sec-predictionAccuracySessionInfo">
+<span class="header-section-number">14.7</span> Session Info</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.4 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: UTC
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] viridis_0.6.5     viridisLite_0.4.2 magrittr_2.0.3    pROC_1.18.5      
+ [5] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
+ [9] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
+[13] ggplot2_3.5.1     tidyverse_2.0.0   petersenlab_1.0.3
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.5       xfun_0.45          htmlwidgets_1.6.4  psych_2.4.6.26    
+ [5] lattice_0.22-6     tzdb_0.4.0         quadprog_1.5-8     vctrs_0.6.5       
+ [9] tools_4.4.1        generics_0.1.3     stats4_4.4.1       parallel_4.4.1    
+[13] fansi_1.0.6        cluster_2.1.6      pkgconfig_2.0.3    data.table_1.15.4 
+[17] checkmate_2.3.1    RColorBrewer_1.1-3 lifecycle_1.0.4    farver_2.1.2      
+[21] compiler_4.4.1     munsell_0.5.1      mnormt_2.1.1       mitools_2.4       
+[25] htmltools_0.5.8.1  yaml_2.3.9         htmlTable_2.4.2    Formula_1.2-5     
+[29] pillar_1.9.0       Hmisc_5.1-3        rpart_4.1.23       nlme_3.1-164      
+[33] lavaan_0.6-18      tidyselect_1.2.1   digest_0.6.36      mvtnorm_1.2-5     
+[37] stringi_1.8.4      reshape2_1.4.4     labeling_0.4.3     fastmap_1.2.0     
+[41] grid_4.4.1         colorspace_2.1-0   cli_3.6.3          base64enc_0.1-3   
+[45] utf8_1.2.4         pbivnorm_0.6.0     foreign_0.8-86     withr_3.0.0       
+[49] scales_1.3.0       backports_1.5.0    timechange_0.3.0   rmarkdown_2.27    
+[53] nnet_7.3-19        gridExtra_2.3      hms_1.1.3          evaluate_0.24.0   
+[57] knitr_1.48         mix_1.0-12         rlang_1.1.4        Rcpp_1.0.12       
+[61] xtable_1.8-4       glue_1.7.0         DBI_1.2.3          rstudioapi_0.16.0 
+[65] jsonlite_1.8.8     R6_2.5.1           plyr_1.8.9        </code></pre>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Corston2000" class="csl-entry" role="listitem">
+Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for windows</em>. Wiley-Blackwell.
+</div>
+<div id="ref-Farris2008" class="csl-entry" role="listitem">
+Farris, C., Treat, T. A., Viken, R. J., &amp; McFall, R. M. (2008). Perceptual mechanisms that characterize gender differences in decoding women’s sexual intent. <em>Psychological Science</em>, <em>19</em>(4), 348–354. <a href="https://doi.org/10.1111/j.1467-9280.2008.02092.x">https://doi.org/10.1111/j.1467-9280.2008.02092.x</a>
+</div>
+<div id="ref-Farris2006" class="csl-entry" role="listitem">
+Farris, C., Viken, R. J., Treat, T. A., &amp; McFall, R. M. (2006). Heterosocial perceptual organization: Application of the choice model to sexual coercion. <em>Psychological Science (0956-7976)</em>, <em>17</em>(10), 869–875. <a href="https://doi.org/10.1111/j.1467-9280.2006.01796.x">https://doi.org/10.1111/j.1467-9280.2006.01796.x</a>
+</div>
+<div id="ref-Kessler2020" class="csl-entry" role="listitem">
+Kessler, R. C., Bossarte, R. M., Luedtke, A., Zaslavsky, A. M., &amp; Zubizarreta, J. R. (2020). Suicide prediction models: A critical review of recent research with recommendations for the way forward. <em>Molecular Psychiatry</em>, <em>25</em>(1), 168–179. <a href="https://doi.org/10.1038/s41380-019-0531-0">https://doi.org/10.1038/s41380-019-0531-0</a>
+</div>
+<div id="ref-Meehl1955" class="csl-entry" role="listitem">
+Meehl, P. E., &amp; Rosen, A. (1955). Antecedent probability and the efficiency of psychometric signs, patterns, or cutting scores. <em>Psychological Bulletin</em>, <em>52</em>(3), 194–216. <a href="https://doi.org/10.1037/h0048070">https://doi.org/10.1037/h0048070</a>
+</div>
+<div id="ref-PetersenPrinciplesPsychAssessment" class="csl-entry" role="listitem">
+Petersen, I. T. (2024b). <em>Principles of psychological assessment: With applied examples in <span>R</span></em>. University of Iowa Libraries. <a href="https://doi.org/10.25820/work.007199">https://doi.org/10.25820/work.007199</a>
+</div>
+<div id="ref-Petersen2024a" class="csl-entry" role="listitem">
+Petersen, I. T. (2024a). <em>Principles of psychological assessment: With applied examples in <span>R</span></em>. <span>Chapman and Hall/CRC</span>. <a href="https://doi.org/10.1201/9781003357421">https://doi.org/10.1201/9781003357421</a>
+</div>
+</div>
+</section></main><!-- /main --><div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://fantasyfootballanalytics.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script><noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<h3>Feedback</h3>
+
+<div class="feedback">
+    Please consider providing feedback about this textbook, so that I can make it as helpful as possible. You can provide feedback at the following link:
+    
+    <a href="https://forms.gle/LsnVKwqmS1VuxWD18">https://forms.gle/LsnVKwqmS1VuxWD18</a>
+</div>
+
+<h3>Email Notification</h3>
+
+<div class="rmdsale">
+The online version of this book will remain open access. If you want to know when the print version of the book is for sale, enter your email below so I can let you know.
+<br><iframe src="https://docs.google.com/forms/d/e/1FAIpQLSccMKaTBXzMBmcy4myCNQnL8mCgRczh0Eg_Pw3c15bork7-xQ/viewform?embedded=true" width="640" height="750" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+
+</div>
+<script id="dsq-count-scr" src="//fantasyfootballanalytics.disqus.com/count.js" async=""></script><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/isaactpetersen\.github\.io\/Fantasy-Football-Analytics-Textbook");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./base-rates.html" class="pagination-link" aria-label="Base Rates">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Base Rates</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Fantasy Football Analytics was written by <a href="https://psychology.uiowa.edu/people/isaac-petersen">Isaac T. Petersen</a>.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/evaluating-prediction-accuracy.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
