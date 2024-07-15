@@ -668,6 +668,471 @@ If we lower the base rate, we would need a larger sample to get enough people to
 SDT/ROC methods are traditionally about dichotomous decisions (yes/no), not graded judgments.
 SDT/ROC methods can get messy with ordinal data that are more graded because you would have an AUC curve for each ordinal grouping.
 
+### Accuracy Indices {#sec-accuracyIndicesCategorical}
+
+There are various accuracy indices we can use to evaluate the accuracy of predictions for categorical outcome variables.
+We have already described several accuracy indices, including percent accuracy, sensitivity, specificity, positive predictive value, negative predictive value, and area under the ROC curve.
+We describe these and other indices in greater detail below.
+
+The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `accuracyAtCutoff()` that computes many accuracy indices for the prediction of categorical outcome variables.
+
+```{r}
+#petersenlab::accuracyAtCutoff()
+```
+
+There are also test calculators available online:
+
+- http://araw.mede.uic.edu/cgi-bin/testcalc.pl
+- https://dlrs.shinyapps.io/shinyDLRs/
+
+### Confusion Matrix aka 2x2 Accuracy Table aka Cross-Tabulation aka Contingency Table {#sec-confusionMatrix}
+
+A confusion matrix (aka 2x2 accuracy table, cross-tabulation table, or contigency table) is a matrix for categorical data that presents the predicted outcome on one dimension and the actual outcome (truth) on the other dimension.
+If the predictions and outcomes are dichotomous, the confusion matrix is a 2x2 matrix with two rows and two columns that represent four possible predicted-actual combinations ([decision outcomes](#sec-decisionOutcomes)).
+In such a case, the confusion matrix provides a tabular count of each type of accurate cases ([true positives](#sec-truePositive) and [true negatives](#sec-trueNegative)) versus the number of each type of error ([false positives](#sec-falsePositive) and [false negatives](#sec-falseNegative)), as shown in INSERT.
+An example of a confusion matrix is in INSERT.
+
+#### Number {#sec-confusionMatrix-number}
+
+```{r}
+#table(mydata$diagnosisFactor, mydata$disorderFactor)
+```
+
+#### Number with margins added {#sec-confusionMatrix-numberMargins}
+
+```{r}
+#addmargins(table(mydata$diagnosisFactor, mydata$disorderFactor))
+```
+
+#### Proportions {#sec-confusionMatrix-numberMarginsProportions}
+
+```{r}
+#prop.table(table(mydata$diagnosisFactor, mydata$disorderFactor))
+```
+
+#### Proportions with margins added {#sec-confusionMatrix-numberMarginsProportionsMargins}
+
+```{r}
+#addmargins(prop.table(table(mydata$diagnosisFactor, mydata$disorderFactor)))
+```
+
+### True Positives (TP) {#sec-truePositive}
+
+True positives (TPs) are instances in which a positive classification (e.g., a disorder present) is correct—that is, the test says that a classification is present, and the classification is present.
+True positives are also called valid positives (VPs) or hits.
+Higher values reflect greater accuracy.
+The formula for true positives is in @eq-truePositive:
+
+$$
+\begin{aligned}
+  \text{TP} &= \text{BR} \times \text{SR} \times N
+\end{aligned}
+$$ {#eq-truePositive}
+
+### True Negatives (TN) {#sec-trueNegative}
+
+True negatives (TNs) are instances in which a negative classification (e.g., absence of a disorder) is correct—that is, the test says that a classification is not present, and the classification is actually not present.
+True negatives are also called valid negatives (VNs) or correct rejections.
+Higher values reflect greater accuracy.
+The formula for true negatives is in @eq-trueNegative:
+
+$$
+\begin{aligned}
+  \text{TN} &= (1 - \text{BR}) \times (1 - \text{SR}) \times N
+\end{aligned}
+$$ {#eq-trueNegative}
+
+### False Positives (FP) {#sec-falsePositive}
+
+False positives (FPs) are instances in which a positive classification (e.g., a disorder present) is incorrect—that is, the test says that a classification is present, and the classification is not present.
+False positives are also called false alarms (FAs).
+Lower values reflect greater accuracy.
+The formula for false positives is in Equation @eq-falsePositive:
+
+$$
+\begin{aligned}
+  \text{FP} &= (1 - \text{BR}) \times \text{SR} \times N
+\end{aligned}
+$$ {#eq-falsePositive}
+
+### False Negatives (FN) {#sec-falseNegative}
+
+False negatives (FNs) are instances in which a negative classification (e.g., absence of a disorder) is incorrect—that is, the test says that a classification is not present, and the classification is present.
+False negatives are also called misses.
+Lower values reflect greater accuracy.
+The formula for false negatives is in @eq-falseNegative:
+
+$$
+\begin{aligned}
+  \text{FN} &= \text{BR} \times (1 - \text{SR}) \times N
+\end{aligned}
+(\#eq:falseNegative)
+$$ {#eq-falseNegative}
+
+### Selection Ratio (SR) {#sec-selectionRatio}
+
+The selection ratio (SR) is the marginal probability of selection, independent of other things: $P(R_i)$.
+In clinical psychology, the selection ratio is the proportion of people who test positive for the disorder, as in @eq-selectionRatio:
+
+$$
+\begin{aligned}
+  \text{SR} &= P(R_i) \\
+  &= \frac{\text{TP} + \text{FP}}{N}
+\end{aligned}
+(\#eq:selectionRatio)
+$$ {#eq-selectionRatio}
+
+### Base Rate (BR) {#sec-pretestProbability}
+
+The [base rate](#sec-baseRate) (BR) of a classification is its [marginal probability](#sec-baseRate), independent of other things: $P(C_i)$.
+In clinical psychology, the base rate of a disorder is its prevalence in the population, as in @eq-baseRate.
+Without additional information, the [base rate](#sec-baseRate) is used as the initial *pretest probability*.
+
+$$
+\begin{aligned}
+  \text{BR} &= P(C_i) \\
+  &= \frac{\text{TP} + \text{FN}}{N}
+\end{aligned}
+$$ {#eq-baseRate}
+
+### Pretest Odds {#sec-pretestOdds}
+
+The pretest odds of a classification can be estimated using the pretest probability (i.e., [base rate](#sec-baseRate)).
+To convert a probability to odds, divide the probability by one minus that probability, as in @eq-pretestOdds.
+
+$$
+\begin{aligned}
+  \text{pretest odds} &= \frac{\text{pretest probability}}{1 - \text{pretest probability}} \\
+\end{aligned}
+(\#eq:pretestOdds)
+$$ {#eq-pretestOdds}
+
+### Percent Accuracy {#sec-percentAccuracy}
+
+Percent Accuracy is also called overall accuracy.
+Higher values reflect greater accuracy.
+The formula for percent accuracy is in @eq-percentAccuracy.
+Percent accuracy has several problems.
+First, it treats all errors ([FP](#sec-falsePositive) and [FN](#sec-falseNegative)) as equally important.
+However, in practice, it is rarely the case that [false positives](#sec-falsePositive) and [false negatives](#sec-falseNegative) are equally important.
+Second, percent accuracy can be misleading because it is highly influenced by [base rates](#sec-baseRate).
+You can have a high percent accuracy by predicting from the [base rate](#sec-baseRate) and saying that no one has the characteristic (if the [base rate](#sec-baseRate) is low) or that everyone has the characteristic (if the [base rate](#sec-baseRate) is high).
+Thus, it is also important to consider other aspects of accuracy.
+
+$$
+\text{Percent Accuracy} = 100\% \times \frac{\text{TP} + \text{TN}}{N}
+$$ {#eq-percentAccuracy}
+
+### Percent Accuracy by Chance {#sec-percentAccuracyByChance}
+
+The formula for calculating percent accuracy by chance is in @eq-percentAccuracyByChance.
+
+$$
+\begin{aligned}
+  \text{Percent Accuracy by Chance} &= 100\% \times [P(\text{TP}) + P(\text{TN})] \\
+  &= 100\% \times \{(\text{BR} \times {\text{SR}}) + [(1 - \text{BR}) \times (1 - \text{SR})]\}
+\end{aligned}
+$$ {#eq-percentAccuracyByChance}
+
+### Percent Accuracy Predicting from the Base Rate {#sec-percentAccuracyPredictingFromBaseRate}
+
+[*Predicting from the base rate*](#sec-predictingFromBaseRate) is going with the most likely outcome in every prediction.
+If the [base rate](#sec-baseRate) is less than .50, it would involve predicting that the condition is absent for every case.
+If the [base rate](#sec-baseRate) is .50 or above, it would involve predicting that the condition is present for every case.
+[Predicting from the base rate](#sec-predictingFromBaseRate) is a special case of [percent accuracy by chance](#sec-percentAccuracyByChance) when the [selection ratio](#sec-selectionRatio) is set to either one (if the [base rate](#sec-baseRate) $\geq$ .5) or zero (if the [base rate](#sec-baseRate) < .5).
+
+### Relative Improvement Over Chance (RIOC) {#sec-relativeImprovementOverChance}
+
+Relative improvement over chance (RIOC) is a prediction's improvement over chance as a proportion of the maximum possible improvement over chance, as described by @Farrington1989.
+Higher values reflect greater accuracy.
+The formula for calculating RIOC is in @eq-relativeImprovementOverChance.
+
+$$
+\begin{aligned}
+  \text{relative improvement over chance (RIOC)} &= \frac{\text{total correct} - \text{chance correct}}{\text{maximum correct} - \text{chance correct}} \\
+\end{aligned}
+$$ {#eq-relativeImprovementOverChance}
+
+### Relative Improvement Over Predicting from the Base Rate {#sec-relativeImprovementOverPredictingFromBaseRate}
+
+Relative improvement over [predicting from the base rate](#sec-predictingFromBaseRate) is a prediction's improvement over [predicting from the base rate](#sec-predictingFromBaseRate) as a proportion of the maximum possible improvement over [predicting from the base rate](#sec-predictingFromBaseRate).
+Higher values reflect greater accuracy.
+The formula for calculating relative improvement over predicting from the base rate is in @eq-relativeImprovementOverPredictingFromBaseRate.
+
+$$
+\scriptsize
+\begin{aligned}
+  \text{relative improvement over predicting from base rate} &= \frac{\text{total correct} - \text{correct by predicting from base rate}}{\text{maximum correct} - \text{correct by predicting from base rate}} \\
+\end{aligned}
+$$ {#eq-relativeImprovementOverPredictingFromBaseRate}
+
+### Sensitivity (SN) {#sec-sensitivity}
+
+Sensitivity (SN) is also called true positive rate (TPR), hit rate (HR), or recall.
+Sensitivity is the [conditional probability](#sec-conditionalProbability) of a positive test given that the person has the condition: $P(R|C)$.
+Higher values reflect greater accuracy.
+The formula for calculating sensitivity is in @eq-sensitivity.
+As described in Section @sec-accuracyCutoff, as the cutoff increases (becomes more conservative), sensitivity decreases.
+As the cutoff decreases, sensitivity increases.
+
+$$
+\begin{aligned}
+  \text{sensitivity (SN)} &= P(R|C) \\
+  &= \frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{\text{TP}}{N \times \text{BR}} = 1 - \text{FNR}
+\end{aligned}
+$$ {#eq-sensitivity}
+
+### Specificity (SP) {#sec-specificity}
+
+Specificity (SP) is also called true negative rate (TNR) or selectivity.
+Specificity is the [conditional probability](#sec-conditionalProbability) of a negative test given that the person does not have the condition: $P(\text{not } R|\text{not } C)$.
+Higher values reflect greater accuracy.
+The formula for calculating specificity is in @eq-specificity.
+As described in Section @sec-accuracyCutoff, as the cutoff increases (becomes more conservative), specificity increases.
+As the cutoff decreases, specificity decreases.
+
+$$
+\begin{aligned}
+  \text{specificity (SP)} &= P(\text{not } R|\text{not } C) \\
+  &= \frac{\text{TN}}{\text{TN} + \text{FP}} = \frac{\text{TN}}{N (1 - \text{BR})} = 1 - \text{FPR}
+\end{aligned}
+$$ {#eq-specificity}
+
+### False Negative Rate (FNR) {#sec-falseNegativeRate}
+
+The false negative rate (FNR) is also called the miss rate.
+The false negative rate is the [conditional probability](#sec-conditionalProbability) of a negative test given that the person has the condition: $P(\text{not } R|C)$.
+Lower values reflect greater accuracy.
+The formula for calculating false negative rate is in @eq-falseNegativeRate.
+
+$$
+\begin{aligned}
+  \text{false negative rate (FNR)} &= P(\text{not } R|C) \\
+  &= \frac{\text{FN}}{\text{FN} + \text{TP}} = \frac{\text{FN}}{N \times \text{BR}} = 1 - \text{TPR}
+\end{aligned}
+$$ {#eq-falseNegativeRate}
+
+### False Positive Rate (FPR) {#sec-falsePositiveRate}
+
+The false positive rate (FPR) is also called the false alarm rate (FAR) or fall-out.
+The false positive rate is the [conditional probability](#sec-conditionalProbability) of a positive test given that the person does not have the condition: $P(R|\text{not } C)$.
+Lower values reflect greater accuracy.
+The formula for calculating false positive rate is in @eq-falsePositiveRate:
+
+$$
+\begin{aligned}
+  \text{false positive rate (FPR)} &= P(R|\text{not } C) \\
+  &= \frac{\text{FP}}{\text{FP} + \text{TN}} = \frac{\text{FP}}{N (1 - \text{BR})} = 1 - \text{TNR}
+\end{aligned}
+(\#eq:falsePositiveRate)
+$$ {#eq-falsePositiveRate}
+
+### Positive Predictive Value (PPV) {#sec-ppv}
+
+The positive predictive value (PPV) is also called the positive predictive power (PPP) or precision.
+Many people confuse [sensitivity](#sec-sensitivity) ($P(R|C)$) with its inverse [conditional probability](#sec-conditionalProbability), PPV ($P(C|R)$).
+PPV is the [conditional probability](#sec-conditionalProbability) of having the condition given a positive test: $P(C|R)$.
+Higher values reflect greater accuracy.
+The formula for calculating positive predictive value is in @eq-positivePredictiveValue.
+
+PPV can be low even when [sensitivity](#sec-sensitivity) is high because it depends not only on [sensitivity](#sec-sensitivity), but also on [specificity](#sec-specificity) and the [base rate](#sec-baseRate).
+Because PPV depends on the [base rate](#sec-baseRate), PPV is not an intrinsic property of a measure.
+The same measure will have a different PPV in different contexts with different [base rates](#sec-baseRate) [@Treat2023].
+As described in Section @sec-accuracyCutoff, as the [base rate](#sec-baseRate) increases, PPV increases.
+As the [base rate](#sec-baseRate) decreases, PPV decreases.
+PPV also differs as a function of the cutoff.
+As described in Section @sec-accuracyCutoff, as the cutoff increases (becomes more conservative), PPV increases.
+As the cutoff decreases (becomes more liberal), PPV decreases.
+
+$$
+\small
+\begin{aligned}
+  \text{positive predictive value (PPV)} &= P(C|R) \\
+  &= \frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{\text{TP}}{N \times \text{SR}}\\
+  &= \frac{\text{sensitivity} \times {\text{BR}}}{\text{sensitivity} \times {\text{BR}} + [(1 - \text{specificity}) \times (1 - \text{BR})]}
+\end{aligned}
+$$ {#eq-positivePredictiveValue}
+
+### Negative Predictive Value (NPV) {#sec-npv}
+
+The negative predictive value (NPV) is also called the negative predictive power (NPP).
+Many people confuse [specificity](#sec-specificity) ($P(\text{not } R|\text{not } C)$) with its inverse [conditional probability](#sec-conditionalProbability), NPV ($P(\text{not } C| \text{not } R)$).
+NPV is the [conditional probability](#sec-conditionalProbability) of not having the condition given a negative test: $P(\text{not } C| \text{not } R)$.
+Higher values reflect greater accuracy.
+The formula for calculating negative predictive value is in @eq-negativePredictiveValue.
+
+NPV can be low even when [specificity](#sec-specificity) is high because it depends not only on [specificity](#sec-specificity), but also on [sensitivity](#sec-sensitivity) and the [base rate](#sec-baseRate).
+Because NPV depends on the [base rate](#sec-baseRate), NPV is not an intrinsic property of a measure.
+The same measure will have a different NPV in different contexts with different [base rates](#sec-baseRate) [@Treat2023].
+As described in Section @sec-accuracyCutoff, as the [base rate](#sec-baseRate) increases, NPV decreases.
+As the [base rate](#sec-baseRate) decreases, NPV increases.
+NPV also differs as a function of the cutoff.
+As described in Section @sec-accuracyCutoff, as the cutoff increases (becomes more conservative), NPV decreases.
+As the cutoff decreases (becomes more liberal), NPV decreases.
+
+$$
+\small
+\begin{aligned}
+  \text{negative predictive value (NPV)} &= P(\text{not } C|\text{not } R) \\
+  &= \frac{\text{TN}}{\text{TN} + \text{FN}} = \frac{\text{TN}}{N(\text{1 - SR})}\\
+  &= \frac{\text{specificity} \times (1-{\text{BR}})}{\text{specificity} \times (1-{\text{BR}}) + [(1 - \text{sensitivity}) \times \text{BR})]}
+\end{aligned}
+$$ {#eq-negativePredictiveValue}
+
+### False Discovery Rate (FDR) {#sec-falseDiscoveryRate}
+
+Many people confuse the false positive rate ($P(R|\text{not } C)$) with its inverse [conditional probability](#sec-conditionalProbability), the false discovery rate ($P(\text{not } C| R)$).
+The false discovery rate (FDR) is the [conditional probability](#sec-conditionalProbability) of not having the condition given a positive test: $P(\text{not } C| R)$.
+Lower values reflect greater accuracy.
+The formula for calculating false discovery rate is in @eq-falseDiscoveryRate.
+
+$$
+\begin{aligned}
+  \text{false discovery rate (FDR)} &= P(\text{not } C|R) \\
+  &= \frac{\text{FP}}{\text{FP} + \text{TP}} = 1 - \text{PPV}
+\end{aligned}
+$$ {#eq-falseDiscoveryRate}
+
+### False Omission Rate (FOR) {#sec-falseOmissionRate}
+
+Many people confuse the false negative rate ($P(\text{not } R|C)$) with its inverse [conditional probability](#sec-conditionalProbability), the false omission rate ($P(C|\text{not } R)$).
+The false omission rate (FOR) is the conditional probability of having the condition given a negative test: $P(C|\text{not } R)$.
+Lower values reflect greater accuracy.
+The formula for calculating false omission rate is in @sec-falseOmissionRate.
+
+$$
+\begin{aligned}
+  \text{false omission rate (FOR)} &= P(C|\text{not } R) \\
+  &= \frac{\text{FN}}{\text{FN} + \text{TN}} = 1 - \text{NPV}
+\end{aligned}
+$$ {#sec-falseOmissionRate}
+
+### Youden's J Statistic {#sec-youdenJ-example}
+
+Youden's J statistic is also called Youden's Index or informedness.
+Youden's J statistic is the sum of [sensitivity](#sec-sensitivity) and [specificity](#sec-specificity) (and subtracting one).
+Higher values reflect greater accuracy.
+The formula for calculating Youden's J statistic is in @eq-youdenIndex.
+
+$$
+\begin{aligned}
+  \text{Youden's J statistic} &= \text{sensitivity} + \text{specificity} - 1
+\end{aligned}
+$$ {#eq-youdenIndex}
+
+### Balanced Accuracy {#sec-balancedAccuracy}
+
+Balanced accuracy is the average of [sensitivity](#sec-sensitivity) and [specificity](#sec-specificity).
+Higher values reflect greater accuracy.
+The formula for calculating balanced accuracy is in @balancedAccuracy.
+
+$$
+\begin{aligned}
+  \text{balanced accuracy} &= \frac{\text{sensitivity} + \text{specificity}}{2}
+\end{aligned}
+$$ {#eq-balancedAccuracy}
+
+### F-Score {#sec-fScore}
+
+The F-score combines [precision](#sec-ppv) ([positive predictive value](#sec-ppv)) and [recall](#sec-sensitivity) ([sensitivity](#sec-sensitivity)), where $\beta$ indicates how many times more important [sensitivity](#sec-sensitivity) is than the [positive predictive value](#sec-ppv).
+If [sensitivity](#sec-sensitivity) and the [positive predictive value](#sec-ppv) are equally important, $\beta = 1$, and the F-score is called the $F_1$ score.
+Higher values reflect greater accuracy.
+The formula for calculating the F-score is in @eq-FScore.
+
+$$
+\begin{aligned}
+  F_\beta &= (1 + \beta^2) \cdot \frac{\text{positive predictive value} \cdot \text{sensitivity}}{(\beta^2 \cdot \text{positive predictive value}) + \text{sensitivity}} \\
+  &= \frac{(1 + \beta^2) \cdot \text{TP}}{(1 + \beta^2) \cdot \text{TP} + \beta^2 \cdot \text{FN} + \text{FP}}
+\end{aligned}
+$$ {#eq-FScore}
+
+The formula for calculating the $F_1$ score is in @eq-F1Score.
+
+$$
+\begin{aligned}
+  F_1 &= \frac{2 \cdot \text{positive predictive value} \cdot \text{sensitivity}}{(\text{positive predictive value}) + \text{sensitivity}} \\
+  &= \frac{2 \cdot \text{TP}}{2 \cdot \text{TP} + \text{FN} + \text{FP}}
+\end{aligned}
+$$ {#eq-F1Score}
+
+### Matthews Correlation Coefficient (MCC) {#sec-matthewsCorrelationCoefficient}
+
+The Matthews correlation coefficient (MCC) is also called the phi coefficient.
+It is a correlation coefficient between predicted and observed values from a binary classification.
+Higher values reflect greater accuracy.
+The formula for calculating the MCC is in @eq-matthewsCorrelationCoefficient.
+
+$$
+\begin{aligned}
+  \text{MCC} &= \frac{\text{TP} \times \text{TN} - \text{FP} \times \text{FN}}{\sqrt{(\text{TP} + \text{FP})(\text{TP} + \text{FN})(\text{TN} + \text{FP})(\text{TN} + \text{FN})}}
+\end{aligned}
+$$ {#eq-matthewsCorrelationCoefficient}
+
+### Diagnostic Odds Ratio {#sec-diagnosticOddsRatio}
+
+The diagnostic odds ratio is the odds of a positive test among people with the condition relative to the odds of a positive test among people without the condition.
+Higher values reflect greater accuracy.
+The formula for calculating the diagnostic odds ratio is in @eq-diagnosticOddsRatio.
+If the predictor is bad, the diagnostic odds ratio could be less than one, and values can go up from there.
+If the diagnostic odds ratio is greater than 2, we take the odds ratio seriously because we are twice as likely to predict accurately than inaccurately.
+However, the diagnostic odds ratio ignores/hides [base rates](#sec-baseRate).
+When interpreting the diagnostic odds ratio, it is important to keep in mind the [practical significance](#sec-practicalSignificance), because otherwise it is not very meaningful.
+Consider a risk factor that has a diagnostic odds ratio of 3 for tuberculosis, i.e., it puts you at 3 times as likely to develop tuberculosis.
+The prevalence of tuberculosis is relatively low.
+Assuming the prevalence of tuberculosis is less than 1/10th of 1%, your risk of developing tuberculosis is still very low even if the risk factor (with a diagnostic odds ratio of 3) is present.
+
+$$
+\begin{aligned}
+  \text{diagnostic odds ratio} &= \frac{\text{TP} \times \text{TN}}{\text{FP} \times \text{FN}} \\
+  &= \frac{\text{sensitivity} \times \text{specificity}}{(1 - \text{sensitivity}) \times (1 - \text{specificity})} \\
+  &= \frac{\text{PPV} \times \text{NPV}}{(1 - \text{PPV}) \times (1 - \text{NPV})} \\
+  &= \frac{\text{LR+}}{\text{LR}-}
+\end{aligned}
+$$ {#eq-diagnosticOddsRatio}
+
+### Diagnostic Likelihood Ratio {#sec-diagnosticLikelihoodRatio2}
+
+The diagnostic likelihood ratio is described in @sec-diagnosticLikelihoodRatio.
+There are two types of diagnostic likelihood ratios: the [positive likelihood ratio](#sec-positiveLikelihoodRatio) and the [negative likelihood ratio](#sec-negativeLikelihoodRatio).
+
+#### Positive Likelihood Ratio (LR+) {#sec-positiveLikelihoodRatio2}
+
+The positive likelihood ratio (LR+) is described in @sec-positiveLikelihoodRatio.
+The formula for calculating the positive likelihood ratio is in @eq-positiveLikelihoodRatio.
+
+#### Negative Likelihood Ratio (LR−) {#sec-negativeLikelihoodRatio2}
+
+The negative likelihood ratio (LR−) is described in @sec-negativeLikelihoodRatio.
+The formula for calculating the negative likelihood ratio is in @eq-positiveLikelihoodRatio.
+
+### Posttest Odds {#sec-posttestOdds}
+
+As presented in @eq-bayes5, the posttest (or posterior) odds are equal to the [pretest odds](#sec-pretestOdds) multiplied by the [likelihood ratio](#sec-diagnosticLikelihoodRatio).
+The posttest odds and [posttest probability](#sec-posttestProbability) can be useful to calculate when the [pretest probability](#sec-baseRate) is different from the [pretest probability](#sec-baseRate) (or prevalence) of the classification.
+For instance, you might use a different [pretest probability](#sec-baseRate) if a test result is already known and you want to know the updated [posttest probability](#sec-posttestProbability) after conducting a second test.
+The formula for calculating posttest odds is in @eq-posttestOdds.
+
+$$
+\begin{aligned}
+  \text{posttest odds} &= \text{pretest odds} \times \text{likelihood ratio} \\
+\end{aligned}
+$$ {#eq-posttestOdds}
+
+For calculating the posttest odds of a [true positive](#sec-truePositive) compared to a [false positive](#sec-falsePositive), we use the [positive likelihood ratio](#sec-positiveLikelihoodRatio) below.
+We would use the [negative likelihood ratio](#sec-negativeLikelihoodRatio) if we wanted to calculate the posttest odds of a [false negative](#sec-falseNegative) compared to a [true negative](#sec-trueNegative).
+
+### Posttest Probability {#sec-posttestProbability}
+
+The posttest probability is the probability of having the disorder given a test result.
+When the [base rate](#sec-baseRate) is used as the [pretest probability](#sec-baseRate), the posttest probability given a positive test is equal to [positive predictive value](#sec-ppv).
+To convert odds to a probability, divide the odds by one plus the odds, as is in @eq-posttestProbability.
+
+$$
+\begin{aligned}
+  \text{posttest probability} &= \frac{\text{posttest odds}}{1 + \text{posttest odds}}
+\end{aligned}
+$$ {#eq-posttestProbability}
+
 ## Prediction of Continuous Outcomes {#sec-predictionContinuous}
 
 ## Types of Accuracy {#sec-accuracyTypes}
