@@ -518,14 +518,68 @@ R^2_{adj} = 1 - (1 - R^2) \frac{n - 1}{n - p - 1}
 <p>where <span class="math inline">\(p\)</span> is the number of <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> in the model, and <span class="math inline">\(n\)</span> is the sample size.</p>
 </section><section id="sec-overfitting" class="level2" data-number="9.5"><h2 data-number="9.5" class="anchored" data-anchor-id="sec-overfitting">
 <span class="header-section-number">9.5</span> Overfitting</h2>
-<p>Statistical models applied to big data (e.g., data with many <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>) can <em>over-fit</em> the data, which means that the statistical model accounts for error variance, which will not generalize to future samples. So, even though an over-fitting statistical model appears to be accurate because it is accounting for more variance, it is not actually that accurate—it will predict new data less accurately than how accurately it accounts for the data with which the model was built. In the case of fantasy football analytics, this is especially relevant because there are hundreds if not thousands of variables we could consider for inclusion and many, many players when considering historical data.</p>
+<p>Statistical models applied to big data (e.g., data with many <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>) can <em>overfit</em> the data, which means that the statistical model accounts for error variance, which will not generalize to future samples. So, even though an overfitting statistical model appears to be accurate because it is accounting for more variance, it is not actually that accurate—it will predict new data less accurately than how accurately it accounts for the data with which the model was built. In the case of fantasy football analytics, this is especially relevant because there are hundreds if not thousands of variables we could consider for inclusion and many, many players when considering historical data.</p>
 <p>Consider an example where you develop an algorithm to predict players’ fantasy performance based on 2023 data using hundreds of <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>. To some extent, these <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> will likely account for true variance (i.e., signal) and error variance (i.e., noise). If we were to apply the same algorithm based on the 2023 prediction model to 2024 data, the prediction model would likely predict less accurately than with 2023 data. The regression coefficients in the</p>
-<p>In <a href="#fig-overfittingModel" class="quarto-xref">Figure&nbsp;<span>9.3</span></a>, the blue line represents the true distribution of the data, and the red line is an over-fitting model:</p>
+<p>In <a href="#fig-overfittingModel" class="quarto-xref">Figure&nbsp;<span>9.3</span></a>, the blue line represents the true distribution of the data, and the red line is an overfitting model:</p>
 <div class="cell">
-<div class="cell-output-display">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a>sampleSize <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>quadraticX <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(sampleSize)</span>
+<span id="cb2-5"><a href="#cb2-5"></a>quadraticY <span class="ot">&lt;-</span> quadraticX <span class="sc">^</span> <span class="dv">2</span> <span class="sc">+</span> <span class="fu">rnorm</span>(sampleSize)</span>
+<span id="cb2-6"><a href="#cb2-6"></a>quadraticData <span class="ot">&lt;-</span> <span class="fu">cbind</span>(quadraticX, quadraticY) <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>  data.frame <span class="sc">%&gt;%</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>  <span class="fu">arrange</span>(quadraticX)</span>
+<span id="cb2-9"><a href="#cb2-9"></a></span>
+<span id="cb2-10"><a href="#cb2-10"></a>quadraticModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb2-11"><a href="#cb2-11"></a>  quadraticY <span class="sc">~</span> quadraticX <span class="sc">+</span> <span class="fu">I</span>(quadraticX <span class="sc">^</span> <span class="dv">2</span>),</span>
+<span id="cb2-12"><a href="#cb2-12"></a>  <span class="at">data =</span> quadraticData)</span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a>quadraticNewData <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-15"><a href="#cb2-15"></a>  <span class="at">quadraticX =</span> <span class="fu">seq</span>(</span>
+<span id="cb2-16"><a href="#cb2-16"></a>    <span class="at">from =</span> <span class="fu">min</span>(quadraticData<span class="sc">$</span>quadraticX),</span>
+<span id="cb2-17"><a href="#cb2-17"></a>    <span class="at">to =</span> <span class="fu">max</span>(quadraticData<span class="sc">$</span>quadraticY),</span>
+<span id="cb2-18"><a href="#cb2-18"></a>    <span class="at">length.out =</span> sampleSize))</span>
+<span id="cb2-19"><a href="#cb2-19"></a></span>
+<span id="cb2-20"><a href="#cb2-20"></a>quadraticNewData<span class="sc">$</span>quadraticY <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb2-21"><a href="#cb2-21"></a>  quadraticModel,</span>
+<span id="cb2-22"><a href="#cb2-22"></a>  <span class="at">newdata =</span> quadraticNewData)</span>
+<span id="cb2-23"><a href="#cb2-23"></a></span>
+<span id="cb2-24"><a href="#cb2-24"></a>loessFit <span class="ot">&lt;-</span> <span class="fu">loess</span>(</span>
+<span id="cb2-25"><a href="#cb2-25"></a>  quadraticY <span class="sc">~</span> quadraticX,</span>
+<span id="cb2-26"><a href="#cb2-26"></a>  <span class="at">data =</span> quadraticData,</span>
+<span id="cb2-27"><a href="#cb2-27"></a>  <span class="at">span =</span> <span class="fl">0.01</span>,</span>
+<span id="cb2-28"><a href="#cb2-28"></a>  <span class="at">degree =</span> <span class="dv">1</span>)</span>
+<span id="cb2-29"><a href="#cb2-29"></a></span>
+<span id="cb2-30"><a href="#cb2-30"></a>loessNewData <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-31"><a href="#cb2-31"></a>  <span class="at">quadraticX =</span> <span class="fu">seq</span>(</span>
+<span id="cb2-32"><a href="#cb2-32"></a>    <span class="at">from =</span> <span class="fu">min</span>(quadraticData<span class="sc">$</span>quadraticX),</span>
+<span id="cb2-33"><a href="#cb2-33"></a>    <span class="at">to =</span> <span class="fu">max</span>(quadraticData<span class="sc">$</span>quadraticY),</span>
+<span id="cb2-34"><a href="#cb2-34"></a>    <span class="at">length.out =</span> sampleSize))</span>
+<span id="cb2-35"><a href="#cb2-35"></a></span>
+<span id="cb2-36"><a href="#cb2-36"></a>quadraticNewData<span class="sc">$</span>loessY <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb2-37"><a href="#cb2-37"></a>  loessFit,</span>
+<span id="cb2-38"><a href="#cb2-38"></a>  <span class="at">newdata =</span> quadraticNewData)</span>
+<span id="cb2-39"><a href="#cb2-39"></a></span>
+<span id="cb2-40"><a href="#cb2-40"></a><span class="fu">plot</span>(</span>
+<span id="cb2-41"><a href="#cb2-41"></a>  <span class="at">x =</span> quadraticData<span class="sc">$</span>quadraticX,</span>
+<span id="cb2-42"><a href="#cb2-42"></a>  <span class="at">y =</span> quadraticData<span class="sc">$</span>quadraticY,</span>
+<span id="cb2-43"><a href="#cb2-43"></a>  <span class="at">xlab =</span> <span class="st">""</span>,</span>
+<span id="cb2-44"><a href="#cb2-44"></a>  <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb2-45"><a href="#cb2-45"></a></span>
+<span id="cb2-46"><a href="#cb2-46"></a><span class="fu">lines</span>(</span>
+<span id="cb2-47"><a href="#cb2-47"></a>  quadraticNewData<span class="sc">$</span>quadraticY <span class="sc">~</span> quadraticNewData<span class="sc">$</span>quadraticX,</span>
+<span id="cb2-48"><a href="#cb2-48"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb2-49"><a href="#cb2-49"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb2-50"><a href="#cb2-50"></a></span>
+<span id="cb2-51"><a href="#cb2-51"></a><span class="fu">lines</span>(</span>
+<span id="cb2-52"><a href="#cb2-52"></a>  quadraticNewData<span class="sc">$</span>loessY <span class="sc">~</span> quadraticNewData<span class="sc">$</span>quadraticX,</span>
+<span id="cb2-53"><a href="#cb2-53"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb2-54"><a href="#cb2-54"></a>  <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
 <div id="fig-overfittingModel" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-overfittingModel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="multiple-regression_files/figure-html/fig-overfittingModel-1.png" class="img-fluid figure-img" width="768">
+<img src="multiple-regression_files/figure-html/fig-overfittingModel-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-overfittingModel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.3: Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024a</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024b</a>)</span>.
@@ -620,7 +674,7 @@ Table&nbsp;9.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for 
 </section><section id="sec-multipleRegressionSessionInfo" class="level2" data-number="9.9"><h2 data-number="9.9" class="anchored" data-anchor-id="sec-multipleRegressionSessionInfo">
 <span class="header-section-number">9.9</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
