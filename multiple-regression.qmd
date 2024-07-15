@@ -215,8 +215,8 @@ where $p$ is the number of [predictor variables](#sec-correlationalStudy) in the
 
 ## Overfitting {#sec-overfitting}
 
-Statistical models applied to big data (e.g., data with many [predictor variables](#sec-correlationalStudy)) can *over-fit* the data, which means that the statistical model accounts for error variance, which will not generalize to future samples.
-So, even though an over-fitting statistical model appears to be accurate because it is accounting for more variance, it is not actually that accurate—it will predict new data less accurately than how accurately it accounts for the data with which the model was built.
+Statistical models applied to big data (e.g., data with many [predictor variables](#sec-correlationalStudy)) can *overfit* the data, which means that the statistical model accounts for error variance, which will not generalize to future samples.
+So, even though an overfitting statistical model appears to be accurate because it is accounting for more variance, it is not actually that accurate—it will predict new data less accurately than how accurately it accounts for the data with which the model was built.
 In the case of fantasy football analytics, this is especially relevant because there are hundreds if not thousands of variables we could consider for inclusion and many, many players when considering historical data.
 
 Consider an example where you develop an algorithm to predict players' fantasy performance based on 2023 data using hundreds of [predictor variables](#sec-correlationalStudy).
@@ -224,14 +224,14 @@ To some extent, these [predictor variables](#sec-correlationalStudy) will likely
 If we were to apply the same algorithm based on the 2023 prediction model to 2024 data, the prediction model would likely predict less accurately than with 2023 data.
 The regression coefficients in the 
 
-In @fig-overfittingModel, the blue line represents the true distribution of the data, and the red line is an over-fitting model:
+In @fig-overfittingModel, the blue line represents the true distribution of the data, and the red line is an overfitting model:
 
 ```{r}
 #| label: fig-overfittingModel
 #| fig-cap: "Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."
-#| echo: false
-#| fig.height: 8
-#| fig.width: 8
+#| code-fold: true
+
+set.seed(52242)
 
 sampleSize <- 200
 quadraticX <- rnorm(sampleSize)
@@ -240,17 +240,51 @@ quadraticData <- cbind(quadraticX, quadraticY) %>%
   data.frame %>%
   arrange(quadraticX)
 
-quadraticModel <- lm(quadraticY ~ quadraticX + I(quadraticX ^ 2), data = quadraticData)
-quadraticNewData <- data.frame(quadraticX = seq(from = min(quadraticData$quadraticX), to = max(quadraticData$quadraticY), length.out = sampleSize))
-quadraticNewData$quadraticY <- predict(quadraticModel, newdata = quadraticNewData)
+quadraticModel <- lm(
+  quadraticY ~ quadraticX + I(quadraticX ^ 2),
+  data = quadraticData)
 
-loessFit <- loess(quadraticY ~ quadraticX, data = quadraticData, span = 0.01, degree = 1)
-loessNewData <- data.frame(quadraticX = seq(from = min(quadraticData$quadraticX), to = max(quadraticData$quadraticY), length.out = sampleSize))
-quadraticNewData$loessY <- predict(loessFit, newdata = quadraticNewData)
+quadraticNewData <- data.frame(
+  quadraticX = seq(
+    from = min(quadraticData$quadraticX),
+    to = max(quadraticData$quadraticY),
+    length.out = sampleSize))
 
-plot(x = quadraticData$quadraticX, y = quadraticData$quadraticY, xlab = "", ylab = "")
-lines(quadraticNewData$quadraticY ~ quadraticNewData$quadraticX, lwd = 2, col = "blue")
-lines(quadraticNewData$loessY ~ quadraticNewData$quadraticX, lwd = 2, col = "red")
+quadraticNewData$quadraticY <- predict(
+  quadraticModel,
+  newdata = quadraticNewData)
+
+loessFit <- loess(
+  quadraticY ~ quadraticX,
+  data = quadraticData,
+  span = 0.01,
+  degree = 1)
+
+loessNewData <- data.frame(
+  quadraticX = seq(
+    from = min(quadraticData$quadraticX),
+    to = max(quadraticData$quadraticY),
+    length.out = sampleSize))
+
+quadraticNewData$loessY <- predict(
+  loessFit,
+  newdata = quadraticNewData)
+
+plot(
+  x = quadraticData$quadraticX,
+  y = quadraticData$quadraticY,
+  xlab = "",
+  ylab = "")
+
+lines(
+  quadraticNewData$quadraticY ~ quadraticNewData$quadraticX,
+  lwd = 2,
+  col = "blue")
+
+lines(
+  quadraticNewData$loessY ~ quadraticNewData$quadraticX,
+  lwd = 2,
+  col = "red")
 ```
 
 ## Covariates {#sec-covariates}
