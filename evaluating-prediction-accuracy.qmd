@@ -25,7 +25,17 @@ Nevertheless, it is also important to understand principles in the prediction of
 ## Types of Accuracy {#sec-accuracyTypes}
 
 There are two primary dimensions of accuracy: (1) [discrimination](#sec-discrimination) and (2) [calibration](#sec-calibration).
+[Discrimination](#sec-discrimination) and [calibration](#sec-calibration) are distinct forms of accuracy.
+Just because predictions are high in one form of accuracy does not mean that they will be high in the other form of accuracy.
+As described by @Lindhiem2020, predictions can follow any of the following configurations (and anywhere in between):
+
+- high [discrimination](#sec-discrimination), high [calibration](#sec-calibration)
+- high [discrimination](#sec-discrimination), low [calibration](#sec-calibration)
+- low [discrimination](#sec-discrimination), high [calibration](#sec-calibration)
+- low [discrimination](#sec-discrimination), low [calibration](#sec-calibration)
+
 Some general indexes of accuracy combine discrimination and calibration, as described in @sec-generalAccuracy.
+
 In addition, accuracy indices can be [threshold-dependent](#sec-thresholdDependentAccuracy) or [-independent](#sec-thresholdIndependentAccuracy) and can be scale-dependent or -independent.
 [Threshold-dependent accuracy indices](#sec-thresholdDependentAccuracy) differ based on the cutoff (i.e., threshold), whereas [threshold-independent accuracy indices](#sec-thresholdIndependentAccuracy) do not.
 Thus, raising or lowering the cutoff will change [threshold-dependent](#sec-thresholdDependentAccuracy) accuracy indices.
@@ -1598,6 +1608,42 @@ In this case, the 95% confidence interval of the observed value does not include
 Gold-standard recommendations include examining the predicted values in relation to the observed values using locally estimated scatterplot smoothing (LOESS) [@Austin2014], such as in Figure INSERT.
 We can examine whether the LOESS-based 95% confidence interval of the observed value at every level of the predicted values includes the diagonal reference line (i.e., the actual observed value).
 In this case, the 95% confidence interval of the observed value does not include the reference line at lower levels of the predicted values, so the predictions are [miscalibrated](#sec-calibration) at lower levels of the predicted values.
+
+## Integrating the Accuracy Indices {#sec-integratingAccuracy}
+
+After computing the accuracy indices of [discrimination](#sec-discrimination) and (2) [calibration](#sec-calibration), it is then the task to integrate the indices to determine (a) which are the most accurate predictions for the given goals, and (b) whether additional improvements and refinements to the predictions need to be made.
+Each of the accuracy indices is computed differently and thus reward (and penalize) predictive (in)accuracy differently.
+Sometimes, the the accuracy indices will paint a consistent picture regarding which predictions are the most accurate.
+Other times, the accuracy indices may disagree about which predictions are most accurate.
+
+In fantasy football, when evaluating the accuracy of seasonal projections, we care most about accurately distinguishing between higher levels of points (e.g., 200 vs 150) as opposed to lower levels of points (e.g., 0 vs 10).
+Thus, it can be helpful to punish larger errors more heavily than smaller errors, as [RMSE](#sec-rootMeanSquaredError) (unlike [MAE](#sec-meanAbsoluteError)).
+
+Thus, we would emphasize the following metrics:
+
+- [discrimination](#sec-discrimination):
+  - [adjusted $R^2$](#sec-adjustedRsquared)
+- [calibration](#sec-calibration):
+  - [calibration plot](#sec-calibrationPlot)
+- [general accuracy](#sec-calibration):
+  - [RMSE](#sec-rootMeanSquaredError)
+
+If you focus on only one accuracy index, [RMSE](#sec-rootMeanSquaredError) would be a good choice.
+However, I would also examine a [calibration plot](#sec-calibrationPlot) to evaluate whether predictions are poorly calibrated at higher levels of points.
+I would also examine [ME](#sec-meanError)—not to compare the accuracy of various predictions per se—but to determine whether predictions are systematically under- or overestimating actual points.
+If so, predictions may be able to be refined by adding or subtracting a constant to the predictions; however, this could worsen other accuracy indices, so it is important to conduct an interative process of modifying then evaluating, then further modifiying and evaluating, etc.
+
+If we are making predictions about a categorical variable, we would emphasize the following metrics:
+
+- [discrimination](#sec-discrimination):
+  - area under the receiver operating curve
+  - and, secondarily—depending on the particulary cutoff and the relative costs of false positives versus false negatives:
+    - sensitivity
+    - specificicity
+    - positive predictive value
+    - negative predictive value
+- [calibration](#sec-calibration):
+  - [calibration plot](#sec-calibrationPlot)
 
 ## Theory Versus Empiricism {#sec-theoryVsEmpiricism}
 
