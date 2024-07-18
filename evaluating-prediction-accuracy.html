@@ -406,7 +406,7 @@ window.Quarto = {
 <a href="#sec-calibrationIndices" id="toc-sec-calibrationIndices" class="nav-link" data-scroll-target="#sec-calibrationIndices"><span class="header-section-number">14.7.3</span> Calibration</a>
   <ul class="collapse">
 <li><a href="#sec-calibrationPlot" id="toc-sec-calibrationPlot" class="nav-link" data-scroll-target="#sec-calibrationPlot"><span class="header-section-number">14.7.3.1</span> Calibration Plot</a></li>
-  <li><a href="#sec-spiegelhalterZ" id="toc-sec-spiegelhalterZ" class="nav-link" data-scroll-target="#sec-spiegelhalterZ"><span class="header-section-number">14.7.3.2</span> Spiegelhalter’s z</a></li>
+  <li><a href="#sec-spiegelhalterZ" id="toc-sec-spiegelhalterZ" class="nav-link" data-scroll-target="#sec-spiegelhalterZ"><span class="header-section-number">14.7.3.2</span> Spiegelhalter’s <em>z</em></a></li>
   <li><a href="#sec-calibrationContinuous" id="toc-sec-calibrationContinuous" class="nav-link" data-scroll-target="#sec-calibrationContinuous"><span class="header-section-number">14.7.3.3</span> Calibration for predicting a continuous outcome</a></li>
   </ul>
 </li>
@@ -501,8 +501,8 @@ window.Quarto = {
 </section><section id="sec-calibration" class="level3" data-number="14.3.2"><h3 data-number="14.3.2" class="anchored" data-anchor-id="sec-calibration">
 <span class="header-section-number">14.3.2</span> Calibration</h3>
 <p>When dealing with a categorical outcome, calibration is the degree to which a probabilistic estimate of an event reflects the true underlying probability of the event. When dealing with a continuous outcome, calibration is the degree to which the predicted values are close in value to the outcome values. The importance of examining calibration (in addition to discrimination) is described by <span class="citation" data-cites="Lindhiem2020">Lindhiem et al. (<a href="references.html#ref-Lindhiem2020" role="doc-biblioref">2020</a>)</span>.</p>
-<p>Calibration is relevant to all kinds of predictions, including weather forecasts. For instance, on the days that the meteorologist says there is a 60% chance of rain, it should rain about 60% of the time. Calibration is also important for fantasy football predictions. When projections state that a a group of players is each expected to score 200 points, their projections would be miscalibrated if those players scored only 150 points on average.</p>
-<p>There are four general patterns of miscalibration: overextremity, underextremity, overprediction, and underprediction (see <a href="#fig-miscalibration" class="quarto-xref">Figure&nbsp;<span>14.6</span></a>). <em>Overextremity</em> exists when the predicted probabilites are too close to the extremes (zero or one). <em>Underextremity</em> exists when the predicted probabilities are too far away from the extremes. <em>Overprediction</em> exists when the predicted probabilities are consistently greater than the observed probabilities. <em>Underprediction</em> exists when the predicted probabilities are consistently less than the observed probabilities. For a more thorough description of these types of miscalibration, see <span class="citation" data-cites="Lindhiem2020">Lindhiem et al. (<a href="references.html#ref-Lindhiem2020" role="doc-biblioref">2020</a>)</span>.</p>
+<p>Calibration is relevant to all kinds of predictions, including weather forecasts. For instance, on the days that the meteorologist says there is a 60% chance of rain, it should rain about 60% of the time. Calibration is also important for fantasy football predictions. When projections state that a group of players is each expected to score 200 points, their projections would be miscalibrated if those players scored only 150 points on average.</p>
+<p>There are four general patterns of miscalibration: overextremity, underextremity, overprediction, and underprediction (see <a href="#fig-miscalibration" class="quarto-xref">Figure&nbsp;<span>14.7</span></a>). <em>Overextremity</em> exists when the predicted probabilites are too close to the extremes (zero or one). <em>Underextremity</em> exists when the predicted probabilities are too far away from the extremes. <em>Overprediction</em> exists when the predicted probabilities are consistently greater than the observed probabilities. <em>Underprediction</em> exists when the predicted probabilities are consistently less than the observed probabilities. For a more thorough description of these types of miscalibration, see <span class="citation" data-cites="Lindhiem2020">Lindhiem et al. (<a href="references.html#ref-Lindhiem2020" role="doc-biblioref">2020</a>)</span>.</p>
 <p>Indices for evaluating calibration are described in <a href="#sec-calibrationIndices" class="quarto-xref"><span>Section 14.7.3</span></a>.</p>
 </section><section id="sec-generalAccuracy" class="level3" data-number="14.3.3"><h3 data-number="14.3.3" class="anchored" data-anchor-id="sec-generalAccuracy">
 <span class="header-section-number">14.3.3</span> General Accuracy</h3>
@@ -1431,114 +1431,156 @@ Figure&nbsp;14.5: Receiver Operating Characteristic (ROC) Curves for Various Lev
 <p>The effect size of a predictor, i.e., the standardized regression coefficient is called a beta (<span class="math inline">\(\beta\)</span>) coefficient, is a general index of <a href="#sec-discrimination">discrimination accuracy</a> for a continuous outcome. Larger values reflect greater accuracy. We can obtain standardized regression coefficients by standardizing the predictors and outcome using the <code><a href="https://rdrr.io/r/base/scale.html">scale()</a></code> function in R.</p>
 </section></section><section id="sec-calibrationIndices" class="level3" data-number="14.7.3"><h3 data-number="14.7.3" class="anchored" data-anchor-id="sec-calibrationIndices">
 <span class="header-section-number">14.7.3</span> Calibration</h3>
-<p>When dealing with a categorical outcome, calibration is the degree to which a probabilistic estimate of an event reflects the true underlying probability of the event. When dealing with a continuous outcome, calibration is the degree to which the predicted values are close in value to the outcome values. The importance of examining calibration (in addition to <a href="#sec-discrimination">discrimination</a>) is described by <span class="citation" data-cites="Lindhiem2020">Lindhiem et al. (<a href="references.html#ref-Lindhiem2020" role="doc-biblioref">2020</a>)</span>. Calibration can be examined in several ways, including <a href="#sec-spiegelhalterZ">Spiegelhalter’s <span class="math inline">\(z\)</span></a> (see <a href="#sec-spiegelhalterZ" class="quarto-xref"><span>Section 14.7.3.2</span></a>), and the <a href="#sec-miscalibration">mean difference between predicted and observed values</a> at different binned thresholds as depicted graphically with a <a href="#sec-calibrationPlot">calibration plot</a> (see <a href="#fig-miscalibration" class="quarto-xref">Figure&nbsp;<span>14.6</span></a>).</p>
+<p>When dealing with a categorical outcome, calibration is the degree to which a probabilistic estimate of an event reflects the true underlying probability of the event. When dealing with a continuous outcome, calibration is the degree to which the predicted values are close in value to the outcome values. The importance of examining calibration (in addition to <a href="#sec-discrimination">discrimination</a>) is described by <span class="citation" data-cites="Lindhiem2020">Lindhiem et al. (<a href="references.html#ref-Lindhiem2020" role="doc-biblioref">2020</a>)</span>. Calibration can be examined in several ways, including <a href="#sec-spiegelhalterZ">Spiegelhalter’s <span class="math inline">\(z\)</span></a> (see <a href="#sec-spiegelhalterZ" class="quarto-xref"><span>Section 14.7.3.2</span></a>), and the <a href="#sec-miscalibration">mean difference between predicted and observed values</a> at different binned thresholds as depicted graphically with a <a href="#sec-calibrationPlot">calibration plot</a> (see <a href="#fig-miscalibration" class="quarto-xref">Figure&nbsp;<span>14.7</span></a>).</p>
 <section id="sec-calibrationPlot" class="level4" data-number="14.7.3.1"><h4 data-number="14.7.3.1" class="anchored" data-anchor-id="sec-calibrationPlot">
 <span class="header-section-number">14.7.3.1</span> Calibration Plot</h4>
 <p>Calibration plots can be helpful for identifying miscalibration. A calibration plot depicts the predicted probability of an event on the x-axis, and the actual (observed) probability of the event on the y-axis. The predictions are binned into a certain number of groups (commonly 10). The diagonal line reflects predictions that are perfectly calibrated. To the extent that predictions deviate from the diagonal line, the predictions are miscalibrated.</p>
-<p>The various types of miscalibration are depicted in <a href="#fig-miscalibration" class="quarto-xref">Figure&nbsp;<span>14.6</span></a>:</p>
+<p>Well-calibrated predictions are depicted in <a href="#fig-calibrationPlot" class="quarto-xref">Figure&nbsp;<span>14.6</span></a>:</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Specify data</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a>examplePredictions <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">0</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)</span>
-<span id="cb13-3"><a href="#cb13-3"></a>exampleOutcomes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">15</span>, .<span class="dv">3</span>, .<span class="dv">4</span>, .<span class="dv">45</span>, .<span class="dv">5</span>, .<span class="dv">55</span>, .<span class="dv">6</span>, .<span class="dv">7</span>, .<span class="dv">85</span>, <span class="dv">1</span>)</span>
+<span id="cb13-2"><a href="#cb13-2"></a>examplePredictionsWellCalibrated <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">0</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)</span>
+<span id="cb13-3"><a href="#cb13-3"></a>exampleOutcomesWellCalibrated <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">0</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)</span>
 <span id="cb13-4"><a href="#cb13-4"></a></span>
-<span id="cb13-5"><a href="#cb13-5"></a>overPrediction <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">02</span>, .<span class="dv">05</span>, .<span class="dv">1</span>, .<span class="dv">15</span>, .<span class="dv">2</span>, .<span class="dv">3</span>, .<span class="dv">4</span>, .<span class="dv">5</span>, .<span class="dv">7</span>, <span class="dv">1</span>)</span>
-<span id="cb13-6"><a href="#cb13-6"></a>underPrediction <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">3</span>, .<span class="dv">5</span>, .<span class="dv">6</span>, .<span class="dv">7</span>, .<span class="dv">8</span>, .<span class="dv">85</span>, .<span class="dv">9</span>, .<span class="dv">95</span>, .<span class="dv">98</span>, <span class="dv">1</span>)</span>
-<span id="cb13-7"><a href="#cb13-7"></a>overExtremity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">3</span>, .<span class="dv">38</span>, .<span class="dv">42</span>, .<span class="dv">47</span>, .<span class="dv">5</span>, .<span class="dv">53</span>, .<span class="dv">58</span>, .<span class="dv">62</span>, .<span class="dv">7</span>, <span class="dv">1</span>)</span>
-<span id="cb13-8"><a href="#cb13-8"></a>underExtremity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">05</span>, .<span class="dv">08</span>, .<span class="dv">11</span>, .<span class="dv">2</span>, .<span class="dv">5</span>, .<span class="dv">8</span>, .<span class="dv">89</span>, .<span class="dv">92</span>, .<span class="dv">95</span>, <span class="dv">1</span>)</span>
-<span id="cb13-9"><a href="#cb13-9"></a></span>
-<span id="cb13-10"><a href="#cb13-10"></a><span class="co"># Plot</span></span>
-<span id="cb13-11"><a href="#cb13-11"></a><span class="fu">par</span>(</span>
-<span id="cb13-12"><a href="#cb13-12"></a>  <span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>),</span>
-<span id="cb13-13"><a href="#cb13-13"></a>  <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.1</span>) <span class="co">#margins: bottom, left, top, right</span></span>
-<span id="cb13-14"><a href="#cb13-14"></a></span>
-<span id="cb13-15"><a href="#cb13-15"></a><span class="fu">plot</span>(</span>
-<span id="cb13-16"><a href="#cb13-16"></a>  examplePredictions,</span>
-<span id="cb13-17"><a href="#cb13-17"></a>  overExtremity,</span>
-<span id="cb13-18"><a href="#cb13-18"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-19"><a href="#cb13-19"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-20"><a href="#cb13-20"></a>  <span class="at">main =</span> <span class="st">"Overextremity"</span>,</span>
-<span id="cb13-21"><a href="#cb13-21"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
-<span id="cb13-22"><a href="#cb13-22"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
-<span id="cb13-23"><a href="#cb13-23"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
-<span id="cb13-24"><a href="#cb13-24"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
-<span id="cb13-25"><a href="#cb13-25"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
-<span id="cb13-26"><a href="#cb13-26"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
-<span id="cb13-27"><a href="#cb13-27"></a></span>
-<span id="cb13-28"><a href="#cb13-28"></a><span class="fu">lines</span>(</span>
-<span id="cb13-29"><a href="#cb13-29"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-30"><a href="#cb13-30"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-31"><a href="#cb13-31"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb13-32"><a href="#cb13-32"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
-<span id="cb13-33"><a href="#cb13-33"></a></span>
-<span id="cb13-34"><a href="#cb13-34"></a><span class="fu">plot</span>(</span>
-<span id="cb13-35"><a href="#cb13-35"></a>  examplePredictions,</span>
-<span id="cb13-36"><a href="#cb13-36"></a>  underExtremity,</span>
-<span id="cb13-37"><a href="#cb13-37"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-38"><a href="#cb13-38"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-39"><a href="#cb13-39"></a>  <span class="at">main =</span> <span class="st">"Underextremity"</span>,</span>
-<span id="cb13-40"><a href="#cb13-40"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
-<span id="cb13-41"><a href="#cb13-41"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
-<span id="cb13-42"><a href="#cb13-42"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
-<span id="cb13-43"><a href="#cb13-43"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
-<span id="cb13-44"><a href="#cb13-44"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
-<span id="cb13-45"><a href="#cb13-45"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
-<span id="cb13-46"><a href="#cb13-46"></a></span>
-<span id="cb13-47"><a href="#cb13-47"></a><span class="fu">lines</span>(</span>
-<span id="cb13-48"><a href="#cb13-48"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-49"><a href="#cb13-49"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-50"><a href="#cb13-50"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb13-51"><a href="#cb13-51"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
-<span id="cb13-52"><a href="#cb13-52"></a></span>
-<span id="cb13-53"><a href="#cb13-53"></a><span class="fu">plot</span>(</span>
-<span id="cb13-54"><a href="#cb13-54"></a>  examplePredictions,</span>
-<span id="cb13-55"><a href="#cb13-55"></a>  overPrediction,</span>
-<span id="cb13-56"><a href="#cb13-56"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-57"><a href="#cb13-57"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-58"><a href="#cb13-58"></a>  <span class="at">main =</span> <span class="st">"Overprediction"</span>,</span>
-<span id="cb13-59"><a href="#cb13-59"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
-<span id="cb13-60"><a href="#cb13-60"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
-<span id="cb13-61"><a href="#cb13-61"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
-<span id="cb13-62"><a href="#cb13-62"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
-<span id="cb13-63"><a href="#cb13-63"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
-<span id="cb13-64"><a href="#cb13-64"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
-<span id="cb13-65"><a href="#cb13-65"></a></span>
-<span id="cb13-66"><a href="#cb13-66"></a><span class="fu">lines</span>(</span>
-<span id="cb13-67"><a href="#cb13-67"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-68"><a href="#cb13-68"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-69"><a href="#cb13-69"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb13-70"><a href="#cb13-70"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
-<span id="cb13-71"><a href="#cb13-71"></a></span>
-<span id="cb13-72"><a href="#cb13-72"></a><span class="fu">plot</span>(</span>
-<span id="cb13-73"><a href="#cb13-73"></a>  examplePredictions,</span>
-<span id="cb13-74"><a href="#cb13-74"></a>  underPrediction,</span>
-<span id="cb13-75"><a href="#cb13-75"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-76"><a href="#cb13-76"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-77"><a href="#cb13-77"></a>  <span class="at">main =</span> <span class="st">"Underprediction"</span>,</span>
-<span id="cb13-78"><a href="#cb13-78"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
-<span id="cb13-79"><a href="#cb13-79"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
-<span id="cb13-80"><a href="#cb13-80"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
-<span id="cb13-81"><a href="#cb13-81"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
-<span id="cb13-82"><a href="#cb13-82"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
-<span id="cb13-83"><a href="#cb13-83"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
-<span id="cb13-84"><a href="#cb13-84"></a></span>
-<span id="cb13-85"><a href="#cb13-85"></a><span class="fu">lines</span>(</span>
-<span id="cb13-86"><a href="#cb13-86"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-87"><a href="#cb13-87"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb13-88"><a href="#cb13-88"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb13-89"><a href="#cb13-89"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="co"># Plot</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="fu">plot</span>(</span>
+<span id="cb13-7"><a href="#cb13-7"></a>  examplePredictionsWellCalibrated,</span>
+<span id="cb13-8"><a href="#cb13-8"></a>  exampleOutcomesWellCalibrated,</span>
+<span id="cb13-9"><a href="#cb13-9"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb13-10"><a href="#cb13-10"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb13-11"><a href="#cb13-11"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb13-12"><a href="#cb13-12"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb13-13"><a href="#cb13-13"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb13-14"><a href="#cb13-14"></a>  <span class="at">type =</span> <span class="st">"n"</span>)</span>
+<span id="cb13-15"><a href="#cb13-15"></a></span>
+<span id="cb13-16"><a href="#cb13-16"></a><span class="fu">lines</span>(</span>
+<span id="cb13-17"><a href="#cb13-17"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb13-18"><a href="#cb13-18"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb13-19"><a href="#cb13-19"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb13-20"><a href="#cb13-20"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
+<span id="cb13-21"><a href="#cb13-21"></a></span>
+<span id="cb13-22"><a href="#cb13-22"></a><span class="fu">points</span>(</span>
+<span id="cb13-23"><a href="#cb13-23"></a>  examplePredictionsWellCalibrated,</span>
+<span id="cb13-24"><a href="#cb13-24"></a>  exampleOutcomesWellCalibrated,</span>
+<span id="cb13-25"><a href="#cb13-25"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb13-26"><a href="#cb13-26"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb13-27"><a href="#cb13-27"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb13-28"><a href="#cb13-28"></a>  <span class="at">type =</span> <span class="st">"p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlot-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.6: Predictions that are Well-Calibrated. That is, the predicted values are close to the observed values.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The various types of miscalibration are depicted in <a href="#fig-miscalibration" class="quarto-xref">Figure&nbsp;<span>14.7</span></a>:</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># Specify data</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>examplePredictions <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">0</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)</span>
+<span id="cb14-3"><a href="#cb14-3"></a>exampleOutcomes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">15</span>, .<span class="dv">3</span>, .<span class="dv">4</span>, .<span class="dv">45</span>, .<span class="dv">5</span>, .<span class="dv">55</span>, .<span class="dv">6</span>, .<span class="dv">7</span>, .<span class="dv">85</span>, <span class="dv">1</span>)</span>
+<span id="cb14-4"><a href="#cb14-4"></a></span>
+<span id="cb14-5"><a href="#cb14-5"></a>overPrediction <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">02</span>, .<span class="dv">05</span>, .<span class="dv">1</span>, .<span class="dv">15</span>, .<span class="dv">2</span>, .<span class="dv">3</span>, .<span class="dv">4</span>, .<span class="dv">5</span>, .<span class="dv">7</span>, <span class="dv">1</span>)</span>
+<span id="cb14-6"><a href="#cb14-6"></a>underPrediction <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">3</span>, .<span class="dv">5</span>, .<span class="dv">6</span>, .<span class="dv">7</span>, .<span class="dv">8</span>, .<span class="dv">85</span>, .<span class="dv">9</span>, .<span class="dv">95</span>, .<span class="dv">98</span>, <span class="dv">1</span>)</span>
+<span id="cb14-7"><a href="#cb14-7"></a>overExtremity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">3</span>, .<span class="dv">38</span>, .<span class="dv">42</span>, .<span class="dv">47</span>, .<span class="dv">5</span>, .<span class="dv">53</span>, .<span class="dv">58</span>, .<span class="dv">62</span>, .<span class="dv">7</span>, <span class="dv">1</span>)</span>
+<span id="cb14-8"><a href="#cb14-8"></a>underExtremity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">05</span>, .<span class="dv">08</span>, .<span class="dv">11</span>, .<span class="dv">2</span>, .<span class="dv">5</span>, .<span class="dv">8</span>, .<span class="dv">89</span>, .<span class="dv">92</span>, .<span class="dv">95</span>, <span class="dv">1</span>)</span>
+<span id="cb14-9"><a href="#cb14-9"></a></span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="co"># Plot</span></span>
+<span id="cb14-11"><a href="#cb14-11"></a><span class="fu">par</span>(</span>
+<span id="cb14-12"><a href="#cb14-12"></a>  <span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>),</span>
+<span id="cb14-13"><a href="#cb14-13"></a>  <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.1</span>) <span class="co">#margins: bottom, left, top, right</span></span>
+<span id="cb14-14"><a href="#cb14-14"></a></span>
+<span id="cb14-15"><a href="#cb14-15"></a><span class="fu">plot</span>(</span>
+<span id="cb14-16"><a href="#cb14-16"></a>  examplePredictions,</span>
+<span id="cb14-17"><a href="#cb14-17"></a>  overExtremity,</span>
+<span id="cb14-18"><a href="#cb14-18"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-19"><a href="#cb14-19"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-20"><a href="#cb14-20"></a>  <span class="at">main =</span> <span class="st">"Overextremity"</span>,</span>
+<span id="cb14-21"><a href="#cb14-21"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb14-22"><a href="#cb14-22"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb14-23"><a href="#cb14-23"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb14-24"><a href="#cb14-24"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb14-25"><a href="#cb14-25"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb14-26"><a href="#cb14-26"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb14-27"><a href="#cb14-27"></a></span>
+<span id="cb14-28"><a href="#cb14-28"></a><span class="fu">lines</span>(</span>
+<span id="cb14-29"><a href="#cb14-29"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-30"><a href="#cb14-30"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-31"><a href="#cb14-31"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb14-32"><a href="#cb14-32"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
+<span id="cb14-33"><a href="#cb14-33"></a></span>
+<span id="cb14-34"><a href="#cb14-34"></a><span class="fu">plot</span>(</span>
+<span id="cb14-35"><a href="#cb14-35"></a>  examplePredictions,</span>
+<span id="cb14-36"><a href="#cb14-36"></a>  underExtremity,</span>
+<span id="cb14-37"><a href="#cb14-37"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-38"><a href="#cb14-38"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-39"><a href="#cb14-39"></a>  <span class="at">main =</span> <span class="st">"Underextremity"</span>,</span>
+<span id="cb14-40"><a href="#cb14-40"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb14-41"><a href="#cb14-41"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb14-42"><a href="#cb14-42"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb14-43"><a href="#cb14-43"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb14-44"><a href="#cb14-44"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb14-45"><a href="#cb14-45"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb14-46"><a href="#cb14-46"></a></span>
+<span id="cb14-47"><a href="#cb14-47"></a><span class="fu">lines</span>(</span>
+<span id="cb14-48"><a href="#cb14-48"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-49"><a href="#cb14-49"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-50"><a href="#cb14-50"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb14-51"><a href="#cb14-51"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
+<span id="cb14-52"><a href="#cb14-52"></a></span>
+<span id="cb14-53"><a href="#cb14-53"></a><span class="fu">plot</span>(</span>
+<span id="cb14-54"><a href="#cb14-54"></a>  examplePredictions,</span>
+<span id="cb14-55"><a href="#cb14-55"></a>  overPrediction,</span>
+<span id="cb14-56"><a href="#cb14-56"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-57"><a href="#cb14-57"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-58"><a href="#cb14-58"></a>  <span class="at">main =</span> <span class="st">"Overprediction"</span>,</span>
+<span id="cb14-59"><a href="#cb14-59"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb14-60"><a href="#cb14-60"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb14-61"><a href="#cb14-61"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb14-62"><a href="#cb14-62"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb14-63"><a href="#cb14-63"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb14-64"><a href="#cb14-64"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb14-65"><a href="#cb14-65"></a></span>
+<span id="cb14-66"><a href="#cb14-66"></a><span class="fu">lines</span>(</span>
+<span id="cb14-67"><a href="#cb14-67"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-68"><a href="#cb14-68"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-69"><a href="#cb14-69"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb14-70"><a href="#cb14-70"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span>
+<span id="cb14-71"><a href="#cb14-71"></a></span>
+<span id="cb14-72"><a href="#cb14-72"></a><span class="fu">plot</span>(</span>
+<span id="cb14-73"><a href="#cb14-73"></a>  examplePredictions,</span>
+<span id="cb14-74"><a href="#cb14-74"></a>  underPrediction,</span>
+<span id="cb14-75"><a href="#cb14-75"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-76"><a href="#cb14-76"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-77"><a href="#cb14-77"></a>  <span class="at">main =</span> <span class="st">"Underprediction"</span>,</span>
+<span id="cb14-78"><a href="#cb14-78"></a>  <span class="at">xlab =</span> <span class="st">"Predicted Probability"</span>,</span>
+<span id="cb14-79"><a href="#cb14-79"></a>  <span class="at">ylab =</span> <span class="st">"Observed Proportion"</span>,</span>
+<span id="cb14-80"><a href="#cb14-80"></a>  <span class="at">bty =</span> <span class="st">"l"</span>,</span>
+<span id="cb14-81"><a href="#cb14-81"></a>  <span class="at">cex =</span> <span class="fl">1.5</span>,</span>
+<span id="cb14-82"><a href="#cb14-82"></a>  <span class="at">col =</span> <span class="st">"#e41a1c"</span>,</span>
+<span id="cb14-83"><a href="#cb14-83"></a>  <span class="at">type =</span> <span class="st">"o"</span>)</span>
+<span id="cb14-84"><a href="#cb14-84"></a></span>
+<span id="cb14-85"><a href="#cb14-85"></a><span class="fu">lines</span>(</span>
+<span id="cb14-86"><a href="#cb14-86"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-87"><a href="#cb14-87"></a>  <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb14-88"><a href="#cb14-88"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb14-89"><a href="#cb14-89"></a>  <span class="at">col =</span> <span class="st">"#377eb8"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-miscalibration" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miscalibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="evaluating-prediction-accuracy_files/figure-html/fig-miscalibration-1.png" class="img-fluid figure-img" width="768">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-miscalibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14.6: Types of Miscalibration. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024b</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024c</a>)</span>.
+Figure&nbsp;14.7: Types of Miscalibration. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024b</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2024c</a>)</span>.
 </figcaption></figure>
 </div>
 </div>
 </div>
 </section><section id="sec-spiegelhalterZ" class="level4" data-number="14.7.3.2"><h4 data-number="14.7.3.2" class="anchored" data-anchor-id="sec-spiegelhalterZ">
-<span class="header-section-number">14.7.3.2</span> Spiegelhalter’s z</h4>
+<span class="header-section-number">14.7.3.2</span> Spiegelhalter’s <em>z</em>
+</h4>
 <p>Spiegelhalter’s <em>z</em> was calculated using the <code>rms</code> package <span class="citation" data-cites="R-rms">(<a href="references.html#ref-R-rms" role="doc-biblioref">Harrell, Jr., 2024</a>)</span>. Smaller <em>z</em> values (and larger associated <em>p</em>-values) reflect greater <a href="#calibration">calibration accuracy</a>. A statistically significant Spiegelhalter’s <em>z</em> (<em>p</em> &lt; .05) indicates a significant degree of miscalibration.</p>
 </section><section id="sec-calibrationContinuous" class="level4" data-number="14.7.3.3"><h4 data-number="14.7.3.3" class="anchored" data-anchor-id="sec-calibrationContinuous">
 <span class="header-section-number">14.7.3.3</span> Calibration for predicting a continuous outcome</h4>
@@ -1643,7 +1685,7 @@ Figure&nbsp;14.6: Types of Miscalibration. From <span class="citation" data-cite
 </section><section id="sec-predictionAccuracySessionInfo" class="level2" data-number="14.13"><h2 data-number="14.13" class="anchored" data-anchor-id="sec-predictionAccuracySessionInfo">
 <span class="header-section-number">14.13</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
