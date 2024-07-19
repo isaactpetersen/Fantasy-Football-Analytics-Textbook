@@ -350,67 +350,68 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span class="header-section-number">15.1</span> Getting Started</h2>
 <section id="sec-mythbustersLoadPackages" class="level3" data-number="15.1.1"><h3 data-number="15.1.1" class="anchored" data-anchor-id="sec-mythbustersLoadPackages">
 <span class="header-section-number">15.1.1</span> Load Packages</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"here"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section><section id="sec-mythbustersLoadData" class="level3" data-number="15.1.2"><h3 data-number="15.1.2" class="anchored" data-anchor-id="sec-mythbustersLoadData">
 <span class="header-section-number">15.1.2</span> Load Data</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"nfl_playerContracts.RData"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in here("data", "nfl_playerContracts.RData"): could not find function "here"</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"nfl_pbp.RData"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in here("data", "nfl_pbp.RData"): could not find function "here"</code></pre>
-</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"nfl_playerContracts.RData"</span>))</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"nfl_pbp.RData"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section></section><section id="sec-contractYear" class="level2" data-number="15.2"><h2 data-number="15.2" class="anchored" data-anchor-id="sec-contractYear">
 <span class="header-section-number">15.2</span> Do Players Score More Fantasy Points in their Contract Year?</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>nfl_playerContracts_subset <span class="sc">%&gt;%</span> </span>
-<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">filter</span>(player <span class="sc">==</span> <span class="st">"Aaron Rodgers"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">select</span>(player<span class="sc">:</span>years, contractYear, next_contract_start, played_in_contract_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in nfl_playerContracts_subset %&gt;% filter(player == "Aaron Rodgers") %&gt;% : could not find function "%&gt;%"</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Subset to remove players without a year signed</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(year_signed) <span class="sc">&amp;</span> year_signed <span class="sc">!=</span> <span class="dv">0</span>)</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co"># Determine the contract year for a given contract</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>nfl_playerContracts_subset<span class="sc">$</span>contractYear <span class="ot">&lt;-</span> nfl_playerContracts_subset<span class="sc">$</span>year_signed <span class="sc">+</span> nfl_playerContracts_subset<span class="sc">$</span>years <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="co"># Arrange contracts by player and year_signed</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">%&gt;%</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player, position) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-11"><a href="#cb3-11"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(player, position, <span class="sc">-</span>year_signed) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-12"><a href="#cb3-12"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span>
+<span id="cb3-13"><a href="#cb3-13"></a></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="co"># Determine if the player played in the original contract year</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">%&gt;%</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player, position) <span class="sc">%&gt;%</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb3-18"><a href="#cb3-18"></a>    <span class="at">next_contract_start =</span> <span class="fu">lag</span>(year_signed)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb3-21"><a href="#cb3-21"></a>    <span class="at">played_in_contract_year =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb3-22"><a href="#cb3-22"></a>      <span class="fu">is.na</span>(next_contract_start) <span class="sc">|</span> contractYear <span class="sc">&lt;</span> next_contract_start,</span>
+<span id="cb3-23"><a href="#cb3-23"></a>      <span class="cn">TRUE</span>,</span>
+<span id="cb3-24"><a href="#cb3-24"></a>      <span class="cn">FALSE</span>))</span>
+<span id="cb3-25"><a href="#cb3-25"></a></span>
+<span id="cb3-26"><a href="#cb3-26"></a><span class="co"># Check individual players</span></span>
+<span id="cb3-27"><a href="#cb3-27"></a>nfl_playerContracts_subset <span class="sc">%&gt;%</span> </span>
+<span id="cb3-28"><a href="#cb3-28"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player <span class="sc">==</span> <span class="st">"Aaron Rodgers"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-29"><a href="#cb3-29"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player<span class="sc">:</span>years, contractYear, next_contract_start, played_in_contract_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["player"],"name":[1],"type":["chr"],"align":["left"]},{"label":["position"],"name":[2],"type":["chr"],"align":["left"]},{"label":["team"],"name":[3],"type":["chr"],"align":["left"]},{"label":["is_active"],"name":[4],"type":["lgl"],"align":["right"]},{"label":["year_signed"],"name":[5],"type":["int"],"align":["right"]},{"label":["years"],"name":[6],"type":["int"],"align":["right"]},{"label":["contractYear"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["next_contract_start"],"name":[8],"type":["int"],"align":["right"]},{"label":["played_in_contract_year"],"name":[9],"type":["lgl"],"align":["right"]}],"data":[{"1":"Aaron Rodgers","2":"QB","3":"Jets","4":"TRUE","5":"2023","6":"3","7":"2025","8":"NA","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"GB/NYJ","4":"FALSE","5":"2022","6":"5","7":"2026","8":"2023","9":"FALSE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2018","6":"4","7":"2021","8":"2022","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2013","6":"5","7":"2017","8":"2018","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2008","6":"5","7":"2012","8":"2013","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2005","6":"5","7":"2009","8":"2008","9":"FALSE"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>nfl_playerContracts_subset <span class="sc">%&gt;%</span> </span>
-<span id="cb7-2"><a href="#cb7-2"></a>  <span class="fu">filter</span>(player <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Jared Allen"</span>, <span class="st">"Aaron Rodgers"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-3"><a href="#cb7-3"></a>  <span class="fu">select</span>(player<span class="sc">:</span>years, contractYear, next_contract_start, played_in_contract_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in nfl_playerContracts_subset %&gt;% filter(player %in% c("Jared Allen", : could not find function "%&gt;%"</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Subset to remove players without a year signed</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts <span class="sc">%&gt;%</span> </span>
-<span id="cb9-3"><a href="#cb9-3"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(year_signed) <span class="sc">&amp;</span> year_signed <span class="sc">!=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in nfl_playerContracts %&gt;% filter(!is.na(year_signed) &amp; year_signed != : could not find function "%&gt;%"</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>nfl_playerContracts_subset <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Jared Allen"</span>, <span class="st">"Aaron Rodgers"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player<span class="sc">:</span>years, contractYear, next_contract_start, played_in_contract_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["player"],"name":[1],"type":["chr"],"align":["left"]},{"label":["position"],"name":[2],"type":["chr"],"align":["left"]},{"label":["team"],"name":[3],"type":["chr"],"align":["left"]},{"label":["is_active"],"name":[4],"type":["lgl"],"align":["right"]},{"label":["year_signed"],"name":[5],"type":["int"],"align":["right"]},{"label":["years"],"name":[6],"type":["int"],"align":["right"]},{"label":["contractYear"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["next_contract_start"],"name":[8],"type":["int"],"align":["right"]},{"label":["played_in_contract_year"],"name":[9],"type":["lgl"],"align":["right"]}],"data":[{"1":"Aaron Rodgers","2":"QB","3":"Jets","4":"TRUE","5":"2023","6":"3","7":"2025","8":"NA","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"GB/NYJ","4":"FALSE","5":"2022","6":"5","7":"2026","8":"2023","9":"FALSE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2018","6":"4","7":"2021","8":"2022","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2013","6":"5","7":"2017","8":"2018","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2008","6":"5","7":"2012","8":"2013","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2005","6":"5","7":"2009","8":"2008","9":"FALSE"},{"1":"Jared Allen","2":"ED","3":"CHI/CAR","4":"FALSE","5":"2014","6":"3","7":"2016","8":"NA","9":"TRUE"},{"1":"Jared Allen","2":"ED","3":"Vikings","4":"FALSE","5":"2008","6":"6","7":"2013","8":"2014","9":"TRUE"},{"1":"Jared Allen","2":"ED","3":"Chiefs","4":"FALSE","5":"2007","6":"1","7":"2007","8":"2008","9":"TRUE"},{"1":"Jared Allen","2":"ED","3":"Chiefs","4":"FALSE","5":"2004","6":"3","7":"2006","8":"2007","9":"TRUE"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Determine the contract year for a given contract</span></span>
-<span id="cb11-2"><a href="#cb11-2"></a>nfl_playerContracts_subset<span class="sc">$</span>contractYear <span class="ot">&lt;-</span> nfl_playerContracts_subset<span class="sc">$</span>year_signed <span class="sc">+</span> nfl_playerContracts_subset<span class="sc">$</span>years <span class="sc">-</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'nfl_playerContracts_subset' not found</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Arrange contracts by player and year_signed</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">%&gt;%</span></span>
-<span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">group_by</span>(player, position) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-4"><a href="#cb13-4"></a>  <span class="fu">arrange</span>(player, position, <span class="sc">-</span>year_signed) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-5"><a href="#cb13-5"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in nfl_playerContracts_subset %&gt;% group_by(player, position) %&gt;% : could not find function "%&gt;%"</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># Determine if the player played in the original contract year</span></span>
-<span id="cb15-2"><a href="#cb15-2"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">%&gt;%</span></span>
-<span id="cb15-3"><a href="#cb15-3"></a>  <span class="fu">group_by</span>(player, position) <span class="sc">%&gt;%</span></span>
-<span id="cb15-4"><a href="#cb15-4"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb15-5"><a href="#cb15-5"></a>    <span class="at">next_contract_start =</span> <span class="fu">lag</span>(year_signed)) <span class="sc">%&gt;%</span></span>
-<span id="cb15-6"><a href="#cb15-6"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb15-7"><a href="#cb15-7"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb15-8"><a href="#cb15-8"></a>    <span class="at">played_in_contract_year =</span> <span class="fu">ifelse</span>(</span>
-<span id="cb15-9"><a href="#cb15-9"></a>      <span class="fu">is.na</span>(next_contract_start) <span class="sc">|</span> contractYear <span class="sc">&lt;</span> next_contract_start,</span>
-<span id="cb15-10"><a href="#cb15-10"></a>      <span class="cn">TRUE</span>,</span>
-<span id="cb15-11"><a href="#cb15-11"></a>      <span class="cn">FALSE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in nfl_playerContracts_subset %&gt;% group_by(player, position) %&gt;% : could not find function "%&gt;%"</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Merge with seasonal fantasy points data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Merge with seasonal fantasy points data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="sec-mythbustersConclusion" class="level2" data-number="15.3"><h2 data-number="15.3" class="anchored" data-anchor-id="sec-mythbustersConclusion">
@@ -418,7 +419,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </section><section id="sec-mythbustersSessionInfo" class="level2" data-number="15.4"><h2 data-number="15.4" class="anchored" data-anchor-id="sec-mythbustersSessionInfo">
 <span class="header-section-number">15.4</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
@@ -440,11 +441,21 @@ tzcode source: system (glibc)
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
+other attached packages:
+ [1] lubridate_1.9.3 forcats_1.0.0   stringr_1.5.1   dplyr_1.1.4    
+ [5] purrr_1.0.2     readr_2.1.5     tidyr_1.3.1     tibble_3.2.1   
+ [9] ggplot2_3.5.1   tidyverse_2.0.0 here_1.0.1     
+
 loaded via a namespace (and not attached):
- [1] htmlwidgets_1.6.4 compiler_4.4.1    fastmap_1.2.0     cli_3.6.3        
- [5] tools_4.4.1       htmltools_0.5.8.1 rmarkdown_2.27    knitr_1.48       
- [9] jsonlite_1.8.8    xfun_0.46         digest_0.6.36     rlang_1.1.4      
-[13] evaluate_0.24.0  </code></pre>
+ [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.1    tidyselect_1.2.1 
+ [5] scales_1.3.0      yaml_2.3.9        fastmap_1.2.0     R6_2.5.1         
+ [9] generics_0.1.3    knitr_1.48        htmlwidgets_1.6.4 munsell_0.5.1    
+[13] rprojroot_2.0.4   pillar_1.9.0      tzdb_0.4.0        rlang_1.1.4      
+[17] utf8_1.2.4        stringi_1.8.4     xfun_0.46         timechange_0.3.0 
+[21] cli_3.6.3         withr_3.0.0       magrittr_2.0.3    digest_0.6.36    
+[25] grid_4.4.1        hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5      
+[29] evaluate_0.24.0   glue_1.7.0        fansi_1.0.6       colorspace_2.1-0 
+[33] rmarkdown_2.27    tools_4.4.1       pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
 </div>
 </div>
 
