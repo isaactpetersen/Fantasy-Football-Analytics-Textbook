@@ -137,10 +137,37 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
     document.body.classList.add('hypothesis-enabled');
   });
 </script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
-<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 <meta property="og:title" content="15&nbsp; Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta property="og:description" content="">
 <meta property="og:site_name" content="Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta name="twitter:title" content="15&nbsp; Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta name="twitter:description" content="">
 <meta name="twitter:card" content="summary">
 </head>
 <body class="nav-sidebar floating">
@@ -297,7 +324,15 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
   <li><a href="#sec-mythbustersLoadData" id="toc-sec-mythbustersLoadData" class="nav-link" data-scroll-target="#sec-mythbustersLoadData"><span class="header-section-number">15.1.2</span> Load Data</a></li>
   </ul>
 </li>
-  <li><a href="#sec-contractYear" id="toc-sec-contractYear" class="nav-link" data-scroll-target="#sec-contractYear"><span class="header-section-number">15.2</span> Do Players Score More Fantasy Points in their Contract Year?</a></li>
+  <li>
+<a href="#sec-contractYear" id="toc-sec-contractYear" class="nav-link" data-scroll-target="#sec-contractYear"><span class="header-section-number">15.2</span> Do Players Perform Better in their Contract Year?</a>
+  <ul>
+<li><a href="#qb" id="toc-qb" class="nav-link" data-scroll-target="#qb"><span class="header-section-number">15.2.1</span> QB</a></li>
+  <li><a href="#rb" id="toc-rb" class="nav-link" data-scroll-target="#rb"><span class="header-section-number">15.2.2</span> RB</a></li>
+  <li><a href="#wrte" id="toc-wrte" class="nav-link" data-scroll-target="#wrte"><span class="header-section-number">15.2.3</span> WR/TE</a></li>
+  <li><a href="#qbrbwrte" id="toc-qbrbwrte" class="nav-link" data-scroll-target="#qbrbwrte"><span class="header-section-number">15.2.4</span> QB/RB/WR/TE</a></li>
+  </ul>
+</li>
   <li><a href="#sec-mythbustersConclusion" id="toc-sec-mythbustersConclusion" class="nav-link" data-scroll-target="#sec-mythbustersConclusion"><span class="header-section-number">15.3</span> Conclusion</a></li>
   <li><a href="#sec-mythbustersSessionInfo" id="toc-sec-mythbustersSessionInfo" class="nav-link" data-scroll-target="#sec-mythbustersSessionInfo"><span class="header-section-number">15.4</span> Session Info</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/mythbusters.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -351,20 +386,34 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <section id="sec-mythbustersLoadPackages" class="level3" data-number="15.1.1"><h3 data-number="15.1.1" class="anchored" data-anchor-id="sec-mythbustersLoadPackages">
 <span class="header-section-number">15.1.1</span> Load Packages</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"petersenlab"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"lme4"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"lmerTest"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="sec-mythbustersLoadData" class="level3" data-number="15.1.2"><h3 data-number="15.1.2" class="anchored" data-anchor-id="sec-mythbustersLoadData">
 <span class="header-section-number">15.1.2</span> Load Data</h3>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_playerContracts.RData"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_pbp.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_actualStats_weekly.RData"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_actualStats_seasonal.RData"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_espnQBR.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-contractYear" class="level2" data-number="15.2"><h2 data-number="15.2" class="anchored" data-anchor-id="sec-contractYear">
-<span class="header-section-number">15.2</span> Do Players Score More Fantasy Points in their Contract Year?</h2>
+<span class="header-section-number">15.2</span> Do Players Perform Better in their Contract Year?</h2>
+<p>Considerable speculation exists regarding whether players perform better in their last year of their contract (i.e., their “contract year”). Fantasy football talking heads and commentators frequently discuss the benefit of selecting players who are in their contract year, because it supposedly means that player has more motivation to perform well so they get a new contract and get paid more. To our knowledge, no peer-reviewed studies have examined this question for football players. One study found that National Basketball Association (NBA) players improved in field goal percentage, points, and player efficiency rating (but not other statistics: rebounds, assists, steals, or blocks) from their pre-contract year to their contract year, and that Major League Baseball (MLB) players improved in runs batted in (RBIs; but not other statistics: batting average, slugging percentage, on base percentage, home runs, fielding percentage) from their pre-contract year to their contract year [White2014a]. Other casual analyses have been examined contract-year performance of National Football League (NFL) players, including articles in <a href="https://www.4for4.com/2012/preseason/2012-contract-year-players-and-myth-increased-production">2012</a> (archived <a href="https://perma.cc/CT3F-QN5E">here</a>) and <a href="https://www.4for4.com/2022/preseason/do-players-perform-better-fantasy-football-contract-year">2022</a> (archived <a href="https://perma.cc/F4F5-7RQZ">here</a>).</p>
+<p>Let’s examine the question empirically. In order to do that, we have to make some assumptions/constraints. In this example, we will make the following constraints:</p>
+<ul>
+<li>We will examine seasons since 2011, beginning when most data for player contracts are available.</li>
+<li>For maximum <a href="basic-statistics.html#sec-statisticalPower">statistical power</a> to detect an effect if a contract year effect exists, we will examine all seasons for a player (since 2011), not just their contract year and their pre-contract year.</li>
+<li>To ensure a more fair, apples-to-apples comparison of the games in which players played, we will examine <em>per-game</em> performance (except for yards per carry, which is based on <span class="math inline">\(\frac{\text{rushing yards}}{\text{carries}}\)</span> from the entire season).</li>
+<li>We will examine regular season games only (no postseason).</li>
+<li>To ensure we do not make generalization about a player’s performance in a season from a small sample, the player has to play at least 5 games in a given season for that player–season combination to be included in analysis.</li>
+</ul>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Subset to remove players without a year signed</span></span>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Subset to remove players without a year signed</span></span>
 <span id="cb3-2"><a href="#cb3-2"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts <span class="sc">%&gt;%</span> </span>
 <span id="cb3-3"><a href="#cb3-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(year_signed) <span class="sc">&amp;</span> year_signed <span class="sc">!=</span> <span class="dv">0</span>)</span>
 <span id="cb3-4"><a href="#cb3-4"></a></span>
@@ -390,35 +439,431 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span id="cb3-24"><a href="#cb3-24"></a>      <span class="cn">FALSE</span>))</span>
 <span id="cb3-25"><a href="#cb3-25"></a></span>
 <span id="cb3-26"><a href="#cb3-26"></a><span class="co"># Check individual players</span></span>
-<span id="cb3-27"><a href="#cb3-27"></a>nfl_playerContracts_subset <span class="sc">%&gt;%</span> </span>
-<span id="cb3-28"><a href="#cb3-28"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player <span class="sc">==</span> <span class="st">"Aaron Rodgers"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-29"><a href="#cb3-29"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player<span class="sc">:</span>years, contractYear, next_contract_start, played_in_contract_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output-display">
-<div data-pagedtable="false">
-  <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["player"],"name":[1],"type":["chr"],"align":["left"]},{"label":["position"],"name":[2],"type":["chr"],"align":["left"]},{"label":["team"],"name":[3],"type":["chr"],"align":["left"]},{"label":["is_active"],"name":[4],"type":["lgl"],"align":["right"]},{"label":["year_signed"],"name":[5],"type":["int"],"align":["right"]},{"label":["years"],"name":[6],"type":["int"],"align":["right"]},{"label":["contractYear"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["next_contract_start"],"name":[8],"type":["int"],"align":["right"]},{"label":["played_in_contract_year"],"name":[9],"type":["lgl"],"align":["right"]}],"data":[{"1":"Aaron Rodgers","2":"QB","3":"Jets","4":"TRUE","5":"2023","6":"3","7":"2025","8":"NA","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"GB/NYJ","4":"FALSE","5":"2022","6":"5","7":"2026","8":"2023","9":"FALSE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2018","6":"4","7":"2021","8":"2022","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2013","6":"5","7":"2017","8":"2018","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2008","6":"5","7":"2012","8":"2013","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2005","6":"5","7":"2009","8":"2008","9":"FALSE"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>nfl_playerContracts_subset <span class="sc">%&gt;%</span> </span>
-<span id="cb4-2"><a href="#cb4-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Jared Allen"</span>, <span class="st">"Aaron Rodgers"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-3"><a href="#cb4-3"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player<span class="sc">:</span>years, contractYear, next_contract_start, played_in_contract_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output-display">
-<div data-pagedtable="false">
-  <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["player"],"name":[1],"type":["chr"],"align":["left"]},{"label":["position"],"name":[2],"type":["chr"],"align":["left"]},{"label":["team"],"name":[3],"type":["chr"],"align":["left"]},{"label":["is_active"],"name":[4],"type":["lgl"],"align":["right"]},{"label":["year_signed"],"name":[5],"type":["int"],"align":["right"]},{"label":["years"],"name":[6],"type":["int"],"align":["right"]},{"label":["contractYear"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["next_contract_start"],"name":[8],"type":["int"],"align":["right"]},{"label":["played_in_contract_year"],"name":[9],"type":["lgl"],"align":["right"]}],"data":[{"1":"Aaron Rodgers","2":"QB","3":"Jets","4":"TRUE","5":"2023","6":"3","7":"2025","8":"NA","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"GB/NYJ","4":"FALSE","5":"2022","6":"5","7":"2026","8":"2023","9":"FALSE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2018","6":"4","7":"2021","8":"2022","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2013","6":"5","7":"2017","8":"2018","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2008","6":"5","7":"2012","8":"2013","9":"TRUE"},{"1":"Aaron Rodgers","2":"QB","3":"Packers","4":"FALSE","5":"2005","6":"5","7":"2009","8":"2008","9":"FALSE"},{"1":"Jared Allen","2":"ED","3":"CHI/CAR","4":"FALSE","5":"2014","6":"3","7":"2016","8":"NA","9":"TRUE"},{"1":"Jared Allen","2":"ED","3":"Vikings","4":"FALSE","5":"2008","6":"6","7":"2013","8":"2014","9":"TRUE"},{"1":"Jared Allen","2":"ED","3":"Chiefs","4":"FALSE","5":"2007","6":"1","7":"2007","8":"2008","9":"TRUE"},{"1":"Jared Allen","2":"ED","3":"Chiefs","4":"FALSE","5":"2004","6":"3","7":"2006","8":"2007","9":"TRUE"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Merge with seasonal fantasy points data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-27"><a href="#cb3-27"></a><span class="co">#nfl_playerContracts_subset %&gt;% </span></span>
+<span id="cb3-28"><a href="#cb3-28"></a><span class="co">#  dplyr::filter(player == "Aaron Rodgers") %&gt;% </span></span>
+<span id="cb3-29"><a href="#cb3-29"></a><span class="co">#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)</span></span>
+<span id="cb3-30"><a href="#cb3-30"></a><span class="co">#</span></span>
+<span id="cb3-31"><a href="#cb3-31"></a><span class="co">#nfl_playerContracts_subset %&gt;% </span></span>
+<span id="cb3-32"><a href="#cb3-32"></a><span class="co">#  dplyr::filter(player %in% c("Jared Allen", "Aaron Rodgers")) %&gt;% </span></span>
+<span id="cb3-33"><a href="#cb3-33"></a><span class="co">#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)</span></span>
+<span id="cb3-34"><a href="#cb3-34"></a></span>
+<span id="cb3-35"><a href="#cb3-35"></a><span class="co"># Subset data</span></span>
+<span id="cb3-36"><a href="#cb3-36"></a>nfl_playerContractYears <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">%&gt;%</span> </span>
+<span id="cb3-37"><a href="#cb3-37"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(played_in_contract_year <span class="sc">==</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-38"><a href="#cb3-38"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-39"><a href="#cb3-39"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player, position, team, contractYear) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-40"><a href="#cb3-40"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">playerMerge =</span> <span class="fu">toupper</span>(<span class="fu">str_replace_all</span>(player, <span class="st">"[[:punct:]]"</span>, <span class="st">""</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-41"><a href="#cb3-41"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">season =</span> contractYear) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-42"><a href="#cb3-42"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">contractYear =</span> <span class="dv">1</span>)</span>
+<span id="cb3-43"><a href="#cb3-43"></a></span>
+<span id="cb3-44"><a href="#cb3-44"></a><span class="co"># Merge with weekly and seasonal stats data</span></span>
+<span id="cb3-45"><a href="#cb3-45"></a>nfl_actualStats_offense_weekly <span class="ot">&lt;-</span> nfl_actualStats_offense_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb3-46"><a href="#cb3-46"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">playerMerge =</span> <span class="fu">toupper</span>(<span class="fu">str_replace_all</span>(player_display_name, <span class="st">"[[:punct:]]"</span>, <span class="st">""</span>)))</span>
+<span id="cb3-47"><a href="#cb3-47"></a><span class="co">#nfl_actualStats_offense_seasonal &lt;- nfl_actualStats_offense_seasonal %&gt;% </span></span>
+<span id="cb3-48"><a href="#cb3-48"></a><span class="co">#  mutate(playerMerge = toupper(str_replace_all(player_display_name, "[[:punct:]]", "")))</span></span>
+<span id="cb3-49"><a href="#cb3-49"></a></span>
+<span id="cb3-50"><a href="#cb3-50"></a>nfl_actualStatsContracts_offense_weekly <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb3-51"><a href="#cb3-51"></a>  nfl_actualStats_offense_weekly,</span>
+<span id="cb3-52"><a href="#cb3-52"></a>  nfl_playerContractYears,</span>
+<span id="cb3-53"><a href="#cb3-53"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"playerMerge"</span>, <span class="st">"position_group"</span> <span class="ot">=</span> <span class="st">"position"</span>, <span class="st">"season"</span>)</span>
+<span id="cb3-54"><a href="#cb3-54"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-55"><a href="#cb3-55"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>))</span>
+<span id="cb3-56"><a href="#cb3-56"></a></span>
+<span id="cb3-57"><a href="#cb3-57"></a><span class="co">#nfl_actualStatsContracts_offense_seasonal &lt;- full_join(</span></span>
+<span id="cb3-58"><a href="#cb3-58"></a><span class="co">#  nfl_actualStats_offense_seasonal,</span></span>
+<span id="cb3-59"><a href="#cb3-59"></a><span class="co">#  nfl_playerContractYears,</span></span>
+<span id="cb3-60"><a href="#cb3-60"></a><span class="co">#  by = c("playerMerge", "position_group" = "position", "season")</span></span>
+<span id="cb3-61"><a href="#cb3-61"></a><span class="co">#) %&gt;% </span></span>
+<span id="cb3-62"><a href="#cb3-62"></a><span class="co">#  filter(position_group %in% c("QB","RB","WR","TE"))</span></span>
+<span id="cb3-63"><a href="#cb3-63"></a></span>
+<span id="cb3-64"><a href="#cb3-64"></a>nfl_actualStatsContracts_offense_weekly<span class="sc">$</span>contractYear[<span class="fu">which</span>(<span class="fu">is.na</span>(nfl_actualStatsContracts_offense_weekly<span class="sc">$</span>contractYear))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-65"><a href="#cb3-65"></a><span class="co">#nfl_actualStatsContracts_offense_seasonal$contractYear[which(is.na(nfl_actualStatsContracts_offense_seasonal$contractYear))] &lt;- 0</span></span>
+<span id="cb3-66"><a href="#cb3-66"></a></span>
+<span id="cb3-67"><a href="#cb3-67"></a>nfl_actualStatsContracts_offense_weekly <span class="ot">&lt;-</span> nfl_actualStatsContracts_offense_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb3-68"><a href="#cb3-68"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(playerMerge, season, season_type, week)</span>
+<span id="cb3-69"><a href="#cb3-69"></a></span>
+<span id="cb3-70"><a href="#cb3-70"></a><span class="co">#nfl_actualStatsContracts_offense_seasonal &lt;- nfl_actualStatsContracts_offense_seasonal %&gt;% </span></span>
+<span id="cb3-71"><a href="#cb3-71"></a><span class="co">#  arrange(playerMerge, season)</span></span>
+<span id="cb3-72"><a href="#cb3-72"></a></span>
+<span id="cb3-73"><a href="#cb3-73"></a>nfl_actualStatsContractsSubset_offense_weekly <span class="ot">&lt;-</span> nfl_actualStatsContracts_offense_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb3-74"><a href="#cb3-74"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"REG"</span>)</span>
+<span id="cb3-75"><a href="#cb3-75"></a></span>
+<span id="cb3-76"><a href="#cb3-76"></a><span class="co">#table(nfl_playerContracts$year_signed) # most contract data is available beginning in 2011</span></span>
+<span id="cb3-77"><a href="#cb3-77"></a></span>
+<span id="cb3-78"><a href="#cb3-78"></a><span class="co"># Calculate Per Game Totals</span></span>
+<span id="cb3-79"><a href="#cb3-79"></a>nfl_actualStatsContracts_seasonal <span class="ot">&lt;-</span> nfl_actualStatsContractsSubset_offense_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb3-80"><a href="#cb3-80"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(playerMerge, season) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-81"><a href="#cb3-81"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb3-82"><a href="#cb3-82"></a>    <span class="at">position_group =</span> petersenlab<span class="sc">::</span><span class="fu">Mode</span>(position_group),</span>
+<span id="cb3-83"><a href="#cb3-83"></a>    <span class="at">rushing_yards =</span> <span class="fu">sum</span>(rushing_yards, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb3-84"><a href="#cb3-84"></a>    <span class="at">carries =</span> <span class="fu">sum</span>(carries, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb3-85"><a href="#cb3-85"></a>    <span class="at">rushing_epa =</span> <span class="fu">mean</span>(rushing_epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-86"><a href="#cb3-86"></a>    <span class="at">receiving_yards =</span> <span class="fu">mean</span>(receiving_yards, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-87"><a href="#cb3-87"></a>    <span class="at">receiving_epa =</span> <span class="fu">mean</span>(receiving_epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-88"><a href="#cb3-88"></a>    <span class="at">contractYear =</span> <span class="fu">mean</span>(contractYear, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-89"><a href="#cb3-89"></a>    <span class="at">games =</span> <span class="fu">n</span>(),</span>
+<span id="cb3-90"><a href="#cb3-90"></a>    <span class="at">.groups =</span> <span class="st">"drop_last"</span></span>
+<span id="cb3-91"><a href="#cb3-91"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-92"><a href="#cb3-92"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">ypc =</span> rushing_yards <span class="sc">/</span> carries)</span>
+<span id="cb3-93"><a href="#cb3-93"></a></span>
+<span id="cb3-94"><a href="#cb3-94"></a><span class="co"># Merge with seasonal fantasy points data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-</section><section id="sec-mythbustersConclusion" class="level2" data-number="15.3"><h2 data-number="15.3" class="anchored" data-anchor-id="sec-mythbustersConclusion">
+<section id="qb" class="level3" data-number="15.2.1"><h3 data-number="15.2.1" class="anchored" data-anchor-id="qb">
+<span class="header-section-number">15.2.1</span> QB</h3>
+<p>First, we prepare the data by merging and performing additional processing:</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Merge with QBR data</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>nfl_espnQBR<span class="sc">$</span>playerMerge <span class="ot">&lt;-</span> <span class="fu">paste</span>(nfl_espnQBR<span class="sc">$</span>name_first, nfl_espnQBR<span class="sc">$</span>name_last, <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3"></a>  stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(., <span class="st">"[[:punct:]]"</span>, <span class="st">""</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">toupper</span>()</span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_playerContractYears <span class="sc">%&gt;%</span> </span>
+<span id="cb4-7"><a href="#cb4-7"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb4-9"><a href="#cb4-9"></a>    .,</span>
+<span id="cb4-10"><a href="#cb4-10"></a>    nfl_espnQBR,</span>
+<span id="cb4-11"><a href="#cb4-11"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"playerMerge"</span>,<span class="st">"team"</span>,<span class="st">"season"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12"></a>  )</span>
+<span id="cb4-13"><a href="#cb4-13"></a></span>
+<span id="cb4-14"><a href="#cb4-14"></a>nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear[<span class="fu">which</span>(<span class="fu">is.na</span>(nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a></span>
+<span id="cb4-16"><a href="#cb4-16"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb4-17"><a href="#cb4-17"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(playerMerge, season, season_type, game_week)</span>
+<span id="cb4-18"><a href="#cb4-18"></a></span>
+<span id="cb4-19"><a href="#cb4-19"></a>nfl_contractYearQBRsubset_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb4-20"><a href="#cb4-20"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb4-21"><a href="#cb4-21"></a>    season_type <span class="sc">==</span> <span class="st">"Regular"</span>,</span>
+<span id="cb4-22"><a href="#cb4-22"></a>    game_week <span class="sc">!=</span> <span class="st">"Season Total"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-23"><a href="#cb4-23"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">game_week =</span> <span class="fu">as.numeric</span>(game_week)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-24"><a href="#cb4-24"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(playerMerge, season, season_type, game_week)</span>
+<span id="cb4-25"><a href="#cb4-25"></a></span>
+<span id="cb4-26"><a href="#cb4-26"></a><span class="co">#hist(nfl_contractYearQBRsubset_weekly$qb_plays) # players have at least 20 dropbacks per game</span></span>
+<span id="cb4-27"><a href="#cb4-27"></a></span>
+<span id="cb4-28"><a href="#cb4-28"></a><span class="co"># Calculate Per Game Totals</span></span>
+<span id="cb4-29"><a href="#cb4-29"></a>nfl_contractYearQBR_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBRsubset_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb4-30"><a href="#cb4-30"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(playerMerge, season) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-31"><a href="#cb4-31"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb4-32"><a href="#cb4-32"></a>    <span class="at">qbr =</span> <span class="fu">mean</span>(qbr_total, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-33"><a href="#cb4-33"></a>    <span class="at">pts_added =</span> <span class="fu">mean</span>(pts_added, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-34"><a href="#cb4-34"></a>    <span class="at">epa_pass =</span> <span class="fu">mean</span>(pass, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-35"><a href="#cb4-35"></a>    <span class="at">qb_plays =</span> <span class="fu">sum</span>(qb_plays, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb4-36"><a href="#cb4-36"></a>    <span class="at">contractYear =</span> <span class="fu">mean</span>(contractYear, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-37"><a href="#cb4-37"></a>    <span class="at">games =</span> <span class="fu">n</span>(),</span>
+<span id="cb4-38"><a href="#cb4-38"></a>    <span class="at">.groups =</span> <span class="st">"drop_last"</span></span>
+<span id="cb4-39"><a href="#cb4-39"></a>  )</span>
+<span id="cb4-40"><a href="#cb4-40"></a></span>
+<span id="cb4-41"><a href="#cb4-41"></a>nfl_contractYearQBRsubset_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb4-42"><a href="#cb4-42"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb4-43"><a href="#cb4-43"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
+<span id="cb4-44"><a href="#cb4-44"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Then, we analyze the data. Below is a mixed model that examines whether a player has a higher QBR per game when they are in a contract year compared to when they are not in a contract year.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>mixedModel_qbr <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
+<span id="cb5-2"><a href="#cb5-2"></a>  qbr <span class="sc">~</span> contractYear <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> playerMerge),</span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal</span>
+<span id="cb5-4"><a href="#cb5-4"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="fu">summary</span>(mixedModel_qbr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: qbr ~ contractYear + (1 | playerMerge)
+   Data: nfl_contractYearQBR_seasonal
+
+REML criterion at convergence: 8905.6
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.2329 -0.5456  0.0896  0.5713  3.2440 
+
+Random effects:
+ Groups      Name        Variance Std.Dev.
+ playerMerge (Intercept) 111.6    10.56   
+ Residual                198.5    14.09   
+Number of obs: 1063, groups:  playerMerge, 253
+
+Fixed effects:
+             Estimate Std. Error       df t value Pr(&gt;|t|)    
+(Intercept)   44.3390     0.8730 229.8416  50.789   &lt;2e-16 ***
+contractYear  -0.3597     1.2223 953.3947  -0.294    0.769    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr)
+contractYer -0.237</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>mixedModel_ptsAdded <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
+<span id="cb7-2"><a href="#cb7-2"></a>  pts_added <span class="sc">~</span> contractYear <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> playerMerge),</span>
+<span id="cb7-3"><a href="#cb7-3"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal</span>
+<span id="cb7-4"><a href="#cb7-4"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5"></a></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="fu">summary</span>(mixedModel_ptsAdded)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: pts_added ~ contractYear + (1 | playerMerge)
+   Data: nfl_contractYearQBR_seasonal
+
+REML criterion at convergence: 4855.5
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.6918 -0.4922  0.0889  0.5347  4.4230 
+
+Random effects:
+ Groups      Name        Variance Std.Dev.
+ playerMerge (Intercept) 2.570    1.603   
+ Residual                4.331    2.081   
+Number of obs: 1063, groups:  playerMerge, 253
+
+Fixed effects:
+             Estimate Std. Error       df t value Pr(&gt;|t|)    
+(Intercept)   -0.8463     0.1311 218.4369  -6.453 6.97e-10 ***
+contractYear  -0.1217     0.1808 942.5385  -0.673    0.501    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr)
+contractYer -0.233</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>mixedModel_epaPass <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
+<span id="cb9-2"><a href="#cb9-2"></a>  epa_pass <span class="sc">~</span> contractYear <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> playerMerge),</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal</span>
+<span id="cb9-4"><a href="#cb9-4"></a>)</span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="fu">summary</span>(mixedModel_epaPass)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: epa_pass ~ contractYear + (1 | playerMerge)
+   Data: nfl_contractYearQBR_seasonal
+
+REML criterion at convergence: 4535.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0103 -0.5190  0.0374  0.5646  4.3622 
+
+Random effects:
+ Groups      Name        Variance Std.Dev.
+ playerMerge (Intercept) 2.462    1.569   
+ Residual                3.053    1.747   
+Number of obs: 1063, groups:  playerMerge, 253
+
+Fixed effects:
+             Estimate Std. Error       df t value Pr(&gt;|t|)    
+(Intercept)    1.0830     0.1219 238.3990   8.885   &lt;2e-16 ***
+contractYear   0.3796     0.1532 930.4435   2.478   0.0134 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr)
+contractYer -0.211</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Placeholder for model predicting fantasy points</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="rb" class="level3" data-number="15.2.2"><h3 data-number="15.2.2" class="anchored" data-anchor-id="rb">
+<span class="header-section-number">15.2.2</span> RB</h3>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>nfl_actualStatsContractsRB_seasonal <span class="ot">&lt;-</span> nfl_actualStatsContracts_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb12-3"><a href="#cb12-3"></a>    position_group <span class="sc">==</span> <span class="st">"RB"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>mixedModel_ypc <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
+<span id="cb13-2"><a href="#cb13-2"></a>  ypc <span class="sc">~</span> contractYear <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> playerMerge),</span>
+<span id="cb13-3"><a href="#cb13-3"></a>  <span class="at">data =</span> nfl_actualStatsContractsRB_seasonal</span>
+<span id="cb13-4"><a href="#cb13-4"></a>)</span>
+<span id="cb13-5"><a href="#cb13-5"></a></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="fu">summary</span>(mixedModel_ypc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: ypc ~ contractYear + (1 | playerMerge)
+   Data: nfl_actualStatsContractsRB_seasonal
+
+REML criterion at convergence: 4820.7
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.8762 -0.4616  0.0099  0.4832  6.4885 
+
+Random effects:
+ Groups      Name        Variance Std.Dev.
+ playerMerge (Intercept) 0.3907   0.6251  
+ Residual                1.1421   1.0687  
+Number of obs: 1512, groups:  playerMerge, 482
+
+Fixed effects:
+              Estimate Std. Error        df t value Pr(&gt;|t|)    
+(Intercept)  3.908e+00  4.473e-02 4.807e+02  87.371   &lt;2e-16 ***
+contractYear 6.493e-02  7.025e-02 1.423e+03   0.924    0.356    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr)
+contractYer -0.346</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>mixedModel_epaRush <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
+<span id="cb15-2"><a href="#cb15-2"></a>  rushing_epa <span class="sc">~</span> contractYear <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> playerMerge),</span>
+<span id="cb15-3"><a href="#cb15-3"></a>  <span class="at">data =</span> nfl_actualStatsContractsRB_seasonal</span>
+<span id="cb15-4"><a href="#cb15-4"></a>)</span>
+<span id="cb15-5"><a href="#cb15-5"></a></span>
+<span id="cb15-6"><a href="#cb15-6"></a><span class="fu">summary</span>(mixedModel_epaRush)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: rushing_epa ~ contractYear + (1 | playerMerge)
+   Data: nfl_actualStatsContractsRB_seasonal
+
+REML criterion at convergence: 4286.1
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.6918 -0.5180  0.0878  0.6132  3.4724 
+
+Random effects:
+ Groups      Name        Variance Std.Dev.
+ playerMerge (Intercept) 0.1029   0.3208  
+ Residual                0.9048   0.9512  
+Number of obs: 1512, groups:  playerMerge, 482
+
+Fixed effects:
+               Estimate Std. Error         df t value Pr(&gt;|t|)    
+(Intercept)    -0.65727    0.03290  571.69610 -19.979   &lt;2e-16 ***
+contractYear    0.04921    0.05963 1508.66760   0.825    0.409    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr)
+contractYer -0.424</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Placeholder for model predicting fantasy points</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="wrte" class="level3" data-number="15.2.3"><h3 data-number="15.2.3" class="anchored" data-anchor-id="wrte">
+<span class="header-section-number">15.2.3</span> WR/TE</h3>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>nfl_actualStatsContractsWRTE_seasonal <span class="ot">&lt;-</span> nfl_actualStatsContracts_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb18-2"><a href="#cb18-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb18-3"><a href="#cb18-3"></a>    position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>,<span class="st">"TE"</span>),</span>
+<span id="cb18-4"><a href="#cb18-4"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>mixedModel_receivingYards <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
+<span id="cb19-2"><a href="#cb19-2"></a>  receiving_yards <span class="sc">~</span> contractYear <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> playerMerge),</span>
+<span id="cb19-3"><a href="#cb19-3"></a>  <span class="at">data =</span> nfl_actualStatsContractsWRTE_seasonal</span>
+<span id="cb19-4"><a href="#cb19-4"></a>)</span>
+<span id="cb19-5"><a href="#cb19-5"></a></span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="fu">summary</span>(mixedModel_receivingYards)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: receiving_yards ~ contractYear + (1 | playerMerge)
+   Data: nfl_actualStatsContractsWRTE_seasonal
+
+REML criterion at convergence: 27037
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.7767 -0.5662 -0.0859  0.5273  4.4992 
+
+Random effects:
+ Groups      Name        Variance Std.Dev.
+ playerMerge (Intercept) 233.6    15.28   
+ Residual                190.6    13.81   
+Number of obs: 3173, groups:  playerMerge, 931
+
+Fixed effects:
+              Estimate Std. Error        df t value Pr(&gt;|t|)    
+(Intercept)    29.2139     0.6025 1132.0364  48.491  &lt; 2e-16 ***
+contractYear   -3.6313     0.6375 2743.9390  -5.696 1.36e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr)
+contractYer -0.246</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>mixedModel_epaReceiving <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
+<span id="cb21-2"><a href="#cb21-2"></a>  receiving_epa <span class="sc">~</span> contractYear <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> playerMerge),</span>
+<span id="cb21-3"><a href="#cb21-3"></a>  <span class="at">data =</span> nfl_actualStatsContractsWRTE_seasonal</span>
+<span id="cb21-4"><a href="#cb21-4"></a>)</span>
+<span id="cb21-5"><a href="#cb21-5"></a></span>
+<span id="cb21-6"><a href="#cb21-6"></a><span class="fu">summary</span>(mixedModel_epaReceiving)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: receiving_epa ~ contractYear + (1 | playerMerge)
+   Data: nfl_actualStatsContractsWRTE_seasonal
+
+REML criterion at convergence: 10518.4
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.1612 -0.5784 -0.0612  0.5305  3.9497 
+
+Random effects:
+ Groups      Name        Variance Std.Dev.
+ playerMerge (Intercept) 0.5217   0.7223  
+ Residual                1.2782   1.1306  
+Number of obs: 3171, groups:  playerMerge, 931
+
+Fixed effects:
+               Estimate Std. Error         df t value Pr(&gt;|t|)    
+(Intercept)     0.71368    0.03529 1251.15888  20.221   &lt;2e-16 ***
+contractYear   -0.10818    0.04995 3022.81977  -2.166   0.0304 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr)
+contractYer -0.346</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># Placeholder for model predicting fantasy points</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="qbrbwrte" class="level3" data-number="15.2.4"><h3 data-number="15.2.4" class="anchored" data-anchor-id="qbrbwrte">
+<span class="header-section-number">15.2.4</span> QB/RB/WR/TE</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="co"># Placeholder for model predicting fantasy points</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="co"># Include player position as a covariate</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="sec-mythbustersConclusion" class="level2" data-number="15.3"><h2 data-number="15.3" class="anchored" data-anchor-id="sec-mythbustersConclusion">
 <span class="header-section-number">15.3</span> Conclusion</h2>
 </section><section id="sec-mythbustersSessionInfo" class="level2" data-number="15.4"><h2 data-number="15.4" class="anchored" data-anchor-id="sec-mythbustersSessionInfo">
 <span class="header-section-number">15.4</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
@@ -441,20 +886,37 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] lubridate_1.9.3 forcats_1.0.0   stringr_1.5.1   dplyr_1.1.4    
- [5] purrr_1.0.2     readr_2.1.5     tidyr_1.3.1     tibble_3.2.1   
- [9] ggplot2_3.5.1   tidyverse_2.0.0
+ [1] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
+ [5] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
+ [9] ggplot2_3.5.1     tidyverse_2.0.0   lmerTest_3.1-3    lme4_1.1-35.5    
+[13] Matrix_1.7-0      petersenlab_1.0.3
 
 loaded via a namespace (and not attached):
- [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.1    tidyselect_1.2.1 
- [5] scales_1.3.0      yaml_2.3.9        fastmap_1.2.0     R6_2.5.1         
- [9] generics_0.1.3    knitr_1.48        htmlwidgets_1.6.4 munsell_0.5.1    
-[13] pillar_1.9.0      tzdb_0.4.0        rlang_1.1.4       utf8_1.2.4       
-[17] stringi_1.8.4     xfun_0.46         timechange_0.3.0  cli_3.6.3        
-[21] withr_3.0.0       magrittr_2.0.3    digest_0.6.36     grid_4.4.1       
-[25] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.24.0  
-[29] glue_1.7.0        fansi_1.0.6       colorspace_2.1-0  rmarkdown_2.27   
-[33] tools_4.4.1       pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
+ [1] tidyselect_1.2.1    psych_2.4.6.26      viridisLite_0.4.2  
+ [4] fastmap_1.2.0       digest_0.6.36       rpart_4.1.23       
+ [7] timechange_0.3.0    lifecycle_1.0.4     cluster_2.1.6      
+[10] magrittr_2.0.3      compiler_4.4.1      rlang_1.1.4        
+[13] Hmisc_5.1-3         tools_4.4.1         utf8_1.2.4         
+[16] yaml_2.3.9          data.table_1.15.4   knitr_1.48         
+[19] htmlwidgets_1.6.4   mnormt_2.1.1        plyr_1.8.9         
+[22] RColorBrewer_1.1-3  foreign_0.8-86      withr_3.0.0        
+[25] numDeriv_2016.8-1.1 nnet_7.3-19         grid_4.4.1         
+[28] stats4_4.4.1        fansi_1.0.6         lavaan_0.6-18      
+[31] xtable_1.8-4        colorspace_2.1-0    scales_1.3.0       
+[34] MASS_7.3-60.2       cli_3.6.3           mvtnorm_1.2-5      
+[37] rmarkdown_2.27      generics_0.1.3      rstudioapi_0.16.0  
+[40] reshape2_1.4.4      tzdb_0.4.0          minqa_1.2.7        
+[43] DBI_1.2.3           splines_4.4.1       parallel_4.4.1     
+[46] base64enc_0.1-3     mitools_2.4         vctrs_0.6.5        
+[49] boot_1.3-30         jsonlite_1.8.8      hms_1.1.3          
+[52] Formula_1.2-5       htmlTable_2.4.2     glue_1.7.0         
+[55] nloptr_2.1.1        stringi_1.8.4       gtable_0.3.5       
+[58] quadprog_1.5-8      munsell_0.5.1       pillar_1.9.0       
+[61] htmltools_0.5.8.1   R6_2.5.1            mix_1.0-12         
+[64] evaluate_0.24.0     pbivnorm_0.6.0      lattice_0.22-6     
+[67] backports_1.5.0     Rcpp_1.0.13         gridExtra_2.3      
+[70] nlme_3.1-164        checkmate_2.3.1     xfun_0.46          
+[73] pkgconfig_2.0.3    </code></pre>
 </div>
 </div>
 
