@@ -148,8 +148,9 @@ nfl_actualStatsContractsSubset_offense_weekly <- nfl_actualStatsContracts_offens
 
 # Calculate Per Game Totals
 nfl_actualStatsContracts_seasonal <- nfl_actualStatsContractsSubset_offense_weekly %>% 
-  dplyr::group_by(playerMerge, season) %>% 
+  dplyr::group_by(player_id, season) %>% 
   dplyr::summarise(
+    player_display_name = petersenlab::Mode(player_display_name),
     position_group = petersenlab::Mode(position_group),
     rushing_yards = sum(rushing_yards, na.rm = TRUE), # season total
     carries = sum(carries, na.rm = TRUE), # season total
@@ -161,6 +162,7 @@ nfl_actualStatsContracts_seasonal <- nfl_actualStatsContractsSubset_offense_week
     .groups = "drop_last"
   ) %>% 
   dplyr::mutate(
+    player_id = as.factor(player_id),
     ypc = rushing_yards / carries,
     contractYear = factor(
       contractYear,
@@ -228,6 +230,10 @@ nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>%
       labels = c("no", "yes")
     ))
 
+nfl_contractYearQBR_seasonal <- nfl_contractYearQBR_seasonal %>% 
+  group_by(playerMerge) %>%
+  mutate(player_id = as.factor(as.character(cur_group_id())))
+
 nfl_contractYearQBRsubset_seasonal <- nfl_contractYearQBR_seasonal %>% 
   dplyr::filter(
     games >= 5, # keep only player-season combinations in which QBs played at least 5 games
@@ -239,7 +245,7 @@ Below is a mixed model that examines whether a player has a higher QBR per game 
 
 ```{r}
 mixedModel_qbr <- lmerTest::lmer(
-  qbr ~ contractYear + (1 | playerMerge),
+  qbr ~ contractYear + (1 | player_id),
   data = nfl_contractYearQBR_seasonal
 )
 
@@ -250,7 +256,7 @@ emmeans::emmeans(mixedModel_qbr, "contractYear")
 
 ```{r}
 mixedModel_ptsAdded <- lmerTest::lmer(
-  pts_added ~ contractYear + (1 | playerMerge),
+  pts_added ~ contractYear + (1 | player_id),
   data = nfl_contractYearQBR_seasonal
 )
 
@@ -261,7 +267,7 @@ emmeans::emmeans(mixedModel_ptsAdded, "contractYear")
 
 ```{r}
 mixedModel_epaPass <- lmerTest::lmer(
-  epa_pass ~ contractYear + (1 | playerMerge),
+  epa_pass ~ contractYear + (1 | player_id),
   data = nfl_contractYearQBR_seasonal
 )
 
@@ -288,7 +294,7 @@ nfl_actualStatsContractsRB_seasonal <- nfl_actualStatsContracts_seasonal %>%
 
 ```{r}
 mixedModel_ypc <- lmerTest::lmer(
-  ypc ~ contractYear + (1 | playerMerge),
+  ypc ~ contractYear + (1 | player_id),
   data = nfl_actualStatsContractsRB_seasonal
 )
 
@@ -299,7 +305,7 @@ emmeans::emmeans(mixedModel_ypc, "contractYear")
 
 ```{r}
 mixedModel_epaRush <- lmerTest::lmer(
-  rushing_epa ~ contractYear + (1 | playerMerge),
+  rushing_epa ~ contractYear + (1 | player_id),
   data = nfl_actualStatsContractsRB_seasonal
 )
 
@@ -326,7 +332,7 @@ nfl_actualStatsContractsWRTE_seasonal <- nfl_actualStatsContracts_seasonal %>%
 
 ```{r}
 mixedModel_receivingYards <- lmerTest::lmer(
-  receiving_yards ~ contractYear + (1 | playerMerge),
+  receiving_yards ~ contractYear + (1 | player_id),
   data = nfl_actualStatsContractsWRTE_seasonal
 )
 
@@ -337,7 +343,7 @@ emmeans::emmeans(mixedModel_receivingYards, "contractYear")
 
 ```{r}
 mixedModel_epaReceiving <- lmerTest::lmer(
-  receiving_epa ~ contractYear + (1 | playerMerge),
+  receiving_epa ~ contractYear + (1 | player_id),
   data = nfl_actualStatsContractsWRTE_seasonal
 )
 
