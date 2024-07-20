@@ -5,6 +5,9 @@
 ### Load Packages {#sec-mythbustersLoadPackages}
 
 ```{r}
+library("petersenlab")
+library("lme4")
+library("lmerTest")
 library("tidyverse")
 ```
 
@@ -12,19 +15,16 @@ library("tidyverse")
 
 ```{r}
 load(file = "./data/nfl_playerContracts.RData")
-load(file = "./data/nfl_pbp.RData")
+load(file = "./data/nfl_actualStats_weekly.RData")
+load(file = "./data/nfl_actualStats_seasonal.RData")
+load(file = "./data/nfl_espnQBR.RData")
 ```
 
-```{r}
-#| eval: false
-#| include: false
-
-load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
-```
-
-## Do Players Score More Fantasy Points in their Contract Year? {#sec-contractYear}
+## Do Players Perform Better in their Contract Year? {#sec-contractYear}
 
 ```{r}
+#| code-fold: true
+
 # Subset to remove players without a year signed
 nfl_playerContracts_subset <- nfl_playerContracts %>% 
   dplyr::filter(!is.na(year_signed) & year_signed != 0)
@@ -51,15 +51,230 @@ nfl_playerContracts_subset <- nfl_playerContracts_subset %>%
       FALSE))
 
 # Check individual players
-nfl_playerContracts_subset %>% 
-  dplyr::filter(player == "Aaron Rodgers") %>% 
-  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)
+#nfl_playerContracts_subset %>% 
+#  dplyr::filter(player == "Aaron Rodgers") %>% 
+#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)
+#
+#nfl_playerContracts_subset %>% 
+#  dplyr::filter(player %in% c("Jared Allen", "Aaron Rodgers")) %>% 
+#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)
 
-nfl_playerContracts_subset %>% 
-  dplyr::filter(player %in% c("Jared Allen", "Aaron Rodgers")) %>% 
-  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)
+# Subset data
+nfl_playerContractYears <- nfl_playerContracts_subset %>% 
+  dplyr::filter(played_in_contract_year == TRUE) %>% 
+  dplyr::filter(position %in% c("QB","RB","WR","TE")) %>% 
+  dplyr::select(player, position, team, contractYear) %>% 
+  dplyr::mutate(playerMerge = toupper(str_replace_all(player, "[[:punct:]]", ""))) %>% 
+  dplyr::rename(season = contractYear) %>% 
+  dplyr::mutate(contractYear = 1)
+
+# Merge with weekly and seasonal stats data
+nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly %>% 
+  dplyr::mutate(playerMerge = toupper(str_replace_all(player_display_name, "[[:punct:]]", "")))
+#nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal %>% 
+#  mutate(playerMerge = toupper(str_replace_all(player_display_name, "[[:punct:]]", "")))
+
+nfl_actualStatsContracts_offense_weekly <- dplyr::full_join(
+  nfl_actualStats_offense_weekly,
+  nfl_playerContractYears,
+  by = c("playerMerge", "position_group" = "position", "season")
+) %>% 
+  dplyr::filter(position_group %in% c("QB","RB","WR","TE"))
+
+#nfl_actualStatsContracts_offense_seasonal <- full_join(
+#  nfl_actualStats_offense_seasonal,
+#  nfl_playerContractYears,
+#  by = c("playerMerge", "position_group" = "position", "season")
+#) %>% 
+#  filter(position_group %in% c("QB","RB","WR","TE"))
+
+nfl_actualStatsContracts_offense_weekly$contractYear[which(is.na(nfl_actualStatsContracts_offense_weekly$contractYear))] <- 0
+#nfl_actualStatsContracts_offense_seasonal$contractYear[which(is.na(nfl_actualStatsContracts_offense_seasonal$contractYear))] <- 0
+
+nfl_actualStatsContracts_offense_weekly <- nfl_actualStatsContracts_offense_weekly %>% 
+  dplyr::arrange(playerMerge, season, season_type, week)
+
+#nfl_actualStatsContracts_offense_seasonal <- nfl_actualStatsContracts_offense_seasonal %>% 
+#  arrange(playerMerge, season)
+
+nfl_actualStatsContractsSubset_offense_weekly <- nfl_actualStatsContracts_offense_weekly %>% 
+  dplyr::filter(season_type == "REG")
+
+# Calculate Per Game Totals
+nfl_actualStatsContracts_seasonal <- nfl_actualStatsContractsSubset_offense_weekly %>% 
+  dplyr::group_by(playerMerge, season) %>% 
+  dplyr::summarise(
+    position_group = petersenlab::Mode(position_group),
+    rushing_yards = sum(rushing_yards, na.rm = TRUE), # season total
+    carries = sum(carries, na.rm = TRUE), # season total
+    rushing_epa = mean(rushing_epa, na.rm = TRUE),
+    receiving_yards = mean(receiving_yards, na.rm = TRUE),
+    receiving_epa = mean(receiving_epa, na.rm = TRUE),
+    contractYear = mean(contractYear, na.rm = TRUE),
+    games = n(),
+    .groups = "drop_last"
+  ) %>% 
+  dplyr::mutate(ypc = rushing_yards / carries)
 
 # Merge with seasonal fantasy points data
+```
+
+### QB
+
+First, we prepare the data by merging and performing additional processing:
+
+```{r}
+#| code-fold: true
+
+# Merge with QBR data
+nfl_espnQBR$playerMerge <- paste(nfl_espnQBR$name_first, nfl_espnQBR$name_last, sep = " ") %>% 
+  stringr::str_replace_all(., "[[:punct:]]", "") %>% 
+  toupper()
+
+nfl_contractYearQBR_weekly <- nfl_playerContractYears %>% 
+  dplyr::filter(position == "QB") %>% 
+  dplyr::full_join(
+    .,
+    nfl_espnQBR,
+    by = c("playerMerge","team","season")
+  )
+
+nfl_contractYearQBR_weekly$contractYear[which(is.na(nfl_contractYearQBR_weekly$contractYear))] <- 0
+
+nfl_contractYearQBR_weekly <- nfl_contractYearQBR_weekly %>% 
+  dplyr::arrange(playerMerge, season, season_type, game_week)
+
+nfl_contractYearQBRsubset_weekly <- nfl_contractYearQBR_weekly %>% 
+  dplyr::filter(
+    season_type == "Regular",
+    game_week != "Season Total") %>% 
+  dplyr::mutate(game_week = as.numeric(game_week)) %>% 
+  dplyr::arrange(playerMerge, season, season_type, game_week)
+
+#hist(nfl_contractYearQBRsubset_weekly$qb_plays) # players have at least 20 dropbacks per game
+
+# Calculate Per Game Totals
+nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>% 
+  dplyr::group_by(playerMerge, season) %>% 
+  dplyr::summarise(
+    qbr = mean(qbr_total, na.rm = TRUE),
+    pts_added = mean(pts_added, na.rm = TRUE),
+    epa_pass = mean(pass, na.rm = TRUE),
+    qb_plays = sum(qb_plays, na.rm = TRUE), # season total
+    contractYear = mean(contractYear, na.rm = TRUE),
+    games = n(),
+    .groups = "drop_last"
+  )
+
+nfl_contractYearQBRsubset_seasonal <- nfl_contractYearQBR_seasonal %>% 
+  dplyr::filter(games >= 5) # keep only player-season combinations in which QBs played at least 5 games
+```
+
+Then, we analyze the data.
+Below is a mixed model that examines whether a player has a higher QBR per game when they are in a contract year compared to when they are not in a contract year.
+
+```{r}
+mixedModel_qbr <- lmerTest::lmer(
+  qbr ~ contractYear + (1 | playerMerge),
+  data = nfl_contractYearQBR_seasonal
+)
+
+summary(mixedModel_qbr)
+```
+
+```{r}
+mixedModel_ptsAdded <- lmerTest::lmer(
+  pts_added ~ contractYear + (1 | playerMerge),
+  data = nfl_contractYearQBR_seasonal
+)
+
+summary(mixedModel_ptsAdded)
+```
+
+```{r}
+mixedModel_epaPass <- lmerTest::lmer(
+  epa_pass ~ contractYear + (1 | playerMerge),
+  data = nfl_contractYearQBR_seasonal
+)
+
+summary(mixedModel_epaPass)
+```
+
+```{r}
+# Placeholder for model predicting fantasy points
+```
+
+### RB
+
+```{r}
+#| code-fold: true
+
+nfl_actualStatsContractsRB_seasonal <- nfl_actualStatsContracts_seasonal %>% 
+  dplyr::filter(
+    position_group == "RB",
+    games >= 5)
+```
+
+```{r}
+mixedModel_ypc <- lmerTest::lmer(
+  ypc ~ contractYear + (1 | playerMerge),
+  data = nfl_actualStatsContractsRB_seasonal
+)
+
+summary(mixedModel_ypc)
+```
+
+```{r}
+mixedModel_epaRush <- lmerTest::lmer(
+  rushing_epa ~ contractYear + (1 | playerMerge),
+  data = nfl_actualStatsContractsRB_seasonal
+)
+
+summary(mixedModel_epaRush)
+```
+
+```{r}
+# Placeholder for model predicting fantasy points
+```
+
+### WR/TE
+
+```{r}
+#| code-fold: true
+
+nfl_actualStatsContractsWRTE_seasonal <- nfl_actualStatsContracts_seasonal %>% 
+  dplyr::filter(
+    position_group %in% c("WR","TE"),
+    games >= 5)
+```
+
+```{r}
+mixedModel_receivingYards <- lmerTest::lmer(
+  receiving_yards ~ contractYear + (1 | playerMerge),
+  data = nfl_actualStatsContractsWRTE_seasonal
+)
+
+summary(mixedModel_receivingYards)
+```
+
+```{r}
+mixedModel_epaReceiving <- lmerTest::lmer(
+  receiving_epa ~ contractYear + (1 | playerMerge),
+  data = nfl_actualStatsContractsWRTE_seasonal
+)
+
+summary(mixedModel_epaReceiving)
+```
+
+```{r}
+# Placeholder for model predicting fantasy points
+```
+
+### QB/RB/WR/TE
+
+```{r}
+# Placeholder for model predicting fantasy points
+# Include player position as a covariate
 ```
 
 ## Conclusion {#sec-mythbustersConclusion}
