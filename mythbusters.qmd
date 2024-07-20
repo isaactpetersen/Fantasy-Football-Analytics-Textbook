@@ -9,7 +9,15 @@ library("petersenlab")
 library("lme4")
 library("lmerTest")
 library("MuMIn")
+library("emmeans")
 library("tidyverse")
+```
+
+```{r}
+#| include: false
+
+emm_options(lmerTest.limit = 100000)
+emm_options(pbkrtest.limit = 100000)
 ```
 
 ### Load Data {#sec-mythbustersLoadData}
@@ -108,6 +116,16 @@ nfl_actualStatsContracts_offense_weekly <- dplyr::full_join(
 nfl_actualStatsContracts_offense_weekly$contractYear[which(is.na(nfl_actualStatsContracts_offense_weekly$contractYear))] <- 0
 #nfl_actualStatsContracts_offense_seasonal$contractYear[which(is.na(nfl_actualStatsContracts_offense_seasonal$contractYear))] <- 0
 
+#nfl_actualStatsContracts_offense_weekly$contractYear <- factor(
+#  nfl_actualStatsContracts_offense_weekly$contractYear,
+#  levels = c(0, 1),
+#  labels = c("no", "yes"))
+
+#nfl_actualStatsContracts_offense_seasonal$contractYear <- factor(
+#  nfl_actualStatsContracts_offense_seasonal$contractYear,
+#  levels = c(0, 1),
+#  labels = c("no", "yes"))
+
 nfl_actualStatsContracts_offense_weekly <- nfl_actualStatsContracts_offense_weekly %>% 
   dplyr::arrange(playerMerge, season, season_type, week)
 
@@ -133,7 +151,13 @@ nfl_actualStatsContracts_seasonal <- nfl_actualStatsContractsSubset_offense_week
     games = n(),
     .groups = "drop_last"
   ) %>% 
-  dplyr::mutate(ypc = rushing_yards / carries)
+  dplyr::mutate(
+    ypc = rushing_yards / carries,
+    contractYear = factor(
+      contractYear,
+      levels = c(0, 1),
+      labels = c("no", "yes")
+    ))
 
 # Merge with seasonal fantasy points data
 ```
@@ -159,6 +183,10 @@ nfl_contractYearQBR_weekly <- nfl_playerContractYears %>%
   )
 
 nfl_contractYearQBR_weekly$contractYear[which(is.na(nfl_contractYearQBR_weekly$contractYear))] <- 0
+#nfl_contractYearQBR_weekly$contractYear <- factor(
+#  nfl_contractYearQBR_weekly$contractYear,
+#  levels = c(0, 1),
+#  labels = c("no", "yes"))
 
 nfl_contractYearQBR_weekly <- nfl_contractYearQBR_weekly %>% 
   dplyr::arrange(playerMerge, season, season_type, game_week)
@@ -183,7 +211,13 @@ nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>%
     contractYear = mean(contractYear, na.rm = TRUE),
     games = n(),
     .groups = "drop_last"
-  )
+  ) %>% 
+  dplyr::mutate(
+    contractYear = factor(
+      contractYear,
+      levels = c(0, 1),
+      labels = c("no", "yes")
+    ))
 
 nfl_contractYearQBRsubset_seasonal <- nfl_contractYearQBR_seasonal %>% 
   dplyr::filter(
@@ -202,6 +236,7 @@ mixedModel_qbr <- lmerTest::lmer(
 
 summary(mixedModel_qbr)
 MuMIn::r.squaredGLMM(mixedModel_qbr)
+emmeans::emmeans(mixedModel_qbr, "contractYear")
 ```
 
 ```{r}
@@ -212,6 +247,7 @@ mixedModel_ptsAdded <- lmerTest::lmer(
 
 summary(mixedModel_ptsAdded)
 MuMIn::r.squaredGLMM(mixedModel_ptsAdded)
+emmeans::emmeans(mixedModel_ptsAdded, "contractYear")
 ```
 
 ```{r}
@@ -222,6 +258,7 @@ mixedModel_epaPass <- lmerTest::lmer(
 
 summary(mixedModel_epaPass)
 MuMIn::r.squaredGLMM(mixedModel_epaPass)
+emmeans::emmeans(mixedModel_epaPass, "contractYear")
 ```
 
 ```{r}
@@ -248,6 +285,7 @@ mixedModel_ypc <- lmerTest::lmer(
 
 summary(mixedModel_ypc)
 MuMIn::r.squaredGLMM(mixedModel_ypc)
+emmeans::emmeans(mixedModel_ypc, "contractYear")
 ```
 
 ```{r}
@@ -258,6 +296,7 @@ mixedModel_epaRush <- lmerTest::lmer(
 
 summary(mixedModel_epaRush)
 MuMIn::r.squaredGLMM(mixedModel_epaRush)
+emmeans::emmeans(mixedModel_epaRush, "contractYear")
 ```
 
 ```{r}
@@ -284,6 +323,7 @@ mixedModel_receivingYards <- lmerTest::lmer(
 
 summary(mixedModel_receivingYards)
 MuMIn::r.squaredGLMM(mixedModel_receivingYards)
+emmeans::emmeans(mixedModel_receivingYards, "contractYear")
 ```
 
 ```{r}
@@ -294,6 +334,7 @@ mixedModel_epaReceiving <- lmerTest::lmer(
 
 summary(mixedModel_epaReceiving)
 MuMIn::r.squaredGLMM(mixedModel_epaReceiving)
+emmeans::emmeans(mixedModel_epaReceiving, "contractYear")
 ```
 
 ```{r}
