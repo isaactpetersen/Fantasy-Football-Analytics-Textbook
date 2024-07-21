@@ -5,7 +5,346 @@
 ### Load Packages {#sec-dataVisualizationLoadPackages}
 
 ```{r}
+library("tidyverse")
+library("nflplotR")
+```
 
+### Load Data {#sec-dataVisualizationLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/nfl_pbp.RData")
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/player_stats_seasonal.RData")
+```
+
+We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` objects in @sec-calculatePlayerAge.
+
+## Scatterplot {#sec-scatterplot}
+
+First, we prepare the data:
+
+```{r}
+# Subset Data
+rb_seasonal <- player_stats_seasonal_offense %>% 
+  filter(position_group == "RB")
+```
+
+Second, we create the base plot using the `ggplot()` function of the `ggplot2` package.
+We specify the data object and the variables in the data object that are associated with the x- and y-axes:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal, # specify data object
+  aes(
+    x = age, # specify variable on x-axis
+    y = rushing_yards)) # specify variable on y-axis
+```
+
+Third, we create a scatterplot using the `geom_point()` function from the `ggplot2` package:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() # add points for scatterplot
+```
+
+Fourth, we add a linear best-fit line using the `geom_smooth()`:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth(method = "lm") # add linear best-fit line
+```
+
+We could also estimate a quadratic polynomial best-fit line:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ poly(x, 2)) # add quadratic best-fit line
+```
+
+Or, we could estimate a smooth best-fit (LOESS) line to allow for any form of nonlinearity:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth(method = "loess") # add smooth best-fit (LOESS) line
+```
+
+By default, the best-fit line is based on a generalized additive model, which allows for nonlinearity:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth() # add GAM best-fit line; same as specifying method = "gam"
+```
+
+Then, we can change the axes:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(
+    expand = c(0,0), # set origin of x-axis to 0
+    lim = c(20,40), # set limits of x-axis
+    breaks = seq(from = 20, to = 40, by = 5) # specify x-axis labels
+  ) +
+  scale_y_continuous(
+    expand = c(0,0), # set origin of y-axis to 0
+    lim = c(0,NA), # set limits of y-axis
+    breaks = seq(from = 0, to = 2500, by = 250) # specify y-axis labels
+  )
+```
+
+Then, we can add plot labels:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(
+    expand = c(0,0),
+    lim = c(20,40),
+    breaks = seq(from = 20, to = 40, by = 5)
+  ) +
+  scale_y_continuous(
+    expand = c(0,0),
+    lim = c(0,NA),
+    breaks = seq(from = 0, to = 2500, by = 250)
+  ) +
+  labs( # add plot labels
+    x = "Rushing Back Age (years)",
+    y = "Rushing Yards per season",
+    title = "2023 NFL Rushing Yards Per Carry per Season by Player Age",
+    subtitle = "(minimum 50 rushing attempts)"
+  )
+```
+
+Then, we can use a theme such as the classic theme (`theme_classic()`) to make it more visually presentable:
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(
+    expand = c(0,0),
+    lim = c(20,40),
+    breaks = seq(from = 20, to = 40, by = 5)
+  ) +
+  scale_y_continuous(
+    expand = c(0,0),
+    lim = c(0,NA),
+    breaks = seq(from = 0, to = 2500, by = 250)
+  ) +
+  labs(
+    x = "Rushing Back Age (years)",
+    y = "Rushing Yards per season",
+    title = "2023 NFL Rushing Yards Per Carry per Season by Player Age",
+    subtitle = "(minimum 50 rushing attempts)"
+  ) +
+  theme_classic() # use the classic theme
+```
+
+Or, we could use a different theme, such as `theme_dark()`.
+For a list of themes available in `ggplot2`, see here: <https://ggplot2-book.org/themes#sec-themes>.
+
+```{r}
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(
+    expand = c(0,0),
+    lim = c(20,40),
+    breaks = seq(from = 20, to = 40, by = 5)
+  ) +
+  scale_y_continuous(
+    expand = c(0,0),
+    lim = c(0,NA),
+    breaks = seq(from = 0, to = 2500, by = 250)
+  ) +
+  labs(
+    x = "Rushing Back Age (years)",
+    y = "Rushing Yards per season",
+    title = "2023 NFL Rushing Yards Per Carry per Season by Player Age",
+    subtitle = "(minimum 50 rushing attempts)"
+  ) +
+  theme_dark() # use the dark theme
+```
+
+## Examples {#sec-scatterplot}
+
+### Players {#sec-scatterplotPlayers}
+
+#### Running Back Performance By Player Age {#sec-plotRBperformanceByAge}
+
+```{r}
+# Prepare Data
+rushing_attempts <- nfl_pbp %>% 
+  dplyr::filter(season_type == "REG") %>% 
+  dplyr::filter(
+    rush == 1,
+    rush_attempt == 1,
+    qb_scramble == 0,
+    qb_dropback == 0,
+    !is.na(rushing_yards))
+
+rb_yardsPerCarry <- rushing_attempts %>% 
+  dplyr::group_by(rusher_id, season) %>% 
+  dplyr::summarise(
+    ypc = mean(rushing_yards, na.rm = TRUE),
+    rush_attempts = n(),
+    .groups = "drop") %>% 
+  dplyr::ungroup() %>% 
+  dplyr::left_join(
+    player_stats_seasonal_offense,
+    by = c("rusher_id" = "player_id", "season")
+  ) %>% 
+  dplyr::filter(
+    position_group == "RB",
+    rush_attempts >= 50)
+```
+
+##### Rushing Yards Per Carry {#sec-plotYPCbyAge}
+
+```{r}
+#| label: fig-rushYPCperSeasonByAge
+#| fig-cap: "NFL Rushing Yards Per Carry per Season by Player Age"
+
+ggplot2::ggplot(
+  data = rb_yardsPerCarry,
+  aes(
+    x = age,
+    y = ypc)) +
+  geom_point() +
+  geom_smooth() +
+  labs(
+    x = "Rushing Back Age (years)",
+    y = "Rushing Yards per Carry/season",
+    title = "NFL Rushing Yards Per Carry per Season by Player Age",
+    subtitle = "(minimum 50 rushing attempts)"
+  ) +
+  theme_classic()
+```
+
+##### Rushing EPA Per Season {#sec-plotRushEPAbyAge}
+
+```{r}
+#| label: fig-rushEPAperSeasonByAge
+#| fig-cap: "NFL Rushing Expected Points Added (EPA) per Season by Player Age"
+
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_epa)) +
+  geom_point() +
+  geom_smooth() +
+  labs(
+    x = "Rushing Back Age (years)",
+    y = "Rushing EPA/season",
+    title = "NFL Rushing Expected Points Added (EPA) per Season by Player Age"
+  ) +
+  theme_classic()
+```
+
+### Teams {#sec-scatterplotTeams}
+
+#### Defensive and Offensive EPA per Play {#sec-plotDefOffEPA}
+
+Expected points added (EPA) per play by the team with possession.
+
+```{r}
+#| label: fig-plotDefOffEPA
+#| fig-cap: "2023 NFL Offensive and Defensive EPA per Play"
+
+pbp_regularSeason <- nfl_pbp %>% 
+  dplyr::filter(
+    season == 2023,
+    season_type == "REG") %>%
+  dplyr::filter(!is.na(posteam) & (rush == 1 | pass == 1))
+
+epa_offense <- pbp_regularSeason %>%
+  dplyr::group_by(team = posteam) %>%
+  dplyr::summarise(off_epa = mean(epa, na.rm = TRUE))
+
+epa_defense <- pbp_regularSeason %>%
+  dplyr::group_by(team = defteam) %>%
+  dplyr::summarise(def_epa = mean(epa, na.rm = TRUE))
+
+epa_combined <- epa_offense %>%
+  dplyr::inner_join(
+    epa_defense,
+    by = "team")
+
+ggplot2::ggplot(
+  data = epa_combined,
+  aes(
+    x = off_epa,
+    y = def_epa)) +
+  nflplotR::geom_mean_lines(
+    aes(
+      x0 = off_epa ,
+      y0 = def_epa)) +
+  nflplotR::geom_nfl_logos(
+    aes(
+      team_abbr = team),
+      width = 0.065,
+      alpha = 0.7) +
+  labs(
+    x = "Offense EPA/play",
+    y = "Defense EPA/play",
+    title = "2023 NFL Offensive and Defensive EPA per Play"
+  ) +
+  theme_classic() +
+  scale_y_reverse()
 ```
 
 ## Conclusion {#sec-dataVisualizationConclusion}

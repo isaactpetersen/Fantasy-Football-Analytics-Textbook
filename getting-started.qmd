@@ -210,6 +210,7 @@ Hopefully, that provides an example for how to learn about a particular function
 
 Below, we provide examples for how to download various types of National Football League (NFL) data.
 For additional resources, @Congelio2023 provides a helpful introductory text for working with NFL data in `R`.
+We save each data file after downloading it, so we can use the data in subsequent chapters.
 
 ```{r}
 #| eval: false
@@ -256,7 +257,6 @@ nfl_players <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_players,
@@ -281,7 +281,6 @@ nfl_teams <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_teams,
@@ -313,7 +312,6 @@ nfl_rosters_weekly <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_rosters,
@@ -346,7 +344,6 @@ nfl_schedules <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_schedules,
@@ -373,7 +370,6 @@ nfl_combine <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_combine,
@@ -400,7 +396,6 @@ nfl_draftPicks <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_draftPicks,
@@ -427,7 +422,6 @@ nfl_depthCharts <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_depthCharts,
@@ -465,8 +459,6 @@ nfl_pbp <- nflreadr::load_pbp(seasons = TRUE)
 ```
 
 ```{r}
-#| include: false
-
 save(
   nfl_pbp,
   file = "./data/nfl_pbp.RData"
@@ -500,8 +492,6 @@ nfl_4thdown <- nfl4th::load_4th_pbp(seasons = 2014:2023)
 ```
 
 ```{r}
-#| include: false
-
 save(
   nfl_4thdown,
   file = "./data/nfl_4thdown.RData"
@@ -534,8 +524,6 @@ nfl_participation <- progressr::with_progress(
 ```
 
 ```{r}
-#| include: false
-
 save(
   nfl_participation,
   file = "./data/nfl_participation.RData"
@@ -583,7 +571,6 @@ nfl_actualStats_kicking_weekly <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_actualStats_offense_weekly, nfl_actualStats_defense_weekly, nfl_actualStats_kicking_weekly,
@@ -610,7 +597,6 @@ nfl_injuries <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_injuries,
@@ -637,7 +623,6 @@ nfl_snapCounts <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_snapCounts,
@@ -678,7 +663,6 @@ nfl_espnQBR <- bind_rows(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_espnQBR,
@@ -723,7 +707,6 @@ nfl_nextGenStats_weekly <- bind_rows(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_nextGenStats_weekly,
@@ -806,7 +789,6 @@ nfl_advancedStatsPFR <- bind_rows(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_advancedStatsPFR,
@@ -833,7 +815,6 @@ nfl_playerContracts <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_playerContracts,
@@ -860,7 +841,6 @@ nfl_ftnCharting <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_ftnCharting,
@@ -887,7 +867,6 @@ nfl_playerIDs <- progressr::with_progress(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_playerIDs,
@@ -925,7 +904,6 @@ nfl_rankings <- bind_rows(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_rankings,
@@ -977,7 +955,6 @@ nfl_expectedFantasyPoints_offense <- bind_rows(
 
 ```{r}
 #| eval: false
-#| include: false
 
 save(
   nfl_expectedFantasyPoints_weekly,
@@ -2220,139 +2197,6 @@ save(
   player_stats_seasonal_offense, player_stats_seasonal_defense, player_stats_seasonal_kicking,
   file = "./data/player_stats_seasonal.RData"
 )
-```
-
-## Plotting {#sec-plotting}
-
-### Rushing Yards per Carry By Player Age {#sec-plotRushEPAbyAge}
-
-```{r}
-#| label: fig-rushYPCperSeasonByAge
-#| fig-cap: "2023 NFL Rushing Yards Per Carry per Season by Player Age"
-
-# Prepare Data
-rushing_attempts <- nfl_pbp %>% 
-  dplyr::filter(
-    season_type == "REG") %>% 
-    filter(
-      rush == 1,
-      rush_attempt == 1,
-      qb_scramble == 0,
-      qb_dropback == 0,
-      !is.na(rushing_yards))
-
-rb_yardsPerCarry <- rushing_attempts %>% 
-  group_by(rusher_id, season) %>% 
-  summarise(
-    ypc = mean(rushing_yards, na.rm = TRUE),
-    rush_attempts = n(),
-    .groups = "drop") %>% 
-  ungroup() %>% 
-  left_join(
-    nfl_players %>% select(-season),
-    by = c("rusher_id" = "gsis_id")
-  ) %>% 
-  filter(
-    position_group == "RB",
-    rush_attempts >= 50) %>% 
-  left_join(
-    season_startdate,
-    by = "season"
-  )
-
-rb_yardsPerCarry$age <- interval(
-  start = rb_yardsPerCarry$birth_date,
-  end = rb_yardsPerCarry$startdate
-) %>% 
-  time_length(unit = "years")
-
-# Create Plot
-ggplot2::ggplot(
-  data = rb_yardsPerCarry,
-  ggplot2::aes(
-    x = age,
-    y = ypc)) +
-  ggplot2::geom_point() +
-  ggplot2::geom_smooth() +
-  ggplot2::labs(
-    x = "Rushing Back Age (years)",
-    y = "Rushing Yards per Carry/season",
-    title = "2023 NFL Rushing Yards Per Carry per Season by Player Age",
-    subtitle = "(minimum 50 rushing attempts)"
-  ) +
-  ggplot2::theme_classic()
-```
-
-```{r}
-#| label: fig-rushEPAperSeasonByAge
-#| fig-cap: "2023 NFL Rushing Expected Points Added (EPA) per Season by Player Age"
-
-# Subset Data
-rb_seasonal <- player_stats_seasonal_offense %>% 
-  filter(position_group == "RB")
-
-# Create Plot
-ggplot2::ggplot(
-  data = rb_seasonal,
-  ggplot2::aes(
-    x = age,
-    y = rushing_epa)) +
-  ggplot2::geom_point() +
-  ggplot2::geom_smooth() +
-  ggplot2::labs(
-    x = "Rushing Back Age (years)",
-    y = "Rushing EPA/season",
-    title = "2023 NFL Rushing Expected Points Added (EPA) per Season by Player Age"
-  ) +
-  ggplot2::theme_classic()
-```
-
-### Defensive and Offensive EPA per Play {#sec-plotDefOffEPA}
-
-Expected points added (EPA) per play by the team with possession.
-
-```{r}
-#| label: fig-plotDefOffEPA
-#| fig-cap: "2023 NFL Offensive and Defensive EPA per Play"
-
-pbp_regularSeason <- nfl_pbp %>% 
-  dplyr::filter(
-    season == 2023,
-    season_type == "REG") %>%
-  dplyr::filter(!is.na(posteam) & (rush == 1 | pass == 1))
-
-epa_offense <- pbp_regularSeason %>%
-  dplyr::group_by(team = posteam) %>%
-  dplyr::summarise(off_epa = mean(epa, na.rm = TRUE))
-
-epa_defense <- pbp_regularSeason %>%
-  dplyr::group_by(team = defteam) %>%
-  dplyr::summarise(def_epa = mean(epa, na.rm = TRUE))
-
-epa_combined <- epa_offense %>%
-  dplyr::inner_join(epa_defense, by = "team")
-
-ggplot2::ggplot(
-  data = epa_combined,
-  ggplot2::aes(
-    x = off_epa,
-    y = def_epa)) +
-  nflplotR::geom_mean_lines(
-    ggplot2::aes(
-      x0 = off_epa ,
-      y0 = def_epa)) +
-  nflplotR::geom_nfl_logos(
-    ggplot2::aes(
-      team_abbr = team),
-      width = 0.065,
-      alpha = 0.7) +
-  ggplot2::labs(
-    x = "Offense EPA/play",
-    y = "Defense EPA/play",
-    title = "2023 NFL Offensive and Defensive EPA per Play"
-  ) +
-  ggplot2::theme_classic() +
-  ggplot2::scale_y_reverse()
 ```
 
 ::: {.content-visible when-format="html"}
