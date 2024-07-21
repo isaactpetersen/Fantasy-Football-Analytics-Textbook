@@ -24,10 +24,20 @@ emm_options(pbkrtest.limit = 100000)
 
 ```{r}
 load(file = "./data/nfl_playerContracts.RData")
-load(file = "./data/nfl_actualStats_weekly.RData")
-load(file = "./data/nfl_actualStats_seasonal.RData")
+load(file = "./data/player_stats_weekly.RData") #load(file = "./data/nfl_actualStats_weekly.RData")
+load(file = "./data/player_stats_seasonal.RData") #load(file = "./data/nfl_actualStats_seasonal.RData")
 load(file = "./data/nfl_espnQBR.RData")
 ```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+```
+
+We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` objects in @sec-calculatePlayerAge.
 
 ## Do Players Perform Better in their Contract Year? {#sec-contractYear}
 
@@ -55,6 +65,9 @@ For analysis, the same player contributes multiple observations of performance (
 Inclusion of multiple data points from the same player would violate the [assumption of multiple regression](#sec-assumptionsRegression) that all observations are independent.
 Thus, we use mixed-effects models that allow nonindependent observations.
 In our mixed-effects models, we include a random intercept for each player, to allow our model to account for players' differing level of performance.
+We examine two mixed-effects models for each outcome variable.
+One that accounts for the effects of age and experience, and one that does not.
+The model that accounts for the effects of age and experience includes random intercepts and random linear slopes, along with a fixed quadratic effect of age to allow for curvilinear effects and a fixed effect of experience.
 
 ```{r}
 #| code-fold: true
@@ -103,55 +116,57 @@ nfl_playerContractYears <- nfl_playerContracts_subset %>%
   dplyr::mutate(contractYear = 1)
 
 # Merge with weekly and seasonal stats data
-nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly %>% 
+player_stats_weekly_offense <- player_stats_weekly_offense %>% 
   dplyr::mutate(playerMerge = toupper(str_replace_all(player_display_name, "[[:punct:]]", "")))
 #nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal %>% 
 #  mutate(playerMerge = toupper(str_replace_all(player_display_name, "[[:punct:]]", "")))
 
-nfl_actualStatsContracts_offense_weekly <- dplyr::full_join(
-  nfl_actualStats_offense_weekly,
+player_statsContracts_offense_weekly <- dplyr::full_join(
+  player_stats_weekly_offense,
   nfl_playerContractYears,
   by = c("playerMerge", "position_group" = "position", "season")
 ) %>% 
   dplyr::filter(position_group %in% c("QB","RB","WR","TE"))
 
-#nfl_actualStatsContracts_offense_seasonal <- full_join(
-#  nfl_actualStats_offense_seasonal,
+#player_statsContracts_offense_seasonal <- full_join(
+#  player_stats_seasonal_offense,
 #  nfl_playerContractYears,
 #  by = c("playerMerge", "position_group" = "position", "season")
 #) %>% 
 #  filter(position_group %in% c("QB","RB","WR","TE"))
 
-nfl_actualStatsContracts_offense_weekly$contractYear[which(is.na(nfl_actualStatsContracts_offense_weekly$contractYear))] <- 0
-#nfl_actualStatsContracts_offense_seasonal$contractYear[which(is.na(nfl_actualStatsContracts_offense_seasonal$contractYear))] <- 0
+player_statsContracts_offense_weekly$contractYear[which(is.na(player_statsContracts_offense_weekly$contractYear))] <- 0
+#player_statsContracts_offense_seasonal$contractYear[which(is.na(player_statsContracts_offense_seasonal$contractYear))] <- 0
 
-#nfl_actualStatsContracts_offense_weekly$contractYear <- factor(
-#  nfl_actualStatsContracts_offense_weekly$contractYear,
+#player_statsContracts_offense_weekly$contractYear <- factor(
+#  player_statsContracts_offense_weekly$contractYear,
 #  levels = c(0, 1),
 #  labels = c("no", "yes"))
 
-#nfl_actualStatsContracts_offense_seasonal$contractYear <- factor(
-#  nfl_actualStatsContracts_offense_seasonal$contractYear,
+#player_statsContracts_offense_seasonal$contractYear <- factor(
+#  player_statsContracts_offense_seasonal$contractYear,
 #  levels = c(0, 1),
 #  labels = c("no", "yes"))
 
-nfl_actualStatsContracts_offense_weekly <- nfl_actualStatsContracts_offense_weekly %>% 
+player_statsContracts_offense_weekly <- player_statsContracts_offense_weekly %>% 
   dplyr::arrange(playerMerge, season, season_type, week)
 
-#nfl_actualStatsContracts_offense_seasonal <- nfl_actualStatsContracts_offense_seasonal %>% 
+#player_statsContracts_offense_seasonal <- player_statsContracts_offense_seasonal %>% 
 #  arrange(playerMerge, season)
 
-nfl_actualStatsContractsSubset_offense_weekly <- nfl_actualStatsContracts_offense_weekly %>% 
+player_statsContractsSubset_offense_weekly <- player_statsContracts_offense_weekly %>% 
   dplyr::filter(season_type == "REG")
 
 #table(nfl_playerContracts$year_signed) # most contract data is available beginning in 2011
 
 # Calculate Per Game Totals
-nfl_actualStatsContracts_seasonal <- nfl_actualStatsContractsSubset_offense_weekly %>% 
+player_statsContracts_seasonal <- player_statsContractsSubset_offense_weekly %>% 
   dplyr::group_by(player_id, season) %>% 
   dplyr::summarise(
     player_display_name = petersenlab::Mode(player_display_name),
     position_group = petersenlab::Mode(position_group),
+    age = min(age, na.rm = TRUE),
+    years_of_experience = min(years_of_experience, na.rm = TRUE),
     rushing_yards = sum(rushing_yards, na.rm = TRUE), # season total
     carries = sum(carries, na.rm = TRUE), # season total
     rushing_epa = mean(rushing_epa, na.rm = TRUE),
@@ -169,6 +184,12 @@ nfl_actualStatsContracts_seasonal <- nfl_actualStatsContractsSubset_offense_week
       levels = c(0, 1),
       labels = c("no", "yes")
     ))
+
+player_statsContracts_seasonal$age[which(is.infinite((player_statsContracts_seasonal$age)))] <- NA
+player_statsContracts_seasonal$years_of_experience[which(is.infinite((player_statsContracts_seasonal$years_of_experience)))] <- NA
+
+player_statsContracts_seasonal$ageCentered20 <- player_statsContracts_seasonal$age - 20
+player_statsContracts_seasonal$ageCentered20Quadratic <- player_statsContracts_seasonal$ageCentered20 ^ 2
 
 # Merge with seasonal fantasy points data
 ```
@@ -209,12 +230,24 @@ nfl_contractYearQBRsubset_weekly <- nfl_contractYearQBR_weekly %>%
   dplyr::mutate(game_week = as.numeric(game_week)) %>% 
   dplyr::arrange(playerMerge, season, season_type, game_week)
 
+# Merge with age and experience
+nfl_contractYearQBRsubset_weekly <- player_statsContractsSubset_offense_weekly %>% 
+  dplyr::filter(position == "QB") %>% 
+  dplyr::select(playerMerge, season, week, age, years_of_experience) %>% 
+  full_join(
+    nfl_contractYearQBRsubset_weekly,
+    by = c("playerMerge","season", c("week" = "game_week"))
+  ) %>% 
+  arrange(player_id, season, week)
+
 #hist(nfl_contractYearQBRsubset_weekly$qb_plays) # players have at least 20 dropbacks per game
 
 # Calculate Per Game Totals
 nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>% 
   dplyr::group_by(playerMerge, season) %>% 
   dplyr::summarise(
+    age = min(age, na.rm = TRUE),
+    years_of_experience = min(years_of_experience, na.rm = TRUE),
     qbr = mean(qbr_total, na.rm = TRUE),
     pts_added = mean(pts_added, na.rm = TRUE),
     epa_pass = mean(pass, na.rm = TRUE),
@@ -229,6 +262,12 @@ nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>%
       levels = c(0, 1),
       labels = c("no", "yes")
     ))
+
+nfl_contractYearQBR_seasonal$age[which(is.infinite((nfl_contractYearQBR_seasonal$age)))] <- NA
+nfl_contractYearQBR_seasonal$years_of_experience[which(is.infinite((nfl_contractYearQBR_seasonal$years_of_experience)))] <- NA
+
+nfl_contractYearQBR_seasonal$ageCentered20 <- nfl_contractYearQBR_seasonal$age - 20
+nfl_contractYearQBR_seasonal$ageCentered20Quadratic <- nfl_contractYearQBR_seasonal$ageCentered20 ^ 2
 
 nfl_contractYearQBR_seasonal <- nfl_contractYearQBR_seasonal %>% 
   group_by(playerMerge) %>%
@@ -246,34 +285,67 @@ Below is a mixed model that examines whether a player has a higher QBR per game 
 ```{r}
 mixedModel_qbr <- lmerTest::lmer(
   qbr ~ contractYear + (1 | player_id),
-  data = nfl_contractYearQBR_seasonal
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(mixedModel_qbr)
 MuMIn::r.squaredGLMM(mixedModel_qbr)
 emmeans::emmeans(mixedModel_qbr, "contractYear")
+
+mixedModelAge_qbr <- lmerTest::lmer(
+  qbr ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_qbr)
+MuMIn::r.squaredGLMM(mixedModelAge_qbr)
+emmeans::emmeans(mixedModelAge_qbr, "contractYear")
 ```
 
 ```{r}
 mixedModel_ptsAdded <- lmerTest::lmer(
   pts_added ~ contractYear + (1 | player_id),
-  data = nfl_contractYearQBR_seasonal
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(mixedModel_ptsAdded)
 MuMIn::r.squaredGLMM(mixedModel_ptsAdded)
 emmeans::emmeans(mixedModel_ptsAdded, "contractYear")
+
+mixedModelAge_ptsAdded <- lmerTest::lmer(
+  pts_added ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_ptsAdded)
+MuMIn::r.squaredGLMM(mixedModelAge_ptsAdded)
+emmeans::emmeans(mixedModelAge_ptsAdded, "contractYear")
 ```
 
 ```{r}
 mixedModel_epaPass <- lmerTest::lmer(
   epa_pass ~ contractYear + (1 | player_id),
-  data = nfl_contractYearQBR_seasonal
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(mixedModel_epaPass)
 MuMIn::r.squaredGLMM(mixedModel_epaPass)
 emmeans::emmeans(mixedModel_epaPass, "contractYear")
+
+mixedModelAge_epaPass <- lmerTest::lmer(
+  epa_pass ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 | player_id), # removed random slopes to address convergence issue
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_epaPass)
+MuMIn::r.squaredGLMM(mixedModelAge_epaPass)
+emmeans::emmeans(mixedModelAge_epaPass, "contractYear")
 ```
 
 ```{r}
@@ -285,7 +357,7 @@ emmeans::emmeans(mixedModel_epaPass, "contractYear")
 ```{r}
 #| code-fold: true
 
-nfl_actualStatsContractsRB_seasonal <- nfl_actualStatsContracts_seasonal %>% 
+player_statsContractsRB_seasonal <- player_statsContracts_seasonal %>% 
   dplyr::filter(
     position_group == "RB",
     games >= 5, # keep only player-season combinations in which QBs played at least 5 games
@@ -295,23 +367,45 @@ nfl_actualStatsContractsRB_seasonal <- nfl_actualStatsContracts_seasonal %>%
 ```{r}
 mixedModel_ypc <- lmerTest::lmer(
   ypc ~ contractYear + (1 | player_id),
-  data = nfl_actualStatsContractsRB_seasonal
+  data = player_statsContractsRB_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(mixedModel_ypc)
 MuMIn::r.squaredGLMM(mixedModel_ypc)
 emmeans::emmeans(mixedModel_ypc, "contractYear")
+
+mixedModelAge_ypc <- lmerTest::lmer(
+  ypc ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = player_statsContractsRB_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_ypc)
+MuMIn::r.squaredGLMM(mixedModelAge_ypc)
+emmeans::emmeans(mixedModelAge_ypc, "contractYear")
 ```
 
 ```{r}
 mixedModel_epaRush <- lmerTest::lmer(
   rushing_epa ~ contractYear + (1 | player_id),
-  data = nfl_actualStatsContractsRB_seasonal
+  data = player_statsContractsRB_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(mixedModel_epaRush)
 MuMIn::r.squaredGLMM(mixedModel_epaRush)
 emmeans::emmeans(mixedModel_epaRush, "contractYear")
+
+mixedModelAge_epaRush <- lmerTest::lmer(
+  rushing_epa ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = player_statsContractsRB_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_epaRush)
+MuMIn::r.squaredGLMM(mixedModelAge_epaRush)
+emmeans::emmeans(mixedModelAge_epaRush, "contractYear")
 ```
 
 ```{r}
@@ -323,7 +417,7 @@ emmeans::emmeans(mixedModel_epaRush, "contractYear")
 ```{r}
 #| code-fold: true
 
-nfl_actualStatsContractsWRTE_seasonal <- nfl_actualStatsContracts_seasonal %>% 
+player_statsContractsWRTE_seasonal <- player_statsContracts_seasonal %>% 
   dplyr::filter(
     position_group %in% c("WR","TE"),
     games >= 5, # keep only player-season combinations in which QBs played at least 5 games
@@ -333,23 +427,45 @@ nfl_actualStatsContractsWRTE_seasonal <- nfl_actualStatsContracts_seasonal %>%
 ```{r}
 mixedModel_receivingYards <- lmerTest::lmer(
   receiving_yards ~ contractYear + (1 | player_id),
-  data = nfl_actualStatsContractsWRTE_seasonal
+  data = player_statsContractsWRTE_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(mixedModel_receivingYards)
 MuMIn::r.squaredGLMM(mixedModel_receivingYards)
 emmeans::emmeans(mixedModel_receivingYards, "contractYear")
+
+mixedModelAge_receivingYards <- lmerTest::lmer(
+  receiving_yards ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = player_statsContractsWRTE_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_receivingYards)
+MuMIn::r.squaredGLMM(mixedModelAge_receivingYards)
+emmeans::emmeans(mixedModelAge_receivingYards, "contractYear")
 ```
 
 ```{r}
 mixedModel_epaReceiving <- lmerTest::lmer(
   receiving_epa ~ contractYear + (1 | player_id),
-  data = nfl_actualStatsContractsWRTE_seasonal
+  data = player_statsContractsWRTE_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(mixedModel_epaReceiving)
 MuMIn::r.squaredGLMM(mixedModel_epaReceiving)
 emmeans::emmeans(mixedModel_epaReceiving, "contractYear")
+
+mixedModelAge_epaReceiving <- lmerTest::lmer(
+  receiving_epa ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = player_statsContractsWRTE_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_epaReceiving)
+MuMIn::r.squaredGLMM(mixedModelAge_epaReceiving)
+emmeans::emmeans(mixedModelAge_epaReceiving, "contractYear")
 ```
 
 ```{r}
