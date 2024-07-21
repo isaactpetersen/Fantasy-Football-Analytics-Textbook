@@ -1844,7 +1844,9 @@ Specify scoring settings:
 
 #### Career {#sec-calculateActualPointsCareer}
 
-### Player Age {#sec-calculatePlayerAge}
+### Player Age and Experience {#sec-calculatePlayerAge}
+
+#### Weekly {#sec-calculatePlayerAgeWeekly}
 
 ```{r}
 # Reshape from wide to long format
@@ -1970,6 +1972,16 @@ player_game_birthdate_gameday_kicking$age <- interval(
 ) %>% 
   time_length(unit = "years")
 
+# Calculate ageCentered and ageCenteredQuadratic
+player_game_birthdate_gameday_offense$ageCentered20 <- player_game_birthdate_gameday_offense$age - 20
+player_game_birthdate_gameday_offense$ageCentered20Quadratic <- player_game_birthdate_gameday_offense$ageCentered20 ^ 2
+
+player_game_birthdate_gameday_defense$ageCentered20 <- player_game_birthdate_gameday_defense$age - 20
+player_game_birthdate_gameday_defense$ageCentered20Quadratic <- player_game_birthdate_gameday_defense$ageCentered20 ^ 2
+
+player_game_birthdate_gameday_kicking$ageCentered20 <- player_game_birthdate_gameday_kicking$age - 20
+player_game_birthdate_gameday_kicking$ageCentered20Quadratic <- player_game_birthdate_gameday_kicking$ageCentered20 ^ 2
+
 # Merge with player info
 player_age_offense <-  left_join(
   player_game_birthdate_gameday_offense,
@@ -2003,39 +2015,123 @@ nfl_actualStats_game_kicking_weekly <- nfl_actualStats_kicking_weekly %>%
     by = c("season","week","player_id"))
 
 # Merge with player weekly stats
-player_age_stats_offense <- left_join(
+player_stats_weekly_offense <- full_join(
   player_age_offense %>% select(-position, -position_group),
   nfl_actualStats_game_offense_weekly,
-  by = c(c("season","week","player_id","game_id")))
+  by = c("season","week","player_id","game_id"))
 
-player_age_stats_defense <- left_join(
+player_stats_weekly_defense <- full_join(
   player_age_defense %>% select(-position, -position_group),
   nfl_actualStats_game_defense_weekly,
-  by = c(c("season","week","player_id","game_id")))
+  by = c("season","week","player_id","game_id"))
 
-player_age_stats_kicking <- left_join(
+player_stats_weekly_kicking <- full_join(
   player_age_kicking %>% select(-position, -position_group),
   nfl_actualStats_game_kicking_weekly,
-  by = c(c("season","week","player_id","game_id")))
+  by = c("season","week","player_id","game_id"))
 
-player_age_stats_offense$years_of_experience <- as.integer(player_age_stats_offense$years_of_experience)
-player_age_stats_defense$years_of_experience <- as.integer(player_age_stats_defense$years_of_experience)
-player_age_stats_kicking$years_of_experience <- as.integer(player_age_stats_kicking$years_of_experience)
+player_stats_weekly_offense$total_years_of_experience <- as.integer(player_stats_weekly_offense$years_of_experience)
+player_stats_weekly_defense$total_years_of_experience <- as.integer(player_stats_weekly_defense$years_of_experience)
+player_stats_weekly_kicking$total_years_of_experience <- as.integer(player_stats_weekly_kicking$years_of_experience)
 
+player_stats_weekly_offense$years_of_experience <- NULL
+player_stats_weekly_defense$years_of_experience <- NULL
+player_stats_weekly_kicking$years_of_experience <- NULL
+
+distinct_seasons_offense <- player_stats_weekly_offense %>%
+  select(player_id, season) %>%
+  distinct() %>% 
+  left_join(
+    nfl_players[,c("gsis_id","years_of_experience")],
+    by = c("player_id" = "gsis_id")
+  ) %>% 
+  mutate(total_years_of_experience = as.integer(years_of_experience)) %>% 
+  select(-years_of_experience)
+
+distinct_seasons_defense <- player_stats_weekly_defense %>%
+  select(player_id, season) %>%
+  distinct() %>% 
+  left_join(
+    nfl_players[,c("gsis_id","years_of_experience")],
+    by = c("player_id" = "gsis_id")
+  ) %>% 
+  mutate(total_years_of_experience = as.integer(years_of_experience)) %>% 
+  select(-years_of_experience)
+
+distinct_seasons_kicking <- player_stats_weekly_kicking %>%
+  select(player_id, season) %>%
+  distinct() %>% 
+  left_join(
+    nfl_players[,c("gsis_id","years_of_experience")],
+    by = c("player_id" = "gsis_id")
+  ) %>% 
+  mutate(total_years_of_experience = as.integer(years_of_experience)) %>% 
+  select(-years_of_experience)
+
+years_of_experience_offense <- distinct_seasons_offense %>% 
+  arrange(player_id, -season) %>% 
+  group_by(player_id) %>%
+  mutate(years_of_experience = first(total_years_of_experience) - (row_number() - 1)) %>%
+  ungroup()
+
+years_of_experience_defense <- distinct_seasons_defense %>% 
+  arrange(player_id, -season) %>% 
+  group_by(player_id) %>%
+  mutate(years_of_experience = first(total_years_of_experience) - (row_number() - 1)) %>%
+  ungroup()
+
+years_of_experience_kicking <- distinct_seasons_kicking %>% 
+  arrange(player_id, -season) %>% 
+  group_by(player_id) %>%
+  mutate(years_of_experience = first(total_years_of_experience) - (row_number() - 1)) %>%
+  ungroup()
+
+years_of_experience_offense$years_of_experience[which(years_of_experience_offense$years_of_experience < 0)] <- 0
+years_of_experience_defense$years_of_experience[which(years_of_experience_defense$years_of_experience < 0)] <- 0
+years_of_experience_kicking$years_of_experience[which(years_of_experience_kicking$years_of_experience < 0)] <- 0
+
+player_stats_weekly_offense <- player_stats_weekly_offense %>% 
+  left_join(
+    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    by = c("player_id","season")
+  )
+
+player_stats_weekly_defense <- player_stats_weekly_defense %>% 
+  left_join(
+    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    by = c("player_id","season")
+  )
+
+player_stats_weekly_kicking <- player_stats_weekly_kicking %>% 
+  left_join(
+    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    by = c("player_id","season")
+  )
+
+# Save data
+save(
+  player_stats_weekly_offense, player_stats_weekly_defense, player_stats_weekly_kicking,
+  file = "./data/player_stats_weekly.RData"
+)
+```
+
+#### Seasonal {#sec-calculatePlayerAgeSeasonal}
+
+```{r}
 # Merge player info with seasonal stats
-player_seasonal_offense <- left_join(
+player_stats_seasonal_offense <- full_join(
   nfl_actualStats_offense_seasonal,
   nfl_players %>% select(-position, -position_group, -season),
   by = c("player_id" = "gsis_id")
 )
 
-player_seasonal_defense <- left_join(
+player_stats_seasonal_defense <- full_join(
   nfl_actualStats_defense_seasonal,
   nfl_players %>% select(-position, -position_group, -season),
   by = c("player_id" = "gsis_id")
 )
 
-player_seasonal_kicking <- left_join(
+player_stats_seasonal_kicking <- full_join(
   nfl_actualStats_kicking_seasonal,
   nfl_players %>% select(-position, -position_group, -season),
   by = c("player_id" = "gsis_id")
@@ -2046,41 +2142,80 @@ season_startdate <- nfl_schedules %>%
   group_by(season) %>% 
   summarise(startdate = min(gameday, na.rm = TRUE))
 
-player_seasonal_offense <- player_seasonal_offense %>% 
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
   left_join(
     season_startdate,
     by = "season"
   )
 
-player_seasonal_defense <- player_seasonal_defense %>% 
+player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
   left_join(
     season_startdate,
     by = "season"
   )
 
-player_seasonal_kicking <- player_seasonal_kicking %>% 
+player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
   left_join(
     season_startdate,
     by = "season"
   )
 
-player_seasonal_offense$age <- interval(
-  start = player_seasonal_offense$birth_date,
-  end = player_seasonal_offense$startdate
+player_stats_seasonal_offense$age <- interval(
+  start = player_stats_seasonal_offense$birth_date,
+  end = player_stats_seasonal_offense$startdate
 ) %>% 
   time_length(unit = "years")
 
-player_seasonal_defense$age <- interval(
-  start = player_seasonal_defense$birth_date,
-  end = player_seasonal_defense$startdate
+player_stats_seasonal_defense$age <- interval(
+  start = player_stats_seasonal_defense$birth_date,
+  end = player_stats_seasonal_defense$startdate
 ) %>% 
   time_length(unit = "years")
 
-player_seasonal_kicking$age <- interval(
-  start = player_seasonal_kicking$birth_date,
-  end = player_seasonal_kicking$startdate
+player_stats_seasonal_kicking$age <- interval(
+  start = player_stats_seasonal_kicking$birth_date,
+  end = player_stats_seasonal_kicking$startdate
 ) %>% 
   time_length(unit = "years")
+
+# Calculate ageCentered and ageCenteredQuadratic
+player_stats_seasonal_offense$ageCentered20 <- player_stats_seasonal_offense$age - 20
+player_stats_seasonal_offense$ageCentered20Quadratic <- player_stats_seasonal_offense$ageCentered20 ^ 2
+
+player_stats_seasonal_defense$ageCentered20 <- player_stats_seasonal_defense$age - 20
+player_stats_seasonal_defense$ageCentered20Quadratic <- player_stats_seasonal_defense$ageCentered20 ^ 2
+
+player_stats_seasonal_kicking$ageCentered20 <- player_stats_seasonal_kicking$age - 20
+player_stats_seasonal_kicking$ageCentered20Quadratic <- player_stats_seasonal_kicking$ageCentered20 ^ 2
+
+# Years of experience
+player_stats_seasonal_offense$years_of_experience <- NULL
+player_stats_seasonal_defense$years_of_experience <- NULL
+player_stats_seasonal_kicking$years_of_experience <- NULL
+
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+  left_join(
+    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    by = c("player_id","season")
+  )
+
+player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
+  left_join(
+    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    by = c("player_id","season")
+  )
+
+player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
+  left_join(
+    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    by = c("player_id","season")
+  )
+
+# Save data
+save(
+  player_stats_seasonal_offense, player_stats_seasonal_defense, player_stats_seasonal_kicking,
+  file = "./data/player_stats_seasonal.RData"
+)
 ```
 
 ## Plotting {#sec-plotting}
