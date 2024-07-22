@@ -472,28 +472,7 @@ ggplot2::ggplot(
 
 ## Bar Plot {#sec-barPlot}
 
-A bar plot of fantasy points by position is depicted in @fig-barPlot.
-
-```{r}
-#| label: fig-barPlot
-#| fig-cap: "Bar Plot."
-
-ggplot2::ggplot(
-  data = player_stats_seasonal_offense %>%
-    filter(position_group %in% c("QB","RB","WR","TE")),
-  mapping = aes(
-    x = position_group,
-    y = fantasy_points,
-    fill = position_group
-    )
-) +
-  geom_bar(
-    stat = "identity",
-    position = position_dodge(width = 0)) +
-  theme_classic()
-```
-
-To display bars corresponding to a 95% confidence interval, we first compute summary statistics:
+To create a bar plot, we first compute summary statistics:
 
 ```{r}
 player_stats_seasonal_offense_summary <- player_stats_seasonal_offense %>%
@@ -520,6 +499,26 @@ The summary statistics are in @tbl-summaryStats.
 player_stats_seasonal_offense_summary
 ```
 
+A bar plot of fantasy points by position is depicted in @fig-barPlot.
+
+```{r}
+#| label: fig-barPlot
+#| fig-cap: "Bar Plot."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense_summary,
+  mapping = aes(
+    x = position_group,
+    y = mean,
+    fill = position_group,
+    color = position_group
+    )
+) +
+  geom_bar(
+    stat = "identity") +
+  theme_classic()
+```
+
 Based on the summary statistics in @tbl-summaryStats, we create a bar plot with bars representing the 95% confidence interval in @fig-barPlotConfidenceInterval.
 
 ```{r}
@@ -532,16 +531,18 @@ ggplot2::ggplot(
   mapping = aes(
     x = position_group,
     y = mean,
-    fill = position_group
+    fill = position_group,
+    color = position_group
     )
 ) +
   geom_bar(
-    stat = "identity",
-    position = position_dodge(width = 0)) +
+    stat = "identity") +
   geom_errorbar(
-    aes(ymin = ci_lower, ymax = ci_upper),
+    aes(
+      ymin = ci_lower,
+      ymax = ci_upper),
     width = 0.2,
-    position = position_dodge(width = 0)
+    color = "black"
   ) +
   theme_classic()
 ```
