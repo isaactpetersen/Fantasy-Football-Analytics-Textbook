@@ -217,7 +217,7 @@ Genetically informed designs are not as relevant for fantasy football analytics,
 A key tool when describing a research question or hypothesis is to create a conceptual depiction of the hypothesized causal processes.
 A causal diagram depicts the hypothesized causal processes that link two or more variables.
 A common form of causal diagrams is the directed acyclic graph (DAG).
-DAGs provide a helpful tool to communicate about causal questions and help identify how to avoid bias (i.e., over-estimation) in associations between variables due to [confounding](#sec-causalDiagramConfounding) (i.e., common causes) [@Digitale2022].
+DAGs provide a helpful tool to communicate about causal questions and help identify how to avoid bias (i.e., overestimation) in associations between variables due to [confounding](#sec-causalDiagramConfounding) (i.e., common causes) [@Digitale2022].
 For instance, from a DAG, it is possible to determine what variables it is important to control for in order to get unbiased estimates of the association between two variables of interest.
 To create DAGs, you can use the `R` package `dagitty` [@Textor2017] or the associated browser-based extension, DAGitty: <https://dagitty.net> (archived at <https://perma.cc/U9BY-VZE2>).
 Examples of various causal diagrams that could explain why `X` is associated with `Y` are in Figures [-@fig-XCausesY], [-@fig-YCausesX] and [-@fig-ZCausesXandY].
@@ -505,6 +505,52 @@ dagitty::adjustmentSets(
 However, as with [full mediation](#sec-causalDiagramMediationPartial), to obtain an unbiased estimate of the *total* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important *not* to control for player preparation (`M`).
 When the goal is to understand the (total) causal effect of coaching quality (`X`) and fantasy points (`Y`), controlling for a mediator (player preparation; `M`) would be inappropriate because doing so would remove the causal effect, thus artificially reducing the estimate of the association between coaching quality (`X`) and fantasy points (`Y`) [@Lederer2019].
 
+### Ancestors and Descendants {#sec-ancestorsDescendants}
+
+In a causal model, an *ancestor* is a variable that influences another variable, either directly or indirectly via another variable [@Rohrer2018].
+A *descendant* is a variable that is influenced by another variable [@Rohrer2018].
+In general, one should not control for descendants of the outcome variable, because doing so could eliminate the apparent effect of a legitimate cause on the outcome variable [@Digitale2022].
+Moreover, as described above, when trying to understand the total causal effect of a predictor variable on an outcome variable, one should not control for descendants of the predictor variable that are also antecedents of the outcome variable (i.e., mediators of the effect of the predictor variable on the outcome variable) [@Digitale2022].
+
+Consider the example in @fig-dagDescendant:
+
+```{r}
+#| label: fig-dagDescendant
+#| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Ancestor (Mediation) and Descendant of Y."
+
+descendentDag <- dagitty::dagitty("dag{
+  X -> M
+  M -> Y
+  X -> Y
+  Y -> Z
+}")
+
+#plot(dagitty::graphLayout(descendentDag))
+ggdag::ggdag(descendentDag) + theme_dag_blank()
+```
+
+```{r}
+dagitty::impliedConditionalIndependencies(descendentDag)
+```
+
+In this example, `X` and `M` are conditionally independent with `Z` when accounting for the mediator (`Y`).
+
+```{r}
+dagitty::adjustmentSets(
+  descendentDag, 
+  exposure = "X",
+  outcome = "Y",
+  effect = "direct")
+
+dagitty::adjustmentSets(
+  descendentDag, 
+  exposure = "X",
+  outcome = "Y",
+  effect = "total")
+```
+
+As indicated above, one should not control for the descendant of the outcome variable; thus, one should not control for `Z` when examining the association between `X` or `M` and `Y`.
+
 ### Collider Bias {#sec-colliderBias}
 
 *Collision* occurs when two variables influence a third variable, the collider [@DOnofrio2020].
@@ -709,11 +755,12 @@ There are three criteria for establishing causality: 1) the cause precedes the e
 3) There are no other alternative explanations for the effect apart from the cause.
 In general, it is important to be aware of the counterfactual and to consider what would have happened if the supposed cause had not occurred.
 Various experimental and quasi-experimental designs and approaches can be leveraged to more closely approximate causal inferences.
-Longitudinal designs, within-subject analyses, inclusion of control variables, and genetically informed designs are all quasi-experimental designs that afford the researcher greater control over some possible third variable [confounds](#sec-causalDiagramConfounding).
+[Longitudinal designs](#sec-causalInferenceLongitudinal), [within-subject analyses](#sec-causalInferenceWithinSubject), [inclusion of control variables](#sec-causalInferenceControlVariables), and [genetically informed designs](#sec-causalInferenceGeneticallyInformed) are all quasi-experimental designs that afford the researcher greater control over some possible third variable [confounds](#sec-causalDiagramConfounding).
 Causal diagrams can be a useful tool for identifying the proper variables to control for (and those not to control for).
 When [confounding](#sec-causalDiagramConfounding) exists, it is important to control for the [confound(s)](#sec-causalDiagramConfounding).
 It is important not to control for mediators when interested in the total effect of the [predictor variable](#sec-correlationalStudy) on the [outcome variable](#sec-correlationalStudy).
-When there is a [collision](#sec-colliderBias), it is important not to control for the [collider](#sec-colliderBias) unless the [collider](#sec-colliderBias) is also a [confound](#sec-causalDiagramConfounding).
+In addition, it is important not to control for [descendants](#sec-ancestorsDescendants) of the [outcome variable](#sec-correlationalStudy).
+When there is a [collision](#sec-colliderBias), it is important not to control for the [collider](#sec-colliderBias) (unless the [collider](#sec-colliderBias) is also a [confound](#sec-causalDiagramConfounding)).
 
 ::: {.content-visible when-format="html"}
 
