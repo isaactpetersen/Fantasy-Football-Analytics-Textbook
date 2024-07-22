@@ -29,6 +29,121 @@ load(file = "./data/player_stats_seasonal.RData")
 
 We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` objects in @sec-calculatePlayerAge.
 
+## Overview {#sec-dataVisualizationOverview}
+
+The R Graph Gallery provides examples of various types of plots: <https://r-graph-gallery.com>.
+
+## Univariate Distribution {#sec-univariateDistribution}
+
+### Histogram {#sec-histogram}
+
+A histogram of fantasy points is depicted in @fig-histogram.
+
+```{r}
+#| label: fig-histogram
+#| fig-cap: "Histogram of Fantasy Points."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasy_points)
+) +
+  geom_histogram(
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  theme_classic()
+```
+
+### Density Plot {#sec-densityPlot}
+
+A histogram of fantasy points is depicted in @fig-density.
+
+```{r}
+#| label: fig-density
+#| fig-cap: "Density Plot of Fantasy Points."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasy_points,
+    fill = position_group)
+) +
+  geom_density(alpha = 0.7) + # add transparency
+  theme_classic()
+```
+
+### Histogram with Overlaid Density Plot {#sec-histogramDensity}
+
+A histogram of fantasy points with an overlaid density plot is depicted in @fig-histogramDensity.
+
+```{r}
+#| label: fig-histogramDensity
+#| fig-cap: "Histogram with Overlaid Density Plot."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasy_points)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  theme_classic()
+```
+
+### Box-and-Whisker Plot {#sec-boxAndWhiskerPlot}
+
+A box-and-whisker plot of fantasy points is depicted in @fig-boxAndWhisker.
+
+```{r}
+#| label: fig-boxAndWhisker
+#| fig-cap: "Box-and-Whisker Plot."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = position_group,
+    y = fantasy_points,
+    fill = position_group)
+) +
+  geom_boxplot() +
+  theme_classic() + 
+  theme(legend.position = "none")
+```
+
+### Violin Plot {#sec-violinPlot}
+
+A violin plot of fantasy points is depicted in @fig-boxAndWhisker.
+
+```{r}
+#| label: fig-violin
+#| fig-cap: "Violin Plot."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = position_group,
+    y = fantasy_points,
+    fill = position_group)
+) +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  theme_classic() + 
+  theme(legend.position = "none")
+```
+
 ## Scatterplot {#sec-scatterplot}
 
 First, we prepare the data:
@@ -330,6 +445,84 @@ ggplotly(plot_ypcByPlayerAge)
 ```
 
 :::
+
+## Line Chart {#sec-lineChart}
+
+## Bar Plot {#sec-barPlot}
+
+A bar plot of fantasy points by position is depicted in @fig-barPlot.
+
+```{r}
+#| label: fig-barPlot
+#| fig-cap: "Bar Plot."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = position_group,
+    y = fantasy_points,
+    fill = position_group
+    )
+) +
+  geom_bar(
+    stat = "identity",
+    position = position_dodge(width = 0)) +
+  theme_classic()
+```
+
+To display bars corresponding to a 95% confidence interval, we first compute summary statistics:
+
+```{r}
+player_stats_seasonal_offense_summary <- player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")) %>% 
+  group_by(position_group) %>%
+  summarise( 
+    n = sum(!is.na(fantasy_points)),
+    mean = mean(fantasy_points, na.rm = TRUE),
+    sd = sd(fantasy_points, na.rm = TRUE)
+  ) %>%
+  mutate(se = sd/sqrt(n)) %>%
+  mutate(
+    ci_lower = mean - qt(0.975, df = n - 1) * se,
+    ci_upper = mean + qt(0.975, df = n - 1) * se
+  )
+```
+
+The summary statistics are in @tbl-summaryStats.
+
+```{r}
+#| label: tbl-summaryStats
+#| tbl-cap: "Table of Summary Statistics."
+
+player_stats_seasonal_offense_summary
+```
+
+Based on the summary statistics in @tbl-summaryStats, we create a bar plot with bars representing the 95% confidence interval in @fig-barPlotConfidenceInterval.
+
+```{r}
+#| label: fig-barPlotConfidenceInterval
+#| fig-cap: "Bar Plot with Bars Representing the 95% Confidence Interval."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense_summary %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = position_group,
+    y = mean,
+    fill = position_group
+    )
+) +
+  geom_bar(
+    stat = "identity",
+    position = position_dodge(width = 0)) +
+  geom_errorbar(
+    aes(ymin = ci_lower, ymax = ci_upper),
+    width = 0.2,
+    position = position_dodge(width = 0)
+  ) +
+  theme_classic()
+```
 
 ## Examples {#sec-scatterplot}
 
