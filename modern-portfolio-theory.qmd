@@ -5,12 +5,164 @@
 ### Load Packages {#sec-modernPortfolioTheoryLoadPackages}
 
 ```{r}
-
+library("quantmod")
+library("fPortfolio")
+library("tidyverse")
 ```
 
 ## Overview {#sec-modernPortfolioTheoryOverview}
 
 <https://eng.wealthfront.com/2012/01/17/moneyball-using-modern-portfolio-theory-to-win-your-fantasy-sports-league/> (archived at <https://perma.cc/NE35-G6LR>)
+
+## Download Historical Stock Prices {#sec-downloadStockPrices}
+
+```{r}
+symbols <- c(
+  "AAPL",  # Apple
+  "MSFT",  # Microsoft
+  "GOOGL", # Google
+  "AMZN",  # Amazon
+  "META",  # Meta/Facebook
+  "V",     # Visa
+  "DIS",   # Disney
+  "NKE",   # Nike
+  "TSLA")  # Tesla
+
+quantmod::getSymbols(symbols)
+```
+
+## Calculate Stock Returns {#sec-calculateStockReturns}
+
+```{r}
+prices <- do.call(
+  merge,
+  lapply(
+    symbols,
+    function(sym) quantmod::Cl(get(sym))))
+
+returns <- na.omit(
+  TTR::ROC(
+    prices,
+    type = "discrete"))
+
+returns_ts <- timeSeries::as.timeSeries(returns)
+```
+
+## Create Portfolio {#sec-createPortfolio}
+
+```{r}
+portfolioSpec <- fPortfolio::portfolioSpec()
+
+fPortfolio::setNFrontierPoints(portfolioSpec) <- 1000
+```
+
+## Determine the Efficient Frontier {#sec-efficientFrontier}
+
+```{r}
+efficientFrontier <- portfolioFrontier(
+  returns_ts,
+  spec = portfolioSpec)
+
+efficientFrontier
+```
+
+```{r}
+# Extract the coordinates of individual assets
+asset_means <- colMeans(returns)
+asset_sd <- apply(returns, 2, sd)
+
+# Add some padding to plot limits (so ticker symbols don't get cut off)
+xlim <- range(asset_sd) * c(0.9, 1.1)
+ylim <- range(asset_means) * c(0.9, 1.1)
+
+xlim[1] <- 0
+ylim[1] <- 0
+
+# Set scientific notation penalty
+options(scipen = 999)
+
+plot(
+  efficientFrontier,
+  which = c(
+    1,  # efficient frontier
+    3,  # tangency portfolio
+    4), # risk/return of individual assets
+  control = list(
+    xlim = xlim,
+    ylim = ylim
+  ))
+
+# Add text labels for individual assets
+points(
+  asset_sd,
+  asset_means,
+  col = "red",
+  pch = 19)
+
+text(
+  asset_sd,
+  asset_means,
+  labels = symbols,
+  pos = 4,
+  cex = 0.8,
+  col = "black")
+```
+
+## Identify the Optimal Weights {#sec-portfolioOptimalWeights}
+
+### Tangency Portfolio {#sec-tangencyPortfolio}
+
+The tangency portfolio is the portfolio with the highest Sharpe ratio (i.e., the highest ratio of return to risk).
+In other words, it is the portfolio with the greatest risk-adjusted returns.
+
+```{r}
+# Find the tangency portfolio (portfolio with the highest Sharpe ratio)
+tangencyPortfolio <- fPortfolio::tangencyPortfolio(
+  data = returns_ts,
+  spec = portfolioSpec)
+
+# Extract optimal weights
+tangencyPortfolio_optimalWeights <- fPortfolio::getWeights(tangencyPortfolio)
+tangencyPortfolio_optimalWeights
+
+# Output the results
+summary(tangencyPortfolio)
+```
+
+### Portfolio with Max Return at a Given Risk-Level {#sec-tangencyPortfolio}
+
+```{r}
+#| eval: false
+
+# Define target risk levels
+targetRisks <- seq(0, 0.3, by = 0.01)
+
+# Initialize storage for optimal portfolios
+optimalPortfolios <- list()
+optimalWeights_list <- list()
+
+# Find optimal weightings for each target risk level
+for (risk in targetRisks) {
+  # Create a portfolio optimization specification with the target risk
+  portfolioSpec <- fPortfolio::portfolioSpec()
+  fPortfolio::setTargetRisk(portfolioSpec) <- risk
+  
+  # Solve for the maximum return at this target risk
+  optimal_portfolio <- fPortfolio::maxreturnPortfolio(
+    returns_ts,
+    spec = portfolioSpec)
+  
+  # Store the optimal portfolio
+  optimalPortfolios[[as.character(risk)]] <- optimal_portfolio
+  
+  # Store the optimal portfolio weights with risk level
+  optimal_weights <- fPortfolio::getWeights(optimal_portfolio)
+  optimalWeights_list[[as.character(risk)]] <- c(RiskLevel = risk, optimal_weights)
+}
+
+optimalWeightsByRisk <- dplyr::bind_rows(optimalWeights_list)
+optimalWeightsByRisk
+```
 
 ## Conclusion {#sec-modernPortfolioTheoryConclusion}
 
