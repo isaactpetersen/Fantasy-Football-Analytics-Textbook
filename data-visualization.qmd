@@ -77,11 +77,11 @@ ggplot2::ggplot(
 
 ### Histogram with Overlaid Density and Rug Plot {#sec-histogramDensity}
 
-A histogram of fantasy points with an overlaid density plot is depicted in @fig-histogramDensity.
+A histogram of fantasy points with an overlaid density and rug plot is depicted in @fig-histogramDensity.
 
 ```{r}
 #| label: fig-histogramDensity
-#| fig-cap: "Histogram with Overlaid Density Plot."
+#| fig-cap: "Histogram with Overlaid Density and Rug Plot."
 
 ggplot2::ggplot(
   data = player_stats_seasonal_offense %>%
@@ -476,6 +476,8 @@ ggplot2::ggplot(
 To create a bar plot, we first compute summary statistics:
 
 ```{r}
+confidenceLevel <- .95 # for 95% confidence interval
+
 player_stats_seasonal_offense_summary <- player_stats_seasonal_offense %>%
     filter(position_group %in% c("QB","RB","WR","TE")) %>% 
   group_by(position_group) %>%
@@ -486,8 +488,8 @@ player_stats_seasonal_offense_summary <- player_stats_seasonal_offense %>%
   ) %>%
   mutate(se = sd/sqrt(n)) %>%
   mutate(
-    ci_lower = mean - qt(0.975, df = n - 1) * se,
-    ci_upper = mean + qt(0.975, df = n - 1) * se
+    ci_lower = mean - qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se,
+    ci_upper = mean + qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se
   )
 ```
 
