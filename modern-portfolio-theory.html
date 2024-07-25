@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.55">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Isaac T. Petersen">
+<meta name="dcterms.date" content="today">
+<title>17&nbsp; Modern Portfolio Theory – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./mythbusters.html" rel="prev">
+<link href="./images/logo.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-C3SNF7Y0PJ"></script><script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
+</script><script type="application/json" class="js-hypothesis-config">
+{
+  "theme": "clean",
+  "openSidebar": false
+}
+</script><script async="" src="https://hypothes.is/embed.js"></script><script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<meta property="og:title" content="17&nbsp; Modern Portfolio Theory – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta property="og:description" content="">
+<meta property="og:site_name" content="Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta name="twitter:title" content="17&nbsp; Modern Portfolio Theory – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta name="twitter:description" content="">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./modern-portfolio-theory.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Modern Portfolio Theory</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./fantasy-football.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Intro to Football and Fantasy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started with <code>R</code> for Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Data Visualization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./player-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Player Evaluation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./draft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">The Fantasy Draft</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./research-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Research Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./basic-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Basic Statistics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Correlation Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Multiple Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cognitive-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Heuristics and Cognitive Biases in Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./actuarial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Judgment Versus Actuarial Approaches to Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./base-rates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Base Rates</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./evaluating-prediction-accuracy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Evaluation of Prediction/Forecasting Accuracy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mythbusters.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./modern-portfolio-theory.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Modern Portfolio Theory</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#sec-modernPortfolioTheoryGettingStarted" id="toc-sec-modernPortfolioTheoryGettingStarted" class="nav-link active" data-scroll-target="#sec-modernPortfolioTheoryGettingStarted"><span class="header-section-number">17.1</span> Getting Started</a>
+  <ul>
+<li><a href="#sec-modernPortfolioTheoryLoadPackages" id="toc-sec-modernPortfolioTheoryLoadPackages" class="nav-link" data-scroll-target="#sec-modernPortfolioTheoryLoadPackages"><span class="header-section-number">17.1.1</span> Load Packages</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-modernPortfolioTheoryOverview" id="toc-sec-modernPortfolioTheoryOverview" class="nav-link" data-scroll-target="#sec-modernPortfolioTheoryOverview"><span class="header-section-number">17.2</span> Overview</a></li>
+  <li>
+<a href="#sec-likeStockPicking" id="toc-sec-likeStockPicking" class="nav-link" data-scroll-target="#sec-likeStockPicking"><span class="header-section-number">17.3</span> Fantasy Football is Like Stock Picking</a>
+  <ul>
+<li><a href="#sec-wisdomOfTheCrowd" id="toc-sec-wisdomOfTheCrowd" class="nav-link" data-scroll-target="#sec-wisdomOfTheCrowd"><span class="header-section-number">17.3.1</span> The Wisdom of the Crowd (or Market)</a></li>
+  <li><a href="#sec-diversification" id="toc-sec-diversification" class="nav-link" data-scroll-target="#sec-diversification"><span class="header-section-number">17.3.2</span> Diversification</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-efficientFrontier" id="toc-sec-efficientFrontier" class="nav-link" data-scroll-target="#sec-efficientFrontier"><span class="header-section-number">17.4</span> The Efficient Frontier of a Stock Portfolio</a>
+  <ul>
+<li><a href="#sec-downloadStockPrices" id="toc-sec-downloadStockPrices" class="nav-link" data-scroll-target="#sec-downloadStockPrices"><span class="header-section-number">17.4.1</span> Download Historical Stock Prices</a></li>
+  <li><a href="#sec-calculateStockReturns" id="toc-sec-calculateStockReturns" class="nav-link" data-scroll-target="#sec-calculateStockReturns"><span class="header-section-number">17.4.2</span> Calculate Stock Returns</a></li>
+  <li><a href="#sec-createPortfolio" id="toc-sec-createPortfolio" class="nav-link" data-scroll-target="#sec-createPortfolio"><span class="header-section-number">17.4.3</span> Create Portfolio</a></li>
+  <li><a href="#sec-efficientFrontier" id="toc-sec-efficientFrontier" class="nav-link" data-scroll-target="#sec-efficientFrontier"><span class="header-section-number">17.4.4</span> Determine the Efficient Frontier</a></li>
+  <li>
+<a href="#sec-portfolioOptimalWeights" id="toc-sec-portfolioOptimalWeights" class="nav-link" data-scroll-target="#sec-portfolioOptimalWeights"><span class="header-section-number">17.4.5</span> Identify the Optimal Weights</a>
+  <ul class="collapse">
+<li><a href="#sec-tangencyPortfolio" id="toc-sec-tangencyPortfolio" class="nav-link" data-scroll-target="#sec-tangencyPortfolio"><span class="header-section-number">17.4.5.1</span> Tangency Portfolio</a></li>
+  <li><a href="#sec-tangencyPortfolio" id="toc-sec-tangencyPortfolio" class="nav-link" data-scroll-target="#sec-tangencyPortfolio"><span class="header-section-number">17.4.5.2</span> Portfolio with Max Return at a Given Risk Level</a></li>
+  </ul>
+</li>
+  </ul>
+</li>
+  <li><a href="#sec-efficientFrontierFantasy" id="toc-sec-efficientFrontierFantasy" class="nav-link" data-scroll-target="#sec-efficientFrontierFantasy"><span class="header-section-number">17.5</span> The Efficient Frontier of a Fantasy Team</a></li>
+  <li><a href="#sec-modernPortfolioTheoryConclusion" id="toc-sec-modernPortfolioTheoryConclusion" class="nav-link" data-scroll-target="#sec-modernPortfolioTheoryConclusion"><span class="header-section-number">17.6</span> Conclusion</a></li>
+  <li><a href="#sec-modernPortfolioTheorySessionInfo" id="toc-sec-modernPortfolioTheorySessionInfo" class="nav-link" data-scroll-target="#sec-modernPortfolioTheorySessionInfo"><span class="header-section-number">17.7</span> Session Info</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/modern-portfolio-theory.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><div class="alert alert-info hints-alert">
+  <div class="hints-icon">
+    <i class="fa fa-comments-o"></i>
+  </div>
+  <div class="hints-container">
+    <b>I need your help!</b>
+    <p>
+    I want your feedback to make the book better for you and other readers. If you find typos, errors, or places where the text may be improved, please let me know.
+    The best ways to provide feedback are by <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">GitHub</a> or <a href="https://hypothes.is">hypothes.is</a> annotations.
+    </p>
+
+    <p>
+      <i class="fa fa-github"></i>
+      <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues">Opening an issue</a> or <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/pulls">submitting a pull request</a> on GitHub: <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook</a>
+    </p>
+    <p>
+      <img style="display: inline;" src="https://hypothes.is/organizations/__default__/logo" alt="Hypothesis">
+      Adding an annotation using <a href="https://hypothes.is">hypothes.is</a>.
+      To add an annotation, <span style="background-color: #3297FD; color: white">select some text</span> and then click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class="annotator-adder-actions__icon"><path fill="currentColor" fill-rule="nonzero" d="M15 0c.27 0 .505.099.703.297A.961.961 0 0116 1v15l-4-3H1a.974.974 0 01-.703-.29A.953.953 0 010 12V1C0 .719.096.482.29.29A.966.966 0 011 0h14zM7 3l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C4.156 5.229 4 6 4 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188C4.729 8.854 5.082 9 5.5 9c.417 0 .77-.146 1.063-.438C6.854 8.271 7 7.918 7 7.5c0-.417-.146-.77-.438-1.063A1.447 1.447 0 005.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L7 4V3zm5 0l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C9.156 5.229 9 6 9 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188c.291.291.645.437 1.062.437.417 0 .77-.146 1.063-.438.291-.291.437-.645.437-1.062 0-.417-.146-.77-.438-1.063A1.447 1.447 0 0010.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L12 4V3z"></path></svg></span>
+      symbol on the pop-up menu.
+      To see the annotations of others, click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class=""><g fill-rule="evenodd"><rect fill="none" stroke="none" x="0" y="0" width="16" height="16"></rect><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12L6 8l4-4"></path></g></svg></span>
+      symbol in the upper right-hand corner of the page.
+    </p>
+  </div>
+</div>
+
+<header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-modernPortfolioTheory" class="quarto-section-identifier"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Modern Portfolio Theory</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="sec-modernPortfolioTheoryGettingStarted" class="level2" data-number="17.1"><h2 data-number="17.1" class="anchored" data-anchor-id="sec-modernPortfolioTheoryGettingStarted">
+<span class="header-section-number">17.1</span> Getting Started</h2>
+<section id="sec-modernPortfolioTheoryLoadPackages" class="level3" data-number="17.1.1"><h3 data-number="17.1.1" class="anchored" data-anchor-id="sec-modernPortfolioTheoryLoadPackages">
+<span class="header-section-number">17.1.1</span> Load Packages</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"quantmod"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"fPortfolio"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="sec-modernPortfolioTheoryOverview" class="level2" data-number="17.2"><h2 data-number="17.2" class="anchored" data-anchor-id="sec-modernPortfolioTheoryOverview">
+<span class="header-section-number">17.2</span> Overview</h2>
+</section><section id="sec-likeStockPicking" class="level2" data-number="17.3"><h2 data-number="17.3" class="anchored" data-anchor-id="sec-likeStockPicking">
+<span class="header-section-number">17.3</span> Fantasy Football is Like Stock Picking</h2>
+<p>Selecting players for your fantasy team is like picking stocks. In both fantasy football and the stock market, your goal is to pick assets (i.e., players/stocks) that will perform best and that others undervalue. But what is the best way to do that? Below, we discuss approaches to picking players/stocks.</p>
+<section id="sec-wisdomOfTheCrowd" class="level3" data-number="17.3.1"><h3 data-number="17.3.1" class="anchored" data-anchor-id="sec-wisdomOfTheCrowd">
+<span class="header-section-number">17.3.1</span> The Wisdom of the Crowd (or Market)</h3>
+<p>In picking players, there are various approaches one could take. You could do lots of research to pick players/stocks with strong fundamentals that you think will do particularly well next year. By picking these players/stocks, you are predicting that they will <em>outperform</em> their expectations. However, all of your information is likely already reflected in the current valuation of the player/stock, so your prediction is basically a gamble. This is evidenced by the fact that people do not reliably beat the crowd/market.</p>
+<p>Even so-called experts do not beat the market reliably. There is little consistency in the performance of mutual fund managers over time. The following charts are from Leonard Mlodinow’s book, “The Drunkard’s Walk: How Randomness Rules Our Lives”. The chart on the left depicts the performance of the top mutual funds from 1991 to 1995. The chart on the right depicts the performance of the same funds in the same order over the subsequent 5 years (1996 to 2000):</p>
+<p>The best funds from 1991–1995 were not necessarily the best funds from 1996–2000. This suggests that mutual fund managers differ in great part because of luck or chance rather than reliable skill. That is likely why <a href="http://www.npr.org/blogs/money/2013/01/14/169326326/housecat-beats-investors-in-stock-market-challenge">a cat beat professional investors in a stock market challenge</a> (archived at <a href="https://perma.cc/R3XU-K6J8" class="uri">https://perma.cc/R3XU-K6J8</a>). Although our sample size is much smaller with fantasy football projections, there also appears to be little consistency in fantasy football sites’ rank in accuracy over time [INSERT], suggesting that the projection sources are not reliably better than each other (or the crowd) over time.</p>
+<p>The market reflects all of the knowledge of the crowd. One common misconception is that if you go with the market, you will receive “average” returns (by “average”, I mean that you will be in the 50th percentile among investors). This is not true—it has been shown that most mutual funds (about 80%) underperform the average returns of the stock market. So, by going with the market average, you will likely perform better than the “average” fund/investor. Consistent with this, crowd-averaged fantasy football projections tend to be more accurate than any individual’s projection: INSERT This evidence is consistent with the notion of the wisdom of the crowd. Moreover, even if the stock market is relatively efficient in terms of valuing stocks based on the available information, your fantasy football league is likely not. Thus, it may be effective to use crowd-based projections to identify players who are undervalued by your league.</p>
+</section><section id="sec-diversification" class="level3" data-number="17.3.2"><h3 data-number="17.3.2" class="anchored" data-anchor-id="sec-diversification">
+<span class="header-section-number">17.3.2</span> Diversification</h3>
+<p>Modern portfolio theory is a framework for determining the optimal composition of an investment portfolio to maximize expected returns for a given level of risk. Here, <em>risk</em> refers to the <a href="basic-statistics.html#sec-descriptiveStatisticsSpread">variability</a> (e.g., standard deviation or variance) of returns across time. Given two portfolios with the same expected returns over time, people will prefer the “safer” portfolio—that is, the portfolio with less <a href="basic-statistics.html#sec-descriptiveStatisticsSpread">variability</a>/volatility across time. One of the powerful notions of modern portfolio theory is that, through diversification, one can achieve lower risk with the same expected returns. In investing, <em>diversification</em> involves owning multiple asset classes (e.g., domestic and international stocks and bonds), with the goal of having asset classes that are either uncorrelated or negatively correlated. That is, owning different types of assets is safer than owning only one type. If you have too much money in one asset and that asset tanks, you will lose your money. In other words, you do not want to put all of your eggs in one basket. By owning different asset classes, you can limit your downside risk without sacrificing much in terms of expected return.</p>
+<p>This lesson can also apply to fantasy football. When assembling a team, you are essentially putting together a portfolio of assets (i.e., team of players). As with stocks, each player has an expected return (i.e., projection) and a degree of risk. In fantasy football, a player’s risk might be quantified in terms of the <a href="basic-statistics.html#sec-descriptiveStatisticsSpread">variability</a> of projected scores for a player across projection sources (e.g., Projection Source A, Source B, Souce C, etc.), or as historical game-to-game <a href="basic-statistics.html#sec-descriptiveStatisticsSpread">variability</a>. All things equal, we want to minimize our risk for a given level of expected returns. That way, we have the best chance of winning any given week. For the same level of expected returns, higher risk teams might have a few amazing games, but their teams might fall flat in other weeks. That is, for a given (high) rate of return, <a href="https://eng.wealthfront.com/2012/01/17/moneyball-using-modern-portfolio-theory-to-win-your-fantasy-sports-league/">you are best off in the long run (i.e., over the course of a season) with a lower risk team</a> compared to a higher risk team (archived at <a href="https://perma.cc/NE35-G6LR" class="uri">https://perma.cc/NE35-G6LR</a>).</p>
+<p>In terms of diversification, it can be helpful to diversify in multiple ways. First, it can be helpful not to rely on just one or two “stud” players. If they are on bye or have a down week, your team is more likely to suffer. Also, there are risks in picking multiple offensive players from the same team. If you draft your starting Quarterback and Wide Receiver from the same team (e.g., the Cowboys), you are exposing your fantasy team to considerable risk. For instance, if you have the Quarterback and Wide Receiver from the same team, and the team has a poor offensive outing, that will have a greater impact. You can limit your downside risk by diversifying—drafting players from different teams. That way if the Cowboys’ offense does poorly in a given week, your fantasy team will not be as affected. Having multiple players on a juggernaut offense can be a boon, but it can be challenging to predict which offense will lead the league.</p>
+<p>However, sometimes having two players on the same team might be beneficial because some positions may be uncorrelated or even negatively correlated, which can also reduce risk. For instance, the performance of the Tight End and Running Back on the same team tends to be slightly negatively correlated, so it might not be a bad idea to start the Tight End and Running Back from the same team. For a correlation matrix of all positions on the team, see: <a href="https://assets-global.website-files.com/5f1af76ed86d6771ad48324b/607a4434a565aa7763bd1312_AndyAsh-Sharpstack-RPpaper.pdf" class="uri">https://assets-global.website-files.com/5f1af76ed86d6771ad48324b/607a4434a565aa7763bd1312_AndyAsh-Sharpstack-RPpaper.pdf</a> (archived at <a href="https://perma.cc/JQ6G-KSRT" class="uri">https://perma.cc/JQ6G-KSRT</a>).</p>
+<p>Another important idea from modern portfolio theory is that, if you want to achieve higher returns, you may be able to by accepting additional—and the right combination of—risk. That is, higher returns generally requires taking on additional risk—at least as long as we stay along the <a href="#sec-efficientFrontier">efficient frontier</a>, described next.</p>
+</section></section><section id="sec-efficientFrontier" class="level2" data-number="17.4"><h2 data-number="17.4" class="anchored" data-anchor-id="sec-efficientFrontier">
+<span class="header-section-number">17.4</span> The Efficient Frontier of a Stock Portfolio</h2>
+<p>The ultimate goal in fantasy football is to draft players for your starting lineup that provide the most projected points and the smallest downside risk. That is, your goal is to achieve the optimal portfolio at a given level of risk, depending on how much risk you are willing to tolerate. One of the key tools in modern portfolio theory for identifying the optimal portfolio (for a given risk level) is the efficient frontier. The efficient frontier is a visual depiction of the maximum expected returns for a given level of risk (where risk is the <a href="basic-statistics.html#sec-descriptiveStatisticsSpread">variability</a> in returns over time). The efficient frontier is helpful for identifying the optimal portfolio—the optimal combination and weighting of assets—for a given risk level.</p>
+<p>In the example below, we use historical returns (since YEAR) as the expected future returns. However, using historical returns as the expected future returns is risky because, as described in the common disclaimer, “Past performance does not guarantee future results.” If you select a relatively short period of historical returns, you may be selecting a period when the stock performed particularly well. When evaluating historical returns it is preferable to evaluate long time horizons and to evaluate how the stock performed during period of both boom (i.e., “bull markets”) and bust (i.e., “bear markets”, such as in a recession).</p>
+<section id="sec-downloadStockPrices" class="level3" data-number="17.4.1"><h3 data-number="17.4.1" class="anchored" data-anchor-id="sec-downloadStockPrices">
+<span class="header-section-number">17.4.1</span> Download Historical Stock Prices</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>symbols <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb2-2"><a href="#cb2-2"></a>  <span class="st">"AAPL"</span>,  <span class="co"># Apple</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a>  <span class="st">"MSFT"</span>,  <span class="co"># Microsoft</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>  <span class="st">"GOOGL"</span>, <span class="co"># Google</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>  <span class="st">"AMZN"</span>,  <span class="co"># Amazon</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="st">"META"</span>,  <span class="co"># Meta/Facebook</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="st">"V"</span>,     <span class="co"># Visa</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>  <span class="st">"DIS"</span>,   <span class="co"># Disney</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>  <span class="st">"NKE"</span>,   <span class="co"># Nike</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>  <span class="st">"TSLA"</span>)  <span class="co"># Tesla</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a>quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(symbols)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] "AAPL"  "MSFT"  "GOOGL" "AMZN"  "META"  "V"     "DIS"   "NKE"   "TSLA" </code></pre>
+</div>
+</div>
+</section><section id="sec-calculateStockReturns" class="level3" data-number="17.4.2"><h3 data-number="17.4.2" class="anchored" data-anchor-id="sec-calculateStockReturns">
+<span class="header-section-number">17.4.2</span> Calculate Stock Returns</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>prices <span class="ot">&lt;-</span> <span class="fu">do.call</span>(</span>
+<span id="cb4-2"><a href="#cb4-2"></a>  merge,</span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">lapply</span>(</span>
+<span id="cb4-4"><a href="#cb4-4"></a>    symbols,</span>
+<span id="cb4-5"><a href="#cb4-5"></a>    <span class="cf">function</span>(sym) quantmod<span class="sc">::</span><span class="fu">Cl</span>(<span class="fu">get</span>(sym))))</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a>returns <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(</span>
+<span id="cb4-8"><a href="#cb4-8"></a>  TTR<span class="sc">::</span><span class="fu">ROC</span>(</span>
+<span id="cb4-9"><a href="#cb4-9"></a>    prices,</span>
+<span id="cb4-10"><a href="#cb4-10"></a>    <span class="at">type =</span> <span class="st">"discrete"</span>))</span>
+<span id="cb4-11"><a href="#cb4-11"></a></span>
+<span id="cb4-12"><a href="#cb4-12"></a>returns_ts <span class="ot">&lt;-</span> timeSeries<span class="sc">::</span><span class="fu">as.timeSeries</span>(returns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-createPortfolio" class="level3" data-number="17.4.3"><h3 data-number="17.4.3" class="anchored" data-anchor-id="sec-createPortfolio">
+<span class="header-section-number">17.4.3</span> Create Portfolio</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>portfolioSpec <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioSpec</span>()</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a>fPortfolio<span class="sc">::</span><span class="fu">setNFrontierPoints</span>(portfolioSpec) <span class="ot">&lt;-</span> <span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-efficientFrontier" class="level3" data-number="17.4.4"><h3 data-number="17.4.4" class="anchored" data-anchor-id="sec-efficientFrontier">
+<span class="header-section-number">17.4.4</span> Determine the Efficient Frontier</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>efficientFrontier <span class="ot">&lt;-</span> <span class="fu">portfolioFrontier</span>(</span>
+<span id="cb6-2"><a href="#cb6-2"></a>  returns_ts,</span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="at">spec =</span> portfolioSpec)</span>
+<span id="cb6-4"><a href="#cb6-4"></a></span>
+<span id="cb6-5"><a href="#cb6-5"></a>efficientFrontier</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Title:
+ MV Portfolio Frontier 
+ Estimator:         covEstimator 
+ Solver:            solveRquadprog 
+ Optimize:          minRisk 
+ Constraints:       LongOnly 
+ Portfolio Points:  5 of 1000 
+
+Portfolio Weights:
+     AAPL.Close MSFT.Close GOOGL.Close AMZN.Close META.Close V.Close DIS.Close
+1        0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    1.0000
+250      0.1311     0.1342      0.1091     0.0574     0.0000  0.2944    0.1492
+500      0.0820     0.2358      0.0340     0.1440     0.0529  0.2073    0.0000
+750      0.0000     0.1363      0.0000     0.1843     0.0942  0.0000    0.0000
+1000     0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    0.0000
+     NKE.Close TSLA.Close
+1       0.0000     0.0000
+250     0.1048     0.0198
+500     0.0000     0.2439
+750     0.0000     0.5851
+1000    0.0000     1.0000
+
+Covariance Risk Budgets:
+     AAPL.Close MSFT.Close GOOGL.Close AMZN.Close META.Close V.Close DIS.Close
+1        0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    1.0000
+250      0.1351     0.1399      0.1120     0.0614     0.0000  0.2950    0.1340
+500      0.0598     0.1833      0.0244     0.1256     0.0465  0.1293    0.0000
+750      0.0000     0.0495      0.0000     0.0852     0.0442  0.0000    0.0000
+1000     0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    0.0000
+     NKE.Close TSLA.Close
+1       0.0000     0.0000
+250     0.0968     0.0258
+500     0.0000     0.4311
+750     0.0000     0.8211
+1000    0.0000     1.0000
+
+Target Returns and Risks:
+       mean    Cov   CVaR    VaR
+1    0.0004 0.0165 0.0376 0.0234
+250  0.0008 0.0128 0.0304 0.0198
+500  0.0013 0.0163 0.0375 0.0258
+750  0.0017 0.0245 0.0547 0.0365
+1000 0.0022 0.0356 0.0777 0.0509
+
+Description:
+ Thu Jul 25 00:06:14 2024 by user:  </code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Extract the coordinates of individual assets</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>asset_means <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(returns)</span>
+<span id="cb8-3"><a href="#cb8-3"></a>asset_sd <span class="ot">&lt;-</span> <span class="fu">apply</span>(returns, <span class="dv">2</span>, sd)</span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co"># Add some padding to plot limits (so ticker symbols don't get cut off)</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>xlim <span class="ot">&lt;-</span> <span class="fu">range</span>(asset_sd) <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">1.1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7"></a>ylim <span class="ot">&lt;-</span> <span class="fu">range</span>(asset_means) <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">1.1</span>)</span>
+<span id="cb8-8"><a href="#cb8-8"></a></span>
+<span id="cb8-9"><a href="#cb8-9"></a>xlim[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a>ylim[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co"># Set scientific notation penalty</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span>
+<span id="cb8-14"><a href="#cb8-14"></a></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="fu">plot</span>(</span>
+<span id="cb8-16"><a href="#cb8-16"></a>  efficientFrontier,</span>
+<span id="cb8-17"><a href="#cb8-17"></a>  <span class="at">which =</span> <span class="fu">c</span>(</span>
+<span id="cb8-18"><a href="#cb8-18"></a>    <span class="dv">1</span>,  <span class="co"># efficient frontier</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a>    <span class="dv">3</span>,  <span class="co"># tangency portfolio</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a>    <span class="dv">4</span>), <span class="co"># risk/return of individual assets</span></span>
+<span id="cb8-21"><a href="#cb8-21"></a>  <span class="at">control =</span> <span class="fu">list</span>(</span>
+<span id="cb8-22"><a href="#cb8-22"></a>    <span class="at">xlim =</span> xlim,</span>
+<span id="cb8-23"><a href="#cb8-23"></a>    <span class="at">ylim =</span> ylim</span>
+<span id="cb8-24"><a href="#cb8-24"></a>  ))</span>
+<span id="cb8-25"><a href="#cb8-25"></a></span>
+<span id="cb8-26"><a href="#cb8-26"></a><span class="co"># Add text labels for individual assets</span></span>
+<span id="cb8-27"><a href="#cb8-27"></a><span class="fu">points</span>(</span>
+<span id="cb8-28"><a href="#cb8-28"></a>  asset_sd,</span>
+<span id="cb8-29"><a href="#cb8-29"></a>  asset_means,</span>
+<span id="cb8-30"><a href="#cb8-30"></a>  <span class="at">col =</span> <span class="st">"red"</span>,</span>
+<span id="cb8-31"><a href="#cb8-31"></a>  <span class="at">pch =</span> <span class="dv">19</span>)</span>
+<span id="cb8-32"><a href="#cb8-32"></a></span>
+<span id="cb8-33"><a href="#cb8-33"></a><span class="fu">text</span>(</span>
+<span id="cb8-34"><a href="#cb8-34"></a>  asset_sd,</span>
+<span id="cb8-35"><a href="#cb8-35"></a>  asset_means,</span>
+<span id="cb8-36"><a href="#cb8-36"></a>  <span class="at">labels =</span> symbols,</span>
+<span id="cb8-37"><a href="#cb8-37"></a>  <span class="at">pos =</span> <span class="dv">4</span>,</span>
+<span id="cb8-38"><a href="#cb8-38"></a>  <span class="at">cex =</span> <span class="fl">0.8</span>,</span>
+<span id="cb8-39"><a href="#cb8-39"></a>  <span class="at">col =</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-efficientFrontier" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-efficientFrontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="modern-portfolio-theory_files/figure-html/fig-efficientFrontier-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-efficientFrontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.1: Efficient Frontier for a Stock Portfolio.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="sec-portfolioOptimalWeights" class="level3" data-number="17.4.5"><h3 data-number="17.4.5" class="anchored" data-anchor-id="sec-portfolioOptimalWeights">
+<span class="header-section-number">17.4.5</span> Identify the Optimal Weights</h3>
+<section id="sec-tangencyPortfolio" class="level4" data-number="17.4.5.1"><h4 data-number="17.4.5.1" class="anchored" data-anchor-id="sec-tangencyPortfolio">
+<span class="header-section-number">17.4.5.1</span> Tangency Portfolio</h4>
+<p>The tangency portfolio is the portfolio with the highest Sharpe ratio (i.e., the highest ratio of return to risk). In other words, it is the portfolio with the greatest risk-adjusted returns.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Find the tangency portfolio (portfolio with the highest Sharpe ratio)</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>tangencyPortfolio <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">tangencyPortfolio</span>(</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="at">data =</span> returns_ts,</span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="at">spec =</span> portfolioSpec)</span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co"># Extract optimal weights</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>tangencyPortfolio_optimalWeights <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">getWeights</span>(tangencyPortfolio)</span>
+<span id="cb9-8"><a href="#cb9-8"></a>tangencyPortfolio_optimalWeights</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code> AAPL.Close  MSFT.Close GOOGL.Close  AMZN.Close  META.Close     V.Close 
+ 0.09212755  0.22728104  0.04758282  0.13541885  0.04641009  0.23417993 
+  DIS.Close   NKE.Close  TSLA.Close 
+ 0.00000000  0.00000000  0.21699972 </code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Output the results</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="fu">summary</span>(tangencyPortfolio)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Title:
+ MV Tangency Portfolio 
+ Estimator:         covEstimator 
+ Solver:            solveRquadprog 
+ Optimize:          minRisk 
+ Constraints:       LongOnly 
+
+Portfolio Weights:
+ AAPL.Close  MSFT.Close GOOGL.Close  AMZN.Close  META.Close     V.Close 
+     0.0921      0.2273      0.0476      0.1354      0.0464      0.2342 
+  DIS.Close   NKE.Close  TSLA.Close 
+     0.0000      0.0000      0.2170 
+
+Covariance Risk Budgets:
+ AAPL.Close  MSFT.Close GOOGL.Close  AMZN.Close  META.Close     V.Close 
+     0.0712      0.1862      0.0362      0.1232      0.0425      0.1573 
+  DIS.Close   NKE.Close  TSLA.Close 
+     0.0000      0.0000      0.3834 
+
+Target Returns and Risks:
+  mean    Cov   CVaR    VaR 
+0.0012 0.0158 0.0364 0.0251 
+
+Description:
+ Thu Jul 25 00:06:14 2024 by user:  </code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="modern-portfolio-theory_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="modern-portfolio-theory_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="modern-portfolio-theory_files/figure-html/unnamed-chunk-7-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-tangencyPortfolio" class="level4" data-number="17.4.5.2"><h4 data-number="17.4.5.2" class="anchored" data-anchor-id="sec-tangencyPortfolio">
+<span class="header-section-number">17.4.5.2</span> Portfolio with Max Return at a Given Risk Level</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Define target risk levels</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a>targetRisks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.3</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co"># Initialize storage for optimal portfolios</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a>optimalPortfolios <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb13-6"><a href="#cb13-6"></a>optimalWeights_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb13-7"><a href="#cb13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="co"># Find optimal weightings for each target risk level</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="cf">for</span> (risk <span class="cf">in</span> targetRisks) {</span>
+<span id="cb13-10"><a href="#cb13-10"></a>  <span class="co"># Create a portfolio optimization specification with the target risk</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a>  portfolioSpec <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioSpec</span>()</span>
+<span id="cb13-12"><a href="#cb13-12"></a>  fPortfolio<span class="sc">::</span><span class="fu">setTargetRisk</span>(portfolioSpec) <span class="ot">&lt;-</span> risk</span>
+<span id="cb13-13"><a href="#cb13-13"></a>  </span>
+<span id="cb13-14"><a href="#cb13-14"></a>  <span class="co"># Solve for the maximum return at this target risk</span></span>
+<span id="cb13-15"><a href="#cb13-15"></a>  optimal_portfolio <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">maxreturnPortfolio</span>(</span>
+<span id="cb13-16"><a href="#cb13-16"></a>    returns_ts,</span>
+<span id="cb13-17"><a href="#cb13-17"></a>    <span class="at">spec =</span> portfolioSpec)</span>
+<span id="cb13-18"><a href="#cb13-18"></a>  </span>
+<span id="cb13-19"><a href="#cb13-19"></a>  <span class="co"># Store the optimal portfolio</span></span>
+<span id="cb13-20"><a href="#cb13-20"></a>  optimalPortfolios[[<span class="fu">as.character</span>(risk)]] <span class="ot">&lt;-</span> optimal_portfolio</span>
+<span id="cb13-21"><a href="#cb13-21"></a>  </span>
+<span id="cb13-22"><a href="#cb13-22"></a>  <span class="co"># Store the optimal portfolio weights with risk level</span></span>
+<span id="cb13-23"><a href="#cb13-23"></a>  optimal_weights <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">getWeights</span>(optimal_portfolio)</span>
+<span id="cb13-24"><a href="#cb13-24"></a>  optimalWeights_list[[<span class="fu">as.character</span>(risk)]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">RiskLevel =</span> risk, optimal_weights)</span>
+<span id="cb13-25"><a href="#cb13-25"></a>}</span>
+<span id="cb13-26"><a href="#cb13-26"></a></span>
+<span id="cb13-27"><a href="#cb13-27"></a>optimalWeightsByRisk <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(optimalWeights_list)</span>
+<span id="cb13-28"><a href="#cb13-28"></a>optimalWeightsByRisk</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section></section><section id="sec-efficientFrontierFantasy" class="level2" data-number="17.5"><h2 data-number="17.5" class="anchored" data-anchor-id="sec-efficientFrontierFantasy">
+<span class="header-section-number">17.5</span> The Efficient Frontier of a Fantasy Team</h2>
+<p><a href="https://eng.wealthfront.com/2012/01/17/moneyball-using-modern-portfolio-theory-to-win-your-fantasy-sports-league/" class="uri">https://eng.wealthfront.com/2012/01/17/moneyball-using-modern-portfolio-theory-to-win-your-fantasy-sports-league/</a> (archived at <a href="https://perma.cc/JQ6G-KSRT" class="uri">https://perma.cc/JQ6G-KSRT</a>)</p>
+</section><section id="sec-modernPortfolioTheoryConclusion" class="level2" data-number="17.6"><h2 data-number="17.6" class="anchored" data-anchor-id="sec-modernPortfolioTheoryConclusion">
+<span class="header-section-number">17.6</span> Conclusion</h2>
+<p>In summary, fantasy football is similar to stock picking. You are most likely to pick the best players if you go with the wisdom of the crowd (e.g., average projections across projection sources) and diversify. Most projections are public information, so you might wonder whether using crowd projections gains you anything because everybody else has access to public information. However, this is also the case with stocks, and people still consistently perform best over time when they go with the market.</p>
+</section><section id="sec-modernPortfolioTheorySessionInfo" class="level2" data-number="17.7"><h2 data-number="17.7" class="anchored" data-anchor-id="sec-modernPortfolioTheorySessionInfo">
+<span class="header-section-number">17.7</span> Session Info</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.4 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: UTC
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] lubridate_1.9.3     forcats_1.0.0       stringr_1.5.1      
+ [4] dplyr_1.1.4         purrr_1.0.2         readr_2.1.5        
+ [7] tidyr_1.3.1         tibble_3.2.1        ggplot2_3.5.1      
+[10] tidyverse_2.0.0     fPortfolio_4023.84  fAssets_4023.85    
+[13] fBasics_4032.96     timeSeries_4032.109 timeDate_4032.109  
+[16] quantmod_0.4.26     TTR_0.24.4          xts_0.14.0         
+[19] zoo_1.8-12         
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.5        xfun_0.46           htmlwidgets_1.6.4  
+ [4] lattice_0.22-6      tzdb_0.4.0          numDeriv_2016.8-1.1
+ [7] generics_0.1.3      quadprog_1.5-8      vctrs_0.6.5        
+[10] tools_4.4.1         bitops_1.0-7        stats4_4.4.1       
+[13] curl_5.2.1          parallel_4.4.1      fansi_1.0.6        
+[16] DEoptimR_1.1-3      pkgconfig_2.0.3     lifecycle_1.0.4    
+[19] truncnorm_1.0-9     compiler_4.4.1      fMultivar_4031.84  
+[22] munsell_0.5.1       mnormt_2.1.1        htmltools_0.5.8.1  
+[25] RCurl_1.98-1.16     Rsolnp_1.16         yaml_2.3.9         
+[28] pillar_1.9.0        MASS_7.3-60.2       boot_1.3-30        
+[31] robustbase_0.99-3   rneos_0.4-0         tidyselect_1.2.1   
+[34] digest_0.6.36       stringi_1.8.4       mvtnorm_1.2-5      
+[37] slam_0.1-51         kernlab_0.9-32      mvnormtest_0.1-9-3 
+[40] gsl_2.1-8           fastmap_1.2.0       grid_4.4.1         
+[43] colorspace_2.1-0    cli_3.6.3           magrittr_2.0.3     
+[46] utf8_1.2.4          XML_3.99-0.17       withr_3.0.0        
+[49] sn_2.1.1            scales_1.3.0        timechange_0.3.0   
+[52] energy_1.7-11       rmarkdown_2.27      igraph_2.0.3       
+[55] hms_1.1.3           ecodist_2.1.3       evaluate_0.24.0    
+[58] knitr_1.48          Rglpk_0.6-5.1       rlang_1.1.4        
+[61] spatial_7.3-17      Rcpp_1.0.13         glue_1.7.0         
+[64] jsonlite_1.8.8      fCopulae_4022.85    R6_2.5.1           </code></pre>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Corston2000" class="csl-entry" role="listitem">
+Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for windows</em>. Wiley-Blackwell.
+</div>
+</div>
+</section></main><!-- /main --><div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://fantasyfootballanalytics.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script><noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<h3>Feedback</h3>
+
+<div class="feedback">
+    Please consider providing feedback about this textbook, so that I can make it as helpful as possible. You can provide feedback at the following link:
+    
+    <a href="https://forms.gle/LsnVKwqmS1VuxWD18">https://forms.gle/LsnVKwqmS1VuxWD18</a>
+</div>
+
+<h3>Email Notification</h3>
+
+<div class="rmdsale">
+The online version of this book will remain open access. If you want to know when the print version of the book is for sale, enter your email below so I can let you know.
+<br><iframe src="https://docs.google.com/forms/d/e/1FAIpQLSccMKaTBXzMBmcy4myCNQnL8mCgRczh0Eg_Pw3c15bork7-xQ/viewform?embedded=true" width="640" height="750" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+
+</div>
+<script id="dsq-count-scr" src="//fantasyfootballanalytics.disqus.com/count.js" async=""></script><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/isaactpetersen\.github\.io\/Fantasy-Football-Analytics-Textbook");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./mythbusters.html" class="pagination-link" aria-label="Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>“Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R” was written by <a href="https://psychology.uiowa.edu/people/isaac-petersen">Isaac T. Petersen</a>.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/modern-portfolio-theory.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
