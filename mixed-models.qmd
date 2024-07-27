@@ -5,35 +5,244 @@
 ### Load Packages {#sec-mixedModelsLoadPackages}
 
 ```{r}
-
+library("petersenlab")
+library("lme4")
+library("lmerTest")
+library("MuMIn")
+library("emmeans")
+library("sjstats")
+library("mgcv")
+library("tidyverse")
 ```
+
+### Specify Package Options {#sec-mixedModelsPackageOptions}
+
+```{r}
+emm_options(lmerTest.limit = 100000)
+emm_options(pbkrtest.limit = 100000)
+```
+
+### Load Data {#sec-mixedModelsLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/player_stats_seasonal.RData")
+```
+
+We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` objects in @sec-calculatePlayerAge.
 
 ## Overview of Mixed Models {#sec-mixedModelsOverview}
 
-## Age-Performance Curve {#sec-agePerformanceCurve}
+## Fantasy Points Per Season by Position, Age, and Experience {#sec-fantasyPointsByAgeExperience}
 
-Fit separately by position:
+```{r}
+player_stats_seasonal_offense_subset <- player_stats_seasonal_offense %>% 
+  filter(position_group %in% c("QB","RB","WR","TE"))
 
-- random intercepts
-- random linear slopes (i.e., random effect of age)
-- fixed effects of linear and quadratic age
-- fixed effect of experience
+player_stats_seasonal_offense_subset$position[which(player_stats_seasonal_offense_subset$position == "HB")] <- "RB"
 
-## Bayesian Mixed Models {#sec-mixedModelsBayesian}
+player_stats_seasonal_kicking_subset <- player_stats_seasonal_kicking %>% 
+  filter(position == "K")
 
-Model 1 (fit separately by position):
+player_stats_seasonal_offense_subset <- bind_rows(
+  player_stats_seasonal_offense_subset,
+  player_stats_seasonal_kicking_subset
+)
 
-- random intercepts
-- random linear slopes (i.e., random effect of age)
-- fixed effects of linear and quadratic age
-- fixed effect of experience
+player_stats_seasonal_offense_subset$player_idFactor <- factor(player_stats_seasonal_offense_subset$player_id)
+```
 
-Model 2 (fit separately by position):
+### Models {#sec-fantasyPointsByAgeExperienceModels}
 
-- random intercepts
-- random GAM slopes (i.e., age)
-- fixed effects of GAM slopes (i.e., age)
-- fixed effect of experience
+```{r}
+pointsPerSeason_nullModel <- lmerTest::lmer(
+  fantasy_points ~ 1 + (1 | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeason_nullModel)
+MuMIn::r.squaredGLMM(pointsPerSeason_nullModel)
+performance::icc(pointsPerSeason_nullModel)
+
+pointsPerSeason_position <- lmerTest::lmer(
+  fantasy_points ~ as.factor(position) + (1 | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeason_position)
+MuMIn::r.squaredGLMM(pointsPerSeason_position)
+emmeans::emmeans(pointsPerSeason_position, "position")
+performance::icc(pointsPerSeason_position)
+
+pointsPerSeason_positionAgeFixedLinearSlopes <- lmerTest::lmer(
+  fantasy_points ~ as.factor(position) + ageCentered20 + (1 | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeason_positionAgeFixedLinearSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeFixedLinearSlopes)
+emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "ageCentered20")
+performance::icc(pointsPerSeason_positionAgeFixedLinearSlopes)
+
+pointsPerSeason_positionAgeRandomLinearSlopes <- lmerTest::lmer(
+  fantasy_points ~ as.factor(position) + ageCentered20 + (1 + ageCentered20 | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeason_positionAgeRandomLinearSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearSlopes)
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "ageCentered20")
+performance::icc(pointsPerSeason_positionAgeRandomLinearSlopes)
+
+pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes <- lmerTest::lmer(
+  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20Quadratic")
+performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+
+pointsPerSeason_positionAgeRandomLinearRandomQuadraticSlopes <- lmerTest::lmer(
+  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 + ageCentered20Quadratic | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction <- lmerTest::lmer(
+  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + as.factor(position):ageCentered20 + as.factor(position):ageCentered20Quadratic + (1 + ageCentered20 | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction, "ageCentered20")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20Quadratic")
+performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+
+pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
+  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + as.factor(position):ageCentered20 + as.factor(position):ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "ageCentered20")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "ageCentered20Quadratic")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "years_of_experience")
+performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+
+
+pointsPerSeason_gam <- gam(
+  fantasy_points ~ as.factor(position) + ageCentered20 + as.factor(position):ageCentered20 + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
+  data = player_stats_seasonal_offense_subset
+)
+
+summary(pointsPerSeason_gam)
+```
+
+Compare models:
+
+```{r}
+anova(
+  pointsPerSeason_nullModel,
+  pointsPerSeason_position,
+)
+
+anova(
+  pointsPerSeason_positionAgeFixedLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
+)
+```
+
+### Plots of Model-Implied Fantasy Points by Position, Age, and Experience {#sec-fantasyPointsByAgeExperiencePlots}
+
+```{r}
+pointsPerSeason_positionAge_newData <- expand.grid(
+  position = factor(c("FB","QB","RB","TE","WR")), #,"K"
+  age = seq(from = 20, to = 40, length.out = 10000)
+)
+
+pointsPerSeason_positionAge_newData$ageCentered20 <- pointsPerSeason_positionAge_newData$age - 20
+pointsPerSeason_positionAge_newData$ageCentered20Quadratic <- pointsPerSeason_positionAge_newData$ageCentered20 ^ 2
+pointsPerSeason_positionAge_newData$years_of_experience <- floor(pointsPerSeason_positionAge_newData$ageCentered20)
+
+pointsPerSeason_positionAge_newData$fantasyPoints <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+pointsPerSeason_positionAge_newData$fantasyPoints_gam <- predict(
+  object = pointsPerSeason_gam,
+  newdata = pointsPerSeason_positionAge_newData,
+  newdata.guaranteed = TRUE,
+  exclude = "s(player_idFactor,ageCentered20)"
+)
+```
+
+#### Model-Implied Fantasy Points by Position and Age {#sec-fantasyPointsByPositionAgePlot}
+
+```{r}
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints,
+    color = position
+  )
+) + 
+  geom_smooth() +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position"
+  ) +
+  theme_classic()
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_gam,
+    color = position
+  )
+) + 
+  geom_smooth() +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position"
+  ) +
+  theme_classic()
+```
+
+
+#### Model-Implied Fantasy Points by Experience {#sec-fantasyPointsByExperiencePlot}
 
 ## Conclusion {#sec-mixedModelsConclusion}
 
