@@ -7,6 +7,7 @@
 ```{r}
 library("mclust")
 library("tidyverse")
+library("plotly")
 ```
 
 ### Load Data {#sec-clusterAnalysisLoadData}
@@ -30,7 +31,7 @@ load(file = "./data/player_stats_seasonal.RData")
 
 ```
 
-### Example {#sec-clusterAnalysisExample}
+### Example: Tiers of Prior Season Fantasy Points {#sec-clusterAnalysisExample}
 
 #### Prepare Data {#sec-clusterAnalysisExamplePrepareData}
 
@@ -110,16 +111,19 @@ tiersRB_icl
 summary(tiersRB_icl)
 plot(tiersRB_icl)
 
-tiersRB_boostrap <- mclustBootstrapLRT(
-  player_stats_seasonal_offense_recentRB$fantasy_points,
-  modelName = "V") # variable/unequal variance (for univariate data)
+numTiersRB <- 3
 
-numTiersRB <- as.numeric(summary(tiersRB_boostrap)[,"Length"][1]) # or could specify the number of teams manually
-
-tiersRB_boostrap
-plot(
-  tiersRB_boostrap,
-  G = numTiersRB - 1)
+# The following code errors out:
+#tiersRB_boostrap <- mclustBootstrapLRT(
+#  player_stats_seasonal_offense_recentRB$fantasy_points,
+#  modelName = "V") # variable/unequal variance (for univariate data)
+#
+#numTiersRB <- as.numeric(summary(tiersRB_boostrap)[,"Length"][1]) # or could specify the number of teams manually
+#
+#tiersRB_boostrap
+#plot(
+#  tiersRB_boostrap,
+#  G = numTiersRB - 1)
 ```
 
 ##### Wide Receivers {#sec-clusterAnalysisExampleNumTiersWRs}
@@ -232,7 +236,56 @@ Here are the number of players that are in each of the four clusters (i.e., tier
 table(clusterModelQBs$classification)
 ```
 
-We can merge the player's classification into the dataset and plot each player's classification:
+##### Running Backs {#sec-clusterAnalysisExampleNumTiersRBs}
+
+```{r}
+clusterModelRBs <- Mclust(
+  data = player_stats_seasonal_offense_recentRB$fantasy_points,
+  G = numTiersRB,
+)
+```
+
+Here are the number of players that are in each of the four clusters (i.e., tiers):
+
+```{r}
+table(clusterModelRBs$classification)
+```
+
+##### Wide Receivers {#sec-clusterAnalysisExampleNumTiersWRs}
+
+```{r}
+clusterModelWRs <- Mclust(
+  data = player_stats_seasonal_offense_recentWR$fantasy_points,
+  G = numTiersWR,
+)
+```
+
+Here are the number of players that are in each of the four clusters (i.e., tiers):
+
+```{r}
+table(clusterModelWRs$classification)
+```
+
+##### Tight Ends {#sec-clusterAnalysisExampleNumTiersTEs}
+
+```{r}
+clusterModelTEs <- Mclust(
+  data = player_stats_seasonal_offense_recentTE$fantasy_points,
+  G = numTiersTE,
+)
+```
+
+Here are the number of players that are in each of the four clusters (i.e., tiers):
+
+```{r}
+table(clusterModelTEs$classification)
+```
+
+#### Plot the Tiers {#sec-clusterAnalysisExamplePlotTiers}
+
+We can merge the player's classification into the dataset and plot each player's classification.
+
+##### Quarterbacks {#sec-clusterAnalysisExamplePlotTiersQB}
 
 ```{r}
 #| label: fig-qbTiers
@@ -240,54 +293,181 @@ We can merge the player's classification into the dataset and plot each player's
 
 player_stats_seasonal_offense_recentQB$tier <- clusterModelQBs$classification
 
+player_stats_seasonal_offense_recentQB <- player_stats_seasonal_offense_recentQB %>%
+  mutate(
+    tier = factor(case_match( # recode so 1 is highest tier
+      tier,
+      1 ~ 4,
+      2 ~ 3,
+      3 ~ 2,
+      4 ~ 1)))
+
 player_stats_seasonal_offense_recentQB$position_rank <- rank(
   player_stats_seasonal_offense_recentQB$fantasy_points * -1,
   na.last = "keep",
   ties.method = "min")
 
-ggplot2::ggplot(
+plot_qbTiers <- ggplot2::ggplot(
   data = player_stats_seasonal_offense_recentQB,
   mapping = aes(
     x = fantasy_points,
     y = position_rank,
-    color = as.factor(tier)
+    color = tier
   )) +
-  geom_label(
+  geom_point(
     aes(
-      x = fantasy_points,
-      label = round(fantasy_points, 0),
-      fill = as.factor(tier)
-      ),
-    color = "white",
-    size = 5,
-    #show.legend = FALSE
-    ) +
-  geom_label(
-    aes(
-      x = fantasy_points,
-      label = player_display_name,
-      fill = as.factor(tier)),
-    color = "white",
-    hjust = 1.1,
-    size = 4,
-    show.legend = FALSE
-    ) +
+      text = player_display_name # add player name for mouse over tooltip
+  )) +
   scale_y_continuous(trans = "reverse") +
   coord_cartesian(clip = "off") +
-  theme_classic() +
   labs(
     x = "Projected Points",
-    y = "Rank",
+    y = "Position Rank",
     title = "Quarterback Fantasy Points by Tier",
-    fill = "Tier")
+    color = "Tier") +
+  theme_classic() +
+  theme(legend.position = "top")
+
+ggplotly(plot_qbTiers)
 ```
 
-##### Running Backs {#sec-clusterAnalysisExampleNumTiersRBs}
+##### Running Backs {#sec-clusterAnalysisExamplePlotTiersRBs}
 
-##### Wide Receivers {#sec-clusterAnalysisExampleNumTiersWRs}
+```{r}
+#| label: fig-rbTiers
+#| fig-cap: "Running Back Fantasy Points by Tier."
 
-##### Tight Ends {#sec-clusterAnalysisExampleNumTiersTEs}
+player_stats_seasonal_offense_recentRB$tier <- clusterModelRBs$classification
 
+player_stats_seasonal_offense_recentRB <- player_stats_seasonal_offense_recentRB %>%
+  mutate(
+    tier = factor(case_match( # recode so 1 is highest tier
+      tier,
+      1 ~ 3,
+      2 ~ 2,
+      3 ~ 1)))
+
+player_stats_seasonal_offense_recentRB$position_rank <- rank(
+  player_stats_seasonal_offense_recentRB$fantasy_points * -1,
+  na.last = "keep",
+  ties.method = "min")
+
+plot_rbTiers <- ggplot2::ggplot(
+  data = player_stats_seasonal_offense_recentRB,
+  mapping = aes(
+    x = fantasy_points,
+    y = position_rank,
+    color = tier
+  )) +
+  geom_point(
+    aes(
+      text = player_display_name # add player name for mouse over tooltip
+  )) +
+  scale_y_continuous(trans = "reverse") +
+  coord_cartesian(clip = "off") +
+  labs(
+    x = "Projected Points",
+    y = "Position Rank",
+    title = "Running Back Fantasy Points by Tier",
+    color = "Tier") +
+  theme_classic() +
+  theme(legend.position = "top")
+
+ggplotly(plot_rbTiers)
+```
+
+##### Wide Receivers {#sec-clusterAnalysisExamplePlotTiersWRs}
+
+```{r}
+#| label: fig-wrTiers
+#| fig-cap: "Quarterback Fantasy Points by Tier."
+
+player_stats_seasonal_offense_recentWR$tier <- clusterModelWRs$classification
+
+player_stats_seasonal_offense_recentWR <- player_stats_seasonal_offense_recentWR %>%
+  mutate(
+    tier = factor(case_match( # recode so 1 is highest tier
+      tier,
+      1 ~ 5,
+      2 ~ 4,
+      3 ~ 3,
+      4 ~ 2,
+      5 ~ 1)))
+
+player_stats_seasonal_offense_recentWR$position_rank <- rank(
+  player_stats_seasonal_offense_recentWR$fantasy_points * -1,
+  na.last = "keep",
+  ties.method = "min")
+
+plot_wrTiers <- ggplot2::ggplot(
+  data = player_stats_seasonal_offense_recentWR,
+  mapping = aes(
+    x = fantasy_points,
+    y = position_rank,
+    color = tier
+  )) +
+  geom_point(
+    aes(
+      text = player_display_name # add player name for mouse over tooltip
+  )) +
+  scale_y_continuous(trans = "reverse") +
+  coord_cartesian(clip = "off") +
+  labs(
+    x = "Projected Points",
+    y = "Position Rank",
+    title = "Wide Receiver Fantasy Points by Tier",
+    color = "Tier") +
+  theme_classic() +
+  theme(legend.position = "top")
+
+ggplotly(plot_wrTiers)
+```
+
+##### Tight Ends {#sec-clusterAnalysisExamplePlotTiersTEs}
+
+```{r}
+#| label: fig-teTiers
+#| fig-cap: "Tight End Fantasy Points by Tier."
+
+player_stats_seasonal_offense_recentTE$tier <- clusterModelTEs$classification
+
+player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recentTE %>%
+  mutate(
+    tier = factor(case_match( # recode so 1 is highest tier
+      tier,
+      1 ~ 4,
+      2 ~ 3,
+      3 ~ 2,
+      4 ~ 1)))
+
+player_stats_seasonal_offense_recentTE$position_rank <- rank(
+  player_stats_seasonal_offense_recentTE$fantasy_points * -1,
+  na.last = "keep",
+  ties.method = "min")
+
+plot_teTiers <- ggplot2::ggplot(
+  data = player_stats_seasonal_offense_recentTE,
+  mapping = aes(
+    x = fantasy_points,
+    y = position_rank,
+    color = tier
+  )) +
+  geom_point(
+    aes(
+      text = player_display_name # add player name for mouse over tooltip
+  )) +
+  scale_y_continuous(trans = "reverse") +
+  coord_cartesian(clip = "off") +
+  labs(
+    x = "Projected Points",
+    y = "Position Rank",
+    title = "Tight End Fantasy Points by Tier",
+    color = "Tier") +
+  theme_classic() +
+  theme(legend.position = "top")
+
+ggplotly(plot_teTiers)
+```
 
 ## Conclusion {#sec-clusterAnalysisConclusion}
 
