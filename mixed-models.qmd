@@ -12,6 +12,8 @@ library("MuMIn")
 library("emmeans")
 library("sjstats")
 library("mgcv")
+library("AICcmodavg")
+library("parallel")
 library("tidyverse")
 ```
 
@@ -28,11 +30,13 @@ emm_options(pbkrtest.limit = 100000)
 #| eval: false
 #| include: false
 
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_depthCharts.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
 ```
 
 ```{r}
+load(file = "./data/nfl_depthCharts.RData")
 load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
 ```
@@ -58,109 +62,266 @@ player_stats_seasonal_offense_subset <- bind_rows(
 )
 
 player_stats_seasonal_offense_subset$player_idFactor <- factor(player_stats_seasonal_offense_subset$player_id)
+player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seasonal_offense_subset$position)
+
+#for(i in unique(nfl_depthCharts$season)){
+#  print(i)
+#  nfl_depthCharts %>%
+#    filter(season == i) %>% 
+#    select(week) %>% 
+#    arrange(week) %>% 
+#    unique() %>% 
+#    pull() %>% 
+#    print()
+#}
+
+seasons17week <- 2001:2020
+seasons18week <- 2021:max(nfl_depthCharts$season, na.rm = TRUE)
+
+endOfSeasonDepthCharts <- nfl_depthCharts %>% 
+  filter((season %in% seasons17week & week == 18) | (season %in% seasons18week & week == 19)) # get end-of-season depth charts
+
+qb1s <- endOfSeasonDepthCharts %>% 
+  filter(position == "QB", depth_team == 1)
+
+fb1s <- endOfSeasonDepthCharts %>% 
+  filter(position == "FB", depth_team == 1)
+
+k1s <- endOfSeasonDepthCharts %>% 
+  filter(position == "K", depth_team == 1)
+
+rb1s <- endOfSeasonDepthCharts %>% 
+  filter(position == "RB", depth_team == 1)
+
+wr1s <- endOfSeasonDepthCharts %>% 
+  filter(position == "WR", depth_team == 1)
+
+te1s <- endOfSeasonDepthCharts %>% 
+  filter(position == "TE", depth_team == 1)
+
+player_stats_seasonal_offense_subsetDepth <- player_stats_seasonal_offense_subset %>% 
+  filter(player_id %in% c(
+    qb1s$gsis_id,
+    fb1s$gsis_id,
+    k1s$gsis_id,
+    rb1s$gsis_id,
+    wr1s$gsis_id,
+    te1s$gsis_id
+    ))
+```
+
+### Plots of Raw Data {#sec-fantasyPointsByAgeExperienceRawData}
+
+Plots of players' raw fantasy points data by age are in Figures [-@fig-rawFantasyPointsByAgeQB]–[-@fig-rawFantasyPointsByAgeTE].
+
+```{r}
+#| label: fig-rawFantasyPointsByAgeQB
+#| fig-cap: "Plot of Raw Trajectories of Fantasy Points by Age for Quarterbacks."
+
+ggplot(
+  data = player_stats_seasonal_offense_subset %>% filter(position == "QB"),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    group = player_id)) +
+  geom_line()  +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Quarterbacks"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-rawFantasyPointsByAgeFB
+#| fig-cap: "Plot of Raw Trajectories of Fantasy Points by Age for Fullbacks."
+
+ggplot(
+  data = player_stats_seasonal_offense_subset %>% filter(position == "FB"),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    group = player_id)) +
+  geom_line()  +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Fullbacks"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-rawFantasyPointsByAgeRB
+#| fig-cap: "Plot of Raw Trajectories of Fantasy Points by Age for Running Backs."
+
+ggplot(
+  data = player_stats_seasonal_offense_subset %>% filter(position == "RB"),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    group = player_id)) +
+  geom_line()  +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Running Backs"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-rawFantasyPointsByAgeWR
+#| fig-cap: "Plot of Raw Trajectories of Fantasy Points by Age for Wide Receivers."
+
+ggplot(
+  data = player_stats_seasonal_offense_subset %>% filter(position == "WR"),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    group = player_id)) +
+  geom_line()  +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Wide Receivers"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-rawFantasyPointsByAgeTE
+#| fig-cap: "Plot of Raw Trajectories of Fantasy Points by Age for Tight Ends."
+
+ggplot(
+  data = player_stats_seasonal_offense_subset %>% filter(position == "TE"),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    group = player_id)) +
+  geom_line()  +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Tight Ends"
+  ) +
+  theme_classic()
 ```
 
 ### Models {#sec-fantasyPointsByAgeExperienceModels}
 
 ```{r}
 pointsPerSeason_nullModel <- lmerTest::lmer(
-  fantasy_points ~ 1 + (1 | player_id),
+  fantasy_points ~ 1 + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(pointsPerSeason_nullModel)
 MuMIn::r.squaredGLMM(pointsPerSeason_nullModel)
 performance::icc(pointsPerSeason_nullModel)
+AIC(pointsPerSeason_nullModel)
 
 pointsPerSeason_position <- lmerTest::lmer(
-  fantasy_points ~ as.factor(position) + (1 | player_id),
+  fantasy_points ~ positionFactor + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(pointsPerSeason_position)
 MuMIn::r.squaredGLMM(pointsPerSeason_position)
-emmeans::emmeans(pointsPerSeason_position, "position")
+emmeans::emmeans(pointsPerSeason_position, "positionFactor")
 performance::icc(pointsPerSeason_position)
+AIC(pointsPerSeason_position)
 
 pointsPerSeason_positionAgeFixedLinearSlopes <- lmerTest::lmer(
-  fantasy_points ~ as.factor(position) + ageCentered20 + (1 | player_id),
+  fantasy_points ~ positionFactor + ageCentered20 + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(pointsPerSeason_positionAgeFixedLinearSlopes)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeFixedLinearSlopes)
-emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "positionFactor")
 emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "ageCentered20")
 performance::icc(pointsPerSeason_positionAgeFixedLinearSlopes)
+AIC(pointsPerSeason_positionAgeFixedLinearSlopes)
 
 pointsPerSeason_positionAgeRandomLinearSlopes <- lmerTest::lmer(
-  fantasy_points ~ as.factor(position) + ageCentered20 + (1 + ageCentered20 | player_id),
+  fantasy_points ~ positionFactor + ageCentered20 + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearSlopes)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearSlopes)
-emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "positionFactor")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "ageCentered20")
 performance::icc(pointsPerSeason_positionAgeRandomLinearSlopes)
+AIC(pointsPerSeason_positionAgeRandomLinearSlopes)
 
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes <- lmerTest::lmer(
-  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 | player_id),
+  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
-emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "positionFactor")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20Quadratic")
 performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 
 pointsPerSeason_positionAgeRandomLinearRandomQuadraticSlopes <- lmerTest::lmer(
-  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 + ageCentered20Quadratic | player_id),
+  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 + ageCentered20Quadratic | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction <- lmerTest::lmer(
-  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + as.factor(position):ageCentered20 + as.factor(position):ageCentered20Quadratic + (1 + ageCentered20 | player_id),
+  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
-emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction, "positionFactor")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction, "ageCentered20")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20Quadratic")
 performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
-  fantasy_points ~ as.factor(position) + ageCentered20 + ageCentered20Quadratic + as.factor(position):ageCentered20 + as.factor(position):ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
+  REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
-emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "position")
+emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "positionFactor")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "ageCentered20")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "ageCentered20Quadratic")
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "years_of_experience")
 performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
-
-
-pointsPerSeason_gam <- gam(
-  fantasy_points ~ as.factor(position) + ageCentered20 + as.factor(position):ageCentered20 + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
-  data = player_stats_seasonal_offense_subset
-)
-
-summary(pointsPerSeason_gam)
+AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 ```
 
 Compare models:
@@ -168,7 +329,7 @@ Compare models:
 ```{r}
 anova(
   pointsPerSeason_nullModel,
-  pointsPerSeason_position,
+  pointsPerSeason_position
 )
 
 anova(
@@ -177,13 +338,75 @@ anova(
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
 )
+
+mixedModels <- list(
+  "null" = pointsPerSeason_nullModel,
+  "position" = pointsPerSeason_position,
+  "fixedLinear" = pointsPerSeason_positionAgeFixedLinearSlopes,
+  "randomLinear" = pointsPerSeason_positionAgeRandomLinearSlopes,
+  "randomLinearFixedQuadratic" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  "randomLinearFixedQuadraticInteraction" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
+)
+
+aictab(mixedModels)
 ```
 
-### Plots of Model-Implied Fantasy Points by Position, Age, and Experience {#sec-fantasyPointsByAgeExperiencePlots}
+Generalized Additive Model:
 
 ```{r}
+num_cores <- detectCores()
+
+pointsPerSeason_gam <- bam( # using bam() instead of gam() for faster estimation due to large size of data
+  fantasy_points ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
+  data = player_stats_seasonal_offense_subset,
+  nthreads = num_cores
+)
+
+pointsPerSeason_gamSummary <- summary(pointsPerSeason_gam)
+
+pointsPerSeason_gamSummary
+pointsPerSeason_gamSummary$r.sq
+MuMIn::r.squaredGLMM(pointsPerSeason_gam)
+AIC(pointsPerSeason_gam)
+```
+
+Players at the top of the end-of-season depth chart:
+
+```{r}
+pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
+  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
+  data = player_stats_seasonal_offense_subset,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+MuMIn::r.squaredGLMM(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+emmeans::emmeans(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "positionFactor")
+emmeans::emmeans(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "ageCentered20")
+emmeans::emmeans(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "ageCentered20Quadratic")
+emmeans::emmeans(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "years_of_experience")
+performance::icc(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+
+pointsPerSeasonDepth_gam <- bam( # using bam() instead of gam() for faster estimation due to large size of data
+  fantasy_points ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
+  data = player_stats_seasonal_offense_subsetDepth,
+  nthreads = num_cores
+)
+
+pointsPerSeasonDepth_gamSummary <- summary(pointsPerSeasonDepth_gam)
+
+pointsPerSeasonDepth_gamSummary
+pointsPerSeasonDepth_gamSummary$r.sq
+MuMIn::r.squaredGLMM(pointsPerSeasonDepth_gam)
+AIC(pointsPerSeasonDepth_gam)
+```
+
+### Plots of Model-Implied Fantasy Points by Position and Age {#sec-fantasyPointsByAgePlots}
+
+```{r}
+# Create newdata object
 pointsPerSeason_positionAge_newData <- expand.grid(
-  position = factor(c("FB","QB","RB","TE","WR")), #,"K"
+  positionFactor = factor(c("FB","QB","RB","TE","WR")), #,"K"
   age = seq(from = 20, to = 40, length.out = 10000)
 )
 
@@ -191,58 +414,311 @@ pointsPerSeason_positionAge_newData$ageCentered20 <- pointsPerSeason_positionAge
 pointsPerSeason_positionAge_newData$ageCentered20Quadratic <- pointsPerSeason_positionAge_newData$ageCentered20 ^ 2
 pointsPerSeason_positionAge_newData$years_of_experience <- floor(pointsPerSeason_positionAge_newData$ageCentered20)
 
-pointsPerSeason_positionAge_newData$fantasyPoints <- predict(
+# From Quadratic Model: All Players
+pointsPerSeason_positionAge_newData$fantasyPoints_quadratic <- predict(
   object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
   newdata = pointsPerSeason_positionAge_newData,
   re.form = NA
 )
 
+# From Quadratic Model: Players at Top of End-of-Season Depth Chart
+pointsPerSeason_positionAge_newData$fantasyPoints_depthQuadratic <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+# From GAM Model: All Players
 pointsPerSeason_positionAge_newData$fantasyPoints_gam <- predict(
   object = pointsPerSeason_gam,
   newdata = pointsPerSeason_positionAge_newData,
   newdata.guaranteed = TRUE,
   exclude = "s(player_idFactor,ageCentered20)"
 )
+
+# From GAM Model: Players at Top of End-of-Season Depth Chart
+pointsPerSeason_positionAge_newData$fantasyPoints_depthGAM <- predict(
+  object = pointsPerSeasonDepth_gam,
+  newdata = pointsPerSeason_positionAge_newData,
+  newdata.guaranteed = TRUE,
+  exclude = "s(player_idFactor,ageCentered20)"
+)
 ```
 
-#### Model-Implied Fantasy Points by Position and Age {#sec-fantasyPointsByPositionAgePlot}
+Plots of model-implied fantasy points by position and age are in Figures [-@fig-fantasyPointsByAgeQuadratic]–[-@fig-fantasyPointsByAgeGAM].
 
 ```{r}
+#| label: fig-fantasyPointsByAgeQuadratic
+#| fig-cap: "Plot of Model-Implied Quadratic Trajectories of Fantasy Points by Age."
+
 ggplot2::ggplot(
   data = pointsPerSeason_positionAge_newData,
   mapping = aes(
     x = age,
-    y = fantasyPoints,
-    color = position
+    y = fantasyPoints_quadratic,
+    color = positionFactor
   )
 ) + 
   geom_smooth() +
   labs(
     x = "Player Age (years)",
     y = "Fantasy Points (Season)",
-    title = "Fantasy Points (Season) by Player Age and Position"
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Quadratic Model with All Players"
   ) +
   theme_classic()
+```
+
+```{r}
+#| label: fig-fantasyPointsByAgeQuadraticDepth
+#| fig-cap: "Plot of Model-Implied Quadratic Trajectories of Fantasy Points by Age For Players Who Were Once at the Top of the End-of-Season Depth Chart."
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_depthQuadratic,
+    color = positionFactor
+  )
+) + 
+  geom_smooth() +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Quadratic Model with Players Who Were Once at Top of End-of-Season Depth Chart"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-fantasyPointsByAgeGAM
+#| fig-cap: "Plot of Implied Trajectories of Fantasy Points by Age from a Generalized Additive Model."
 
 ggplot2::ggplot(
   data = pointsPerSeason_positionAge_newData,
   mapping = aes(
     x = age,
     y = fantasyPoints_gam,
-    color = position
+    color = positionFactor
   )
 ) + 
   geom_smooth() +
   labs(
     x = "Player Age (years)",
     y = "Fantasy Points (Season)",
-    title = "Fantasy Points (Season) by Player Age and Position"
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Generalized Additive Model with All Players"
   ) +
   theme_classic()
 ```
 
 
-#### Model-Implied Fantasy Points by Experience {#sec-fantasyPointsByExperiencePlot}
+```{r}
+#| label: fig-fantasyPointsByAgeGAM
+#| fig-cap: "Plot of Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, For Players Who Were Once at the Top of the End-of-Season Depth Chart."
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_depthGAM,
+    color = positionFactor
+  )
+) + 
+  geom_smooth() +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Generalized Additive Model with Players Who Were Once at Top of End-of-Season Depth Chart"
+  ) +
+  theme_classic()
+```
+
+### Plots of Individuals' Model-Implied Fantasy Points by Age {#sec-fantasyPointsIndividualByAgePlots}
+
+```{r}
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
+  filter(!is.na(player_idFactor), !is.na(fantasy_points), !is.na(positionFactor), !is.na(ageCentered20), !is.na(ageCentered20Quadratic), !is.na(years_of_experience))
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_quadratic <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_gam <- predict(
+  object = pointsPerSeason_gam,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+```
+
+Plots of players' model-implied fantasy points by age are in Figures [-@fig-individualFantasyPointsByAgeQB]–[-@fig-individualFantasyPointsByAgeTE].
+
+```{r}
+#| label: fig-individualFantasyPointsByAgeQB
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, for Quarterbacks. Overlaid with the Model-Implied Trajectory for Quarterbacks."
+
+ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "QB"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_gam,
+    group = player_id)) +
+  geom_smooth(
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_smooth(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_gam
+    ),
+    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "QB"),
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Quarterbacks"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-individualFantasyPointsByAgeFB
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, for Fullbacks. Overlaid with the Model-Implied Trajectory for Fullbacks."
+
+ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "FB"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_gam,
+    group = player_id)) +
+  geom_smooth(
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_smooth(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_gam
+    ),
+    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "FB"),
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Fullbacks"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-individualFantasyPointsByAgeRB
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, for Running Backs. Overlaid with the Model-Implied Trajectory for Running Backs."
+
+ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "RB"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_gam,
+    group = player_id)) +
+  geom_smooth(
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_smooth(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_gam
+    ),
+    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "RB"),
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Running Backs"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-individualFantasyPointsByAgeWR
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, for Wide Receivers. Overlaid with the Model-Implied Trajectory for Wide Receivers."
+
+ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "WR"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_gam,
+    group = player_id)) +
+  geom_smooth(
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_smooth(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_gam
+    ),
+    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "WR"),
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Wide Receivers"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-individualFantasyPointsByAgeTE
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, for Tight Ends. Overlaid with the Model-Implied Trajectory for Wide Tight Ends."
+
+ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "TE"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_gam,
+    group = player_id)) +
+  geom_smooth(
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_smooth(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_gam
+    ),
+    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "TE"),
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Tight Ends"
+  ) +
+  theme_classic()
+```
 
 ## Conclusion {#sec-mixedModelsConclusion}
 
