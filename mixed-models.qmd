@@ -114,7 +114,9 @@ player_stats_seasonal_offense_subsetDepth <- player_stats_seasonal_offense_subse
 
 ### Plots of Raw Data {#sec-fantasyPointsByAgeExperienceRawData}
 
-Plots of players' raw fantasy points data by age are in Figures [-@fig-rawFantasyPointsByAgeQB]–[-@fig-rawFantasyPointsByAgeTE].
+#### Quarterbacks {#sec-fantasyPointsByAgeExperienceRawDataQB}
+
+A plot of Quarterbacks' raw fantasy points data by age is in @fig-rawFantasyPointsByAgeQB.
 
 ```{r}
 #| label: fig-rawFantasyPointsByAgeQB
@@ -149,6 +151,10 @@ ggplotly(
   tooltip = c("age","fantasy_points","text"))
 ```
 
+#### Fullbacks {#sec-fantasyPointsByAgeExperienceRawDataFB}
+
+A plot of Fullbacks' raw fantasy points data by age is in @fig-rawFantasyPointsByAgeFB.
+
 ```{r}
 #| label: fig-rawFantasyPointsByAgeFB
 #| fig-cap: "Plot of Raw Trajectories of Fantasy Points by Age for Fullbacks."
@@ -181,6 +187,10 @@ ggplotly(
   plot_rawFantasyPointsByAgeFB,
   tooltip = c("age","fantasy_points","text"))
 ```
+
+#### Running Backs {#sec-fantasyPointsByAgeExperienceRawDataRB}
+
+A plot of Running Backs' raw fantasy points data by age is in @fig-rawFantasyPointsByAgeRB.
 
 ```{r}
 #| label: fig-rawFantasyPointsByAgeRB
@@ -215,6 +225,10 @@ ggplotly(
   tooltip = c("age","fantasy_points","text"))
 ```
 
+#### Wide Receivers {#sec-fantasyPointsByAgeExperienceRawDataWR}
+
+A plot of Wide Receivers' raw fantasy points data by age is in @fig-rawFantasyPointsByAgeWR.
+
 ```{r}
 #| label: fig-rawFantasyPointsByAgeWR
 #| fig-cap: "Plot of Raw Trajectories of Fantasy Points by Age for Wide Receivers."
@@ -247,6 +261,10 @@ ggplotly(
   plot_rawFantasyPointsByAgeWR,
   tooltip = c("age","fantasy_points","text"))
 ```
+
+#### Tight Ends {#sec-fantasyPointsByAgeExperienceRawDataTE}
+
+A plot of Tight Ends' raw fantasy points data by age is in @fig-rawFantasyPointsByAgeTE.
 
 ```{r}
 #| label: fig-rawFantasyPointsByAgeTE
@@ -481,7 +499,8 @@ pointsPerSeason_positionAge_newData <- expand.grid(
 
 pointsPerSeason_positionAge_newData$ageCentered20 <- pointsPerSeason_positionAge_newData$age - 20
 pointsPerSeason_positionAge_newData$ageCentered20Quadratic <- pointsPerSeason_positionAge_newData$ageCentered20 ^ 2
-pointsPerSeason_positionAge_newData$years_of_experience <- floor(pointsPerSeason_positionAge_newData$ageCentered20)
+pointsPerSeason_positionAge_newData$years_of_experience <- floor(pointsPerSeason_positionAge_newData$age - 22) # assuming that most players start at age 22 (i.e., rookie year) and thus have 1 year of experience at age 23
+pointsPerSeason_positionAge_newData$years_of_experience[which(pointsPerSeason_positionAge_newData$years_of_experience < 0)] <- 0
 
 # From Quadratic Model: All Players
 pointsPerSeason_positionAge_newData$fantasyPoints_quadratic <- predict(
@@ -516,6 +535,8 @@ pointsPerSeason_positionAge_newData$fantasyPoints_depthGAM <- predict(
 
 Plots of model-implied fantasy points by position and age are in Figures [-@fig-fantasyPointsByAgeQuadratic]–[-@fig-fantasyPointsByAgeGAMdepth].
 
+#### Quadratic Model {#sec-fantasyPointsByAgePlotsQuadratic}
+
 ```{r}
 #| label: fig-fantasyPointsByAgeQuadratic
 #| fig-cap: "Plot of Model-Implied Quadratic Trajectories of Fantasy Points by Age."
@@ -537,6 +558,8 @@ ggplot2::ggplot(
   ) +
   theme_classic()
 ```
+
+#### Quadratic Model: Top of Depth Chart {#sec-fantasyPointsByAgePlotsQuadraticDepth}
 
 ```{r}
 #| label: fig-fantasyPointsByAgeQuadraticDepth
@@ -560,6 +583,8 @@ ggplot2::ggplot(
   theme_classic()
 ```
 
+#### Generalized Additive Model {#sec-fantasyPointsByAgePlotsGAM}
+
 ```{r}
 #| label: fig-fantasyPointsByAgeGAM
 #| fig-cap: "Plot of Implied Trajectories of Fantasy Points by Age from a Generalized Additive Model."
@@ -582,6 +607,7 @@ ggplot2::ggplot(
   theme_classic()
 ```
 
+#### Generalized Additive Model: Top of Depth Chart {#sec-fantasyPointsByAgePlotsGAMdepth}
 
 ```{r}
 #| label: fig-fantasyPointsByAgeGAMdepth
@@ -620,9 +646,40 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_gam <- predict(
   object = pointsPerSeason_gam,
   newdata = player_stats_seasonal_offense_subsetCC
 )
+
+zeroAge <- pointsPerSeason_positionAge_newData %>% 
+  group_by(positionFactor) %>% 
+  filter(fantasyPoints_gam < 0) %>% 
+  slice(which.min(age))
+
+peakAge <- pointsPerSeason_positionAge_newData %>% 
+  group_by(positionFactor) %>% 
+  slice(which.max(fantasyPoints_gam))
+
+peakAge2 <- pointsPerSeason_positionAge_newData %>% 
+  filter(age > 22) %>% 
+  group_by(positionFactor) %>% 
+  slice(which.max(fantasyPoints_gam))
+
+qbPeakAge <- round(peakAge$age[which(peakAge$positionFactor == "QB")], 0)
+fbPeakAge <- round(peakAge$age[which(peakAge$positionFactor == "FB")], 0)
+rbPeakAge <- round(peakAge$age[which(peakAge$positionFactor == "RB")], 0)
+wrPeakAge <- round(peakAge$age[which(peakAge$positionFactor == "WR")], 0)
+wrPeakAge2 <- round(peakAge2$age[which(peakAge$positionFactor == "WR")], 0)
+tePeakAge <- round(peakAge$age[which(peakAge$positionFactor == "TE")], 0)
+
+qbZeroAge <- round(zeroAge$age[which(zeroAge$positionFactor == "QB")], 0)
+fbZeroAge <- round(zeroAge$age[which(zeroAge$positionFactor == "FB")], 0)
+rbZeroAge <- round(zeroAge$age[which(zeroAge$positionFactor == "RB")], 0)
+wrZeroAge <- round(zeroAge$age[which(zeroAge$positionFactor == "WR")], 0)
+teZeroAge <- round(zeroAge$age[which(zeroAge$positionFactor == "TE")], 0)
 ```
 
-Plots of players' model-implied fantasy points by age are in Figures [-@fig-individualFantasyPointsByAgeQB]–[-@fig-individualFantasyPointsByAgeTE].
+#### Quarterbacks {#sec-fantasyPointsIndividualByAgePlotsQB}
+
+A plot of Quarterbacks' model-implied fantasy points by age is in @fig-individualFantasyPointsByAgeQB.
+The model-implied peak of Quarterbacks' fantasy points is at age `{r} qbPeakAge`.
+The model-predicted value of zero fantasy points for Quarterbacks is at `{r} qbZeroAge`.
 
 ```{r}
 #| label: fig-individualFantasyPointsByAgeQB
@@ -663,6 +720,12 @@ ggplotly(
   tooltip = c("age","fantasyPoints_gam","text"))
 ```
 
+#### Fullbacks {#sec-fantasyPointsIndividualByAgePlotsFB}
+
+A plot of Fullbacks' model-implied fantasy points by age is in @fig-individualFantasyPointsByAgeFB.
+The model-implied peak of Fullbacks' fantasy points is at age `{r} fbPeakAge`.
+The model-predicted value of zero fantasy points for Quarterbacks is at `{r} fbZeroAge`.
+
 ```{r}
 #| label: fig-individualFantasyPointsByAgeFB
 #| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, for Fullbacks. Overlaid with the Model-Implied Trajectory for Fullbacks."
@@ -701,6 +764,12 @@ ggplotly(
   plot_individualFantasyPointsByAgeFB,
   tooltip = c("age","fantasyPoints_gam","text"))
 ```
+
+#### Running Backs {#sec-fantasyPointsIndividualByAgePlotsRB}
+
+A plot of Running Backs' model-implied fantasy points by age is in @fig-individualFantasyPointsByAgeRB.
+The model-implied peak of Running Backs' fantasy points is at age `{r} rbPeakAge`.
+The model-predicted value of zero fantasy points for Quarterbacks is at `{r} rbZeroAge`.
 
 ```{r}
 #| label: fig-individualFantasyPointsByAgeRB
@@ -741,6 +810,12 @@ ggplotly(
   tooltip = c("age","fantasyPoints_gam","text"))
 ```
 
+#### Wide Receivers {#sec-fantasyPointsIndividualByAgePlotsWR}
+
+A plot of Wide Receivers' model-implied fantasy points by age is in @fig-individualFantasyPointsByAgeWR.
+The model-implied peaks of Running Backs' fantasy points are at ages `{r} wrPeakAge` and `{r} wrPeakAge2`.
+The model-predicted value of zero fantasy points for Quarterbacks is at `{r} wrZeroAge`.
+
 ```{r}
 #| label: fig-individualFantasyPointsByAgeWR
 #| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Generalized Additive Model, for Wide Receivers. Overlaid with the Model-Implied Trajectory for Wide Receivers."
@@ -779,6 +854,12 @@ ggplotly(
   plot_individualFantasyPointsByAgeWR,
   tooltip = c("age","fantasyPoints_gam","text"))
 ```
+
+#### Tight Ends {#sec-fantasyPointsIndividualByAgePlotsTE}
+
+A plot of Tight Ends' model-implied fantasy points by age is in @fig-individualFantasyPointsByAgeTE.
+The model-implied peak of Running Backs' fantasy points is at age `{r} tePeakAge`.
+The model-predicted value of zero fantasy points for Quarterbacks is at `{r} teZeroAge`.
 
 ```{r}
 #| label: fig-individualFantasyPointsByAgeTE
