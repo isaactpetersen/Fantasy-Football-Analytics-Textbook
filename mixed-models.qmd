@@ -301,6 +301,8 @@ ggplotly(
 
 ### Models {#sec-fantasyPointsByAgeExperienceModels}
 
+#### Null Model {#sec-fantasyPointsByAgeExperienceModelsNull}
+
 ```{r}
 pointsPerSeason_nullModel <- lmerTest::lmer(
   fantasy_points ~ 1 + (1 | player_idFactor),
@@ -313,7 +315,11 @@ summary(pointsPerSeason_nullModel)
 MuMIn::r.squaredGLMM(pointsPerSeason_nullModel)
 performance::icc(pointsPerSeason_nullModel)
 AIC(pointsPerSeason_nullModel)
+```
 
+#### Model with Position as Fixed-Effect Predictor {#sec-fantasyPointsByAgeExperienceModelsPosition}
+
+```{r}
 pointsPerSeason_position <- lmerTest::lmer(
   fantasy_points ~ positionFactor + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
@@ -326,7 +332,14 @@ MuMIn::r.squaredGLMM(pointsPerSeason_position)
 emmeans::emmeans(pointsPerSeason_position, "positionFactor")
 performance::icc(pointsPerSeason_position)
 AIC(pointsPerSeason_position)
+```
 
+
+#### Identify the Best-Fitting Functional Form of Age {#sec-fantasyPointsByAgeExperienceModelsAge}
+
+##### Linear Models {#sec-fantasyPointsByAgeExperienceModelsAgeLinear}
+
+```{r}
 pointsPerSeason_positionAgeFixedLinearSlopes <- lmerTest::lmer(
   fantasy_points ~ positionFactor + ageCentered20 + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
@@ -354,7 +367,11 @@ emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "positionFactor"
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "ageCentered20")
 performance::icc(pointsPerSeason_positionAgeRandomLinearSlopes)
 AIC(pointsPerSeason_positionAgeRandomLinearSlopes)
+```
 
+##### Quadratic Models {#sec-fantasyPointsByAgeExperienceModelsAgeQuadratic}
+
+```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes <- lmerTest::lmer(
   fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
@@ -409,7 +426,7 @@ performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInte
 AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 ```
 
-Compare models:
+##### Compare Models {#sec-fantasyPointsByAgeExperienceModelsAgeCompare}
 
 ```{r}
 anova(
@@ -436,7 +453,7 @@ mixedModels <- list(
 aictab(mixedModels)
 ```
 
-Generalized Additive Model:
+##### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
 
 ```{r}
 num_cores <- detectCores()
@@ -456,7 +473,7 @@ MuMIn::r.squaredGLMM(pointsPerSeason_gam)
 AIC(pointsPerSeason_gam)
 ```
 
-Players at the top of the end-of-season depth chart:
+##### Players Who Were (at Least Once) at the Top of the End-of-Season Depth Chart {#sec-fantasyPointsByAgeExperienceModelsAgeDepth}
 
 ```{r}
 pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
