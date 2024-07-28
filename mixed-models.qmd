@@ -13,6 +13,7 @@ library("emmeans")
 library("sjstats")
 library("mgcv")
 library("AICcmodavg")
+library("bbmle")
 library("parallel")
 library("plotly")
 library("viridis")
@@ -593,23 +594,39 @@ ggplotly(
 
 By accounting for which player each observation comes from using mixed models, we can examine the association between age and fantasy points in a more meaningful way, without violating the [assumption in multiple regression](#sec-assumptionsRegression) that the observations are independent (i.e., that the residuals are uncorrelated).
 
-#### Null Model {#sec-fantasyPointsByAgeExperienceModelsNull}
+#### Linear Regression Model {#sec-fantasyPointsByAgeExperienceModelsRegression}
 
 ```{r}
-pointsPerSeason_nullModel <- lmerTest::lmer(
+pointsPerSeason_regressionModel <- lm(
+  fantasy_points ~ 1,
+  data = player_stats_seasonal_offense_subset,
+  na.action = "na.exclude"
+)
+
+summary(pointsPerSeason_regressionModel)
+summary(pointsPerSeason_regressionModel)$r.squared
+AIC(pointsPerSeason_regressionModel)
+MuMIn::AICc(pointsPerSeason_regressionModel)
+```
+
+#### Random Intercepts Model {#sec-fantasyPointsByAgeExperienceModelsIntercepts}
+
+```{r}
+pointsPerSeason_randomIntercepts <- lmerTest::lmer(
   fantasy_points ~ 1 + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
 
-summary(pointsPerSeason_nullModel)
-MuMIn::r.squaredGLMM(pointsPerSeason_nullModel)
-performance::icc(pointsPerSeason_nullModel)
-AIC(pointsPerSeason_nullModel)
+summary(pointsPerSeason_randomIntercepts)
+MuMIn::r.squaredGLMM(pointsPerSeason_randomIntercepts)
+performance::icc(pointsPerSeason_randomIntercepts)
+AIC(pointsPerSeason_randomIntercepts)
+AICc(pointsPerSeason_randomIntercepts)
 ```
 
-#### Model with Position as Fixed-Effect Predictor {#sec-fantasyPointsByAgeExperienceModelsPosition}
+#### Random Intercepts Model with Position as Fixed-Effect Predictor {#sec-fantasyPointsByAgeExperienceModelsPosition}
 
 ```{r}
 pointsPerSeason_position <- lmerTest::lmer(
@@ -720,9 +737,51 @@ AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperi
 
 ##### Compare Models {#sec-fantasyPointsByAgeExperienceModelsAgeCompare}
 
+Groups of models:
+
+```{r}
+lmVsMixedModel <- list(
+  "linearRegression" = pointsPerSeason_regressionModel,
+  "randomIntercepts" = pointsPerSeason_randomIntercepts
+)
+
+lmAndmixedModels <- list(
+  "linearRegression" = pointsPerSeason_regressionModel,
+  "randomIntercepts" = pointsPerSeason_randomIntercepts,
+  "position" = pointsPerSeason_position,
+  "fixedLinear" = pointsPerSeason_positionAgeFixedLinearSlopes,
+  "randomLinear" = pointsPerSeason_positionAgeRandomLinearSlopes,
+  "randomLinearFixedQuadratic" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  "randomLinearFixedQuadraticInteraction" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
+)
+
+mixedModels <- list(
+  "randomIntercepts" = pointsPerSeason_randomIntercepts,
+  "position" = pointsPerSeason_position,
+  "fixedLinear" = pointsPerSeason_positionAgeFixedLinearSlopes,
+  "randomLinear" = pointsPerSeason_positionAgeRandomLinearSlopes,
+  "randomLinearFixedQuadratic" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  "randomLinearFixedQuadraticInteraction" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
+)
+
+mixedModels1 <- list(
+  "randomIntercepts" = pointsPerSeason_randomIntercepts,
+  "position" = pointsPerSeason_position
+)
+
+mixedModels2 <- list(
+  "fixedLinear" = pointsPerSeason_positionAgeFixedLinearSlopes,
+  "randomLinear" = pointsPerSeason_positionAgeRandomLinearSlopes,
+  "randomLinearFixedQuadratic" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  "randomLinearFixedQuadraticInteraction" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
+)
+```
+
+###### Likelihood Ratio Test {#sec-fantasyPointsByAgeExperienceModelsAgeCompareLRT}
+
 ```{r}
 anova(
-  pointsPerSeason_nullModel,
+  pointsPerSeason_randomIntercepts,
   pointsPerSeason_position
 )
 
@@ -732,17 +791,76 @@ anova(
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
 )
+```
 
-mixedModels <- list(
-  "null" = pointsPerSeason_nullModel,
-  "position" = pointsPerSeason_position,
-  "fixedLinear" = pointsPerSeason_positionAgeFixedLinearSlopes,
-  "randomLinear" = pointsPerSeason_positionAgeRandomLinearSlopes,
-  "randomLinearFixedQuadratic" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
-  "randomLinearFixedQuadraticInteraction" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
-)
+###### Akaike Information Criterion (AIC) {#sec-fantasyPointsByAgeExperienceModelsAgeCompareAIC}
 
-aictab(mixedModels)
+```{r}
+AIC(
+  pointsPerSeason_regressionModel,
+  pointsPerSeason_randomIntercepts,
+  pointsPerSeason_positionAgeFixedLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
+  )
+
+#AICcmodavg::aictab(lmAndmixedModels) # throws error (can't mix lm with lmer)
+bbmle::AICtab(lmAndmixedModels)
+
+AICcmodavg::aictab(mixedModels)
+bbmle::AICtab(mixedModels)
+```
+
+###### Corrected Akaike Information Criterion (AICc) {#sec-fantasyPointsByAgeExperienceModelsAgeCompareAICc}
+
+```{r}
+#AICcmodavg::aictab(lmVsMixedModel) # throws error (can't mix lm with lmer)
+bbmle::AICctab(lmVsMixedModel)
+
+AICcmodavg::aictab(mixedModels) # throws error (can't mix lm with lmer)
+#bbmle::AICctab(mixedModels) # throws error (different numbers of observations)
+
+AICcmodavg::aictab(mixedModels1)
+bbmle::AICctab(mixedModels1)
+
+AICcmodavg::aictab(mixedModels2)
+bbmle::AICctab(mixedModels2)
+```
+
+###### Bayesian Information Criterion (BIC) {#sec-fantasyPointsByAgeExperienceModelsAgeCompareBIC}
+
+```{r}
+BIC(
+  pointsPerSeason_regressionModel,
+  pointsPerSeason_randomIntercepts,
+  pointsPerSeason_positionAgeFixedLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
+  )
+```
+
+###### $R^2$ {#sec-fantasyPointsByAgeExperienceModelsAgeCompareRsquared}
+
+```{r}
+summary(pointsPerSeason_regressionModel)$r.squared
+MuMIn::r.squaredGLMM(pointsPerSeason_randomIntercepts)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeFixedLinearSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+```
+
+###### Deviance {#sec-fantasyPointsByAgeExperienceModelsAgeCompareDeviance}
+
+```{r}
+deviance(pointsPerSeason_regressionModel)
+deviance(pointsPerSeason_randomIntercepts)
+deviance(pointsPerSeason_positionAgeFixedLinearSlopes)
+deviance(pointsPerSeason_positionAgeRandomLinearSlopes)
+deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 ```
 
 ##### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
@@ -763,6 +881,61 @@ pointsPerSeason_gamSummary
 pointsPerSeason_gamSummary$r.sq
 MuMIn::r.squaredGLMM(pointsPerSeason_gam)
 AIC(pointsPerSeason_gam)
+```
+
+###### Compare Models
+
+```{r}
+linearMixedModelsVsGAM <- list(
+  "fixedLinear" = pointsPerSeason_positionAgeFixedLinearSlopes,
+  "randomLinear" = pointsPerSeason_positionAgeRandomLinearSlopes,
+  "randomLinearFixedQuadratic" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  "randomLinearFixedQuadraticInteraction" = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction,
+  "gam" = pointsPerSeason_gam
+)
+
+AIC(
+  pointsPerSeason_positionAgeFixedLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction,
+  pointsPerSeason_gam
+)
+
+BIC(
+  pointsPerSeason_positionAgeFixedLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction,
+  pointsPerSeason_gam
+)
+
+#AICcmodavg::aictab(linearMixedModelsVsGAM) # throws error (can't mix bam with lmer)
+bbmle::AICctab(linearMixedModelsVsGAM)
+
+summary(pointsPerSeason_regressionModel)$r.squared
+MuMIn::r.squaredGLMM(pointsPerSeason_randomIntercepts)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeFixedLinearSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+MuMIn::r.squaredGLMM(pointsPerSeason_gam)
+
+deviance(pointsPerSeason_regressionModel)
+deviance(pointsPerSeason_randomIntercepts)
+deviance(pointsPerSeason_positionAgeFixedLinearSlopes)
+deviance(pointsPerSeason_positionAgeRandomLinearSlopes)
+deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+deviance(pointsPerSeason_gam)
+
+logLik(pointsPerSeason_regressionModel)
+logLik(pointsPerSeason_randomIntercepts)
+logLik(pointsPerSeason_positionAgeFixedLinearSlopes)
+logLik(pointsPerSeason_positionAgeRandomLinearSlopes)
+logLik(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+logLik(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+logLik(pointsPerSeason_gam)
 ```
 
 ##### Players Who Were (at Least Once) at the Top of the End-of-Season Depth Chart {#sec-fantasyPointsByAgeExperienceModelsAgeDepth}
