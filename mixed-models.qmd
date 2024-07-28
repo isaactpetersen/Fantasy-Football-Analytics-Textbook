@@ -47,6 +47,12 @@ We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` obj
 
 ## Overview of Mixed Models {#sec-mixedModelsOverview}
 
+We will discuss a modeling framework that goes by many terms, including mixed models, mixed-effects models, multilevel models, hierarchical linear models.
+
+### Ecological Fallacy {#sec-ecologicalFallacy}
+
+### Simpson's Paradox {#sec-simpsonsParadox}
+
 ## Fantasy Points Per Season by Position, Age, and Experience {#sec-fantasyPointsByAgeExperience}
 
 ```{r}
@@ -112,7 +118,268 @@ player_stats_seasonal_offense_subsetDepth <- player_stats_seasonal_offense_subse
     ))
 ```
 
-### Plots of Raw Data {#sec-fantasyPointsByAgeExperienceRawData}
+### Scatterplots of Fantasy Points by Age and Position {#sec-fantasyPointsByAgeScatterplot}
+
+[Scatterplots](#sec-scatterplot) are a helpful tool for quickly examining the association between two variables.
+However, [scatterplots](#sec-scatterplot)—as well as correlation and multiple regression—can hide meaningful associations that differ across units of analysis.
+
+#### Quarterbacks {#sec-fantasyPointsByAgeScatterplotQB}
+
+A [scatterplot](#sec-scatterplot) of Quarterbacks' fantasy points by age is in @fig-fantasyPointsByAgeScatterplotQB.
+
+```{r}
+#| label: fig-fantasyPointsByAgeScatterplotQB
+#| fig-cap: "Scatterplot of Fantasy Points by Age for Quarterbacks."
+
+plot_scatterplotFantasyPointsByAgeQB <- ggplot(
+  data = player_stats_seasonal_offense_subset %>% 
+    filter(position == "QB") %>% 
+    mutate(
+      age = round(age, 2),
+      fantasy_points = round(fantasy_points, 2)
+    ),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    color = player_id)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+  )) +
+  geom_smooth(
+    mapping = aes(
+    x = age,
+    y = fantasy_points),
+    inherit.aes = FALSE
+  ) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Quarterbacks"
+  ) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+ggplotly(
+  plot_scatterplotFantasyPointsByAgeQB,
+  tooltip = c("age","fantasy_points","text","label"))
+```
+
+Based on the [scatterplot](#sec-scatterplot) (and the bivariate association below), Quarterbacks' fantasy points appear to increase with age.
+
+```{r}
+cor.test(
+  formula = ~ age + fantasy_points,
+  data = player_stats_seasonal_offense_subset %>% filter(position == "QB")
+)
+```
+
+#### Fullbacks {#sec-fantasyPointsByAgeScatterplotFB}
+
+A [scatterplot](#sec-scatterplot) of Fullbacks' fantasy points by age is in @fig-fantasyPointsByAgeScatterplotFB.
+
+```{r}
+#| label: fig-fantasyPointsByAgeScatterplotFB
+#| fig-cap: "Scatterplot of Fantasy Points by Age for Fullbacks."
+
+plot_scatterplotFantasyPointsByAgeFB <- ggplot(
+  data = player_stats_seasonal_offense_subset %>% 
+    filter(position == "FB") %>% 
+    mutate(
+      age = round(age, 2),
+      fantasy_points = round(fantasy_points, 2)
+    ),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    color = player_id)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+  )) +
+  geom_smooth(
+    mapping = aes(
+    x = age,
+    y = fantasy_points),
+    inherit.aes = FALSE
+  ) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Fullbacks"
+  ) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+ggplotly(
+  plot_scatterplotFantasyPointsByAgeFB,
+  tooltip = c("age","fantasy_points","text","label"))
+```
+
+Based on the [scatterplot](#sec-scatterplot), Fullbacks' fantasy points appear to be relatively stable across ages.
+
+#### Running Backs {#sec-fantasyPointsByAgeScatterplotRB}
+
+A [scatterplot](#sec-scatterplot) of Running Backs' fantasy points by age is in @fig-fantasyPointsByAgeScatterplotRB.
+
+```{r}
+#| label: fig-fantasyPointsByAgeScatterplotRB
+#| fig-cap: "Scatterplot of Fantasy Points by Age for Running Backs."
+
+plot_scatterplotFantasyPointsByAgeRB <- ggplot(
+  data = player_stats_seasonal_offense_subset %>% 
+    filter(position == "RB") %>% 
+    mutate(
+      age = round(age, 2),
+      fantasy_points = round(fantasy_points, 2)
+    ),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    color = player_id)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+  )) +
+  geom_smooth(
+    mapping = aes(
+    x = age,
+    y = fantasy_points),
+    inherit.aes = FALSE
+  ) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Running Backs"
+  ) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+ggplotly(
+  plot_scatterplotFantasyPointsByAgeRB,
+  tooltip = c("age","fantasy_points","text","label"))
+```
+
+Based on the [scatterplot](#sec-scatterplot), Running Backs' fantasy points appear to be relatively stable across ages.
+
+#### Wide Receivers {#sec-fantasyPointsByAgeScatterplotWR}
+
+A [scatterplot](#sec-scatterplot) of Wide Receivers' fantasy points by age is in @fig-fantasyPointsByAgeScatterplotWR.
+
+```{r}
+#| label: fig-fantasyPointsByAgeScatterplotWR
+#| fig-cap: "Scatterplot of Fantasy Points by Age for Wide Receivers."
+
+plot_scatterplotFantasyPointsByAgeWR <- ggplot(
+  data = player_stats_seasonal_offense_subset %>% 
+    filter(position == "WR") %>% 
+    mutate(
+      age = round(age, 2),
+      fantasy_points = round(fantasy_points, 2)
+    ),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    color = player_id)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+  )) +
+  geom_smooth(
+    mapping = aes(
+    x = age,
+    y = fantasy_points),
+    inherit.aes = FALSE
+  ) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Wide Receivers"
+  ) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+ggplotly(
+  plot_scatterplotFantasyPointsByAgeWR,
+  tooltip = c("age","fantasy_points","text","label"))
+```
+
+Based on the [scatterplot](#sec-scatterplot), Wide Receivers' fantasy points appear to be relatively stable across ages.
+
+#### Tight Ends {#sec-fantasyPointsByAgeScatterplotTE}
+
+A [scatterplot](#sec-scatterplot) of Tight Ends' fantasy points by age is in @fig-fantasyPointsByAgeScatterplotTE.
+
+```{r}
+#| label: fig-fantasyPointsByAgeScatterplotTE
+#| fig-cap: "Scatterplot of Fantasy Points by Age for Tight Ends."
+
+plot_scatterplotFantasyPointsByAgeTE <- ggplot(
+  data = player_stats_seasonal_offense_subset %>% 
+    filter(position == "TE") %>% 
+    mutate(
+      age = round(age, 2),
+      fantasy_points = round(fantasy_points, 2)
+    ),
+  mapping = aes(
+    x = age,
+    y = fantasy_points,
+    color = player_id)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+  )) +
+  geom_smooth(
+    mapping = aes(
+    x = age,
+    y = fantasy_points),
+    inherit.aes = FALSE
+  ) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Tight Ends"
+  ) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+ggplotly(
+  plot_scatterplotFantasyPointsByAgeTE,
+  tooltip = c("age","fantasy_points","text","label"))
+```
+
+Based on the [scatterplot](#sec-scatterplot) (and the bivariate association below), Tight Ends' fantasy points appear to increase with age.
+
+```{r}
+cor.test(
+  formula = ~ age + fantasy_points,
+  data = player_stats_seasonal_offense_subset %>% filter(position == "TE")
+)
+```
+
+### Plots of Raw Trajectories of Fantasy Points By Age and Player {#sec-fantasyPointsByAgeExperienceRawData}
+
+[Scatterplots](#sec-scatterplot) can be helpful for quickly visualizing the association between two variables.
+However, as mentioned earlier, [scatterplots](#sec-scatterplot) can hide the association between variables at different units of analysis.
+For instance, consider that we are trying to predict how a player will perform based on their age.
+We are interested not only in what the association is between age and fantasy points between players (i.e., a between-person association).
+We are also interested in what the association is between age and fantasy points *within* a given player (and within each player; i.e., a within-individual association).
+Arguably, the within-individual association between age and fantasy points is more relevant to the prediction of performance than the association between age and fantasy points between players.
+Assuming that the between-player association between age and fantasy points is the same as the within-player association when it is not is an example of the [ecological fallacy](#sec-fallaciesEcological).
+
+Below, we depict players' raw trajectories of fantasy points as a function of age.
+These are known as spaghetti plots.
+By examining the trajectory for each player, we can get a better understanding of hor performance changes (within an individual) as a function of age.
 
 #### Quarterbacks {#sec-fantasyPointsByAgeExperienceRawDataQB}
 
@@ -299,7 +566,9 @@ ggplotly(
   tooltip = c("age","fantasy_points","text"))
 ```
 
-### Models {#sec-fantasyPointsByAgeExperienceModels}
+### Mixed Models {#sec-fantasyPointsByAgeExperienceModels}
+
+By accounting for which player each observation comes from using mixed models, we can examine the association between age and fantasy points in a more meaningful way, without violating the [assumption in multiple regression](#sec-assumptionsRegression) that the observations are independent (i.e., that the residuals are uncorrelated).
 
 #### Null Model {#sec-fantasyPointsByAgeExperienceModelsNull}
 
@@ -918,6 +1187,25 @@ ggplotly(
 ```
 
 ## Conclusion {#sec-mixedModelsConclusion}
+
+Mixed models allow accounting for multiple levels or units of analysis and to include both fixed and random effects.
+Inclusion of random effects allows effects of a predictor to vary as a function of individuals in the grouping level.
+This allows for more accurately predicting phenomena.
+We applied mixed models with random intercepts and random slopes to allow our model estimates to account for the fact that different players have different starting points (intercepts) and different changes over time (slopes) in fantasy points.
+A quadratic, inverted-U-shaped form as a function of age fit better than a linear form as a function of age in predicting players' fantasy points.
+A generalized additive model that allows further nonlinearity fit even better than the quadratic model.
+
+Based on the bivariate scatterplots between age and fantasy points, we might conclude that players tend to stay stable or even increase in fantasy points with age.
+However, we would be wrong.
+When we account for the longitudinal data (i.e., multiple observations over time for the same player) using mixed models, we observe that fantasy points tend to decrease with age, with the timing and rate of decline differing for each position.
+In other words, the association between age and fantasy points differs at the person level versus the group level.
+This is an example of Simpson's paradox.
+The discrepancy between the positive or null association between age and fantasy points at the group level, and the negative association at the person level may be due, in part, to the selective attrition of players with age.
+The highest performing players will tend to play the longest, whereas the poorest performing players will retire or get dropped from the team at the youngest ages.
+Thus, the selective attrition may make it seem that there is no association between age and performance (or even a positive one!), when in fact, players' performance tends to decrease with age after age 26 or so (with the timing differing from position to position).
+
+In sum, mixed models are valuable for examining associations between variables when there are multiple levels (i.e., clustering or nesting).
+It is important not to confuse the association at one level (e.g., group level) with the association at another level (e.g., person level), which is an example of the [ecological fallacy](#sec-fallaciesEcological).
 
 ::: {.content-visible when-format="html"}
 
