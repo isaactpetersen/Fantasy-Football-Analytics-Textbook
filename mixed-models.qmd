@@ -590,24 +590,91 @@ ggplotly(
   tooltip = c("age","fantasy_points","text","label"))
 ```
 
-### Mixed Models {#sec-fantasyPointsByAgeExperienceModels}
+### Linear Regression Models {#sec-fantasyPointsByAgeExperienceModelsRegression}
 
-By accounting for which player each observation comes from using mixed models, we can examine the association between age and fantasy points in a more meaningful way, without violating the [assumption in multiple regression](#sec-assumptionsRegression) that the observations are independent (i.e., that the residuals are uncorrelated).
-
-#### Linear Regression Model {#sec-fantasyPointsByAgeExperienceModelsRegression}
+#### Null Model {#sec-fantasyPointsByAgeExperienceModelsRegressionNull}
 
 ```{r}
-pointsPerSeason_regressionModel <- lm(
+pointsPerSeason_nullModel <- lm(
   fantasy_points ~ 1,
   data = player_stats_seasonal_offense_subset,
   na.action = "na.exclude"
 )
 
-summary(pointsPerSeason_regressionModel)
-summary(pointsPerSeason_regressionModel)$r.squared
-AIC(pointsPerSeason_regressionModel)
-MuMIn::AICc(pointsPerSeason_regressionModel)
+summary(pointsPerSeason_nullModel)
+summary(pointsPerSeason_nullModel)$r.squared
+AIC(pointsPerSeason_nullModel)
+MuMIn::AICc(pointsPerSeason_nullModel)
 ```
+
+#### Linear Model {#sec-fantasyPointsByAgeExperienceModelsRegressionLinear}
+
+```{r}
+pointsPerSeason_linearRegression <- lm(
+  fantasy_points ~ positionFactor + ageCentered20 + positionFactor:ageCentered20,
+  data = player_stats_seasonal_offense_subset,
+  na.action = "na.exclude"
+)
+
+summary(pointsPerSeason_linearRegression)
+summary(pointsPerSeason_linearRegression)$r.squared
+AIC(pointsPerSeason_linearRegression)
+MuMIn::AICc(pointsPerSeason_linearRegression)
+```
+
+#### Quadratic Model {#sec-fantasyPointsByAgeExperienceModelsRegressionLinear}
+
+```{r}
+pointsPerSeason_quadraticRegression <- lm(
+  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic,
+  data = player_stats_seasonal_offense_subset,
+  na.action = "na.exclude"
+)
+
+summary(pointsPerSeason_quadraticRegression)
+summary(pointsPerSeason_quadraticRegression)$r.squared
+AIC(pointsPerSeason_quadraticRegression)
+MuMIn::AICc(pointsPerSeason_quadraticRegression)
+```
+
+#### Compare Models {#sec-fantasyPointsByAgeExperienceModelsRegressionCompare}
+
+```{r}
+anova(
+  pointsPerSeason_linearRegression,
+  pointsPerSeason_quadraticRegression
+)
+
+AIC(
+  pointsPerSeason_nullModel,
+  pointsPerSeason_linearRegression,
+  pointsPerSeason_quadraticRegression
+  )
+
+lmModels <- list(
+  "nullModel" = pointsPerSeason_nullModel,
+  "linearRegression" = pointsPerSeason_linearRegression,
+  "quadraticRegression" = pointsPerSeason_quadraticRegression
+)
+
+bbmle::AICtab(lmModels)
+
+summary(pointsPerSeason_nullModel)$r.squared
+summary(pointsPerSeason_linearRegression)$r.squared
+summary(pointsPerSeason_quadraticRegression)$r.squared
+
+deviance(pointsPerSeason_nullModel)
+deviance(pointsPerSeason_linearRegression)
+deviance(pointsPerSeason_quadraticRegression)
+
+logLik(pointsPerSeason_nullModel)
+logLik(pointsPerSeason_linearRegression)
+logLik(pointsPerSeason_quadraticRegression)
+```
+
+### Mixed Models {#sec-fantasyPointsByAgeExperienceModels}
+
+By accounting for which player each observation comes from using mixed models, we can examine the association between age and fantasy points in a more meaningful way, without violating the [assumption in multiple regression](#sec-assumptionsRegression) that the observations are independent (i.e., that the residuals are uncorrelated).
 
 #### Random Intercepts Model {#sec-fantasyPointsByAgeExperienceModelsIntercepts}
 
@@ -642,7 +709,6 @@ emmeans::emmeans(pointsPerSeason_position, "positionFactor")
 performance::icc(pointsPerSeason_position)
 AIC(pointsPerSeason_position)
 ```
-
 
 #### Identify the Best-Fitting Functional Form of Age {#sec-fantasyPointsByAgeExperienceModelsAge}
 
@@ -741,7 +807,7 @@ After fitting several models, we now must compare their fit to determine which m
 Parsimonious models are more likely to be true and more likely to generalize to other samples, because more complex models are more likely to overfit the data.
 Thus, more complex models will almost always fit better than simpler models.
 Thus, we are not just interested in whether a more complex model fits better than the simpler model; we also care about whether the more complex model fits *significantly* better than the simpler model given its additional complexity.
-For evaluating and comparing models, we examine the [likelihood ratio test](#sec-fantasyPointsByAgeExperienceModelsAgeCompareLRT), the [Akaike Information Criterion](#sec-fantasyPointsByAgeExperienceModelsAgeCompareAIC) (AIC), the [corrected AIC](#sec-fantasyPointsByAgeExperienceModelsAgeCompareAICc) (AICc), the [Bayesian Information Criterion](#sec-fantasyPointsByAgeExperienceModelsAgeCompareBIC) (BIC), [$R^2$](#sec-fantasyPointsByAgeExperienceModelsAgeCompareRsquared), and [deviance](#sec-fantasyPointsByAgeExperienceModelsAgeCompareDeviance).
+For evaluating and comparing models, we examine the [likelihood ratio test](#sec-fantasyPointsByAgeExperienceModelsAgeCompareLRT), the [Akaike Information Criterion](#sec-fantasyPointsByAgeExperienceModelsAgeCompareAIC) (AIC), the [corrected AIC](#sec-fantasyPointsByAgeExperienceModelsAgeCompareAICc) (AICc), the [Bayesian Information Criterion](#sec-fantasyPointsByAgeExperienceModelsAgeCompareBIC) (BIC), [$R^2$](#sec-fantasyPointsByAgeExperienceModelsAgeCompareRsquared), [deviance](#sec-fantasyPointsByAgeExperienceModelsAgeCompareDeviance), and [log likelihood](#sec-fantasyPointsByAgeExperienceModelsAgeCompareLogLik).
 
 The BIC penalizes model complexity more than the AIC does.
 The BIC is preferable when there is a "true" model, and one intends to identify the true model.
@@ -752,12 +818,14 @@ Below, we specify various groups of models for the model fit comparisons:
 
 ```{r}
 lmVsMixedModel <- list(
-  "linearRegression" = pointsPerSeason_regressionModel,
+  "nullModel" = pointsPerSeason_nullModel,
   "randomIntercepts" = pointsPerSeason_randomIntercepts
 )
 
 lmAndMixedModels <- list(
-  "linearRegression" = pointsPerSeason_regressionModel,
+  "nullModel" = pointsPerSeason_nullModel,
+  "linearRegression" = pointsPerSeason_linearRegression,
+  "quadraticRegression" = pointsPerSeason_quadraticRegression,
   "randomIntercepts" = pointsPerSeason_randomIntercepts,
   "position" = pointsPerSeason_position,
   "fixedLinear" = pointsPerSeason_positionAgeFixedLinearSlopes,
@@ -808,7 +876,9 @@ anova(
 
 ```{r}
 AIC(
-  pointsPerSeason_regressionModel,
+  pointsPerSeason_nullModel,
+  pointsPerSeason_linearRegression,
+  pointsPerSeason_quadraticRegression,
   pointsPerSeason_randomIntercepts,
   pointsPerSeason_positionAgeFixedLinearSlopes,
   pointsPerSeason_positionAgeRandomLinearSlopes,
@@ -839,7 +909,9 @@ bbmle::AICctab(mixedModels2)
 
 ```{r}
 BIC(
-  pointsPerSeason_regressionModel,
+  pointsPerSeason_nullModel,
+  pointsPerSeason_linearRegression,
+  pointsPerSeason_quadraticRegression,
   pointsPerSeason_randomIntercepts,
   pointsPerSeason_positionAgeFixedLinearSlopes,
   pointsPerSeason_positionAgeRandomLinearSlopes,
@@ -850,7 +922,7 @@ BIC(
 #AICcmodavg::bictab(lmAndMixedModels) # throws error (can't mix lm with lmer)
 bbmle::BICtab(lmVsMixedModel)
 
-AICcmodavg::bictab(mixedModels) # throws error (can't mix lm with lmer)
+AICcmodavg::bictab(mixedModels)
 #bbmle::AICctab(mixedModels) # throws error (different numbers of observations)
 
 AICcmodavg::bictab(mixedModels1)
@@ -863,7 +935,9 @@ bbmle::BICtab(mixedModels2)
 ###### $R^2$ {#sec-fantasyPointsByAgeExperienceModelsAgeCompareRsquared}
 
 ```{r}
-summary(pointsPerSeason_regressionModel)$r.squared
+summary(pointsPerSeason_nullModel)$r.squared
+summary(pointsPerSeason_linearRegression)$r.squared
+summary(pointsPerSeason_quadraticRegression)$r.squared
 MuMIn::r.squaredGLMM(pointsPerSeason_randomIntercepts)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeFixedLinearSlopes)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearSlopes)
@@ -874,12 +948,27 @@ MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes
 ###### Deviance {#sec-fantasyPointsByAgeExperienceModelsAgeCompareDeviance}
 
 ```{r}
-deviance(pointsPerSeason_regressionModel)
+deviance(pointsPerSeason_nullModel)
+deviance(pointsPerSeason_linearRegression)
+deviance(pointsPerSeason_quadraticRegression)
 deviance(pointsPerSeason_randomIntercepts)
 deviance(pointsPerSeason_positionAgeFixedLinearSlopes)
 deviance(pointsPerSeason_positionAgeRandomLinearSlopes)
 deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+```
+
+###### Log Likelihood {#sec-fantasyPointsByAgeExperienceModelsAgeCompareLogLik}
+
+```{r}
+logLik(pointsPerSeason_nullModel)
+logLik(pointsPerSeason_linearRegression)
+logLik(pointsPerSeason_quadraticRegression)
+logLik(pointsPerSeason_randomIntercepts)
+logLik(pointsPerSeason_positionAgeFixedLinearSlopes)
+logLik(pointsPerSeason_positionAgeRandomLinearSlopes)
+logLik(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+logLik(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 ```
 
 ##### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
@@ -935,7 +1024,9 @@ BIC(
 #AICcmodavg::bictab(linearMixedModelsVsGAM) # throws error (can't mix bam with lmer)
 bbmle::BICtab(linearMixedModelsVsGAM)
 
-summary(pointsPerSeason_regressionModel)$r.squared
+summary(pointsPerSeason_nullModel)$r.squared
+summary(pointsPerSeason_linearRegression)$r.squared
+summary(pointsPerSeason_quadraticRegression)$r.squared
 MuMIn::r.squaredGLMM(pointsPerSeason_randomIntercepts)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeFixedLinearSlopes)
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearSlopes)
@@ -943,7 +1034,9 @@ MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 MuMIn::r.squaredGLMM(pointsPerSeason_gam)
 
-deviance(pointsPerSeason_regressionModel)
+deviance(pointsPerSeason_nullModel)
+deviance(pointsPerSeason_linearRegression)
+deviance(pointsPerSeason_quadraticRegression)
 deviance(pointsPerSeason_randomIntercepts)
 deviance(pointsPerSeason_positionAgeFixedLinearSlopes)
 deviance(pointsPerSeason_positionAgeRandomLinearSlopes)
@@ -951,7 +1044,9 @@ deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 deviance(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 deviance(pointsPerSeason_gam)
 
-logLik(pointsPerSeason_regressionModel)
+logLik(pointsPerSeason_nullModel)
+logLik(pointsPerSeason_linearRegression)
+logLik(pointsPerSeason_quadraticRegression)
 logLik(pointsPerSeason_randomIntercepts)
 logLik(pointsPerSeason_positionAgeFixedLinearSlopes)
 logLik(pointsPerSeason_positionAgeRandomLinearSlopes)
