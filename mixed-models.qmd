@@ -745,7 +745,7 @@ lmVsMixedModel <- list(
   "randomIntercepts" = pointsPerSeason_randomIntercepts
 )
 
-lmAndmixedModels <- list(
+lmAndMixedModels <- list(
   "linearRegression" = pointsPerSeason_regressionModel,
   "randomIntercepts" = pointsPerSeason_randomIntercepts,
   "position" = pointsPerSeason_position,
@@ -805,11 +805,7 @@ AIC(
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
   )
 
-#AICcmodavg::aictab(lmAndmixedModels) # throws error (can't mix lm with lmer)
-bbmle::AICtab(lmAndmixedModels)
-
-AICcmodavg::aictab(mixedModels)
-bbmle::AICtab(mixedModels)
+bbmle::AICtab(lmAndMixedModels)
 ```
 
 ###### Corrected Akaike Information Criterion (AICc) {#sec-fantasyPointsByAgeExperienceModelsAgeCompareAICc}
@@ -839,6 +835,18 @@ BIC(
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction
   )
+
+#AICcmodavg::bictab(lmAndMixedModels) # throws error (can't mix lm with lmer)
+bbmle::BICtab(lmVsMixedModel)
+
+AICcmodavg::bictab(mixedModels) # throws error (can't mix lm with lmer)
+#bbmle::AICctab(mixedModels) # throws error (different numbers of observations)
+
+AICcmodavg::bictab(mixedModels1)
+bbmle::BICtab(mixedModels1)
+
+AICcmodavg::bictab(mixedModels2)
+bbmle::BICtab(mixedModels2)
 ```
 
 ###### $R^2$ {#sec-fantasyPointsByAgeExperienceModelsAgeCompareRsquared}
@@ -883,7 +891,7 @@ MuMIn::r.squaredGLMM(pointsPerSeason_gam)
 AIC(pointsPerSeason_gam)
 ```
 
-###### Compare Models
+###### Compare Models {#sec-fantasyPointsByAgeExperienceModelsAgeGAMcompare}
 
 ```{r}
 linearMixedModelsVsGAM <- list(
@@ -902,6 +910,9 @@ AIC(
   pointsPerSeason_gam
 )
 
+#AICcmodavg::aictab(linearMixedModelsVsGAM) # throws error (can't mix bam with lmer)
+bbmle::AICctab(linearMixedModelsVsGAM)
+
 BIC(
   pointsPerSeason_positionAgeFixedLinearSlopes,
   pointsPerSeason_positionAgeRandomLinearSlopes,
@@ -910,8 +921,8 @@ BIC(
   pointsPerSeason_gam
 )
 
-#AICcmodavg::aictab(linearMixedModelsVsGAM) # throws error (can't mix bam with lmer)
-bbmle::AICctab(linearMixedModelsVsGAM)
+#AICcmodavg::bictab(linearMixedModelsVsGAM) # throws error (can't mix bam with lmer)
+bbmle::BICtab(linearMixedModelsVsGAM)
 
 summary(pointsPerSeason_regressionModel)$r.squared
 MuMIn::r.squaredGLMM(pointsPerSeason_randomIntercepts)
