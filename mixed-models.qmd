@@ -127,6 +127,27 @@ player_stats_seasonal_offense_subsetDepth <- player_stats_seasonal_offense_subse
     ))
 ```
 
+Create a `newdata` object for generating the plots of model-implied fantasy points by age and position:
+
+```{r}
+pointsPerSeason_positionAge_newData <- expand.grid(
+  positionFactor = factor(c("FB","QB","RB","TE","WR")), #,"K"
+  age = seq(from = 20, to = 40, length.out = 10000)
+)
+
+pointsPerSeason_positionAge_newData$ageCentered20 <- pointsPerSeason_positionAge_newData$age - 20
+pointsPerSeason_positionAge_newData$ageCentered20Quadratic <- pointsPerSeason_positionAge_newData$ageCentered20 ^ 2
+pointsPerSeason_positionAge_newData$years_of_experience <- floor(pointsPerSeason_positionAge_newData$age - 22) # assuming that most players start at age 22 (i.e., rookie year) and thus have 1 year of experience at age 23
+pointsPerSeason_positionAge_newData$years_of_experience[which(pointsPerSeason_positionAge_newData$years_of_experience < 0)] <- 0
+```
+
+Create an object with complete cases for generating the plots of individuals' -implied fantasy points by age and position:
+
+```{r}
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
+  filter(!is.na(player_idFactor), !is.na(fantasy_points), !is.na(positionFactor), !is.na(ageCentered20), !is.na(ageCentered20Quadratic), !is.na(years_of_experience))
+```
+
 ### Scatterplots of Fantasy Points by Age and Position {#sec-fantasyPointsByAgeScatterplot}
 
 [Scatterplots](#sec-scatterplot) are a helpful tool for quickly examining the association between two variables.
@@ -607,6 +628,33 @@ AIC(pointsPerSeason_nullModel)
 MuMIn::AICc(pointsPerSeason_nullModel)
 ```
 
+```{r}
+#| label: fig-fantasyPointsNull
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Null Model."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_nullModel <- predict(
+  object = pointsPerSeason_nullModel,
+  newdata = pointsPerSeason_positionAge_newData
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_nullModel
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Null Model"
+  ) +
+  theme_classic()
+```
+
 #### Linear Model {#sec-fantasyPointsByAgeExperienceModelsRegressionLinear}
 
 ```{r}
@@ -622,6 +670,34 @@ AIC(pointsPerSeason_linearRegression)
 MuMIn::AICc(pointsPerSeason_linearRegression)
 ```
 
+```{r}
+#| label: fig-fantasyPointsLinearRegression
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Linear Regression Model."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_linearRegression <- predict(
+  object = pointsPerSeason_linearRegression,
+  newdata = pointsPerSeason_positionAge_newData
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_linearRegression,
+    color = positionFactor
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Linear Regression Model"
+  ) +
+  theme_classic()
+```
+
 #### Quadratic Model {#sec-fantasyPointsByAgeExperienceModelsRegressionLinear}
 
 ```{r}
@@ -635,6 +711,34 @@ summary(pointsPerSeason_quadraticRegression)
 summary(pointsPerSeason_quadraticRegression)$r.squared
 AIC(pointsPerSeason_quadraticRegression)
 MuMIn::AICc(pointsPerSeason_quadraticRegression)
+```
+
+```{r}
+#| label: fig-fantasyPointsQuadraticRegression
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Quadratic Regression Model."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_quadraticRegression <- predict(
+  object = pointsPerSeason_quadraticRegression,
+  newdata = pointsPerSeason_positionAge_newData
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_quadraticRegression,
+    color = positionFactor
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Quadratic Regression Model"
+  ) +
+  theme_classic()
 ```
 
 #### Compare Models {#sec-fantasyPointsByAgeExperienceModelsRegressionCompare}
@@ -693,6 +797,34 @@ AIC(pointsPerSeason_randomIntercepts)
 AICc(pointsPerSeason_randomIntercepts)
 ```
 
+```{r}
+#| label: fig-fantasyPointsLinearRegression
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Random Intercepts Mixed Model."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_randomIntercepts <- predict(
+  object = pointsPerSeason_randomIntercepts,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomIntercepts
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "Random Intercepts Model"
+  ) +
+  theme_classic()
+```
+
 #### Random Intercepts Model with Position as Fixed-Effect Predictor {#sec-fantasyPointsByAgeExperienceModelsPosition}
 
 ```{r}
@@ -708,6 +840,35 @@ MuMIn::r.squaredGLMM(pointsPerSeason_position)
 emmeans::emmeans(pointsPerSeason_position, "positionFactor")
 performance::icc(pointsPerSeason_position)
 AIC(pointsPerSeason_position)
+```
+
+```{r}
+#| label: fig-fantasyPointsPosition
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Random Intercepts Mixed Model With Position as a Fixed-Effect Predictor."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_position <- predict(
+  object = pointsPerSeason_position,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_position,
+    color = positionFactor
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Random Intercepts Model With Position as Fixed-Effect Predictor"
+  ) +
+  theme_classic()
 ```
 
 #### Identify the Best-Fitting Functional Form of Age {#sec-fantasyPointsByAgeExperienceModelsAge}
@@ -728,7 +889,38 @@ emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "positionFactor")
 emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "ageCentered20")
 performance::icc(pointsPerSeason_positionAgeFixedLinearSlopes)
 AIC(pointsPerSeason_positionAgeFixedLinearSlopes)
+```
 
+```{r}
+#| label: fig-fantasyPointsFixedLinearSlopes
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age and Position in Mixed Model With Random Intercepts and Fixed Linear Slopes."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_fixedLinearSlopes <- predict(
+  object = pointsPerSeason_positionAgeFixedLinearSlopes,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_fixedLinearSlopes,
+    color = positionFactor
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Mixed Model with Random Intercepts and Fixed Linear Slopes"
+  ) +
+  theme_classic()
+```
+
+```{r}
 pointsPerSeason_positionAgeRandomLinearSlopes <- lmerTest::lmer(
   fantasy_points ~ positionFactor + ageCentered20 + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
@@ -742,6 +934,35 @@ emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "positionFactor"
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "ageCentered20")
 performance::icc(pointsPerSeason_positionAgeRandomLinearSlopes)
 AIC(pointsPerSeason_positionAgeRandomLinearSlopes)
+```
+
+```{r}
+#| label: fig-fantasyPointsRandomLinearSlopes
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age and Position in Mixed Model With Random Intercepts and Random Linear Slopes."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_randomLinearSlopes <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearSlopes,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomLinearSlopes,
+    color = positionFactor
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Mixed Model with Random Intercepts and Random Linear Slopes"
+  ) +
+  theme_classic()
 ```
 
 ##### Quadratic Models {#sec-fantasyPointsByAgeExperienceModelsAgeQuadratic}
@@ -761,14 +982,47 @@ emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "a
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20Quadratic")
 performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+```
 
+```{r}
+#| label: fig-fantasyPointsRandomLinearFixedQuadracticSlopes
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age and Position in Mixed Model With Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_randomLinearFixedQuadraticSlopes <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomLinearFixedQuadraticSlopes,
+    color = positionFactor
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Mixed Model with Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes"
+  ) +
+  theme_classic()
+```
+
+```{r}
 pointsPerSeason_positionAgeRandomLinearRandomQuadraticSlopes <- lmerTest::lmer(
   fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 + ageCentered20Quadratic | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
 )
+```
 
+```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction <- lmerTest::lmer(
   fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
@@ -783,7 +1037,38 @@ emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInte
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "ageCentered20Quadratic")
 performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+```
 
+```{r}
+#| label: fig-fantasyPointsRandomLinearFixedQuadraticSlopesInteraction
+#| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age and Position in Mixed Model With Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes in Interaction With Position."
+#| code-fold: true
+
+pointsPerSeason_positionAge_newData$fantasyPoints_randomLinearFixedQuadraticSlopesInteraction <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction,
+  newdata = pointsPerSeason_positionAge_newData,
+  re.form = NA
+)
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
+    color = positionFactor
+  )
+) + 
+  geom_line(linewidth = 2) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Mixed Model with Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes in Interaction With Position"
+  ) +
+  theme_classic()
+```
+
+```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
   fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
@@ -1090,17 +1375,6 @@ AIC(pointsPerSeasonDepth_gam)
 ### Plots of Model-Implied Fantasy Points by Position and Age {#sec-fantasyPointsByAgePlots}
 
 ```{r}
-# Create newdata object
-pointsPerSeason_positionAge_newData <- expand.grid(
-  positionFactor = factor(c("FB","QB","RB","TE","WR")), #,"K"
-  age = seq(from = 20, to = 40, length.out = 10000)
-)
-
-pointsPerSeason_positionAge_newData$ageCentered20 <- pointsPerSeason_positionAge_newData$age - 20
-pointsPerSeason_positionAge_newData$ageCentered20Quadratic <- pointsPerSeason_positionAge_newData$ageCentered20 ^ 2
-pointsPerSeason_positionAge_newData$years_of_experience <- floor(pointsPerSeason_positionAge_newData$age - 22) # assuming that most players start at age 22 (i.e., rookie year) and thus have 1 year of experience at age 23
-pointsPerSeason_positionAge_newData$years_of_experience[which(pointsPerSeason_positionAge_newData$years_of_experience < 0)] <- 0
-
 # From Quadratic Model: All Players
 pointsPerSeason_positionAge_newData$fantasyPoints_quadratic <- predict(
   object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
@@ -1237,9 +1511,6 @@ ggplot2::ggplot(
 ### Plots of Individuals' Model-Implied Fantasy Points by Age {#sec-fantasyPointsIndividualByAgePlots}
 
 ```{r}
-player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
-  filter(!is.na(player_idFactor), !is.na(fantasy_points), !is.na(positionFactor), !is.na(ageCentered20), !is.na(ageCentered20Quadratic), !is.na(years_of_experience))
-
 player_stats_seasonal_offense_subsetCC$fantasyPoints_quadratic <- predict(
   object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
   newdata = player_stats_seasonal_offense_subsetCC
