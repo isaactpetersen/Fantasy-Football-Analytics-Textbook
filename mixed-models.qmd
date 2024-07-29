@@ -5,7 +5,6 @@
 ### Load Packages {#sec-mixedModelsLoadPackages}
 
 ```{r}
-library("petersenlab")
 library("lme4")
 library("lmerTest")
 library("MuMIn")
@@ -145,7 +144,13 @@ Create an object with complete cases for generating the plots of individuals' -i
 
 ```{r}
 player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
-  filter(!is.na(player_idFactor), !is.na(fantasy_points), !is.na(positionFactor), !is.na(ageCentered20), !is.na(ageCentered20Quadratic), !is.na(years_of_experience))
+  filter(
+    !is.na(player_idFactor),
+    !is.na(fantasy_points),
+    !is.na(positionFactor),
+    !is.na(ageCentered20),
+    !is.na(ageCentered20Quadratic),
+    !is.na(years_of_experience))
 ```
 
 ### Scatterplots of Fantasy Points by Age and Position {#sec-fantasyPointsByAgeScatterplot}
@@ -628,6 +633,8 @@ AIC(pointsPerSeason_nullModel)
 MuMIn::AICc(pointsPerSeason_nullModel)
 ```
 
+A plot of the model-implied trajectories of fantasy points by age from the null model is in @fig-fantasyPointsNull.
+
 ```{r}
 #| label: fig-fantasyPointsNull
 #| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Null Model."
@@ -670,6 +677,8 @@ AIC(pointsPerSeason_linearRegression)
 MuMIn::AICc(pointsPerSeason_linearRegression)
 ```
 
+A plot of the model-implied trajectories of fantasy points by age from the linear regression model is in @fig-fantasyPointsLinearRegression.
+
 ```{r}
 #| label: fig-fantasyPointsLinearRegression
 #| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Linear Regression Model."
@@ -693,7 +702,8 @@ ggplot2::ggplot(
     x = "Player Age (years)",
     y = "Fantasy Points (Season)",
     title = "Fantasy Points (Season) by Player Age and Position",
-    subtitle = "Linear Regression Model"
+    subtitle = "Linear Regression Model",
+    color = "Position"
   ) +
   theme_classic()
 ```
@@ -712,6 +722,8 @@ summary(pointsPerSeason_quadraticRegression)$r.squared
 AIC(pointsPerSeason_quadraticRegression)
 MuMIn::AICc(pointsPerSeason_quadraticRegression)
 ```
+
+A plot of the model-implied trajectories of fantasy points by age from the regression model with a quadratic term for age is in @fig-fantasyPointsQuadraticRegression.
 
 ```{r}
 #| label: fig-fantasyPointsQuadraticRegression
@@ -736,7 +748,8 @@ ggplot2::ggplot(
     x = "Player Age (years)",
     y = "Fantasy Points (Season)",
     title = "Fantasy Points (Season) by Player Age and Position",
-    subtitle = "Quadratic Regression Model"
+    subtitle = "Quadratic Regression Model",
+    color = "Position"
   ) +
   theme_classic()
 ```
@@ -797,6 +810,8 @@ AIC(pointsPerSeason_randomIntercepts)
 AICc(pointsPerSeason_randomIntercepts)
 ```
 
+A plot of the model-implied trajectories of fantasy points by age from the mixed model with random intercepts is in @fig-fantasyPointsRandomIntercepts.
+
 ```{r}
 #| label: fig-fantasyPointsRandomIntercepts
 #| fig-cap: "Plot of Model-Implied Trajectories of Fantasy Points by Age in Random Intercepts Mixed Model."
@@ -825,6 +840,70 @@ ggplot2::ggplot(
   theme_classic()
 ```
 
+A plot of individuals' model-implied trajectories of fantasy points by age from the mixed model with random intercepts is in @fig-individualFantasyPointsRandomIntercepts.
+
+```{r}
+#| label: fig-individualFantasyPointsRandomIntercepts
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Mixed Model with Random Intercepts. Overlaid with the Model-Implied Trajectory."
+#| code-fold: true
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_randomIntercepts <- predict(
+  object = pointsPerSeason_randomIntercepts,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+
+plot_individualFantasyPointsRandomIntercepts <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomIntercepts,
+    #color = positionFactor,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_randomIntercepts,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_line(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_randomIntercepts
+    ),
+    data = pointsPerSeason_positionAge_newData,
+    inherit.aes = FALSE,
+    se = TRUE,
+    color = "#3366FF",
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_randomIntercepts,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position: Random Intercepts Model",
+    #color = "Position"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsRandomIntercepts,
+  tooltip = c("age","fantasyPoints_randomIntercepts","text","label")
+)
+```
+
 #### Random Intercepts Model with Position as Fixed-Effect Predictor {#sec-fantasyPointsByAgeExperienceModelsPosition}
 
 ```{r}
@@ -841,6 +920,8 @@ emmeans::emmeans(pointsPerSeason_position, "positionFactor")
 performance::icc(pointsPerSeason_position)
 AIC(pointsPerSeason_position)
 ```
+
+A plot of the model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts and a fixed effect of position is in @fig-fantasyPointsPosition.
 
 ```{r}
 #| label: fig-fantasyPointsPosition
@@ -866,14 +947,80 @@ ggplot2::ggplot(
     x = "Player Age (years)",
     y = "Fantasy Points (Season)",
     title = "Fantasy Points (Season) by Player Age and Position",
-    subtitle = "Random Intercepts Model With Position as Fixed-Effect Predictor"
+    subtitle = "Random Intercepts Model With Position as Fixed-Effect Predictor",
+    color = "Position"
   ) +
   theme_classic()
+```
+
+A plot of individuals' model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts and a fixed effect of position is in @fig-individualFantasyPointsPosition.
+
+```{r}
+#| label: fig-individualFantasyPointsPosition
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Mixed Model With Random Intercepts and a Fixed-Effect of Position. Overlaid with the Model-Implied Trajectory by Position."
+#| code-fold: true
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_position <- predict(
+  object = pointsPerSeason_position,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+
+plot_individualFantasyPointsPosition <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_position,
+    color = positionFactor,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_position,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5) +
+  geom_line(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_position,
+      color = positionFactor
+    ),
+    data = pointsPerSeason_positionAge_newData,
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_position,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position: Random Intercepts Model With Position As Predictor",
+    color = "Position"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsRandomIntercepts,
+  tooltip = c("age","fantasyPoints_position","text","label")
+)
 ```
 
 #### Identify the Best-Fitting Functional Form of Age {#sec-fantasyPointsByAgeExperienceModelsAge}
 
 ##### Linear Models {#sec-fantasyPointsByAgeExperienceModelsAgeLinear}
+
+###### Random Intercepts, Fixed Linear Slopes {#sec-fantasyPointsByAgeExperienceModelsAgeLinearFixed}
 
 ```{r}
 pointsPerSeason_positionAgeFixedLinearSlopes <- lmerTest::lmer(
@@ -890,6 +1037,8 @@ emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "ageCentered20")
 performance::icc(pointsPerSeason_positionAgeFixedLinearSlopes)
 AIC(pointsPerSeason_positionAgeFixedLinearSlopes)
 ```
+
+A plot of the model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts and fixed linear slopes is in @fig-fantasyPointsFixedLinearSlopes.
 
 ```{r}
 #| label: fig-fantasyPointsFixedLinearSlopes
@@ -915,10 +1064,76 @@ ggplot2::ggplot(
     x = "Player Age (years)",
     y = "Fantasy Points (Season)",
     title = "Fantasy Points (Season) by Player Age and Position",
-    subtitle = "Mixed Model with Random Intercepts and Fixed Linear Slopes"
+    subtitle = "Mixed Model with Random Intercepts and Fixed Linear Slopes",
+    color = "Position"
   ) +
   theme_classic()
 ```
+
+A plot of individuals model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts and fixed linear slopes is in @fig-individualFantasyPointsFixedLinearSlopes.
+
+```{r}
+#| label: fig-individualFantasyPointsFixedLinearSlopes
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age and Position, from a Mixed Model With Random Intercepts and Fixed Slopes. Overlaid with the Model-Implied Trajectory by Position."
+#| code-fold: true
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_fixedLinearSlopes <- predict(
+  object = pointsPerSeason_positionAgeFixedLinearSlopes,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+
+plot_individualFantasyPointsFixedLinearSlopes <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_fixedLinearSlopes,
+    color = positionFactor,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_fixedLinearSlopes,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5) +
+  geom_line(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_fixedLinearSlopes,
+      color = positionFactor
+    ),
+    data = pointsPerSeason_positionAge_newData,
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_fixedLinearSlopes,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position: Model With Random Intercepts and Fixed Slopes",
+    color = "Position"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsFixedLinearSlopes,
+  tooltip = c("age","fantasyPoints_fixedLinearSlopes","text","label")
+)
+```
+
+###### Random Intercepts, Random Linear Slopes {#sec-fantasyPointsByAgeExperienceModelsAgeLinearRandom}
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearSlopes <- lmerTest::lmer(
@@ -935,6 +1150,8 @@ emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "ageCentered20")
 performance::icc(pointsPerSeason_positionAgeRandomLinearSlopes)
 AIC(pointsPerSeason_positionAgeRandomLinearSlopes)
 ```
+
+A plot of the model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts and random linear slopes is in @fig-fantasyPointsRandomLinearSlopes.
 
 ```{r}
 #| label: fig-fantasyPointsRandomLinearSlopes
@@ -960,12 +1177,78 @@ ggplot2::ggplot(
     x = "Player Age (years)",
     y = "Fantasy Points (Season)",
     title = "Fantasy Points (Season) by Player Age and Position",
-    subtitle = "Mixed Model with Random Intercepts and Random Linear Slopes"
+    subtitle = "Mixed Model with Random Intercepts and Random Linear Slopes",
+    color = "Position"
   ) +
   theme_classic()
 ```
 
+A plot of individuals' model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts and random linear slopes is in @fig-fantasyPointsRandomLinearSlopes.
+
+```{r}
+#| label: fig-individualFantasyPointsRandomLinearSlopes
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age and Position, from a Mixed Model With Random Intercepts and Random Linear Slopes. Overlaid with the Model-Implied Trajectory by Position."
+#| code-fold: true
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearSlopes <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearSlopes,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+
+plot_individualFantasyPointsRandomLinearSlopes <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomLinearSlopes,
+    color = positionFactor,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_randomLinearSlopes,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5) +
+  geom_line(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_randomLinearSlopes,
+      color = positionFactor
+    ),
+    data = pointsPerSeason_positionAge_newData,
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_randomLinearSlopes,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position: Model With Random Intercepts and Random Linear Slopes",
+    color = "Position"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsRandomLinearSlopes,
+  tooltip = c("age","fantasyPoints_randomLinearSlopes","text","label")
+)
+```
+
 ##### Quadratic Models {#sec-fantasyPointsByAgeExperienceModelsAgeQuadratic}
+
+###### Random Intercepts, Random Linear Slopes, Fixed Quadratic Slopes {#sec-fantasyPointsByAgeExperienceModelsAgeQuadraticFixed}
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes <- lmerTest::lmer(
@@ -983,6 +1266,8 @@ emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "a
 performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 ```
+
+A plot of the model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts, random linear slopes, and fixed quadratic slopes is in @fig-fantasyPointsRandomLinearFixedQuadracticSlopes.
 
 ```{r}
 #| label: fig-fantasyPointsRandomLinearFixedQuadracticSlopes
@@ -1013,6 +1298,71 @@ ggplot2::ggplot(
   theme_classic()
 ```
 
+A plot of individuals' model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts, random linear slopes, and fixed quadratic slopes is in @fig-individualFantasyPointsRandomLinearFixedQuadracticSlopes.
+
+```{r}
+#| label: fig-individualFantasyPointsRandomLinearFixedQuadracticSlopes
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age and Position, from a Mixed Model With Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes. Overlaid with the Model-Implied Trajectory by Position."
+#| code-fold: true
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearFixedQuadraticSlopes <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+
+plot_individualFantasyPointsRandomLinearFixedQuadracticSlopes <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomLinearFixedQuadraticSlopes,
+    color = positionFactor,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_randomLinearFixedQuadraticSlopes,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5) +
+  geom_line(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_randomLinearFixedQuadraticSlopes,
+      color = positionFactor
+    ),
+    data = pointsPerSeason_positionAge_newData,
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_randomLinearFixedQuadraticSlopes,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position: Model With Random Intercepts and Random Linear Slopes",
+    color = "Position"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsRandomLinearFixedQuadracticSlopes,
+  tooltip = c("age","fantasyPoints_randomLinearFixedQuadraticSlopes","text","label")
+)
+```
+
+###### Random Intercepts, Random Linear Slopes, Random Quadratic Slopes {#sec-fantasyPointsByAgeExperienceModelsAgeQuadraticRandom}
+
 ```{r}
 pointsPerSeason_positionAgeRandomLinearRandomQuadraticSlopes <- lmerTest::lmer(
   fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 + ageCentered20Quadratic | player_idFactor),
@@ -1021,6 +1371,8 @@ pointsPerSeason_positionAgeRandomLinearRandomQuadraticSlopes <- lmerTest::lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 ```
+
+###### Random Intercepts, Random Linear Slopes, Fixed Quadratic Slopes in Interaction With Position {#sec-fantasyPointsByAgeExperienceModelsAgeQuadraticFixedInteraction}
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction <- lmerTest::lmer(
@@ -1038,6 +1390,8 @@ emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "a
 performance::icc(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 AIC(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 ```
+
+A plot of the model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts, random linear slopes, and fixed quadratic slopes in interaction with position is in @fig-fantasyPointsRandomLinearFixedQuadraticSlopesInteraction.
 
 ```{r}
 #| label: fig-fantasyPointsRandomLinearFixedQuadraticSlopesInteraction
@@ -1067,6 +1421,71 @@ ggplot2::ggplot(
   ) +
   theme_classic()
 ```
+
+A plot of individuals' model-implied trajectories of fantasy points by age and position from the mixed model with random intercepts, random linear slopes, and fixed quadratic slopes in interaction with position is in @fig-individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction.
+
+```{r}
+#| label: fig-individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age and Position, from a Mixed Model With Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes in Interaction With Position. Overlaid with the Model-Implied Trajectory by Position."
+#| code-fold: true
+
+player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearFixedQuadraticSlopesInteraction <- predict(
+  object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction,
+  newdata = player_stats_seasonal_offense_subsetCC
+)
+
+plot_individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
+    color = positionFactor,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5) +
+  geom_line(
+    mapping = aes(
+      x = age,
+      y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
+      color = positionFactor
+    ),
+    data = pointsPerSeason_positionAge_newData,
+    inherit.aes = FALSE,
+    se = TRUE,
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position:\nModel With Random Intercepts, Random Linear Slopes, and\nFixed Quadratic Slopes in Interaction With Position",
+    color = "Position"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction,
+  tooltip = c("age","fantasyPoints_randomLinearFixedQuadraticSlopesInteraction","text","label")
+)
+```
+
+###### Adding Fixed-Effect Predictor of Experience {#sec-fantasyPointsByAgeExperienceModelsAgeQuadraticFixedInteractionExperience}
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
