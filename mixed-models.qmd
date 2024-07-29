@@ -708,7 +708,7 @@ ggplot2::ggplot(
   theme_classic()
 ```
 
-#### Quadratic Model {#sec-fantasyPointsByAgeExperienceModelsRegressionLinear}
+#### Quadratic Model {#sec-fantasyPointsByAgeExperienceModelsRegressionQuadratic}
 
 ```{r}
 pointsPerSeason_quadraticRegression <- lm(
@@ -853,20 +853,22 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomIntercepts <- predict
 )
 
 plot_individualFantasyPointsRandomIntercepts <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC,
+  data = player_stats_seasonal_offense_subsetCC %>% 
+    mutate(
+      age = round(age, 2),
+      fantasyPoints_randomIntercepts = round(fantasyPoints_randomIntercepts, 2)
+    ),
   mapping = aes(
     x = age,
     y = fantasyPoints_randomIntercepts,
-    #color = positionFactor,
     group = player_id)) +
-  geom_smooth(
+  geom_line(
     aes(
       x = age,
       y = fantasyPoints_randomIntercepts,
       text = player_display_name, # add player name for mouse over tooltip
       label = season # add season for mouse over tooltip
     ),
-    se = FALSE,
     linewidth = 0.5,
     color = "black") +
   geom_line(
@@ -874,21 +876,15 @@ plot_individualFantasyPointsRandomIntercepts <- ggplot(
       x = age,
       y = fantasyPoints_randomIntercepts
     ),
-    data = pointsPerSeason_positionAge_newData,
+    data = pointsPerSeason_positionAge_newData %>% 
+      mutate(
+        age = round(age, 2),
+        fantasy_points = round(fantasyPoints_randomIntercepts, 2)
+        ),
     inherit.aes = FALSE,
     se = TRUE,
     color = "#3366FF",
     linewidth = 2
-  ) +
-  geom_point(
-    aes(
-      x = age,
-      y = fantasyPoints_randomIntercepts,
-      text = player_display_name, # add player name for mouse over tooltip
-      label = season # add season for mouse over tooltip
-    ),
-    size = 1,
-    color = "transparent" # make points invisible but keep tooltips
   ) +
   labs(
     x = "Player Age (years)",
@@ -966,20 +962,23 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_position <- predict(
 )
 
 plot_individualFantasyPointsPosition <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC,
+  data = player_stats_seasonal_offense_subsetCC %>% 
+    mutate(
+      age = round(age, 2),
+      fantasyPoints_position = round(fantasyPoints_position, 2)
+    ),
   mapping = aes(
     x = age,
     y = fantasyPoints_position,
     color = positionFactor,
     group = player_id)) +
-  geom_smooth(
+  geom_line(
     aes(
       x = age,
       y = fantasyPoints_position,
       text = player_display_name, # add player name for mouse over tooltip
       label = season # add season for mouse over tooltip
     ),
-    se = FALSE,
     linewidth = 0.5) +
   geom_line(
     mapping = aes(
@@ -987,20 +986,14 @@ plot_individualFantasyPointsPosition <- ggplot(
       y = fantasyPoints_position,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData,
+    data = pointsPerSeason_positionAge_newData %>% 
+      mutate(
+        age = round(age, 2),
+        fantasyPoints_position = round(fantasyPoints_position, 2)
+        ),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
-  ) +
-  geom_point(
-    aes(
-      x = age,
-      y = fantasyPoints_position,
-      text = player_display_name, # add player name for mouse over tooltip
-      label = season # add season for mouse over tooltip
-    ),
-    size = 1,
-    color = "transparent" # make points invisible but keep tooltips
   ) +
   labs(
     x = "Player Age (years)",
@@ -1011,7 +1004,7 @@ plot_individualFantasyPointsPosition <- ggplot(
   theme_classic()
 
 ggplotly(
-  plot_individualFantasyPointsRandomIntercepts,
+  plot_individualFantasyPointsPosition,
   tooltip = c("age","fantasyPoints_position","text","label")
 )
 ```
@@ -1083,20 +1076,23 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_fixedLinearSlopes <- predic
 )
 
 plot_individualFantasyPointsFixedLinearSlopes <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC,
+  data = player_stats_seasonal_offense_subsetCC %>% 
+    mutate(
+      age = round(age, 2),
+      fantasyPoints_fixedLinearSlopes = round(fantasyPoints_fixedLinearSlopes, 2)
+    ),
   mapping = aes(
     x = age,
     y = fantasyPoints_fixedLinearSlopes,
     color = positionFactor,
     group = player_id)) +
-  geom_smooth(
+  geom_line(
     aes(
       x = age,
       y = fantasyPoints_fixedLinearSlopes,
       text = player_display_name, # add player name for mouse over tooltip
       label = season # add season for mouse over tooltip
     ),
-    se = FALSE,
     linewidth = 0.5) +
   geom_line(
     mapping = aes(
@@ -1108,16 +1104,6 @@ plot_individualFantasyPointsFixedLinearSlopes <- ggplot(
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
-  ) +
-  geom_point(
-    aes(
-      x = age,
-      y = fantasyPoints_fixedLinearSlopes,
-      text = player_display_name, # add player name for mouse over tooltip
-      label = season # add season for mouse over tooltip
-    ),
-    size = 1,
-    color = "transparent" # make points invisible but keep tooltips
   ) +
   labs(
     x = "Player Age (years)",
@@ -1196,20 +1182,23 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearSlopes <- predi
 )
 
 plot_individualFantasyPointsRandomLinearSlopes <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC,
+  data = player_stats_seasonal_offense_subsetCC %>% 
+    mutate(
+      age = round(age, 2),
+      fantasyPoints_randomLinearSlopes = round(fantasyPoints_randomLinearSlopes, 2)
+    ),
   mapping = aes(
     x = age,
     y = fantasyPoints_randomLinearSlopes,
     color = positionFactor,
     group = player_id)) +
-  geom_smooth(
+  geom_line(
     aes(
       x = age,
       y = fantasyPoints_randomLinearSlopes,
       text = player_display_name, # add player name for mouse over tooltip
       label = season # add season for mouse over tooltip
     ),
-    se = FALSE,
     linewidth = 0.5) +
   geom_line(
     mapping = aes(
@@ -1217,20 +1206,14 @@ plot_individualFantasyPointsRandomLinearSlopes <- ggplot(
       y = fantasyPoints_randomLinearSlopes,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData,
+    data = pointsPerSeason_positionAge_newData %>% 
+      mutate(
+        age = round(age, 2),
+        fantasyPoints_randomLinearSlopes = round(fantasyPoints_randomLinearSlopes, 2)
+        ),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
-  ) +
-  geom_point(
-    aes(
-      x = age,
-      y = fantasyPoints_randomLinearSlopes,
-      text = player_display_name, # add player name for mouse over tooltip
-      label = season # add season for mouse over tooltip
-    ),
-    size = 1,
-    color = "transparent" # make points invisible but keep tooltips
   ) +
   labs(
     x = "Player Age (years)",
@@ -1311,13 +1294,17 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearFixedQuadraticS
 )
 
 plot_individualFantasyPointsRandomLinearFixedQuadracticSlopes <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC,
+  data = player_stats_seasonal_offense_subsetCC %>% 
+    mutate(
+      age = round(age, 2),
+      fantasyPoints_randomLinearFixedQuadraticSlopes = round(fantasyPoints_randomLinearFixedQuadraticSlopes, 2)
+    ),
   mapping = aes(
     x = age,
     y = fantasyPoints_randomLinearFixedQuadraticSlopes,
     color = positionFactor,
     group = player_id)) +
-  geom_smooth(
+  geom_line(
     aes(
       x = age,
       y = fantasyPoints_randomLinearFixedQuadraticSlopes,
@@ -1332,20 +1319,14 @@ plot_individualFantasyPointsRandomLinearFixedQuadracticSlopes <- ggplot(
       y = fantasyPoints_randomLinearFixedQuadraticSlopes,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData,
+    data = pointsPerSeason_positionAge_newData %>% 
+      mutate(
+        age = round(age, 2),
+        fantasyPoints_randomLinearFixedQuadraticSlopes = round(fantasyPoints_randomLinearFixedQuadraticSlopes, 2)
+        ),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
-  ) +
-  geom_point(
-    aes(
-      x = age,
-      y = fantasyPoints_randomLinearFixedQuadraticSlopes,
-      text = player_display_name, # add player name for mouse over tooltip
-      label = season # add season for mouse over tooltip
-    ),
-    size = 1,
-    color = "transparent" # make points invisible but keep tooltips
   ) +
   labs(
     x = "Player Age (years)",
@@ -1435,20 +1416,23 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearFixedQuadraticS
 )
 
 plot_individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC,
+  data = player_stats_seasonal_offense_subsetCC %>% 
+    mutate(
+      age = round(age, 2),
+      fantasyPoints_randomLinearFixedQuadraticSlopesInteraction = round(fantasyPoints_randomLinearFixedQuadraticSlopesInteraction, 2)
+    ),
   mapping = aes(
     x = age,
     y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
     color = positionFactor,
     group = player_id)) +
-  geom_smooth(
+  geom_line(
     aes(
       x = age,
       y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
       text = player_display_name, # add player name for mouse over tooltip
       label = season # add season for mouse over tooltip
     ),
-    se = FALSE,
     linewidth = 0.5) +
   geom_line(
     mapping = aes(
@@ -1456,20 +1440,14 @@ plot_individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction <- ggplo
       y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData,
+    data = pointsPerSeason_positionAge_newData %>% 
+      mutate(
+        age = round(age, 2),
+        fantasyPoints_randomLinearFixedQuadraticSlopesInteraction = round(fantasyPoints_randomLinearFixedQuadraticSlopesInteraction, 2)
+        ),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
-  ) +
-  geom_point(
-    aes(
-      x = age,
-      y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
-      text = player_display_name, # add player name for mouse over tooltip
-      label = season # add season for mouse over tooltip
-    ),
-    size = 1,
-    color = "transparent" # make points invisible but keep tooltips
   ) +
   labs(
     x = "Player Age (years)",
