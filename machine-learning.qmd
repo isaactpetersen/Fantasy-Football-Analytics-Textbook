@@ -5,7 +5,216 @@
 ### Load Packages {#sec-machineLearningLoadPackages}
 
 ```{r}
+library("LongituRF")
+```
 
+### Load Data {#sec-machineLearningLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+# Downloaded Data
+load(file = "./data/nfl_players.RData")
+load(file = "./data/nfl_teams.RData")
+load(file = "./data/nfl_rosters.RData")
+load(file = "./data/nfl_rosters_weekly.RData")
+load(file = "./data/nfl_schedules.RData")
+load(file = "./data/nfl_combine.RData")
+load(file = "./data/nfl_draftPicks.RData")
+load(file = "./data/nfl_depthCharts.RData")
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
+load(file = "./data/nfl_actualStats_weekly.RData")
+load(file = "./data/nfl_injuries.RData")
+load(file = "./data/nfl_snapCounts.RData")
+load(file = "./data/nfl_espnQBR.RData")
+load(file = "./data/nfl_nextGenStats_weekly.RData")
+load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
+load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
+load(file = "./data/nfl_playerContracts.RData")
+load(file = "./data/nfl_ftnCharting.RData")
+load(file = "./data/nfl_playerIDs.RData")
+load(file = "./data/nfl_rankings.RData")
+load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
+load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
+
+# Calculated Data
+load(file = "./data/nfl_actualStats_career.RData")
+load(file = "./data/nfl_actualStats_seasonal.RData")
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+```
+
+```{r}
+# Downloaded Data
+load(file = "./data/nfl_players.RData")
+load(file = "./data/nfl_teams.RData")
+load(file = "./data/nfl_rosters.RData")
+load(file = "./data/nfl_rosters_weekly.RData")
+load(file = "./data/nfl_schedules.RData")
+load(file = "./data/nfl_combine.RData")
+load(file = "./data/nfl_draftPicks.RData")
+load(file = "./data/nfl_depthCharts.RData")
+load(file = "./data/nfl_pbp.RData")
+load(file = "./data/nfl_4thdown.RData")
+load(file = "./data/nfl_participation.RData")
+load(file = "./data/nfl_actualStats_weekly.RData")
+load(file = "./data/nfl_injuries.RData")
+load(file = "./data/nfl_snapCounts.RData")
+load(file = "./data/nfl_espnQBR.RData")
+load(file = "./data/nfl_nextGenStats_weekly.RData")
+load(file = "./data/nfl_advancedStatsPFR.RData")
+load(file = "./data/nfl_playerContracts.RData")
+load(file = "./data/nfl_ftnCharting.RData")
+load(file = "./data/nfl_playerIDs.RData")
+load(file = "./data/nfl_rankings.RData")
+load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
+load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
+
+# Calculated Data
+load(file = "./data/nfl_actualStats_career.RData")
+load(file = "./data/nfl_actualStats_seasonal.RData")
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/player_stats_seasonal.RData")
+```
+
+## Overview of Machine Learning {#sec-machineLearningOverview}
+
+Machine learning can be useful for leveraging big data and lots of predictor variable to develop predictive models with greater accuracy.
+However, many machine learning techniques are black boxes—it is often unclear
+Machine learning tends to be a data-driven, atheoretical technique.
+This can result in overfitting.
+Thus, when estimating machine learning models, it is common to keep a hold-out sample for use in cross-validation to evaluate the extent of shrinkage of model coefficients.
+Shrinkage occurs when predictor variables explain some random error variance in the original model.
+When the model is applied to an independent sample, the predictive model will likely not perform quite as well, and the regressions coefficients will tend to get smaller (i.e., shrink).
+
+## Data Processing {#sec-machineLearningDataProcessing}
+
+```{r}
+#| eval: false
+#| include: false
+
+varNames <- c(
+  names(nfl_players),
+  names(nfl_teams),
+  names(nfl_rosters),
+  names(nfl_rosters_weekly),
+  names(nfl_schedules),
+  names(nfl_combine),
+  names(nfl_draftPicks),
+  names(nfl_depthCharts),
+  names(nfl_pbp),
+  names(nfl_4thdown),
+  names(nfl_participation),
+  names(nfl_actualStats_offense_weekly),
+  names(nfl_injuries),
+  names(nfl_snapCounts),
+  names(nfl_espnQBR),
+  names(nfl_nextGenStats_weekly),
+  names(nfl_advancedStatsPFR_seasonal),
+  names(nfl_advancedStatsPFR_weekly),
+  names(nfl_playerContracts),
+  names(nfl_ftnCharting),
+  names(nfl_playerIDs),
+  names(nfl_rankings),
+  names(nfl_expectedFantasyPoints_weekly),
+  names(nfl_expectedFantasyPoints_pbp)
+)
+
+varNames <- unique(varNames)
+
+write.csv(
+  varNames,
+  file = "./data/varNames.csv",
+  row.names = FALSE
+)
+
+nfl_players$gsis_id
+nfl_rosters$gsis_id
+nfl_rosters_weekly$gsis_id
+nfl_draftPicks$gsis_id
+nfl_depthCharts$gsis_id
+nfl_advancedStatsPFR_seasonal$gsis_id
+
+nfl_actualStats_offense_weekly$player_id
+nfl_expectedFantasyPoints_weekly$player_id
+
+nfl_rankings$id
+
+nfl_combine$pfr_id
+nfl_advancedStatsPFR$pfr_id
+nfl_advancedStatsPFR$pfr_player_id
+
+nfl_playerIDs$gsis_id
+nfl_playerIDs$pfr_id
+```
+
+### Merge Data {#sec-machineLearningMergeData}
+
+```{r}
+# Use common name for the same (gsis_id) ID variable
+nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly %>% 
+  rename(gsis_id = player_id)
+
+nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal %>% 
+  rename(gsis_id = player_id)
+
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+  rename(gsis_id = player_id)
+
+player_stats_weekly_offense <- player_stats_weekly_offense %>% 
+  rename(gsis_id = player_id)
+
+nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
+  rename(gsis_id = player_id)
+
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+  rename(gsis_id = player_id)
+
+# Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
+#-todo: remove redundant variables
+idListToMerge <- list(
+  nfl_players %>% filter(!is.na(gsis_id)) %>% select(-season),
+  nfl_draftPicks %>% filter(!is.na(gsis_id)) %>% select(-season, -age)
+)
+
+idSeasonListToMerge <- list(
+  nfl_rosters %>% filter(!is.na(gsis_id), !is.na(season)) %>% select(-week),
+  player_stats_seasonal_offense %>% filter(!is.na(gsis_id), !is.na(season)), #nfl_actualStats_offense_seasonal %>% filter(!is.na(gsis_id), !is.na(season)),
+  nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season))
+)
+
+idSeasonWeekToMerge <- list(
+  nfl_rosters_weekly %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
+  nfl_depthCharts %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
+  #nfl_actualStats_offense_weekly,
+  nfl_expectedFantasyPoints_weekly %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week))
+  #nfl_advancedStatsPFR_weekly,
+)
+
+# Merge data
+idMerged <- idListToMerge %>% 
+  reduce(full_join, by = c("gsis_id"))
+
+idSeasonMerged <- idSeasonListToMerge %>% 
+  reduce(full_join, by = c("gsis_id","season"))
+
+idSeasonWeekMerged <- idSeasonWeekToMerge %>% 
+  reduce(full_join, by = c("gsis_id","season","week"))
+
+seasonalData <- full_join(
+  idMerged,
+  idSeasonMerged,
+  by = "gsis_id"
+)
+
+seasonalAndWeeklyData <- full_join( # need to troubleshoot error
+  seasonalData,
+  idSeasonWeekMerged,
+  by = c("gsis_id","season")
+)
 ```
 
 ## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
