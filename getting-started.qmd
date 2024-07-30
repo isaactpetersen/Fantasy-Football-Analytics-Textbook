@@ -233,13 +233,14 @@ load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
 load(file = "./data/nfl_espnQBR.RData")
 load(file = "./data/nfl_nextGenStats_weekly.RData")
-load(file = "./data/nfl_advancedStatsPFR.RData")
+load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
+load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
 load(file = "./data/nfl_playerContracts.RData")
 load(file = "./data/nfl_ftnCharting.RData")
 load(file = "./data/nfl_playerIDs.RData")
 load(file = "./data/nfl_rankings.RData")
 load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
-load(file = "./data/nfl_expectedFantasyPoints_offense.RData")
+load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
 
 # Calculated Data
 load(file = "./data/nfl_actualStats_career.RData")
@@ -720,9 +721,9 @@ save(
 load(file = "./data/nfl_nextGenStats_weekly.RData")
 ```
 
-### Advanced Stats from PFR {#sec-advancedStatsPFR}
+### Advanced Stats from Pro Football Reference {#sec-advancedStatsPFR}
 
-A Data Dictionary for PFR passing data is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_pfr_passing.html>
+A Data Dictionary for Pro Football Reference passing data is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_pfr_passing.html>
 
 ```{r}
 #| eval: false
@@ -775,31 +776,87 @@ nfl_advancedStatsPFR_def_weekly <- progressr::with_progress(
     stat_type = c("def"),
     summary_level = c("week")))
 
-nfl_advancedStatsPFR <- bind_rows(
+nfl_advancedStatsPFR_seasonal <- bind_rows(
   nfl_advancedStatsPFR_pass_seasonal,
-  nfl_advancedStatsPFR_pass_weekly,
   nfl_advancedStatsPFR_rush_seasonal,
-  nfl_advancedStatsPFR_rush_weekly,
   nfl_advancedStatsPFR_rec_seasonal,
-  nfl_advancedStatsPFR_rec_weekly,
-  nfl_advancedStatsPFR_def_seasonal,
-  nfl_advancedStatsPFR_def_weekly,
+  nfl_advancedStatsPFR_def_seasonal
 )
+
+nfl_advancedStatsPFR_weekly <- bind_rows(
+  nfl_advancedStatsPFR_pass_weekly,
+  nfl_advancedStatsPFR_rush_weekly,
+  nfl_advancedStatsPFR_rec_weekly,
+  nfl_advancedStatsPFR_def_weekly
+)
+```
+
+Merge with `gsis_id` for merging with other datasets:
+
+```{r}
+#| eval: false
+
+nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
+  rename(pfr_id = pfr_player_id)
+
+nfl_advancedStatsPFR_seasonal <- left_join(
+  nfl_advancedStatsPFR_seasonal,
+  nfl_playerIDs %>% 
+    filter(!is.na(pfr_id)) %>% 
+    filter(gsis_id != "00-0039137") %>% # drop DL Byron Young, keep OLB Byron Young
+    select(pfr_id, gsis_id) %>% 
+    unique(),
+  by = "pfr_id"
+)
+
+nfl_advancedStatsPFR_weekly <- left_join(
+  nfl_advancedStatsPFR_weekly,
+  nfl_playerIDs %>% 
+    filter(!is.na(pfr_id)) %>% 
+    filter(gsis_id != "00-0039137") %>% # drop DL Byron Young, keep OLB Byron Young
+    select(pfr_id, gsis_id) %>% 
+    unique(),
+  by = "pfr_id"
+)
+
+nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0035665" & nfl_advancedStatsPFR_seasonal$pos %in% c("LB","LILB","RILB"))] <- NA # drop LB David Young, keep DB David Young
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035665" & nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA"))] <- NA # drop LB David Young, keep DB David Young
+
+nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0035292" & nfl_advancedStatsPFR_seasonal$pos %in% c("LB","LILB","RILB"))] <- NA # drop LB David Young, keep DB David Young
+nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035292" & nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA"))] <- NA # drop LB David Young, keep DB David Young
+
+nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0033894" & nfl_advancedStatsPFR_seasonal$pos == "DB")] <- NA # drop S Marcus Williams, keep DB David Young
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0033894" & nfl_advancedStatsPFR_weekly$pos == "DB")] <- NA # drop S Marcus Williams
+
+nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0038407" & nfl_advancedStatsPFR_seasonal$pos == "DB")] <- NA # drop DB Jaylon Jones, keep CB Jaylon Jones
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038407" & nfl_advancedStatsPFR_weekly$pos == "DB")] <- NA # drop DB Jaylon Jones, keep CB Jaylon Jones
+
+nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0037106" & nfl_advancedStatsPFR_seasonal$pos == "DB")] <- NA # drop DB Jaylon Jones, keep CB Jaylon Jones
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0037106" & nfl_advancedStatsPFR_weekly$pos == "DB")] <- NA # drop DB Jaylon Jones, keep CB Jaylon Jones
+
+nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0038549" & nfl_advancedStatsPFR_seasonal$pos == "WR")] <- NA # drop WR DJ TUrner, keep CB DJ Turner
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" & nfl_advancedStatsPFR_weekly$pos == "WR")] <- NA # drop WR DJ TUrner, keep CB DJ Turner
 ```
 
 ```{r}
 #| eval: false
 
 save(
-  nfl_advancedStatsPFR,
-  file = "./data/nfl_advancedStatsPFR.RData"
+  nfl_advancedStatsPFR_seasonal,
+  file = "./data/nfl_advancedStatsPFR_seasonal.RData"
+)
+
+save(
+  nfl_advancedStatsPFR_weekly,
+  file = "./data/nfl_advancedStatsPFR_weekly.RData"
 )
 ```
 
 ```{r}
 #| include: false
 
-load(file = "./data/nfl_advancedStatsPFR.RData")
+load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
+load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
 ```
 
 ### Player Contracts {#sec-playerContracts}
@@ -947,7 +1004,7 @@ nfl_expectedFantasyPoints_rush <- progressr::with_progress(
 
 nfl_expectedFantasyPoints_weekly$season <- as.integer(nfl_expectedFantasyPoints_weekly$season)
 
-nfl_expectedFantasyPoints_offense <- bind_rows(
+nfl_expectedFantasyPoints_pbp <- bind_rows(
   nfl_expectedFantasyPoints_pass,
   nfl_expectedFantasyPoints_rush
 )
@@ -962,8 +1019,8 @@ save(
 )
 
 save(
-  nfl_expectedFantasyPoints_offense,
-  file = "./data/nfl_expectedFantasyPoints_offense.RData"
+  nfl_expectedFantasyPoints_pbp,
+  file = "./data/nfl_expectedFantasyPoints_pbp.RData"
 )
 ```
 
@@ -971,7 +1028,7 @@ save(
 #| include: false
 
 load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
-load(file = "./data/nfl_expectedFantasyPoints_offense.RData")
+load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
 ```
 
 ## Data Dictionary {#sec-dataDictionary}
@@ -1949,6 +2006,38 @@ player_game_birthdate_gameday_kicking$age <- lubridate::interval(
 ) %>% 
   lubridate::time_length(unit = "years")
 
+# Merge with Pro Football Reference Data on Player Age by Season
+player_game_birthdate_gameday_offense <- player_game_birthdate_gameday_offense %>% 
+  dplyr::left_join(
+    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
+    by = c("player_id" = "gsis_id", "season")
+  )
+
+player_game_birthdate_gameday_defense <- player_game_birthdate_gameday_defense %>% 
+  dplyr::left_join(
+    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
+    by = c("player_id" = "gsis_id", "season")
+  )
+
+player_game_birthdate_gameday_kicking <- player_game_birthdate_gameday_kicking %>% 
+  dplyr::left_join(
+    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
+    by = c("player_id" = "gsis_id", "season")
+  )
+
+# Set age as first non-missing value from calculation above or from PFR
+player_game_birthdate_gameday_offense <- player_game_birthdate_gameday_offense %>% 
+  mutate(age = coalesce(age.x, age.y)) %>% 
+  select(-age.x, -age.y)
+
+player_game_birthdate_gameday_defense <- player_game_birthdate_gameday_defense %>% 
+  mutate(age = coalesce(age.x, age.y)) %>% 
+  select(-age.x, -age.y)
+
+player_game_birthdate_gameday_kicking <- player_game_birthdate_gameday_kicking %>% 
+  mutate(age = coalesce(age.x, age.y)) %>% 
+  select(-age.x, -age.y)
+
 # Calculate ageCentered and ageCenteredQuadratic
 player_game_birthdate_gameday_offense$ageCentered20 <- player_game_birthdate_gameday_offense$age - 20
 player_game_birthdate_gameday_offense$ageCentered20Quadratic <- player_game_birthdate_gameday_offense$ageCentered20 ^ 2
@@ -2156,6 +2245,38 @@ player_stats_seasonal_kicking$age <- lubridate::interval(
   end = player_stats_seasonal_kicking$startdate
 ) %>% 
   lubridate::time_length(unit = "years")
+
+# Merge with Pro Football Reference Data on Player Age by Season
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+  dplyr::left_join(
+    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
+    by = c("player_id" = "gsis_id", "season")
+  )
+
+player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
+  dplyr::left_join(
+    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
+    by = c("player_id" = "gsis_id", "season")
+  )
+
+player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
+  dplyr::left_join(
+    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
+    by = c("player_id" = "gsis_id", "season")
+  )
+
+# Set age as first non-missing value from calculation above or from PFR
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+  mutate(age = coalesce(age.x, age.y)) %>% 
+  select(-age.x, -age.y)
+
+player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
+  mutate(age = coalesce(age.x, age.y)) %>% 
+  select(-age.x, -age.y)
+
+player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
+  mutate(age = coalesce(age.x, age.y)) %>% 
+  select(-age.x, -age.y)
 
 # Calculate ageCentered and ageCenteredQuadratic
 player_stats_seasonal_offense$ageCentered20 <- player_stats_seasonal_offense$age - 20
