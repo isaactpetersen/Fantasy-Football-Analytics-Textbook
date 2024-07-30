@@ -6,6 +6,7 @@
 
 ```{r}
 library("LongituRF")
+library("doParallel")
 library("missForest")
 library("powerjoin")
 library("tidyverse")
@@ -314,7 +315,16 @@ seasonalData_subset %>% select_if(is.logical) %>% str()
 ### Impute the Missing Data {#sec-missingDataImputation}
 
 ```{r}
-seasonalData_subset_imp <- missForest::missForest(seasonalData_subset %>% data.frame)
+num_cores <- detectCores()
+num_cores
+
+registerDoParallel(cores = num_cores)
+
+seasonalData_subset_imp <- missForest::missForest(
+  seasonalData_subset %>% data.frame,
+  verbose = TRUE,
+  mtry = 100,
+  parallelize = "variables")
 ```
 
 ## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
