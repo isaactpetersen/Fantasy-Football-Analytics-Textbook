@@ -1137,47 +1137,59 @@ Note&nbsp;3.3: Downloading 4th down data
 </div>
 <p>Merge with <code>gsis_id</code> for merging with other datasets:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>nfl_advancedStatsPFR_weekly <span class="ot">&lt;-</span> nfl_advancedStatsPFR_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb54-2"><a href="#cb54-2"></a>  <span class="fu">rename</span>(<span class="at">pfr_id =</span> pfr_player_id)</span>
-<span id="cb54-3"><a href="#cb54-3"></a></span>
-<span id="cb54-4"><a href="#cb54-4"></a>nfl_advancedStatsPFR_seasonal <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
-<span id="cb54-5"><a href="#cb54-5"></a>  nfl_advancedStatsPFR_seasonal,</span>
-<span id="cb54-6"><a href="#cb54-6"></a>  nfl_playerIDs <span class="sc">%&gt;%</span> </span>
-<span id="cb54-7"><a href="#cb54-7"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pfr_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb54-8"><a href="#cb54-8"></a>    <span class="fu">filter</span>(gsis_id <span class="sc">!=</span> <span class="st">"00-0039137"</span>) <span class="sc">%&gt;%</span> <span class="co"># drop DL Byron Young, keep OLB Byron Young</span></span>
-<span id="cb54-9"><a href="#cb54-9"></a>    <span class="fu">select</span>(pfr_id, gsis_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb54-10"><a href="#cb54-10"></a>    <span class="fu">unique</span>(),</span>
-<span id="cb54-11"><a href="#cb54-11"></a>  <span class="at">by =</span> <span class="st">"pfr_id"</span></span>
-<span id="cb54-12"><a href="#cb54-12"></a>)</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a><span class="co"># Prepare data for merging</span></span>
+<span id="cb54-2"><a href="#cb54-2"></a>nfl_advancedStatsPFR_weekly <span class="ot">&lt;-</span> nfl_advancedStatsPFR_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb54-3"><a href="#cb54-3"></a>  <span class="fu">rename</span>(<span class="at">pfr_id =</span> pfr_player_id)</span>
+<span id="cb54-4"><a href="#cb54-4"></a></span>
+<span id="cb54-5"><a href="#cb54-5"></a><span class="co"># Identify duplicates</span></span>
+<span id="cb54-6"><a href="#cb54-6"></a>nfl_advancedStatsPFR_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb54-7"><a href="#cb54-7"></a>  <span class="fu">select</span>(pfr_id, season, age) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-8"><a href="#cb54-8"></a>  <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb54-9"><a href="#cb54-9"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb54-10"><a href="#cb54-10"></a>  <span class="fu">group_by</span>(pfr_id, season) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-11"><a href="#cb54-11"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-12"><a href="#cb54-12"></a>  <span class="fu">arrange</span>(pfr_id, season)</span>
 <span id="cb54-13"><a href="#cb54-13"></a></span>
-<span id="cb54-14"><a href="#cb54-14"></a>nfl_advancedStatsPFR_weekly <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
-<span id="cb54-15"><a href="#cb54-15"></a>  nfl_advancedStatsPFR_weekly,</span>
-<span id="cb54-16"><a href="#cb54-16"></a>  nfl_playerIDs <span class="sc">%&gt;%</span> </span>
-<span id="cb54-17"><a href="#cb54-17"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pfr_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb54-18"><a href="#cb54-18"></a>    <span class="fu">filter</span>(gsis_id <span class="sc">!=</span> <span class="st">"00-0039137"</span>) <span class="sc">%&gt;%</span> <span class="co"># drop DL Byron Young, keep OLB Byron Young</span></span>
-<span id="cb54-19"><a href="#cb54-19"></a>    <span class="fu">select</span>(pfr_id, gsis_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb54-20"><a href="#cb54-20"></a>    <span class="fu">unique</span>(),</span>
-<span id="cb54-21"><a href="#cb54-21"></a>  <span class="at">by =</span> <span class="st">"pfr_id"</span></span>
-<span id="cb54-22"><a href="#cb54-22"></a>)</span>
-<span id="cb54-23"><a href="#cb54-23"></a></span>
-<span id="cb54-24"><a href="#cb54-24"></a><span class="co"># Remove distinct players who were given the same `pfr_id` (to allow merging)</span></span>
-<span id="cb54-25"><a href="#cb54-25"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0035665"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"LB"</span>,<span class="st">"LILB"</span>,<span class="st">"RILB"</span>))] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop LB David Young, keep DB David Young</span></span>
-<span id="cb54-26"><a href="#cb54-26"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035665" &amp; nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA"))] &lt;- NA # drop LB David Young, keep DB David Young</span></span>
-<span id="cb54-27"><a href="#cb54-27"></a></span>
-<span id="cb54-28"><a href="#cb54-28"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0035292"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"LB"</span>,<span class="st">"LILB"</span>,<span class="st">"RILB"</span>))] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop LB David Young, keep DB David Young</span></span>
-<span id="cb54-29"><a href="#cb54-29"></a>nfl_advancedStatsPFR_weekly<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_weekly<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0035292"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_weekly<span class="sc">$</span>team <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"TEN"</span>,<span class="st">"MIA"</span>))] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop LB David Young, keep DB David Young</span></span>
-<span id="cb54-30"><a href="#cb54-30"></a></span>
-<span id="cb54-31"><a href="#cb54-31"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0033894"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DB"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop S Marcus Williams, keep DB David Young</span></span>
-<span id="cb54-32"><a href="#cb54-32"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0033894" &amp; nfl_advancedStatsPFR_weekly$pos == "DB")] &lt;- NA # drop S Marcus Williams</span></span>
-<span id="cb54-33"><a href="#cb54-33"></a></span>
-<span id="cb54-34"><a href="#cb54-34"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0038407"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DB"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
-<span id="cb54-35"><a href="#cb54-35"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038407" &amp; nfl_advancedStatsPFR_weekly$pos == "DB")] &lt;- NA # drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
-<span id="cb54-36"><a href="#cb54-36"></a></span>
-<span id="cb54-37"><a href="#cb54-37"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0037106"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DB"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
-<span id="cb54-38"><a href="#cb54-38"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0037106" &amp; nfl_advancedStatsPFR_weekly$pos == "DB")] &lt;- NA # drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
+<span id="cb54-14"><a href="#cb54-14"></a><span class="co"># Merge seasonal data with the player IDs</span></span>
+<span id="cb54-15"><a href="#cb54-15"></a>nfl_advancedStatsPFR_seasonal <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb54-16"><a href="#cb54-16"></a>  nfl_advancedStatsPFR_seasonal,</span>
+<span id="cb54-17"><a href="#cb54-17"></a>  nfl_playerIDs <span class="sc">%&gt;%</span> </span>
+<span id="cb54-18"><a href="#cb54-18"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pfr_id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-19"><a href="#cb54-19"></a>    <span class="fu">filter</span>(gsis_id <span class="sc">!=</span> <span class="st">"00-0039137"</span>) <span class="sc">%&gt;%</span> <span class="co"># drop DL Byron Young, keep OLB Byron Young</span></span>
+<span id="cb54-20"><a href="#cb54-20"></a>    <span class="fu">select</span>(pfr_id, gsis_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-21"><a href="#cb54-21"></a>    <span class="fu">unique</span>(),</span>
+<span id="cb54-22"><a href="#cb54-22"></a>  <span class="at">by =</span> <span class="st">"pfr_id"</span></span>
+<span id="cb54-23"><a href="#cb54-23"></a>)</span>
+<span id="cb54-24"><a href="#cb54-24"></a></span>
+<span id="cb54-25"><a href="#cb54-25"></a><span class="co"># Merge weekly data with the player IDs</span></span>
+<span id="cb54-26"><a href="#cb54-26"></a>nfl_advancedStatsPFR_weekly <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb54-27"><a href="#cb54-27"></a>  nfl_advancedStatsPFR_weekly,</span>
+<span id="cb54-28"><a href="#cb54-28"></a>  nfl_playerIDs <span class="sc">%&gt;%</span> </span>
+<span id="cb54-29"><a href="#cb54-29"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pfr_id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-30"><a href="#cb54-30"></a>    <span class="fu">filter</span>(gsis_id <span class="sc">!=</span> <span class="st">"00-0039137"</span>) <span class="sc">%&gt;%</span> <span class="co"># drop DL Byron Young, keep OLB Byron Young</span></span>
+<span id="cb54-31"><a href="#cb54-31"></a>    <span class="fu">select</span>(pfr_id, gsis_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-32"><a href="#cb54-32"></a>    <span class="fu">unique</span>(),</span>
+<span id="cb54-33"><a href="#cb54-33"></a>  <span class="at">by =</span> <span class="st">"pfr_id"</span></span>
+<span id="cb54-34"><a href="#cb54-34"></a>)</span>
+<span id="cb54-35"><a href="#cb54-35"></a></span>
+<span id="cb54-36"><a href="#cb54-36"></a><span class="co"># Remove distinct players who were given the same `pfr_id` (to allow merging)</span></span>
+<span id="cb54-37"><a href="#cb54-37"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0035665"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"LB"</span>,<span class="st">"LILB"</span>,<span class="st">"RILB"</span>))] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop LB David Young, keep DB David Young</span></span>
+<span id="cb54-38"><a href="#cb54-38"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035665" &amp; nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA"))] &lt;- NA # drop LB David Young, keep DB David Young</span></span>
 <span id="cb54-39"><a href="#cb54-39"></a></span>
-<span id="cb54-40"><a href="#cb54-40"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0038549"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"WR"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop WR DJ TUrner, keep CB DJ Turner</span></span>
-<span id="cb54-41"><a href="#cb54-41"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" &amp; nfl_advancedStatsPFR_weekly$pos == "WR")] &lt;- NA # drop WR DJ TUrner, keep CB DJ Turner</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb54-40"><a href="#cb54-40"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0035292"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"LB"</span>,<span class="st">"LILB"</span>,<span class="st">"RILB"</span>))] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop LB David Young, keep DB David Young</span></span>
+<span id="cb54-41"><a href="#cb54-41"></a>nfl_advancedStatsPFR_weekly<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_weekly<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0035292"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_weekly<span class="sc">$</span>team <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"TEN"</span>,<span class="st">"MIA"</span>))] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop LB David Young, keep DB David Young</span></span>
+<span id="cb54-42"><a href="#cb54-42"></a></span>
+<span id="cb54-43"><a href="#cb54-43"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0033894"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DB"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop S Marcus Williams, keep DB David Young</span></span>
+<span id="cb54-44"><a href="#cb54-44"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0033894" &amp; nfl_advancedStatsPFR_weekly$pos == "DB")] &lt;- NA # drop S Marcus Williams</span></span>
+<span id="cb54-45"><a href="#cb54-45"></a></span>
+<span id="cb54-46"><a href="#cb54-46"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0038407"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DB"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
+<span id="cb54-47"><a href="#cb54-47"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038407" &amp; nfl_advancedStatsPFR_weekly$pos == "DB")] &lt;- NA # drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
+<span id="cb54-48"><a href="#cb54-48"></a></span>
+<span id="cb54-49"><a href="#cb54-49"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0037106"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DB"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
+<span id="cb54-50"><a href="#cb54-50"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0037106" &amp; nfl_advancedStatsPFR_weekly$pos == "DB")] &lt;- NA # drop DB Jaylon Jones, keep CB Jaylon Jones</span></span>
+<span id="cb54-51"><a href="#cb54-51"></a></span>
+<span id="cb54-52"><a href="#cb54-52"></a>nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id[<span class="fu">which</span>(nfl_advancedStatsPFR_seasonal<span class="sc">$</span>gsis_id <span class="sc">==</span> <span class="st">"00-0038549"</span> <span class="sc">&amp;</span> nfl_advancedStatsPFR_seasonal<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"WR"</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># drop WR DJ TUrner, keep CB DJ Turner</span></span>
+<span id="cb54-53"><a href="#cb54-53"></a><span class="co">#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" &amp; nfl_advancedStatsPFR_weekly$pos == "WR")] &lt;- NA # drop WR DJ TUrner, keep CB DJ Turner</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
