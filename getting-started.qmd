@@ -796,9 +796,20 @@ Merge with `gsis_id` for merging with other datasets:
 ```{r}
 #| eval: false
 
+# Prepare data for merging
 nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
   rename(pfr_id = pfr_player_id)
 
+# Identify duplicates
+nfl_advancedStatsPFR_seasonal %>% 
+  select(pfr_id, season, age) %>% 
+  na.omit() %>% 
+  unique() %>% 
+  group_by(pfr_id, season) %>% 
+  filter(n() > 1) %>% 
+  arrange(pfr_id, season)
+
+# Merge seasonal data with the player IDs
 nfl_advancedStatsPFR_seasonal <- left_join(
   nfl_advancedStatsPFR_seasonal,
   nfl_playerIDs %>% 
@@ -809,6 +820,7 @@ nfl_advancedStatsPFR_seasonal <- left_join(
   by = "pfr_id"
 )
 
+# Merge weekly data with the player IDs
 nfl_advancedStatsPFR_weekly <- left_join(
   nfl_advancedStatsPFR_weekly,
   nfl_playerIDs %>% 
