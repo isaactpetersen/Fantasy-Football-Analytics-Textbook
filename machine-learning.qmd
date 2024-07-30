@@ -6,6 +6,9 @@
 
 ```{r}
 library("LongituRF")
+library("missForest")
+library("powerjoin")
+library("tidyverse")
 ```
 
 ### Load Data {#sec-machineLearningLoadData}
@@ -154,7 +157,8 @@ nfl_playerIDs$pfr_id
 ### Merge Data {#sec-machineLearningMergeData}
 
 ```{r}
-# Use common name for the same (gsis_id) ID variable
+# Prepare data for merging
+## Use common name for the same (gsis_id) ID variable
 nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly %>% 
   rename(gsis_id = player_id)
 
@@ -170,8 +174,56 @@ player_stats_weekly_offense <- player_stats_weekly_offense %>%
 nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
   rename(gsis_id = player_id)
 
+## Ensure variables with the same name have the same type
+nfl_players <- nfl_players %>% 
+  mutate(
+    birth_date = as.Date(birth_date),
+    jersey_number = as.character(jersey_number),
+    gsis_it_id = as.character(gsis_it_id),
+    years_of_experience = as.integer(years_of_experience))
+
 player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
-  rename(gsis_id = player_id)
+  mutate(
+    birth_date = as.Date(birth_date),
+    jersey_number = as.character(jersey_number),
+    gsis_it_id = as.character(gsis_it_id))
+
+nfl_rosters <- nfl_rosters %>% 
+  mutate(
+    draft_number = as.integer(draft_number))
+
+nfl_rosters_weekly <- nfl_rosters %>% 
+  mutate(
+    draft_number = as.integer(draft_number))
+
+nfl_depthCharts <- nfl_depthCharts %>% 
+  mutate(
+    season = as.integer(season))
+
+nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
+  mutate(
+    receptions = as.integer(receptions))
+
+## Rename variables
+#-todo: rename variables in expected fantasy points so they don't get coalesced with actual points
+nfl_draftPicks <- nfl_draftPicks %>%
+  rename(
+    games_career = games,
+    pass_completions_career = pass_completions,
+    pass_attempts_career = pass_attempts,
+    pass_yards_career = pass_yards,
+    pass_tds_career = pass_tds,
+    pass_ints_career = pass_ints,
+    rush_atts_career = rush_atts,
+    rush_yards_career = rush_yards,
+    rush_tds_career = rush_tds,
+    receptions_career = receptions,
+    rec_yards_career = rec_yards,
+    rec_tds_career = rec_tds,
+    def_solo_tackles_career = def_solo_tackles,
+    def_ints_career = def_ints,
+    def_sacks_career = def_sacks
+  )
 
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 #-todo: remove redundant variables
@@ -186,7 +238,7 @@ idSeasonListToMerge <- list(
   nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season))
 )
 
-idSeasonWeekToMerge <- list(
+idSeasonWeekListToMerge <- list(
   nfl_rosters_weekly %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
   nfl_depthCharts %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
   #nfl_actualStats_offense_weekly,
@@ -196,25 +248,73 @@ idSeasonWeekToMerge <- list(
 
 # Merge data
 idMerged <- idListToMerge %>% 
-  reduce(full_join, by = c("gsis_id"))
+  reduce(
+    powerjoin::power_full_join,
+    by = c("gsis_id"),
+    conflict = coalesce_xy)
 
 idSeasonMerged <- idSeasonListToMerge %>% 
-  reduce(full_join, by = c("gsis_id","season"))
+  reduce(
+    powerjoin::power_full_join,
+    by = c("gsis_id","season"),
+    conflict = coalesce_xy)
 
-idSeasonWeekMerged <- idSeasonWeekToMerge %>% 
-  reduce(full_join, by = c("gsis_id","season","week"))
+idSeasonWeekMerged <- idSeasonWeekListToMerge %>% 
+  reduce(
+    powerjoin::power_full_join,
+    by = c("gsis_id","season","week"),
+    conflict = coalesce_xy)
 
-seasonalData <- full_join(
-  idMerged,
+seasonalData <- powerjoin::power_full_join(
   idSeasonMerged,
-  by = "gsis_id"
+  idMerged,
+  by = "gsis_id",
+  conflict = coalesce_xy
 )
 
-seasonalAndWeeklyData <- full_join( # need to troubleshoot error
-  seasonalData,
+seasonalAndWeeklyData <- powerjoin::power_full_join(
   idSeasonWeekMerged,
-  by = c("gsis_id","season")
+  seasonalData,
+  by = c("gsis_id","season"),
+  conflict = coalesce_xy
 )
+```
+
+### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
+
+```{r}
+seasonalData %>% select_if(~class(.) == "Date")
+seasonalData %>% select_if(is.character)
+seasonalData %>% select_if(is.factor)
+seasonalData %>% select_if(is.logical)
+
+seasonalData_subset <- seasonalData %>% 
+  dplyr::select(-c(
+    birth_date, loaded, full_name, player_name, player_display_name, display_name, suffix, headshot_url, player, pos,
+    gsis_id, espn_id, sportradar_id, yahoo_id, rotowire_id, pff_id, fantasy_data_id, sleeper_id, pfr_id,
+    pfr_player_id, cfb_player_id, pfr_player_name, esb_id, gsis_it_id, smart_id,
+    college, college_name, team_abbr, current_team_id, college_conference, draft_club, status_description_abbr,
+    status_short_description, short_name, headshot, uniform_number, jersey_number, first_name, last_name,
+    football_name, team
+    ))
+```
+
+### Convert Character Predictors to Factors {#sec-convertCharacterToFactor}
+
+```{r}
+seasonalData_subset <- seasonalData_subset %>% mutate(across(where(is.character), as.factor))
+seasonalData_subset <- seasonalData_subset %>% mutate(across(where(is.logical), as.factor))
+
+seasonalData_subset %>% select_if(~class(.) == "Date") %>% str()
+seasonalData_subset %>% select_if(is.character) %>% str()
+seasonalData_subset %>% select_if(is.factor) %>% str()
+seasonalData_subset %>% select_if(is.logical) %>% str()
+```
+
+### Impute the Missing Data {#sec-missingDataImputation}
+
+```{r}
+seasonalData_subset_imp <- missForest::missForest(seasonalData_subset %>% data.frame)
 ```
 
 ## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
@@ -238,6 +338,24 @@ seasonalAndWeeklyData <- full_join( # need to troubleshoot error
 #### Longitudinal Data {#sec-randomForestLongitudinalData}
 
 [@Hu2023]
+
+```{r}
+smerf <- LongituRF::MERF(
+  X = seasonalData[,c("ageCentered20")] %>% as.matrix(),
+  Y = seasonalData$fantasy_points,
+  Z = seasonalData[,c("ageCentered20")] %>% as.matrix(),
+  id = seasonalData$gsis_id,
+  time = seasonalData$ageCentered20,
+  mtry = 2,
+  ntree = 500,
+  sto = "BM")
+
+smerf$forest # is the fitted random forest (obtained at the last iteration)
+smerf$random_effects # are the predicted random effects for each individual
+smerf$omega # are the predicted stochastic processes
+plot(smerf$Vraisemblance) # evolution of the log-likelihood
+smerf$OOB # OOB error at each iteration
+```
 
 ### *k*-Fold Cross-Validation {#sec-kfoldCV}
 
