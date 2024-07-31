@@ -9,6 +9,8 @@ library("LongituRF")
 library("doParallel")
 library("missForest")
 library("powerjoin")
+library("mice")
+library("miceadds")
 library("tidyverse")
 ```
 
@@ -155,10 +157,11 @@ nfl_playerIDs$gsis_id
 nfl_playerIDs$pfr_id
 ```
 
-### Merge Data {#sec-machineLearningMergeData}
+### Prepare Data for Merging {#sec-machineLearningPrepareDataForMerging}
 
 ```{r}
 # Prepare data for merging
+#-todo: calculate years_of_experience
 ## Use common name for the same (gsis_id) ID variable
 nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly %>% 
   rename(gsis_id = player_id)
@@ -225,11 +228,15 @@ nfl_draftPicks <- nfl_draftPicks %>%
     def_ints_career = def_ints,
     def_sacks_career = def_sacks
   )
+```
 
+### Merge Data {#sec-machineLearningMergeData}
+
+```{r}
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 #-todo: remove redundant variables
 idListToMerge <- list(
-  nfl_players %>% filter(!is.na(gsis_id)) %>% select(-season),
+  nfl_players %>% filter(!is.na(gsis_id)) %>% select(-season, -years_of_experience),
   nfl_draftPicks %>% filter(!is.na(gsis_id)) %>% select(-season, -age)
 )
 
@@ -279,6 +286,14 @@ seasonalAndWeeklyData <- powerjoin::power_full_join(
   by = c("gsis_id","season"),
   conflict = coalesce_xy
 )
+
+# check on duplicate id-by-season data (nfl_rosters, nfl_advancedStatsPFR_seasonal)
+seasonalData %>% 
+  select(gsis_id, season)
+
+seasonalData %>% 
+  select(gsis_id, season) %>% 
+  unique()
 ```
 
 ### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
@@ -292,7 +307,7 @@ seasonalData %>% select_if(is.logical)
 seasonalData_subset <- seasonalData %>% 
   dplyr::select(-c(
     birth_date, loaded, full_name, player_name, player_display_name, display_name, suffix, headshot_url, player, pos,
-    gsis_id, espn_id, sportradar_id, yahoo_id, rotowire_id, pff_id, fantasy_data_id, sleeper_id, pfr_id,
+    espn_id, sportradar_id, yahoo_id, rotowire_id, pff_id, fantasy_data_id, sleeper_id, pfr_id,
     pfr_player_id, cfb_player_id, pfr_player_name, esb_id, gsis_it_id, smart_id,
     college, college_name, team_abbr, current_team_id, college_conference, draft_club, status_description_abbr,
     status_short_description, short_name, headshot, uniform_number, jersey_number, first_name, last_name,
@@ -314,6 +329,10 @@ seasonalData_subset %>% select_if(is.logical) %>% str()
 
 ### Impute the Missing Data {#sec-missingDataImputation}
 
+(CONSIDER WIDENING THE DATA TO AVOID MULTILEVEL IMPUTATION)
+
+#### `missForest`
+
 ```{r}
 num_cores <- detectCores()
 num_cores
@@ -321,11 +340,68 @@ num_cores
 registerDoParallel(cores = num_cores)
 
 seasonalData_subset_imp <- missForest::missForest(
-  seasonalData_subset %>% data.frame,
+  seasonalData_subset %>% select(ageCentered20, ageCentered20Quadratic, fantasy_points) %>% data.frame,
   verbose = TRUE,
   mtry = 100,
-  parallelize = "variables")
+  parallelize = "forests")
 ```
+
+#### `MICE`
+
+```{r}
+# Specify data to impute
+dataToImpute <- seasonalData_subset %>% 
+  select(gsis_id, season, ageCentered20, ageCentered20Quadratic, fantasy_points, years_of_experience) %>% 
+  filter(!is.na(gsis_id), !is.na(season)) %>% 
+  mutate(ID = as.integer(as.factor(as.character(gsis_id)))) %>% 
+  arrange(gsis_id, season)
+
+# Specify variables to impute
+varsToImpute <- c("fantasy_points")
+Y <- varsToImpute
+
+# Specify predictors of missing data
+clusterVariable <- "ID"
+fixedEffectPredictors <- c("ageCentered20Quadratic")
+randomEffectPrectors <- c("ageCentered20")
+
+# Specify number of imputations
+numImputations <- 1
+
+# Specify the imputation method
+meth <- make.method(dataToImpute)
+meth[1:length(meth)] <- ""
+meth[Y] <- "2l.pmm" # specify the imputation method here; this can differ by outcome variable
+
+# Specify the predictor matrix
+
+pred <- make.predictorMatrix(dataToImpute)
+pred[1:nrow(pred), 1:ncol(pred)] <- 0
+pred[Y, clusterVariable] <- (-2) # cluster variable
+pred[Y, randomEffectPrectors] <- 2 # random effect predictor
+#pred[Y, fixedEffectPredictors] <- 1 # fixed effect predictor
+pred[Y, Y] <- 1 # fixed effect predictor of each predictor in predicting the other predictors
+
+diag(pred) <- 0
+pred
+
+# Imputation
+mi_mice <- mice(
+  as.data.frame(dataToImpute),
+  method = meth,
+  predictorMatrix = pred,
+  m = numImputations,
+  maxit = 100, # generally use 100 maximum iterations; this example uses 5 for speed
+  seed = 52242)
+
+mi_mice$loggedEvents
+
+seasonalData_subset_imp <- complete(
+  mi_mice,
+  action = "stacked",
+  include = FALSE)
+```
+
 
 ## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
 

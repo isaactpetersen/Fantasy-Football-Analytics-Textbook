@@ -256,6 +256,33 @@ nfl_players <- progressr::with_progress(
   nflreadr::load_players())
 ```
 
+The `nfl_players` object is in `id` form.
+That is, each row should be uniquely identified by `gsis_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_players <- nfl_players %>% 
+  select(gsis_id, everything()) %>% 
+  arrange(display_name)
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_players %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1)
+```
+
+Let's do some data cleanup:
+
+```{r}
+nfl_players[nfl_players == ""] <- NA
+
+nfl_players <- nfl_players %>% 
+  filter(!is.na(gsis_id))
+```
+
 ```{r}
 #| eval: false
 
@@ -278,6 +305,23 @@ load(file = "./data/nfl_players.RData")
 
 nfl_teams <- progressr::with_progress(
   nflreadr::load_teams(current = TRUE))
+```
+
+The `nfl_teams` object is in `id` form.
+That is, each row should be uniquely identified by `team_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_teams <- nfl_teams %>% 
+  select(team_id, everything())
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_teams %>% 
+  group_by(team_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -309,6 +353,88 @@ nfl_rosters <- progressr::with_progress(
 
 nfl_rosters_weekly <- progressr::with_progress(
   nflreadr::load_rosters_weekly(seasons = TRUE))
+```
+
+The `nfl_rosters` object is in `id`-`season`-`team` form.
+That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `team`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_rosters <- nfl_rosters %>% 
+  select(gsis_id, season, team, week, everything()) %>% 
+  arrange(full_name, gsis_id, season, team, week)
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_rosters %>% 
+  group_by(gsis_id, season, team) %>% 
+  filter(n() > 1)
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Drop players with missing values for gsis_id
+nfl_rosters <- nfl_rosters %>% 
+  filter(!is.na(gsis_id))
+
+# Fill in missing values for a player in their duplicate instances, and then keep only the first of the duplicate instances
+nfl_rosters <- nfl_rosters %>% 
+  group_by(gsis_id, season, team) %>% 
+  fill(names(.), .direction = "downup") %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+```
+
+Let's check again for duplicate `id` instances:
+
+```{r}
+nfl_rosters %>% 
+  group_by(gsis_id, season, team) %>% 
+  filter(n() > 1)
+```
+
+The `nfl_rosters_weekly` object is in `id`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_rosters_weekly <- nfl_rosters_weekly %>% 
+  select(gsis_id, season, week, everything()) %>% 
+  arrange(full_name, gsis_id, season, week)
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_rosters_weekly %>% 
+  group_by(gsis_id, season, week) %>% 
+  filter(n() > 1)
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Drop players with missing values for gsis_id
+nfl_rosters_weekly <- nfl_rosters_weekly %>% 
+  filter(!is.na(gsis_id))
+
+# Fill in missing values for a player in their duplicate instances, and then keep only the first of the duplicate instances
+nfl_rosters_weekly <- nfl_rosters_weekly %>% 
+  group_by(gsis_id, season, week) %>% 
+  fill(names(.), .direction = "downup") %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+```
+
+Let's check again for duplicate `id` instances:
+
+```{r}
+nfl_rosters_weekly %>% 
+  group_by(gsis_id, season, week) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -343,6 +469,17 @@ nfl_schedules <- progressr::with_progress(
   nflreadr::load_schedules(seasons = TRUE))
 ```
 
+The `nfl_schedules` object is in `id` form.
+That is, each row should be uniquely identified by `game_id`.
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_schedules %>% 
+  group_by(game_id) %>% 
+  filter(n() > 1)
+```
+
 ```{r}
 #| eval: false
 
@@ -367,6 +504,46 @@ A Data Dictionary for data from the combine is located at the following link: <h
 
 nfl_combine <- progressr::with_progress(
   nflreadr::load_combine(seasons = TRUE))
+```
+
+The `nfl_combine` object is in `id` form.
+That is, each row should be uniquely identified by their `id`.
+However, there is no `gsis_id` variable to merge it easily with other datasets.
+Some of the players have other `id` variables, including `pfr_id` and `cfb_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_combine <- nfl_combine %>% 
+  select(pfr_id, cfb_id, everything()) %>% 
+  arrange(season, player_name)
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_combine %>% 
+  group_by(pfr_id) %>% 
+  filter(n() > 1, !is.na(pfr_id)) %>% 
+  arrange(pfr_id)
+
+nfl_combine %>% 
+  group_by(cfb_id) %>% 
+  filter(n() > 1, !is.na(cfb_id)) %>% 
+  arrange(cfb_id)
+```
+
+However, these apparent duplicates appear to be different players:
+
+```{r}
+nfl_combine %>% 
+  group_by(season, pfr_id, pos) %>% 
+  filter(n() > 1, !is.na(pfr_id)) %>% 
+  arrange(pfr_id)
+
+nfl_combine %>% 
+  group_by(season, cfb_id, pos) %>% 
+  filter(n() > 1, !is.na(cfb_id)) %>% 
+  arrange(cfb_id)
 ```
 
 ```{r}
@@ -395,6 +572,41 @@ nfl_draftPicks <- progressr::with_progress(
   nflreadr::load_draft_picks(seasons = TRUE))
 ```
 
+The `nfl_draftPicks` object is in `id` form.
+That is, each row should be uniquely identified by `gsis_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_draftPicks <- nfl_draftPicks %>% 
+  select(gsis_id, everything()) %>% 
+  arrange(pfr_player_name)
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_draftPicks %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1)
+```
+
+Let's do some data cleanup:
+
+```{r}
+nfl_draftPicks[nfl_draftPicks == ""] <- NA
+
+nfl_draftPicks <- nfl_draftPicks %>% 
+  filter(!is.na(gsis_id))
+```
+
+Let's check again for duplicate `id` instances:
+
+```{r}
+nfl_draftPicks %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1)
+```
+
 ```{r}
 #| eval: false
 
@@ -419,6 +631,47 @@ A Data Dictionary for data from weekly depth charts is located at the following 
 
 nfl_depthCharts <- progressr::with_progress(
   nflreadr::load_depth_charts(seasons = TRUE))
+```
+
+The `nfl_depthCharts` object is in `id`-`season`-`week`-`position` form.
+That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, `week`, and `depth_position`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_depthCharts <- nfl_depthCharts %>% 
+  select(gsis_id, season, week, depth_position, everything()) %>% 
+  arrange(full_name, gsis_id, season, week, depth_position)
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_depthCharts %>% 
+  group_by(gsis_id, season, week, depth_position) %>% 
+  filter(n() > 1)
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Drop players with missing values for gsis_id
+nfl_depthCharts <- nfl_depthCharts %>% 
+  filter(!is.na(gsis_id))
+
+# Fill in missing values for a player in their duplicate instances, and then keep only the first of the duplicate instances
+nfl_depthCharts <- nfl_depthCharts %>% 
+  group_by(gsis_id, season, week, depth_position) %>% 
+  fill(names(.), .direction = "downup") %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+```
+
+Let's check again for duplicate `id` instances:
+
+```{r}
+nfl_depthCharts %>% 
+  group_by(gsis_id, season, week, depth_position) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -457,6 +710,24 @@ nfl_pbp <- progressr::with_progress(
 #| include: false
 
 nfl_pbp <- nflreadr::load_pbp(seasons = TRUE)
+```
+
+The `nfl_pbp` object is in `game_id`-`drive`-`play_id` form.
+That is, each row should be uniquely identified by the combination of `game_id`, `drive`, `play_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_pbp <- nfl_pbp %>% 
+  select(game_id, drive, play_id, everything()) %>% 
+  arrange(game_id, drive, play_id)
+```
+
+Let's check for duplicate `id` instances:
+
+```{r}
+nfl_pbp %>% 
+  group_by(game_id, drive, play_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -2186,6 +2457,16 @@ player_stats_weekly_kicking <- player_stats_weekly_kicking %>%
     years_of_experience_offense[,c("player_id","season","years_of_experience")],
     by = c("player_id","season")
   )
+
+# Arrange data
+player_stats_weekly_offense <- player_stats_weekly_offense %>% 
+  arrange(player_display_name, season, week)
+
+player_stats_weekly_defense <- player_stats_weekly_defense %>% 
+  arrange(player_display_name, season, week)
+
+player_stats_weekly_kicking <- player_stats_weekly_kicking %>% 
+  arrange(player_display_name, season, week)
 ```
 
 ```{r}
@@ -2323,6 +2604,19 @@ player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>%
     years_of_experience_offense[,c("player_id","season","years_of_experience")],
     by = c("player_id","season")
   )
+
+# Arrange data
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+  relocate(season, .after = player_id) %>% 
+  arrange(player_display_name, season)
+
+player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
+  relocate(season, .after = player_id) %>% 
+  arrange(player_display_name, season)
+
+player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
+  relocate(season, .after = player_id) %>% 
+  arrange(player_display_name, season)
 ```
 
 ```{r}
