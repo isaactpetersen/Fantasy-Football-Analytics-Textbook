@@ -211,12 +211,45 @@ Hopefully, that provides an example for how to learn about a particular function
 Below, we provide examples for how to download various types of National Football League (NFL) data.
 For additional resources, @Congelio2023 provides a helpful introductory text for working with NFL data in `R`.
 We save each data file after downloading it, so we can use the data in subsequent chapters.
+Guidance for how to merge the various data files is provided at the following link: <https://github.com/nflverse/nfldata/blob/master/DATASETS.md>
 
 ```{r}
 #| eval: false
 #| include: false
 
-# Downloaded Data
+# Downloaded Data - Raw
+load(file = "./data/nfl_players_raw.RData")
+load(file = "./data/nfl_teams_raw.RData")
+load(file = "./data/nfl_rosters_raw.RData")
+load(file = "./data/nfl_rosters_weekly_raw.RData")
+load(file = "./data/nfl_schedules_raw.RData")
+load(file = "./data/nfl_combine_raw.RData")
+load(file = "./data/nfl_draftPicks_raw.RData")
+load(file = "./data/nfl_depthCharts_raw.RData")
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp_raw.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown_raw.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation_raw.RData", fsep = ""))
+load(file = "./data/nfl_actualStats_weekly_raw.RData")
+load(file = "./data/nfl_injuries_raw.RData")
+load(file = "./data/nfl_snapCounts_raw.RData")
+load(file = "./data/nfl_espnQBR_seasonal_raw.RData")
+load(file = "./data/nfl_espnQBR_weekly_raw.RData")
+load(file = "./data/nfl_nextGenStats_weekly_raw.RData")
+load(file = "./data/nfl_advancedStatsPFR_seasonal_raw.RData")
+load(file = "./data/nfl_advancedStatsPFR_weekly_raw.RData")
+load(file = "./data/nfl_playerContracts_raw.RData")
+load(file = "./data/nfl_ftnCharting_raw.RData")
+load(file = "./data/nfl_playerIDs_raw.RData")
+load(file = "./data/nfl_rankings_draft_raw.RData")
+load(file = "./data/nfl_rankings_weekly_raw.RData")
+load(file = "./data/nfl_expectedFantasyPoints_weekly_raw.RData")
+load(file = "./data/nfl_expectedFantasyPoints_pbp_raw.RData")
+
+# Calculated Data - Raw
+load(file = "./data/nfl_actualStats_career_raw.RData")
+load(file = "./data/nfl_actualStats_seasonal_raw.RData")
+
+# Downloaded Data - Processed
 load(file = "./data/nfl_players.RData")
 load(file = "./data/nfl_teams.RData")
 load(file = "./data/nfl_rosters.RData")
@@ -231,18 +264,20 @@ load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fan
 load(file = "./data/nfl_actualStats_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
-load(file = "./data/nfl_espnQBR.RData")
+load(file = "./data/nfl_espnQBR_seasonal.RData")
+load(file = "./data/nfl_espnQBR_weekly.RData")
 load(file = "./data/nfl_nextGenStats_weekly.RData")
 load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
 load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
 load(file = "./data/nfl_playerContracts.RData")
 load(file = "./data/nfl_ftnCharting.RData")
 load(file = "./data/nfl_playerIDs.RData")
-load(file = "./data/nfl_rankings.RData")
+load(file = "./data/nfl_rankings_draft.RData")
+load(file = "./data/nfl_rankings_weekly.RData")
 load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
 load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
 
-# Calculated Data
+# Calculated Data - Processed
 load(file = "./data/nfl_actualStats_career.RData")
 load(file = "./data/nfl_actualStats_seasonal.RData")
 ```
@@ -271,7 +306,7 @@ save(
 load(file = "./data/nfl_players_raw.RData")
 ```
 
-The `nfl_players` object is in `id` form.
+The `nfl_players` object is in `player` form.
 That is, each row should be uniquely identified by `gsis_id`.
 Let's rearrange the data accordingly:
 
@@ -281,7 +316,7 @@ nfl_players <- nfl_players_raw %>%
   arrange(display_name)
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `player` instances:
 
 ```{r}
 nfl_players %>% 
@@ -339,7 +374,7 @@ save(
 load(file = "./data/nfl_teams_raw.RData")
 ```
 
-The `nfl_teams` object is in `id` form.
+The `nfl_teams` object is in `team` form.
 That is, each row should be uniquely identified by `team_id`.
 Let's rearrange the data accordingly:
 
@@ -348,7 +383,7 @@ nfl_teams <- nfl_teams_raw %>%
   select(team_id, everything())
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `team` instances:
 
 ```{r}
 nfl_teams %>% 
@@ -408,7 +443,7 @@ load(file = "./data/nfl_rosters_raw.RData")
 load(file = "./data/nfl_rosters_weekly_raw.RData")
 ```
 
-The `nfl_rosters` object is in `id`-`season`-`team` form.
+The `nfl_rosters` object is in `player`-`season`-`team` form.
 That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `team`.
 Let's rearrange the data accordingly:
 
@@ -418,7 +453,7 @@ nfl_rosters <- nfl_rosters_raw %>%
   arrange(full_name, gsis_id, season, team, week)
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `player`-`season`-`team` instances:
 
 ```{r}
 nfl_rosters %>% 
@@ -441,7 +476,7 @@ nfl_rosters <- nfl_rosters %>%
   ungroup()
 ```
 
-Let's check again for duplicate `id` instances:
+Let's check again for duplicate `player`-`season`-`team` instances:
 
 ```{r}
 nfl_rosters %>% 
@@ -449,7 +484,7 @@ nfl_rosters %>%
   filter(n() > 1)
 ```
 
-The `nfl_rosters_weekly` object is in `id`-`season`-`week` form.
+The `nfl_rosters_weekly` object is in `player`-`season`-`week` form.
 That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `week`.
 Let's rearrange the data accordingly:
 
@@ -459,7 +494,7 @@ nfl_rosters_weekly <- nfl_rosters_weekly_raw %>%
   arrange(full_name, gsis_id, season, week)
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `player`-`season`-`week` instances:
 
 ```{r}
 nfl_rosters_weekly %>% 
@@ -482,7 +517,7 @@ nfl_rosters_weekly <- nfl_rosters_weekly %>%
   ungroup()
 ```
 
-Let's check again for duplicate `id` instances:
+Let's check again for duplicate `player`-`season`-`week` instances:
 
 ```{r}
 nfl_rosters_weekly %>% 
@@ -537,14 +572,14 @@ save(
 load(file = "./data/nfl_schedules_raw.RData")
 ```
 
-The `nfl_schedules` object is in `id` form.
+The `nfl_schedules` object is in `game` form.
 That is, each row should be uniquely identified by `game_id`.
 
 ```{r}
 nfl_schedules <- nfl_schedules_raw
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `game` instances:
 
 ```{r}
 nfl_schedules %>% 
@@ -593,8 +628,8 @@ save(
 load(file = "./data/nfl_combine_raw.RData")
 ```
 
-The `nfl_combine` object is in `id` form.
-That is, each row should be uniquely identified by their `id`.
+The `nfl_combine` object is in `player` form.
+That is, each row should be uniquely identified by the player's `id`.
 However, there is no `gsis_id` variable to merge it easily with other datasets.
 Some of the players have other `id` variables, including `pfr_id` and `cfb_id`.
 Let's rearrange the data accordingly:
@@ -605,7 +640,7 @@ nfl_combine <- nfl_combine_raw %>%
   arrange(season, player_name)
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `pfr_id` and `cfb_id` instances:
 
 ```{r}
 nfl_combine %>% 
@@ -674,7 +709,7 @@ save(
 load(file = "./data/nfl_draftPicks_raw.RData")
 ```
 
-The `nfl_draftPicks` object is in `id` form.
+The `nfl_draftPicks` object is in `player` form.
 That is, each row should be uniquely identified by `gsis_id`.
 Let's rearrange the data accordingly:
 
@@ -684,7 +719,7 @@ nfl_draftPicks <- nfl_draftPicks_raw %>%
   arrange(pfr_player_name)
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `player` instances:
 
 ```{r}
 nfl_draftPicks %>% 
@@ -703,7 +738,7 @@ nfl_draftPicks <- nfl_draftPicks %>%
   filter(!is.na(gsis_id))
 ```
 
-Let's check again for duplicate `id` instances:
+Let's check again for duplicate `player` instances:
 
 ```{r}
 nfl_draftPicks %>% 
@@ -762,7 +797,7 @@ nfl_depthCharts <- nfl_depthCharts_raw %>%
   arrange(full_name, gsis_id, season, week, depth_position)
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `id`-`season`-`week`-`position` instances:
 
 ```{r}
 nfl_depthCharts %>% 
@@ -785,7 +820,7 @@ nfl_depthCharts <- nfl_depthCharts %>%
   ungroup()
 ```
 
-Let's check again for duplicate `id` instances:
+Let's check again for duplicate `id`-`season`-`week`-`position` instances:
 
 ```{r}
 nfl_depthCharts %>% 
@@ -852,7 +887,7 @@ load(file = "./data/nfl_pbp_raw.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp_raw.RData", fsep = ""))
 ```
 
-The `nfl_pbp` object is in `game_id`-`drive`-`play_id` form.
+The `nfl_pbp` object is in `game`-`drive`-`play` form.
 That is, each row should be uniquely identified by the combination of `game_id`, `drive`, `play_id`.
 Let's rearrange the data accordingly:
 
@@ -862,7 +897,7 @@ nfl_pbp <- nfl_pbp_raw %>%
   arrange(game_id, drive, play_id)
 ```
 
-Let's check for duplicate `id` instances:
+Let's check for duplicate `game`-`drive`-`play` instances:
 
 ```{r}
 nfl_pbp %>% 
@@ -900,7 +935,46 @@ Note: the following code takes a while to run.
 ```{r}
 #| output: false
 
-nfl_4thdown <- nfl4th::load_4th_pbp(seasons = 2014:2023)
+nfl_4thdown_raw <- nfl4th::load_4th_pbp(seasons = 2014:nflreadr::most_recent_season())
+```
+
+```{r}
+save(
+  nfl_4thdown_raw,
+  file = "./data/nfl_4thdown_raw.RData"
+)
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = "./data/nfl_4thdown_raw.RData")
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown_raw.RData", fsep = ""))
+```
+
+The `nfl_4thdown` object is in `game`-`drive`-`play` form.
+That is, each row should be uniquely identified by the combination of `game_id`, `drive`, `play_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_4thdown <- nfl_4thdown_raw %>% 
+  select(game_id, drive, play_id, everything()) %>% 
+  arrange(game_id, drive, play_id)
+```
+
+Let's check for duplicate `game`-`drive`-`play` instances:
+
+```{r}
+nfl_4thdown %>% 
+  group_by(game_id, drive, play_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -929,10 +1003,49 @@ load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fan
 A Data Dictionary for the participation data is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_participation.html>
 
 ```{r}
-nfl_participation <- progressr::with_progress(
+nfl_participation_raw <- progressr::with_progress(
   nflreadr::load_participation(
     seasons = TRUE,
     include_pbp = TRUE))
+```
+
+```{r}
+save(
+  nfl_participation_raw,
+  file = "./data/nfl_participation_raw.RData"
+)
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = "./data/nfl_participation_raw.RData")
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation_raw.RData", fsep = ""))
+```
+
+The `nfl_participation` object is in `game`-`drive`-`play` form.
+That is, each row should be uniquely identified by the combination of `nflverse_game_id`, `drive`, `play_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_participation <- nfl_participation_raw %>% 
+  select(nflverse_game_id, drive, play_id, everything()) %>% 
+  arrange(nflverse_game_id, drive, play_id)
+```
+
+Let's check for duplicate `game`-`drive`-`play` instances:
+
+```{r}
+nfl_participation %>% 
+  group_by(nflverse_game_id, drive, play_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -965,20 +1078,69 @@ A Data Dictionary for statistics for defensive players is located at the followi
 ```{r}
 #| eval: false
 
-nfl_actualStats_offense_weekly <- progressr::with_progress(
+nfl_actualStats_offense_weekly_raw <- progressr::with_progress(
   nflreadr::load_player_stats(
     seasons = TRUE,
     stat_type = "offense"))
 
-nfl_actualStats_defense_weekly <- progressr::with_progress(
+nfl_actualStats_defense_weekly_raw <- progressr::with_progress(
   nflreadr::load_player_stats(
     seasons = TRUE,
     stat_type = "defense"))
 
-nfl_actualStats_kicking_weekly <- progressr::with_progress(
+nfl_actualStats_kicking_weekly_raw <- progressr::with_progress(
   nflreadr::load_player_stats(
     seasons = TRUE,
     stat_type = "kicking"))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_offense_weekly_raw, nfl_actualStats_defense_weekly_raw, nfl_actualStats_kicking_weekly_raw,
+  file = "./data/nfl_actualStats_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_weekly_raw.RData")
+```
+
+The `nfl_actualStats_weekly` objects are in `player`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly_raw %>% 
+  select(player_id, season, week, everything()) %>% 
+  arrange(player_display_name, player_id, season, week)
+
+nfl_actualStats_defense_weekly <- nfl_actualStats_defense_weekly_raw %>% 
+  select(player_id, season, week, everything()) %>% 
+  arrange(player_display_name, player_id, season, week)
+
+nfl_actualStats_kicking_weekly <- nfl_actualStats_kicking_weekly_raw %>% 
+  select(player_id, season, week, everything()) %>% 
+  arrange(player_display_name, player_id, season, week)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+nfl_actualStats_offense_weekly %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1)
+
+nfl_actualStats_defense_weekly %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1)
+
+nfl_actualStats_kicking_weekly %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -1003,8 +1165,41 @@ A Data Dictionary for injury data is located at the following link: <https://nfl
 ```{r}
 #| eval: false
 
-nfl_injuries <- progressr::with_progress(
+nfl_injuries_raw <- progressr::with_progress(
   nflreadr::load_injuries(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_injuries_raw,
+  file = "./data/nfl_injuries_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_injuries_raw.RData")
+```
+
+The `nfl_injuries` object is in `player`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_injuries <- nfl_injuries_raw %>% 
+  select(gsis_id, season, week, everything()) %>% 
+  arrange(full_name, gsis_id, season, week)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+nfl_injuries %>% 
+  group_by(gsis_id, season, week) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -1029,8 +1224,41 @@ A Data Dictionary for snap counts data is located at the following link: <https:
 ```{r}
 #| eval: false
 
-nfl_snapCounts <- progressr::with_progress(
+nfl_snapCounts_raw <- progressr::with_progress(
   nflreadr::load_snap_counts(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_snapCounts_raw,
+  file = "./data/nfl_snapCounts_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_snapCounts_raw.RData")
+```
+
+The `nfl_snapCounts` object is in `game`-`player` form.
+That is, each row should be uniquely identified by the combination of `game_id` and `pfr_player_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_snapCounts <- nfl_snapCounts_raw %>% 
+  select(game_id, pfr_player_id, everything()) %>% 
+  arrange(game_id, pfr_player_id)
+```
+
+Let's check for duplicate `game` instances:
+
+```{r}
+nfl_snapCounts %>% 
+  group_by(game_id, pfr_player_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -1055,30 +1283,91 @@ A Data Dictionary for ESPN QBR data is located at the following link: <https://n
 ```{r}
 #| eval: false
 
-nfl_espnQBR_seasonal <- progressr::with_progress(
+nfl_espnQBR_seasonal_raw <- progressr::with_progress(
   nflreadr::load_espn_qbr(
     seasons = TRUE,
     summary_type = c("season")))
 
-nfl_espnQBR_weekly <- progressr::with_progress(
+nfl_espnQBR_weekly_raw <- progressr::with_progress(
   nflreadr::load_espn_qbr(
     seasons = TRUE,
-    summary_type = c("weekly")))
-
-nfl_espnQBR_weekly$game_week <- as.character(nfl_espnQBR_weekly$game_week)
-
-nfl_espnQBR <- bind_rows(
-  nfl_espnQBR_seasonal,
-  nfl_espnQBR_weekly
-)
+    summary_type = c("week")))
 ```
 
 ```{r}
 #| eval: false
 
 save(
-  nfl_espnQBR,
-  file = "./data/nfl_espnQBR.RData"
+  nfl_espnQBR_seasonal_raw,
+  file = "./data/nfl_espnQBR_seasonal_raw.RData"
+)
+
+save(
+  nfl_espnQBR_weekly_raw,
+  file = "./data/nfl_espnQBR_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_espnQBR_seasonal_raw.RData")
+load(file = "./data/nfl_espnQBR_weekly_raw.RData")
+```
+
+The `nfl_espnQBR_seasonal` object is in `player`-`season`-`season type` form, where `season type` refers to regular season versus postseason.
+That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `season_type`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_espnQBR_seasonal <- nfl_espnQBR_seasonal_raw %>% 
+  select(player_id, season, season_type, everything()) %>% 
+  arrange(name_display, player_id, season, season_type)
+```
+
+Let's check for duplicate `player`-`season`-`team` instances:
+
+```{r}
+nfl_espnQBR_seasonal %>% 
+  group_by(player_id, season, season_type) %>% 
+  filter(n() > 1)
+```
+
+The `nfl_espnQBR_weekly` object is in both `game`-`player` form and `player`-`season`-`season type`-`week` form, where `season type` refers to regular season versus postseason.
+That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `week` or by the combination of `player_id`, `season`, `season_type`, and `week_num`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_espnQBR_weekly <- nfl_espnQBR_weekly_raw %>% 
+  select(player_id, season, season_type, week_num, everything()) %>% 
+  arrange(name_display, player_id, season, season_type, week_num)
+```
+
+Let's check for duplicate `game`-`player` or `player`-`season`-`season type`-`week` instances:
+
+```{r}
+nfl_espnQBR_weekly %>% 
+  arrange(game_id, player_id) %>% 
+  group_by(game_id, player_id) %>% 
+  filter(n() > 1)
+
+nfl_espnQBR_weekly %>% 
+  arrange(player_id, season, season_type, week_num) %>% 
+  group_by(player_id, season, season_type, week_num) %>% 
+  filter(n() > 1)
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_espnQBR_seasonal,
+  file = "./data/nfl_espnQBR_seasonal.RData"
+)
+
+save(
+  nfl_espnQBR_weekly,
+  file = "./data/nfl_espnQBR_weekly.RData"
 )
 ```
 
@@ -1095,26 +1384,59 @@ A Data Dictionary for NFL Next Gen Stats data is located at the following link: 
 ```{r}
 #| eval: false
 
-nfl_nextGenStats_pass_weekly <- progressr::with_progress(
+nfl_nextGenStats_pass_weekly_raw <- progressr::with_progress(
   nflreadr::load_nextgen_stats(
     seasons = TRUE,
     stat_type = c("passing")))
 
-nfl_nextGenStats_rush_weekly <- progressr::with_progress(
+nfl_nextGenStats_rush_weekly_raw <- progressr::with_progress(
   nflreadr::load_nextgen_stats(
     seasons = TRUE,
     stat_type = c("rushing")))
 
-nfl_nextGenStats_rec_weekly <- progressr::with_progress(
+nfl_nextGenStats_rec_weekly_raw <- progressr::with_progress(
   nflreadr::load_nextgen_stats(
     seasons = TRUE,
     stat_type = c("receiving")))
 
-nfl_nextGenStats_weekly <- bind_rows(
-  nfl_nextGenStats_pass_weekly,
-  nfl_nextGenStats_rush_weekly,
-  nfl_nextGenStats_rec_weekly
+nfl_nextGenStats_weekly_raw <- bind_rows(
+  nfl_nextGenStats_pass_weekly_raw,
+  nfl_nextGenStats_rush_weekly_raw,
+  nfl_nextGenStats_rec_weekly_raw
 )
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_nextGenStats_weekly_raw,
+  file = "./data/nfl_nextGenStats_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_nextGenStats_weekly_raw.RData")
+```
+
+The `nfl_nextGenStats_weekly` object is in `player`-`season`-`season type`-`week` form, where `season type` refers to regular season versus postseason.
+That is, each row should be uniquely identified by the combination of `player_gsis_id`, `season`, `season_type`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_nextGenStats_weekly <- nfl_nextGenStats_weekly_raw %>% 
+  select(player_gsis_id, season, season_type, week, everything()) %>% 
+  arrange(player_display_name, player_gsis_id, season, season_type)
+```
+
+Let's check for duplicate `player`-`season`-`season type`-`week` instances:
+
+```{r}
+nfl_nextGenStats_weekly %>% 
+  group_by(player_gsis_id, season, season_type, week) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -1139,74 +1461,288 @@ A Data Dictionary for Pro Football Reference passing data is located at the foll
 ```{r}
 #| eval: false
 
-nfl_advancedStatsPFR_pass_seasonal <- progressr::with_progress(
+nfl_advancedStatsPFR_pass_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("pass"),
     summary_level = c("season")))
 
-nfl_advancedStatsPFR_pass_weekly <- progressr::with_progress(
+nfl_advancedStatsPFR_pass_weekly_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("pass"),
     summary_level = c("week")))
 
-nfl_advancedStatsPFR_rush_seasonal <- progressr::with_progress(
+nfl_advancedStatsPFR_rush_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("rush"),
     summary_level = c("season")))
 
-nfl_advancedStatsPFR_rush_weekly <- progressr::with_progress(
+nfl_advancedStatsPFR_rush_weekly_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("rush"),
     summary_level = c("week")))
 
-nfl_advancedStatsPFR_rec_seasonal <- progressr::with_progress(
+nfl_advancedStatsPFR_rec_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("rec"),
     summary_level = c("season")))
 
-nfl_advancedStatsPFR_rec_weekly <- progressr::with_progress(
+nfl_advancedStatsPFR_rec_weekly_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("rec"),
     summary_level = c("week")))
 
-nfl_advancedStatsPFR_def_seasonal <- progressr::with_progress(
+nfl_advancedStatsPFR_def_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("def"),
     summary_level = c("season")))
 
-nfl_advancedStatsPFR_def_weekly <- progressr::with_progress(
+nfl_advancedStatsPFR_def_weekly_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("def"),
     summary_level = c("week")))
+```
 
-nfl_advancedStatsPFR_seasonal <- bind_rows(
+```{r}
+#| eval: false
+
+save(
+  nfl_advancedStatsPFR_pass_seasonal_raw,
+  nfl_advancedStatsPFR_rush_seasonal_raw,
+  nfl_advancedStatsPFR_rec_seasonal_raw,
+  nfl_advancedStatsPFR_def_seasonal_raw,
+  file = "./data/nfl_advancedStatsPFR_seasonal_raw.RData"
+)
+
+save(
+  nfl_advancedStatsPFR_pass_weekly_raw,
+  nfl_advancedStatsPFR_rush_weekly_raw,
+  nfl_advancedStatsPFR_rec_weekly_raw,
+  nfl_advancedStatsPFR_def_weekly_raw,
+  file = "./data/nfl_advancedStatsPFR_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_advancedStatsPFR_seasonal_raw.RData")
+load(file = "./data/nfl_advancedStatsPFR_weekly_raw.RData")
+```
+
+```{r}
+nfl_advancedStatsPFR_pass_seasonal <- nfl_advancedStatsPFR_pass_seasonal_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(player, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.pass = player
+  )
+
+nfl_advancedStatsPFR_rush_seasonal <- nfl_advancedStatsPFR_rush_seasonal_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(player, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.rush = player,
+    age.rush = age,
+    team = tm
+  )
+
+nfl_advancedStatsPFR_rec_seasonal <- nfl_advancedStatsPFR_rec_seasonal_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(player, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.rec = player,
+    age.rec = age,
+    team = tm
+  )
+
+nfl_advancedStatsPFR_def_seasonal <- nfl_advancedStatsPFR_def_seasonal_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(player, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.def = player,
+    age.def = age,
+    team = tm
+  )
+
+nfl_advancedStatsPFR_pass_weekly <- nfl_advancedStatsPFR_pass_weekly_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(pfr_player_name, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.pass = pfr_player_name,
+    season.pass = season,
+    week.pass = week,
+    team.pass = team
+  )
+
+nfl_advancedStatsPFR_rush_weekly <- nfl_advancedStatsPFR_rush_weekly_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(pfr_player_name, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.rush = pfr_player_name,
+    season.rush = season,
+    week.rush = week,
+    team.rush = team
+  )
+
+nfl_advancedStatsPFR_rec_weekly <- nfl_advancedStatsPFR_rec_weekly_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(pfr_player_name, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.rec = pfr_player_name,
+    season.rec = season,
+    week.rec = week,
+    team.rec = team
+  )
+
+nfl_advancedStatsPFR_def_weekly <- nfl_advancedStatsPFR_def_weekly_raw %>% 
+  mutate(
+    nameMerge = toupper(str_remove_all(pfr_player_name, "[[:punct:]]"))
+  ) %>% 
+  rename(
+    player_name.def = pfr_player_name,
+    season.def = season,
+    week.def = week,
+    team.def = team
+  )
+
+nfl_advancedStatsPFR_seasonal_list <- list(
   nfl_advancedStatsPFR_pass_seasonal,
   nfl_advancedStatsPFR_rush_seasonal,
   nfl_advancedStatsPFR_rec_seasonal,
-  nfl_advancedStatsPFR_def_seasonal
-)
+  nfl_advancedStatsPFR_def_seasonal)
 
-nfl_advancedStatsPFR_weekly <- bind_rows(
+nfl_advancedStatsPFR_weekly_list <- list(
   nfl_advancedStatsPFR_pass_weekly,
   nfl_advancedStatsPFR_rush_weekly,
   nfl_advancedStatsPFR_rec_weekly,
-  nfl_advancedStatsPFR_def_weekly
-)
+  nfl_advancedStatsPFR_def_weekly)
+
+nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal_list %>% 
+  purrr::reduce(
+    full_join,
+    by = c("pfr_id","nameMerge","season","team"))
+
+nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly_list %>% 
+  purrr::reduce(
+    full_join,
+    by = c("game_id","pfr_player_id")) #nameMerge
+
+#nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly_list %>% 
+#  purrr::reduce(
+#    full_join,
+#    by = c("pfr_player_id","nameMerge","season","week"))
+
+nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
+  mutate(
+    player_name = coalesce(
+      player_name.pass,
+      player_name.rush,
+      player_name.rec,
+      player_name.def
+    ),
+    age = coalesce(
+      #age.pass,
+      age.rush,
+      age.rec,
+      age.def
+    )
+  ) %>% 
+  select(-c(starts_with("player_name.")))
+
+nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
+  mutate(
+    player_name = coalesce(
+      player_name.pass,
+      player_name.rush,
+      player_name.rec,
+      player_name.def
+    ),
+    ,
+    season = coalesce(
+      season.pass,
+      season.rush,
+      season.rec,
+      season.def
+    ),
+    week = coalesce(
+      week.pass,
+      week.rush,
+      week.rec,
+      week.def
+    ),
+    team = coalesce(
+      team.pass,
+      team.rush,
+      team.rec,
+      team.def
+    )
+  ) %>% 
+  select(-c(starts_with("player_name.")))
+
+# Todo:
+#-separate variables from each pass/rush/rec/def object
+```
+
+The `nfl_advancedStatsPFR_seasonal` object is in `player`-`season`-`team` form.
+That is, each row should be uniquely identified by the combination of `pfr_id`, `season`, and `team`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
+  select(pfr_id, season, team, player_name, everything()) %>% 
+  arrange(player_name, pfr_id, season, team)
+```
+
+Let's check for duplicate `player`-`season`-`team` instances:
+
+```{r}
+nfl_advancedStatsPFR_seasonal %>% 
+  group_by(pfr_id, season, team) %>% 
+  filter(n() > 1)
+```
+
+The `nfl_advancedStatsPFR_weekly` object is in both `game`-`player` form and `player`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `week` or by the combination of `player_id`, `season`, `season_type`, and `week_num`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
+  select(pfr_player_id, season, week, everything()) %>% 
+  arrange(player_name, pfr_player_id, season, week)
+```
+
+Let's check for duplicate `game`-`player` or `player`-`season`-`week` instances:
+
+```{r}
+nfl_advancedStatsPFR_weekly %>% 
+  arrange(game_id, pfr_player_id) %>% 
+  group_by(game_id, pfr_player_id) %>% 
+  filter(n() > 1)
+
+nfl_advancedStatsPFR_weekly %>% 
+  arrange(pfr_player_id, season, week) %>% 
+  group_by(pfr_player_id, season, week) %>% 
+  filter(n() > 1)
 ```
 
 Merge with `gsis_id` for merging with other datasets:
 
 ```{r}
-#| eval: false
-
 # Prepare data for merging
 nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
   rename(pfr_id = pfr_player_id)
@@ -1262,6 +1798,24 @@ nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_i
 #nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" & nfl_advancedStatsPFR_weekly$pos == "WR")] <- NA # drop WR DJ TUrner, keep CB DJ Turner
 ```
 
+Let's check again for duplicate `game`-`player` or `player`-`season`-`week` instances:
+
+```{r}
+nfl_advancedStatsPFR_seasonal %>% 
+  group_by(pfr_id, season, team) %>% 
+  filter(n() > 1)
+
+nfl_advancedStatsPFR_weekly %>% 
+  arrange(game_id, pfr_id) %>% 
+  group_by(game_id, pfr_id) %>% 
+  filter(n() > 1)
+
+nfl_advancedStatsPFR_weekly %>% 
+  arrange(pfr_id, season, week) %>% 
+  group_by(pfr_id, season, week) %>% 
+  filter(n() > 1)
+```
+
 ```{r}
 #| eval: false
 
@@ -1290,8 +1844,41 @@ A Data Dictionary for player contracts data is located at the following link: <h
 ```{r}
 #| eval: false
 
-nfl_playerContracts <- progressr::with_progress(
+nfl_playerContracts_raw <- progressr::with_progress(
   nflreadr::load_contracts())
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_playerContracts_raw,
+  file = "./data/nfl_playerContracts_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_playerContracts_raw.RData")
+```
+
+The `nfl_playerContracts` object is in `player`-`year`-`team`-`value` form.
+That is, each row should be uniquely identified by the combination of `otc_id`, `year_signed`, `team`, and `value`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_playerContracts <- nfl_playerContracts_raw %>% 
+  select(otc_id, year_signed, team, everything()) %>% 
+  arrange(player, otc_id, year_signed, team)
+```
+
+Let's check for duplicate `player`-`year`-`team`-`value` instances:
+
+```{r}
+nfl_playerContracts %>% 
+  group_by(otc_id, year_signed, team, value) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -1316,8 +1903,41 @@ A Data Dictionary for FTN Charting data is located at the following link: <https
 ```{r}
 #| eval: false
 
-nfl_ftnCharting <- progressr::with_progress(
+nfl_ftnCharting_raw <- progressr::with_progress(
   nflreadr::load_ftn_charting(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_ftnCharting_raw,
+  file = "./data/nfl_ftnCharting_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_ftnCharting_raw.RData")
+```
+
+The `nfl_ftnCharting` object is in `game`-`play` form.
+That is, each row should be uniquely identified by the combination of `nflverse_game_id` and `play_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_ftnCharting <- nfl_ftnCharting_raw %>% 
+  select(nflverse_game_id, nflverse_play_id, everything()) %>% 
+  arrange(nflverse_game_id, nflverse_play_id)
+```
+
+Let's check for duplicate `game`-`drive`-`play` instances:
+
+```{r}
+nfl_ftnCharting %>% 
+  group_by(nflverse_game_id, nflverse_play_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -1342,8 +1962,44 @@ A Data Dictionary for fantasy player ID data is located at the following link: <
 ```{r}
 #| eval: false
 
-nfl_playerIDs <- progressr::with_progress(
+nfl_playerIDs_raw <- progressr::with_progress(
   nflreadr::load_ff_playerids())
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_playerIDs_raw,
+  file = "./data/nfl_playerIDs_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_playerIDs_raw.RData")
+```
+
+The `nfl_playerIDs` object is in `player` form.
+That is, each row should be uniquely identified by `mfl_id`.
+
+```{r}
+nfl_playerIDs <- nfl_playerIDs_raw %>% 
+  arrange(name, mfl_id)
+```
+
+Let's check for duplicate `player` instances:
+
+```{r}
+nfl_playerIDs %>% 
+  group_by(mfl_id) %>% 
+  filter(n() > 1)
+
+nfl_playerIDs %>% 
+  filter(!is.na(gsis_id)) %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
@@ -1368,34 +2024,92 @@ A Data Dictionary for FantasyPros ranking data is located at the following link:
 ```{r}
 #| eval: false
 
-#nfl_rankings <- progressr::with_progress( # currently throws error
+#nfl_rankings_raw <- progressr::with_progress( # currently throws error
 #  nflreadr::load_ff_rankings(type = "all"))
 
-nfl_rankings_draft <- progressr::with_progress(
+nfl_rankings_draft_raw <- progressr::with_progress(
   nflreadr::load_ff_rankings(type = "draft"))
 
-nfl_rankings_weekly <- progressr::with_progress(
+nfl_rankings_weekly_raw <- progressr::with_progress(
   nflreadr::load_ff_rankings(type = "week"))
-
-nfl_rankings <- bind_rows(
-  nfl_rankings_draft,
-  nfl_rankings_weekly
-)
 ```
 
 ```{r}
 #| eval: false
 
 save(
-  nfl_rankings,
-  file = "./data/nfl_rankings.RData"
+  nfl_rankings_draft_raw,
+  file = "./data/nfl_rankings_draft_raw.RData"
+)
+
+save(
+  nfl_rankings_weekly_raw,
+  file = "./data/nfl_rankings_weekly_raw.RData"
 )
 ```
 
 ```{r}
 #| include: false
 
-load(file = "./data/nfl_rankings.RData")
+load(file = "./data/nfl_rankings_draft_raw.RData")
+load(file = "./data/nfl_rankings_weekly_raw.RData")
+```
+
+The `nfl_rankings_draft` object is in `player`-`page_type` form.
+That is, each row should be uniquely identified by the player's `id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_rankings_draft <- nfl_rankings_draft_raw %>% 
+  select(id, page_type, player, pos, team, everything()) %>% 
+  arrange(player, id, pos, page_type)
+```
+
+Let's check for duplicate `player`-`page_type` instances:
+
+```{r}
+nfl_rankings_draft %>% 
+  group_by(id, page_type) %>% 
+  filter(n() > 1)
+```
+
+The `nfl_rankings_weekly` object is in `player`-`page` form.
+That is, each row should be uniquely identified by `fantasypros_id` and `page`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_rankings_weekly <- nfl_rankings_weekly_raw %>% 
+  select(fantasypros_id, page, player_name, pos, team, everything()) %>% 
+  arrange(player_name, fantasypros_id, page, pos)
+```
+
+Let's check for duplicate `player`-`page` instances:
+
+```{r}
+nfl_rankings_weekly %>% 
+  group_by(fantasypros_id, page) %>% 
+  filter(n() > 1)
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_rankings_draft,
+  file = "./data/nfl_rankings_draft.RData"
+)
+
+save(
+  nfl_rankings_weekly,
+  file = "./data/nfl_rankings_weekly.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_rankings_draft.RData")
+load(file = "./data/nfl_rankings_weekly.RData")
 ```
 
 ### Expected Fantasy Points {#sec-expectedFantasyPoints}
@@ -1405,38 +2119,155 @@ A Data Dictionary for expected fantasy points data is located at the following l
 ```{r}
 #| eval: false
 
-nfl_expectedFantasyPoints_weekly <- progressr::with_progress(
+nfl_expectedFantasyPoints_weekly_raw <- progressr::with_progress(
   nflreadr::load_ff_opportunity(
     seasons = TRUE,
     stat_type = "weekly",
     model_version = "latest"
   ))
 
-nfl_expectedFantasyPoints_pass <- progressr::with_progress(
+nfl_expectedFantasyPoints_pass_raw <- progressr::with_progress(
   nflreadr::load_ff_opportunity(
     seasons = TRUE,
     stat_type = "pbp_pass",
     model_version = "latest"
   ))
 
-nfl_expectedFantasyPoints_rush <- progressr::with_progress(
+nfl_expectedFantasyPoints_rush_raw <- progressr::with_progress(
   nflreadr::load_ff_opportunity(
     seasons = TRUE,
     stat_type = "pbp_rush",
     model_version = "latest"
   ))
+```
 
-nfl_expectedFantasyPoints_weekly$season <- as.integer(nfl_expectedFantasyPoints_weekly$season)
+```{r}
+nfl_expectedFantasyPoints_weekly_raw <- nflreadr::load_ff_opportunity(
+  seasons = TRUE,
+  stat_type = "weekly",
+  model_version = "latest"
+  )
 
-nfl_expectedFantasyPoints_pbp <- bind_rows(
-  nfl_expectedFantasyPoints_pass,
-  nfl_expectedFantasyPoints_rush
+nfl_expectedFantasyPoints_pass_raw <- nflreadr::load_ff_opportunity(
+  seasons = TRUE,
+  stat_type = "pbp_pass",
+  model_version = "latest"
+  )
+
+nfl_expectedFantasyPoints_rush_raw <- nflreadr::load_ff_opportunity(
+  seasons = TRUE,
+  stat_type = "pbp_rush",
+  model_version = "latest"
+  )
+```
+
+```{r}
+save(
+  nfl_expectedFantasyPoints_weekly_raw,
+  file = "./data/nfl_expectedFantasyPoints_weekly_raw.RData"
+)
+
+save(
+  nfl_expectedFantasyPoints_pass_raw,
+  nfl_expectedFantasyPoints_rush_raw,
+  file = "./data/nfl_expectedFantasyPoints_pbp_raw.RData"
 )
 ```
 
 ```{r}
 #| eval: false
+#| include: false
 
+load(file = "./data/nfl_expectedFantasyPoints_weekly_raw.RData")
+load(file = "./data/nfl_expectedFantasyPoints_pbp_raw.RData")
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly_raw.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp_raw.RData", fsep = ""))
+```
+
+```{r}
+nfl_expectedFantasyPoints_pbp_list <- list(
+  nfl_expectedFantasyPoints_pass_raw,
+  nfl_expectedFantasyPoints_rush_raw)
+
+nfl_expectedFantasyPoints_pbp <- full_join(
+  nfl_expectedFantasyPoints_pass_raw,
+  nfl_expectedFantasyPoints_rush_raw,
+  by = c("game_id","fixed_drive","play_id"),
+  suffix = c(".pass", ".rush")
+)
+
+# Todo:
+#-separate variables from each pass/rush object
+```
+
+The `nfl_expectedFantasyPoints_weekly` object is in `game`-`player` form and in `season`-`week`-`player` form.
+That is, each row should be uniquely identified by the combination of `game_id` and `player_id`.
+Each row should also be uniquely identified by the combination of `season`, `week`, and player_id.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly_raw %>% 
+  select(season, week, game_id, player_id, full_name, posteam, position, everything()) %>% 
+  arrange(full_name, player_id, season, week)
+```
+
+Let's check for duplicate `game`-`player` instances and `season`-`week`-`player` instances:
+
+```{r}
+nfl_expectedFantasyPoints_weekly %>% 
+  group_by(game_id, player_id) %>% 
+  filter(n() > 1)
+
+nfl_expectedFantasyPoints_weekly %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1)
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Drop players with missing values for player_id
+nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
+  filter(!is.na(player_id))
+```
+
+Let's check again for duplicate `game`-`player` instances and `season`-`week`-`player` instances:
+
+```{r}
+nfl_expectedFantasyPoints_weekly %>% 
+  group_by(game_id, player_id) %>% 
+  filter(n() > 1)
+
+nfl_expectedFantasyPoints_weekly %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1)
+```
+
+The `nfl_expectedFantasyPoints_pbp` object is in `game`-`drive`-`play` form.
+That is, each row should be uniquely identified by the combination of `game_id`, `fixed_drive`, and `play_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_expectedFantasyPoints_pbp <- nfl_expectedFantasyPoints_pbp %>% 
+  select(game_id, fixed_drive, play_id, everything()) %>% 
+  arrange(game_id, fixed_drive, play_id)
+```
+
+Let's check for duplicate `game`-`player` instances and `season`-`week`-`player` instances:
+
+```{r}
+nfl_expectedFantasyPoints_pbp %>% 
+  group_by(game_id, fixed_drive, play_id) %>% 
+  filter(n() > 1)
+```
+
+```{r}
 save(
   nfl_expectedFantasyPoints_weekly,
   file = "./data/nfl_expectedFantasyPoints_weekly.RData"
@@ -1449,10 +2280,19 @@ save(
 ```
 
 ```{r}
+#| eval: false
 #| include: false
 
 load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
 load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp.RData", fsep = ""))
 ```
 
 ## Data Dictionary {#sec-dataDictionary}
@@ -2158,17 +2998,139 @@ Note: the following code takes a while to run.
 ```{r}
 #| eval: false
 
-nfl_actualStats_offense_career <- nflfastR::calculate_player_stats(
+nfl_actualStats_offense_career_raw <- nflfastR::calculate_player_stats(
   nfl_pbp,
   weekly = FALSE)
 
-nfl_actualStats_defense_career <- nflfastR::calculate_player_stats_def(
+nfl_actualStats_defense_career_raw <- nflfastR::calculate_player_stats_def(
   nfl_pbp,
   weekly = FALSE)
 
-nfl_actualStats_kicking_career <- nflfastR::calculate_player_stats_kicking(
+nfl_actualStats_kicking_career_raw <- nflfastR::calculate_player_stats_kicking(
   nfl_pbp,
   weekly = FALSE)
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_offense_career_raw, nfl_actualStats_defense_career_raw, nfl_actualStats_kicking_career_raw,
+  file = "./data/nfl_actualStats_career_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load("./data/nfl_actualStats_career_raw.RData")
+```
+
+The `nfl_actualStats_offense_career`, `nfl_actualStats_defense_career`, and `nfl_actualStats_kicking_career` objects are in `player` form.
+That is, each row should be uniquely identified by the combination of `player_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_offense_career <- nfl_actualStats_offense_career_raw %>% 
+  arrange(player_display_name, player_id)
+
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career_raw %>% 
+  arrange(player_display_name, player_id)
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career_raw %>% 
+  arrange(player_display_name, player_id)
+```
+
+Let's check for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_offense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1)
+
+nfl_actualStats_defense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1)
+
+nfl_actualStats_kicking_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1)
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Sum statistics across a player's years with multiple teams
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career %>% 
+  group_by(player_id) %>% 
+  summarise(
+    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
+  group_by(player_id) %>% 
+  summarise(
+    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+# Re-calculate percentage stats
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
+  mutate(
+    fg_pct = fg_made / fg_att,
+    pat_pct = pat_made / pat_att
+  )
+
+# Merge data back with player info
+nfl_actualStats_defense_career_raw_playerInfo <- nfl_actualStats_defense_career_raw %>% 
+  select(player_id, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
+  unique() %>% 
+  group_by(player_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+
+nfl_actualStats_kicking_career_raw_playerInfo <- nfl_actualStats_kicking_career_raw %>% 
+  select(player_id, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
+  unique() %>% 
+  group_by(player_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career_raw_playerInfo %>% 
+  right_join(
+    nfl_actualStats_defense_career,
+    by = "player_id"
+  )
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career_raw_playerInfo %>% 
+  right_join(
+    nfl_actualStats_kicking_career,
+    by = "player_id"
+  )
+
+# Rearrange data
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career %>% 
+  arrange(player_display_name, player_id)
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
+  arrange(player_display_name, player_id)
+```
+
+Let's check again for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_offense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1)
+
+nfl_actualStats_defense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1)
+
+nfl_actualStats_kicking_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1)
 ```
 
 ```{r}
