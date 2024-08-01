@@ -252,8 +252,23 @@ load(file = "./data/nfl_actualStats_seasonal.RData")
 ```{r}
 #| eval: false
 
-nfl_players <- progressr::with_progress(
+nfl_players_raw <- progressr::with_progress(
   nflreadr::load_players())
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_players_raw,
+  file = "./data/nfl_players_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_players_raw.RData")
 ```
 
 The `nfl_players` object is in `id` form.
@@ -261,7 +276,7 @@ That is, each row should be uniquely identified by `gsis_id`.
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_players <- nfl_players %>% 
+nfl_players <- nfl_players_raw %>% 
   select(gsis_id, everything()) %>% 
   arrange(display_name)
 ```
@@ -277,8 +292,10 @@ nfl_players %>%
 Let's do some data cleanup:
 
 ```{r}
+# Convert missing values to NA
 nfl_players[nfl_players == ""] <- NA
 
+# Drop players with missing values for gsis_id
 nfl_players <- nfl_players %>% 
   filter(!is.na(gsis_id))
 ```
@@ -303,8 +320,23 @@ load(file = "./data/nfl_players.RData")
 ```{r}
 #| eval: false
 
-nfl_teams <- progressr::with_progress(
+nfl_teams_raw <- progressr::with_progress(
   nflreadr::load_teams(current = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_teams_raw,
+  file = "./data/nfl_teams_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_teams_raw.RData")
 ```
 
 The `nfl_teams` object is in `id` form.
@@ -312,7 +344,7 @@ That is, each row should be uniquely identified by `team_id`.
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_teams <- nfl_teams %>% 
+nfl_teams <- nfl_teams_raw %>% 
   select(team_id, everything())
 ```
 
@@ -348,11 +380,32 @@ A Data Dictionary for rosters is located at the following link: <https://nflread
 ```{r}
 #| eval: false
 
-nfl_rosters <- progressr::with_progress(
+nfl_rosters_raw <- progressr::with_progress(
   nflreadr::load_rosters(seasons = TRUE))
 
-nfl_rosters_weekly <- progressr::with_progress(
+nfl_rosters_weekly_raw <- progressr::with_progress(
   nflreadr::load_rosters_weekly(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_rosters_raw,
+  file = "./data/nfl_rosters_raw.RData"
+)
+
+save(
+  nfl_rosters_weekly_raw,
+  file = "./data/nfl_rosters_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_rosters_raw.RData")
+load(file = "./data/nfl_rosters_weekly_raw.RData")
 ```
 
 The `nfl_rosters` object is in `id`-`season`-`team` form.
@@ -360,7 +413,7 @@ That is, each row should be uniquely identified by the combination of `gsis_id`,
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_rosters <- nfl_rosters %>% 
+nfl_rosters <- nfl_rosters_raw %>% 
   select(gsis_id, season, team, week, everything()) %>% 
   arrange(full_name, gsis_id, season, team, week)
 ```
@@ -401,7 +454,7 @@ That is, each row should be uniquely identified by the combination of `gsis_id`,
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_rosters_weekly <- nfl_rosters_weekly %>% 
+nfl_rosters_weekly <- nfl_rosters_weekly_raw %>% 
   select(gsis_id, season, week, everything()) %>% 
   arrange(full_name, gsis_id, season, week)
 ```
@@ -465,12 +518,31 @@ A Data Dictionary for game schedules data is located at the following link: <htt
 ```{r}
 #| eval: false
 
-nfl_schedules <- progressr::with_progress(
+nfl_schedules_raw <- progressr::with_progress(
   nflreadr::load_schedules(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_schedules_raw,
+  file = "./data/nfl_schedules_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_schedules_raw.RData")
 ```
 
 The `nfl_schedules` object is in `id` form.
 That is, each row should be uniquely identified by `game_id`.
+
+```{r}
+nfl_schedules <- nfl_schedules_raw
+```
 
 Let's check for duplicate `id` instances:
 
@@ -502,8 +574,23 @@ A Data Dictionary for data from the combine is located at the following link: <h
 ```{r}
 #| eval: false
 
-nfl_combine <- progressr::with_progress(
+nfl_combine_raw <- progressr::with_progress(
   nflreadr::load_combine(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_combine_raw,
+  file = "./data/nfl_combine_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_combine_raw.RData")
 ```
 
 The `nfl_combine` object is in `id` form.
@@ -513,7 +600,7 @@ Some of the players have other `id` variables, including `pfr_id` and `cfb_id`.
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_combine <- nfl_combine %>% 
+nfl_combine <- nfl_combine_raw %>% 
   select(pfr_id, cfb_id, everything()) %>% 
   arrange(season, player_name)
 ```
@@ -568,8 +655,23 @@ A Data Dictionary for draft picks data is located at the following link: <https:
 ```{r}
 #| eval: false
 
-nfl_draftPicks <- progressr::with_progress(
+nfl_draftPicks_raw <- progressr::with_progress(
   nflreadr::load_draft_picks(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_draftPicks_raw,
+  file = "./data/nfl_draftPicks_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_draftPicks_raw.RData")
 ```
 
 The `nfl_draftPicks` object is in `id` form.
@@ -577,7 +679,7 @@ That is, each row should be uniquely identified by `gsis_id`.
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_draftPicks <- nfl_draftPicks %>% 
+nfl_draftPicks <- nfl_draftPicks_raw %>% 
   select(gsis_id, everything()) %>% 
   arrange(pfr_player_name)
 ```
@@ -593,8 +695,10 @@ nfl_draftPicks %>%
 Let's do some data cleanup:
 
 ```{r}
+# Convert missing values to NA
 nfl_draftPicks[nfl_draftPicks == ""] <- NA
 
+# Drop players with missing values for gsis_id
 nfl_draftPicks <- nfl_draftPicks %>% 
   filter(!is.na(gsis_id))
 ```
@@ -629,8 +733,23 @@ A Data Dictionary for data from weekly depth charts is located at the following 
 ```{r}
 #| eval: false
 
-nfl_depthCharts <- progressr::with_progress(
+nfl_depthCharts_raw <- progressr::with_progress(
   nflreadr::load_depth_charts(seasons = TRUE))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_depthCharts_raw,
+  file = "./data/nfl_depthCharts_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_depthCharts_raw.RData")
 ```
 
 The `nfl_depthCharts` object is in `id`-`season`-`week`-`position` form.
@@ -638,7 +757,7 @@ That is, each row should be uniquely identified by the combination of `gsis_id`,
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_depthCharts <- nfl_depthCharts %>% 
+nfl_depthCharts <- nfl_depthCharts_raw %>% 
   select(gsis_id, season, week, depth_position, everything()) %>% 
   arrange(full_name, gsis_id, season, week, depth_position)
 ```
@@ -702,14 +821,35 @@ Note: the following code takes a while to run.
 ```{r}
 #| eval: false
 
-nfl_pbp <- progressr::with_progress(
+nfl_pbp_raw <- progressr::with_progress(
   nflreadr::load_pbp(seasons = TRUE))
 ```
 
 ```{r}
 #| include: false
 
-nfl_pbp <- nflreadr::load_pbp(seasons = TRUE)
+nfl_pbp_raw <- nflreadr::load_pbp(seasons = TRUE)
+```
+
+```{r}
+save(
+  nfl_pbp_raw,
+  file = "./data/nfl_pbp_raw.RData"
+)
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = "./data/nfl_pbp_raw.RData")
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp_raw.RData", fsep = ""))
 ```
 
 The `nfl_pbp` object is in `game_id`-`drive`-`play_id` form.
@@ -717,7 +857,7 @@ That is, each row should be uniquely identified by the combination of `game_id`,
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_pbp <- nfl_pbp %>% 
+nfl_pbp <- nfl_pbp_raw %>% 
   select(game_id, drive, play_id, everything()) %>% 
   arrange(game_id, drive, play_id)
 ```
