@@ -3109,7 +3109,7 @@ save(
 load("./data/nfl_actualStats_career_raw.RData")
 ```
 
-The `nfl_actualStats_offense_career`, `nfl_actualStats_defense_career`, and `nfl_actualStats_kicking_career` objects are in `player` form.
+The `nfl_actualStats_career` objects are in `player` form.
 That is, each row should be uniquely identified by the combination of `player_id`.
 Let's rearrange the data accordingly:
 
@@ -3298,12 +3298,145 @@ for(i in 1:length(seasons)){
 # Close the progress bar
 close(pb)
 
-nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonalList %>% 
+nfl_actualStats_offense_seasonal_raw <- nfl_actualStats_offense_seasonalList %>% 
   dplyr::bind_rows()
-nfl_actualStats_defense_seasonal <- nfl_actualStats_defense_seasonalList %>% 
+nfl_actualStats_defense_seasonal_raw <- nfl_actualStats_defense_seasonalList %>% 
   dplyr::bind_rows()
-nfl_actualStats_kicking_seasonal <- nfl_actualStats_kicking_seasonalList %>% 
+nfl_actualStats_kicking_seasonal_raw <- nfl_actualStats_kicking_seasonalList %>% 
   dplyr::bind_rows()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_offense_seasonal_raw, nfl_actualStats_defense_seasonal_raw, nfl_actualStats_kicking_seasonal_raw,
+  file = "./data/nfl_actualStats_seasonal_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load("./data/nfl_actualStats_seasonal_raw.RData")
+```
+
+The `nfl_actualStats_seasonal` objects are in `player`-`season` form.
+That is, each row should be uniquely identified by the combination of `player_id` and `season`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal_raw %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+
+nfl_actualStats_defense_seasonal <- nfl_actualStats_defense_seasonal_raw %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+
+nfl_actualStats_kicking_seasonal <- nfl_actualStats_kicking_seasonal_raw %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+```
+
+Let's check for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_offense_seasonal %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_defense_seasonal %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_kicking_seasonal %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Sum statistics across a player's years with multiple teams
+nfl_actualStats_defense_seasonal <- nfl_actualStats_defense_seasonal %>% 
+  group_by(player_id, season) %>% 
+  summarise(
+    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+nfl_actualStats_kicking_seasonal <- nfl_actualStats_kicking_seasonal %>% 
+  group_by(player_id, season) %>% 
+  summarise(
+    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+# Re-calculate percentage stats
+nfl_actualStats_kicking_seasonal <- nfl_actualStats_kicking_seasonal %>% 
+  mutate(
+    fg_pct = fg_made / fg_att,
+    pat_pct = pat_made / pat_att
+  )
+
+# Merge data back with player info
+nfl_actualStats_defense_seasonal_raw_playerInfo <- nfl_actualStats_defense_seasonal_raw %>% 
+  select(player_id, season, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
+  unique() %>% 
+  group_by(player_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+
+nfl_actualStats_kicking_seasonal_raw_playerInfo <- nfl_actualStats_kicking_seasonal_raw %>% 
+  select(player_id, season, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
+  unique() %>% 
+  group_by(player_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+
+nfl_actualStats_defense_seasonal <- nfl_actualStats_defense_seasonal_raw_playerInfo %>% 
+  right_join(
+    nfl_actualStats_defense_seasonal,
+    by = c("player_id","season")
+  )
+
+nfl_actualStats_kicking_seasonal <- nfl_actualStats_kicking_seasonal_raw_playerInfo %>% 
+  right_join(
+    nfl_actualStats_kicking_seasonal,
+    by = c("player_id","season")
+  )
+
+# Rearrange data
+nfl_actualStats_defense_seasonal <- nfl_actualStats_defense_seasonal %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+
+nfl_actualStats_kicking_seasonal <- nfl_actualStats_kicking_seasonal %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+```
+
+Let's check again for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_offense_seasonal %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_defense_seasonal %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_kicking_seasonal %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
 ```
 
 ```{r}
@@ -3656,16 +3789,40 @@ player_stats_weekly_kicking <- player_stats_weekly_kicking %>%
     years_of_experience_offense[,c("player_id","season","years_of_experience")],
     by = c("player_id","season")
   )
+```
 
-# Arrange data
+The `player_stats_weekly` objects are in `player`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
 player_stats_weekly_offense <- player_stats_weekly_offense %>% 
-  arrange(player_display_name, season, week)
+  arrange(player_display_name, player_id, season, week)
 
 player_stats_weekly_defense <- player_stats_weekly_defense %>% 
-  arrange(player_display_name, season, week)
+  arrange(player_display_name, player_id, season, week)
 
 player_stats_weekly_kicking <- player_stats_weekly_kicking %>% 
-  arrange(player_display_name, season, week)
+  arrange(player_display_name, player_id, season, week)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+player_stats_weekly_offense %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+player_stats_weekly_defense %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head() #todo: fix duplicate instances
+
+player_stats_weekly_kicking %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head() #todo: fix duplicate instances
 ```
 
 ```{r}
@@ -3803,19 +3960,43 @@ player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>%
     years_of_experience_offense[,c("player_id","season","years_of_experience")],
     by = c("player_id","season")
   )
+```
 
-# Arrange data
+The `player_stats_seasonal` objects are in `player`-`season` form.
+That is, each row should be uniquely identified by the combination of `player_id` and `season`.
+Let's rearrange the data accordingly:
+
+```{r}
 player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
-  relocate(season, .after = player_id) %>% 
-  arrange(player_display_name, season)
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
 
 player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
-  relocate(season, .after = player_id) %>% 
-  arrange(player_display_name, season)
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
 
 player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
-  relocate(season, .after = player_id) %>% 
-  arrange(player_display_name, season)
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+```
+
+Let's check for duplicate `player`-`season` instances:
+
+```{r}
+player_stats_seasonal_offense %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+player_stats_seasonal_defense %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+player_stats_seasonal_kicking %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
 ```
 
 ```{r}
