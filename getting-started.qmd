@@ -408,6 +408,70 @@ save(
 load(file = "./data/nfl_teams.RData")
 ```
 
+### Fantasy Player IDs {#sec-fantasyPlayerIDs}
+
+A Data Dictionary for fantasy player ID data is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_ff_playerids.html>
+
+```{r}
+#| eval: false
+
+nfl_playerIDs_raw <- progressr::with_progress(
+  nflreadr::load_ff_playerids())
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_playerIDs_raw,
+  file = "./data/nfl_playerIDs_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_playerIDs_raw.RData")
+```
+
+The `nfl_playerIDs` object is in `player` form.
+That is, each row should be uniquely identified by `mfl_id`.
+
+```{r}
+nfl_playerIDs <- nfl_playerIDs_raw %>% 
+  arrange(name, mfl_id)
+```
+
+Let's check for duplicate `player` instances:
+
+```{r}
+nfl_playerIDs %>% 
+  group_by(mfl_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_playerIDs %>% 
+  filter(!is.na(gsis_id)) %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_playerIDs,
+  file = "./data/nfl_playerIDs.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_playerIDs.RData")
+```
+
 ### Player Info {#sec-downloadPlayerInfo}
 
 ### Rosters {#sec-downloadRosters}
@@ -2016,70 +2080,6 @@ save(
 #| include: false
 
 load(file = "./data/nfl_ftnCharting.RData")
-```
-
-### Fantasy Player IDs {#sec-fantasyPlayerIDs}
-
-A Data Dictionary for fantasy player ID data is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_ff_playerids.html>
-
-```{r}
-#| eval: false
-
-nfl_playerIDs_raw <- progressr::with_progress(
-  nflreadr::load_ff_playerids())
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_playerIDs_raw,
-  file = "./data/nfl_playerIDs_raw.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_playerIDs_raw.RData")
-```
-
-The `nfl_playerIDs` object is in `player` form.
-That is, each row should be uniquely identified by `mfl_id`.
-
-```{r}
-nfl_playerIDs <- nfl_playerIDs_raw %>% 
-  arrange(name, mfl_id)
-```
-
-Let's check for duplicate `player` instances:
-
-```{r}
-nfl_playerIDs %>% 
-  group_by(mfl_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-nfl_playerIDs %>% 
-  filter(!is.na(gsis_id)) %>% 
-  group_by(gsis_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_playerIDs,
-  file = "./data/nfl_playerIDs.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_playerIDs.RData")
 ```
 
 ### FantasyPros Rankings {#sec-fantasyProsRankings}
