@@ -63,12 +63,12 @@ You can install `R` packages using the following syntax:
 install.packages("INSERT_PACKAGE_NAME_HERE")
 ```
 
-For instance, you can use the following code to install the `nflreadr` package:
+For instance, you can use the following code to install the `tidyverse` package:
 
 ```{r}
 #| eval: false
 
-install.packages("nflreadr")
+install.packages("tidyverse")
 ```
 
 ## Load Packages {#sec-loadPackages}
@@ -226,6 +226,19 @@ players <- data.frame(
 fantasyPoints <- data.frame(
   ID = c(2, 7, 13, 14),
   fantasyPoints = c(250, 170, 65, 15)
+)
+
+fantasyPoints_weekly = expand.grid(
+  ID = 1:12,
+  season = c(2022, 2023),
+  week = 1:17
+)
+
+set.seed(52242)
+fantasyPoints_weekly$fantasyPoints <- sample(
+  0:35,
+  size = nrow(fantasyPoints_weekly),
+  replace = TRUE
 )
 ```
 
@@ -808,71 +821,59 @@ When the data are in wide form, each player has only one row.
 When the data are in long form, each player has multiple rows—e.g., a row for each game.
 The data structure is called wide or long form because a dataset in wide form has more columns and fewer rows (i.e., it appears wider and shorter), whereas a dataset in long form has more rows and fewer columns (i.e., it appears narrower and taller).
 
-Here are the data in the `nfl_actualStats_offense_weekly` [UPDATE] object.
+Here are the original data in long form.
 The data are structured in "player-season-week form".
-That is, every row in the dataset is uniquely identified by the variables, `player_id`, `season`, and `week`.
+That is, every row in the dataset is uniquely identified by the combination of variables, `ID`, `season`, and `week`.
 This is an example of long form, because each player has multiple rows.
 
-Original data:
-
 ```{r}
-# UPDATE
+dataLong <- full_join(
+  players %>% select(-age),
+  fantasyPoints_weekly,
+  by = c("ID")
+)
 
-#dataLong <- nfl_actualStats_offense_weekly %>% 
-#  select(player_id, player_display_name, season, week, fantasy_points)
-#
-#dim(dataLong)
-#
-#names(dataLong)
+dataLong
+
+dim(dataLong)
+
+names(dataLong)
 ```
 
-Below, we widen the data by two variables (`season` and `week`), using `tidyverse`, so that the data are now in "player form" (where each row is uniquely identified by the `player_id` variable): 
+Below, we widen the data by two variables (`season` and `week`), using `tidyverse`, so that the data are now in "player form" (where each row is uniquely identified by the `ID` variable): 
 
 ```{r}
-# UPDATE
+dataWide <- dataLong %>% 
+  pivot_wider(
+    names_from = c(season, week),
+    names_glue = "{.value}_{season}_week{week}",
+    values_from = fantasyPoints)
 
-#dataWide <- dataLong %>% 
-#  pivot_wider(
-#    names_from = c(season, week),
-#    names_glue = "{.value}_{season}_week{week}",
-#    values_from = fantasy_points)
-#
-#dim(dataWide)
-#
-#names(dataWide)
+dataWide
+
+dim(dataWide)
+
+names(dataWide)
 ```
 
 ## Transform Data from Wide to Long {#sec-wideToLong}
 
 Conversely, we can also restructure data from wide to long.
-
-Original data:
-
-```{r}
-# UPDATE
-
-#dataWide <- nfl_actualStats_offense_weekly %>% 
-#  select(player_id, player_display_name, season, week, recent_team, opponent_team)
-#
-#dim(dataWide)
-#
-#names(dataWide)
-```
-
-Data in long form, transformed from wide form using `tidyverse`:
+Here are the data in long form, after they have been transformed from wide form using `tidyverse`:
 
 ```{r}
-# UPDATE
+dataLong <- dataWide %>% 
+  pivot_longer(
+    cols = fantasyPoints_2022_week1:fantasyPoints_2023_week17,
+    names_to = c("season", "week"),
+    names_pattern = "fantasyPoints_(.*)_week(.*)",
+    values_to = "fantasyPoints")
 
-#dataLong <- dataWide %>% 
-#  pivot_longer(
-#    cols = c(recent_team, opponent_team),
-#    names_to = "role",
-#    values_to = "team")
-#
-#dim(dataLong)
-#
-#names(dataLong)
+dataLong
+
+dim(dataLong)
+
+names(dataLong)
 ```
 
 ## Loops {#sec-loops}
