@@ -20,7 +20,7 @@ library("tidyverse")
 #| eval: false
 #| include: false
 
-# Downloaded Data
+# Downloaded Data - Processed
 load(file = "./data/nfl_players.RData")
 load(file = "./data/nfl_teams.RData")
 load(file = "./data/nfl_rosters.RData")
@@ -35,18 +35,20 @@ load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fan
 load(file = "./data/nfl_actualStats_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
-load(file = "./data/nfl_espnQBR.RData")
+load(file = "./data/nfl_espnQBR_seasonal.RData")
+load(file = "./data/nfl_espnQBR_weekly.RData")
 load(file = "./data/nfl_nextGenStats_weekly.RData")
 load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
 load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
 load(file = "./data/nfl_playerContracts.RData")
 load(file = "./data/nfl_ftnCharting.RData")
 load(file = "./data/nfl_playerIDs.RData")
-load(file = "./data/nfl_rankings.RData")
-load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
-load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
+load(file = "./data/nfl_rankings_draft.RData")
+load(file = "./data/nfl_rankings_weekly.RData")
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp.RData", fsep = ""))
 
-# Calculated Data
+# Calculated Data - Processed
 load(file = "./data/nfl_actualStats_career.RData")
 load(file = "./data/nfl_actualStats_seasonal.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
@@ -54,7 +56,7 @@ load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fan
 ```
 
 ```{r}
-# Downloaded Data
+# Downloaded Data - Processed
 load(file = "./data/nfl_players.RData")
 load(file = "./data/nfl_teams.RData")
 load(file = "./data/nfl_rosters.RData")
@@ -69,17 +71,20 @@ load(file = "./data/nfl_participation.RData")
 load(file = "./data/nfl_actualStats_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
-load(file = "./data/nfl_espnQBR.RData")
+load(file = "./data/nfl_espnQBR_seasonal.RData")
+load(file = "./data/nfl_espnQBR_weekly.RData")
 load(file = "./data/nfl_nextGenStats_weekly.RData")
-load(file = "./data/nfl_advancedStatsPFR.RData")
+load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
+load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
 load(file = "./data/nfl_playerContracts.RData")
 load(file = "./data/nfl_ftnCharting.RData")
 load(file = "./data/nfl_playerIDs.RData")
-load(file = "./data/nfl_rankings.RData")
+load(file = "./data/nfl_rankings_draft.RData")
+load(file = "./data/nfl_rankings_weekly.RData")
 load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
 load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
 
-# Calculated Data
+# Calculated Data - Processed
 load(file = "./data/nfl_actualStats_career.RData")
 load(file = "./data/nfl_actualStats_seasonal.RData")
 load(file = "./data/player_stats_weekly.RData")
@@ -178,6 +183,10 @@ player_stats_weekly_offense <- player_stats_weekly_offense %>%
 nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
   rename(gsis_id = player_id)
 
+## Rename other variables to ensure common names
+player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+  rename(team = team_abbr)
+
 ## Ensure variables with the same name have the same type
 nfl_players <- nfl_players %>% 
   mutate(
@@ -228,6 +237,18 @@ nfl_draftPicks <- nfl_draftPicks %>%
     def_ints_career = def_ints,
     def_sacks_career = def_sacks
   )
+
+# Check duplicate ids
+player_stats_seasonal_offense %>% 
+  group_by(gsis_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_advancedStatsPFR_seasonal %>% 
+  group_by(gsis_id, season, team) %>% 
+  filter(n() > 1, !is.na(gsis_id)) %>% 
+  select(gsis_id, pfr_id, season, team, everything()) %>% 
+  head()
 ```
 
 ### Merge Data {#sec-machineLearningMergeData}
@@ -235,39 +256,50 @@ nfl_draftPicks <- nfl_draftPicks %>%
 ```{r}
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 #-todo: remove redundant variables
-idListToMerge <- list(
+playerListToMerge <- list(
   nfl_players %>% filter(!is.na(gsis_id)) %>% select(-season, -years_of_experience),
   nfl_draftPicks %>% filter(!is.na(gsis_id)) %>% select(-season, -age)
 )
 
-idSeasonListToMerge <- list(
-  nfl_rosters %>% filter(!is.na(gsis_id), !is.na(season)) %>% select(-week),
-  player_stats_seasonal_offense %>% filter(!is.na(gsis_id), !is.na(season)), #nfl_actualStats_offense_seasonal %>% filter(!is.na(gsis_id), !is.na(season)),
-  nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season))
+playerSeasonListToMerge <- list(
+  player_stats_seasonal_offense %>% filter(!is.na(gsis_id), !is.na(season), !is.na(team))
 )
 
-idSeasonWeekListToMerge <- list(
+playerSeasonTeamListToMerge <- list(
+  nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(team))
+)
+
+playerSeasonWeekListToMerge <- list(
   nfl_rosters_weekly %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
-  nfl_depthCharts %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
   #nfl_actualStats_offense_weekly,
   nfl_expectedFantasyPoints_weekly %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week))
   #nfl_advancedStatsPFR_weekly,
 )
 
+playerSeasonWeekPositionListToMerge <- list(
+  nfl_depthCharts %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
+)
+
 # Merge data
-idMerged <- idListToMerge %>% 
+playerMerged <- playerListToMerge %>% 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id"),
     conflict = coalesce_xy)
 
-idSeasonMerged <- idSeasonListToMerge %>% 
+playerSeasonMerged <- playerSeasonListToMerge %>% 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season"),
     conflict = coalesce_xy)
 
-idSeasonWeekMerged <- idSeasonWeekListToMerge %>% 
+playerSeasonTeamMerged <- playerSeasonTeamListToMerge %>% 
+  reduce(
+    powerjoin::power_full_join,
+    by = c("gsis_id","season"),
+    conflict = coalesce_xy)
+
+playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>% 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season","week"),
