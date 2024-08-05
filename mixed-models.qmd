@@ -13,7 +13,11 @@ library("sjstats")
 library("mgcv")
 library("AICcmodavg")
 library("bbmle")
+library("rstan")
+library("brms")
+library("cmdstanr") # todo: install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos"))); check_cmdstan_toolchain(); cmdstanr::install_cmdstan()
 library("parallel")
+library("parallely")
 library("plotly")
 library("viridis")
 library("tidyverse")
@@ -1829,6 +1833,127 @@ AIC(pointsPerSeasonDepth_gam)
 ```
 
 ### Bayesian Mixed Models {#sec-fantasyPointsByAgeExperienceModelsBayesian}
+
+#### Determine Response Distribution {#sec-fantasyPointsByAgeExperienceModelsBayesianDistribution}
+
+```{r}
+#| label: fig-histogramFantasyPoints
+#| fig-cap: "Histogram of Fantasy Points with Overlaid Density Plot and Rug Plot."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense_subset,
+  mapping = aes(
+    x = fantasy_points)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  theme_classic()
+```
+
+Because the response distribution (i.e., fantasy points) is positively skewed, we will use a gamma response distribution.
+
+#### Prepare Data {#sec-fantasyPointsByAgeExperienceModelsBayesianPrepareData}
+
+```{r}
+player_stats_seasonal_offense_subset$fantasy_points_posOnly <- player_stats_seasonal_offense_subset$fantasy_points
+player_stats_seasonal_offense_subset$fantasy_points_posOnly[which(player_stats_seasonal_offense_subset$fantasy_points_posOnly < 0)] <- 0
+```
+
+#### Specify Model Formula {#sec-fantasyPointsByAgeExperienceModelsBayesianFormula}
+
+Specify model formula:
+
+```{r}
+#| eval: false
+
+#mgcv smooth terms: https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.terms.html
+
+#bayesianMixedModelFormula <- brms::bf(
+#  fantasy_points ~ positionFactor + s(ageCentered20, by = #positionFactor) + years_of_experience + s(ageCentered20, #player_idFactor, bs = "fs") + (1 | player_idFactor)
+#)
+
+#bayesianMixedModelFormula <- brms::bf(
+#  fantasy_points ~ positionFactor + s(ageCentered20, by = #positionFactor) + years_of_experience + (1 | player_idFactor)
+#)
+
+bayesianMixedModelFormula <- brms::bf(
+  fantasy_points_posOnly ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(ageCentered20, player_idFactor, bs = "re") + (1 | player_idFactor)
+)
+```
+
+#### Run Model {#sec-fantasyPointsByAgeExperienceModelsBayesianRunModel}
+
+Now, we can run the model.
+
+::: {#nte-bayesianMixedModel .callout-note title="Bayesian mixed model"}
+Note: the following code takes a while to run.
+:::
+
+```{r}
+#| eval: false
+
+bayesianMixedModelFit <- brms::brm(
+  formula = bayesianMixedModelFormula,
+  data = player_stats_seasonal_offense_subset,
+  family = hurdle_gamma(),
+  cores = 4,
+  save_pars = save_pars(latent = FALSE, all = FALSE),
+  threads = threading(parallelly::availableCores()),
+  backend = "cmdstanr",
+  seed = 52242,
+  silent = 0
+)
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+save(
+  bayesianMixedModelFit,
+  file = "./data/bayesianMixedModelFit.RData")
+```
+
+```{r}
+#| include: false
+
+load("./data/bayesianMixedModelFit.RData")
+```
+
+#### Model Summary {#sec-fantasyPointsByAgeExperienceModelsBayesianModelSummary}
+
+```{r}
+summary(bayesianMixedModelFit)
+brms::prior_summary(bayesianMixedModelFit)
+```
+
+#### Trace Plots {#sec-fantasyPointsByAgeExperienceModelsBayesianTrace}
+
+```{r}
+#| label: fig-bayesianTracePlots
+#| fig-cap: "Trace Plots from Bayesian Mixed Model."
+
+plot(bayesianMixedModelFit, ask = FALSE)
+```
+
+#### Posterior Predictive Check {#sec-fantasyPointsByAgeExperienceModelsBayesianPPcheck}
+
+```{r}
+#| label: fig-bayesianPosteriorPredictiveCheck
+#| fig-cap: "Posterior Predictive Check from Bayesian Mixed Model."
+
+pp_check(bayesianMixedModelFit) + 
+  ggplot2::xlim(0, 600)
+```
 
 ### Plots of Model-Implied Fantasy Points by Position and Age {#sec-fantasyPointsByAgePlots}
 
