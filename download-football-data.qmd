@@ -1389,7 +1389,12 @@ load(file = "./data/nfl_nextGenStats_weekly.RData")
 
 ### Advanced Stats from Pro Football Reference {#sec-advancedStatsPFR}
 
-A Data Dictionary for Pro Football Reference passing data is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_pfr_passing.html>
+A Data Dictionary for Pro Football Reference passing data is located at the following links:
+
+- <https://nflreadr.nflverse.com/articles/dictionary_pfr_passing.html>
+- <https://www.pro-football-reference.com/about/advanced_stats.htm>
+
+Advanced stats from the 2023 season are available at the following link: <https://www.pro-football-reference.com/years/2023/advanced.htm>
 
 ```{r}
 #| eval: false
@@ -1561,7 +1566,7 @@ nfl_advancedStatsPFR_weekly_list <- list(
   nfl_advancedStatsPFR_rec_weekly,
   nfl_advancedStatsPFR_def_weekly)
 
-nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal_list %>% 
+nfl_advancedStatsPFR_seasonalByTeam <- nfl_advancedStatsPFR_seasonal_list %>% 
   purrr::reduce(
     full_join,
     by = c("pfr_id","nameMerge","season","team"))
@@ -1576,7 +1581,7 @@ nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly_list %>%
 #    full_join,
 #    by = c("pfr_player_id","nameMerge","season","week"))
 
-nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
+nfl_advancedStatsPFR_seasonalByTeam <- nfl_advancedStatsPFR_seasonalByTeam %>% 
   mutate(
     pfr_player_name = coalesce(
       player.pass,
@@ -1595,12 +1600,26 @@ nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>%
       pos.rush,
       pos.rec,
       pos.def
+    ),
+    g = coalesce(
+      #g.pass,
+      g.rush,
+      g.rec,
+      g.def
+    ),
+    gs = coalesce(
+      #gs.pass,
+      gs.rush,
+      gs.rec,
+      gs.def
     )
   ) %>% 
   select(-c(
     starts_with("player."),
     starts_with("age."),
-    starts_with("pos.")))
+    starts_with("pos."),
+    starts_with("g."),
+    starts_with("gs.")))
 
 nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
   mutate(
@@ -1665,12 +1684,12 @@ nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>%
     ))
 ```
 
-The `nfl_advancedStatsPFR_seasonal` object is in `player`-`season`-`team` form.
+The `nfl_advancedStatsPFR_seasonalByTeam` object is in `player`-`season`-`team` form.
 That is, each row should be uniquely identified by the combination of `pfr_id`, `season`, and `team`.
 Let's rearrange the data accordingly:
 
 ```{r}
-nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
+nfl_advancedStatsPFR_seasonalByTeam <- nfl_advancedStatsPFR_seasonalByTeam %>% 
   select(pfr_id, season, team, pfr_player_name, everything()) %>% 
   arrange(pfr_player_name, pfr_id, season, team)
 ```
@@ -1678,15 +1697,83 @@ nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>%
 Let's check for duplicate `player`-`season`-`team` instances:
 
 ```{r}
-nfl_advancedStatsPFR_seasonal %>% 
+nfl_advancedStatsPFR_seasonalByTeam %>% 
   group_by(pfr_id, season, team) %>% 
   filter(n() > 1) %>% 
   head()
 ```
 
+Aggregate variables  within each pass/rush/rec/def object by team for seasonal data (so seasonal data are in player-season form, not player-season-team form).
+Depending on the variable, aggregation was performed using a sum, weighted mean (weighted by the number of games played for each team), or a recomputed percentage.
+
 ```{r}
-# Todo:
-#-sum/avg variables within each pass/rush/rec/def object by team for seasonal data (so seasonal data are in player-season form, not player-season-team form)
+pfrVars <- nfl_advancedStatsPFR_seasonalByTeam %>% 
+  select(pass_attempts.pass:m_tkl_percent.def, g, gs) %>% 
+  names()
+
+weightedAverageVars <- c(
+  "pocket_time.pass",
+  "ybc_att.rush","yac_att.rush",
+  "ybc_r.rec","yac_r.rec","adot.rec","rat.rec",
+  "yds_cmp.def","yds_tgt.def","dadot.def","m_tkl_percent.def","rat.def"
+)
+
+recomputeVars <- c(
+  "drop_pct.pass", # drops.pass / pass_attempts.pass
+  "bad_throw_pct.pass", # bad_throws.pass / pass_attempts.pass
+  "on_tgt_pct.pass", # on_tgt_throws.pass / pass_attempts.pass
+  "pressure_pct.pass", # times_pressured.pass / pass_attempts.pass
+  "drop_percent.rec", # drop.rec / tgt.rec
+  "rec_br.rec", # rec.rec / brk_tkl.rec
+  "cmp_percent.def" # cmp.def / tgt.def
+)
+
+sumVars <- pfrVars[pfrVars %ni% c(
+  weightedAverageVars, recomputeVars,
+  "nameMerge", "loaded.pass", "loaded.rush", "loaded.rec", "loaded.def")]
+
+nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonalByTeam %>% 
+  group_by(pfr_id, nameMerge, season) %>% 
+  summarise(
+    across(all_of(weightedAverageVars), ~ weighted.mean(.x, w = g, na.rm = TRUE)),
+    across(all_of(sumVars), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop") %>% 
+  mutate(
+    drop_pct.pass = drops.pass / pass_attempts.pass,
+    bad_throw_pct.pass = bad_throws.pass / pass_attempts.pass,
+    on_tgt_pct.pass = on_tgt_throws.pass / pass_attempts.pass,
+    pressure_pct.pass = times_pressured.pass / pass_attempts.pass,
+    drop_percent.rec = drop.rec / tgt.rec,
+    rec_br.rec = drop.rec / tgt.rec,
+    cmp_percent.def = cmp.def / tgt.def
+  )
+
+# Merge with other player info
+nfl_advancedStatsPFR_seasonalByTeam_1stTeam <- nfl_advancedStatsPFR_seasonalByTeam %>% 
+  group_by(pfr_id, season) %>% 
+  slice(1)
+
+nfl_advancedStatsPFR_seasonalByTeam_1stTeam_mergeVars <- nfl_advancedStatsPFR_seasonalByTeam_1stTeam %>% 
+  select(pfr_id, season, team, pfr_player_name, age, pos) #, g, gs
+
+nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
+  left_join(
+    nfl_advancedStatsPFR_seasonalByTeam_1stTeam_mergeVars,
+    by = c("pfr_id","season")
+  ) %>% 
+  select(
+    pfr_id, season, pfr_player_name, pos, age, team, g, gs, 
+    contains(".pass"), contains(".rush"), contains(".rec"), contains(".def"), 
+    everything())
+```
+
+Let's check for duplicate `player`-`season` instances:
+
+```{r}
+nfl_advancedStatsPFR_seasonal %>% 
+  group_by(pfr_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
 ```
 
 The `nfl_advancedStatsPFR_weekly` object is in both `game`-`player` form and `player`-`season`-`week` form.
@@ -1774,7 +1861,7 @@ nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_i
 #nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" & nfl_advancedStatsPFR_weekly$pos == "WR")] <- NA # drop WR DJ TUrner, keep CB DJ Turner
 ```
 
-Now, each row of the `nfl_advancedStatsPFR_seasonal` object should be uniquely identified by the combination of `gsis_id` (or `pfr_id`), `season`, and `team`.
+Now, each row of the `nfl_advancedStatsPFR_seasonal` object should be uniquely identified by the combination of `gsis_id` (or `pfr_id`), and `season`.
 Each row of the `nfl_advancedStatsPFR_weekly` object should be uniquely identified by the combination of `gsis_id` (or `pfr_id`), `season`, and `week` or by the combination of `gsis_id` (or `pfr_id`), `season`, `game_type`, and `week`.
 
 Let's check again for duplicate `game`-`player` or `player`-`season`-`week` instances:
@@ -1784,7 +1871,7 @@ Let's check again for duplicate `game`-`player` or `player`-`season`-`week` inst
 nfl_advancedStatsPFR_seasonal %>% 
   select(gsis_id, everything()) %>% 
   filter(!is.na(gsis_id)) %>% 
-  group_by(gsis_id, season, team) %>% 
+  group_by(gsis_id, season) %>% 
   filter(n() > 1) %>% 
   head()
 
@@ -1806,7 +1893,7 @@ nfl_advancedStatsPFR_weekly %>%
 
 # Based on pfr_id
 nfl_advancedStatsPFR_seasonal %>% 
-  group_by(pfr_id, season, team) %>% 
+  group_by(pfr_id, season) %>% 
   filter(n() > 1) %>% 
   head()
 
