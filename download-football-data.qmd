@@ -1471,88 +1471,84 @@ load(file = "./data/nfl_advancedStatsPFR_weekly_raw.RData")
 ```
 
 ```{r}
+# Clean up player name for merging; name variables based on which data object they're from
+
+## Seasonal Data
 nfl_advancedStatsPFR_pass_seasonal <- nfl_advancedStatsPFR_pass_seasonal_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(player)
   ) %>% 
-  rename(
-    player_name.pass = player
-  )
+  rename_with(
+    ~ paste0(., ".pass"),
+    -c(pfr_id, nameMerge, season, team))
 
 nfl_advancedStatsPFR_rush_seasonal <- nfl_advancedStatsPFR_rush_seasonal_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(player)
   ) %>% 
   rename(
-    player_name.rush = player,
-    age.rush = age,
     team = tm
-  )
+  ) %>% 
+  rename_with(
+    ~ paste0(., ".rush"),
+    -c(pfr_id, nameMerge, season, team))
 
 nfl_advancedStatsPFR_rec_seasonal <- nfl_advancedStatsPFR_rec_seasonal_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(player)
   ) %>% 
   rename(
-    player_name.rec = player,
-    age.rec = age,
     team = tm
-  )
+  ) %>% 
+  rename_with(
+    ~ paste0(., ".rec"),
+    -c(pfr_id, nameMerge, season, team))
 
 nfl_advancedStatsPFR_def_seasonal <- nfl_advancedStatsPFR_def_seasonal_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(player)
-  ) %>% 
+  )  %>% 
   rename(
-    player_name.def = player,
-    age.def = age,
     team = tm
-  )
+  ) %>% 
+  rename_with(
+    ~ paste0(., ".def"),
+    -c(pfr_id, nameMerge, season, team))
 
+## Weekly Data
 nfl_advancedStatsPFR_pass_weekly <- nfl_advancedStatsPFR_pass_weekly_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(pfr_player_name)
   ) %>% 
-  rename(
-    player_name.pass = pfr_player_name,
-    season.pass = season,
-    week.pass = week,
-    team.pass = team
-  )
+  rename_with(
+    ~ paste0(., ".pass"),
+    -c(game_id, pfr_player_id))
 
 nfl_advancedStatsPFR_rush_weekly <- nfl_advancedStatsPFR_rush_weekly_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(pfr_player_name)
   ) %>% 
-  rename(
-    player_name.rush = pfr_player_name,
-    season.rush = season,
-    week.rush = week,
-    team.rush = team
-  )
+  rename_with(
+    ~ paste0(., ".rush"),
+    -c(game_id, pfr_player_id))
 
 nfl_advancedStatsPFR_rec_weekly <- nfl_advancedStatsPFR_rec_weekly_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(pfr_player_name)
   ) %>% 
-  rename(
-    player_name.rec = pfr_player_name,
-    season.rec = season,
-    week.rec = week,
-    team.rec = team
-  )
+  rename_with(
+    ~ paste0(., ".rec"),
+    -c(game_id, pfr_player_id))
 
 nfl_advancedStatsPFR_def_weekly <- nfl_advancedStatsPFR_def_weekly_raw %>% 
   mutate(
     nameMerge = petersenlab::cleanUpNames(pfr_player_name)
   ) %>% 
-  rename(
-    player_name.def = pfr_player_name,
-    season.def = season,
-    week.def = week,
-    team.def = team
-  )
+  rename_with(
+    ~ paste0(., ".def"),
+    -c(game_id, pfr_player_id))
 
+## Merge across positions
 nfl_advancedStatsPFR_seasonal_list <- list(
   nfl_advancedStatsPFR_pass_seasonal,
   nfl_advancedStatsPFR_rush_seasonal,
@@ -1582,28 +1578,37 @@ nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly_list %>%
 
 nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
   mutate(
-    player_name = coalesce(
-      player_name.pass,
-      player_name.rush,
-      player_name.rec,
-      player_name.def
+    pfr_player_name = coalesce(
+      player.pass,
+      player.rush,
+      player.rec,
+      player.def
     ),
     age = coalesce(
       #age.pass,
       age.rush,
       age.rec,
       age.def
+    ),
+    pos = coalesce(
+      #pos.pass,
+      pos.rush,
+      pos.rec,
+      pos.def
     )
   ) %>% 
-  select(-c(starts_with("player_name.")))
+  select(-c(
+    starts_with("player."),
+    starts_with("age."),
+    starts_with("pos.")))
 
 nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
   mutate(
-    player_name = coalesce(
-      player_name.pass,
-      player_name.rush,
-      player_name.rec,
-      player_name.def
+    pfr_player_name = coalesce(
+      pfr_player_name.pass,
+      pfr_player_name.rush,
+      pfr_player_name.rec,
+      pfr_player_name.def
     ),
     season = coalesce(
       season.pass,
@@ -1622,12 +1627,42 @@ nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>%
       team.rush,
       team.rec,
       team.def
+    ),
+    nameMerge = coalesce(
+      nameMerge.pass,
+      nameMerge.rush,
+      nameMerge.rec,
+      nameMerge.def
+    ),
+    pfr_game_id = coalesce(
+      pfr_game_id.pass,
+      pfr_game_id.rush,
+      pfr_game_id.rec,
+      pfr_game_id.def
+    ),
+    game_type = coalesce(
+      game_type.pass,
+      game_type.rush,
+      game_type.rec,
+      game_type.def
+    ),
+    opponent = coalesce(
+      opponent.pass,
+      opponent.rush,
+      opponent.rec,
+      opponent.def
     )
   ) %>% 
-  select(-c(starts_with("player_name.")))
-
-# Todo:
-#-separate variables from each pass/rush/rec/def object
+  select(-c(
+    starts_with("pfr_player_name."),
+    starts_with("season."),
+    starts_with("week."),
+    starts_with("team."),
+    starts_with("nameMerge."),
+    starts_with("pfr_game_id."),
+    starts_with("game_type."),
+    starts_with("opponent."),
+    ))
 ```
 
 The `nfl_advancedStatsPFR_seasonal` object is in `player`-`season`-`team` form.
@@ -1636,8 +1671,8 @@ Let's rearrange the data accordingly:
 
 ```{r}
 nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
-  select(pfr_id, season, team, player_name, everything()) %>% 
-  arrange(player_name, pfr_id, season, team)
+  select(pfr_id, season, team, pfr_player_name, everything()) %>% 
+  arrange(pfr_player_name, pfr_id, season, team)
 ```
 
 Let's check for duplicate `player`-`season`-`team` instances:
@@ -1649,14 +1684,19 @@ nfl_advancedStatsPFR_seasonal %>%
   head()
 ```
 
+```{r}
+# Todo:
+#-sum/avg variables within each pass/rush/rec/def object by team for seasonal data (so seasonal data are in player-season form, not player-season-team form)
+```
+
 The `nfl_advancedStatsPFR_weekly` object is in both `game`-`player` form and `player`-`season`-`week` form.
-That is, each row should be uniquely identified by the combination of `gsis_id`, `season`, and `week` or by the combination of `player_id`, `season`, `season_type`, and `week_num`.
+That is, each row should be uniquely identified by the combination of `pfr_player_id`, `season`, and `week` or by the combination of `pfr_player_id`, `season`, `game_type`, and `week`.
 Let's rearrange the data accordingly:
 
 ```{r}
 nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
-  select(pfr_player_id, season, week, everything()) %>% 
-  arrange(player_name, pfr_player_id, season, week)
+  select(pfr_player_id, season, week, game_type, game_id, pfr_player_name, everything()) %>% 
+  arrange(pfr_player_name, pfr_player_id, season, week)
 ```
 
 Let's check for duplicate `game`-`player` or `player`-`season`-`week` instances:
@@ -1734,9 +1774,37 @@ nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_i
 #nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" & nfl_advancedStatsPFR_weekly$pos == "WR")] <- NA # drop WR DJ TUrner, keep CB DJ Turner
 ```
 
+Now, each row of the `nfl_advancedStatsPFR_seasonal` object should be uniquely identified by the combination of `gsis_id` (or `pfr_id`), `season`, and `team`.
+Each row of the `nfl_advancedStatsPFR_weekly` object should be uniquely identified by the combination of `gsis_id` (or `pfr_id`), `season`, and `week` or by the combination of `gsis_id` (or `pfr_id`), `season`, `game_type`, and `week`.
+
 Let's check again for duplicate `game`-`player` or `player`-`season`-`week` instances:
 
 ```{r}
+# Based on gsis_id
+nfl_advancedStatsPFR_seasonal %>% 
+  select(gsis_id, everything()) %>% 
+  filter(!is.na(gsis_id)) %>% 
+  group_by(gsis_id, season, team) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_advancedStatsPFR_weekly %>% 
+  select(gsis_id, everything()) %>% 
+  filter(!is.na(gsis_id)) %>% 
+  arrange(game_id, gsis_id) %>% 
+  group_by(game_id, gsis_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_advancedStatsPFR_weekly %>% 
+  select(gsis_id, everything()) %>% 
+  filter(!is.na(gsis_id)) %>% 
+  arrange(gsis_id, season, week) %>% 
+  group_by(gsis_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+# Based on pfr_id
 nfl_advancedStatsPFR_seasonal %>% 
   group_by(pfr_id, season, team) %>% 
   filter(n() > 1) %>% 
