@@ -30,6 +30,7 @@ load(file = "./data/nfl_playerContracts.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
 load(file = "./data/nfl_espnQBR_seasonal.RData")
+load(file = "./data/nfl_espnQBR_weekly.RData")
 ```
 
 ```{r}
@@ -37,6 +38,7 @@ load(file = "./data/nfl_playerContracts.RData")
 load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
 load(file = "./data/nfl_espnQBR_seasonal.RData")
+load(file = "./data/nfl_espnQBR_weekly.RData")
 ```
 
 We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` objects in @sec-calculatePlayerAge.
@@ -130,7 +132,7 @@ nfl_playerContractYears <- nfl_playerContracts_subset %>%
 
 # Merge with weekly and seasonal stats data
 player_stats_weekly_offense <- player_stats_weekly_offense %>% 
-  dplyr::mutate(nameMerge = petersenlab::cleanUpNames(player_display_name, ))
+  dplyr::mutate(nameMerge = petersenlab::cleanUpNames(player_display_name))
 #nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal %>% 
 #  mutate(nameMerge = petersenlab::cleanUpNames(player_display_name, ))
 
@@ -198,8 +200,7 @@ player_statsContracts_seasonal <- player_statsContractsSubset_offense_weekly %>%
       labels = c("no", "yes")
     ))
 
-player_statsContracts_seasonal$age[which(is.infinite((player_statsContracts_seasonal$age)))] <- NA
-player_statsContracts_seasonal$years_of_experience[which(is.infinite((player_statsContracts_seasonal$years_of_experience)))] <- NA
+player_statsContracts_seasonal[sapply(player_statsContracts_seasonal, is.infinite)] <- NA
 
 player_statsContracts_seasonal$ageCentered20 <- player_statsContracts_seasonal$age - 20
 player_statsContracts_seasonal$ageCentered20Quadratic <- player_statsContracts_seasonal$ageCentered20 ^ 2
@@ -215,14 +216,14 @@ First, we prepare the data by merging and performing additional processing:
 #| code-fold: true
 
 # Merge with QBR data
-nfl_espnQBR_seasonal$nameMerge <- paste(nfl_espnQBR_seasonal$name_first, nfl_espnQBR_seasonal$name_last, sep = " ") %>% 
+nfl_espnQBR_weekly$nameMerge <- paste(nfl_espnQBR_weekly$name_first, nfl_espnQBR_weekly$name_last, sep = " ") %>% 
   petersenlab::cleanUpNames(.)
 
 nfl_contractYearQBR_weekly <- nfl_playerContractYears %>% 
   dplyr::filter(position == "QB") %>% 
   dplyr::full_join(
     .,
-    nfl_espnQBR_seasonal,
+    nfl_espnQBR_weekly,
     by = c("nameMerge","team","season")
   )
 
@@ -236,11 +237,13 @@ nfl_contractYearQBR_weekly <- nfl_contractYearQBR_weekly %>%
   dplyr::arrange(nameMerge, season, season_type, game_week)
 
 nfl_contractYearQBRsubset_weekly <- nfl_contractYearQBR_weekly %>% 
-  dplyr::filter(
-    season_type == "Regular",
-    game_week != "Season Total") %>% 
-  dplyr::mutate(game_week = as.numeric(game_week)) %>% 
-  dplyr::arrange(nameMerge, season, season_type, game_week)
+  dplyr::filter(season_type == "Regular") %>% 
+  dplyr::arrange(nameMerge, season, season_type, game_week) %>% 
+  mutate(
+    player = coalesce(player, name_display),
+    position = "QB") %>% 
+  group_by(nameMerge, player_id) %>% 
+  fill(player, .direction = "downup")
 
 # Merge with age and experience
 nfl_contractYearQBRsubset_weekly <- player_statsContractsSubset_offense_weekly %>% 
@@ -249,7 +252,7 @@ nfl_contractYearQBRsubset_weekly <- player_statsContractsSubset_offense_weekly %
   full_join(
     nfl_contractYearQBRsubset_weekly,
     by = c("nameMerge","season", c("week" = "game_week"))
-  ) %>% 
+  ) %>% select(player_id, season, week, player, everything()) %>% 
   arrange(player_id, season, week)
 
 #hist(nfl_contractYearQBRsubset_weekly$qb_plays) # players have at least 20 dropbacks per game
@@ -275,8 +278,7 @@ nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>%
       labels = c("no", "yes")
     ))
 
-nfl_contractYearQBR_seasonal$age[which(is.infinite((nfl_contractYearQBR_seasonal$age)))] <- NA
-nfl_contractYearQBR_seasonal$years_of_experience[which(is.infinite((nfl_contractYearQBR_seasonal$years_of_experience)))] <- NA
+nfl_contractYearQBR_seasonal[sapply(nfl_contractYearQBR_seasonal, is.infinite)] <- NA
 
 nfl_contractYearQBR_seasonal$ageCentered20 <- nfl_contractYearQBR_seasonal$age - 20
 nfl_contractYearQBR_seasonal$ageCentered20Quadratic <- nfl_contractYearQBR_seasonal$ageCentered20 ^ 2
