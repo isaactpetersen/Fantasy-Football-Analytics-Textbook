@@ -7,6 +7,7 @@
 ```{r}
 library("nflreadr")
 library("tidyverse")
+library("ggtext")
 ```
 
 ### Download Football Data {#sec-sportsCognitivePsychologyDownloadFootballData}
@@ -15,35 +16,13 @@ library("tidyverse")
 #| eval: false
 #| include: false
 
-# Downloaded Data
-load(file = "./data/nfl_players.RData")
-load(file = "./data/nfl_teams.RData")
-load(file = "./data/nfl_rosters.RData")
-load(file = "./data/nfl_rosters_weekly.RData")
-load(file = "./data/nfl_schedules.RData")
-load(file = "./data/nfl_combine.RData")
-load(file = "./data/nfl_draftPicks.RData")
-load(file = "./data/nfl_depthCharts.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown.RData", fsep = ""))
-load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
-load(file = "./data/nfl_actualStats_weekly.RData")
-load(file = "./data/nfl_injuries.RData")
-load(file = "./data/nfl_snapCounts.RData")
-load(file = "./data/nfl_espnQBR.RData")
-load(file = "./data/nfl_nextGenStats_weekly.RData")
-load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
-load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
-load(file = "./data/nfl_playerContracts.RData")
-load(file = "./data/nfl_ftnCharting.RData")
-load(file = "./data/nfl_playerIDs.RData")
-load(file = "./data/nfl_rankings.RData")
-load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
-load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
+```
 
-# Calculated Data
-load(file = "./data/nfl_actualStats_career.RData")
-load(file = "./data/nfl_actualStats_seasonal.RData")
+```{r}
+load(file = "./data/nfl_pbp.RData")
+load(file = "./data/nfl_4thdown.RData")
 ```
 
 ## Overview {#sec-sportsCognitivePsychologyOverview}
@@ -117,9 +96,13 @@ text_df <- tibble(
 nfl_4thdown %>%
   filter(vegas_wp > .2, between(go_boost, -10, 10), season %in% c(2014, 2023)) %>%
   ggplot(aes(go_boost, go, color = as.factor(season))) + 
-  geom_richtext(data = text_df,   
-                aes(x, y, label = label, angle = angle), 
-                color = "black", fill = NA, label.color = NA, size = 5) + 
+  ggtext::geom_richtext(
+    data = text_df,   
+    aes(x, y, label = label, angle = angle), 
+    color = "black",
+    fill = NA,
+    label.color = NA,
+    size = 5) + 
   geom_vline(xintercept = 0) +
   stat_smooth(method = "gam", method.args = list(gamma = 1), formula = y ~ s(x, bs = "cs", k = 10), show.legend = F, se = F, linewidth = 4) +
   # this is just to get the plot to draw the full 0 to 100 range
@@ -134,8 +117,8 @@ nfl_4thdown %>%
     legend.position = "none",
     plot.title = element_markdown(size = 22, hjust = 0.5),
     plot.subtitle = element_markdown(size = 14, hjust = 0.5),
-    axis.title.x = element_text(size = 14, face="bold"),
-    axis.title.y = element_text(size = 14, face="bold")
+    axis.title.x = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 14, face = "bold")
   ) +
   scale_y_continuous(breaks = scales::pretty_breaks(n = 4), limits = c(0, 100), expand = c(0,0)) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 10), limits = c(-10, 10), expand = c(0,0)) +
@@ -144,12 +127,12 @@ nfl_4thdown %>%
   geom_segment(
     aes(x = -.1, y = 80, xend = -2, yend = 80),
     arrow = arrow(length = unit(0.05, "npc")),
-    color = "black", size = 2
+    color = "black", linewidth = 2
     ) +
   geom_segment(
     aes(x = .1, y = 80, xend = 2, yend = 80),
     arrow = arrow(length = unit(0.05, "npc")),
-    color = "black", size = 2
+    color = "black", linewidth = 2
   )
 ```
 
