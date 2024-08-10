@@ -302,14 +302,16 @@ seasonalData <- powerjoin::power_full_join(
   playerMerged,
   by = "gsis_id",
   conflict = coalesce_xy
-)
+) %>% 
+  filter(!is.na(season))
 
 seasonalAndWeeklyData <- powerjoin::power_full_join(
   playerSeasonWeekMerged,
   seasonalData,
   by = c("gsis_id","season"),
   conflict = coalesce_xy
-)
+) %>% 
+  filter(!is.na(week))
 
 # check on duplicate id-by-season data (nfl_rosters, nfl_advancedStatsPFR_seasonal)
 
@@ -317,6 +319,37 @@ seasonalData %>%
   group_by(gsis_id, season) %>% 
   filter(n() > 1) %>% 
   head()
+
+seasonalAndWeeklyData %>% 
+  group_by(gsis_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+### Lag Fantasy Points {#sec-lagFantasyPoints}
+
+```{r}
+seasonalData <- seasonalData %>% 
+  arrange(gsis_id, season) %>% 
+  group_by(gsis_id) %>% 
+  mutate(
+    fantasyPoints_lag = lead(fantasy_points)
+  ) %>% 
+  ungroup()
+
+seasonalData$fantasyPoints_lag[is.na(seasonalData$fantasyPoints_lag)] <- 0
+```
+
+### Fill in Missing Data {#sec-fillMissingData}
+
+```{r}
+seasonalData <- seasonalData %>% 
+  arrange(gsis_id, season) %>% 
+  group_by(gsis_id) %>% 
+  fill(
+    player_name, player_display_name, pos, position, position_group,
+    .direction = "downup") %>% 
+  ungroup()
 ```
 
 ### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
@@ -335,8 +368,7 @@ seasonalData_subset <- seasonalData %>%
     "college", "college_name", "team_abbr", "current_team_id", "college_conference", "draft_club", "status_description_abbr",
     "status_short_description", "short_name", "headshot", "uniform_number", "jersey_number", "first_name", "last_name",
     "football_name", "team"
-  ))) %>% 
-  filter(!is.na(season))
+  )))
 ```
 
 ### Convert Character Predictors to Factors {#sec-convertCharacterToFactor}
@@ -351,16 +383,40 @@ seasonalData_subset %>% select_if(is.factor) %>% str()
 seasonalData_subset %>% select_if(is.logical) %>% str()
 ```
 
-### Lag Fantasy Points {#sec-lagFantasyPoints}
+### Separate by Position {#sec-separateByPosition}
 
 ```{r}
-seasonalData_subset <- seasonalData_subset %>% 
-  arrange(gsis_id, season) %>% 
-  group_by(gsis_id) %>% 
-  mutate(
-    fantasyPoints_lag = lead(fantasy_points)
-  ) %>% 
-  ungroup()
+seasonalData_subsetQB <- seasonalData_subset %>% 
+  filter(position == "QB") %>% 
+  select(
+    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
+    height, weight, rookie_year, draft_number,
+    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    completions:rushing_2pt_conversions, contains(".pass"))
+
+seasonalData_subsetRB <- seasonalData_subset %>% 
+  filter(position == "RB") %>% 
+  select(
+    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
+    height, weight, rookie_year, draft_number,
+    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    carries:special_teams_tds, contains(".rush"), contains(".rec"))
+
+seasonalData_subsetWR <- seasonalData_subset %>% 
+  filter(position == "WR") %>% 
+  select(
+    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
+    height, weight, rookie_year, draft_number,
+    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    carries:special_teams_tds, contains(".rush"), contains(".rec"))
+
+seasonalData_subsetTE <- seasonalData_subset %>% 
+  filter(position == "TE") %>% 
+  select(
+    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
+    height, weight, rookie_year, draft_number,
+    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    carries:special_teams_tds, contains(".rush"), contains(".rec"))
 ```
 
 ### Split into Test and Training Data {#sec-splitTestTraining}
@@ -369,6 +425,7 @@ seasonalData_subset <- seasonalData_subset %>%
 
 NOTES:
 
+- SEPARATE BY POSITION
 - CONSIDER WIDENING THE DATA TO AVOID MULTILEVEL IMPUTATION
 - IMPUTE THE TRAINING AND TEST DATA SEPARATELY
 
@@ -380,8 +437,10 @@ num_cores
 
 registerDoParallel(cores = num_cores)
 
-seasonalData_subset_imp <- missForest::missForest(
-  seasonalData_subset %>% select(ageCentered20, ageCentered20Quadratic, years_of_experience, position_group, fantasyPoints_lag) %>% data.frame,
+seasonalData_subsetQB_imp <- missForest::missForest(
+  seasonalData_subsetQB %>% 
+    select(ageCentered20, ageCentered20Quadratic, years_of_experience, passing_epa, pacr, dakota, rushing_epa) %>% 
+    data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
@@ -392,7 +451,7 @@ seasonalData_subset_imp <- missForest::missForest(
 ```{r}
 # Specify data to impute
 dataToImpute <- seasonalData_subset %>% 
-  select(gsis_id, season, ageCentered20, ageCentered20Quadratic, fantasy_points, years_of_experience) %>% 
+  select(gsis_id, season, ageCentered20, ageCentered20Quadratic, fantasyPoints_lag, years_of_experience, passing_epa) %>% 
   filter(!is.na(gsis_id), !is.na(season)) %>% 
   mutate(ID = as.integer(as.factor(as.character(gsis_id)))) %>% 
   arrange(gsis_id, season)
@@ -467,11 +526,11 @@ seasonalData_subset_imp <- complete(
 
 ```{r}
 smerf <- LongituRF::MERF(
-  X = seasonalData_subset_imp$ximp[,c("position_group")] %>% as.matrix(),
-  Y = seasonalData_subset_imp$ximp[,c("fantasyPoints_lag")],
-  Z = seasonalData_subset_imp$ximp[,c("years_of_experience")] %>% as.matrix(),
-  id = seasonalData_subset$gsis_id,
-  time = seasonalData_subset_imp$ximp[,c("ageCentered20")] %>% as.matrix(),
+  X = seasonalData_subsetQB_imp$ximp[,c("passing_epa")] %>% as.matrix(),
+  Y = seasonalData_subsetQB$fantasyPoints_lag,
+  Z = seasonalData_subsetQB_imp$ximp[,c("years_of_experience")] %>% as.matrix(),
+  id = seasonalData_subsetQB$gsis_id,
+  time = seasonalData_subsetQB_imp$ximp[,c("ageCentered20")] %>% as.matrix(),
   mtry = 2,
   ntree = 500,
   sto = "BM")
