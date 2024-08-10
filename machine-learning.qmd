@@ -363,6 +363,8 @@ seasonalData_subset <- seasonalData_subset %>%
   ungroup()
 ```
 
+### Split into Test and Training Data {#sec-splitTestTraining}
+
 ### Impute the Missing Data {#sec-missingDataImputation}
 
 NOTES:
@@ -379,7 +381,7 @@ num_cores
 registerDoParallel(cores = num_cores)
 
 seasonalData_subset_imp <- missForest::missForest(
-  seasonalData_subset %>% select(ageCentered20, ageCentered20Quadratic, fantasyPoints_lag) %>% data.frame,
+  seasonalData_subset %>% select(ageCentered20, ageCentered20Quadratic, years_of_experience, position_group, fantasyPoints_lag) %>% data.frame,
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
@@ -441,7 +443,6 @@ seasonalData_subset_imp <- complete(
   include = FALSE)
 ```
 
-
 ## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
 
 ### Regression with One Predictor {#sec-regressionOnePredictor}
@@ -466,9 +467,9 @@ seasonalData_subset_imp <- complete(
 
 ```{r}
 smerf <- LongituRF::MERF(
-  X = seasonalData_subset_imp$ximp[,c("ageCentered20")] %>% as.matrix(),
+  X = seasonalData_subset_imp$ximp[,c("position_group")] %>% as.matrix(),
   Y = seasonalData_subset_imp$ximp[,c("fantasyPoints_lag")],
-  Z = seasonalData_subset_imp$ximp[,c("ageCentered20")] %>% as.matrix(),
+  Z = seasonalData_subset_imp$ximp[,c("years_of_experience")] %>% as.matrix(),
   id = seasonalData_subset$gsis_id,
   time = seasonalData_subset_imp$ximp[,c("ageCentered20")] %>% as.matrix(),
   mtry = 2,
