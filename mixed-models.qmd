@@ -16,6 +16,7 @@ library("bbmle")
 library("rstan")
 library("brms")
 library("cmdstanr") # todo: install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos"))); check_cmdstan_toolchain(); cmdstanr::install_cmdstan()
+library("fitdistrplus")
 library("parallel")
 library("parallelly")
 library("plotly")
@@ -167,7 +168,7 @@ pointsPerSeason_positionAge_newData$years_of_experience <- floor(pointsPerSeason
 pointsPerSeason_positionAge_newData$years_of_experience[which(pointsPerSeason_positionAge_newData$years_of_experience < 0)] <- 0
 ```
 
-Create an object with complete cases for generating the plots of individuals' -implied fantasy points by age and position:
+Create an object with complete cases for generating the plots of individuals' model-implied fantasy points by age and position:
 
 ```{r}
 player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
@@ -1838,6 +1839,20 @@ AIC(pointsPerSeasonDepth_gam)
 #### Determine Response Distribution {#sec-fantasyPointsByAgeExperienceModelsBayesianDistribution}
 
 ```{r}
+fantasyPointsVector <- player_stats_seasonal_offense_subset$fantasy_points %>% 
+    na.omit() %>% 
+    as.vector()
+
+player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros <- player_stats_seasonal_offense_subset$fantasyPointsPos <- player_stats_seasonal_offense_subset$fantasy_points
+player_stats_seasonal_offense_subset$fantasyPointsPos[player_stats_seasonal_offense_subset$fantasy_points < 0] <- 0
+player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros[player_stats_seasonal_offense_subset$fantasy_points <= 0] <- 0.01
+
+fantasyPointsVectorPosNoZeros <- fantasyPointsVectorPos <- fantasyPointsVector
+fantasyPointsVectorPos[fantasyPointsVector < 0] <- 0
+fantasyPointsVectorPosNoZeros[fantasyPointsVector <= 0] <- 0.01
+```
+
+```{r}
 #| label: fig-histogramFantasyPoints
 #| fig-cap: "Histogram of Fantasy Points with Overlaid Density Plot and Rug Plot."
 
@@ -1858,6 +1873,73 @@ ggplot2::ggplot(
   ) +
   geom_rug() +
   theme_classic()
+```
+
+```{r}
+#| label: fig-cullenFreyGraphy
+#| fig-cap: "Cullen and Frey Graph."
+
+fitdistrplus::descdist(fantasyPointsVector)
+```
+
+```{r}
+# all values
+fit.norm <- fitdistrplus::fitdist(fantasyPointsVector, "norm")
+
+# positive-only
+fit.exp <- fitdist(fantasyPointsVectorPos, "exp")
+
+# positive and no zeros
+fit.gamma <- fitdistrplus::fitdist(fantasyPointsVectorPosNoZeros, "gamma")
+fit.lognormal <- fitdistrplus::fitdist(fantasyPointsVectorPosNoZeros, "lnorm")
+fit.weibull <- fitdistrplus::fitdist(fantasyPointsVectorPosNoZeros, "weibull")
+
+# Model fit
+AIC(fit.norm)
+AIC(fit.exp)
+AIC(fit.gamma) # fits best
+AIC(fit.lognormal)
+AIC(fit.weibull)
+```
+
+```{r}
+plot(fit.norm)
+```
+
+```{r}
+plot(fit.lognormal)
+```
+
+```{r}
+plot(fit.gamma)
+```
+
+```{r}
+plot(fit.exp)
+```
+
+```{r}
+plot(fit.weibull)
+```
+
+```{r}
+model_normal <- glm(
+  formula = fantasy_points ~ 1,
+  family = gaussian(),
+  data = player_stats_seasonal_offense_subset,
+  maxit = 100000)
+
+model_gamma <- glm(
+  formula = fantasyPointsPosNoZeros ~ 1,
+  family = Gamma(),
+  data = player_stats_seasonal_offense_subset,
+  maxit = 100000)
+
+sum(resid(model_normal)^2)
+sum(resid(model_gamma)^2)
+
+AIC(model_normal)
+AIC(model_gamma)
 ```
 
 Because the response distribution (i.e., fantasy points) is positively skewed, we will use a gamma response distribution.
