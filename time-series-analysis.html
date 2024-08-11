@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Isaac T. Petersen">
+<meta name="dcterms.date" content="today">
+<title>21&nbsp; Time Series Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./cluster-analysis.html" rel="prev">
+<link href="./images/logo.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-C3SNF7Y0PJ"></script><script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
+</script><script type="application/json" class="js-hypothesis-config">
+{
+  "theme": "clean",
+  "openSidebar": false
+}
+</script><script async="" src="https://hypothes.is/embed.js"></script><script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<meta property="og:title" content="21&nbsp; Time Series Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta property="og:description" content="">
+<meta property="og:site_name" content="Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta name="twitter:title" content="21&nbsp; Time Series Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta name="twitter:description" content="">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./time-series-analysis.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Time Series Analysis</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./fantasy-football.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Intro to Football and Fantasy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started with <code>R</code> for Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./download-football-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Download and Process NFL Football Data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Visualization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./player-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Player Evaluation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./draft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Fantasy Draft</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./research-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Research Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./basic-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Basic Statistics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Correlation Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Multiple Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mixed-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Mixed Models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cognitive-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Heuristics and Cognitive Biases in Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./actuarial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Judgment Versus Actuarial Approaches to Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./base-rates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Base Rates</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./evaluating-prediction-accuracy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Evaluation of Prediction/Forecasting Accuracy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mythbusters.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./modern-portfolio-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Modern Portfolio Theory</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Cluster Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./time-series-analysis.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Time Series Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#sec-timeSeriesGettingStarted" id="toc-sec-timeSeriesGettingStarted" class="nav-link active" data-scroll-target="#sec-timeSeriesGettingStarted"><span class="header-section-number">21.1</span> Getting Started</a>
+  <ul>
+<li><a href="#sec-timeSeriesLoadPackages" id="toc-sec-timeSeriesLoadPackages" class="nav-link" data-scroll-target="#sec-timeSeriesLoadPackages"><span class="header-section-number">21.1.1</span> Load Packages</a></li>
+  <li><a href="#sec-timeSeriesLoadData" id="toc-sec-timeSeriesLoadData" class="nav-link" data-scroll-target="#sec-timeSeriesLoadData"><span class="header-section-number">21.1.2</span> Load Data</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-timeSeriesOverview" id="toc-sec-timeSeriesOverview" class="nav-link" data-scroll-target="#sec-timeSeriesOverview"><span class="header-section-number">21.2</span> Overview of Time Series Analysis</a></li>
+  <li><a href="#sec-createTimeSeriesObjects" id="toc-sec-createTimeSeriesObjects" class="nav-link" data-scroll-target="#sec-createTimeSeriesObjects"><span class="header-section-number">21.3</span> Create the Time Series Objects</a></li>
+  <li><a href="#sec-plotTimeSeries" id="toc-sec-plotTimeSeries" class="nav-link" data-scroll-target="#sec-plotTimeSeries"><span class="header-section-number">21.4</span> Plot the Time Series</a></li>
+  <li><a href="#sec-rollingMeanMedian" id="toc-sec-rollingMeanMedian" class="nav-link" data-scroll-target="#sec-rollingMeanMedian"><span class="header-section-number">21.5</span> Rolling Mean/Median</a></li>
+  <li><a href="#sec-autoCorrelation" id="toc-sec-autoCorrelation" class="nav-link" data-scroll-target="#sec-autoCorrelation"><span class="header-section-number">21.6</span> Autocorrelation</a></li>
+  <li><a href="#sec-arimaModel" id="toc-sec-arimaModel" class="nav-link" data-scroll-target="#sec-arimaModel"><span class="header-section-number">21.7</span> Fit an Autoregressive Integrated Moving Average Model</a></li>
+  <li><a href="#sec-arimaForecasts" id="toc-sec-arimaForecasts" class="nav-link" data-scroll-target="#sec-arimaForecasts"><span class="header-section-number">21.8</span> Generate the Model Forecasts</a></li>
+  <li><a href="#sec-plotARIMAforecast" id="toc-sec-plotARIMAforecast" class="nav-link" data-scroll-target="#sec-plotARIMAforecast"><span class="header-section-number">21.9</span> Plot the Model Forecasts</a></li>
+  <li><a href="#sec-timeSeriesConclusion" id="toc-sec-timeSeriesConclusion" class="nav-link" data-scroll-target="#sec-timeSeriesConclusion"><span class="header-section-number">21.10</span> Conclusion</a></li>
+  <li><a href="#sec-timeSeriesSessionInfo" id="toc-sec-timeSeriesSessionInfo" class="nav-link" data-scroll-target="#sec-timeSeriesSessionInfo"><span class="header-section-number">21.11</span> Session Info</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/time-series-analysis.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><div class="alert alert-info hints-alert">
+  <div class="hints-icon">
+    <i class="fa fa-comments-o"></i>
+  </div>
+  <div class="hints-container">
+    <b>I need your help!</b>
+    <p>
+    I want your feedback to make the book better for you and other readers. If you find typos, errors, or places where the text may be improved, please let me know.
+    The best ways to provide feedback are by <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">GitHub</a> or <a href="https://hypothes.is">hypothes.is</a> annotations.
+    </p>
+
+    <p>
+      <i class="fa fa-github"></i>
+      <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues">Opening an issue</a> or <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/pulls">submitting a pull request</a> on GitHub: <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook</a>
+    </p>
+    <p>
+      <img style="display: inline;" src="https://hypothes.is/organizations/__default__/logo" alt="Hypothesis">
+      Adding an annotation using <a href="https://hypothes.is">hypothes.is</a>.
+      To add an annotation, <span style="background-color: #3297FD; color: white">select some text</span> and then click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class="annotator-adder-actions__icon"><path fill="currentColor" fill-rule="nonzero" d="M15 0c.27 0 .505.099.703.297A.961.961 0 0116 1v15l-4-3H1a.974.974 0 01-.703-.29A.953.953 0 010 12V1C0 .719.096.482.29.29A.966.966 0 011 0h14zM7 3l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C4.156 5.229 4 6 4 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188C4.729 8.854 5.082 9 5.5 9c.417 0 .77-.146 1.063-.438C6.854 8.271 7 7.918 7 7.5c0-.417-.146-.77-.438-1.063A1.447 1.447 0 005.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L7 4V3zm5 0l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C9.156 5.229 9 6 9 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188c.291.291.645.437 1.062.437.417 0 .77-.146 1.063-.438.291-.291.437-.645.437-1.062 0-.417-.146-.77-.438-1.063A1.447 1.447 0 0010.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L12 4V3z"></path></svg></span>
+      symbol on the pop-up menu.
+      To see the annotations of others, click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class=""><g fill-rule="evenodd"><rect fill="none" stroke="none" x="0" y="0" width="16" height="16"></rect><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12L6 8l4-4"></path></g></svg></span>
+      symbol in the upper right-hand corner of the page.
+    </p>
+  </div>
+</div>
+
+<header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-timeSeries" class="quarto-section-identifier"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Time Series Analysis</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="sec-timeSeriesGettingStarted" class="level2" data-number="21.1"><h2 data-number="21.1" class="anchored" data-anchor-id="sec-timeSeriesGettingStarted">
+<span class="header-section-number">21.1</span> Getting Started</h2>
+<section id="sec-timeSeriesLoadPackages" class="level3" data-number="21.1.1"><h3 data-number="21.1.1" class="anchored" data-anchor-id="sec-timeSeriesLoadPackages">
+<span class="header-section-number">21.1.1</span> Load Packages</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"xts"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"zoo"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"forecast"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-timeSeriesLoadData" class="level3" data-number="21.1.2"><h3 data-number="21.1.2" class="anchored" data-anchor-id="sec-timeSeriesLoadData">
+<span class="header-section-number">21.1.2</span> Load Data</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/player_stats_weekly.RData"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/player_stats_seasonal.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="sec-timeSeriesOverview" class="level2" data-number="21.2"><h2 data-number="21.2" class="anchored" data-anchor-id="sec-timeSeriesOverview">
+<span class="header-section-number">21.2</span> Overview of Time Series Analysis</h2>
+<p>Time series analysis is useful when trying to generate forecasts from longitudinal data. There many different types of time series analyses. For simplicity, in this chapter, we use autoregressive integrated moving average (ARIMA) models to demonstrate one approach to time series analysis. ARIMA models perform best when there is a clear pattern where later values are influenced by earlier values (i.e., autoregressive effects and moving average effects). This may not strongly be the case in fantasy football, so ARIMA models may not be particularly useful in forecasting fantasy football performance. Nevertheless, ARIMA models are widely used in forecasting financial markets and economic indicators. Thus, it is a useful technique to learn.</p>
+<p>Adapted from: <a href="https://rc2e.com/timeseriesanalysis" class="uri">https://rc2e.com/timeseriesanalysis</a> (archived at <a href="https://perma.cc/U5P6-2VWC" class="uri">https://perma.cc/U5P6-2VWC</a>).</p>
+</section><section id="sec-createTimeSeriesObjects" class="level2" data-number="21.3"><h2 data-number="21.3" class="anchored" data-anchor-id="sec-createTimeSeriesObjects">
+<span class="header-section-number">21.3</span> Create the Time Series Objects</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>weeklyFantasyPoints_tomBrady <span class="ot">&lt;-</span> player_stats_weekly_offense <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">filter</span>(</span>
+<span id="cb3-3"><a href="#cb3-3"></a>    player_id <span class="sc">==</span> <span class="st">"00-0019596"</span> <span class="sc">|</span> player_display_name <span class="sc">==</span> <span class="st">"Tom Brady"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a>weeklyFantasyPoints_peytonManning <span class="ot">&lt;-</span> player_stats_weekly_offense <span class="sc">%&gt;%</span> </span>
+<span id="cb3-6"><a href="#cb3-6"></a>  <span class="fu">filter</span>(</span>
+<span id="cb3-7"><a href="#cb3-7"></a>    player_id <span class="sc">==</span> <span class="st">"00-0010346"</span> <span class="sc">|</span> player_display_name <span class="sc">==</span> <span class="st">"Peyton Manning"</span>)</span>
+<span id="cb3-8"><a href="#cb3-8"></a></span>
+<span id="cb3-9"><a href="#cb3-9"></a>ts_tomBrady <span class="ot">&lt;-</span> xts<span class="sc">::</span><span class="fu">xts</span>(</span>
+<span id="cb3-10"><a href="#cb3-10"></a>  <span class="at">x =</span> weeklyFantasyPoints_tomBrady[<span class="st">"fantasy_points"</span>],</span>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="at">order.by =</span> weeklyFantasyPoints_tomBrady<span class="sc">$</span>gameday)</span>
+<span id="cb3-12"><a href="#cb3-12"></a></span>
+<span id="cb3-13"><a href="#cb3-13"></a>ts_peytonManning <span class="ot">&lt;-</span> xts<span class="sc">::</span><span class="fu">xts</span>(</span>
+<span id="cb3-14"><a href="#cb3-14"></a>  <span class="at">x =</span> weeklyFantasyPoints_peytonManning[<span class="st">"fantasy_points"</span>],</span>
+<span id="cb3-15"><a href="#cb3-15"></a>  <span class="at">order.by =</span> weeklyFantasyPoints_peytonManning<span class="sc">$</span>gameday)</span>
+<span id="cb3-16"><a href="#cb3-16"></a></span>
+<span id="cb3-17"><a href="#cb3-17"></a>ts_tomBrady</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>           fantasy_points
+2000-11-23           0.24
+2001-09-23           2.74
+2001-09-30           6.92
+2001-10-07           0.34
+2001-10-14          22.56
+2001-10-21          19.88
+2001-10-28           8.02
+2001-11-04          22.00
+2001-11-11           4.18
+2001-11-18           8.00
+       ...               
+2022-11-06          15.20
+2022-11-13          16.02
+2022-11-27          18.04
+2022-12-05          17.14
+2022-12-11          10.12
+2022-12-18          16.58
+2022-12-25          11.34
+2023-01-01          37.68
+2023-01-08           7.36
+2023-01-16          22.04</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>ts_peytonManning</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>           fantasy_points
+1999-09-12          15.06
+1999-09-19          16.40
+1999-09-26          29.56
+1999-10-10          19.66
+1999-10-17          10.10
+1999-10-24          17.86
+1999-10-31          17.76
+1999-11-07          17.76
+1999-11-14          15.18
+1999-11-21          22.00
+       ...               
+2015-10-04           8.32
+2015-10-11           6.64
+2015-10-18           9.60
+2015-11-01          11.60
+2015-11-08          15.24
+2015-11-15          -6.60
+2016-01-03           2.56
+2016-01-17          10.78
+2016-01-24          14.14
+2016-02-07           3.64</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>ts_combined <span class="ot">&lt;-</span> <span class="fu">merge</span>(</span>
+<span id="cb7-2"><a href="#cb7-2"></a>  ts_tomBrady,</span>
+<span id="cb7-3"><a href="#cb7-3"></a>  ts_peytonManning</span>
+<span id="cb7-4"><a href="#cb7-4"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5"></a></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="fu">names</span>(ts_combined) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Tom Brady"</span>,<span class="st">"Peyton Manning"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-plotTimeSeries" class="level2" data-number="21.4"><h2 data-number="21.4" class="anchored" data-anchor-id="sec-plotTimeSeries">
+<span class="header-section-number">21.4</span> Plot the Time Series</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">plot</span>(</span>
+<span id="cb8-2"><a href="#cb8-2"></a>  ts_tomBrady,</span>
+<span id="cb8-3"><a href="#cb8-3"></a>  <span class="at">main =</span> <span class="st">"Tom Brady's Fantasy Points by Game"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="time-series-analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">plot</span>(</span>
+<span id="cb9-2"><a href="#cb9-2"></a>  ts_combined,</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  legend,</span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="at">legend.loc =</span> <span class="st">"topright"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="at">main =</span> <span class="st">"Fantasy Points by Game"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="time-series-analysis_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-rollingMeanMedian" class="level2" data-number="21.5"><h2 data-number="21.5" class="anchored" data-anchor-id="sec-rollingMeanMedian">
+<span class="header-section-number">21.5</span> Rolling Mean/Median</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>zoo<span class="sc">::</span><span class="fu">rollmean</span>(</span>
+<span id="cb10-2"><a href="#cb10-2"></a>  <span class="at">x =</span> ts_tomBrady,</span>
+<span id="cb10-3"><a href="#cb10-3"></a>  <span class="at">k =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>           fantasy_points
+2001-09-30          6.560
+2001-10-07         10.488
+2001-10-14         11.544
+2001-10-21         14.560
+2001-10-28         15.328
+2001-11-04         12.416
+2001-11-11         13.984
+2001-11-18         14.084
+2001-11-25         10.568
+2001-12-02         11.488
+       ...               
+2022-10-23         15.492
+2022-10-27         14.748
+2022-11-06         15.612
+2022-11-13         16.700
+2022-11-27         15.304
+2022-12-05         15.580
+2022-12-11         14.644
+2022-12-18         18.572
+2022-12-25         16.616
+2023-01-01         19.000</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>zoo<span class="sc">::</span><span class="fu">rollmedian</span>(</span>
+<span id="cb12-2"><a href="#cb12-2"></a>  <span class="at">x =</span> ts_tomBrady,</span>
+<span id="cb12-3"><a href="#cb12-3"></a>  <span class="at">k =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>           fantasy_points
+2001-09-30           2.74
+2001-10-07           6.92
+2001-10-14           8.02
+2001-10-21          19.88
+2001-10-28          19.88
+2001-11-04           8.02
+2001-11-11           8.02
+2001-11-18           8.52
+2001-11-25           8.00
+2001-12-02           8.52
+       ...               
+2022-10-23          15.20
+2022-10-27          15.20
+2022-11-06          16.02
+2022-11-13          17.10
+2022-11-27          16.02
+2022-12-05          16.58
+2022-12-11          16.58
+2022-12-18          16.58
+2022-12-25          11.34
+2023-01-01          16.58</code></pre>
+</div>
+</div>
+</section><section id="sec-autoCorrelation" class="level2" data-number="21.6"><h2 data-number="21.6" class="anchored" data-anchor-id="sec-autoCorrelation">
+<span class="header-section-number">21.6</span> Autocorrelation</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">acf</span>(ts_tomBrady)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="time-series-analysis_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">Box.test</span>(ts_tomBrady)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+    Box-Pierce test
+
+data:  ts_tomBrady
+X-squared = 6.9696, df = 1, p-value = 0.008291</code></pre>
+</div>
+</div>
+</section><section id="sec-arimaModel" class="level2" data-number="21.7"><h2 data-number="21.7" class="anchored" data-anchor-id="sec-arimaModel">
+<span class="header-section-number">21.7</span> Fit an Autoregressive Integrated Moving Average Model</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>forecast<span class="sc">::</span><span class="fu">auto.arima</span>(ts_tomBrady)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Series: ts_tomBrady 
+ARIMA(5,1,4) 
+
+Coefficients:
+         ar1      ar2      ar3      ar4     ar5      ma1     ma2      ma3
+      0.4519  -0.4600  -0.1781  -0.0834  0.2287  -1.3634  0.8837  -0.1480
+s.e.  0.2444   0.2272   0.3634   0.0585  0.0535   0.2504  0.4110   0.5295
+          ma4
+      -0.3333
+s.e.   0.3496
+
+sigma^2 = 59.26:  log likelihood = -1318.42
+AIC=2656.83   AICc=2657.42   BIC=2696.29</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>forecast<span class="sc">::</span><span class="fu">auto.arima</span>(ts_peytonManning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Series: ts_peytonManning 
+ARIMA(1,0,1) with non-zero mean 
+
+Coefficients:
+         ar1      ma1     mean
+      0.9134  -0.8192  17.4587
+s.e.  0.0605   0.0786   0.9682
+
+sigma^2 = 60.52:  log likelihood = -959.87
+AIC=1927.73   AICc=1927.88   BIC=1942.23</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>arima_tomBrady <span class="ot">&lt;-</span> <span class="fu">arima</span>(</span>
+<span id="cb21-2"><a href="#cb21-2"></a>  ts_tomBrady,</span>
+<span id="cb21-3"><a href="#cb21-3"></a>  <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">4</span>))</span>
+<span id="cb21-4"><a href="#cb21-4"></a></span>
+<span id="cb21-5"><a href="#cb21-5"></a><span class="fu">summary</span>(arima_tomBrady)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+arima(x = ts_tomBrady, order = c(5, 1, 4))
+
+Coefficients:
+         ar1      ar2      ar3      ar4     ar5      ma1     ma2      ma3
+      0.4519  -0.4600  -0.1781  -0.0834  0.2287  -1.3634  0.8837  -0.1480
+s.e.  0.2444   0.2272   0.3634   0.0585  0.0535   0.2504  0.4110   0.5295
+          ma4
+      -0.3333
+s.e.   0.3496
+
+sigma^2 estimated as 57.86:  log likelihood = -1318.42,  aic = 2656.83
+
+Training set error measures:
+                    ME     RMSE      MAE       MPE     MAPE      MASE
+Training set 0.6138177 7.596882 6.059765 -26.43736 54.72413 0.7239184
+                     ACF1
+Training set -0.005875514</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="fu">confint</span>(arima_tomBrady)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>          2.5 %      97.5 %
+ar1 -0.02718585  0.93100467
+ar2 -0.90534347 -0.01472881
+ar3 -0.89026492  0.53413092
+ar4 -0.19813198  0.03125533
+ar5  0.12376560  0.33358684
+ma1 -1.85414989 -0.87259362
+ma2  0.07825054  1.68916699
+ma3 -1.18577457  0.88978834
+ma4 -1.01847540  0.35186954</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>forecast<span class="sc">::</span><span class="fu">checkresiduals</span>(arima_tomBrady)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="time-series-analysis_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(5,1,4)
+Q* = 2.2811, df = 3, p-value = 0.5162
+
+Model df: 9.   Total lags used: 12</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>arima_tomBrady_removeNonSigTerms <span class="ot">&lt;-</span> <span class="fu">arima</span>(</span>
+<span id="cb27-2"><a href="#cb27-2"></a>  ts_tomBrady,</span>
+<span id="cb27-3"><a href="#cb27-3"></a>  <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">4</span>),</span>
+<span id="cb27-4"><a href="#cb27-4"></a>  <span class="at">fixed =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">0</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>))</span>
+<span id="cb27-5"><a href="#cb27-5"></a></span>
+<span id="cb27-6"><a href="#cb27-6"></a><span class="fu">summary</span>(arima_tomBrady_removeNonSigTerms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+arima(x = ts_tomBrady, order = c(5, 1, 4), fixed = c(NA, NA, 0, NA, NA, NA, 
+    NA, NA, NA))
+
+Coefficients:
+         ar1      ar2  ar3      ar4     ar5      ma1     ma2      ma3      ma4
+      0.5195  -0.5537    0  -0.0923  0.2248  -1.4320  1.0411  -0.4109  -0.1649
+s.e.  0.2244   0.2095    0   0.0579  0.0559   0.2311  0.3713   0.2145   0.0657
+
+sigma^2 estimated as 57.92:  log likelihood = -1318.59,  aic = 2655.18
+
+Training set error measures:
+                    ME     RMSE      MAE       MPE     MAPE      MASE
+Training set 0.6222971 7.600691 6.078548 -26.34234 54.91081 0.7261622
+                     ACF1
+Training set -0.005570349</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="fu">confint</span>(arima_tomBrady_removeNonSigTerms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>          2.5 %       97.5 %
+ar1  0.07978268  0.959242224
+ar2 -0.96433523 -0.143157528
+ar3          NA           NA
+ar4 -0.20569255  0.021080469
+ar5  0.11530044  0.334344203
+ma1 -1.88493886 -0.979076737
+ma2  0.31341100  1.768874322
+ma3 -0.83134627  0.009456031
+ma4 -0.29362802 -0.036192104</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>forecast<span class="sc">::</span><span class="fu">checkresiduals</span>(arima_tomBrady_removeNonSigTerms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="time-series-analysis_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(5,1,4)
+Q* = 2.3773, df = 3, p-value = 0.4979
+
+Model df: 9.   Total lags used: 12</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>arima_peytonManning <span class="ot">&lt;-</span> <span class="fu">arima</span>(</span>
+<span id="cb33-2"><a href="#cb33-2"></a>  ts_peytonManning,</span>
+<span id="cb33-3"><a href="#cb33-3"></a>  <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb33-4"><a href="#cb33-4"></a></span>
+<span id="cb33-5"><a href="#cb33-5"></a><span class="fu">summary</span>(arima_peytonManning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+arima(x = ts_peytonManning, order = c(1, 0, 1))
+
+Coefficients:
+         ar1      ma1  intercept
+      0.9134  -0.8192    17.4587
+s.e.  0.0605   0.0786     0.9682
+
+sigma^2 estimated as 59.86:  log likelihood = -959.87,  aic = 1927.73
+
+Training set error measures:
+                      ME     RMSE      MAE       MPE     MAPE      MASE
+Training set 0.005206747 7.736947 6.030506 -99.38311 124.2982 0.7309896
+                     ACF1
+Training set -0.008272646</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="fu">confint</span>(arima_peytonManning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>               2.5 %     97.5 %
+ar1        0.7949304  1.0319427
+ma1       -0.9732963 -0.6650994
+intercept 15.5611483 19.3563260</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>forecast<span class="sc">::</span><span class="fu">checkresiduals</span>(arima_peytonManning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="time-series-analysis_files/figure-html/unnamed-chunk-11-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(1,0,1) with non-zero mean
+Q* = 3.8411, df = 8, p-value = 0.8712
+
+Model df: 2.   Total lags used: 10</code></pre>
+</div>
+</div>
+</section><section id="sec-arimaForecasts" class="level2" data-number="21.8"><h2 data-number="21.8" class="anchored" data-anchor-id="sec-arimaForecasts">
+<span class="header-section-number">21.8</span> Generate the Model Forecasts</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>forecast_tomBrady <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">forecast</span>(</span>
+<span id="cb39-2"><a href="#cb39-2"></a>  arima_tomBrady,</span>
+<span id="cb39-3"><a href="#cb39-3"></a>  <span class="at">level =</span> <span class="fu">c</span>(<span class="dv">80</span>, <span class="dv">95</span>)) <span class="co"># 80% and 95% confidence intervals</span></span>
+<span id="cb39-4"><a href="#cb39-4"></a></span>
+<span id="cb39-5"><a href="#cb39-5"></a>forecast_peytonManning <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">forecast</span>(</span>
+<span id="cb39-6"><a href="#cb39-6"></a>  arima_peytonManning,</span>
+<span id="cb39-7"><a href="#cb39-7"></a>  <span class="at">level =</span> <span class="fu">c</span>(<span class="dv">80</span>, <span class="dv">95</span>)) <span class="co"># 80% and 95% confidence intervals</span></span>
+<span id="cb39-8"><a href="#cb39-8"></a></span>
+<span id="cb39-9"><a href="#cb39-9"></a>forecast_tomBrady</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>    Point Forecast     Lo 80    Hi 80     Lo 95    Hi 95
+384       21.03918 11.290652 30.78772 6.1300916 35.94828
+385       15.83752  6.050851 25.62418 0.8701029 30.80493
+386       22.89837 13.062972 32.73377 7.8564254 37.94032
+387       18.55187  8.527204 28.57654 3.2204660 33.88327
+388       17.70611  7.680168 27.73206 2.3727526 33.03948
+389       18.27131  8.148171 28.39445 2.7893058 33.75331
+390       17.91113  7.751759 28.07050 2.3737135 33.44854
+391       19.61626  9.454630 29.77790 4.0753848 35.15715
+392       19.52851  9.362719 29.69431 3.9812732 35.07575
+393       18.52801  8.361647 28.69436 2.9799013 34.07611</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>forecast_peytonManning</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>    Point Forecast    Lo 80    Hi 80      Lo 95    Hi 95
+278       12.71938 2.804079 22.63467 -2.4447620 27.88351
+279       13.12963 3.170404 23.08886 -2.1016934 28.36096
+280       13.50437 3.508639 23.50011 -1.7827835 28.79153
+281       13.84668 3.820584 23.87277 -1.4869093 29.18027
+282       14.15935 4.107997 24.21070 -1.2128686 29.53157
+283       14.44496 4.372576 24.51734 -0.9594210 29.84933
+284       14.70584 4.615948 24.79573 -0.7253186 30.13700
+285       14.94414 4.839661 25.04862 -0.5093279 30.39761
+286       15.16181 5.045178 25.27845 -0.3102454 30.63387
+287       15.36064 5.233877 25.48741 -0.1269092 30.84819</code></pre>
+</div>
+</div>
+</section><section id="sec-plotARIMAforecast" class="level2" data-number="21.9"><h2 data-number="21.9" class="anchored" data-anchor-id="sec-plotARIMAforecast">
+<span class="header-section-number">21.9</span> Plot the Model Forecasts</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>forecast<span class="sc">::</span><span class="fu">autoplot</span>(forecast_tomBrady) <span class="sc">+</span> </span>
+<span id="cb43-2"><a href="#cb43-2"></a>  <span class="fu">labs</span>(</span>
+<span id="cb43-3"><a href="#cb43-3"></a>    <span class="at">x =</span> <span class="st">"Game Number"</span>,</span>
+<span id="cb43-4"><a href="#cb43-4"></a>    <span class="at">y =</span> <span class="st">"Fantasy Points"</span>,</span>
+<span id="cb43-5"><a href="#cb43-5"></a>    <span class="at">title =</span> <span class="st">"Tom Brady's Historical and Projected Fantasy Points by Game"</span></span>
+<span id="cb43-6"><a href="#cb43-6"></a>  ) <span class="sc">+</span></span>
+<span id="cb43-7"><a href="#cb43-7"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="time-series-analysis_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-timeSeriesConclusion" class="level2" data-number="21.10"><h2 data-number="21.10" class="anchored" data-anchor-id="sec-timeSeriesConclusion">
+<span class="header-section-number">21.10</span> Conclusion</h2>
+</section><section id="sec-timeSeriesSessionInfo" class="level2" data-number="21.11"><h2 data-number="21.11" class="anchored" data-anchor-id="sec-timeSeriesSessionInfo">
+<span class="header-section-number">21.11</span> Session Info</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.4 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: UTC
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] lubridate_1.9.3 forcats_1.0.0   stringr_1.5.1   dplyr_1.1.4    
+ [5] purrr_1.0.2     readr_2.1.5     tidyr_1.3.1     tibble_3.2.1   
+ [9] ggplot2_3.5.1   tidyverse_2.0.0 forecast_8.23.0 xts_0.14.0     
+[13] zoo_1.8-12     
+
+loaded via a namespace (and not attached):
+ [1] utf8_1.2.4        generics_0.1.3    stringi_1.8.4     lattice_0.22-6   
+ [5] hms_1.1.3         digest_0.6.36     magrittr_2.0.3    timechange_0.3.0 
+ [9] evaluate_0.24.0   grid_4.4.1        fastmap_1.2.0     jsonlite_1.8.8   
+[13] nnet_7.3-19       fansi_1.0.6       scales_1.3.0      cli_3.6.3        
+[17] rlang_1.1.4       munsell_0.5.1     withr_3.0.1       yaml_2.3.10      
+[21] tools_4.4.1       parallel_4.4.1    tzdb_0.4.0        colorspace_2.1-1 
+[25] curl_5.2.1        vctrs_0.6.5       R6_2.5.1          lifecycle_1.0.4  
+[29] tseries_0.10-56   htmlwidgets_1.6.4 pkgconfig_2.0.3   urca_1.3-4       
+[33] pillar_1.9.0      gtable_0.3.5      glue_1.7.0        quantmod_0.4.26  
+[37] Rcpp_1.0.13       xfun_0.46         lmtest_0.9-40     tidyselect_1.2.1 
+[41] knitr_1.48        farver_2.1.2      htmltools_0.5.8.1 nlme_3.1-164     
+[45] labeling_0.4.3    rmarkdown_2.27    timeDate_4032.109 fracdiff_1.5-3   
+[49] compiler_4.4.1    quadprog_1.5-8    TTR_0.24.4       </code></pre>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Corston2000" class="csl-entry" role="listitem">
+Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for windows</em>. Wiley-Blackwell.
+</div>
+</div>
+</section></main><!-- /main --><div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://fantasyfootballanalytics.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script><noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<h3>Feedback</h3>
+
+<div class="feedback">
+    Please consider providing feedback about this textbook, so that I can make it as helpful as possible. You can provide feedback at the following link:
+    
+    <a href="https://forms.gle/LsnVKwqmS1VuxWD18">https://forms.gle/LsnVKwqmS1VuxWD18</a>
+</div>
+
+<h3>Email Notification</h3>
+
+<div class="rmdsale">
+The online version of this book will remain open access. If you want to know when the print version of the book is for sale, enter your email below so I can let you know.
+<br><iframe src="https://docs.google.com/forms/d/e/1FAIpQLSccMKaTBXzMBmcy4myCNQnL8mCgRczh0Eg_Pw3c15bork7-xQ/viewform?embedded=true" width="640" height="750" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+
+</div>
+<script id="dsq-count-scr" src="//fantasyfootballanalytics.disqus.com/count.js" async=""></script><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/isaactpetersen\.github\.io\/Fantasy-Football-Analytics-Textbook");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./cluster-analysis.html" class="pagination-link" aria-label="Cluster Analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Cluster Analysis</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>“Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R” was written by <a href="https://psychology.uiowa.edu/people/isaac-petersen">Isaac T. Petersen</a>.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/time-series-analysis.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
