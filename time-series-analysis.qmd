@@ -2,10 +2,169 @@
 
 ## Getting Started {#sec-timeSeriesGettingStarted}
 
-### Load Packages {#sec-timeSeriesGettingStarted}
+### Load Packages {#sec-timeSeriesLoadPackages}
 
 ```{r}
+library("xts")
+library("zoo")
+library("forecast")
+library("tidyverse")
+```
 
+### Load Data {#sec-timeSeriesLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/player_stats_seasonal.RData")
+```
+
+## Overview of Time Series Analysis {#sec-timeSeriesOverview}
+
+Time series analysis is useful when trying to generate forecasts from longitudinal data.
+There many different types of time series analyses.
+For simplicity, in this chapter, we use autoregressive integrated moving average (ARIMA) models to demonstrate one approach to time series analysis.
+ARIMA models perform best when there is a clear pattern where later values are influenced by earlier values (i.e., autoregressive effects and moving average effects).
+This may not strongly be the case in fantasy football, so ARIMA models may not be particularly useful in forecasting fantasy football performance.
+Nevertheless, ARIMA models are widely used in forecasting financial markets and economic indicators.
+Thus, it is a useful technique to learn.
+
+Adapted from: <https://rc2e.com/timeseriesanalysis> (archived at <https://perma.cc/U5P6-2VWC>).
+
+## Create the Time Series Objects {#sec-createTimeSeriesObjects}
+
+```{r}
+weeklyFantasyPoints_tomBrady <- player_stats_weekly_offense %>% 
+  filter(
+    player_id == "00-0019596" | player_display_name == "Tom Brady")
+
+weeklyFantasyPoints_peytonManning <- player_stats_weekly_offense %>% 
+  filter(
+    player_id == "00-0010346" | player_display_name == "Peyton Manning")
+
+ts_tomBrady <- xts::xts(
+  x = weeklyFantasyPoints_tomBrady["fantasy_points"],
+  order.by = weeklyFantasyPoints_tomBrady$gameday)
+
+ts_peytonManning <- xts::xts(
+  x = weeklyFantasyPoints_peytonManning["fantasy_points"],
+  order.by = weeklyFantasyPoints_peytonManning$gameday)
+
+ts_tomBrady
+ts_peytonManning
+
+ts_combined <- merge(
+  ts_tomBrady,
+  ts_peytonManning
+)
+
+names(ts_combined) <- c("Tom Brady","Peyton Manning")
+```
+
+## Plot the Time Series {#sec-plotTimeSeries}
+
+```{r}
+plot(
+  ts_tomBrady,
+  main = "Tom Brady's Fantasy Points by Game")
+```
+
+```{r}
+plot(
+  ts_combined,
+  legend,
+  legend.loc = "topright",
+  main = "Fantasy Points by Game")
+```
+
+## Rolling Mean/Median {#sec-rollingMeanMedian}
+
+```{r}
+zoo::rollmean(
+  x = ts_tomBrady,
+  k = 5)
+
+zoo::rollmedian(
+  x = ts_tomBrady,
+  k = 5)
+```
+
+## Autocorrelation {#sec-autoCorrelation}
+
+```{r}
+acf(ts_tomBrady)
+```
+
+```{r}
+Box.test(ts_tomBrady)
+```
+
+## Fit an Autoregressive Integrated Moving Average Model {#sec-arimaModel}
+
+```{r}
+forecast::auto.arima(ts_tomBrady)
+forecast::auto.arima(ts_peytonManning)
+```
+
+```{r}
+arima_tomBrady <- arima(
+  ts_tomBrady,
+  order = c(5, 1, 4))
+
+summary(arima_tomBrady)
+confint(arima_tomBrady)
+forecast::checkresiduals(arima_tomBrady)
+
+arima_tomBrady_removeNonSigTerms <- arima(
+  ts_tomBrady,
+  order = c(5, 1, 4),
+  fixed = c(NA, NA, 0, NA, NA, NA, NA, NA, NA))
+
+summary(arima_tomBrady_removeNonSigTerms)
+confint(arima_tomBrady_removeNonSigTerms)
+forecast::checkresiduals(arima_tomBrady_removeNonSigTerms)
+
+arima_peytonManning <- arima(
+  ts_peytonManning,
+  order = c(1, 0, 1))
+
+summary(arima_peytonManning)
+confint(arima_peytonManning)
+forecast::checkresiduals(arima_peytonManning)
+```
+
+## Generate the Model Forecasts {#sec-arimaForecasts}
+
+```{r}
+forecast_tomBrady <- forecast::forecast(
+  arima_tomBrady,
+  level = c(80, 95)) # 80% and 95% confidence intervals
+
+forecast_peytonManning <- forecast::forecast(
+  arima_peytonManning,
+  level = c(80, 95)) # 80% and 95% confidence intervals
+
+forecast_tomBrady
+forecast_peytonManning
+```
+
+## Plot the Model Forecasts {#sec-plotARIMAforecast}
+
+```{r}
+forecast::autoplot(forecast_tomBrady) + 
+  labs(
+    x = "Game Number",
+    y = "Fantasy Points",
+    title = "Tom Brady's Historical and Projected Fantasy Points by Game"
+  ) +
+  theme_classic()
 ```
 
 ## Conclusion {#sec-timeSeriesConclusion}
