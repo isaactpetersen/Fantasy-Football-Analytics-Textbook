@@ -57,6 +57,7 @@ load(file = "./data/nfl_rankings_draft_raw.RData")
 load(file = "./data/nfl_rankings_weekly_raw.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly_raw.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp_raw.RData", fsep = ""))
+load(file = "./data/players_projections_seasonal_raw.RData")
 
 # Calculated Data - Raw
 load(file = "./data/nfl_actualStats_career_raw.RData")
@@ -89,6 +90,7 @@ load(file = "./data/nfl_rankings_draft.RData")
 load(file = "./data/nfl_rankings_weekly.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp.RData", fsep = ""))
+load(file = "./data/players_projections_seasonal_average.RData")
 
 # Calculated Data - Processed
 load(file = "./data/nfl_actualStats_career.RData")
@@ -137,6 +139,8 @@ nfl_players %>%
   filter(n() > 1) %>% 
   head()
 ```
+
+#### Processing {#sec-processingPlayers}
 
 Let's do some data cleanup:
 
@@ -340,6 +344,8 @@ nfl_rosters %>%
   filter(n() > 1) %>% 
   head()
 ```
+
+#### Processing {#sec-processingRosters}
 
 Let's do some data cleanup:
 
@@ -617,6 +623,8 @@ nfl_draftPicks %>%
   head()
 ```
 
+#### Processing {#sec-processingDraftPicks}
+
 Let's do some data cleanup:
 
 ```{r}
@@ -696,6 +704,8 @@ nfl_depthCharts %>%
   filter(n() > 1) %>% 
   head()
 ```
+
+#### Processing {#sec-processingDepthCharts}
 
 Let's do some data cleanup:
 
@@ -1476,6 +1486,8 @@ load(file = "./data/nfl_advancedStatsPFR_seasonal_raw.RData")
 load(file = "./data/nfl_advancedStatsPFR_weekly_raw.RData")
 ```
 
+#### Processing {#sec-processingAdvancedStatsPFR}
+
 ```{r}
 # Clean up player name for merging; name variables based on which data object they're from
 
@@ -2238,9 +2250,6 @@ nfl_expectedFantasyPoints_pbp <- full_join(
   by = c("game_id","fixed_drive","play_id"),
   suffix = c(".pass", ".rush")
 )
-
-# Todo:
-#-separate variables from each pass/rush object
 ```
 
 The `nfl_expectedFantasyPoints_weekly` object is in `game`-`player` form and in `player`-`season`-`week` form.
@@ -2267,6 +2276,8 @@ nfl_expectedFantasyPoints_weekly %>%
   filter(n() > 1) %>% 
   head()
 ```
+
+#### Processing {#sec-processingExpectedFantasyPoints}
 
 Let's do some data cleanup:
 
@@ -2346,6 +2357,171 @@ load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
 
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp.RData", fsep = ""))
+```
+
+### Fantasy Football Projections {#sec-fantasyFootballProjections}
+
+#### Download Players' Projections {#sec-scrapeProjections}
+
+::: {#nte-downloadProjections .callout-note title="Downloading players' seasonal projections"}
+Note: the following code takes a while to run.
+:::
+
+```{r}
+#| eval: false
+
+players_projections_seasonal_raw <- ffanalytics::scrape_data(
+  season = NULL, # NULL grabs the current season
+  week = 0) # NULL grabs seasonal projections; NULL grabs the current week
+```
+
+```{r}
+#| eval: false
+
+save(
+  players_projections_seasonal_raw,
+  file = "./data/players_projections_seasonal_raw.RData"
+)
+```
+
+The data file is saved in the project repository and can be loaded using the following command:
+
+```{r}
+#| eval: false
+
+load(file = "./data/players_projections_seasonal_raw.RData")
+```
+
+The `players_projections_seasonal_raw` object is in `player`-`position`-`projection source` form.
+That is, each row should be uniquely identified by the combination of `id`, `pos`  and `data_src`.
+Each row should also be uniquely identified by the combination of `player`, `pos`, and `data_src`.
+
+Let's check for duplicate `player`-`position`-`projection source` instances:
+
+```{r}
+players_projections_seasonal_raw %>% 
+  bind_rows() %>% 
+  select(id, pos, data_src, everything()) %>%
+  arrange(player, id, pos, data_src) %>% 
+  group_by(id, pos, data_src) %>% 
+  filter(n() > 1, !is.na(id)) %>% 
+  head()
+
+players_projections_seasonal_raw %>% 
+  bind_rows() %>% 
+  select(player, pos, data_src, everything()) %>%
+  arrange(player, id, pos, data_src) %>% 
+  group_by(id, pos, data_src) %>% 
+  filter(n() > 1, !is.na(id)) %>% 
+  head()
+```
+
+#### Specify League Scoring Settings {#sec-leagueScoringSettings}
+
+First, create a scoring object using the default scoring object:
+
+```{r}
+scoring_obj_default <- ffanalytics::scoring
+```
+
+View the default scoring settings:
+
+```{r}
+scoring_obj_default
+```
+
+Now, modify the scoring settings to match our league settings:
+
+```{r}
+scoring_obj <- scoring_obj_default
+
+scoring_obj$pass$pass_int <- -2
+scoring_obj$misc$fumbles_lost <- -2
+scoring_obj$idp$idp_fum_force <- -2
+```
+
+View our scoring settings:
+
+```{r}
+scoring_obj
+```
+
+#### Calculate Projected Points {#sec-calculateProjectedPoints}
+
+```{r}
+players_projectedStats_seasonal <- ffanalytics::projections_table(
+  players_projections_seasonal_raw,
+  scoring_rules = scoring_obj,
+  return_raw_stats = TRUE)
+
+players_projectedPoints_seasonal <- ffanalytics::projections_table(
+  players_projections_seasonal_raw,
+  scoring_rules = scoring_obj,
+  return_raw_stats = FALSE)
+```
+
+The `players_projectedStats_seasonal` and `players_projectedPoints_seasonal` objects are in `player`-`average type`-`position` form.
+That is, each row should be uniquely identified by the combination of `id`, `avg_type`  and `pos` (or `position`).
+
+Let's check for duplicate `player`-`position`-`projection source` instances:
+
+```{r}
+players_projectedPoints_seasonal %>% 
+  group_by(id, avg_type, pos) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+players_projectedStats_seasonal %>% 
+  group_by(id, avg_type, position) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Let's merge the two objects.
+
+```{r}
+players_projections_seasonal_average <- full_join(
+  players_projectedPoints_seasonal,
+  players_projectedStats_seasonal,
+  by = c("id","avg_type","pos" = "position")
+)
+```
+
+Let's again check for duplicate `player`-`position`-`projection source` instances:
+
+```{r}
+players_projections_seasonal_average %>% 
+  group_by(id, avg_type, pos) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+#### Add Additional Player Information {#sec-addAdditionalInfo}
+
+```{r}
+#| eval: false
+
+players_projections_seasonal_average <- players_projections_seasonal_average %>% 
+  add_ecr() %>% 
+  add_adp() %>% 
+  add_aav() %>%
+  add_uncertainty() %>% 
+  add_player_info()
+```
+
+```{r}
+#| eval: false
+
+save(
+  players_projections_seasonal_average,
+  file = "./data/players_projections_seasonal_average.RData"
+)
+```
+
+The data file is saved in the project repository and can be loaded using the following command:
+
+```{r}
+load(file = "./data/players_projections_seasonal_average.RData")
 ```
 
 ## Calculations {#sec-calculations}
