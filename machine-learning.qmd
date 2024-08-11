@@ -5,12 +5,9 @@
 ### Load Packages {#sec-machineLearningLoadPackages}
 
 ```{r}
-library("LongituRF")
 library("doParallel")
 library("missForest")
 library("powerjoin")
-library("mice")
-library("miceadds")
 library("caret")
 library("tidyverse")
 ```
@@ -185,8 +182,6 @@ nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>%
   rename(gsis_id = player_id)
 
 ## Rename other variables to ensure common names
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
-  rename(team = team_abbr)
 
 ## Ensure variables with the same name have the same type
 nfl_players <- nfl_players %>% 
@@ -300,12 +295,12 @@ playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>%
 
 seasonalData <- powerjoin::power_full_join(
   playerSeasonMerged,
-  playerMerged,
+  playerMerged %>% select(-team, -team_abbr, -team_seq, -current_team_id),
   by = "gsis_id",
   conflict = coalesce_xy
 ) %>% 
   filter(!is.na(season)) %>% 
-  select(gsis_id, season, player_display_name, position, recent_team, games, everything()) #-todo: deduplicate team from prior merged objects
+  select(gsis_id, season, player_display_name, position, team, games, everything())
 
 seasonalAndWeeklyData <- powerjoin::power_full_join(
   playerSeasonWeekMerged,
@@ -315,8 +310,7 @@ seasonalAndWeeklyData <- powerjoin::power_full_join(
 ) %>% 
   filter(!is.na(week))
 
-# check on duplicate id-by-season data (nfl_rosters, nfl_advancedStatsPFR_seasonal)
-
+# Duplicate cases
 seasonalData %>% 
   group_by(gsis_id, season) %>% 
   filter(n() > 1) %>% 
@@ -676,25 +670,25 @@ newData_seasonalTE$fantasyPoints_lag <- newData_seasonalTE_imp$ximp$fantasyPoint
 
 newData_seasonalQB <- left_join(
   newData_seasonalQB,
-  newData_seasonal %>% select(gsis_id, player_display_name, recent_team),
+  newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
 newData_seasonalRB <- left_join(
   newData_seasonalRB,
-  newData_seasonal %>% select(gsis_id, player_display_name, recent_team),
+  newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
 newData_seasonalWR <- left_join(
   newData_seasonalWR,
-  newData_seasonal %>% select(gsis_id, player_display_name, recent_team),
+  newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
 newData_seasonalTE <- left_join(
   newData_seasonalTE,
-  newData_seasonal %>% select(gsis_id, player_display_name, recent_team),
+  newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
@@ -721,6 +715,8 @@ newData_seasonalTE %>%
 
 ```{r}
 #| eval: false
+
+library("LongituRF")
 
 smerf <- LongituRF::MERF(
   X = seasonalData_subsetQB_imp$ximp[,c("passing_epa")] %>% as.matrix(),

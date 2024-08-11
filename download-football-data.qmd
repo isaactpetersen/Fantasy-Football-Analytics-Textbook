@@ -1038,6 +1038,7 @@ Let's rearrange the data accordingly:
 
 ```{r}
 nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly_raw %>% 
+  rename(team = recent_team) %>% 
   select(player_id, season, week, everything()) %>% 
   arrange(player_display_name, player_id, season, week)
 
@@ -2610,6 +2611,7 @@ Let's rearrange the data accordingly:
 
 ```{r}
 nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal_raw %>% 
+  rename(team = recent_team) %>% 
   select(player_id, season, everything()) %>% 
   arrange(player_display_name, player_id, season)
 
@@ -2785,7 +2787,7 @@ Specify scoring settings:
 # Reshape from wide to long format
 nfl_actualStats_offense_weekly_long <- nfl_actualStats_offense_weekly %>% 
   tidyr::pivot_longer(
-    cols = c(recent_team, opponent_team),
+    cols = c(team, opponent_team),
     names_to = "role",
     values_to = "team")
 
@@ -2950,17 +2952,17 @@ player_game_birthdate_gameday_kicking$ageCentered20Quadratic <- player_game_birt
 # Merge with player info
 player_age_offense <- dplyr::left_join(
   player_game_birthdate_gameday_offense,
-  nfl_players %>% select(-birth_date, -season),
+  nfl_players %>% select(-birth_date, -season, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id"))
 
 player_age_defense <- dplyr::left_join(
   player_game_birthdate_gameday_defense,
-  nfl_players %>% select(-birth_date, -season),
+  nfl_players %>% select(-birth_date, -season, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id"))
 
 player_age_kicking <- dplyr::left_join(
   player_game_birthdate_gameday_kicking,
-  nfl_players %>% select(-birth_date, -season),
+  nfl_players %>% select(-birth_date, -season, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id"))
 
 # Add game_id to weekly stats to facilitate merging
@@ -3122,19 +3124,19 @@ save(
 # Merge player info with seasonal stats
 player_stats_seasonal_offense <- dplyr::full_join(
   nfl_actualStats_offense_seasonal,
-  nfl_players %>% select(-position, -position_group, -season),
+  nfl_players %>% select(-position, -position_group, -season, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id")
 )
 
 player_stats_seasonal_defense <- dplyr::full_join(
   nfl_actualStats_defense_seasonal,
-  nfl_players %>% select(-position, -position_group, -season),
+  nfl_players %>% select(-position, -position_group, -season, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id")
 )
 
 player_stats_seasonal_kicking <- dplyr::full_join(
   nfl_actualStats_kicking_seasonal,
-  nfl_players %>% select(-position, -position_group, -season),
+  nfl_players %>% select(-position, -position_group, -season, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id")
 )
 
