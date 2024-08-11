@@ -254,8 +254,8 @@ nfl_advancedStatsPFR_seasonal %>%
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 #-todo: remove redundant variables
 playerListToMerge <- list(
-  nfl_players %>% filter(!is.na(gsis_id)) %>% select(-season, -years_of_experience),
-  nfl_draftPicks %>% filter(!is.na(gsis_id)) %>% select(-season, -age)
+  nfl_players %>% filter(!is.na(gsis_id)) %>% select(-season),
+  nfl_draftPicks %>% filter(!is.na(gsis_id)) %>% select(-season)
 )
 
 playerSeasonListToMerge <- list(
@@ -295,7 +295,7 @@ playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>%
 
 seasonalData <- powerjoin::power_full_join(
   playerSeasonMerged,
-  playerMerged %>% select(-team, -team_abbr, -team_seq, -current_team_id),
+  playerMerged %>% select(-age, -years_of_experience, -team, -team_abbr, -team_seq, -current_team_id),
   by = "gsis_id",
   conflict = coalesce_xy
 ) %>% 
