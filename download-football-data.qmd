@@ -90,6 +90,7 @@ load(file = "./data/nfl_rankings_draft.RData")
 load(file = "./data/nfl_rankings_weekly.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp.RData", fsep = ""))
+load(file = "./data/players_projectedPoints_seasonal.RData")
 load(file = "./data/players_projections_seasonal_average.RData")
 
 # Calculated Data - Processed
@@ -2387,8 +2388,6 @@ save(
 The data file is saved in the project repository and can be loaded using the following command:
 
 ```{r}
-#| eval: false
-
 load(file = "./data/players_projections_seasonal_raw.RData")
 ```
 
@@ -2448,41 +2447,59 @@ scoring_obj
 
 #### Calculate Projected Points {#sec-calculateProjectedPoints}
 
+Calculate projected points by source:
+
 ```{r}
-players_projectedStats_seasonal <- ffanalytics::projections_table(
+players_projectedPoints_seasonal <- ffanalytics:::impute_and_score_sources(
+  data_result = players_projections_seasonal_raw,
+  scoring_rules = scoring_obj)
+```
+
+Calculate projected statistics and points, averaged across sources:
+
+```{r}
+players_projectedStatsAverage_seasonal <- ffanalytics::projections_table(
   players_projections_seasonal_raw,
   scoring_rules = scoring_obj,
   return_raw_stats = TRUE)
 
-players_projectedPoints_seasonal <- ffanalytics::projections_table(
+players_projectedPointsAverage_seasonal <- ffanalytics::projections_table(
   players_projections_seasonal_raw,
   scoring_rules = scoring_obj,
   return_raw_stats = FALSE)
 ```
 
-The `players_projectedStats_seasonal` and `players_projectedPoints_seasonal` objects are in `player`-`average type`-`position` form.
+The `players_projectedPoints_seasonal`, `players_projectedStatsAverage_seasonal`, and `players_projectedPointsAverage_seasonal` objects are in `player`-`average type`-`position` form.
 That is, each row should be uniquely identified by the combination of `id`, `avg_type`  and `pos` (or `position`).
 
 Let's check for duplicate `player`-`position`-`projection source` instances:
 
 ```{r}
 players_projectedPoints_seasonal %>% 
-  group_by(id, avg_type, pos) %>% 
+  bind_rows() %>% 
+  select(id, pos, data_src, everything()) %>%
+  arrange(player, id, pos, data_src) %>% 
+  group_by(id, pos, data_src) %>% 
+  filter(n() > 1, !is.na(id)) %>% 
+  head()
+
+players_projectedStatsAverage_seasonal %>% 
+  group_by(id, avg_type, position) %>% 
   filter(n() > 1) %>% 
   head()
 
-players_projectedStats_seasonal %>% 
-  group_by(id, avg_type, position) %>% 
+players_projectedPointsAverage_seasonal %>% 
+  group_by(id, avg_type, pos) %>% 
   filter(n() > 1) %>% 
   head()
 ```
 
-Let's merge the two objects.
+Let's merge the two averaged projected statistics and points objects:
 
 ```{r}
 players_projections_seasonal_average <- full_join(
-  players_projectedPoints_seasonal,
-  players_projectedStats_seasonal,
+  players_projectedPointsAverage_seasonal,
+  players_projectedStatsAverage_seasonal,
   by = c("id","avg_type","pos" = "position")
 )
 ```
@@ -2513,6 +2530,11 @@ players_projections_seasonal_average <- players_projections_seasonal_average %>%
 #| eval: false
 
 save(
+  players_projectedPoints_seasonal,
+  file = "./data/players_projectedPoints_seasonal.RData"
+)
+
+save(
   players_projections_seasonal_average,
   file = "./data/players_projections_seasonal_average.RData"
 )
@@ -2521,6 +2543,7 @@ save(
 The data file is saved in the project repository and can be loaded using the following command:
 
 ```{r}
+load(file = "./data/players_projectedPoints_seasonal.RData")
 load(file = "./data/players_projections_seasonal_average.RData")
 ```
 
