@@ -5,12 +5,66 @@
 ### Load Packages {#sec-simulationLoadPackages}
 
 ```{r}
-
+library("tidyverse")
 ```
+
 
 ### Load Data {#sec-simulationLoadData}
 
+```{r}
+load(file = "./data/players_projectedPoints_seasonal.RData")
+```
+
 ## Overview {#sec-simulationOverview}
+
+## Simulation of Projected Statistics and Points {#sec-simulationProjectedPoints}
+
+```{r}
+calculate_fantasyPoints <- function(df, scoring_rules){
+  #fantasyPoints <-
+  
+  #return(fantasyPoints)
+}
+
+monte_carlo_simulation <- function(position_df, num_simulations = 10000){
+  player_ids <- unique(position_df$id)
+  
+  results <- lapply(player_ids, function(player_id){
+    player_data <- position_df %>% filter(id == player_id)
+    
+    # Run the simulation for this player
+    simulations <- replicate(num_simulations, {
+      sampled_data <- player_data %>%
+        summarise(across(
+          c(pass_yds, pass_tds, rush_yds, rush_tds, rec_yds, rec_tds), 
+          ~ if (all(is.na(.))) NA else sample(.[!is.na(.)], 1, replace = TRUE)))
+      
+      sampled_data
+    }, simplify = FALSE)
+    
+    simulation_df <- bind_rows(simulations)
+    #simulation_df$fantasyPoints <- calculate_fantasyPoints(simulation_df)
+    
+    ci <- simulation_df %>%
+      summarise(across(where(is.numeric), list(
+        lower = \(x) quantile(x, 0.025, na.rm = TRUE),
+        upper = \(x) quantile(x, 0.975, na.rm = TRUE))))
+    
+    ci <- ci %>% mutate(id = player_id)
+    
+    return(ci)
+    })
+    
+    # Combine results for all players
+    final_ci <- bind_rows(results)
+    
+    return(final_ci)
+}
+
+monte_carlo_simulation(players_projectedPoints_seasonal$QB, num_simulations = 10)
+
+QB_ci <- monte_carlo_simulation(players_projectedPoints_seasonal$QB)
+```
 
 ## Conclusion {#sec-simulationConclusion}
 
