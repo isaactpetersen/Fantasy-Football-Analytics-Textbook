@@ -275,6 +275,15 @@ nfl_playerIDs %>%
   head()
 ```
 
+Let's do some data processing to help with merging the dataset with other datasets:
+
+```{r}
+nfl_playerIDs <- nfl_playerIDs %>% 
+  mutate(
+    nameMerge = petersenlab::cleanUpNames(name)
+  )
+```
+
 ```{r}
 #| eval: false
 
@@ -532,9 +541,60 @@ nfl_combine <- nfl_combine_raw %>%
   arrange(season, player_name)
 ```
 
-Let's check for duplicate `pfr_id` and `cfb_id` instances:
+Let's do some data processing to help with merging the dataset with other datasets:
 
 ```{r}
+nfl_combine <- nfl_combine %>% 
+  mutate(
+    nameMerge = petersenlab::cleanUpNames(player_name)
+  )
+
+# First, merge on both pfr_id and cfb_id
+merged_data1 <- left_join(
+  nfl_combine,
+  nfl_playerIDs %>% select(pfr_id, cfbref_id, gsis_id),
+  by = c("pfr_id", "cfb_id" = "cfbref_id"),
+  na_matches = "never"
+)
+
+# Second, merge on pfr_id
+merged_data2 <- left_join(
+  nfl_combine,
+  nfl_playerIDs %>% select(pfr_id, nameMerge, position, gsis_id),
+  by = c("pfr_id","nameMerge","pos" = "position"),
+  na_matches = "never"
+)
+
+# Third, merge on cfb_id
+merged_data3 <- left_join(
+  nfl_combine,
+  nfl_playerIDs %>% select(cfbref_id, nameMerge, position, gsis_id),
+  by = c("cfb_id" = "cfbref_id","nameMerge","pos" = "position"),
+  na_matches = "never"
+)
+
+# Combine gsis_id across merges
+nfl_combine$gsis_id <- coalesce(
+  merged_data1$gsis_id,
+  merged_data2$gsis_id,
+  merged_data3$gsis_id
+  )
+
+# Rearrange the data
+nfl_combine <- nfl_combine %>% 
+  select(gsis_id, pfr_id, cfb_id, player_name, everything()) %>% 
+  arrange(season, player_name)
+```
+
+Let's check for duplicate `gsis_id`, `pfr_id`, and `cfb_id` instances:
+
+```{r}
+nfl_combine %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1, !is.na(gsis_id)) %>% 
+  arrange(gsis_id) %>% 
+  head()
+
 nfl_combine %>% 
   group_by(pfr_id) %>% 
   filter(n() > 1, !is.na(pfr_id)) %>% 
@@ -548,9 +608,22 @@ nfl_combine %>%
   head()
 ```
 
-However, these apparent duplicates appear to be different players:
+Let's do some additional data processing:
 
 ```{r}
+# Drop Stanford Samuels Jr.
+nfl_combine$gsis_id[which(nfl_combine$cfb_id == "stanford-samuels-1")] <- NA
+```
+
+However, these apparent duplicates appear to be different players at different positions:
+
+```{r}
+nfl_combine %>% 
+  group_by(season, gsis_id, pos) %>% 
+  filter(n() > 1, !is.na(gsis_id)) %>% 
+  arrange(gsis_id) %>% 
+  head()
+
 nfl_combine %>% 
   group_by(season, pfr_id, pos) %>% 
   filter(n() > 1, !is.na(pfr_id)) %>% 

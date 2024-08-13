@@ -5,6 +5,7 @@
 ### Load Packages {#sec-clusterAnalysisLoadPackages}
 
 ```{r}
+library("petersenlab")
 library("mclust")
 library("tidyverse")
 library("plotly")
@@ -16,13 +17,21 @@ library("plotly")
 #| eval: false
 #| include: false
 
+load(file = "./data/nfl_players.RData")
+load(file = "./data/nfl_combine.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
+load(file = "./data/nfl_actualStats_career.RData")
 ```
 
 ```{r}
+load(file = "./data/nfl_players.RData")
+load(file = "./data/nfl_combine.RData")
 load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
+load(file = "./data/nfl_advancedStatsPFR_seasonal.RData")
+load(file = "./data/nfl_actualStats_career.RData")
 ```
 
 ### Overview {#sec-clusterAnalysisOverview}
@@ -40,7 +49,7 @@ There are many approaches to cluster analysis, including model-based clustering,
 An overview of approaches to cluster analysis in `R` is provided by @Kassambara2017a.
 In this chapter, we focus on examples using model-based clustering with the `mclust` package [@Scrucca2023], which uses Gaussian finite mixture modeling.
 
-### Example: Tiers of Prior Season Fantasy Points {#sec-clusterAnalysisExample}
+### Tiers of Prior Season Fantasy Points {#sec-clusterAnalysisExample}
 
 #### Prepare Data {#sec-clusterAnalysisExamplePrepareData}
 
@@ -69,7 +78,7 @@ player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recent %
 ##### Quarterbacks {#sec-clusterAnalysisExampleNumTiersQBs}
 
 ```{r}
-tiersQB_bic <- mclustBIC(
+tiersQB_bic <- mclust::mclustBIC(
   data = player_stats_seasonal_offense_recentQB$fantasy_points,
   G = 1:9
 )
@@ -78,7 +87,7 @@ tiersQB_bic
 summary(tiersQB_bic)
 plot(tiersQB_bic)
 
-tiersQB_icl <- mclustICL(
+tiersQB_icl <- mclust::mclustICL(
   data = player_stats_seasonal_offense_recentQB$fantasy_points,
   G = 1:9
 )
@@ -87,8 +96,8 @@ tiersQB_icl
 summary(tiersQB_icl)
 plot(tiersQB_icl)
 
-tiersQB_boostrap <- mclustBootstrapLRT(
-  player_stats_seasonal_offense_recentQB$fantasy_points,
+tiersQB_boostrap <- mclust::mclustBootstrapLRT(
+  data = player_stats_seasonal_offense_recentQB$fantasy_points,
   modelName = "V") # variable/unequal variance (for univariate data)
 
 numTiersQB <- as.numeric(summary(tiersQB_boostrap)[,"Length"][1]) # or could specify the number of teams manually
@@ -102,7 +111,7 @@ plot(
 ##### Running Backs {#sec-clusterAnalysisExampleNumTiersRBs}
 
 ```{r}
-tiersRB_bic <- mclustBIC(
+tiersRB_bic <- mclust::mclustBIC(
   data = player_stats_seasonal_offense_recentRB$fantasy_points,
   G = 1:9
 )
@@ -111,7 +120,7 @@ tiersRB_bic
 summary(tiersRB_bic)
 plot(tiersRB_bic)
 
-tiersRB_icl <- mclustICL(
+tiersRB_icl <- mclust::mclustICL(
   data = player_stats_seasonal_offense_recentRB$fantasy_points,
   G = 1:9
 )
@@ -126,8 +135,8 @@ numTiersRB <- 3
 The model-based bootstrap clustering of Running Backs' fantasy points is unable to run due to an error:
 
 ```{r}
-tiersRB_boostrap <- mclustBootstrapLRT(
-  player_stats_seasonal_offense_recentRB$fantasy_points,
+tiersRB_boostrap <- mclust::mclustBootstrapLRT(
+  data = player_stats_seasonal_offense_recentRB$fantasy_points,
   modelName = "V") # variable/unequal variance (for univariate data)
 ```
 
@@ -147,7 +156,7 @@ plot(
 ##### Wide Receivers {#sec-clusterAnalysisExampleNumTiersWRs}
 
 ```{r}
-tiersWR_bic <- mclustBIC(
+tiersWR_bic <- mclust::mclustBIC(
   data = player_stats_seasonal_offense_recentWR$fantasy_points,
   G = 1:9
 )
@@ -156,7 +165,7 @@ tiersWR_bic
 summary(tiersWR_bic)
 plot(tiersWR_bic)
 
-tiersWR_icl <- mclustICL(
+tiersWR_icl <- mclust::mclustICL(
   data = player_stats_seasonal_offense_recentWR$fantasy_points,
   G = 1:9
 )
@@ -165,8 +174,8 @@ tiersWR_icl
 summary(tiersWR_icl)
 plot(tiersWR_icl)
 
-tiersWR_boostrap <- mclustBootstrapLRT(
-  player_stats_seasonal_offense_recentWR$fantasy_points,
+tiersWR_boostrap <- mclust::mclustBootstrapLRT(
+  data = player_stats_seasonal_offense_recentWR$fantasy_points,
   modelName = "V") # variable/unequal variance (for univariate data)
 
 numTiersWR <- as.numeric(summary(tiersWR_boostrap)[,"Length"][1]) # or could specify the number of teams manually
@@ -180,7 +189,7 @@ plot(
 ##### Tight Ends {#sec-clusterAnalysisExampleNumTiersTEs}
 
 ```{r}
-tiersTE_bic <- mclustBIC(
+tiersTE_bic <- mclust::mclustBIC(
   data = player_stats_seasonal_offense_recentTE$fantasy_points,
   G = 1:9
 )
@@ -189,7 +198,7 @@ tiersTE_bic
 summary(tiersTE_bic)
 plot(tiersTE_bic)
 
-tiersTE_icl <- mclustICL(
+tiersTE_icl <- mclust::mclustICL(
   data = player_stats_seasonal_offense_recentTE$fantasy_points,
   G = 1:9
 )
@@ -198,8 +207,8 @@ tiersTE_icl
 summary(tiersTE_icl)
 plot(tiersTE_icl)
 
-tiersTE_boostrap <- mclustBootstrapLRT(
-  player_stats_seasonal_offense_recentTE$fantasy_points,
+tiersTE_boostrap <- mclust::mclustBootstrapLRT(
+  data = player_stats_seasonal_offense_recentTE$fantasy_points,
   modelName = "V") # variable/unequal variance (for univariate data)
 
 numTiersTE <- as.numeric(summary(tiersTE_boostrap)[,"Length"][1]) # or could specify the number of teams manually
@@ -219,21 +228,21 @@ In our data, all of the following models are equivalent—i.e., they result in t
 ```{r}
 #| eval: false
 
-Mclust(
+mclust::Mclust(
   data = player_stats_seasonal_offense_recentQB$fantasy_points,
   G = numTiersQB,
 )
 
-Mclust(
+mclust::Mclust(
   data = player_stats_seasonal_offense_recentQB$fantasy_points,
   G = 4,
 )
 
-Mclust(
+mclust::Mclust(
   data = player_stats_seasonal_offense_recentQB$fantasy_points,
 )
 
-Mclust(
+mclust::Mclust(
   data = player_stats_seasonal_offense_recentQB$fantasy_points,
   x = tiersQB_bic
 )
@@ -242,7 +251,7 @@ Mclust(
 Let's fit one of these:
 
 ```{r}
-clusterModelQBs <- Mclust(
+clusterModelQBs <- mclust::Mclust(
   data = player_stats_seasonal_offense_recentQB$fantasy_points,
   G = numTiersQB,
 )
@@ -257,7 +266,7 @@ table(clusterModelQBs$classification)
 ##### Running Backs {#sec-clusterAnalysisExampleModelRBs}
 
 ```{r}
-clusterModelRBs <- Mclust(
+clusterModelRBs <- mclust::Mclust(
   data = player_stats_seasonal_offense_recentRB$fantasy_points,
   G = numTiersRB,
 )
@@ -272,7 +281,7 @@ table(clusterModelRBs$classification)
 ##### Wide Receivers {#sec-clusterAnalysisExampleModelWRs}
 
 ```{r}
-clusterModelWRs <- Mclust(
+clusterModelWRs <- mclust::Mclust(
   data = player_stats_seasonal_offense_recentWR$fantasy_points,
   G = numTiersWR,
 )
@@ -287,7 +296,7 @@ table(clusterModelWRs$classification)
 ##### Tight Ends {#sec-clusterAnalysisExampleModelTEs}
 
 ```{r}
-clusterModelTEs <- Mclust(
+clusterModelTEs <- mclust::Mclust(
   data = player_stats_seasonal_offense_recentTE$fantasy_points,
   G = numTiersTE,
 )
@@ -485,6 +494,232 @@ plot_teTiers <- ggplot2::ggplot(
   theme(legend.position = "top")
 
 ggplotly(plot_teTiers)
+```
+
+### Types of Wide Receivers {#sec-clusterAnalysisWRtypes}
+
+```{r}
+#| eval: false
+#| include: false
+
+#names(nfl_players) #gsis_id: height, weight
+#names(nfl_combine) #gsis_id: vertical, forty, ht, wt
+#names(player_stats_seasonal_offense) #player_id, season: receptions, receiving_air_yards, air_yards_share, target_share
+#names(nfl_advancedStatsPFR_seasonal) #gsis_id, season: adot.rec, rec.rec, brk_tkl.rec, drop.rec, drop_percent.rec
+#names(nfl_actualStats_offense_career) #player_id: receptions, targets, receiving_air_yards, air_yards_share, target_share
+```
+
+
+```{r}
+# Compute Advanced PFR Stats by Career
+pfrVars <- nfl_advancedStatsPFR_seasonal %>% 
+  select(pocket_time.pass:cmp_percent.def, g, gs) %>% 
+  names()
+
+weightedAverageVars <- c(
+  "pocket_time.pass",
+  "ybc_att.rush","yac_att.rush",
+  "ybc_r.rec","yac_r.rec","adot.rec","rat.rec",
+  "yds_cmp.def","yds_tgt.def","dadot.def","m_tkl_percent.def","rat.def"
+)
+
+recomputeVars <- c(
+  "drop_pct.pass", # drops.pass / pass_attempts.pass
+  "bad_throw_pct.pass", # bad_throws.pass / pass_attempts.pass
+  "on_tgt_pct.pass", # on_tgt_throws.pass / pass_attempts.pass
+  "pressure_pct.pass", # times_pressured.pass / pass_attempts.pass
+  "drop_percent.rec", # drop.rec / tgt.rec
+  "rec_br.rec", # rec.rec / brk_tkl.rec
+  "cmp_percent.def" # cmp.def / tgt.def
+)
+
+sumVars <- pfrVars[pfrVars %ni% c(
+  weightedAverageVars, recomputeVars,
+  "nameMerge", "loaded.pass", "loaded.rush", "loaded.rec", "loaded.def")]
+
+nfl_advancedStatsPFR_career <- nfl_advancedStatsPFR_seasonal %>% 
+  group_by(pfr_id, nameMerge) %>% 
+  summarise(
+    across(all_of(weightedAverageVars), ~ weighted.mean(.x, w = g, na.rm = TRUE)),
+    across(all_of(sumVars), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop") %>% 
+  mutate(
+    drop_pct.pass = drops.pass / pass_attempts.pass,
+    bad_throw_pct.pass = bad_throws.pass / pass_attempts.pass,
+    on_tgt_pct.pass = on_tgt_throws.pass / pass_attempts.pass,
+    pressure_pct.pass = times_pressured.pass / pass_attempts.pass,
+    drop_percent.rec = drop.rec / tgt.rec,
+    rec_br.rec = drop.rec / tgt.rec,
+    cmp_percent.def = cmp.def / tgt.def
+  )
+
+uniqueCases <- nfl_advancedStatsPFR_seasonal %>% select(pfr_id, nameMerge, gsis_id) %>% unique()
+
+uniqueCases %>%
+  group_by(pfr_id) %>% 
+  filter(n() > 1)
+
+nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
+  filter(pfr_id != "WillMa06" | nameMerge != "MARCUSWILLIAMS" | !is.na(gsis_id))
+
+
+nfl_advancedStatsPFR_career <- left_join(
+  nfl_advancedStatsPFR_career,
+  nfl_advancedStatsPFR_seasonal %>% select(pfr_id, nameMerge, gsis_id) %>% unique(),
+  by = c("pfr_id", "nameMerge")
+)
+
+# Compute Player Stats Per Season
+player_stats_seasonal_careerWRs <- player_stats_seasonal_offense %>% 
+  filter(position == "WR") %>% 
+  group_by(player_id) %>% 
+  summarise(
+    across(all_of(c("targets", "receptions", "receiving_air_yards")), ~ weighted.mean(.x, w = games, na.rm = TRUE)),
+    .groups = "drop")
+
+# Drop players with no receiving air yards
+player_stats_seasonal_careerWRs <- player_stats_seasonal_careerWRs %>% 
+  filter(receiving_air_yards != 0) %>% 
+  rename(
+    targets_per_season = targets,
+    receptions_per_season = receptions,
+    receiving_air_yards_per_season = receiving_air_yards
+  )
+
+# Merge
+playerListToMerge <- list(
+  nfl_players %>% select(gsis_id, display_name, position, height, weight),
+  nfl_combine %>% select(gsis_id, vertical, forty, ht, wt),
+  player_stats_seasonal_careerWRs %>% select(player_id, targets_per_season, receptions_per_season, receiving_air_yards_per_season) %>% 
+    rename(gsis_id = player_id),
+  nfl_actualStats_offense_career %>% select(player_id, receptions, targets, receiving_air_yards, air_yards_share, target_share) %>% 
+    rename(gsis_id = player_id),
+  nfl_advancedStatsPFR_career %>% select(gsis_id, adot.rec, rec.rec, brk_tkl.rec, drop.rec, drop_percent.rec)
+)
+
+merged_data <- playerListToMerge %>% 
+  reduce(
+    full_join,
+    by = c("gsis_id"),
+    na_matches = "never")
+```
+
+Additional processing:
+
+```{r}
+merged_data <- merged_data %>% 
+  separate(ht, into = c("feet", "inches"), sep = "-") %>%
+  mutate(
+    feet = as.numeric(feet),
+    inches = as.numeric(inches),
+    ht_numeric = feet * 12 + inches
+  ) %>%
+  select(-feet, -inches)
+
+merged_data <- merged_data %>% 
+  mutate(
+    height_coalesced = coalesce(height, ht_numeric),
+    weight_coalesced = coalesce(weight, wt),
+    receptions_coalesced = pmax(receptions, rec.rec, na.rm = TRUE),
+    receiving_air_yards_per_rec = receiving_air_yards / receptions
+  )
+
+merged_data$receiving_air_yards_per_rec[which(merged_data$receptions == 0)] <- 0
+
+merged_dataWRs <- merged_data %>% 
+  filter(position == "WR")
+
+merged_dataWRs_cluster <- merged_dataWRs %>% 
+  filter(receptions_coalesced >= 100) %>% # keep WRs with at least 100 receptions
+  select(gsis_id, display_name, vertical, forty, height_coalesced, weight_coalesced, targets_per_season, receptions_per_season, receiving_air_yards_per_season, air_yards_share, target_share, adot.rec, brk_tkl.rec, drop_percent.rec, receiving_air_yards_per_rec) %>% 
+  na.omit()
+```
+
+#### Identify the Number of WR Types {#sec-clusterAnalysisNumWRtypes}
+
+```{r}
+wrTypes_bic <- mclust::mclustBIC(
+  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  G = 1:9
+)
+
+wrTypes_bic
+summary(wrTypes_bic)
+plot(wrTypes_bic)
+
+wrTypes_icl <- mclust::mclustICL(
+  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  G = 1:9
+)
+
+wrTypes_icl
+summary(wrTypes_icl)
+plot(wrTypes_icl)
+```
+
+```{r}
+#| eval: false
+
+wrTypes_boostrap <- mclust::mclustBootstrapLRT(
+  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  modelName = "VVV") # ellipsoidal (variable volume, variable shape), variable orientation (for multivariate data)
+
+wrTypes_boostrap
+plot(
+  wrTypes_boostrap,
+  G = numTypesWR - 1)
+```
+
+#### Fit the Cluster Model to the Optimal Number of WR Types {#sec-clusterAnalysisModelWRtypes}
+
+```{r}
+numTypesWR <- 3
+
+clusterModelWRtypes <- mclust::Mclust(
+  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  G = numTypesWR,
+)
+
+summary(clusterModelWRtypes)
+```
+
+```{r}
+plot(
+  clusterModelWRtypes,
+  what = "BIC")
+```
+
+```{r}
+plot(
+  clusterModelWRtypes,
+  what = "classification")
+```
+
+```{r}
+plot(
+  clusterModelWRtypes,
+  what = "uncertainty")
+```
+
+```{r}
+plot(
+  clusterModelWRtypes,
+  what = "density")
+```
+
+```{r}
+table(clusterModelWRtypes$classification)
+
+merged_dataWRs_cluster$type <- clusterModelWRtypes$classification
+
+merged_dataWRs_cluster %>% 
+  group_by(type) %>% 
+  summarise(across(
+    where(is.numeric),
+    ~ mean(., na.rm = TRUE)
+    )) %>% 
+  t() %>% 
+  round(., 2)
 ```
 
 ## Conclusion {#sec-clusterAnalysisConclusion}
