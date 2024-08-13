@@ -29,10 +29,28 @@ load(file = "./data/player_stats_seasonal.RData")
 ## Overview of Time Series Analysis {#sec-timeSeriesOverview}
 
 Time series analysis is useful when trying to generate forecasts from longitudinal data.
+That is, time series analysis seeks to evaluate change over time to predict future values.
+
 There many different types of time series analyses.
 For simplicity, in this chapter, we use autoregressive integrated moving average (ARIMA) models to demonstrate one approach to time series analysis.
-ARIMA models perform best when there is a clear pattern where later values are influenced by earlier values (i.e., autoregressive effects and moving average effects).
+
+## Autoregressive Integrated Moving Average (ARIMA) Models {#sec-timeSeriesARIMA}
+
+@Hyndman2021 provide a nice overview of ARIMA models.
+As noted by @Hyndman2021, ARIMA models aim to describe how a variable is correlated with itself over time (autocorrelation)—i.e., how earlier levels of a variable are correlated with later levels of the same variable.
+ARIMA models perform best when there is a clear pattern where later values are influenced by earlier values.
+ARIMA models incorporate autoregression effects, moving average effects, and differencing.
+
+ARIMA models can have various numbers of terms and model complexity.
+They are specified in the following form: $\text{ARIMA}(p,d,q)$, where:
+
+- $p =$ the number of autoregressive terms
+- $d =$ the number of differences between consecutive scores (to make the time series stationary by reducing trends and seasonality)
+- $q =$ the number of moving average terms
+
+ARIMA models assume that the data are stationary (i.e., there are no long-term trends), are non-seasonal (i.e., there is no consistency of the timing of the peaks or troughs in the line), and that earlier values influence later values.
 This may not strongly be the case in fantasy football, so ARIMA models may not be particularly useful in forecasting fantasy football performance.
+Other approaches, such as exponential smoothing, may be useful for data that show longer-term trends and seasonality [@Hyndman2021].
 Nevertheless, ARIMA models are widely used in forecasting financial markets and economic indicators.
 Thus, it is a useful technique to learn.
 
@@ -71,12 +89,18 @@ names(ts_combined) <- c("Tom Brady","Peyton Manning")
 ## Plot the Time Series {#sec-plotTimeSeries}
 
 ```{r}
+#| label: fig-timeSeriesHistoricalTomBrady
+#| fig-cap: "Tom Brady's Historical Fantasy Points by Game."
+
 plot(
   ts_tomBrady,
   main = "Tom Brady's Fantasy Points by Game")
 ```
 
 ```{r}
+#| label: fig-timeSeriesHistoricalBradyManning
+#| fig-cap: "Historical Fantasy Points by Game for Tom Brady and Peyone Manning."
+
 plot(
   ts_combined,
   legend,
@@ -98,7 +122,13 @@ zoo::rollmedian(
 
 ## Autocorrelation {#sec-autoCorrelation}
 
+The autocorrelation function (ACF) plot depicts the autocorrelation of scores as a function of the length of the lag.
+Significant autocorrelation is detected when the autocorrelation exceeds the dashed blue lines, as is depicted in @fig-timeSeriesACFtomBrady.
+
 ```{r}
+#| label: fig-timeSeriesACFtomBrady
+#| fig-cap: "Autocorrelation Function (ACF) Plot of Tom Brady's Historical Fantasy Points by Game."
+
 acf(ts_tomBrady)
 ```
 
@@ -114,6 +144,9 @@ forecast::auto.arima(ts_peytonManning)
 ```
 
 ```{r}
+#| label: fig-arimaTomBrady
+#| fig-cap: "Model Summary of Autoregressive Integrated Moving Average Model fit to Tom Brady's Historical Performance by Game."
+
 arima_tomBrady <- arima(
   ts_tomBrady,
   order = c(5, 1, 4))
@@ -121,6 +154,11 @@ arima_tomBrady <- arima(
 summary(arima_tomBrady)
 confint(arima_tomBrady)
 forecast::checkresiduals(arima_tomBrady)
+```
+
+```{r}
+#| label: fig-arimaModifiedTomBrady
+#| fig-cap: "Model Summary of modified Autoregressive Integrated Moving Average Model fit to Tom Brady's Historical Performance by Game."
 
 arima_tomBrady_removeNonSigTerms <- arima(
   ts_tomBrady,
@@ -130,6 +168,11 @@ arima_tomBrady_removeNonSigTerms <- arima(
 summary(arima_tomBrady_removeNonSigTerms)
 confint(arima_tomBrady_removeNonSigTerms)
 forecast::checkresiduals(arima_tomBrady_removeNonSigTerms)
+```
+
+```{r}
+#| label: fig-arimaPeytonManning
+#| fig-cap: "Model Summary of Autoregressive Integrated Moving Average Model fit to Peyton Manning's Historical Performance by Game."
 
 arima_peytonManning <- arima(
   ts_peytonManning,
@@ -158,11 +201,28 @@ forecast_peytonManning
 ## Plot the Model Forecasts {#sec-plotARIMAforecast}
 
 ```{r}
+#| label: fig-timeSeriesProjectionTomBrady
+#| fig-cap: "Tom Brady's Historical and Projected Fantasy Points by Game."
+
 forecast::autoplot(forecast_tomBrady) + 
   labs(
     x = "Game Number",
     y = "Fantasy Points",
     title = "Tom Brady's Historical and Projected Fantasy Points by Game",
+    subtitle = "(if he were to have continued playing additional seasons)"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-timeSeriesProjectionPeytonManning
+#| fig-cap: "Peyton Manning's Historical and Projected Fantasy Points by Game."
+
+forecast::autoplot(forecast_peytonManning) + 
+  labs(
+    x = "Game Number",
+    y = "Fantasy Points",
+    title = "Peyton Manning's Historical and Projected Fantasy Points by Game",
     subtitle = "(if he were to have continued playing additional seasons)"
   ) +
   theme_classic()
