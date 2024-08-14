@@ -48,6 +48,8 @@ In order to identify these clusters of Wide Receivers, we might conduct a cluste
 There are many approaches to cluster analysis, including model-based clustering, density-based clustering, centroid-based clustering, hierarchical clustering (aka connectivity-based clustering), etc.
 An overview of approaches to cluster analysis in `R` is provided by @Kassambara2017a.
 In this chapter, we focus on examples using model-based clustering with the `mclust` package [@Scrucca2023], which uses Gaussian finite mixture modeling.
+The various types of `mclust` models are provided here:
+<https://mclust-org.github.io/mclust/reference/mclustModelNames.html>.
 
 ### Tiers of Prior Season Fantasy Points {#sec-clusterAnalysisExample}
 
@@ -509,7 +511,6 @@ ggplotly(plot_teTiers)
 #names(nfl_actualStats_offense_career) #player_id: receptions, targets, receiving_air_yards, air_yards_share, target_share
 ```
 
-
 ```{r}
 # Compute Advanced PFR Stats by Career
 pfrVars <- nfl_advancedStatsPFR_seasonal %>% 
@@ -622,7 +623,7 @@ merged_dataWRs <- merged_data %>%
 
 merged_dataWRs_cluster <- merged_dataWRs %>% 
   filter(receptions_coalesced >= 100) %>% # keep WRs with at least 100 receptions
-  select(gsis_id, display_name, vertical, forty, height_coalesced, weight_coalesced, targets_per_season, receptions_per_season, receiving_air_yards_per_season, air_yards_share, target_share, adot.rec, brk_tkl.rec, drop_percent.rec, receiving_air_yards_per_rec) %>% 
+  select(gsis_id, display_name, vertical, forty, height_coalesced, weight_coalesced, adot.rec, drop_percent.rec, receiving_air_yards_per_rec, brk_tkl.rec, receptions_per_season) %>% #targets_per_season, receiving_air_yards_per_season, air_yards_share, target_share
   na.omit()
 ```
 
@@ -648,12 +649,18 @@ summary(wrTypes_icl)
 plot(wrTypes_icl)
 ```
 
+Based on the cluster analyses, it appears that three clusters are the best fit to the data.
+
+```{r}
+numTypesWR <- 3
+```
+
 ```{r}
 #| eval: false
 
 wrTypes_boostrap <- mclust::mclustBootstrapLRT(
   data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
-  modelName = "VVE") # ellipsoidal (variable volume, variable shape), equal orientation (for multivariate data)
+  modelName = "EVE") # ellipsoidal with equal volume, variable shape, and equal orientation (for multivariate data)
 
 wrTypes_boostrap
 plot(
@@ -664,8 +671,6 @@ plot(
 #### Fit the Cluster Model to the Optimal Number of WR Types {#sec-clusterAnalysisModelWRtypes}
 
 ```{r}
-numTypesWR <- 3
-
 clusterModelWRtypes <- mclust::Mclust(
   data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
   G = numTypesWR,
@@ -673,6 +678,8 @@ clusterModelWRtypes <- mclust::Mclust(
 
 summary(clusterModelWRtypes)
 ```
+
+#### Plots of the Cluster Model {#sec-clusterAnalysisPlotsWRtypes}
 
 ```{r}
 plot(
@@ -698,6 +705,8 @@ plot(
   what = "density")
 ```
 
+#### Interpreting the Clusters {#sec-clusterAnalysisInterpretationWRtypes}
+
 ```{r}
 table(clusterModelWRtypes$classification)
 
@@ -713,7 +722,23 @@ merged_dataWRs_cluster %>%
   round(., 2)
 ```
 
-Type 1 WRs:
+Based on this analysis (and the variables included), there appear to be three types of Wide Receivers.
+Type 1 Wide Receivers includes the Elite WR1s who are strong possession receivers (note: not all players in a given cluster map on perfectly to the typology—i.e., not all Type 1 Wide Receivers are elite WR1s).
+They tend to have the lowest drop percentage, the shortest average depth of target, and the fewest receiving air yards per reception.
+They tend to have the most receptions per season and break the most tackles.
+
+Type 2 Wide Receivers includes the consistent contributor, WR2 types.
+They had fewer receptions and fewer broken tackles than Type 1 Wide Receivers.
+Their average depth of target was longer than Type 1, and they had more receiving air yards per reception than Type 1.
+
+Type 3 Wide Receivers includes the deep threats.
+They have the greatest average depth of target and the most receiving yards per reception.
+However, they also have the fewest receptions, the highest drop percentage, and the fewest broken tackles.
+Thus, they may be considered the boom-or-bust Wide Receivers.
+
+The tiers were not particularly distinguishable based on their height, weight, vertical jump, or forty-yard dash time.
+
+Type 1 ("Elite/WR1") WRs:
 
 ```{r}
 merged_dataWRs_cluster %>% 
@@ -721,7 +746,7 @@ merged_dataWRs_cluster %>%
   select(display_name)
 ```
 
-Type 2 WRs:
+Type 2 ("Consistent Contributor/WR2") WRs:
 
 ```{r}
 merged_dataWRs_cluster %>% 
@@ -729,7 +754,7 @@ merged_dataWRs_cluster %>%
   select(display_name)
 ```
 
-Type 3 WRs:
+Type 3 ("Deep Threat/Boom-or-Bust") WRs:
 
 ```{r}
 merged_dataWRs_cluster %>% 
