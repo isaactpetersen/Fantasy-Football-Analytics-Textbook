@@ -5,9 +5,10 @@
 ### Load Packages {#sec-dataVisualizationLoadPackages}
 
 ```{r}
-library("tidyverse")
 library("nflplotR")
 library("plotly")
+library("gghighlight")
+library("tidyverse")
 ```
 
 ### Load Data {#sec-dataVisualizationLoadData}
@@ -33,6 +34,11 @@ We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` obj
 
 The R Graph Gallery provides examples of various types of plots: <https://r-graph-gallery.com>.
 
+A key principle of graphic design and data visualization is the importance of contrast.
+Each visual component (e.g., line) that is important to see should be easy to distinguish.
+For instance, you can highlight lines or points of interest to draw people's attention to the target of interest.
+For examples of highlighting in figures, see Figures [-@fig-lineChartHighlighting] (@sec-lineChartHighlighting) and [-@fig-simulationOf10CoinFlips].
+
 ## Univariate Distribution {#sec-univariateDistribution}
 
 ### Histogram {#sec-histogram}
@@ -53,6 +59,10 @@ ggplot2::ggplot(
     color = "#000000",
     fill = "#0099F8"
   ) +
+  labs(
+    x = "Fantasy Points",
+    title = "Histogram of Fantasy Points"
+  ) +
   theme_classic()
 ```
 
@@ -62,7 +72,7 @@ A histogram of fantasy points is depicted in @fig-density.
 
 ```{r}
 #| label: fig-density
-#| fig-cap: "Density Plot of Fantasy Points."
+#| fig-cap: "Density Plot of Fantasy Points by Position."
 
 ggplot2::ggplot(
   data = player_stats_seasonal_offense %>%
@@ -72,6 +82,11 @@ ggplot2::ggplot(
     fill = position_group)
 ) +
   geom_density(alpha = 0.7) + # add transparency
+  labs(
+    x = "Fantasy Points",
+    fill = "Position",
+    title = "Density Plot of Fantasy Points by Position"
+  ) +
   theme_classic()
 ```
 
@@ -100,6 +115,10 @@ ggplot2::ggplot(
     alpha = 0.6 # add transparency
   ) +
   geom_rug() +
+  labs(
+    x = "Fantasy Points",
+    title = "Histogram of Fantasy Points with Overlaid Density and Rug Plot"
+  ) +
   theme_classic()
 ```
 
@@ -120,6 +139,11 @@ ggplot2::ggplot(
     fill = position_group)
 ) +
   geom_boxplot() +
+  labs(
+    x = "Position",
+    y = "Fantasy Points",
+    title = "Box-and-Whisker Plot of Fantasy Points by Position"
+  ) +
   theme_classic() + 
   theme(legend.position = "none")
 ```
@@ -130,7 +154,7 @@ A violin plot of fantasy points is depicted in @fig-boxAndWhisker.
 
 ```{r}
 #| label: fig-violin
-#| fig-cap: "Violin Plot."
+#| fig-cap: "Violin Plot. Lines represent the 25th, 50th, and 75th quantiles."
 
 ggplot2::ggplot(
   data = player_stats_seasonal_offense %>%
@@ -141,6 +165,12 @@ ggplot2::ggplot(
     fill = position_group)
 ) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  labs(
+    x = "Position",
+    y = "Fantasy Points",
+    title = "Violin Plot by Position",
+    subtitle = "Lines represent the 25th, 50th, and 75th quantiles"
+  ) +
   theme_classic() + 
   theme(legend.position = "none")
 ```
@@ -476,16 +506,48 @@ ggplot2::ggplot(
     filter(player_display_name == "Tom Brady"),
   mapping = aes(
     x = season,
-    y = fantasy_points,
-    fill = position_group
+    y = fantasy_points
     )
 ) +
   geom_line(
     linewidth = 1.5,
     color = "blue"
   ) +
+  labs(
+    x = "Season",
+    y = "Fantasy Points",
+    title = "Bar Plot of Tom Brady's Fantasy Points by Season"
+  ) +
   theme_classic()
 ```
+
+### With Highlighting {#sec-lineChartHighlighting}
+
+```{r}
+#| label: fig-lineChartHighlighting
+#| fig-cap: "Line Chart with Highlighting."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense,
+  mapping = aes(
+    x = season,
+    y = fantasy_points,
+    group = player_id,
+    color = player_display_name)
+) +
+  geom_line() +
+  gghighlight::gghighlight(
+    player_display_name == "Tom Brady",
+    label_key = player_display_name) +
+  labs(
+    x = "Season",
+    y = "Fantasy Points",
+    title = "Fantasy Points by Season and Player",
+    subtitle = "(Tom Brady in Red)"
+  ) +
+  theme_classic()
+```
+
 
 ## Bar Plot {#sec-barPlot}
 
@@ -535,7 +597,13 @@ ggplot2::ggplot(
 ) +
   geom_bar(
     stat = "identity") +
-  theme_classic()
+  labs(
+    x = "Position",
+    y = "Fantasy Points",
+    title = "Bar Plot of Fantasy Points by Position"
+  ) +
+  theme_classic() + 
+  theme(legend.position = "none")
 ```
 
 Based on the summary statistics in @tbl-summaryStats, we create a bar plot with bars representing the 95% confidence interval in @fig-barPlotConfidenceInterval.
@@ -563,7 +631,13 @@ ggplot2::ggplot(
     width = 0.2,
     color = "black"
   ) +
-  theme_classic()
+  labs(
+    x = "Position",
+    y = "Fantasy Points",
+    title = "Bar Plot of Fantasy Points by Position"
+  ) +
+  theme_classic() + 
+  theme(legend.position = "none")
 ```
 
 ## Examples {#sec-scatterplotExamples}
@@ -604,7 +678,6 @@ rb_yardsPerCarry <- rushing_attempts %>%
 ::: {.content-visible when-format="html:js"}
 
 Rushing yards per carry over the course of the season is depicted as a function of the Running Back's age in @fig-rushYPCperSeasonByAge.
-
 
 ```{r}
 #| label: fig-rushYPCperSeasonByAge
