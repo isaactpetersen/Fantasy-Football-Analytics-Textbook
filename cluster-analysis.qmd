@@ -7,8 +7,8 @@
 ```{r}
 library("petersenlab")
 library("mclust")
-library("tidyverse")
 library("plotly")
+library("tidyverse")
 ```
 
 ### Load Data {#sec-clusterAnalysisLoadData}
@@ -609,7 +609,7 @@ Additional processing:
 ```{r}
 merged_data <- merged_data %>% 
   mutate(
-    height_coalesced = coalesce(height, ht_numeric),
+    height_coalesced = coalesce(height, ht),
     weight_coalesced = coalesce(weight, wt),
     receptions_coalesced = pmax(receptions, rec.rec, na.rm = TRUE),
     receiving_air_yards_per_rec = receiving_air_yards / receptions
@@ -653,7 +653,7 @@ plot(wrTypes_icl)
 
 wrTypes_boostrap <- mclust::mclustBootstrapLRT(
   data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
-  modelName = "VVV") # ellipsoidal (variable volume, variable shape), variable orientation (for multivariate data)
+  modelName = "VVE") # ellipsoidal (variable volume, variable shape), equal orientation (for multivariate data)
 
 wrTypes_boostrap
 plot(
@@ -711,6 +711,30 @@ merged_dataWRs_cluster %>%
     )) %>% 
   t() %>% 
   round(., 2)
+```
+
+Type 1 WRs:
+
+```{r}
+merged_dataWRs_cluster %>% 
+  filter(type == 1) %>% 
+  select(display_name)
+```
+
+Type 2 WRs:
+
+```{r}
+merged_dataWRs_cluster %>% 
+  filter(type == 2) %>% 
+  select(display_name)
+```
+
+Type 3 WRs:
+
+```{r}
+merged_dataWRs_cluster %>% 
+  filter(type == 3) %>% 
+  select(display_name)
 ```
 
 ## Conclusion {#sec-clusterAnalysisConclusion}
