@@ -613,6 +613,18 @@ Let's do some additional data processing:
 ```{r}
 # Drop Stanford Samuels Jr.
 nfl_combine$gsis_id[which(nfl_combine$cfb_id == "stanford-samuels-1")] <- NA
+
+nfl_combine <- nfl_combine %>% 
+  separate_wider_delim(
+    ht,
+    names = c("feet", "inches"),
+    delim = "-") %>%
+  mutate(
+    feet = as.numeric(feet),
+    inches = as.numeric(inches),
+    ht = feet * 12 + inches
+  ) %>%
+  select(-feet, -inches)
 ```
 
 However, these apparent duplicates appear to be different players at different positions:
