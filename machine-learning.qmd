@@ -5,10 +5,13 @@
 ### Load Packages {#sec-machineLearningLoadPackages}
 
 ```{r}
+library("petersenlab")
+library("parallel")
 library("doParallel")
 library("missForest")
 library("powerjoin")
 library("caret")
+library("gpboost")
 library("tidyverse")
 ```
 
@@ -96,8 +99,23 @@ However, many machine learning techniques are black boxes—it is often unclear
 Machine learning tends to be a data-driven, atheoretical technique.
 This can result in overfitting.
 Thus, when estimating machine learning models, it is common to keep a hold-out sample for use in cross-validation to evaluate the extent of shrinkage of model coefficients.
+The data that the model is trained on is known as the "training data".
+The data that the model was not trained on but is then is independently tested on—i.e., the hold-out sample—is the "test data".
 Shrinkage occurs when predictor variables explain some random error variance in the original model.
-When the model is applied to an independent sample, the predictive model will likely not perform quite as well, and the regressions coefficients will tend to get smaller (i.e., shrink).
+When the model is applied to an independent sample (i.e., the test data), the predictive model will likely not perform quite as well, and the regressions coefficients will tend to get smaller (i.e., shrink).
+
+If the test data were collected as part of the same processes as the original data and were merely held out for purposes of analysis, this is called internal cross-validation.
+If the test data were collected separately from the original data used to train the model, this is called external cross-validation.
+
+Most machine learning methods were developed with cross-sectional data in mind.
+That is, they assume that each person has only one observation on the outcome variable.
+However, with longitudinal data, each person has multiple observations on the outcome variable.
+
+When performing machine learning, there may be multiple approaches you can take to address this:
+
+- transforming data from [long to wide](#sec-longToWide) form, so that each person has only one row
+- when designing the training and test sets, keep all measurements from the same person in the same data object (either the training or test set); do not have some measurements from a given person in the training set and other measurements from the same person in the test set
+- use a machine learning approach that accounts for the clustered/nested nature of the data
 
 ## Data Processing {#sec-machineLearningDataProcessing}
 
@@ -322,6 +340,23 @@ seasonalAndWeeklyData %>%
   head()
 ```
 
+### Additional Processing {#sec-mlAdditionalProcessing}
+
+```{r}
+# Convert character and logical variables to factors
+seasonalData <- seasonalData %>% 
+  mutate(
+    across(
+      where(is.character),
+      as.factor
+    ),
+    across(
+      where(is.logical),
+      as.factor
+    )
+  )
+```
+
 ### Fill in Missing Data {#sec-fillMissingData}
 
 ```{r}
@@ -349,17 +384,6 @@ seasonalData_lag %>%
   select(gsis_id, player_display_name, season, fantasy_points, fantasyPoints_lag)
 ```
 
-### Create New Data Object {#sec-newDataObject}
-
-```{r}
-newData_seasonal <- seasonalData_lag %>% 
-  filter(season == max(season, na.rm = TRUE))
-
-# Drop rows with missing fantasyPoints_lag (i.e., the player's last season), so we don't impute criterion (fantasy points)
-seasonalData_lag <- seasonalData_lag %>% 
-  filter(!is.na(fantasyPoints_lag))
-```
-
 ### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
 
 ```{r}
@@ -368,33 +392,21 @@ seasonalData_lag %>% select_if(is.character)
 seasonalData_lag %>% select_if(is.factor)
 seasonalData_lag %>% select_if(is.logical)
 
+dropVars <- c(
+  "birth_date", "loaded", "full_name", "player_name", "player_display_name", "display_name", "suffix", "headshot_url", "player", "pos",
+  "espn_id", "sportradar_id", "yahoo_id", "rotowire_id", "pff_id", "fantasy_data_id", "sleeper_id", "pfr_id",
+  "pfr_player_id", "cfb_player_id", "pfr_player_name", "esb_id", "gsis_it_id", "smart_id",
+  "college", "college_name", "team_abbr", "current_team_id", "college_conference", "draft_club", "status_description_abbr",
+  "status_short_description", "short_name", "headshot", "uniform_number", "jersey_number", "first_name", "last_name",
+  "football_name", "team")
+
 seasonalData_lag_subset <- seasonalData_lag %>% 
-  dplyr::select(-any_of(c(
-    "birth_date", "loaded", "full_name", "player_name", "player_display_name", "display_name", "suffix", "headshot_url", "player", "pos",
-    "espn_id", "sportradar_id", "yahoo_id", "rotowire_id", "pff_id", "fantasy_data_id", "sleeper_id", "pfr_id",
-    "pfr_player_id", "cfb_player_id", "pfr_player_name", "esb_id", "gsis_it_id", "smart_id",
-    "college", "college_name", "team_abbr", "current_team_id", "college_conference", "draft_club", "status_description_abbr",
-    "status_short_description", "short_name", "headshot", "uniform_number", "jersey_number", "first_name", "last_name",
-    "football_name", "team"
-  )))
-```
-
-### Convert Character Predictors to Factors {#sec-convertCharacterToFactor}
-
-```{r}
-seasonalData_lag_subset <- seasonalData_lag_subset %>% mutate(across(where(is.character), as.factor))
-seasonalData_lag_subset <- seasonalData_lag_subset %>% mutate(across(where(is.logical), as.factor))
-
-seasonalData_lag_subset %>% select_if(~class(.) == "Date") %>% str()
-seasonalData_lag_subset %>% select_if(is.character) %>% str()
-seasonalData_lag_subset %>% select_if(is.factor) %>% str()
-seasonalData_lag_subset %>% select_if(is.logical) %>% str()
+  dplyr::select(-any_of(dropVars))
 ```
 
 ### Separate by Position {#sec-separateByPosition}
 
 ```{r}
-# Training Data
 seasonalData_lag_subsetQB <- seasonalData_lag_subset %>% 
   filter(position == "QB") %>% 
   select(
@@ -426,70 +438,124 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
     height, weight, rookie_year, draft_number,
     fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
-
-# Out-of-Sample Prediction
-newData_seasonalQB <- newData_seasonal %>% 
-  filter(position == "QB") %>% 
-  select(
-    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
-    completions:rushing_2pt_conversions, contains(".pass"))
-
-newData_seasonalRB <- newData_seasonal %>% 
-  filter(position == "RB") %>% 
-  select(
-    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
-    carries:special_teams_tds, contains(".rush"), contains(".rec"))
-
-newData_seasonalWR <- newData_seasonal %>% 
-  filter(position == "WR") %>% 
-  select(
-    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
-    carries:special_teams_tds, contains(".rush"), contains(".rec"))
-
-newData_seasonalTE <- newData_seasonal %>% 
-  filter(position == "TE") %>% 
-  select(
-    gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
-    carries:special_teams_tds, contains(".rush"), contains(".rec"))
 ```
 
 ### Split into Test and Training Data {#sec-splitTestTraining}
+
+CURRENTLY (WILL CHANGE):
+
+- seasonalData: 1999-2023
+- seasonalData_lag: 1999-2022 (predicting fantasy points in 2023)
+- newData_seasonal: 2023 (to be used for predicting fantasy points in 2024)
+
+to create:
+
+- seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
+- seasonalData_lag_train: 1999-2022 (predicting fantasy points in 2023), most players
+- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), some retired players
+- (eventually, newData_seasonal, which is derived from the imputed version of seasonalData_lag_all, and then keeps only data from 2023, thus predicting fantasy points in 2024, and removing the fantasy_points_lag variable)
+
+To impute:
+
+- seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
+- seasonalData_lag_train: 1999-2022 (predicting fantasy points in 2023), most players
+- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), some retired players
+
+IMPUTATION AND MODEL PROCESS:
+
+IMPUTATION:
+- training data
+- test data
+- all data (training and test data), used for generating next year predictions
+
+MODEL:
+- training data (imputed version of seasonalData_lag_all): all seasons (except 2023 predicting 2024), most players
+
+EVALUATE MODEL PREDICTIONS:
+- test data (imputed version of seasonalData_lag_test): all seasons (except 2023 predicting 2024), some retired players
+
+GENERATE MODEL PREDICTIONS
+- next year data (newData_seasonal): 2023 (predicting 2024)
+
+```{r}
+seasonalData_lag_qb_all <- seasonalData_lag_subsetQB
+seasonalData_lag_rb_all <- seasonalData_lag_subsetRB
+seasonalData_lag_wr_all <- seasonalData_lag_subsetWR
+seasonalData_lag_te_all <- seasonalData_lag_subsetTE
+
+set.seed(52242)
+
+activeQBs <- unique(seasonalData_lag_qb_all$gsis_id[which(seasonalData_lag_qb_all$season == max(seasonalData_lag_qb_all$season, na.rm = TRUE))])
+retiredQBs <- unique(seasonalData_lag_qb_all$gsis_id[which(seasonalData_lag_qb_all$gsis_id %ni% activeQBs)])
+numQBs <- length(unique(seasonalData_lag_qb_all$gsis_id))
+qbHoldoutIDs <- sample(retiredQBs, size = ceiling(.2 * numQBs)) # holdout 20% of players
+
+activeRBs <- unique(seasonalData_lag_rb_all$gsis_id[which(seasonalData_lag_rb_all$season == max(seasonalData_lag_rb_all$season, na.rm = TRUE))])
+retiredRBs <- unique(seasonalData_lag_rb_all$gsis_id[which(seasonalData_lag_rb_all$gsis_id %ni% activeRBs)])
+numRBs <- length(unique(seasonalData_lag_rb_all$gsis_id))
+rbHoldoutIDs <- sample(retiredRBs, size = ceiling(.2 * numRBs)) # holdout 20% of players
+
+activeWRs <- unique(seasonalData_lag_wr_all$gsis_id[which(seasonalData_lag_wr_all$season == max(seasonalData_lag_wr_all$season, na.rm = TRUE))])
+retiredWRs <- unique(seasonalData_lag_wr_all$gsis_id[which(seasonalData_lag_wr_all$gsis_id %ni% activeWRs)])
+numWRs <- length(unique(seasonalData_lag_wr_all$gsis_id))
+wrHoldoutIDs <- sample(retiredWRs, size = ceiling(.2 * numWRs)) # holdout 20% of players
+
+activeTEs <- unique(seasonalData_lag_te_all$gsis_id[which(seasonalData_lag_te_all$season == max(seasonalData_lag_te_all$season, na.rm = TRUE))])
+retiredTEs <- unique(seasonalData_lag_te_all$gsis_id[which(seasonalData_lag_te_all$gsis_id %ni% activeTEs)])
+numTEs <- length(unique(seasonalData_lag_te_all$gsis_id))
+teHoldoutIDs <- sample(retiredTEs, size = ceiling(.2 * numTEs)) # holdout 20% of players
+  
+seasonalData_lag_qb_train <- seasonalData_lag_qb_all %>% 
+  filter(gsis_id %ni% qbHoldoutIDs)
+seasonalData_lag_qb_test <- seasonalData_lag_qb_all %>% 
+  filter(gsis_id %in% qbHoldoutIDs)
+
+seasonalData_lag_rb_train <- seasonalData_lag_rb_all %>% 
+  filter(gsis_id %ni% rbHoldoutIDs)
+seasonalData_lag_rb_test <- seasonalData_lag_rb_all %>% 
+  filter(gsis_id %in% rbHoldoutIDs)
+
+seasonalData_lag_wr_train <- seasonalData_lag_wr_all %>% 
+  filter(gsis_id %ni% wrHoldoutIDs)
+seasonalData_lag_wr_test <- seasonalData_lag_wr_all %>% 
+  filter(gsis_id %in% wrHoldoutIDs)
+
+seasonalData_lag_te_train <- seasonalData_lag_te_all %>% 
+  filter(gsis_id %ni% teHoldoutIDs)
+seasonalData_lag_te_test <- seasonalData_lag_te_all %>% 
+  filter(gsis_id %in% teHoldoutIDs)
+```
 
 ### Impute the Missing Data {#sec-missingDataImputation}
 
 NOTES:
 
-- SEPARATE BY POSITION
+- CONSIDER USING RETIRED PLAYERS AS THE HOLDOUT SAMPLE
 - CONSIDER WIDENING THE DATA TO AVOID MULTILEVEL IMPUTATION
-- IMPUTE THE TRAINING AND TEST DATA SEPARATELY
+- CONSIDER IMPUTING THE TRAINING AND TEST DATA SEPARATELY BY POSITION
 
 Here is a vignette demonstrating how to impute missing data using `missForest()`: <https://rpubs.com/lmorgan95/MissForest> (archived at: <https://perma.cc/6GB4-2E22>).
+Below, we impute the training data and new data separately by position.
+
+```{r}
+#| include: false
+
+num_cores <- parallel::detectCores()
+num_true_cores <- parallel::detectCores(logical = FALSE)
+```
 
 ```{r}
 #| eval: false
 
 num_cores <- detectCores() - 1
-```
-
-```{r}
-#| include: false
-
-num_cores <- detectCores()
+num_true_cores <- parallel::detectCores(logical = FALSE) - 1
 ```
 
 ```{r}
 num_cores
 
-cl <- makeCluster(num_cores)
-registerDoParallel(cl)
+cl <- parallel::makeCluster(num_cores)
+doParallel::registerDoParallel(cl)
 
 set.seed(52242)
 
@@ -503,6 +569,10 @@ seasonalData_lag_subsetQB_imp <- missForest::missForest(
   parallelize = "forests")
 
 seasonalData_lag_subsetQB_imp$OOBerror
+data_train_qb <- cbind(seasonalData_lag_subsetQB[,"gsis_id"], seasonalData_lag_subsetQB_imp$ximp)
+data_train_qb_matrix <- data_train_qb %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
 
 newData_seasonalQB_imp <- missForest::missForest(
   newData_seasonalQB %>% 
@@ -513,6 +583,10 @@ newData_seasonalQB_imp <- missForest::missForest(
   parallelize = "forests")
 
 newData_seasonalQB_imp$OOBerror
+newData_qb <- cbind(newData_seasonalQB[,"gsis_id"], newData_seasonalQB_imp$ximp)
+newData_qb_matrix <- newData_qb %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
 
 # RBs
 seasonalData_lag_subsetRB_imp <- missForest::missForest(
@@ -599,8 +673,8 @@ stopCluster(cl)
 #### Cross-Sectional Data {#sec-randomForestCrossSectionalData}
 
 ```{r}
-cl <- makeCluster(num_cores)
-registerDoParallel(cl)
+cl <- parallel::makeCluster(num_cores)
+doParallel::registerDoParallel(cl)
 
 set.seed(52242)
 
@@ -737,6 +811,73 @@ smerf$OOB # OOB error at each iteration
 ### *k*-Fold Cross-Validation {#sec-kfoldCV}
 
 ### Leave-One-Out (LOO) Cross-Validation {#sec-looCV}
+
+### Combining Tree-Boosting with Mixed Models {#sec-treeBoosting}
+
+Adapted from here:
+<https://towardsdatascience.com/mixed-effects-machine-learning-for-longitudinal-panel-data-with-gpboost-part-iii-523bb38effc>
+
+```{r}
+# Gamma distribution requires positive-only values
+data_train_qb_matrix[,"fantasyPoints_lag"][data_train_qb_matrix[,"fantasyPoints_lag"] <= 0] <- 0.01
+
+# Predictor variables
+pred_vars_qb <- data_train_qb_matrix %>% 
+  as_tibble() %>% 
+  select(-gsis_id, -fantasyPoints_lag, -ageCentered20, ageCentered20Quadratic) %>% 
+  names()
+
+#pred_vars_qb_categorical <- ""
+
+gp_model_qb <- GPModel(
+  group_data = data_train_qb_matrix[,"gsis_id"],
+  likelihood = "gamma", # "gaussian"
+  group_rand_coef_data = cbind(
+    data_train_qb_matrix[,"ageCentered20"],
+    data_train_qb_matrix[,"ageCentered20Quadratic"]),
+  ind_effect_group_rand_coef = c(1,1))
+
+gp_data_qb <- gpb.Dataset(
+  data = data_train_qb_matrix[,pred_vars_qb],
+  label = data_train_qb_matrix[,"fantasyPoints_lag"])
+
+#gpb.Dataset.set.categorical(gp_data_qb, pred_vars_qb_categorical)
+
+params_qb <- list(
+  learning_rate = 0.01,
+  max_depth = 2,
+  num_leaves = 2^10,
+  min_data_in_leaf = 10,
+  lambda_l2 = 10,
+  num_threads = num_cores)
+  #optimizer_cov = "nelder_mead")
+
+nrounds_qb <- 379
+
+gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead"))
+summary(gp_model_qb) # Estimated random effects model
+
+gp_model_fit_qb <- gpb.train(
+  data = gp_data_qb,
+  gp_model = gp_model_qb,
+  nrounds = nrounds_qb,
+  params = params_qb,
+  verbose = 0)
+
+# Model predictions
+pred_qb <- predict(
+  gp_model_fit_qb,
+  data = newData_qb_matrix[,pred_vars_qb],
+  group_data_pred = newData_qb_matrix[,"gsis_id"],
+  group_rand_coef_data_pred = cbind(
+    newData_qb_matrix[,"ageCentered20"],
+    newData_qb_matrix[,"ageCentered20Quadratic"]),
+  predict_var = FALSE,
+  pred_latent = FALSE)
+
+y_pred_qb <- pred_qb[["response_mean"]]
+mean((newData_qb[,"fantasyPoints_lag"] - y_pred_qb)^2)
+```
 
 ## Conclusion {#sec-machineLearningConclusion}
 
