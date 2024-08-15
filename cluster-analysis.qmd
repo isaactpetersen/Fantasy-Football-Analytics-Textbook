@@ -6,6 +6,7 @@
 
 ```{r}
 library("petersenlab")
+library("nflreadr")
 library("mclust")
 library("plotly")
 library("tidyverse")
@@ -536,10 +537,10 @@ recomputeVars <- c(
 
 sumVars <- pfrVars[pfrVars %ni% c(
   weightedAverageVars, recomputeVars,
-  "nameMerge", "loaded.pass", "loaded.rush", "loaded.rec", "loaded.def")]
+  "merge_name", "loaded.pass", "loaded.rush", "loaded.rec", "loaded.def")]
 
 nfl_advancedStatsPFR_career <- nfl_advancedStatsPFR_seasonal %>% 
-  group_by(pfr_id, nameMerge) %>% 
+  group_by(pfr_id, merge_name) %>% 
   summarise(
     across(all_of(weightedAverageVars), ~ weighted.mean(.x, w = g, na.rm = TRUE)),
     across(all_of(sumVars), ~ sum(.x, na.rm = TRUE)),
@@ -554,20 +555,20 @@ nfl_advancedStatsPFR_career <- nfl_advancedStatsPFR_seasonal %>%
     cmp_percent.def = cmp.def / tgt.def
   )
 
-uniqueCases <- nfl_advancedStatsPFR_seasonal %>% select(pfr_id, nameMerge, gsis_id) %>% unique()
+uniqueCases <- nfl_advancedStatsPFR_seasonal %>% select(pfr_id, merge_name, gsis_id) %>% unique()
 
 uniqueCases %>%
   group_by(pfr_id) %>% 
   filter(n() > 1)
 
 nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
-  filter(pfr_id != "WillMa06" | nameMerge != "MARCUSWILLIAMS" | !is.na(gsis_id))
+  filter(pfr_id != "WillMa06" | merge_name != "MARCUSWILLIAMS" | !is.na(gsis_id))
 
 
 nfl_advancedStatsPFR_career <- left_join(
   nfl_advancedStatsPFR_career,
-  nfl_advancedStatsPFR_seasonal %>% select(pfr_id, nameMerge, gsis_id) %>% unique(),
-  by = c("pfr_id", "nameMerge")
+  nfl_advancedStatsPFR_seasonal %>% select(pfr_id, merge_name, gsis_id) %>% unique(),
+  by = c("pfr_id", "merge_name")
 )
 
 # Compute Player Stats Per Season

@@ -278,9 +278,11 @@ nfl_playerIDs %>%
 Let's do some data processing to help with merging the dataset with other datasets:
 
 ```{r}
+nfl_playerIDs$name[which(nfl_playerIDs$name == "Bennett,Michael")] <- "Michael Bennett"
+
 nfl_playerIDs <- nfl_playerIDs %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(name)
+    merge_name = nflreadr::clean_player_names(name, lowercase = TRUE)
   )
 ```
 
@@ -546,7 +548,7 @@ Let's do some data processing to help with merging the dataset with other datase
 ```{r}
 nfl_combine <- nfl_combine %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(player_name)
+    merge_name = nflreadr::clean_player_names(player_name, lowercase = TRUE)
   )
 
 # First, merge on both pfr_id and cfb_id
@@ -560,16 +562,16 @@ merged_data1 <- left_join(
 # Second, merge on pfr_id
 merged_data2 <- left_join(
   nfl_combine,
-  nfl_playerIDs %>% select(pfr_id, nameMerge, position, gsis_id),
-  by = c("pfr_id","nameMerge","pos" = "position"),
+  nfl_playerIDs %>% select(pfr_id, merge_name, position, gsis_id),
+  by = c("pfr_id","merge_name","pos" = "position"),
   na_matches = "never"
 )
 
 # Third, merge on cfb_id
 merged_data3 <- left_join(
   nfl_combine,
-  nfl_playerIDs %>% select(cfbref_id, nameMerge, position, gsis_id),
-  by = c("cfb_id" = "cfbref_id","nameMerge","pos" = "position"),
+  nfl_playerIDs %>% select(cfbref_id, merge_name, position, gsis_id),
+  by = c("cfb_id" = "cfbref_id","merge_name","pos" = "position"),
   na_matches = "never"
 )
 
@@ -1580,49 +1582,49 @@ load(file = "./data/nfl_advancedStatsPFR_weekly_raw.RData")
 ## Seasonal Data
 nfl_advancedStatsPFR_pass_seasonal <- nfl_advancedStatsPFR_pass_seasonal_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(player)
+    merge_name = nflreadr::clean_player_names(player, lowercase = TRUE)
   ) %>% 
   rename_with(
     ~ paste0(., ".pass"),
-    -c(pfr_id, nameMerge, season, team))
+    -c(pfr_id, merge_name, season, team))
 
 nfl_advancedStatsPFR_rush_seasonal <- nfl_advancedStatsPFR_rush_seasonal_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(player)
+    merge_name = nflreadr::clean_player_names(player, lowercase = TRUE)
   ) %>% 
   rename(
     team = tm
   ) %>% 
   rename_with(
     ~ paste0(., ".rush"),
-    -c(pfr_id, nameMerge, season, team))
+    -c(pfr_id, merge_name, season, team))
 
 nfl_advancedStatsPFR_rec_seasonal <- nfl_advancedStatsPFR_rec_seasonal_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(player)
+    merge_name = nflreadr::clean_player_names(player, lowercase = TRUE)
   ) %>% 
   rename(
     team = tm
   ) %>% 
   rename_with(
     ~ paste0(., ".rec"),
-    -c(pfr_id, nameMerge, season, team))
+    -c(pfr_id, merge_name, season, team))
 
 nfl_advancedStatsPFR_def_seasonal <- nfl_advancedStatsPFR_def_seasonal_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(player)
+    merge_name = nflreadr::clean_player_names(player, lowercase = TRUE)
   )  %>% 
   rename(
     team = tm
   ) %>% 
   rename_with(
     ~ paste0(., ".def"),
-    -c(pfr_id, nameMerge, season, team))
+    -c(pfr_id, merge_name, season, team))
 
 ## Weekly Data
 nfl_advancedStatsPFR_pass_weekly <- nfl_advancedStatsPFR_pass_weekly_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(pfr_player_name)
+    merge_name = nflreadr::clean_player_names(pfr_player_name, lowercase = TRUE)
   ) %>% 
   rename_with(
     ~ paste0(., ".pass"),
@@ -1630,7 +1632,7 @@ nfl_advancedStatsPFR_pass_weekly <- nfl_advancedStatsPFR_pass_weekly_raw %>%
 
 nfl_advancedStatsPFR_rush_weekly <- nfl_advancedStatsPFR_rush_weekly_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(pfr_player_name)
+    merge_name = nflreadr::clean_player_names(pfr_player_name, lowercase = TRUE)
   ) %>% 
   rename_with(
     ~ paste0(., ".rush"),
@@ -1638,7 +1640,7 @@ nfl_advancedStatsPFR_rush_weekly <- nfl_advancedStatsPFR_rush_weekly_raw %>%
 
 nfl_advancedStatsPFR_rec_weekly <- nfl_advancedStatsPFR_rec_weekly_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(pfr_player_name)
+    merge_name = nflreadr::clean_player_names(pfr_player_name, lowercase = TRUE)
   ) %>% 
   rename_with(
     ~ paste0(., ".rec"),
@@ -1646,7 +1648,7 @@ nfl_advancedStatsPFR_rec_weekly <- nfl_advancedStatsPFR_rec_weekly_raw %>%
 
 nfl_advancedStatsPFR_def_weekly <- nfl_advancedStatsPFR_def_weekly_raw %>% 
   mutate(
-    nameMerge = petersenlab::cleanUpNames(pfr_player_name)
+    merge_name = nflreadr::clean_player_names(pfr_player_name, lowercase = TRUE)
   ) %>% 
   rename_with(
     ~ paste0(., ".def"),
@@ -1668,17 +1670,17 @@ nfl_advancedStatsPFR_weekly_list <- list(
 nfl_advancedStatsPFR_seasonalByTeam <- nfl_advancedStatsPFR_seasonal_list %>% 
   purrr::reduce(
     full_join,
-    by = c("pfr_id","nameMerge","season","team"))
+    by = c("pfr_id","merge_name","season","team"))
 
 nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly_list %>% 
   purrr::reduce(
     full_join,
-    by = c("game_id","pfr_player_id")) #nameMerge
+    by = c("game_id","pfr_player_id")) #merge_name
 
 #nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly_list %>% 
 #  purrr::reduce(
 #    full_join,
-#    by = c("pfr_player_id","nameMerge","season","week"))
+#    by = c("pfr_player_id","merge_name","season","week"))
 
 nfl_advancedStatsPFR_seasonalByTeam <- nfl_advancedStatsPFR_seasonalByTeam %>% 
   mutate(
@@ -1746,11 +1748,11 @@ nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>%
       team.rec,
       team.def
     ),
-    nameMerge = coalesce(
-      nameMerge.pass,
-      nameMerge.rush,
-      nameMerge.rec,
-      nameMerge.def
+    merge_name = coalesce(
+      merge_name.pass,
+      merge_name.rush,
+      merge_name.rec,
+      merge_name.def
     ),
     pfr_game_id = coalesce(
       pfr_game_id.pass,
@@ -1776,7 +1778,7 @@ nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>%
     starts_with("season."),
     starts_with("week."),
     starts_with("team."),
-    starts_with("nameMerge."),
+    starts_with("merge_name."),
     starts_with("pfr_game_id."),
     starts_with("game_type."),
     starts_with("opponent."),
@@ -1829,10 +1831,10 @@ recomputeVars <- c(
 
 sumVars <- pfrVars[pfrVars %ni% c(
   weightedAverageVars, recomputeVars,
-  "nameMerge", "loaded.pass", "loaded.rush", "loaded.rec", "loaded.def")]
+  "merge_name", "loaded.pass", "loaded.rush", "loaded.rec", "loaded.def")]
 
 nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonalByTeam %>% 
-  group_by(pfr_id, nameMerge, season) %>% 
+  group_by(pfr_id, merge_name, season) %>% 
   summarise(
     across(all_of(weightedAverageVars), ~ weighted.mean(.x, w = g, na.rm = TRUE)),
     across(all_of(sumVars), ~ sum(.x, na.rm = TRUE)),
@@ -3027,7 +3029,7 @@ load(file = "./data/nfl_actualStats_seasonal.RData")
 #### Week-by-Week Statistics {#sec-calculateActualWeeklyStats}
 
 We already load players' week-by-week statistics [above](#sec-downloadActualStats).
-  Nevertheless, we could compute players' weekly statistics from the play-by-play data using the following syntax:
+Nevertheless, we could compute players' weekly statistics from the play-by-play data using the following syntax:
 
 ```{r}
 #| eval: false
