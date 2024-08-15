@@ -54,9 +54,14 @@ We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` obj
 ## Overview of Mixed Models {#sec-mixedModelsOverview}
 
 We will discuss a modeling framework that goes by many terms, including mixed models, mixed-effects models, multilevel models, hierarchical linear models.
-They are sometimes called multilevel models and hiearchical linear models, whose name emphasizes the hierarchical structure of the data because the data are nonindependent.
+They are sometimes called multilevel models and hierarchical linear models, whose name emphasizes the hierarchical structure of the data because the data are nonindependent.
 When observations (i.e., data points) are collected from multiple lower-level units (e.g., people) in an upper-level unit (e.g., married couple, family, classroom, school, neighborhood, team), the data from the lower-level units are considered "nested" within the upper-level unit.
-The data from the lower-level unit are likely to be correlated, to some degree, because they come from the same upper-level unit.
+In this context, *nested data* refers to multiple observations from the same upper-level unit.
+For instance, longitudinal data are nested within the same participant.
+Students are nested within classrooms, which are nested within schools.
+Players are nested within teams.
+
+When data are nested, the data from the lower-level unit are likely to be correlated, to some degree, because they come from the same upper-level unit.
 For example, multiple players may come from the same team, and the players' performance on that team is likely interrelated because they share common experiences and influence one another.
 Thus, data from multiple players on a given team are considered nested within that team.
 Longitudinal data can also be considered nested data, in which time points are nested within the person (i.e., the same player provides an observation across multiple time points).
@@ -79,7 +84,35 @@ Thus, inclusion of random effects without the corresponding fixed effect can lea
 
 ### Ecological Fallacy {#sec-ecologicalFallacy}
 
+As described in @sec-fallaciesEcological, the ecological fallacy is the error of drawing inferences about an individual from group-level data.
+An type of ecological fallacy is [Simpson's paradox](#sec-simpsonsParadox).
+
 ### Simpson's Paradox {#sec-simpsonsParadox}
+
+Examples of Simpson's Paradox are depicted in Figures [-@fig-simpsonParadox] and [-@fig-simpsonsParadox].
+In the example below, there is a positive association between the predictor variable and outcome variable for each group.
+However, when the groups are combined, there is a *negative* association between predictor variable and outcome variable.
+That is, the sign of an association can differ at different levels of analysis (e.g., group level versus person level).
+
+::: {#fig-simpsonsParadox}
+![](images/simpsonsParadox.png)
+
+An Example of Simpson's Paradox. In this example, there is a positive association between `x` and `y` within each group (i.e., red or blue), but there is a negative association between `x` and `y` when the groups are combined. (Figure retrieved from <https://en.wikipedia.org/wiki/File:Simpson%27s_paradox_continuous.svg>)
+:::
+
+Consider that we observe a between-person association between a predictor, for example, how much sports drink a player drinks and their performance, such that players who drink more sports drink before games tend to perform better during games.
+However, based on this association, if we draw the inference that sports drink consumption leads to better performance, this could be a faulty inference.
+It is possible that, at the *within*-person level, there is no association or even a negative association between sports drink consumption and performance.
+For helping to approximate causality, a much stronger test than relying on the between-person association would be to examine the association within the individual.
+That is, examining the association within the individual would examine: when a player consumes more sports drink, whether they perform better than when the same player consumes less sports drink.
+We describe within-person analyses to approximate causal inferences in @sec-causalInferenceWithinSubject.
+
+In short, we often need to account for the groups or "levels" within which people are nested.
+When multiple observations are nested within the same upper-level unit, they are often correlated.
+That is, some variance is attributable to the lower-level unit (e.g., the player) and some variance is attributable to the upper-level unit (e.g., the team).
+It is important to evaluate how much variance is attributable to the upper-level unit.
+If substantial variance is attributable to the upper-level unit, it is important to account for the nested structure of the data.
+Mixed models are a useful approach to account for data with a nested structure so you can avoid committing the ecological fallacy.
 
 ## Fantasy Points Per Season by Position, Age, and Experience {#sec-fantasyPointsByAgeExperience}
 
