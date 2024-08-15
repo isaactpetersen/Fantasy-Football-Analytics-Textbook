@@ -1050,6 +1050,8 @@ params_qb <- list(
   lambda_l2 = 0,
   num_threads = num_cores)
 
+nrounds_qb <- 7000 # identify optimal number of trees through iteration and cross-validation
+
 #gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead")) # to speed up model estimation
 ```
 
@@ -1059,7 +1061,7 @@ params_qb <- list(
 gp_model_fit_qb <- gpb.train(
   data = gp_data_qb,
   gp_model = gp_model_qb,
-  nrounds = nrounds,
+  nrounds = nrounds_qb,
   params = params_qb) # verbose = 0
 
 summary(gp_model_qb) # Estimated random effects model
@@ -1081,7 +1083,12 @@ pred_test_qb <- predict(
 
 y_pred_test_qb <- pred_test_qb[["response_mean"]]
 cbind(y_pred_test_qb, data_test_qb_matrix[,"fantasyPoints_lag"])
-mean((data_test_qb_matrix[,"fantasyPoints_lag"] - y_pred_test_qb)^2)
+
+petersenlab::accuracyOverall(
+  predicted = y_pred_test_qb,
+  actual = data_test_qb_matrix[,"fantasyPoints_lag"],
+  dropUndefined = TRUE
+)
 ```
 
 #### Generate Predictions for Next Season {#sec-treeBoostingModelPredictions}
