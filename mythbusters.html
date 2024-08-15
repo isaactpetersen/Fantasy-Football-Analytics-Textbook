@@ -424,11 +424,12 @@ window.Quarto = {
 <span class="header-section-number">18.1.1</span> Load Packages</h3>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"petersenlab"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"lme4"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"lmerTest"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"MuMIn"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(<span class="st">"emmeans"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"nflreadr"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"lme4"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"lmerTest"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(<span class="st">"MuMIn"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="fu">library</span>(<span class="st">"emmeans"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="sec-mythbustersPackageOptions" class="level3" data-number="18.1.2"><h3 data-number="18.1.2" class="anchored" data-anchor-id="sec-mythbustersPackageOptions">
@@ -515,27 +516,27 @@ window.Quarto = {
 <span id="cb4-37"><a href="#cb4-37"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(played_in_contract_year <span class="sc">==</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-38"><a href="#cb4-38"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-39"><a href="#cb4-39"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player, position, team, contractYear) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-40"><a href="#cb4-40"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">nameMerge =</span> petersenlab<span class="sc">::</span><span class="fu">cleanUpNames</span>(player)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-40"><a href="#cb4-40"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">merge_name =</span> nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(player, <span class="at">lowercase =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-41"><a href="#cb4-41"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">season =</span> contractYear) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-42"><a href="#cb4-42"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">contractYear =</span> <span class="dv">1</span>)</span>
 <span id="cb4-43"><a href="#cb4-43"></a></span>
 <span id="cb4-44"><a href="#cb4-44"></a><span class="co"># Merge with weekly and seasonal stats data</span></span>
 <span id="cb4-45"><a href="#cb4-45"></a>player_stats_weekly_offense <span class="ot">&lt;-</span> player_stats_weekly_offense <span class="sc">%&gt;%</span> </span>
-<span id="cb4-46"><a href="#cb4-46"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">nameMerge =</span> petersenlab<span class="sc">::</span><span class="fu">cleanUpNames</span>(player_display_name))</span>
+<span id="cb4-46"><a href="#cb4-46"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">merge_name =</span> nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(player_display_name, <span class="at">lowercase =</span> <span class="cn">TRUE</span>))</span>
 <span id="cb4-47"><a href="#cb4-47"></a><span class="co">#nfl_actualStats_offense_seasonal &lt;- nfl_actualStats_offense_seasonal %&gt;% </span></span>
-<span id="cb4-48"><a href="#cb4-48"></a><span class="co">#  mutate(nameMerge = petersenlab::cleanUpNames(player_display_name, ))</span></span>
+<span id="cb4-48"><a href="#cb4-48"></a><span class="co">#  mutate(merge_name = nflreadr::clean_player_names(player_display_name, lowercase = TRUE))</span></span>
 <span id="cb4-49"><a href="#cb4-49"></a></span>
 <span id="cb4-50"><a href="#cb4-50"></a>player_statsContracts_offense_weekly <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
 <span id="cb4-51"><a href="#cb4-51"></a>  player_stats_weekly_offense,</span>
 <span id="cb4-52"><a href="#cb4-52"></a>  nfl_playerContractYears,</span>
-<span id="cb4-53"><a href="#cb4-53"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"nameMerge"</span>, <span class="st">"position_group"</span> <span class="ot">=</span> <span class="st">"position"</span>, <span class="st">"season"</span>)</span>
+<span id="cb4-53"><a href="#cb4-53"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>, <span class="st">"position_group"</span> <span class="ot">=</span> <span class="st">"position"</span>, <span class="st">"season"</span>)</span>
 <span id="cb4-54"><a href="#cb4-54"></a>) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-55"><a href="#cb4-55"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>))</span>
 <span id="cb4-56"><a href="#cb4-56"></a></span>
 <span id="cb4-57"><a href="#cb4-57"></a><span class="co">#player_statsContracts_offense_seasonal &lt;- full_join(</span></span>
 <span id="cb4-58"><a href="#cb4-58"></a><span class="co">#  player_stats_seasonal_offense,</span></span>
 <span id="cb4-59"><a href="#cb4-59"></a><span class="co">#  nfl_playerContractYears,</span></span>
-<span id="cb4-60"><a href="#cb4-60"></a><span class="co">#  by = c("nameMerge", "position_group" = "position", "season")</span></span>
+<span id="cb4-60"><a href="#cb4-60"></a><span class="co">#  by = c("merge_name", "position_group" = "position", "season")</span></span>
 <span id="cb4-61"><a href="#cb4-61"></a><span class="co">#) %&gt;% </span></span>
 <span id="cb4-62"><a href="#cb4-62"></a><span class="co">#  filter(position_group %in% c("QB","RB","WR","TE"))</span></span>
 <span id="cb4-63"><a href="#cb4-63"></a></span>
@@ -553,10 +554,10 @@ window.Quarto = {
 <span id="cb4-75"><a href="#cb4-75"></a><span class="co">#  labels = c("no", "yes"))</span></span>
 <span id="cb4-76"><a href="#cb4-76"></a></span>
 <span id="cb4-77"><a href="#cb4-77"></a>player_statsContracts_offense_weekly <span class="ot">&lt;-</span> player_statsContracts_offense_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb4-78"><a href="#cb4-78"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(nameMerge, season, season_type, week)</span>
+<span id="cb4-78"><a href="#cb4-78"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, week)</span>
 <span id="cb4-79"><a href="#cb4-79"></a></span>
 <span id="cb4-80"><a href="#cb4-80"></a><span class="co">#player_statsContracts_offense_seasonal &lt;- player_statsContracts_offense_seasonal %&gt;% </span></span>
-<span id="cb4-81"><a href="#cb4-81"></a><span class="co">#  arrange(nameMerge, season)</span></span>
+<span id="cb4-81"><a href="#cb4-81"></a><span class="co">#  arrange(merge_name, season)</span></span>
 <span id="cb4-82"><a href="#cb4-82"></a></span>
 <span id="cb4-83"><a href="#cb4-83"></a>player_statsContractsSubset_offense_weekly <span class="ot">&lt;-</span> player_statsContracts_offense_weekly <span class="sc">%&gt;%</span> </span>
 <span id="cb4-84"><a href="#cb4-84"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"REG"</span>)</span>
@@ -602,15 +603,15 @@ window.Quarto = {
 <p>First, we prepare the data by merging and performing additional processing:</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Merge with QBR data</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>nfl_espnQBR_weekly<span class="sc">$</span>nameMerge <span class="ot">&lt;-</span> <span class="fu">paste</span>(nfl_espnQBR_weekly<span class="sc">$</span>name_first, nfl_espnQBR_weekly<span class="sc">$</span>name_last, <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-3"><a href="#cb5-3"></a>  petersenlab<span class="sc">::</span><span class="fu">cleanUpNames</span>(.)</span>
+<span id="cb5-2"><a href="#cb5-2"></a>nfl_espnQBR_weekly<span class="sc">$</span>merge_name <span class="ot">&lt;-</span> <span class="fu">paste</span>(nfl_espnQBR_weekly<span class="sc">$</span>name_first, nfl_espnQBR_weekly<span class="sc">$</span>name_last, <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3"></a>  nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(., <span class="at">lowercase =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb5-4"><a href="#cb5-4"></a></span>
 <span id="cb5-5"><a href="#cb5-5"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_playerContractYears <span class="sc">%&gt;%</span> </span>
 <span id="cb5-6"><a href="#cb5-6"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb5-7"><a href="#cb5-7"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
 <span id="cb5-8"><a href="#cb5-8"></a>    .,</span>
 <span id="cb5-9"><a href="#cb5-9"></a>    nfl_espnQBR_weekly,</span>
-<span id="cb5-10"><a href="#cb5-10"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"nameMerge"</span>,<span class="st">"team"</span>,<span class="st">"season"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>,<span class="st">"team"</span>,<span class="st">"season"</span>)</span>
 <span id="cb5-11"><a href="#cb5-11"></a>  )</span>
 <span id="cb5-12"><a href="#cb5-12"></a></span>
 <span id="cb5-13"><a href="#cb5-13"></a>nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear[<span class="fu">which</span>(<span class="fu">is.na</span>(nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
@@ -620,24 +621,24 @@ window.Quarto = {
 <span id="cb5-17"><a href="#cb5-17"></a><span class="co">#  labels = c("no", "yes"))</span></span>
 <span id="cb5-18"><a href="#cb5-18"></a></span>
 <span id="cb5-19"><a href="#cb5-19"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb5-20"><a href="#cb5-20"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(nameMerge, season, season_type, game_week)</span>
+<span id="cb5-20"><a href="#cb5-20"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, game_week)</span>
 <span id="cb5-21"><a href="#cb5-21"></a></span>
 <span id="cb5-22"><a href="#cb5-22"></a>nfl_contractYearQBRsubset_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">%&gt;%</span> </span>
 <span id="cb5-23"><a href="#cb5-23"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"Regular"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-24"><a href="#cb5-24"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(nameMerge, season, season_type, game_week) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-24"><a href="#cb5-24"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, game_week) <span class="sc">%&gt;%</span> </span>
 <span id="cb5-25"><a href="#cb5-25"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb5-26"><a href="#cb5-26"></a>    <span class="at">player =</span> <span class="fu">coalesce</span>(player, name_display),</span>
 <span id="cb5-27"><a href="#cb5-27"></a>    <span class="at">position =</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-28"><a href="#cb5-28"></a>  <span class="fu">group_by</span>(nameMerge, player_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-28"><a href="#cb5-28"></a>  <span class="fu">group_by</span>(merge_name, player_id) <span class="sc">%&gt;%</span> </span>
 <span id="cb5-29"><a href="#cb5-29"></a>  <span class="fu">fill</span>(player, <span class="at">.direction =</span> <span class="st">"downup"</span>)</span>
 <span id="cb5-30"><a href="#cb5-30"></a></span>
 <span id="cb5-31"><a href="#cb5-31"></a><span class="co"># Merge with age and experience</span></span>
 <span id="cb5-32"><a href="#cb5-32"></a>nfl_contractYearQBRsubset_weekly <span class="ot">&lt;-</span> player_statsContractsSubset_offense_weekly <span class="sc">%&gt;%</span> </span>
 <span id="cb5-33"><a href="#cb5-33"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-34"><a href="#cb5-34"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(nameMerge, season, week, age, years_of_experience) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-34"><a href="#cb5-34"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(merge_name, season, week, age, years_of_experience) <span class="sc">%&gt;%</span> </span>
 <span id="cb5-35"><a href="#cb5-35"></a>  <span class="fu">full_join</span>(</span>
 <span id="cb5-36"><a href="#cb5-36"></a>    nfl_contractYearQBRsubset_weekly,</span>
-<span id="cb5-37"><a href="#cb5-37"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"nameMerge"</span>,<span class="st">"season"</span>, <span class="fu">c</span>(<span class="st">"week"</span> <span class="ot">=</span> <span class="st">"game_week"</span>))</span>
+<span id="cb5-37"><a href="#cb5-37"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>,<span class="st">"season"</span>, <span class="fu">c</span>(<span class="st">"week"</span> <span class="ot">=</span> <span class="st">"game_week"</span>))</span>
 <span id="cb5-38"><a href="#cb5-38"></a>  ) <span class="sc">%&gt;%</span> <span class="fu">select</span>(player_id, season, week, player, <span class="fu">everything</span>()) <span class="sc">%&gt;%</span> </span>
 <span id="cb5-39"><a href="#cb5-39"></a>  <span class="fu">arrange</span>(player_id, season, week)</span>
 <span id="cb5-40"><a href="#cb5-40"></a></span>
@@ -645,7 +646,7 @@ window.Quarto = {
 <span id="cb5-42"><a href="#cb5-42"></a></span>
 <span id="cb5-43"><a href="#cb5-43"></a><span class="co"># Calculate Per Game Totals</span></span>
 <span id="cb5-44"><a href="#cb5-44"></a>nfl_contractYearQBR_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBRsubset_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb5-45"><a href="#cb5-45"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(nameMerge, season) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-45"><a href="#cb5-45"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(merge_name, season) <span class="sc">%&gt;%</span> </span>
 <span id="cb5-46"><a href="#cb5-46"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
 <span id="cb5-47"><a href="#cb5-47"></a>    <span class="at">age =</span> <span class="fu">min</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb5-48"><a href="#cb5-48"></a>    <span class="at">years_of_experience =</span> <span class="fu">min</span>(years_of_experience, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
@@ -670,7 +671,7 @@ window.Quarto = {
 <span id="cb5-67"><a href="#cb5-67"></a>nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20Quadratic <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20 <span class="sc">^</span> <span class="dv">2</span></span>
 <span id="cb5-68"><a href="#cb5-68"></a></span>
 <span id="cb5-69"><a href="#cb5-69"></a>nfl_contractYearQBR_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb5-70"><a href="#cb5-70"></a>  <span class="fu">group_by</span>(nameMerge) <span class="sc">%&gt;%</span></span>
+<span id="cb5-70"><a href="#cb5-70"></a>  <span class="fu">group_by</span>(merge_name) <span class="sc">%&gt;%</span></span>
 <span id="cb5-71"><a href="#cb5-71"></a>  <span class="fu">mutate</span>(<span class="at">player_id =</span> <span class="fu">as.factor</span>(<span class="fu">as.character</span>(<span class="fu">cur_group_id</span>())))</span>
 <span id="cb5-72"><a href="#cb5-72"></a></span>
 <span id="cb5-73"><a href="#cb5-73"></a>nfl_contractYearQBRsubset_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal <span class="sc">%&gt;%</span> </span>
@@ -699,7 +700,7 @@ REML criterion at convergence: 8905.7
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--3.2415 -0.5468  0.0895  0.5708  3.2509 
+-3.2554 -0.5475  0.0907  0.5738  3.2547 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
@@ -708,26 +709,26 @@ Random effects:
 Number of obs: 1063, groups:  player_id, 253
 
 Fixed effects:
-                Estimate Std. Error       df t value Pr(&gt;|t|)    
-(Intercept)      44.3123     0.8726 229.9862  50.780   &lt;2e-16 ***
-contractYearyes  -0.2014     1.2119 943.9625  -0.166    0.868    
+                 Estimate Std. Error        df t value Pr(&gt;|t|)    
+(Intercept)      44.26920    0.87356 231.38798  50.677   &lt;2e-16 ***
+contractYearyes   0.05517    1.19528 943.21436   0.046    0.963    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr)
-contrctYrys -0.235</code></pre>
+contrctYrys -0.240</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModel_qbr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>              R2m       R2c
-[1,] 1.952255e-05 0.3598566</code></pre>
+[1,] 1.506369e-06 0.3597179</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModel_qbr, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean    SE  df lower.CL upper.CL
- no             44.3 0.873 261     42.6     46.0
- yes            44.1 1.318 769     41.5     46.7
+ no             44.3 0.874 262     42.5     46.0
+ yes            44.3 1.302 752     41.8     46.9
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -747,46 +748,46 @@ Formula: qbr ~ contractYear + ageCentered20 + ageCentered20Quadratic +
    Data: nfl_contractYearQBR_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 6795
+REML criterion at convergence: 6844.3
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--3.5998 -0.5087  0.0674  0.5453  3.4224 
+-3.6110 -0.5094  0.0710  0.5457  3.4258 
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr 
- player_id (Intercept)   124.960  11.1786       
-           ageCentered20   0.695   0.8337  -0.40
- Residual                166.211  12.8923       
-Number of obs: 825, groups:  player_id, 166
+ player_id (Intercept)   122.2762 11.0579       
+           ageCentered20   0.6852  0.8277  -0.38
+ Residual                166.4307 12.9008       
+Number of obs: 831, groups:  player_id, 167
 
 Fixed effects:
                         Estimate Std. Error        df t value Pr(&gt;|t|)    
-(Intercept)             39.34822    2.38790 162.22128  16.478  &lt; 2e-16 ***
-contractYearyes         -0.03948    1.24483 728.73061  -0.032 0.974708    
-ageCentered20            2.07980    0.72654 266.01219   2.863 0.004536 ** 
-ageCentered20Quadratic  -0.08849    0.02560  96.59867  -3.456 0.000815 ***
-years_of_experience     -0.53694    0.65040 239.69397  -0.826 0.409880    
+(Intercept)             39.48193    2.37393 163.40575  16.631  &lt; 2e-16 ***
+contractYearyes          0.27777    1.22839 730.82229   0.226 0.821169    
+ageCentered20            2.05900    0.72486 267.29207   2.841 0.004850 ** 
+ageCentered20Quadratic  -0.08794    0.02550  96.09781  -3.449 0.000837 ***
+years_of_experience     -0.55190    0.64905 241.75297  -0.850 0.395989    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr) cntrcY agCn20 agC20Q
-contrctYrys  0.045                     
-ageCentrd20 -0.763 -0.085              
-agCntrd20Qd  0.702  0.037 -0.536       
-yrs_f_xprnc  0.224 -0.005 -0.712 -0.158</code></pre>
+contrctYrys  0.046                     
+ageCentrd20 -0.764 -0.089              
+agCntrd20Qd  0.701  0.035 -0.535       
+yrs_f_xprnc  0.227 -0.001 -0.713 -0.157</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModelAge_qbr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>            R2m       R2c
-[1,] 0.02067011 0.4423213</code></pre>
+[1,] 0.02113517 0.4411265</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModelAge_qbr, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean   SE  df lower.CL upper.CL
- no             45.3 1.12 151     43.1     47.5
- yes            45.3 1.39 365     42.5     48.0
+ no             45.2 1.12 153     43.0     47.4
+ yes            45.5 1.37 359     42.8     48.2
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -807,39 +808,39 @@ Formula: pts_added ~ contractYear + (1 | player_id)
    Data: nfl_contractYearQBR_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 4855.5
+REML criterion at convergence: 4855.7
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.6925 -0.4921  0.0894  0.5347  4.4233 
+-4.7037 -0.4894  0.0854  0.5362  4.4263 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
  player_id (Intercept) 2.571    1.604   
- Residual              4.330    2.081   
+ Residual              4.331    2.081   
 Number of obs: 1063, groups:  player_id, 253
 
 Fixed effects:
-                Estimate Std. Error       df t value Pr(&gt;|t|)    
-(Intercept)      -0.8466     0.1311 218.5331  -6.457 6.81e-10 ***
-contractYearyes  -0.1205     0.1792 932.6004  -0.672    0.502    
+                 Estimate Std. Error        df t value Pr(&gt;|t|)    
+(Intercept)      -0.85134    0.13127 219.79804  -6.485 5.76e-10 ***
+contractYearyes  -0.08925    0.17680 931.73837  -0.505    0.614    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr)
-contrctYrys -0.231</code></pre>
+contrctYrys -0.236</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModel_ptsAdded)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>              R2m      R2c
-[1,] 0.0003141994 0.372754</code></pre>
+<pre><code>              R2m       R2c
+[1,] 0.0001770825 0.3726302</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModel_ptsAdded, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean    SE  df lower.CL upper.CL
- no           -0.847 0.131 261    -1.10   -0.588
- yes          -0.967 0.196 761    -1.35   -0.582
+ no           -0.851 0.131 262    -1.11   -0.593
+ yes          -0.941 0.194 745    -1.32   -0.560
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -859,46 +860,46 @@ Formula: pts_added ~ contractYear + ageCentered20 + ageCentered20Quadratic +
    Data: nfl_contractYearQBR_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 3742.1
+REML criterion at convergence: 3768.4
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.9440 -0.4793  0.0777  0.5042  4.4470 
+-4.9543 -0.4823  0.0788  0.5074  4.4513 
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr 
- player_id (Intercept)   3.49909  1.8706        
-           ageCentered20 0.01156  0.1075   -0.50
- Residual                4.03848  2.0096        
-Number of obs: 825, groups:  player_id, 166
+ player_id (Intercept)   3.42877  1.8517        
+           ageCentered20 0.01121  0.1059   -0.49
+ Residual                4.04121  2.0103        
+Number of obs: 831, groups:  player_id, 167
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)             -1.549883   0.375669 145.867369  -4.126 6.19e-05 ***
-contractYearyes         -0.137760   0.193033 723.300424  -0.714  0.47567    
-ageCentered20            0.232100   0.112901 250.231868   2.056  0.04084 *  
-ageCentered20Quadratic  -0.012119   0.003885  67.788657  -3.119  0.00266 ** 
-years_of_experience      0.007183   0.100713 217.903663   0.071  0.94321    
+(Intercept)             -1.538867   0.373292 147.195811  -4.122 6.24e-05 ***
+contractYearyes         -0.101309   0.190415 725.357555  -0.532  0.59486    
+ageCentered20            0.230585   0.112569 251.840267   2.048  0.04156 *  
+ageCentered20Quadratic  -0.012099   0.003865  67.516183  -3.130  0.00258 ** 
+years_of_experience      0.006180   0.100457 220.010278   0.062  0.95101    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr) cntrcY agCn20 agC20Q
 contrctYrys  0.046                     
-ageCentrd20 -0.762 -0.087              
-agCntrd20Qd  0.698  0.048 -0.538       
-yrs_f_xprnc  0.236 -0.006 -0.719 -0.152</code></pre>
+ageCentrd20 -0.762 -0.090              
+agCntrd20Qd  0.698  0.046 -0.537       
+yrs_f_xprnc  0.239 -0.003 -0.721 -0.151</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModelAge_ptsAdded)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>            R2m       R2c
-[1,] 0.01249643 0.4206257</code></pre>
+[1,] 0.01239464 0.4186167</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModelAge_ptsAdded, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean    SE  df lower.CL upper.CL
- no           -0.651 0.169 156   -0.984   -0.317
- yes          -0.788 0.213 390   -1.207   -0.369
+ no           -0.657 0.168 158   -0.988   -0.325
+ yes          -0.758 0.210 383   -1.171   -0.345
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -919,39 +920,39 @@ Formula: epa_pass ~ contractYear + (1 | player_id)
    Data: nfl_contractYearQBR_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 4534.5
+REML criterion at convergence: 4534.4
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--3.0172 -0.5147  0.0389  0.5641  4.3624 
+-3.0166 -0.5102  0.0389  0.5643  4.3629 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
  player_id (Intercept) 2.449    1.565   
- Residual              3.054    1.748   
+ Residual              3.053    1.747   
 Number of obs: 1063, groups:  player_id, 253
 
 Fixed effects:
                 Estimate Std. Error       df t value Pr(&gt;|t|)    
-(Intercept)       1.0809     0.1216 238.3340   8.888  &lt; 2e-16 ***
-contractYearyes   0.3969     0.1518 922.2533   2.615  0.00906 ** 
+(Intercept)       1.0788     0.1217 239.5143   8.862  &lt; 2e-16 ***
+contractYearyes   0.3957     0.1497 921.4232   2.644  0.00833 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr)
-contrctYrys -0.209</code></pre>
+contrctYrys -0.213</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModel_epaPass)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>             R2m       R2c
-[1,] 0.004256893 0.4473566</code></pre>
+[1,] 0.004348227 0.4474718</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModel_epaPass, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean    SE  df lower.CL upper.CL
- no             1.08 0.122 261    0.841     1.32
- yes            1.48 0.174 715    1.137     1.82
+ no             1.08 0.122 262    0.839     1.32
+ yes            1.47 0.172 699    1.137     1.81
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -971,45 +972,45 @@ Formula: epa_pass ~ contractYear + ageCentered20 + ageCentered20Quadratic +
    Data: nfl_contractYearQBR_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 3430.4
+REML criterion at convergence: 3452.2
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--3.4392 -0.5241  0.0693  0.5400  4.4432 
+-3.4462 -0.5233  0.0693  0.5448  4.4517 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
- player_id (Intercept) 1.937    1.392   
- Residual              2.813    1.677   
-Number of obs: 825, groups:  player_id, 166
+ player_id (Intercept) 1.922    1.386   
+ Residual              2.805    1.675   
+Number of obs: 831, groups:  player_id, 167
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)   
-(Intercept)              0.479387   0.292600 670.752637   1.638  0.10181   
-contractYearyes          0.059484   0.159652 750.346834   0.373  0.70956   
-ageCentered20            0.237398   0.090189 487.660557   2.632  0.00875 **
-ageCentered20Quadratic  -0.004303   0.002843 772.792296  -1.514  0.13048   
-years_of_experience     -0.052180   0.083219 291.286102  -0.627  0.53114   
+(Intercept)              0.485918   0.291166 674.959069   1.669  0.09561 . 
+contractYearyes          0.053588   0.157236 752.652519   0.341  0.73334   
+ageCentered20            0.237823   0.089958 489.474418   2.644  0.00846 **
+ageCentered20Quadratic  -0.004309   0.002830 777.320235  -1.522  0.12835   
+years_of_experience     -0.052657   0.082951 292.647453  -0.635  0.52606   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr) cntrcY agCn20 agC20Q
-contrctYrys  0.047                     
-ageCentrd20 -0.746 -0.088              
-agCntrd20Qd  0.685  0.055 -0.492       
-yrs_f_xprnc  0.261 -0.009 -0.750 -0.170</code></pre>
+contrctYrys  0.048                     
+ageCentrd20 -0.747 -0.091              
+agCntrd20Qd  0.685  0.054 -0.492       
+yrs_f_xprnc  0.264 -0.006 -0.751 -0.169</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModelAge_epaPass)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>           R2m       R2c
-[1,] 0.0473217 0.4357552</code></pre>
+<pre><code>            R2m       R2c
+[1,] 0.04725467 0.4347018</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModelAge_epaPass, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean    SE  df lower.CL upper.CL
- no             1.74 0.140 180     1.47     2.02
- yes            1.80 0.177 418     1.45     2.15
+ no             1.75 0.139 183     1.47     2.02
+ yes            1.80 0.174 411     1.46     2.14
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1044,39 +1045,39 @@ Formula: ypc ~ contractYear + (1 | player_id)
    Data: player_statsContractsRB_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 4821.2
+REML criterion at convergence: 4821.1
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--3.8770 -0.4658  0.0122  0.4842  6.4858 
+-3.8768 -0.4660  0.0118  0.4845  6.4861 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
- player_id (Intercept) 0.3927   0.6266  
- Residual              1.1415   1.0684  
+ player_id (Intercept) 0.3923   0.6263  
+ Residual              1.1417   1.0685  
 Number of obs: 1512, groups:  player_id, 482
 
 Fixed effects:
                  Estimate Std. Error        df t value Pr(&gt;|t|)    
-(Intercept)     3.911e+00  4.481e-02 4.819e+02  87.281   &lt;2e-16 ***
-contractYearyes 4.747e-02  6.995e-02 1.423e+03   0.679    0.498    
+(Intercept)     3.911e+00  4.484e-02 4.835e+02  87.227   &lt;2e-16 ***
+contractYearyes 4.942e-02  6.971e-02 1.423e+03   0.709    0.478    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr)
-contrctYrys -0.348</code></pre>
+contrctYrys -0.350</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModel_ypc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>              R2m       R2c
-[1,] 0.0002769049 0.2561506</code></pre>
+[1,] 0.0003022763 0.2559658</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModel_ypc, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean     SE   df lower.CL upper.CL
- no             3.91 0.0448  555     3.82     4.00
- yes            3.96 0.0688 1153     3.82     4.09
+ no             3.91 0.0449  557     3.82     4.00
+ yes            3.96 0.0685 1146     3.83     4.09
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1096,46 +1097,46 @@ Formula: ypc ~ contractYear + ageCentered20 + ageCentered20Quadratic +
    Data: player_statsContractsRB_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 4080.4
+REML criterion at convergence: 4080.3
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.0215 -0.4545 -0.0007  0.4727  6.4132 
+-4.0210 -0.4563 -0.0008  0.4722  6.4138 
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr 
- player_id (Intercept)   1.104808 1.05110       
-           ageCentered20 0.009779 0.09889  -0.80
- Residual                0.994977 0.99749       
+ player_id (Intercept)   1.105261 1.05131       
+           ageCentered20 0.009768 0.09884  -0.80
+ Residual                0.995099 0.99755       
 Number of obs: 1296, groups:  player_id, 361
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)             4.288e+00  1.623e-01  4.350e+02  26.418   &lt;2e-16 ***
-contractYearyes         1.790e-01  7.620e-02  1.102e+03   2.349    0.019 *  
-ageCentered20          -5.131e-02  5.784e-02  4.137e+02  -0.887    0.376    
-ageCentered20Quadratic -1.802e-03  3.710e-03  1.694e+02  -0.486    0.628    
-years_of_experience    -3.573e-03  3.763e-02  2.748e+02  -0.095    0.924    
+(Intercept)             4.289e+00  1.623e-01  4.344e+02  26.422   &lt;2e-16 ***
+contractYearyes         1.801e-01  7.591e-02  1.106e+03   2.373   0.0178 *  
+ageCentered20          -5.189e-02  5.784e-02  4.129e+02  -0.897   0.3702    
+ageCentered20Quadratic -1.755e-03  3.710e-03  1.690e+02  -0.473   0.6368    
+years_of_experience    -3.617e-03  3.761e-02  2.744e+02  -0.096   0.9235    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr) cntrcY agCn20 agC20Q
 contrctYrys  0.165                     
-ageCentrd20 -0.870 -0.194              
-agCntrd20Qd  0.757  0.128 -0.771       
+ageCentrd20 -0.870 -0.195              
+agCntrd20Qd  0.757  0.131 -0.771       
 yrs_f_xprnc  0.179 -0.018 -0.492 -0.104</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModelAge_ypc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>            R2m       R2c
-[1,] 0.02625508 0.3710417</code></pre>
+[1,] 0.02629169 0.3708211</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModelAge_ypc, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean     SE  df lower.CL upper.CL
- no             3.91 0.0535 395     3.81     4.02
- yes            4.09 0.0743 904     3.94     4.24
+ no             3.91 0.0535 396     3.81     4.02
+ yes            4.09 0.0740 899     3.95     4.24
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1156,39 +1157,39 @@ Formula: rushing_epa ~ contractYear + (1 | player_id)
    Data: player_statsContractsRB_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 4286.5
+REML criterion at convergence: 4286.4
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.6927 -0.5195  0.0878  0.6131  3.4716 
+-4.6919 -0.5186  0.0887  0.6130  3.4722 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
- player_id (Intercept) 0.1025   0.3201  
- Residual              0.9053   0.9515  
+ player_id (Intercept) 0.1026   0.3204  
+ Residual              0.9051   0.9514  
 Number of obs: 1512, groups:  player_id, 482
 
 Fixed effects:
                   Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)       -0.65572    0.03294  574.54240 -19.909   &lt;2e-16 ***
-contractYearyes    0.04221    0.05937 1508.87859   0.711    0.477    
+(Intercept)       -0.65667    0.03298  577.83232 -19.912   &lt;2e-16 ***
+contractYearyes    0.04577    0.05916 1508.85908   0.774    0.439    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr)
-contrctYrys -0.427</code></pre>
+contrctYrys -0.430</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModel_epaRush)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>              R2m      R2c
-[1,] 0.0003333205 0.101959</code></pre>
+<pre><code>              R2m       R2c
+[1,] 0.0003945932 0.1021977</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModel_epaRush, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code> contractYear emmean     SE   df lower.CL upper.CL
- no           -0.656 0.0330  571    -0.72   -0.591
- yes          -0.614 0.0543 1062    -0.72   -0.507
+<pre><code> contractYear emmean    SE   df lower.CL upper.CL
+ no           -0.657 0.033  575   -0.722   -0.592
+ yes          -0.611 0.054 1054   -0.717   -0.505
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1208,46 +1209,46 @@ Formula: rushing_epa ~ contractYear + ageCentered20 + ageCentered20Quadratic +
    Data: player_statsContractsRB_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 3678.3
+REML criterion at convergence: 3678.1
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.8034 -0.5080  0.0648  0.5992  3.2002 
+-4.8023 -0.5071  0.0638  0.5993  3.1974 
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr 
- player_id (Intercept)   0.233705 0.48343       
-           ageCentered20 0.002949 0.05431  -0.74
- Residual                0.872781 0.93423       
+ player_id (Intercept)   0.235283 0.48506       
+           ageCentered20 0.002966 0.05446  -0.74
+ Residual                0.872259 0.93395       
 Number of obs: 1296, groups:  player_id, 361
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)            -6.821e-01  1.271e-01  2.879e+02  -5.367 1.65e-07 ***
-contractYearyes         8.655e-02  6.688e-02  1.140e+03   1.294  0.19589    
-ageCentered20           7.518e-02  4.476e-02  2.829e+02   1.680  0.09411 .  
-ageCentered20Quadratic -2.938e-03  3.077e-03  1.199e+02  -0.955  0.34159    
-years_of_experience    -7.123e-02  2.630e-02  3.154e+02  -2.708  0.00713 ** 
+(Intercept)            -6.805e-01  1.271e-01  2.878e+02  -5.352 1.78e-07 ***
+contractYearyes         9.073e-02  6.661e-02  1.146e+03   1.362  0.17345    
+ageCentered20           7.440e-02  4.479e-02  2.832e+02   1.661  0.09781 .  
+ageCentered20Quadratic -2.896e-03  3.078e-03  1.201e+02  -0.941  0.34868    
+years_of_experience    -7.127e-02  2.631e-02  3.153e+02  -2.709  0.00712 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr) cntrcY agCn20 agC20Q
-contrctYrys  0.149                     
-ageCentrd20 -0.888 -0.199              
-agCntrd20Qd  0.801  0.121 -0.820       
-yrs_f_xprnc  0.070 -0.014 -0.372 -0.149</code></pre>
+contrctYrys  0.150                     
+ageCentrd20 -0.888 -0.201              
+agCntrd20Qd  0.801  0.124 -0.820       
+yrs_f_xprnc  0.070 -0.013 -0.372 -0.148</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModelAge_epaRush)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>            R2m       R2c
-[1,] 0.01461916 0.1426266</code></pre>
+[1,] 0.01477437 0.1432941</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModelAge_epaRush, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean     SE  df lower.CL upper.CL
- no           -0.655 0.0381 380   -0.730   -0.580
- yes          -0.569 0.0591 908   -0.685   -0.453
+ no           -0.656 0.0382 382   -0.732   -0.581
+ yes          -0.566 0.0588 903   -0.681   -0.450
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1282,39 +1283,39 @@ Formula: receiving_yards ~ contractYear + (1 | player_id)
    Data: player_statsContractsWRTE_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 27095.1
+REML criterion at convergence: 27094.2
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.7778 -0.5665 -0.0867  0.5260  4.5007 
+-4.7762 -0.5668 -0.0870  0.5265  4.5000 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
- player_id (Intercept) 234.0    15.30   
+ player_id (Intercept) 233.9    15.29   
  Residual              190.1    13.79   
 Number of obs: 3180, groups:  player_id, 937
 
 Fixed effects:
                  Estimate Std. Error        df t value Pr(&gt;|t|)    
-(Intercept)       29.2496     0.6019 1147.3082   48.59  &lt; 2e-16 ***
-contractYearyes   -3.7568     0.6304 2751.5194   -5.96 2.85e-09 ***
+(Intercept)       29.2630     0.6020 1147.8658  48.613  &lt; 2e-16 ***
+contractYearyes   -3.7991     0.6301 2752.6783  -6.029 1.87e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr)
-contrctYrys -0.253</code></pre>
+contrctYrys -0.254</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModel_receivingYards)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>             R2m       R2c
-[1,] 0.006623571 0.5547004</code></pre>
+[1,] 0.006779332 0.5547323</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModel_receivingYards, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean    SE   df lower.CL upper.CL
- no             29.2 0.602 1033     28.1     30.4
- yes            25.5 0.754 1933     24.0     27.0
+ no             29.3 0.602 1034     28.1     30.4
+ yes            25.5 0.753 1931     24.0     26.9
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1335,46 +1336,46 @@ receiving_yards ~ contractYear + ageCentered20 + ageCentered20Quadratic +
    Data: player_statsContractsWRTE_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 23688.1
+REML criterion at convergence: 23687.2
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--2.8956 -0.5512 -0.0854  0.5055  3.8001 
+-2.8960 -0.5509 -0.0850  0.5057  3.8002 
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr 
- player_id (Intercept)   498.869  22.335        
-           ageCentered20   6.319   2.514   -0.67
- Residual                142.654  11.944        
+ player_id (Intercept)   499.008  22.338        
+           ageCentered20   6.314   2.513   -0.67
+ Residual                142.636  11.943        
 Number of obs: 2815, groups:  player_id, 742
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)              17.67742    1.76255 1077.34554  10.029  &lt; 2e-16 ***
-contractYearyes          -3.33186    0.63934 2230.01410  -5.211 2.05e-07 ***
-ageCentered20             3.70441    0.62763 1566.63469   5.902 4.39e-09 ***
-ageCentered20Quadratic   -0.47148    0.03219 1157.14441 -14.649  &lt; 2e-16 ***
-years_of_experience       2.37976    0.49028  946.13761   4.854 1.42e-06 ***
+(Intercept)              17.65659    1.76256 1077.55573  10.018  &lt; 2e-16 ***
+contractYearyes          -3.38701    0.63921 2230.82411  -5.299 1.28e-07 ***
+ageCentered20             3.71523    0.62760 1567.44179   5.920 3.95e-09 ***
+ageCentered20Quadratic   -0.47157    0.03218 1157.02734 -14.653  &lt; 2e-16 ***
+years_of_experience       2.37600    0.49010  945.79109   4.848 1.46e-06 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr) cntrcY agCn20 agC20Q
-contrctYrys  0.106                     
-ageCentrd20 -0.834 -0.148              
-agCntrd20Qd  0.656  0.055 -0.629       
-yrs_f_xprnc  0.335  0.041 -0.680 -0.063</code></pre>
+contrctYrys  0.107                     
+ageCentrd20 -0.834 -0.149              
+agCntrd20Qd  0.656  0.056 -0.630       
+yrs_f_xprnc  0.335  0.042 -0.680 -0.063</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModelAge_receivingYards)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>           R2m       R2c
-[1,] 0.1092495 0.7319898</code></pre>
+[1,] 0.1092205 0.7317998</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModelAge_receivingYards, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean    SE   df lower.CL upper.CL
- no             28.9 0.752  806     27.4     30.4
- yes            25.6 0.839 1219     23.9     27.2
+ no             28.9 0.752  807     27.4     30.4
+ yes            25.5 0.838 1219     23.9     27.2
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1395,39 +1396,39 @@ Formula: receiving_epa ~ contractYear + (1 | player_id)
    Data: player_statsContractsWRTE_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 10538.6
+REML criterion at convergence: 10538.7
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.1707 -0.5760 -0.0616  0.5311  3.9489 
+-4.1703 -0.5759 -0.0615  0.5309  3.9493 
 
 Random effects:
  Groups    Name        Variance Std.Dev.
- player_id (Intercept) 0.5243   0.7241  
- Residual              1.2749   1.1291  
+ player_id (Intercept) 0.5242   0.724   
+ Residual              1.2749   1.129   
 Number of obs: 3178, groups:  player_id, 937
 
 Fixed effects:
                   Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)        0.71366    0.03534 1269.53306  20.194   &lt;2e-16 ***
-contractYearyes   -0.11805    0.04938 3027.99670  -2.391   0.0169 *  
+(Intercept)        0.71352    0.03535 1269.78569  20.185   &lt;2e-16 ***
+contractYearyes   -0.11717    0.04936 3028.50007  -2.374   0.0177 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr)
-contrctYrys -0.354</code></pre>
+contrctYrys -0.355</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModel_epaReceiving)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>             R2m       R2c
-[1,] 0.001550148 0.2925055</code></pre>
+[1,] 0.001528258 0.2924573</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb86"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModel_epaReceiving, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean     SE   df lower.CL upper.CL
- no            0.714 0.0353 1091    0.644    0.783
- yes           0.596 0.0495 2185    0.499    0.693
+ no            0.714 0.0354 1092    0.644    0.783
+ yes           0.596 0.0495 2184    0.499    0.693
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1448,46 +1449,46 @@ receiving_epa ~ contractYear + ageCentered20 + ageCentered20Quadratic +
    Data: player_statsContractsWRTE_seasonal
 Control: lmerControl(optimizer = "bobyqa")
 
-REML criterion at convergence: 9344.8
+REML criterion at convergence: 9344.9
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.2451 -0.5717 -0.0457  0.5353  3.7840 
+-4.2448 -0.5720 -0.0470  0.5351  3.7843 
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr 
- player_id (Intercept)   0.903658 0.95061       
-           ageCentered20 0.007467 0.08641  -0.62
- Residual                1.224344 1.10650       
+ player_id (Intercept)   0.903632 0.95060       
+           ageCentered20 0.007471 0.08644  -0.62
+ Residual                1.224389 1.10652       
 Number of obs: 2814, groups:  player_id, 742
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)             3.021e-01  1.153e-01  8.511e+02   2.619 0.008969 ** 
-contractYearyes        -1.854e-01  5.459e-02  2.581e+03  -3.397 0.000692 ***
-ageCentered20           1.698e-01  3.965e-02  9.816e+02   4.283 2.03e-05 ***
-ageCentered20Quadratic -1.355e-02  2.245e-03  3.951e+02  -6.037 3.62e-09 ***
-years_of_experience     2.172e-02  2.771e-02  8.205e+02   0.784 0.433436    
+(Intercept)             3.021e-01  1.154e-01  8.511e+02   2.619 0.008974 ** 
+contractYearyes        -1.846e-01  5.458e-02  2.582e+03  -3.383 0.000728 ***
+ageCentered20           1.699e-01  3.966e-02  9.818e+02   4.283 2.02e-05 ***
+ageCentered20Quadratic -1.355e-02  2.245e-03  3.953e+02  -6.038 3.60e-09 ***
+years_of_experience     2.165e-02  2.771e-02  8.205e+02   0.781 0.434945    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
             (Intr) cntrcY agCn20 agC20Q
 contrctYrys  0.123                     
-ageCentrd20 -0.857 -0.192              
+ageCentrd20 -0.857 -0.193              
 agCntrd20Qd  0.745  0.089 -0.722       
-yrs_f_xprnc  0.206  0.055 -0.550 -0.113</code></pre>
+yrs_f_xprnc  0.206  0.056 -0.550 -0.113</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb90"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1"></a>MuMIn<span class="sc">::</span><span class="fu">r.squaredGLMM</span>(mixedModelAge_epaReceiving)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>            R2m       R2c
-[1,] 0.01953043 0.3517299</code></pre>
+<pre><code>            R2m      R2c
+[1,] 0.01951911 0.351717</code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb92"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(mixedModelAge_epaReceiving, <span class="st">"contractYear"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> contractYear emmean     SE   df lower.CL upper.CL
  no            0.807 0.0415  791    0.726    0.889
- yes           0.622 0.0536 1733    0.517    0.727
+ yes           0.623 0.0535 1732    0.518    0.728
 
 Degrees-of-freedom method: kenward-roger 
 Confidence level used: 0.95 </code></pre>
@@ -1535,7 +1536,8 @@ other attached packages:
  [1] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
  [5] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
  [9] ggplot2_3.5.1     tidyverse_2.0.0   emmeans_1.10.3    MuMIn_1.48.4     
-[13] lmerTest_3.1-3    lme4_1.1-35.5     Matrix_1.7-0      petersenlab_1.0.5
+[13] lmerTest_3.1-3    lme4_1.1-35.5     Matrix_1.7-0      nflreadr_1.4.1   
+[17] petersenlab_1.0.5
 
 loaded via a namespace (and not attached):
  [1] tidyselect_1.2.1    psych_2.4.6.26      viridisLite_0.4.2  
@@ -1545,25 +1547,26 @@ loaded via a namespace (and not attached):
 [13] rlang_1.1.4         Hmisc_5.1-3         tools_4.4.1        
 [16] utf8_1.2.4          yaml_2.3.10         data.table_1.15.4  
 [19] knitr_1.48          htmlwidgets_1.6.4   mnormt_2.1.1       
-[22] plyr_1.8.9          RColorBrewer_1.1-3  foreign_0.8-86     
-[25] withr_3.0.1         numDeriv_2016.8-1.1 nnet_7.3-19        
+[22] plyr_1.8.9          RColorBrewer_1.1-3  withr_3.0.1        
+[25] foreign_0.8-86      numDeriv_2016.8-1.1 nnet_7.3-19        
 [28] grid_4.4.1          stats4_4.4.1        fansi_1.0.6        
 [31] lavaan_0.6-18       xtable_1.8-4        colorspace_2.1-1   
 [34] scales_1.3.0        MASS_7.3-60.2       cli_3.6.3          
 [37] mvtnorm_1.2-5       rmarkdown_2.27      generics_0.1.3     
 [40] rstudioapi_0.16.0   tzdb_0.4.0          reshape2_1.4.4     
-[43] minqa_1.2.7         DBI_1.2.3           splines_4.4.1      
-[46] parallel_4.4.1      base64enc_0.1-3     mitools_2.4        
-[49] vctrs_0.6.5         boot_1.3-30         jsonlite_1.8.8     
-[52] hms_1.1.3           pbkrtest_0.5.3      Formula_1.2-5      
-[55] htmlTable_2.4.3     glue_1.7.0          nloptr_2.1.1       
-[58] stringi_1.8.4       gtable_0.3.5        quadprog_1.5-8     
-[61] munsell_0.5.1       pillar_1.9.0        htmltools_0.5.8.1  
-[64] R6_2.5.1            mix_1.0-12          evaluate_0.24.0    
-[67] pbivnorm_0.6.0      lattice_0.22-6      backports_1.5.0    
-[70] broom_1.0.6         Rcpp_1.0.13         coda_0.19-4.1      
-[73] gridExtra_2.3       nlme_3.1-164        checkmate_2.3.2    
-[76] xfun_0.46           pkgconfig_2.0.3    </code></pre>
+[43] minqa_1.2.7         DBI_1.2.3           cachem_1.1.0       
+[46] splines_4.4.1       parallel_4.4.1      base64enc_0.1-3    
+[49] mitools_2.4         vctrs_0.6.5         boot_1.3-30        
+[52] jsonlite_1.8.8      hms_1.1.3           pbkrtest_0.5.3     
+[55] Formula_1.2-5       htmlTable_2.4.3     glue_1.7.0         
+[58] nloptr_2.1.1        stringi_1.8.4       gtable_0.3.5       
+[61] quadprog_1.5-8      munsell_0.5.1       pillar_1.9.0       
+[64] htmltools_0.5.8.1   R6_2.5.1            mix_1.0-12         
+[67] evaluate_0.24.0     pbivnorm_0.6.0      lattice_0.22-6     
+[70] backports_1.5.0     broom_1.0.6         memoise_2.0.1      
+[73] Rcpp_1.0.13         coda_0.19-4.1       gridExtra_2.3      
+[76] nlme_3.1-164        checkmate_2.3.2     xfun_0.46          
+[79] pkgconfig_2.0.3    </code></pre>
 </div>
 </div>
 

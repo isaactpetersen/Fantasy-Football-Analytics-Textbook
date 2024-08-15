@@ -94,8 +94,12 @@ load(file = "./data/player_stats_seasonal.RData")
 
 ## Overview of Machine Learning {#sec-machineLearningOverview}
 
+Machine learning takes us away from focusing on [causal inference](#sec-causalInference).
+Machine learning does not care about which processes are causal—i.e., which processes influence the outcome.
+Instead, machine learning cares about prediction—it cares about a predictor variable to the extent that it increases predictive accuracy regardless of whether it is causally related to the outcome.
+
 Machine learning can be useful for leveraging big data and lots of predictor variable to develop predictive models with greater accuracy.
-However, many machine learning techniques are black boxes—it is often unclear
+However, many machine learning techniques are black boxes—it is often unclear how or why certain predictions are made, which can make it difficult to interpret the model's decisions and understand the underlying relationships between variables.
 Machine learning tends to be a data-driven, atheoretical technique.
 This can result in overfitting.
 Thus, when estimating machine learning models, it is common to keep a hold-out sample for use in cross-validation to evaluate the extent of shrinkage of model coefficients.
@@ -357,7 +361,7 @@ seasonalData <- seasonalData %>%
   )
 ```
 
-### Fill in Missing Data {#sec-fillMissingData}
+### Fill in Missing Data for Static Variables {#sec-fillMissingData}
 
 ```{r}
 seasonalData <- seasonalData %>% 
@@ -413,7 +417,7 @@ seasonalData_lag_subsetQB <- seasonalData_lag_subset %>%
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_year, draft_number,
     fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
-    completions:rushing_2pt_conversions, contains(".pass"))
+    completions:rushing_2pt_conversions, special_teams_tds, contains(".pass"), contains(".rush"))
 
 seasonalData_lag_subsetRB <- seasonalData_lag_subset %>% 
   filter(position == "RB") %>% 
@@ -551,6 +555,10 @@ num_cores <- detectCores() - 1
 num_true_cores <- parallel::detectCores(logical = FALSE) - 1
 ```
 
+::: {#nte-machineLearningImputeMissingData .callout-note title="Impute missing data for machine learning"}
+Note: the following code takes a while to run.
+:::
+
 ```{r}
 num_cores
 
@@ -560,96 +568,216 @@ doParallel::registerDoParallel(cl)
 set.seed(52242)
 
 # QBs
-seasonalData_lag_subsetQB_imp <- missForest::missForest(
-  seasonalData_lag_subsetQB %>% 
+seasonalData_lag_qb_all_imp <- missForest::missForest(
+  seasonalData_lag_qb_all %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-seasonalData_lag_subsetQB_imp$OOBerror
-data_train_qb <- cbind(seasonalData_lag_subsetQB[,"gsis_id"], seasonalData_lag_subsetQB_imp$ximp)
+seasonalData_lag_qb_all_imp$OOBerror
+data_all_qb <- cbind(seasonalData_lag_qb_all[,"gsis_id"], seasonalData_lag_qb_all_imp$ximp)
+data_all_qb_matrix <- data_all_qb %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
+newData_qb <- data_all_qb %>% 
+  filter(season == max(season, na.rm = TRUE)) %>% 
+  select(-fantasyPoints_lag)
+newData_qb_matrix <- data_all_qb_matrix[
+  data_all_qb_matrix[, "season"] == max(data_all_qb_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
+  , # all columns
+  drop = FALSE]
+
+dropCol_qb <- which(colnames(newData_qb_matrix) == "fantasyPoints_lag")
+newData_qb_matrix <- newData_qb_matrix[, -dropCol_qb, drop = FALSE]
+
+seasonalData_lag_qb_train_imp <- missForest::missForest(
+  seasonalData_lag_qb_train %>% 
+    select(-gsis_id) %>%
+    data.frame(),
+  verbose = TRUE,
+  mtry = 100,
+  parallelize = "forests")
+
+seasonalData_lag_qb_train_imp$OOBerror
+data_train_qb <- cbind(seasonalData_lag_qb_train[,"gsis_id"], seasonalData_lag_qb_train_imp$ximp)
 data_train_qb_matrix <- data_train_qb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
 
-newData_seasonalQB_imp <- missForest::missForest(
-  newData_seasonalQB %>% 
+seasonalData_lag_qb_test_imp <- missForest::missForest(
+  seasonalData_lag_qb_test %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-newData_seasonalQB_imp$OOBerror
-newData_qb <- cbind(newData_seasonalQB[,"gsis_id"], newData_seasonalQB_imp$ximp)
-newData_qb_matrix <- newData_qb %>%
+seasonalData_lag_qb_test_imp$OOBerror
+data_test_qb <- cbind(seasonalData_lag_qb_test[,"gsis_id"], seasonalData_lag_qb_test_imp$ximp)
+data_test_qb_matrix <- data_test_qb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
 
 # RBs
-seasonalData_lag_subsetRB_imp <- missForest::missForest(
-  seasonalData_lag_subsetRB %>% 
+seasonalData_lag_rb_all_imp <- missForest::missForest(
+  seasonalData_lag_rb_all %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-seasonalData_lag_subsetRB_imp$OOBerror
+seasonalData_lag_rb_all_imp$OOBerror
+data_all_rb <- cbind(seasonalData_lag_rb_all[,"gsis_id"], seasonalData_lag_rb_all_imp$ximp)
+data_all_rb_matrix <- data_all_rb %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
+newData_rb <- data_all_rb %>% 
+  filter(season == max(season, na.rm = TRUE)) %>% 
+  select(-fantasyPoints_lag)
+newData_rb_matrix <- data_all_rb_matrix[
+  data_all_rb_matrix[, "season"] == max(data_all_rb_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
+  , # all columns
+  drop = FALSE]
 
-newData_seasonalRB_imp <- missForest::missForest(
-  newData_seasonalRB %>% 
+dropCol_rb <- which(colnames(newData_rb_matrix) == "fantasyPoints_lag")
+newData_rb_matrix <- newData_rb_matrix[, -dropCol_rb, drop = FALSE]
+
+seasonalData_lag_rb_train_imp <- missForest::missForest(
+  seasonalData_lag_rb_train %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-newData_seasonalRB_imp$OOBerror
+seasonalData_lag_rb_train_imp$OOBerror
+data_train_rb <- cbind(seasonalData_lag_rb_train[,"gsis_id"], seasonalData_lag_rb_train_imp$ximp)
+data_train_rb_matrix <- data_train_rb %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
+
+seasonalData_lag_rb_test_imp <- missForest::missForest(
+  seasonalData_lag_rb_test %>% 
+    select(-gsis_id) %>%
+    data.frame(),
+  verbose = TRUE,
+  mtry = 100,
+  parallelize = "forests")
+
+seasonalData_lag_rb_test_imp$OOBerror
+data_test_rb <- cbind(seasonalData_lag_rb_test[,"gsis_id"], seasonalData_lag_rb_test_imp$ximp)
+data_test_rb_matrix <- data_test_rb %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
 
 # WRs
-seasonalData_lag_subsetWR_imp <- missForest::missForest(
-  seasonalData_lag_subsetWR %>% 
+seasonalData_lag_wr_all_imp <- missForest::missForest(
+  seasonalData_lag_wr_all %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-seasonalData_lag_subsetWR_imp$OOBerror
+seasonalData_lag_wr_all_imp$OOBerror
+data_all_wr <- cbind(seasonalData_lag_wr_all[,"gsis_id"], seasonalData_lag_wr_all_imp$ximp)
+data_all_wr_matrix <- data_all_wr %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
+newData_wr <- data_all_wr %>% 
+  filter(season == max(season, na.rm = TRUE)) %>% 
+  select(-fantasyPoints_lag)
+newData_wr_matrix <- data_all_wr_matrix[
+  data_all_wr_matrix[, "season"] == max(data_all_wr_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
+  , # all columns
+  drop = FALSE]
 
-newData_seasonalWR_imp <- missForest::missForest(
-  newData_seasonalWR %>% 
+dropCol_wr <- which(colnames(newData_wr_matrix) == "fantasyPoints_lag")
+newData_wr_matrix <- newData_wr_matrix[, -dropCol_wr, drop = FALSE]
+
+seasonalData_lag_wr_train_imp <- missForest::missForest(
+  seasonalData_lag_wr_train %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-newData_seasonalWR_imp$OOBerror
+seasonalData_lag_wr_train_imp$OOBerror
+data_train_wr <- cbind(seasonalData_lag_wr_train[,"gsis_id"], seasonalData_lag_wr_train_imp$ximp)
+data_train_wr_matrix <- data_train_wr %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
+
+seasonalData_lag_wr_test_imp <- missForest::missForest(
+  seasonalData_lag_wr_test %>% 
+    select(-gsis_id) %>%
+    data.frame(),
+  verbose = TRUE,
+  mtry = 100,
+  parallelize = "forests")
+
+seasonalData_lag_wr_test_imp$OOBerror
+data_test_wr <- cbind(seasonalData_lag_wr_test[,"gsis_id"], seasonalData_lag_wr_test_imp$ximp)
+data_test_wr_matrix <- data_test_wr %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
 
 # TEs
-seasonalData_lag_subsetTE_imp <- missForest::missForest(
-  seasonalData_lag_subsetTE %>% 
+seasonalData_lag_te_all_imp <- missForest::missForest(
+  seasonalData_lag_te_all %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-seasonalData_lag_subsetTE_imp$OOBerror
+seasonalData_lag_te_all_imp$OOBerror
+data_all_te <- cbind(seasonalData_lag_te_all[,"gsis_id"], seasonalData_lag_te_all_imp$ximp)
+data_all_te_matrix <- data_all_te %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
+newData_te <- data_all_te %>% 
+  filter(season == max(season, na.rm = TRUE)) %>% 
+  select(-fantasyPoints_lag)
+newData_te_matrix <- data_all_te_matrix[
+  data_all_te_matrix[, "season"] == max(data_all_te_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
+  , # all columns
+  drop = FALSE]
 
-newData_seasonalTE_imp <- missForest::missForest(
-  newData_seasonalTE %>% 
+dropCol_te <- which(colnames(newData_te_matrix) == "fantasyPoints_lag")
+newData_te_matrix <- newData_te_matrix[, -dropCol_te, drop = FALSE]
+
+seasonalData_lag_te_train_imp <- missForest::missForest(
+  seasonalData_lag_te_train %>% 
     select(-gsis_id) %>%
     data.frame(),
   verbose = TRUE,
   mtry = 100,
   parallelize = "forests")
 
-newData_seasonalTE_imp$OOBerror
+seasonalData_lag_te_train_imp$OOBerror
+data_train_te <- cbind(seasonalData_lag_te_train[,"gsis_id"], seasonalData_lag_te_train_imp$ximp)
+data_train_te_matrix <- data_train_te %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
+
+seasonalData_lag_te_test_imp <- missForest::missForest(
+  seasonalData_lag_te_test %>% 
+    select(-gsis_id) %>%
+    data.frame(),
+  verbose = TRUE,
+  mtry = 100,
+  parallelize = "forests")
+
+seasonalData_lag_te_test_imp$OOBerror
+data_test_te <- cbind(seasonalData_lag_te_test[,"gsis_id"], seasonalData_lag_te_test_imp$ximp)
+data_test_te_matrix <- data_test_te %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+  as.matrix()
 
 stopCluster(cl)
 ```
@@ -827,7 +955,7 @@ pred_vars_qb <- data_train_qb_matrix %>%
   select(-gsis_id, -fantasyPoints_lag, -ageCentered20, ageCentered20Quadratic) %>% 
   names()
 
-#pred_vars_qb_categorical <- ""
+#pred_vars_qb_categorical <- "" # to specify categorical predictors
 
 gp_model_qb <- GPModel(
   group_data = data_train_qb_matrix[,"gsis_id"],
@@ -841,7 +969,7 @@ gp_data_qb <- gpb.Dataset(
   data = data_train_qb_matrix[,pred_vars_qb],
   label = data_train_qb_matrix[,"fantasyPoints_lag"])
 
-#gpb.Dataset.set.categorical(gp_data_qb, pred_vars_qb_categorical)
+#gpb.Dataset.set.categorical(gp_data_qb, pred_vars_qb_categorical) # to specify categorical predictors
 
 params_qb <- list(
   learning_rate = 0.01,
@@ -850,22 +978,35 @@ params_qb <- list(
   min_data_in_leaf = 10,
   lambda_l2 = 10,
   num_threads = num_cores)
-  #optimizer_cov = "nelder_mead")
 
 nrounds_qb <- 379
 
 gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead"))
-summary(gp_model_qb) # Estimated random effects model
 
 gp_model_fit_qb <- gpb.train(
   data = gp_data_qb,
   gp_model = gp_model_qb,
   nrounds = nrounds_qb,
-  params = params_qb,
-  verbose = 0)
+  params = params_qb) # verbose = 0
 
-# Model predictions
-pred_qb <- predict(
+summary(gp_model_qb) # Estimated random effects model
+
+# Test Model on Test Data
+pred_test_qb <- predict(
+  gp_model_fit_qb,
+  data = data_test_qb_matrix[,pred_vars_qb],
+  group_data_pred = data_test_qb_matrix[,"gsis_id"],
+  group_rand_coef_data_pred = cbind(
+    data_test_qb_matrix[,"ageCentered20"],
+    data_test_qb_matrix[,"ageCentered20Quadratic"]),
+  predict_var = FALSE,
+  pred_latent = FALSE)
+
+y_pred_test_qb <- pred_test_qb[["response_mean"]]
+mean((data_test_qb_matrix[,"fantasyPoints_lag"] - y_pred_test_qb)^2)
+
+# Generate model predictions for next season
+pred_nextYear_qb <- predict(
   gp_model_fit_qb,
   data = newData_qb_matrix[,pred_vars_qb],
   group_data_pred = newData_qb_matrix[,"gsis_id"],
@@ -875,8 +1016,18 @@ pred_qb <- predict(
   predict_var = FALSE,
   pred_latent = FALSE)
 
-y_pred_qb <- pred_qb[["response_mean"]]
-mean((newData_qb[,"fantasyPoints_lag"] - y_pred_qb)^2)
+newData_qb$fantasyPoints_lag <- pred_nextYear_qb$response_mean
+
+# Merge with player names
+newData_qb <- left_join(
+  newData_qb,
+  nfl_playerIDs %>% select(gsis_id, name),
+  by = "gsis_id"
+)
+
+newData_qb %>% 
+  arrange(-fantasyPoints_lag) %>% 
+  select(name, fantasyPoints_lag)
 ```
 
 ## Conclusion {#sec-machineLearningConclusion}
