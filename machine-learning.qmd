@@ -92,6 +92,12 @@ load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
 ```
 
+### Specify Options {#machineLearningSpecifyOptions}
+
+```{r}
+options(scipen = 999) # prevent scientific notation
+```
+
 ## Overview of Machine Learning {#sec-machineLearningOverview}
 
 Machine learning takes us away from focusing on [causal inference](#sec-causalInference).
@@ -945,21 +951,55 @@ smerf$OOB # OOB error at each iteration
 Adapted from here:
 <https://towardsdatascience.com/mixed-effects-machine-learning-for-longitudinal-panel-data-with-gpboost-part-iii-523bb38effc>
 
-```{r}
-# Gamma distribution requires positive-only values
-data_train_qb_matrix[,"fantasyPoints_lag"][data_train_qb_matrix[,"fantasyPoints_lag"] <= 0] <- 0.01
+#### Process Data {#sec-treeBoostingProcessData}
 
-# Predictor variables
+If using a gamma distribution, it requires positive-only values:
+
+```{r}
+#data_train_qb_matrix[,"fantasyPoints_lag"][data_train_qb_matrix[,"fantasyPoints_lag"] <= 0] <- 0.01
+```
+
+#### Specify Predictor Variables {#sec-treeBoostingSpecifyPredictors}
+
+```{r}
 pred_vars_qb <- data_train_qb_matrix %>% 
   as_tibble() %>% 
-  select(-gsis_id, -fantasyPoints_lag, -ageCentered20, ageCentered20Quadratic) %>% 
+  select(-fantasyPoints_lag, -ageCentered20, ageCentered20Quadratic) %>% # -gsis_id
   names()
 
-#pred_vars_qb_categorical <- "" # to specify categorical predictors
+pred_vars_qb_categorical <- "gsis_id" # to specify categorical predictors
+```
+
+#### Specify General Model Options {#sec-treeBoostingSpecifyGeneralModelOptions}
+
+```{r}
+model_likelihood <- "gaussian" # gamma
+nrounds <- 1000
+```
+
+#### Identify Optimal Tuning Parameters {#sec-treeBoostingOptimalTuningParameters}
+
+```{r}
+# Partition training data into inner training data and validation data
+ntrain_qb <- dim(data_train_qb_matrix)[1]
+
+set.seed(52242)
+valid_tune_idx_qb <- sample.int(ntrain_qb, as.integer(0.2*ntrain_qb))
+
+folds_qb <- list(valid_tune_idx_qb)
+
+# Specify parameter grid, gp_model, and gpb.Dataset
+param_grid_qb <- list(
+  "learning_rate" = c(1,0.1,0.01),
+  "max_depth" = c(1,2,3,5,10),
+  "min_data_in_leaf" = c(10,100,1000),
+  "lambda_l2" = c(0,1,10))
+
+other_params_qb <- list(num_leaves = 2^10)
 
 gp_model_qb <- GPModel(
   group_data = data_train_qb_matrix[,"gsis_id"],
-  likelihood = "gamma", # "gaussian"
+  likelihood = model_likelihood,
   group_rand_coef_data = cbind(
     data_train_qb_matrix[,"ageCentered20"],
     data_train_qb_matrix[,"ageCentered20Quadratic"]),
@@ -967,30 +1007,67 @@ gp_model_qb <- GPModel(
 
 gp_data_qb <- gpb.Dataset(
   data = data_train_qb_matrix[,pred_vars_qb],
+  categorical_feature = pred_vars_qb_categorical,
   label = data_train_qb_matrix[,"fantasyPoints_lag"])
 
-#gpb.Dataset.set.categorical(gp_data_qb, pred_vars_qb_categorical) # to specify categorical predictors
+# Find optimal tuning parameters
+opt_params_qb <- gpb.grid.search.tune.parameters(
+  param_grid = param_grid_qb,
+  params = other_params_qb,
+  num_try_random = NULL,
+  folds = folds_qb,
+  data = gp_data_qb,
+  gp_model = gp_model_qb,
+  nrounds = nrounds,
+  early_stopping_rounds = 10,
+  verbose_eval = 1,
+  metric = "mse")
+
+opt_params_qb
+```
+
+#### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
+
+```{r}
+gp_model_qb <- GPModel(
+  group_data = data_train_qb_matrix[,"gsis_id"],
+  likelihood = model_likelihood,
+  group_rand_coef_data = cbind(
+    data_train_qb_matrix[,"ageCentered20"],
+    data_train_qb_matrix[,"ageCentered20Quadratic"]),
+  ind_effect_group_rand_coef = c(1,1))
+
+gp_data_qb <- gpb.Dataset(
+  data = data_train_qb_matrix[,pred_vars_qb],
+  categorical_feature = pred_vars_qb_categorical,
+  label = data_train_qb_matrix[,"fantasyPoints_lag"])
 
 params_qb <- list(
-  learning_rate = 0.01,
-  max_depth = 2,
+  learning_rate = 1,
+  max_depth = 10,
   num_leaves = 2^10,
   min_data_in_leaf = 10,
-  lambda_l2 = 10,
+  lambda_l2 = 0,
   num_threads = num_cores)
 
-nrounds_qb <- 379
+#gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead")) # to speed up model estimation
+```
 
-gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead"))
+#### Fit Model {#sec-treeBoostingFitModel}
 
+```{r}
 gp_model_fit_qb <- gpb.train(
   data = gp_data_qb,
   gp_model = gp_model_qb,
-  nrounds = nrounds_qb,
+  nrounds = nrounds,
   params = params_qb) # verbose = 0
 
 summary(gp_model_qb) # Estimated random effects model
+```
 
+#### Evaluate Accuracy of Model on Test Data {#sec-treeBoostingModelAccuracy}
+
+```{r}
 # Test Model on Test Data
 pred_test_qb <- predict(
   gp_model_fit_qb,
@@ -1003,8 +1080,13 @@ pred_test_qb <- predict(
   pred_latent = FALSE)
 
 y_pred_test_qb <- pred_test_qb[["response_mean"]]
+cbind(y_pred_test_qb, data_test_qb_matrix[,"fantasyPoints_lag"])
 mean((data_test_qb_matrix[,"fantasyPoints_lag"] - y_pred_test_qb)^2)
+```
 
+#### Generate Predictions for Next Season {#sec-treeBoostingModelPredictions}
+
+```{r}
 # Generate model predictions for next season
 pred_nextYear_qb <- predict(
   gp_model_fit_qb,
@@ -1027,7 +1109,7 @@ newData_qb <- left_join(
 
 newData_qb %>% 
   arrange(-fantasyPoints_lag) %>% 
-  select(name, fantasyPoints_lag)
+  select(name, fantasyPoints_lag, fantasy_points)
 ```
 
 ## Conclusion {#sec-machineLearningConclusion}
