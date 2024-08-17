@@ -460,7 +460,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span id="cb2-11"><a href="#cb2-11"></a></span>
 <span id="cb2-12"><a href="#cb2-12"></a>quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(symbols)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>[1] "AAPL" "DIS"  "NKE"  "TSLA"</code></pre>
+<pre><code>[1] "AAPL"  "MSFT"  "GOOGL" "AMZN"  "META"  "V"     "DIS"   "NKE"   "TSLA" </code></pre>
 </div>
 </div>
 </section><section id="sec-calculateStockReturns" class="level3" data-number="19.4.2"><h3 data-number="19.4.2" class="anchored" data-anchor-id="sec-calculateStockReturns">
@@ -470,105 +470,131 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span id="cb4-2"><a href="#cb4-2"></a>  merge,</span>
 <span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">lapply</span>(</span>
 <span id="cb4-4"><a href="#cb4-4"></a>    symbols,</span>
-<span id="cb4-5"><a href="#cb4-5"></a>    <span class="cf">function</span>(sym) quantmod<span class="sc">::</span><span class="fu">Cl</span>(<span class="fu">get</span>(sym))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in get(sym): object 'GOOGL' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>returns <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(</span>
-<span id="cb6-2"><a href="#cb6-2"></a>  TTR<span class="sc">::</span><span class="fu">ROC</span>(</span>
-<span id="cb6-3"><a href="#cb6-3"></a>    prices,</span>
-<span id="cb6-4"><a href="#cb6-4"></a>    <span class="at">type =</span> <span class="st">"discrete"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'prices' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>returns_ts <span class="ot">&lt;-</span> timeSeries<span class="sc">::</span><span class="fu">as.timeSeries</span>(returns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</code></pre>
-</div>
+<span id="cb4-5"><a href="#cb4-5"></a>    <span class="cf">function</span>(sym) quantmod<span class="sc">::</span><span class="fu">Cl</span>(<span class="fu">get</span>(sym))))</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a>returns <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(</span>
+<span id="cb4-8"><a href="#cb4-8"></a>  TTR<span class="sc">::</span><span class="fu">ROC</span>(</span>
+<span id="cb4-9"><a href="#cb4-9"></a>    prices,</span>
+<span id="cb4-10"><a href="#cb4-10"></a>    <span class="at">type =</span> <span class="st">"discrete"</span>))</span>
+<span id="cb4-11"><a href="#cb4-11"></a></span>
+<span id="cb4-12"><a href="#cb4-12"></a>returns_ts <span class="ot">&lt;-</span> timeSeries<span class="sc">::</span><span class="fu">as.timeSeries</span>(returns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section><section id="sec-createPortfolio" class="level3" data-number="19.4.3"><h3 data-number="19.4.3" class="anchored" data-anchor-id="sec-createPortfolio">
 <span class="header-section-number">19.4.3</span> Create Portfolio</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>portfolioSpec <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioSpec</span>()</span>
-<span id="cb10-2"><a href="#cb10-2"></a></span>
-<span id="cb10-3"><a href="#cb10-3"></a>fPortfolio<span class="sc">::</span><span class="fu">setNFrontierPoints</span>(portfolioSpec) <span class="ot">&lt;-</span> <span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>portfolioSpec <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioSpec</span>()</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a>fPortfolio<span class="sc">::</span><span class="fu">setNFrontierPoints</span>(portfolioSpec) <span class="ot">&lt;-</span> <span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="sec-determineEfficientFrontier" class="level3" data-number="19.4.4"><h3 data-number="19.4.4" class="anchored" data-anchor-id="sec-determineEfficientFrontier">
 <span class="header-section-number">19.4.4</span> Determine the Efficient Frontier</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>efficientFrontier <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioFrontier</span>(</span>
-<span id="cb11-2"><a href="#cb11-2"></a>  returns_ts,</span>
-<span id="cb11-3"><a href="#cb11-3"></a>  <span class="at">spec =</span> portfolioSpec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'returns_ts' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>efficientFrontier</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'efficientFrontier' not found</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>efficientFrontier <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioFrontier</span>(</span>
+<span id="cb6-2"><a href="#cb6-2"></a>  returns_ts,</span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="at">spec =</span> portfolioSpec)</span>
+<span id="cb6-4"><a href="#cb6-4"></a></span>
+<span id="cb6-5"><a href="#cb6-5"></a>efficientFrontier</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Title:
+ MV Portfolio Frontier 
+ Estimator:         covEstimator 
+ Solver:            solveRquadprog 
+ Optimize:          minRisk 
+ Constraints:       LongOnly 
+ Portfolio Points:  5 of 1000 
+
+Portfolio Weights:
+     AAPL.Close MSFT.Close GOOGL.Close AMZN.Close META.Close V.Close DIS.Close
+1        0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    1.0000
+250      0.1339     0.1314      0.1037     0.0536     0.0000  0.2976    0.1497
+500      0.0957     0.2160      0.0000     0.1310     0.0797  0.2369    0.0000
+750      0.0000     0.1137      0.0000     0.1536     0.1551  0.0000    0.0000
+1000     0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    0.0000
+     NKE.Close TSLA.Close
+1       0.0000     0.0000
+250     0.1132     0.0169
+500     0.0000     0.2407
+750     0.0000     0.5777
+1000    0.0000     1.0000
+
+Covariance Risk Budgets:
+     AAPL.Close MSFT.Close GOOGL.Close AMZN.Close META.Close V.Close DIS.Close
+1        0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    1.0000
+250      0.1381     0.1366      0.1060     0.0570     0.0000  0.2992    0.1351
+500      0.0707     0.1664      0.0000     0.1136     0.0729  0.1510    0.0000
+750      0.0000     0.0411      0.0000     0.0710     0.0795  0.0000    0.0000
+1000     0.0000     0.0000      0.0000     0.0000     0.0000  0.0000    0.0000
+     NKE.Close TSLA.Close
+1       0.0000     0.0000
+250     0.1062     0.0219
+500     0.0000     0.4253
+750     0.0000     0.8084
+1000    0.0000     1.0000
+
+Target Returns and Risks:
+       mean    Cov   CVaR    VaR
+1    0.0004 0.0165 0.0377 0.0240
+250  0.0008 0.0128 0.0304 0.0198
+500  0.0013 0.0163 0.0374 0.0259
+750  0.0017 0.0245 0.0547 0.0368
+1000 0.0022 0.0356 0.0776 0.0509
+
+Description:
+ Sat Aug 17 20:32:36 2024 by user:  </code></pre>
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># Extract the coordinates of individual assets</span></span>
-<span id="cb15-2"><a href="#cb15-2"></a>asset_means <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(returns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in base::colMeans(x, na.rm = na.rm, dims = dims, ...): 'x' must be an array of at least two dimensions</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Extract the coordinates of individual assets</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>asset_means <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(returns)</span>
+<span id="cb8-3"><a href="#cb8-3"></a>asset_sd <span class="ot">&lt;-</span> <span class="fu">apply</span>(returns, <span class="dv">2</span>, sd)</span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co"># Add some padding to plot limits (so ticker symbols don't get cut off)</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>xlim <span class="ot">&lt;-</span> <span class="fu">range</span>(asset_sd) <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">1.1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7"></a>ylim <span class="ot">&lt;-</span> <span class="fu">range</span>(asset_means) <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">1.1</span>)</span>
+<span id="cb8-8"><a href="#cb8-8"></a></span>
+<span id="cb8-9"><a href="#cb8-9"></a>xlim[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a>ylim[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co"># Set scientific notation penalty</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span>
+<span id="cb8-14"><a href="#cb8-14"></a></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="fu">plot</span>(</span>
+<span id="cb8-16"><a href="#cb8-16"></a>  efficientFrontier,</span>
+<span id="cb8-17"><a href="#cb8-17"></a>  <span class="at">which =</span> <span class="fu">c</span>(</span>
+<span id="cb8-18"><a href="#cb8-18"></a>    <span class="dv">1</span>,  <span class="co"># efficient frontier</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a>    <span class="dv">3</span>,  <span class="co"># tangency portfolio</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a>    <span class="dv">4</span>), <span class="co"># risk/return of individual assets</span></span>
+<span id="cb8-21"><a href="#cb8-21"></a>  <span class="at">control =</span> <span class="fu">list</span>(</span>
+<span id="cb8-22"><a href="#cb8-22"></a>    <span class="at">xlim =</span> xlim,</span>
+<span id="cb8-23"><a href="#cb8-23"></a>    <span class="at">ylim =</span> ylim</span>
+<span id="cb8-24"><a href="#cb8-24"></a>  ))</span>
+<span id="cb8-25"><a href="#cb8-25"></a></span>
+<span id="cb8-26"><a href="#cb8-26"></a><span class="co"># Add text labels for individual assets</span></span>
+<span id="cb8-27"><a href="#cb8-27"></a><span class="fu">points</span>(</span>
+<span id="cb8-28"><a href="#cb8-28"></a>  asset_sd,</span>
+<span id="cb8-29"><a href="#cb8-29"></a>  asset_means,</span>
+<span id="cb8-30"><a href="#cb8-30"></a>  <span class="at">col =</span> <span class="st">"red"</span>,</span>
+<span id="cb8-31"><a href="#cb8-31"></a>  <span class="at">pch =</span> <span class="dv">19</span>)</span>
+<span id="cb8-32"><a href="#cb8-32"></a></span>
+<span id="cb8-33"><a href="#cb8-33"></a><span class="fu">text</span>(</span>
+<span id="cb8-34"><a href="#cb8-34"></a>  asset_sd,</span>
+<span id="cb8-35"><a href="#cb8-35"></a>  asset_means,</span>
+<span id="cb8-36"><a href="#cb8-36"></a>  <span class="at">labels =</span> symbols,</span>
+<span id="cb8-37"><a href="#cb8-37"></a>  <span class="at">pos =</span> <span class="dv">4</span>,</span>
+<span id="cb8-38"><a href="#cb8-38"></a>  <span class="at">cex =</span> <span class="fl">0.8</span>,</span>
+<span id="cb8-39"><a href="#cb8-39"></a>  <span class="at">col =</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-efficientFrontier" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-efficientFrontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="modern-portfolio-theory_files/figure-html/fig-efficientFrontier-1.png" class="img-fluid figure-img" width="672">
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>asset_sd <span class="ot">&lt;-</span> <span class="fu">apply</span>(returns, <span class="dv">2</span>, sd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in apply(returns, 2, sd): dim(X) must have a positive length</code></pre>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-efficientFrontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19.1: Efficient Frontier for a Stock Portfolio.
+</figcaption></figure>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># Add some padding to plot limits (so ticker symbols don't get cut off)</span></span>
-<span id="cb19-2"><a href="#cb19-2"></a>xlim <span class="ot">&lt;-</span> <span class="fu">range</span>(asset_sd) <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">1.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'asset_sd' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>ylim <span class="ot">&lt;-</span> <span class="fu">range</span>(asset_means) <span class="sc">*</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">1.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'asset_means' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>xlim[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in xlim[1] &lt;- 0: object of type 'closure' is not subsettable</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>ylim[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in ylim[1] &lt;- 0: object of type 'closure' is not subsettable</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="co"># Set scientific notation penalty</span></span>
-<span id="cb27-2"><a href="#cb27-2"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span>
-<span id="cb27-3"><a href="#cb27-3"></a></span>
-<span id="cb27-4"><a href="#cb27-4"></a><span class="fu">plot</span>(</span>
-<span id="cb27-5"><a href="#cb27-5"></a>  efficientFrontier,</span>
-<span id="cb27-6"><a href="#cb27-6"></a>  <span class="at">which =</span> <span class="fu">c</span>(</span>
-<span id="cb27-7"><a href="#cb27-7"></a>    <span class="dv">1</span>,  <span class="co"># efficient frontier</span></span>
-<span id="cb27-8"><a href="#cb27-8"></a>    <span class="dv">3</span>,  <span class="co"># tangency portfolio</span></span>
-<span id="cb27-9"><a href="#cb27-9"></a>    <span class="dv">4</span>), <span class="co"># risk/return of individual assets</span></span>
-<span id="cb27-10"><a href="#cb27-10"></a>  <span class="at">control =</span> <span class="fu">list</span>(</span>
-<span id="cb27-11"><a href="#cb27-11"></a>    <span class="at">xlim =</span> xlim,</span>
-<span id="cb27-12"><a href="#cb27-12"></a>    <span class="at">ylim =</span> ylim</span>
-<span id="cb27-13"><a href="#cb27-13"></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'plot': object 'efficientFrontier' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># Add text labels for individual assets</span></span>
-<span id="cb29-2"><a href="#cb29-2"></a><span class="fu">points</span>(</span>
-<span id="cb29-3"><a href="#cb29-3"></a>  asset_sd,</span>
-<span id="cb29-4"><a href="#cb29-4"></a>  asset_means,</span>
-<span id="cb29-5"><a href="#cb29-5"></a>  <span class="at">col =</span> <span class="st">"red"</span>,</span>
-<span id="cb29-6"><a href="#cb29-6"></a>  <span class="at">pch =</span> <span class="dv">19</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'points': object 'asset_sd' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a><span class="fu">text</span>(</span>
-<span id="cb31-2"><a href="#cb31-2"></a>  asset_sd,</span>
-<span id="cb31-3"><a href="#cb31-3"></a>  asset_means,</span>
-<span id="cb31-4"><a href="#cb31-4"></a>  <span class="at">labels =</span> symbols,</span>
-<span id="cb31-5"><a href="#cb31-5"></a>  <span class="at">pos =</span> <span class="dv">4</span>,</span>
-<span id="cb31-6"><a href="#cb31-6"></a>  <span class="at">cex =</span> <span class="fl">0.8</span>,</span>
-<span id="cb31-7"><a href="#cb31-7"></a>  <span class="at">col =</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'asset_sd' not found</code></pre>
 </div>
 </div>
 </section><section id="sec-portfolioOptimalWeights" class="level3" data-number="19.4.5"><h3 data-number="19.4.5" class="anchored" data-anchor-id="sec-portfolioOptimalWeights">
@@ -577,59 +603,100 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span class="header-section-number">19.4.5.1</span> Tangency Portfolio</h4>
 <p>The tangency portfolio is the portfolio with the highest Sharpe ratio (i.e., the highest ratio of return to risk). In other words, it is the portfolio with the greatest risk-adjusted returns.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a><span class="co"># Find the tangency portfolio (portfolio with the highest Sharpe ratio)</span></span>
-<span id="cb33-2"><a href="#cb33-2"></a>tangencyPortfolio <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">tangencyPortfolio</span>(</span>
-<span id="cb33-3"><a href="#cb33-3"></a>  <span class="at">data =</span> returns_ts,</span>
-<span id="cb33-4"><a href="#cb33-4"></a>  <span class="at">spec =</span> portfolioSpec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'returns_ts' not found</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Find the tangency portfolio (portfolio with the highest Sharpe ratio)</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>tangencyPortfolio <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">tangencyPortfolio</span>(</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="at">data =</span> returns_ts,</span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="at">spec =</span> portfolioSpec)</span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co"># Extract optimal weights</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>tangencyPortfolio_optimalWeights <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">getWeights</span>(tangencyPortfolio)</span>
+<span id="cb9-8"><a href="#cb9-8"></a>tangencyPortfolio_optimalWeights</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code> AAPL.Close  MSFT.Close GOOGL.Close  AMZN.Close  META.Close     V.Close 
+0.105179208 0.212463580 0.008530843 0.125434720 0.071716847 0.261557297 
+  DIS.Close   NKE.Close  TSLA.Close 
+0.000000000 0.000000000 0.215117504 </code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># Extract optimal weights</span></span>
-<span id="cb35-2"><a href="#cb35-2"></a>tangencyPortfolio_optimalWeights <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">getWeights</span>(tangencyPortfolio)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in UseMethod("getWeights"): no applicable method for 'getWeights' applied to an object of class "function"</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Output the results</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="fu">summary</span>(tangencyPortfolio)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Title:
+ MV Tangency Portfolio 
+ Estimator:         covEstimator 
+ Solver:            solveRquadprog 
+ Optimize:          minRisk 
+ Constraints:       LongOnly 
+
+Portfolio Weights:
+ AAPL.Close  MSFT.Close GOOGL.Close  AMZN.Close  META.Close     V.Close 
+     0.1052      0.2125      0.0085      0.1254      0.0717      0.2616 
+  DIS.Close   NKE.Close  TSLA.Close 
+     0.0000      0.0000      0.2151 
+
+Covariance Risk Budgets:
+ AAPL.Close  MSFT.Close GOOGL.Close  AMZN.Close  META.Close     V.Close 
+     0.0820      0.1721      0.0064      0.1133      0.0681      0.1786 
+  DIS.Close   NKE.Close  TSLA.Close 
+     0.0000      0.0000      0.3795 
+
+Target Returns and Risks:
+  mean    Cov   CVaR    VaR 
+0.0012 0.0158 0.0364 0.0248 
+
+Description:
+ Sat Aug 17 20:32:37 2024 by user:  </code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>tangencyPortfolio_optimalWeights</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in eval(expr, envir, enclos): object 'tangencyPortfolio_optimalWeights' not found</code></pre>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="modern-portfolio-theory_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="co"># Output the results</span></span>
-<span id="cb39-2"><a href="#cb39-2"></a><span class="fu">summary</span>(tangencyPortfolio)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in object[[i]]: object of type 'closure' is not subsettable</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="modern-portfolio-theory_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="modern-portfolio-theory_files/figure-html/unnamed-chunk-7-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section><section id="sec-maxReturnPortfolio" class="level4" data-number="19.4.5.2"><h4 data-number="19.4.5.2" class="anchored" data-anchor-id="sec-maxReturnPortfolio">
 <span class="header-section-number">19.4.5.2</span> Portfolio with Max Return at a Given Risk Level</h4>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a><span class="co"># Define target risk levels</span></span>
-<span id="cb41-2"><a href="#cb41-2"></a>targetRisks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.3</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
-<span id="cb41-3"><a href="#cb41-3"></a></span>
-<span id="cb41-4"><a href="#cb41-4"></a><span class="co"># Initialize storage for optimal portfolios</span></span>
-<span id="cb41-5"><a href="#cb41-5"></a>optimalPortfolios <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb41-6"><a href="#cb41-6"></a>optimalWeights_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb41-7"><a href="#cb41-7"></a></span>
-<span id="cb41-8"><a href="#cb41-8"></a><span class="co"># Find optimal weightings for each target risk level</span></span>
-<span id="cb41-9"><a href="#cb41-9"></a><span class="cf">for</span> (risk <span class="cf">in</span> targetRisks) {</span>
-<span id="cb41-10"><a href="#cb41-10"></a>  <span class="co"># Create a portfolio optimization specification with the target risk</span></span>
-<span id="cb41-11"><a href="#cb41-11"></a>  portfolioSpec <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioSpec</span>()</span>
-<span id="cb41-12"><a href="#cb41-12"></a>  fPortfolio<span class="sc">::</span><span class="fu">setTargetRisk</span>(portfolioSpec) <span class="ot">&lt;-</span> risk</span>
-<span id="cb41-13"><a href="#cb41-13"></a>  </span>
-<span id="cb41-14"><a href="#cb41-14"></a>  <span class="co"># Solve for the maximum return at this target risk</span></span>
-<span id="cb41-15"><a href="#cb41-15"></a>  optimal_portfolio <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">maxreturnPortfolio</span>(</span>
-<span id="cb41-16"><a href="#cb41-16"></a>    returns_ts,</span>
-<span id="cb41-17"><a href="#cb41-17"></a>    <span class="at">spec =</span> portfolioSpec)</span>
-<span id="cb41-18"><a href="#cb41-18"></a>  </span>
-<span id="cb41-19"><a href="#cb41-19"></a>  <span class="co"># Store the optimal portfolio</span></span>
-<span id="cb41-20"><a href="#cb41-20"></a>  optimalPortfolios[[<span class="fu">as.character</span>(risk)]] <span class="ot">&lt;-</span> optimal_portfolio</span>
-<span id="cb41-21"><a href="#cb41-21"></a>  </span>
-<span id="cb41-22"><a href="#cb41-22"></a>  <span class="co"># Store the optimal portfolio weights with risk level</span></span>
-<span id="cb41-23"><a href="#cb41-23"></a>  optimal_weights <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">getWeights</span>(optimal_portfolio)</span>
-<span id="cb41-24"><a href="#cb41-24"></a>  optimalWeights_list[[<span class="fu">as.character</span>(risk)]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">RiskLevel =</span> risk, optimal_weights)</span>
-<span id="cb41-25"><a href="#cb41-25"></a>}</span>
-<span id="cb41-26"><a href="#cb41-26"></a></span>
-<span id="cb41-27"><a href="#cb41-27"></a>optimalWeightsByRisk <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(optimalWeights_list)</span>
-<span id="cb41-28"><a href="#cb41-28"></a>optimalWeightsByRisk</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Define target risk levels</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a>targetRisks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.3</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co"># Initialize storage for optimal portfolios</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a>optimalPortfolios <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb13-6"><a href="#cb13-6"></a>optimalWeights_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb13-7"><a href="#cb13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="co"># Find optimal weightings for each target risk level</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="cf">for</span> (risk <span class="cf">in</span> targetRisks) {</span>
+<span id="cb13-10"><a href="#cb13-10"></a>  <span class="co"># Create a portfolio optimization specification with the target risk</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a>  portfolioSpec <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">portfolioSpec</span>()</span>
+<span id="cb13-12"><a href="#cb13-12"></a>  fPortfolio<span class="sc">::</span><span class="fu">setTargetRisk</span>(portfolioSpec) <span class="ot">&lt;-</span> risk</span>
+<span id="cb13-13"><a href="#cb13-13"></a>  </span>
+<span id="cb13-14"><a href="#cb13-14"></a>  <span class="co"># Solve for the maximum return at this target risk</span></span>
+<span id="cb13-15"><a href="#cb13-15"></a>  optimal_portfolio <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">maxreturnPortfolio</span>(</span>
+<span id="cb13-16"><a href="#cb13-16"></a>    returns_ts,</span>
+<span id="cb13-17"><a href="#cb13-17"></a>    <span class="at">spec =</span> portfolioSpec)</span>
+<span id="cb13-18"><a href="#cb13-18"></a>  </span>
+<span id="cb13-19"><a href="#cb13-19"></a>  <span class="co"># Store the optimal portfolio</span></span>
+<span id="cb13-20"><a href="#cb13-20"></a>  optimalPortfolios[[<span class="fu">as.character</span>(risk)]] <span class="ot">&lt;-</span> optimal_portfolio</span>
+<span id="cb13-21"><a href="#cb13-21"></a>  </span>
+<span id="cb13-22"><a href="#cb13-22"></a>  <span class="co"># Store the optimal portfolio weights with risk level</span></span>
+<span id="cb13-23"><a href="#cb13-23"></a>  optimal_weights <span class="ot">&lt;-</span> fPortfolio<span class="sc">::</span><span class="fu">getWeights</span>(optimal_portfolio)</span>
+<span id="cb13-24"><a href="#cb13-24"></a>  optimalWeights_list[[<span class="fu">as.character</span>(risk)]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">RiskLevel =</span> risk, optimal_weights)</span>
+<span id="cb13-25"><a href="#cb13-25"></a>}</span>
+<span id="cb13-26"><a href="#cb13-26"></a></span>
+<span id="cb13-27"><a href="#cb13-27"></a>optimalWeightsByRisk <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(optimalWeights_list)</span>
+<span id="cb13-28"><a href="#cb13-28"></a>optimalWeightsByRisk</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section></section><section id="sec-efficientFrontierFantasy" class="level2" data-number="19.5"><h2 data-number="19.5" class="anchored" data-anchor-id="sec-efficientFrontierFantasy">
@@ -646,7 +713,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </section><section id="sec-modernPortfolioTheorySessionInfo" class="level2" data-number="19.7"><h2 data-number="19.7" class="anchored" data-anchor-id="sec-modernPortfolioTheorySessionInfo">
 <span class="header-section-number">19.7</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
@@ -678,7 +745,7 @@ other attached packages:
 [19] zoo_1.8-12         
 
 loaded via a namespace (and not attached):
- [1] gtable_0.3.5        xfun_0.46           htmlwidgets_1.6.4  
+ [1] gtable_0.3.5        xfun_0.47           htmlwidgets_1.6.4  
  [4] lattice_0.22-6      tzdb_0.4.0          numDeriv_2016.8-1.1
  [7] generics_0.1.3      quadprog_1.5-8      vctrs_0.6.5        
 [10] tools_4.4.1         bitops_1.0-8        stats4_4.4.1       
@@ -689,13 +756,13 @@ loaded via a namespace (and not attached):
 [25] RCurl_1.98-1.16     Rsolnp_1.16         yaml_2.3.10        
 [28] pillar_1.9.0        MASS_7.3-60.2       boot_1.3-30        
 [31] robustbase_0.99-3   rneos_0.4-0         tidyselect_1.2.1   
-[34] digest_0.6.36       stringi_1.8.4       mvtnorm_1.2-5      
+[34] digest_0.6.36       stringi_1.8.4       mvtnorm_1.2-6      
 [37] slam_0.1-52         kernlab_0.9-33      mvnormtest_0.1-9-3 
 [40] gsl_2.1-8           fastmap_1.2.0       grid_4.4.1         
 [43] colorspace_2.1-1    cli_3.6.3           magrittr_2.0.3     
 [46] utf8_1.2.4          XML_3.99-0.17       withr_3.0.1        
 [49] sn_2.1.1            scales_1.3.0        timechange_0.3.0   
-[52] energy_1.7-11       rmarkdown_2.27      igraph_2.0.3       
+[52] energy_1.7-11       rmarkdown_2.28      igraph_2.0.3       
 [55] hms_1.1.3           ecodist_2.1.3       evaluate_0.24.0    
 [58] knitr_1.48          Rglpk_0.6-5.1       rlang_1.1.4        
 [61] spatial_7.3-17      Rcpp_1.0.13         glue_1.7.0         
