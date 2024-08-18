@@ -8,6 +8,8 @@
 library("petersenlab")
 ```
 
+## Overview of Decision Making in Uncertainty {#sec-decisionMakingOverview}
+
 ## Wisdom of the Crowd {#sec-wisdomOfCrowd}
 
 In many domains, the average of forecasters' predictions is more accurate than the accuracy of the constituent individuals.
@@ -27,12 +29,13 @@ Error cancellation deals with the idea that, when individuals' judgments bracket
 However, when individuals' judgments do not bracket the truth, the average of the predictions will not cancel out the errors.
 
 Averaging projections from individuals tends to yield predictions that are more accurate than the accuracy of most forecasters in the group [@Mannes2014].
-Indeed, when at least some of of the projections bracket the truth, averaged predictions must be more accurate than the average individual forecaster—in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE) (not in terms of the forecaster at the 50th percentile)—and averaged predictions are often much more accurate [@Larrick2024].
-If none of the projections bracket the truth—e.g., all projections overestimate the truth—averaged predictions will be as acurate than the average individual forecaster in terms of [mean absolute error](#sec-meanAbsoluteError) [@Larrick2024].
+Indeed, when at least some of of the projections bracket the truth, averaged predictions must be more accurate than the average individual forecaster—in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE)—and averaged predictions are often much more accurate [@Larrick2024].
+When referring to the accuracy of the "average individual forecaster", we are referring to accuracy in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE)—not to the accuracy of the forecaster at the 50th percentile.
+If none of the projections bracket the truth—e.g., all projections overestimate the truth—averaged predictions will be as accurate than the average individual forecaster in terms of [mean absolute error](#sec-meanAbsoluteError) [@Larrick2024].
 In sum, "Averaging the answers of a crowd, therefore, ensures a level of accuracy no worse than the average member of the crowd and, in some cases, a level better than nearly all members" [@Larrick2024, p. 126].
-Moreover, averaged projections tend to be more accurate than consensus-based judgments from groups of people that interact and discuss, due to cognitive biases associated with the social interaction among groups, such as herding in which people align their behavior with others [@Mannes2014; @Simoiu2019].
+Moreover, averaged projections tend to be more accurate than consensus-based judgments from groups of people that interact and discuss, due to cognitive biases associated with the social interaction among groups, such as herding in which people align their behavior with others [@Mannes2014; @Simoiu2019], though discussion can be helpful in some contexts [@Larrick2024].
 
-There are well-known prediction markets that allow you to see the crowd-average prediction for various events:
+There are well-known prediction markets, in which people bet money to make predictions for various events, which allows determining the crowd-averaged prediction for events:
 
 - <https://www.predictit.org>
 - <https://polymarket.com>
@@ -44,11 +47,14 @@ Crowd-averaged projections tend to be most accurate when:
 - there is cognitive diversity among the forecasters
 - the projections are made independently—i.e., the forecasters are not aware of others' forecasts and do not discuss or interact with the other forecasters
 - the bracketing rate—i.e., the frequency with which any two forecasters' predictions fall on opposite sides of the truth—is high
+- there are at least 5–10 sources of projections
 
 However, the crowd is not more accurate than the expert or best forecaster in all situations or domains.
-For instance, the crowd tends to be less accurate than the (prospectively identified) best forecaster when there is great variability in forecasters' expertise (in terms of the forecasters' ability to forecast accurately) and when the bracketing rate is low  [@Mannes2014].
+For instance, the crowd tends to be less accurate than the (prospectively identified) best forecaster when there is great variability in forecasters' expertise (in terms of the forecasters' ability to forecast accurately) and when the bracketing rate is low [@Mannes2014].
 Some forecasters may provide terrible projections; thus, including them in an average may make the average projections substantially less accurate.
 Thus, it may be necessary to examine the average of a "select crowd", by aggregating the projections of the most consistently accurate forecasters [@Mannes2014].
+Incorporating at least 5–10 forecasters leverages most of the benefits of the crowd; adding additional forecasters tends to result in diminishing returns [@Larrick2024].
+However, to the extent that those who are most accurate in a given period reflects luck, you are better off averaging the predictions of all forecasters than selecting the forecasters who were most accurate in the most recent period [@Larrick2024].
 
 ## Accuracy of Fantasy Football Crowd Projections {#sec-accuracyOfCrowd}
 
@@ -64,10 +70,10 @@ The [`petersenlab` package](https://cran.r-project.org/web/packages/petersenlab/
 
 Even though some sources are more accurate than the average in a given year, they are not *consistently* more accurate than the average.
 Prediction involves a combination of luck and skill.
-In some years, a prediction will invariably do better than others, in party, based on luck.
-However, luck is unlikely to continue systematically into future years, so a source that got lucky in a given year is unlikely to continue to be lucky in subsequent years.
+In some years, a prediction will invariably do better than others, in part, based on luck.
+However, luck is unlikely to continue systematically into future years, so a source that got lucky in a given year is likely to [regress to the mean](#sec-fallaciesRegression) in subsequent years.
 That is, determinining the most accurate source in a given year, after the fact, is not necessarily the same as identifying the most skilled forecaster.
-It is easy to identify the most accurate source after the fact, but it is challenging to predict, in advance, who the best forecaster will be [@@Larrick2024].
+It is easy to identify the most accurate source after the fact, but it is challenging to predict, in advance, who the best forecaster will be [@Larrick2024].
 It requires a large sample of predictions to determine whether a given forecaster is reliably (i.e., consistently) more accurate than other forecasters and to identify the most accurate forecaster [@Larrick2024].
 Thus, it can be challenging to know, in advance, who the most accurate forecasters will be.
 Because average projections are as or more accurate than the average forecaster's prediction, averaging projections across all forecasters is superior to choosing individual forecasters when the forecasters are roughly similar in forecasting ability or when it is hard to distinguish their ability in advance [@Larrick2024].
@@ -90,6 +96,25 @@ Third, the experts may interact and discuss with one another.
 Interaction and discussion among experts may lead them to follow the herd and conform their projections to what each other predict.
 This has been terms informational influence and may reflect the [anchoring and adjustment heuristic](#sec-heuristicsAnchoringAdjustment) [@Larrick2024].
 In any case, they are able to see each other's projections and make change their projections, accordingly.
+
+## How Well Do People Incorporate Advice From Others? {#sec-incoporateAdvice}
+
+An important question is how well people incorporate advice from others.
+In the context of fantasy football, advice might be sources of projections.
+In general, evidence from social psychology suggests that people tend to underweight how much weight they give to advice from others relative to their own opinions, a phenomeon called egocentric discounting [@Larrick2024; @Rader2017].
+People tend to weight others' advice around 30% in terms of the proportion of a shift a person makes toward another person's perspective, though this depends on the perceived accuracy of the advisor.
+Moreover, people frequently ignores others' advice entirely.
+In general, people make use of crowds too little—they put too much weight on their own prediction and not enough weight on others' predictions whose diversity can be leveraged for error cancellation [@Larrick2024].
+
+## Suggestions {#sec-decisionMakingSuggestions}
+
+Based on the above dicussion, here are some suggestions for decision making in the context of uncertainty:
+
+- seek advice from diverse perspectives and incorporate it into your decision making
+- try to get opinions from others *before* you state your perspective and before the various sources of advice discuss with each other, to ensure independence of advice
+- if some sources of advice (or projections) are clearly more skilled and accurate than others, you can average this "select" crowd of projections or give them greater weight in a weighted average
+- if it is unclear whether or which sources are reliably more accurate than others, using a simple average across all sources (i.e., crowd-averaged projections) can be a useful approach that is as accurate as—if not more accurate than—the average individual forecaster
+- incorporate at least 5–10 sources of projections
 
 ## Conclusion {#sec-decisionMakingConclusion}
 
