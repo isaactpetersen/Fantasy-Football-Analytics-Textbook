@@ -5,9 +5,12 @@
 ### Load Packages {#sec-timeSeriesLoadPackages}
 
 ```{r}
+library("petersenlab")
 library("xts")
 library("zoo")
 library("forecast")
+library("brms")
+library("plotly")
 library("tidyverse")
 ```
 
@@ -19,11 +22,13 @@ library("tidyverse")
 
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/bayesianMixedModelFit.RData", fsep = ""))
 ```
 
 ```{r}
 load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
+load(url("https://osf.io/download/q6rjf/"))
 ```
 
 ## Overview of Time Series Analysis {#sec-timeSeriesOverview}
@@ -32,7 +37,8 @@ Time series analysis is useful when trying to generate forecasts from longitudin
 That is, time series analysis seeks to evaluate change over time to predict future values.
 
 There many different types of time series analyses.
-For simplicity, in this chapter, we use autoregressive integrated moving average (ARIMA) models to demonstrate one approach to time series analysis.
+For simplicity, in this chapter, we use [autoregressive integrated moving average](#sec-timeSeriesARIMA) (ARIMA) models to demonstrate one approach to time series analysis.
+We also leverage [Bayesian mixed models](#sec-fantasyPointsByAgeExperienceModelsBayesian) to generate forecasts of future performance and plots of individuals model-implied performance by age and position.
 
 ## Autoregressive Integrated Moving Average (ARIMA) Models {#sec-timeSeriesARIMA}
 
@@ -56,7 +62,7 @@ Thus, it is a useful technique to learn.
 
 Adapted from: <https://rc2e.com/timeseriesanalysis> (archived at <https://perma.cc/U5P6-2VWC>).
 
-## Create the Time Series Objects {#sec-createTimeSeriesObjects}
+### Create the Time Series Objects {#sec-createTimeSeriesObjects}
 
 ```{r}
 weeklyFantasyPoints_tomBrady <- player_stats_weekly_offense %>% 
@@ -86,7 +92,7 @@ ts_combined <- merge(
 names(ts_combined) <- c("Tom Brady","Peyton Manning")
 ```
 
-## Plot the Time Series {#sec-plotTimeSeries}
+### Plot the Time Series {#sec-plotTimeSeries}
 
 ```{r}
 #| label: fig-timeSeriesHistoricalTomBrady
@@ -108,7 +114,7 @@ plot(
   main = "Fantasy Points by Game")
 ```
 
-## Rolling Mean/Median {#sec-rollingMeanMedian}
+### Rolling Mean/Median {#sec-rollingMeanMedian}
 
 ```{r}
 zoo::rollmean(
@@ -120,7 +126,7 @@ zoo::rollmedian(
   k = 5)
 ```
 
-## Autocorrelation {#sec-autoCorrelation}
+### Autocorrelation {#sec-autoCorrelation}
 
 The autocorrelation function (ACF) plot depicts the autocorrelation of scores as a function of the length of the lag.
 Significant autocorrelation is detected when the autocorrelation exceeds the dashed blue lines, as is depicted in @fig-timeSeriesACFtomBrady.
@@ -136,7 +142,7 @@ acf(ts_tomBrady)
 Box.test(ts_tomBrady)
 ```
 
-## Fit an Autoregressive Integrated Moving Average Model {#sec-arimaModel}
+### Fit an Autoregressive Integrated Moving Average Model {#sec-arimaModel}
 
 ```{r}
 forecast::auto.arima(ts_tomBrady)
@@ -183,7 +189,7 @@ confint(arima_peytonManning)
 forecast::checkresiduals(arima_peytonManning)
 ```
 
-## Generate the Model Forecasts {#sec-arimaForecasts}
+### Generate the Model Forecasts {#sec-arimaForecasts}
 
 ```{r}
 forecast_tomBrady <- forecast::forecast(
@@ -198,7 +204,7 @@ forecast_tomBrady
 forecast_peytonManning
 ```
 
-## Plot the Model Forecasts {#sec-plotARIMAforecast}
+### Plot the Model Forecasts {#sec-plotARIMAforecast}
 
 ```{r}
 #| label: fig-timeSeriesProjectionTomBrady
@@ -226,6 +232,294 @@ forecast::autoplot(forecast_peytonManning) +
     subtitle = "(if he were to have continued playing additional seasons)"
   ) +
   theme_classic()
+```
+
+## Bayesian Mixed Models {#sec-timeSeriesBayesian}
+
+The Bayesian longitudinal mixed models were estimated in @sec-fantasyPointsByAgeExperienceModelsBayesian.
+
+### Prepare New Data Object {#sec-timeSeriesBayesianNewData}
+
+```{r}
+player_stats_seasonal_offense_subset <- player_stats_seasonal_offense %>% 
+  filter(position_group %in% c("QB","RB","WR","TE"))
+
+player_stats_seasonal_offense_subset$position[which(player_stats_seasonal_offense_subset$position == "HB")] <- "RB"
+
+player_stats_seasonal_kicking_subset <- player_stats_seasonal_kicking %>% 
+  filter(position == "K")
+
+player_stats_seasonal_offense_subset <- bind_rows(
+  player_stats_seasonal_offense_subset,
+  player_stats_seasonal_kicking_subset
+)
+
+player_stats_seasonal_offense_subset$player_idFactor <- factor(player_stats_seasonal_offense_subset$player_id)
+player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seasonal_offense_subset$position)
+```
+
+```{r}
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
+  filter(
+    !is.na(player_idFactor),
+    !is.na(fantasy_points),
+    !is.na(positionFactor),
+    !is.na(ageCentered20),
+    !is.na(ageCentered20Quadratic),
+    !is.na(years_of_experience))
+
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC %>% 
+  filter(player_id %in% bayesianMixedModelFit$data$player_idFactor) %>% 
+  mutate(positionFactor = droplevels(positionFactor))
+
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC %>%
+  group_by(player_id) %>% 
+  group_modify(~ add_row(.x, season = max(player_stats_seasonal_offense_subsetCC$season) + 1)) %>% 
+  fill(player_display_name, player_idFactor, position, position_group, positionFactor, team, .direction = "downup") %>% 
+  ungroup
+
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC %>% 
+  left_join(
+    player_stats_seasonal_offense_subsetCC %>% 
+      filter(season == max(player_stats_seasonal_offense_subsetCC$season) - 1) %>% 
+      select(player_id, age_lastYear = age, years_of_experience_lastYear = years_of_experience), 
+    by = "player_id") %>%
+  mutate(
+    age = if_else(season == max(player_stats_seasonal_offense_subsetCC$season), age_lastYear + 1, age), # increment age by 1
+    ageCentered20 = age - 20,
+    years_of_experience = if_else(season == max(player_stats_seasonal_offense_subsetCC$season), years_of_experience_lastYear + 1, years_of_experience)) # increment experience by 1
+
+activePlayers <- unique(player_stats_seasonal_offense_subsetCC[c("player_id","season")]) %>% 
+  filter(season == max(player_stats_seasonal_offense_subsetCC$season) - 1) %>% 
+  select(player_id) %>% 
+  pull()
+
+inactivePlayers <- player_stats_seasonal_offense_subsetCC$player_id[which(player_stats_seasonal_offense_subsetCC$player_id %ni% activePlayers)]
+
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC %>% 
+  filter(player_id %in% activePlayers | (player_id %in% inactivePlayers & season < max(player_stats_seasonal_offense_subsetCC$season) - 1)) %>% 
+  mutate(
+    player_idFactor = droplevels(player_idFactor) 
+  )
+```
+
+### Generate Predictions {#sec-timeSeriesBayesianGeneratePredictions}
+
+```{r}
+player_stats_seasonal_offense_subsetCC$fantasyPoints_bayesian <- predict(
+  bayesianMixedModelFit,
+  newdata = player_stats_seasonal_offense_subsetCC
+)[,"Estimate"]
+```
+
+### Table of Next Season Predictions {#sec-timeSeriesBayesianGeneratePredictions}
+
+```{r}
+player_stats_seasonal_offense_subsetCC %>% 
+  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "QB") %>%
+  arrange(-fantasyPoints_bayesian) %>% 
+  select(player_display_name, fantasyPoints_bayesian)
+
+player_stats_seasonal_offense_subsetCC %>% 
+  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "RB") %>%
+  arrange(-fantasyPoints_bayesian) %>% 
+  select(player_display_name, fantasyPoints_bayesian)
+
+player_stats_seasonal_offense_subsetCC %>% 
+  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "WR") %>%
+  arrange(-fantasyPoints_bayesian) %>% 
+  select(player_display_name, fantasyPoints_bayesian)
+
+player_stats_seasonal_offense_subsetCC %>% 
+  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "TE") %>%
+  arrange(-fantasyPoints_bayesian) %>% 
+  select(player_display_name, fantasyPoints_bayesian)
+```
+
+### Plot of Individuals' Model-Implied Predictions {#sec-timeSeriesBayesianGeneratePredictions}
+
+#### Quarterbacks {#sec-fantasyPointsIndividualByAgePlotsQB}
+
+```{r}
+#| label: fig-individualFantasyPointsBayesianByAgeQB
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Bayesian Generalized Additive Model, for Quarterbacks."
+#| code-fold: true
+
+plot_individualFantasyPointsByAgeQB <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "QB"),
+  mapping = aes(
+    x = round(age, 2),
+    y = round(fantasyPoints_bayesian, 2),
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Quarterbacks"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsByAgeQB,
+  tooltip = c("age","fantasyPoints_bayesian","text","label")
+)
+```
+
+#### Running Backs {#sec-fantasyPointsIndividualByAgePlotsRB}
+
+```{r}
+#| label: fig-individualFantasyPointsBayesianByAgeRB
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Bayesian Generalized Additive Model, for Running Backs."
+#| code-fold: true
+
+plot_individualFantasyPointsByAgeRB <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "RB"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_bayesian,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Running Backs"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsByAgeRB,
+  tooltip = c("age","fantasyPoints_bayesian","text","label")
+)
+```
+
+#### Wide Receivers {#sec-fantasyPointsIndividualByAgePlotsWR}
+
+```{r}
+#| label: fig-individualFantasyPointsBayesianByAgeWR
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Bayesian Generalized Additive Model, for Wide Receivers."
+#| code-fold: true
+
+plot_individualFantasyPointsByAgeWR <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "WR"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_bayesian,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Wide Receivers"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsByAgeWR,
+  tooltip = c("age","fantasyPoints_bayesian","text","label")
+)
+```
+
+#### Tight Ends {#sec-fantasyPointsIndividualByAgePlotsTE}
+
+```{r}
+#| label: fig-individualFantasyPointsBayesianByAgeTE
+#| fig-cap: "Plot of Individuals' Implied Trajectories of Fantasy Points by Age, from a Bayesian Generalized Additive Model, for Tight Ends."
+#| code-fold: true
+
+plot_individualFantasyPointsByAgeTE <- ggplot(
+  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "TE"),
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_bayesian,
+    group = player_id)) +
+  geom_smooth(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black") +
+  geom_point(
+    aes(
+      x = age,
+      y = fantasyPoints_bayesian,
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season # add season for mouse over tooltip
+    ),
+    size = 1,
+    color = "transparent" # make points invisible but keep tooltips
+  ) +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age: Wide Receivers"
+  ) +
+  theme_classic()
+
+ggplotly(
+  plot_individualFantasyPointsByAgeTE,
+  tooltip = c("age","fantasyPoints_bayesian","text","label")
+)
 ```
 
 ## Conclusion {#sec-timeSeriesConclusion}
