@@ -5,7 +5,7 @@
 ### Load Packages {#sec-decisionMakingLoadPackages}
 
 ```{r}
-
+library("petersenlab")
 ```
 
 ## Wisdom of the Crowd {#sec-wisdomOfCrowd}
@@ -20,13 +20,22 @@ Cognitive diversity refers to the representation of individuals with different p
 Cognitive diversity is important because judgments from a cognitively homogeneous group will tend to err *systematically*.
 That is, they tend to err in the same direction—either consistently above or below the truth.
 By contrast, a cognitively diverse group will not tend to err systematically.
-For people of a cognitively diverse group, their judgments will tend to err *randomly*—where some people's predictions fall above the truth and some people's predictions fall below the truth—i.e., individual judgments "bracket" the truth [@Mannes2014].
+Individuals of a cognitively diverse group will bring different areas of expertise (e.g., determination of player skill, player opportunity, matchup strength, etc.) to bear in making their predictions and will thus make different mistakes [@Larrick2024].
+Consequently, for the people comprising a cognitively diverse group, their judgments will tend to err *randomly*—where some people's predictions fall above the truth and some people's predictions fall below the truth—i.e., individual judgments "bracket" the truth [@Mannes2014].
+
 Error cancellation deals with the idea that, when individuals' judgments bracket the truth and show random rather than systematic error, the average of the predictions will "cancel out" some of the errors so that the predictions average out to more closely approximate the truth.
 However, when individuals' judgments do not bracket the truth, the average of the predictions will not cancel out the errors.
 
 Averaging projections from individuals tends to yield predictions that are more accurate than the accuracy of most forecasters in the group [@Mannes2014].
-Indeed, averaged predictions must be as (if not more) accurate than the average forecaster (i.e., the forecaster at the 50th percentile in terms of accuracy), and averaged predictions are often much more accurate [@Larrick2024].
-Moreover, averaged projections tends to be more accurate than consensus-based judgments from groups of people that interact and discuss, due to cognitive biases associated with the social interaction among groups, such as herding in which people align their behavior with others [@Mannes2014; @Simoiu2019].
+Indeed, when at least some of of the projections bracket the truth, averaged predictions must be more accurate than the average individual forecaster—in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE) (not in terms of the forecaster at the 50th percentile)—and averaged predictions are often much more accurate [@Larrick2024].
+If none of the projections bracket the truth—e.g., all projections overestimate the truth—averaged predictions will be as acurate than the average individual forecaster in terms of [mean absolute error](#sec-meanAbsoluteError) [@Larrick2024].
+In sum, "Averaging the answers of a crowd, therefore, ensures a level of accuracy no worse than the average member of the crowd and, in some cases, a level better than nearly all members" [@Larrick2024, p. 126].
+Moreover, averaged projections tend to be more accurate than consensus-based judgments from groups of people that interact and discuss, due to cognitive biases associated with the social interaction among groups, such as herding in which people align their behavior with others [@Mannes2014; @Simoiu2019].
+
+There are well-known prediction markets that allow you to see the crowd-average prediction for various events:
+
+- <https://www.predictit.org>
+- <https://polymarket.com>
 
 Crowd-averaged projections tend to be most accurate when:
 
@@ -35,8 +44,6 @@ Crowd-averaged projections tend to be most accurate when:
 - there is cognitive diversity among the forecasters
 - the projections are made independently—i.e., the forecasters are not aware of others' forecasts and do not discuss or interact with the other forecasters
 - the bracketing rate—i.e., the frequency with which any two forecasters' predictions fall on opposite sides of the truth—is high
-
-When forecasters' predictions perfect bracket the truth (i.e., 50% of predictions are above the truth and 50% of predictive are below the truth), the average predictions must be more accurate than the accuracy of the average forecaster [@Larrick2024].
 
 However, the crowd is not more accurate than the expert or best forecaster in all situations or domains.
 For instance, the crowd tends to be less accurate than the (prospectively identified) best forecaster when there is great variability in forecasters' expertise (in terms of the forecasters' ability to forecast accurately) and when the bracketing rate is low  [@Mannes2014].
@@ -49,11 +56,18 @@ Even though the crowd tends to be more accurate than individual forecasters, cro
 In fantasy football, [DESCRIBE THEIR ACCURACY--BOTH FOR ALL PLAYERS AND WHEN SUBSETTING TO THE TOP X PLAYERS].
 Nevertheless, individual sources tend to be even less accurate. [DESCRIBE THEIR ACCURACY].
 
+The [`petersenlab` package](https://cran.r-project.org/web/packages/petersenlab/index.html) [@R-petersenlab] has the `wisdomOfCrowd()` function that computes the overall accuracy of the crowd-averaged projections, including the bracketing rate of the individual projections.
+
+```{r}
+# insert example using: wisdomOfCrowd()
+```
+
 Even though some sources are more accurate than the average in a given year, they are not *consistently* more accurate than the average.
 Prediction involves a combination of luck and skill.
 In some years, a prediction will invariably do better than others, in party, based on luck.
 However, luck is unlikely to continue systematically into future years, so a source that got lucky in a given year is unlikely to continue to be lucky in subsequent years.
 That is, determinining the most accurate source in a given year, after the fact, is not necessarily the same as identifying the most skilled forecaster.
+It is easy to identify the most accurate source after the fact, but it is challenging to predict, in advance, who the best forecaster will be [@@Larrick2024].
 It requires a large sample of predictions to determine whether a given forecaster is reliably (i.e., consistently) more accurate than other forecasters and to identify the most accurate forecaster [@Larrick2024].
 Thus, it can be challenging to know, in advance, who the most accurate forecasters will be.
 Because average projections are as or more accurate than the average forecaster's prediction, averaging projections across all forecasters is superior to choosing individual forecasters when the forecasters are roughly similar in forecasting ability or when it is hard to distinguish their ability in advance [@Larrick2024].
@@ -64,7 +78,7 @@ That is, because football performance and injuries are so challenging to predict
 
 A second possibility is that the bracketing rate of the predictions is not particularly high [@Mannes2014].
 Even if the individual forecasters' projections are not close to the truth, if ~50% of them overestimate the truth and the other 50% of the underestimate the truth, the average will more closely approximate the truth.
-However, if most forecasters overestimate the truth, averaging the projections will not necessarily lead to more accurate projections.
+However, if all forecasters overestimate the truth for a given player, averaging the projections will not necessarily lead to more accurate projections.
 
 A third possibility is that the forecasts of the different experts are not independent.
 
@@ -74,6 +88,7 @@ Second, there are many players who are systematically *over*predicted (e.g., due
 In general, it is likely for players who are projected to score more points to be overpredicted and for players who are projected to score fewer points to be underpredicted [PRESENT CALIBRATION STATS].
 Third, the experts may interact and discuss with one another.
 Interaction and discussion among experts may lead them to follow the herd and conform their projections to what each other predict.
+This has been terms informational influence and may reflect the [anchoring and adjustment heuristic](#sec-heuristicsAnchoringAdjustment) [@Larrick2024].
 In any case, they are able to see each other's projections and make change their projections, accordingly.
 
 ## Conclusion {#sec-decisionMakingConclusion}
