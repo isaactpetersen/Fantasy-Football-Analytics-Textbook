@@ -761,8 +761,8 @@ The keys are the variable(s) that uniquely identify each row (i.e., they account
 In some data objects, the key might be the player's identification number (e.g., `player_id`).
 However, some data objects have multiple keys.
 For instance, in long form data objects, each participant may have multiple rows corresponding to multiple seasons.
-In this case, the keys may be `player_id` and `season`.
-If a participant has multiple rows corresponding to seasons and games/weeks, the keys are `player_id`, `season`, and `week`.
+In this case, the keys may be `player_id` and `season`—that is, the data are in `player`-`season` form.
+If a participant has multiple rows corresponding to seasons and games/weeks, the keys are `player_id`, `season`, and `week`—in this case, the data are in `player`-`season`-`week` form.
 In general, each row should have a value on each of the keys; there should be no missingness in the keys.
 
 To merge two objects, the key(s) that will be used to match the records must be present in both objects.
@@ -774,6 +774,11 @@ So, it will add a suffix (e.g., `.x`, `.y`) to each common variable to indicate 
 In general, apart from the keys, you should not include variables with the same name in two objects to be merged.
 To prevent this, either remove or rename the shared variable in one of the objects, or include the shared variable as a key.
 However, as described above, you should include it as a key ***only*** if it uniquely identifies each row in terms of levels of nesting.
+
+When two objects are merged that have different formats, the resulting data object inherits the format of the data object that has more levels of nesting.
+For instance, consider that you want to merge two objects, object A and object B.
+Object A is in `player` form and object B is in `player`-`season`-`week` form.
+When you merge them, the resulting data object will be in `player`-`season`-`week` form.
 
 ### Data Before Merging {#sec-mergingData}
 
@@ -939,8 +944,8 @@ When the data are in long form, each player has multiple rows—e.g., a row for 
 The data structure is called wide or long form because a dataset in wide form has more columns and fewer rows (i.e., it appears wider and shorter), whereas a dataset in long form has more rows and fewer columns (i.e., it appears narrower and taller).
 
 Here are the original data in long form.
-The data are structured in "player-season-week form".
-That is, every row in the dataset is uniquely identified by the combination of variables, `ID`, `season`, and `week`.
+The data are structured in "`player`-`season`-`week` form".
+That is, every row in the dataset is uniquely identified by the combination of variables, `ID`, `season`, and `week`—these are the keys.
 This is an example of long form, because each player has multiple rows.
 
 ```{r}
@@ -957,7 +962,7 @@ dim(dataLong)
 names(dataLong)
 ```
 
-Below, we widen the data by two variables (`season` and `week`), using `tidyverse`, so that the data are now in "player form" (where each row is uniquely identified by the `ID` variable): 
+Below, we widen the data by two variables (`season` and `week`), using `tidyverse`, so that the data are now in "`player` form" (where each row is uniquely identified by the `ID` variable): 
 
 ```{r}
 dataWide <- dataLong %>% 
