@@ -307,7 +307,10 @@ load(file = "./data/nfl_playerIDs.RData")
 
 ### Rosters {#sec-downloadRosters}
 
-A Data Dictionary for rosters is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_rosters.html>
+A Data Dictionary for rosters is located at the following links:
+
+- <https://nflreadr.nflverse.com/articles/dictionary_rosters.html>
+- <https://github.com/nflverse/nfldata/blob/master/DATASETS.md#rosters>
 
 ```{r}
 #| eval: false
@@ -317,6 +320,8 @@ nfl_rosters_raw <- progressr::with_progress(
 
 nfl_rosters_weekly_raw <- progressr::with_progress(
   nflreadr::load_rosters_weekly(seasons = TRUE))
+
+rosters <- read_csv("https://raw.githubusercontent.com/leesharpe/nfldata/master/data/rosters.csv")
 ```
 
 ```{r}
@@ -324,6 +329,7 @@ nfl_rosters_weekly_raw <- progressr::with_progress(
 
 save(
   nfl_rosters_raw,
+  rosters,
   file = "./data/nfl_rosters_raw.RData"
 )
 
@@ -346,6 +352,11 @@ Let's rearrange the data accordingly:
 
 ```{r}
 nfl_rosters <- nfl_rosters_raw %>% 
+  left_join(
+    rosters %>% select(playerid, season, team, side, category, games, starts, years, av),
+    by = c("season","team","pfr_id" = "playerid"),
+    na_matches = "never"
+  ) %>% 
   select(gsis_id, season, team, week, everything()) %>% 
   arrange(full_name, gsis_id, season, team, week)
 ```
@@ -505,6 +516,62 @@ save(
 #| include: false
 
 load(file = "./data/nfl_schedules.RData")
+```
+
+### Standings {#sec-standings}
+
+A Data Dictionary for game schedules data is located at the following link: <https://github.com/nflverse/nfldata/blob/master/DATASETS.md#standings>
+
+```{r}
+#| eval: false
+
+nfl_standings_raw <- read_csv("http://www.habitatring.com/standings.csv")
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_standings_raw,
+  file = "./data/nfl_standings_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_standings_raw.RData")
+```
+
+The `nfl_standings` object is in `season`-`team` form.
+That is, each row should be uniquely identified by the combination of `season` and `team`.
+
+```{r}
+nfl_standings <- nfl_standings_raw
+```
+
+Let's check for duplicate `season`-`team` instances:
+
+```{r}
+nfl_standings %>% 
+  group_by(season, team) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_standings,
+  file = "./data/nfl_standings.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_standings.RData")
 ```
 
 ### The Combine {#sec-combine}
@@ -713,6 +780,80 @@ nfl_draftPicks %>%
   head()
 ```
 
+```{r}
+#| eval: false
+
+save(
+  nfl_draftPicks,
+  file = "./data/nfl_draftPicks.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_draftPicks.RData")
+```
+
+### Draft Values {#sec-draftValues}
+
+A Data Dictionary for draft values data is located at the following link: <https://github.com/nflverse/nfldata/blob/master/DATASETS.md#draft_values>
+
+```{r}
+#| eval: false
+
+nfl_draftValues_raw <- read_csv("https://raw.githubusercontent.com/leesharpe/nfldata/master/data/draft_values.csv")
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_draftValues_raw,
+  file = "./data/nfl_draftValues_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_draftValues_raw.RData")
+```
+
+The `nfl_draftValues` object is in `pick` form.
+That is, each row should be uniquely identified by `pick`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_draftValues <- nfl_draftValues_raw %>% 
+  select(pick, everything()) %>% 
+  arrange(pick)
+```
+
+Let's check for duplicate `pick` instances:
+
+```{r}
+nfl_draftValues %>% 
+  group_by(pick) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_draftValues,
+  file = "./data/nfl_draftValues.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_draftValues.RData")
+```
+
 #### Processing {#sec-processingDraftPicks}
 
 Let's do some data cleanup:
@@ -834,6 +975,63 @@ save(
 #| include: false
 
 load(file = "./data/nfl_depthCharts.RData")
+```
+
+### Trades {#sec-trades}
+
+A Data Dictionary for game schedules data is located at the following link: <https://github.com/nflverse/nfldata/blob/master/DATASETS.md#trades>
+
+```{r}
+#| eval: false
+
+nfl_trades_raw <- read_csv("https://raw.githubusercontent.com/leesharpe/nfldata/master/data/trades.csv")
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_trades_raw,
+  file = "./data/nfl_trades_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_trades_raw.RData")
+```
+
+The `nfl_trades` object is in `trade`-`player` form.
+That is, each row should be uniquely identified by the combination of `trade_id` and `pfr_id`.
+
+```{r}
+nfl_trades <- nfl_trades_raw
+```
+
+Let's check for duplicate `trade`-`player` instances:
+
+```{r}
+nfl_trades %>%
+  filter(!is.na(pfr_id)) %>% 
+  group_by(trade_id, pfr_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_trades,
+  file = "./data/nfl_trades.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_trades.RData")
 ```
 
 ### Play-By-Play Data {#sec-downloadPlayByPlay}
