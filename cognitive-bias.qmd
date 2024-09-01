@@ -433,6 +433,7 @@ The gambler's fallacy occurs due to an erroneous belief in the law of small numb
 The law of large numbers is a mathematical theorem that the average of a sufficiently large number of independent observations converges to the true value.
 For instance, if you flip a fair coin 1 million times, it is likely to land heads-up ~50% of the time.
 The law of *small* numbers (aka hasty generalization), by contrast, is an erroneous belief that small samples are representative of the populations from which they were drawn.
+In general, large samples yield more precise results than small samples, whereas extreme results (in either direction—e.g., much higher or much lower than 50% of coins that flip heads-up) are more likely to be obtained from small samples [@Kahneman2011].
 For instance, if you flip a coin 10 times, belief in the law of small numbers would lead one to believe that the coin will flip heads-up exactly 5 times out of 10.
 However, in reality, the chance is less than 1 in 4 (24.6%) that exactly 5 of 10 coin flips turn up heads, as calculated below and as depicted in @fig-simulationOf10CoinFlips:
 
@@ -454,25 +455,40 @@ A binomial distribution is the probability of a particular number of successes (
 
 set.seed(52242)
 
-numHeads <- rbinom(
-  n = 100000,
-  size = 10,
+smallNumFlips <- 10
+largeNumFlips <- 1000000
+numSimulations <- 100000
+
+numHeadsSmallNumFlips <- rbinom(
+  n = numSimulations,
+  size = smallNumFlips,
   prob = .5
 )
 
-simulationOfFlipping10Coins <- data.frame(
-  numHeads = numHeads
+numHeadsLargeNumFlips <- rbinom(
+  n = numSimulations,
+  size = largeNumFlips,
+  prob = .5
 )
 
-simulationOfFlipping10Coins <- simulationOfFlipping10Coins %>% 
+simulationOfFlippingCoins <- data.frame(
+  numHeadsSmallNumFlips = numHeadsSmallNumFlips,
+  numHeadsLargeNumFlips = numHeadsLargeNumFlips
+)
+
+simulationOfFlippingCoins <- simulationOfFlippingCoins %>% 
   mutate(
-    highlight = ifelse(numHeads == 5, "yes", "no")
+    proportionHeadsSmallNumFlips = numHeadsSmallNumFlips / smallNumFlips,
+    proportionHeadsLargeNumFlips = numHeadsLargeNumFlips / largeNumFlips,
+    highlight = ifelse(numHeads == 5, "yes", "no"),
+    extremeSmallNumFlips = ifelse(proportionHeadsSmallNumFlips <= 0.2 | proportionHeadsSmallNumFlips >= 0.8, TRUE, FALSE),
+    extremeLargeNumFlips = ifelse(proportionHeadsLargeNumFlips <= 0.2 | proportionHeadsLargeNumFlips >= 0.8, TRUE, FALSE),
   )
 
 ggplot2::ggplot(
-  data = simulationOfFlipping10Coins,
+  data = simulationOfFlippingCoins,
   mapping = aes(
-    x = numHeads,
+    x = numHeadsSmallNumFlips,
     fill = highlight)
 ) +
   geom_histogram(
@@ -505,6 +521,18 @@ dbinom(
   size = 10,
   prob = 0.5
 ) %>% sum()
+```
+
+Moreover, among the simulations with only 10 coin flips, nearly 11% of sets had extreme results (≤ 20% heads or ≥ 80% heads):
+
+```{r}
+prop.table(table(simulationOfFlippingCoins$extremeSmallNumFlips))
+```
+
+By contrast, among the simulations with 1 million coin flips, none of the sets had extreme results:
+
+```{r}
+prop.table(table(simulationOfFlippingCoins$extremeLargeNumFlips))
 ```
 
 The *gambler's fallacy* is the erroneous belief that future probabilities are influenced by past events, even when the events are independent.
