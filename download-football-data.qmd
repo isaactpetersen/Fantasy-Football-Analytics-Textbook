@@ -3,8 +3,8 @@
 ## Load Packages {#sec-downloadFootballDataLoadPackages}
 
 ```{r}
-library("ffanalytics")
-library("petersenlab")
+library("ffanalytics") # to install: install.packages("remotes"); remotes::install_github("FantasyFootballAnalytics/ffanalytics")
+library("petersenlab") # to install: install.packages("remotes"); remotes::install_github("DevPsyLab/petersenlab")
 library("nflreadr")
 library("nflfastR")
 library("nfl4th")
@@ -782,6 +782,28 @@ nfl_draftPicks %>%
   head()
 ```
 
+#### Processing {#sec-processingDraftPicks}
+
+Let's do some data cleanup:
+
+```{r}
+# Convert missing values to NA
+nfl_draftPicks[nfl_draftPicks == ""] <- NA
+
+# Drop players with missing values for gsis_id
+nfl_draftPicks <- nfl_draftPicks %>% 
+  filter(!is.na(gsis_id))
+```
+
+Let's check again for duplicate `player` instances:
+
+```{r}
+nfl_draftPicks %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
 ```{r}
 #| eval: false
 
@@ -854,43 +876,6 @@ save(
 #| include: false
 
 load(file = "./data/nfl_draftValues.RData")
-```
-
-#### Processing {#sec-processingDraftPicks}
-
-Let's do some data cleanup:
-
-```{r}
-# Convert missing values to NA
-nfl_draftPicks[nfl_draftPicks == ""] <- NA
-
-# Drop players with missing values for gsis_id
-nfl_draftPicks <- nfl_draftPicks %>% 
-  filter(!is.na(gsis_id))
-```
-
-Let's check again for duplicate `player` instances:
-
-```{r}
-nfl_draftPicks %>% 
-  group_by(gsis_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_draftPicks,
-  file = "./data/nfl_draftPicks.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_draftPicks.RData")
 ```
 
 ### Depth Charts {#sec-depthCharts}
@@ -1700,17 +1685,12 @@ Advanced stats from the 2023 season are available at the following link: <https:
 ```{r}
 #| eval: false
 
+# Seasonal Data
 nfl_advancedStatsPFR_pass_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("pass"),
     summary_level = c("season")))
-
-nfl_advancedStatsPFR_pass_weekly_raw <- progressr::with_progress(
-  nflreadr::load_pfr_advstats(
-    seasons = TRUE,
-    stat_type = c("pass"),
-    summary_level = c("week")))
 
 nfl_advancedStatsPFR_rush_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
@@ -1718,29 +1698,36 @@ nfl_advancedStatsPFR_rush_seasonal_raw <- progressr::with_progress(
     stat_type = c("rush"),
     summary_level = c("season")))
 
-nfl_advancedStatsPFR_rush_weekly_raw <- progressr::with_progress(
-  nflreadr::load_pfr_advstats(
-    seasons = TRUE,
-    stat_type = c("rush"),
-    summary_level = c("week")))
-
 nfl_advancedStatsPFR_rec_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("rec"),
     summary_level = c("season")))
 
-nfl_advancedStatsPFR_rec_weekly_raw <- progressr::with_progress(
-  nflreadr::load_pfr_advstats(
-    seasons = TRUE,
-    stat_type = c("rec"),
-    summary_level = c("week")))
-
 nfl_advancedStatsPFR_def_seasonal_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
     seasons = TRUE,
     stat_type = c("def"),
     summary_level = c("season")))
+
+# Weekly Data
+nfl_advancedStatsPFR_pass_weekly_raw <- progressr::with_progress(
+  nflreadr::load_pfr_advstats(
+    seasons = TRUE,
+    stat_type = c("pass"),
+    summary_level = c("week")))
+
+nfl_advancedStatsPFR_rush_weekly_raw <- progressr::with_progress(
+  nflreadr::load_pfr_advstats(
+    seasons = TRUE,
+    stat_type = c("rush"),
+    summary_level = c("week")))
+
+nfl_advancedStatsPFR_rec_weekly_raw <- progressr::with_progress(
+  nflreadr::load_pfr_advstats(
+    seasons = TRUE,
+    stat_type = c("rec"),
+    summary_level = c("week")))
 
 nfl_advancedStatsPFR_def_weekly_raw <- progressr::with_progress(
   nflreadr::load_pfr_advstats(
@@ -2660,9 +2647,15 @@ Note: the following code takes a while to run.
 ```{r}
 #| eval: false
 
+# Seasonal Projections
 players_projections_seasonal_raw <- ffanalytics::scrape_data(
   season = NULL, # NULL grabs the current season
   week = 0) # NULL grabs seasonal projections; NULL grabs the current week
+
+# Weekly Projections
+players_projections_weekly_raw <- ffanalytics::scrape_data(
+  season = NULL, # NULL grabs the current season
+  week = NULL) # NULL grabs the current week
 ```
 
 ```{r}
@@ -2672,15 +2665,21 @@ save(
   players_projections_seasonal_raw,
   file = "./data/players_projections_seasonal_raw.RData"
 )
+
+save(
+  players_projections_weekly_raw,
+  file = "./data/players_projections_weekly_raw.RData"
+)
 ```
 
 The data file is saved in the project repository and can be loaded using the following command:
 
 ```{r}
 load(file = "./data/players_projections_seasonal_raw.RData")
+load(file = "./data/players_projections_weekly_raw.RData")
 ```
 
-The `players_projections_seasonal_raw` object is in `player`-`position`-`projection source` form.
+The `players_projections_seasonal_raw` and `players_projections_weekly_raw` object is in `player`-`position`-`projection source` form.
 That is, each row should be uniquely identified by the combination of `id`, `pos`  and `data_src`.
 Each row should also be uniquely identified by the combination of `player`, `pos`, and `data_src`.
 
@@ -2696,6 +2695,22 @@ players_projections_seasonal_raw %>%
   head()
 
 players_projections_seasonal_raw %>% 
+  bind_rows() %>% 
+  select(player, pos, data_src, everything()) %>%
+  arrange(player, id, pos, data_src) %>% 
+  group_by(id, pos, data_src) %>% 
+  filter(n() > 1, !is.na(id)) %>% 
+  head()
+
+players_projections_weekly_raw %>% 
+  bind_rows() %>% 
+  select(id, pos, data_src, everything()) %>%
+  arrange(player, id, pos, data_src) %>% 
+  group_by(id, pos, data_src) %>% 
+  filter(n() > 1, !is.na(id)) %>% 
+  head()
+
+players_projections_weekly_raw %>% 
   bind_rows() %>% 
   select(player, pos, data_src, everything()) %>%
   arrange(player, id, pos, data_src) %>% 
@@ -2718,13 +2733,49 @@ View the default scoring settings:
 scoring_obj_default
 ```
 
-Now, modify the scoring settings to match our league settings:
+Now, modify the scoring settings to match our league settings (based on [scoring settings](https://support.nfl.com/hc/en-us/articles/4989179237404-Scoring) for fantasy leagues on NFL.com):
 
 ```{r}
 scoring_obj <- scoring_obj_default
 
+# Offense
 scoring_obj$pass$pass_int <- -2
+scoring_obj$rec$rec <- 1
 scoring_obj$misc$fumbles_lost <- -2
+
+# Kickers
+scoring_obj$kick$fg_4049 <- 3
+
+# Defense/Special Teams
+scoring_obj$pts_bracket[[3]]$threshold <- 13
+scoring_obj$pts_bracket[[3]]$points <- 4
+
+scoring_obj$pts_bracket[[4]]$threshold <- 20
+scoring_obj$pts_bracket[[4]]$points <- 1
+
+scoring_obj$pts_bracket[[5]]$threshold <- 27
+scoring_obj$pts_bracket[[5]]$points <- 0
+
+scoring_obj$pts_bracket[[6]] <- list(
+  threshold = 34,
+  points = -1
+)
+
+scoring_obj$pts_bracket[[7]] <- list(
+  threshold = 99,
+  points = -4
+)
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+# My Yahoo League
+scoring_obj <- scoring_obj_default
+
+scoring_obj$pass$pass_int <- -3
+scoring_obj$misc$fumbles_lost <- -3
 scoring_obj$idp$idp_fum_force <- -2
 ```
 
@@ -2742,11 +2793,16 @@ Calculate projected points by source:
 players_projectedPoints_seasonal <- ffanalytics:::impute_and_score_sources(
   data_result = players_projections_seasonal_raw,
   scoring_rules = scoring_obj)
+
+players_projectedPoints_weekly <- ffanalytics:::impute_and_score_sources(
+  data_result = players_projections_weekly_raw,
+  scoring_rules = scoring_obj)
 ```
 
 Calculate projected statistics and points, averaged across sources:
 
 ```{r}
+# Seasonal Projections
 players_projectedStatsAverage_seasonal <- ffanalytics::projections_table(
   players_projections_seasonal_raw,
   scoring_rules = scoring_obj,
@@ -2756,9 +2812,20 @@ players_projectedPointsAverage_seasonal <- ffanalytics::projections_table(
   players_projections_seasonal_raw,
   scoring_rules = scoring_obj,
   return_raw_stats = FALSE)
+
+# Weekly Projections
+players_projectedStatsAverage_weekly <- ffanalytics::projections_table(
+  players_projections_weekly_raw,
+  scoring_rules = scoring_obj,
+  return_raw_stats = TRUE)
+
+players_projectedPointsAverage_weekly <- ffanalytics::projections_table(
+  players_projections_weekly_raw,
+  scoring_rules = scoring_obj,
+  return_raw_stats = FALSE)
 ```
 
-The `players_projectedPoints_seasonal`, `players_projectedStatsAverage_seasonal`, and `players_projectedPointsAverage_seasonal` objects are in `player`-`average type`-`position` form.
+The `players_projectedPoints_seasonal`, `players_projectedStatsAverage_seasonal`, `players_projectedPointsAverage_seasonal`, `players_projectedPoints_weekly`, `players_projectedStatsAverage_weekly`, and `players_projectedPointsAverage_weekly` objects are in `player`-`average type`-`position` form.
 That is, each row should be uniquely identified by the combination of `id`, `avg_type`  and `pos` (or `position`).
 
 Let's check for duplicate `player`-`position`-`projection source` instances:
@@ -2781,6 +2848,24 @@ players_projectedPointsAverage_seasonal %>%
   group_by(id, avg_type, pos) %>% 
   filter(n() > 1) %>% 
   head()
+
+players_projectedPoints_weekly %>% 
+  bind_rows() %>% 
+  select(id, pos, data_src, everything()) %>%
+  arrange(player, id, pos, data_src) %>% 
+  group_by(id, pos, data_src) %>% 
+  filter(n() > 1, !is.na(id)) %>% 
+  head()
+
+players_projectedStatsAverage_weekly %>% 
+  group_by(id, avg_type, position) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+players_projectedPointsAverage_weekly %>% 
+  group_by(id, avg_type, pos) %>% 
+  filter(n() > 1) %>% 
+  head()
 ```
 
 Let's merge the two averaged projected statistics and points objects:
@@ -2791,12 +2876,23 @@ players_projections_seasonal_average <- full_join(
   players_projectedStatsAverage_seasonal,
   by = c("id","avg_type","pos" = "position")
 )
+
+players_projections_weekly_average <- full_join(
+  players_projectedPointsAverage_weekly,
+  players_projectedStatsAverage_weekly,
+  by = c("id","avg_type","pos" = "position")
+)
 ```
 
 Let's again check for duplicate `player`-`position`-`projection source` instances:
 
 ```{r}
 players_projections_seasonal_average %>% 
+  group_by(id, avg_type, pos) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+players_projections_weekly_average %>% 
   group_by(id, avg_type, pos) %>% 
   filter(n() > 1) %>% 
   head()
@@ -2813,19 +2909,24 @@ players_projections_seasonal_average <- players_projections_seasonal_average %>%
   add_aav() %>%
   add_uncertainty() %>% 
   add_player_info()
+
+players_projections_weekly_average <- players_projections_weekly_average %>% 
+  add_ecr() %>% 
+  #add_uncertainty() %>% # currently throws an error
+  add_player_info()
 ```
 
 ```{r}
 #| eval: false
 
 save(
-  players_projectedPoints_seasonal,
+  players_projectedPoints_seasonal, players_projections_seasonal_average,
   file = "./data/players_projectedPoints_seasonal.RData"
 )
 
 save(
-  players_projections_seasonal_average,
-  file = "./data/players_projections_seasonal_average.RData"
+  players_projectedPoints_weekly, players_projections_weekly_average,
+  file = "./data/players_projectedPoints_weekly.RData"
 )
 ```
 
@@ -2833,7 +2934,7 @@ The data file is saved in the project repository and can be loaded using the fol
 
 ```{r}
 load(file = "./data/players_projectedPoints_seasonal.RData")
-load(file = "./data/players_projections_seasonal_average.RData")
+load(file = "./data/players_projectedPoints_weekly.RData")
 ```
 
 ## Calculations {#sec-calculations}
@@ -3440,17 +3541,17 @@ player_game_birthdate_gameday_kicking$ageCentered20Quadratic <- player_game_birt
 # Merge with player info
 player_age_offense <- dplyr::left_join(
   player_game_birthdate_gameday_offense,
-  nfl_players %>% select(-birth_date, -season, -team_abbr, - team_seq),
+  nfl_players %>% select(-birth_date, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id"))
 
 player_age_defense <- dplyr::left_join(
   player_game_birthdate_gameday_defense,
-  nfl_players %>% select(-birth_date, -season, -team_abbr, - team_seq),
+  nfl_players %>% select(-birth_date, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id"))
 
 player_age_kicking <- dplyr::left_join(
   player_game_birthdate_gameday_kicking,
-  nfl_players %>% select(-birth_date, -season, -team_abbr, - team_seq),
+  nfl_players %>% select(-birth_date, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id"))
 
 # Add game_id to weekly stats to facilitate merging
@@ -3612,19 +3713,19 @@ save(
 # Merge player info with seasonal stats
 player_stats_seasonal_offense <- dplyr::full_join(
   nfl_actualStats_offense_seasonal,
-  nfl_players %>% select(-position, -position_group, -season, -team_abbr, - team_seq),
+  nfl_players %>% select(-position, -position_group, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id")
 )
 
 player_stats_seasonal_defense <- dplyr::full_join(
   nfl_actualStats_defense_seasonal,
-  nfl_players %>% select(-position, -position_group, -season, -team_abbr, - team_seq),
+  nfl_players %>% select(-position, -position_group, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id")
 )
 
 player_stats_seasonal_kicking <- dplyr::full_join(
   nfl_actualStats_kicking_seasonal,
-  nfl_players %>% select(-position, -position_group, -season, -team_abbr, - team_seq),
+  nfl_players %>% select(-position, -position_group, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id")
 )
 
