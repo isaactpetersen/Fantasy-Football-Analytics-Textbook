@@ -1,0 +1,79 @@
+on:
+  workflow_dispatch:
+  push:
+    branches: main
+
+name: Quarto Publish
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4 # update
+        with:
+          lfs: true  # This ensures that Git LFS files are pulled
+        
+      - name: Checkout LFS objects
+        run: git lfs checkout
+        
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2 # update
+        
+      - name: Session info
+        run: Rscript -e 'sessionInfo()'
+        
+      - name: Setup pandoc
+        uses: r-lib/actions/setup-pandoc@v2 # update
+        
+      - name: Install libcurl on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -y && sudo apt-get install -y libcurl4-openssl-dev
+        
+      - name: Install tinytex
+        uses: r-lib/actions/setup-tinytex@v2 # update
+        
+      #- name: Install additional LaTeX packages
+      #  run: |
+          #tlmgr install url
+          #tlmgr install underscore
+        
+      - name: Install package dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2 # update
+        
+      #- name: Install remote packages
+      #  run: |
+      #   Rscript -e 'remotes::install_github("DevPsyLab/petersenlab")'
+        
+      - name: Install cmdstan
+        run: |
+          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          cmdstanr::install_cmdstan(cores = 2)
+        shell: Rscript {0}
+        
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2 # update
+        
+      - name: Render Quarto Project
+        uses: quarto-dev/quarto-actions/render@v2 # update
+        with:
+          to: pdf # can specify a particular output format
+        
+      #- name: Render and Publish
+      #  uses: quarto-dev/quarto-actions/publish@v2 # update
+      #  with:
+      #    target: gh-pages
+      #    render: false # renders in previous step, so don't render again
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4 # update
+        with:
+          name: _book
+          path: |
+            _book/
+            *.tex
+            *.md
