@@ -764,28 +764,109 @@ players %>%
 ### Overview {#sec-mergingOverview}
 
 Merging (also called joining) merges two data objects using a shared set of variables called "keys."
-The keys are the variable(s) that uniquely identify each row (i.e., they account for the levels of nesting).
-In some data objects, the key might be the player's identification number (e.g., `player_id`).
-However, some data objects have multiple keys.
-For instance, in long form data objects, each participant may have multiple rows corresponding to multiple seasons.
-In this case, the keys may be `player_id` and `season`—that is, the data are in `player`-`season` form.
-If a participant has multiple rows corresponding to seasons and games/weeks, the keys are `player_id`, `season`, and `week`—in this case, the data are in `player`-`season`-`week` form.
+The keys are the variable(s) that are used to align the rows from the two objects.
+The data for the given key(s) in the first object get paired with (i.e., get placed in the same row as) the data for that same key in the second object.
 In general, each row should have a value on each of the keys; there should be no missingness in the keys.
-
 To merge two objects, the key(s) that will be used to match the records must be present in both objects.
 The keys are used to merge the variables in object 1 (`x`) with the variables in object 2 (`y`).
 Different merge types select different rows to merge.
+
+For some data objects, you might want to combine information for the same player from multiple data objects.
+If each data object is in `player` form (i.e., `player_id` uniquely identifies each row), you might merge by the player's identification number (e.g., `player_id`).
+In this case, the key uniquely identifies each row.
+
+However, some data objects have multiple keys.
+For instance, in long form data objects, each player may have multiple rows corresponding to multiple seasons.
+In this case, the keys may be `player_id` and `season`—that is, the data are in `player`-`season` form.
+If object 1 and object 2 are both in `player`-`season` form, we would use `player_id` and `season` as the keys to merge the two objects.
+In this case, the keys uniquely identify each row; that is, they account for the levels of nesting.
+
+However, if the data objects are of different form, we would select the keys as the variable(s) that represent the lowest common denominator of variables used to join the data objects that are present in both objects.
+For instance, assume that object 1 is in `player`-`season` form.
+For object 2, each player has multiple rows corresponding to seasons and games/weeks—in this case, object 2 is in `player`-`season`-`week` form.
+Object 1 does not have the `week` variable, so it cannot be used to join the objects.
+Thus, we would use `player_id` and `season` as the keys to merge the two objects, because both variables are present in both objects.
+
+It is important not to have rows with duplicate values on the keys.
+For instance, if there is more than one row with the same `player_id` in each object (or multiple rows in object 2 with the same combination of `player_id`, `season`, and `week`), then each row with that `player_id` in object 1 gets paired with each row with that `player_id` in object 2.
+The many possible combinations can lead to the resulting object greatly expanding in terms of the number of rows.
+Thus, you want the keys to uniquely identify each row.
+In the example below, `player` is present in each object, so we can merge by `player`; however, each object has multiple rows with the same player.
+For example, `mergeExample1A` has three rows for `player` A; `mergeExample1B` has two rows for `player` A.
+Thus, when we merge them, the resulting object has many more rows than each respective object (even though neither object has players that the other object does not).
+
+```{r}
+mergeExample1A <- data.frame(
+  player = c("A","A","A","B","B"),
+  age = c(20,22,24,26,28)
+)
+
+mergeExample1B <- data.frame(
+  player = c("A","A","B","B"),
+  points = c(10,15,20,25)
+)
+
+mergeExample1 <- full_join(
+  mergeExample1A,
+  mergeExample1B,
+  by = "player")
+
+mergeExample1
+
+dim(mergeExample1)
+```
 
 Note: if the two objects include variables with the same name (apart from the keys), `R` will not know how you want each to appear in the merged object.
 So, it will add a suffix (e.g., `.x`, `.y`) to each common variable to indicate which object (i.e., object `x` or object `y`) the variable came from, where object `x` is the first object—i.e., the object to which object `y` (the second object) is merged.
 In general, apart from the keys, you should not include variables with the same name in two objects to be merged.
 To prevent this, either remove or rename the shared variable in one of the objects, or include the shared variable as a key.
-However, as described above, you should include it as a key ***only*** if it uniquely identifies each row in terms of levels of nesting.
+However, as described above, you should include it as a key ***only*** if you want to use its values to align the rows from each object.
+Below is an example of merging two objects with the same variable name (i.e., points) that is not used as a key.
+
+```{r}
+mergeExample2A <- data.frame(
+  player = c("A","B","C","D","E"),
+  points = c(20,22,24,26,28)
+)
+
+mergeExample2B <- data.frame(
+  player = c("A","B","C","F"),
+  points = c(10,15,20,25)
+)
+
+mergeExample2 <- full_join(
+  mergeExample2A,
+  mergeExample2B,
+  by = "player")
+
+mergeExample2
+```
 
 When two objects are merged that have different formats, the resulting data object inherits the format of the data object that has more levels of nesting.
 For instance, consider that you want to merge two objects, object A and object B.
 Object A is in `player` form and object B is in `player`-`season`-`week` form.
 When you merge them, the resulting data object will be in `player`-`season`-`week` form.
+
+```{r}
+mergeExample3A <- data.frame(
+  player = c("A","B","C","D","E"),
+  weight = c(225,250,275,300,325)
+)
+
+mergeExample3B <- data.frame(
+  player = c("A","A","B","B"),
+  season = c(2023,2023,2024,2024,2024,2024),
+  week = c(1,2,1,2,3,4)
+  points = c(10,15,20,25,30,35)
+)
+
+mergeExample3 <- full_join(
+  mergeExample3A,
+  mergeExample3B,
+  by = "player")
+
+mergeExample3
+```
 
 ### Data Before Merging {#sec-mergingData}
 
