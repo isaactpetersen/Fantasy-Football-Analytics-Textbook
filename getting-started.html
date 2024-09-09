@@ -1584,15 +1584,98 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21</span> Merging/Joins</h2>
 <section id="sec-mergingOverview" class="level3" data-number="3.21.1"><h3 data-number="3.21.1" class="anchored" data-anchor-id="sec-mergingOverview">
 <span class="header-section-number">3.21.1</span> Overview</h3>
-<p>Merging (also called joining) merges two data objects using a shared set of variables called “keys.” The keys are the variable(s) that uniquely identify each row (i.e., they account for the levels of nesting). In some data objects, the key might be the player’s identification number (e.g., <code>player_id</code>). However, some data objects have multiple keys. For instance, in long form data objects, each participant may have multiple rows corresponding to multiple seasons. In this case, the keys may be <code>player_id</code> and <code>season</code>—that is, the data are in <code>player</code>-<code>season</code> form. If a participant has multiple rows corresponding to seasons and games/weeks, the keys are <code>player_id</code>, <code>season</code>, and <code>week</code>—in this case, the data are in <code>player</code>-<code>season</code>-<code>week</code> form. In general, each row should have a value on each of the keys; there should be no missingness in the keys.</p>
-<p>To merge two objects, the key(s) that will be used to match the records must be present in both objects. The keys are used to merge the variables in object 1 (<code>x</code>) with the variables in object 2 (<code>y</code>). Different merge types select different rows to merge.</p>
-<p>Note: if the two objects include variables with the same name (apart from the keys), <code>R</code> will not know how you want each to appear in the merged object. So, it will add a suffix (e.g., <code>.x</code>, <code>.y</code>) to each common variable to indicate which object (i.e., object <code>x</code> or object <code>y</code>) the variable came from, where object <code>x</code> is the first object—i.e., the object to which object <code>y</code> (the second object) is merged. In general, apart from the keys, you should not include variables with the same name in two objects to be merged. To prevent this, either remove or rename the shared variable in one of the objects, or include the shared variable as a key. However, as described above, you should include it as a key <strong><em>only</em></strong> if it uniquely identifies each row in terms of levels of nesting.</p>
+<p>Merging (also called joining) merges two data objects using a shared set of variables called “keys.” The keys are the variable(s) that are used to align the rows from the two objects. The data for the given key(s) in the first object get paired with (i.e., get placed in the same row as) the data for that same key in the second object. In general, each row should have a value on each of the keys; there should be no missingness in the keys. To merge two objects, the key(s) that will be used to match the records must be present in both objects. The keys are used to merge the variables in object 1 (<code>x</code>) with the variables in object 2 (<code>y</code>). Different merge types select different rows to merge.</p>
+<p>For some data objects, you might want to combine information for the same player from multiple data objects. If each data object is in <code>player</code> form (i.e., <code>player_id</code> uniquely identifies each row), you might merge by the player’s identification number (e.g., <code>player_id</code>). In this case, the key uniquely identifies each row.</p>
+<p>However, some data objects have multiple keys. For instance, in long form data objects, each player may have multiple rows corresponding to multiple seasons. In this case, the keys may be <code>player_id</code> and <code>season</code>—that is, the data are in <code>player</code>-<code>season</code> form. If object 1 and object 2 are both in <code>player</code>-<code>season</code> form, we would use <code>player_id</code> and <code>season</code> as the keys to merge the two objects. In this case, the keys uniquely identify each row; that is, they account for the levels of nesting.</p>
+<p>However, if the data objects are of different form, we would select the keys as the variable(s) that represent the lowest common denominator of variables used to join the data objects that are present in both objects. For instance, assume that object 1 is in <code>player</code>-<code>season</code> form. For object 2, each player has multiple rows corresponding to seasons and games/weeks—in this case, object 2 is in <code>player</code>-<code>season</code>-<code>week</code> form. Object 1 does not have the <code>week</code> variable, so it cannot be used to join the objects. Thus, we would use <code>player_id</code> and <code>season</code> as the keys to merge the two objects, because both variables are present in both objects.</p>
+<p>It is important not to have rows with duplicate values on the keys. For instance, if there is more than one row with the same <code>player_id</code> in each object (or multiple rows in object 2 with the same combination of <code>player_id</code>, <code>season</code>, and <code>week</code>), then each row with that <code>player_id</code> in object 1 gets paired with each row with that <code>player_id</code> in object 2. The many possible combinations can lead to the resulting object greatly expanding in terms of the number of rows. Thus, you want the keys to uniquely identify each row. In the example below, <code>player</code> is present in each object, so we can merge by <code>player</code>; however, each object has multiple rows with the same player. For example, <code>mergeExample1A</code> has three rows for <code>player</code> A; <code>mergeExample1B</code> has two rows for <code>player</code> A. Thus, when we merge them, the resulting object has many more rows than each respective object (even though neither object has players that the other object does not).</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb130"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1"></a>mergeExample1A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb130-2"><a href="#cb130-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
+<span id="cb130-3"><a href="#cb130-3"></a>  <span class="at">age =</span> <span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">22</span>,<span class="dv">24</span>,<span class="dv">26</span>,<span class="dv">28</span>)</span>
+<span id="cb130-4"><a href="#cb130-4"></a>)</span>
+<span id="cb130-5"><a href="#cb130-5"></a></span>
+<span id="cb130-6"><a href="#cb130-6"></a>mergeExample1B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb130-7"><a href="#cb130-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
+<span id="cb130-8"><a href="#cb130-8"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>)</span>
+<span id="cb130-9"><a href="#cb130-9"></a>)</span>
+<span id="cb130-10"><a href="#cb130-10"></a></span>
+<span id="cb130-11"><a href="#cb130-11"></a>mergeExample1 <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
+<span id="cb130-12"><a href="#cb130-12"></a>  mergeExample1A,</span>
+<span id="cb130-13"><a href="#cb130-13"></a>  mergeExample1B,</span>
+<span id="cb130-14"><a href="#cb130-14"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
+<span id="cb130-15"><a href="#cb130-15"></a></span>
+<span id="cb130-16"><a href="#cb130-16"></a>mergeExample1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["player"],"name":[1],"type":["chr"],"align":["left"]},{"label":["age"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["points"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"A","2":"20","3":"10"},{"1":"A","2":"20","3":"15"},{"1":"A","2":"22","3":"10"},{"1":"A","2":"22","3":"15"},{"1":"A","2":"24","3":"10"},{"1":"A","2":"24","3":"15"},{"1":"B","2":"26","3":"20"},{"1":"B","2":"26","3":"25"},{"1":"B","2":"28","3":"20"},{"1":"B","2":"28","3":"25"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb131"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1"></a><span class="fu">dim</span>(mergeExample1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 10  3</code></pre>
+</div>
+</div>
+<p>Note: if the two objects include variables with the same name (apart from the keys), <code>R</code> will not know how you want each to appear in the merged object. So, it will add a suffix (e.g., <code>.x</code>, <code>.y</code>) to each common variable to indicate which object (i.e., object <code>x</code> or object <code>y</code>) the variable came from, where object <code>x</code> is the first object—i.e., the object to which object <code>y</code> (the second object) is merged. In general, apart from the keys, you should not include variables with the same name in two objects to be merged. To prevent this, either remove or rename the shared variable in one of the objects, or include the shared variable as a key. However, as described above, you should include it as a key <strong><em>only</em></strong> if you want to use its values to align the rows from each object. Below is an example of merging two objects with the same variable name (i.e., points) that is not used as a key.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb133"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1"></a>mergeExample2A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb133-2"><a href="#cb133-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span>),</span>
+<span id="cb133-3"><a href="#cb133-3"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">22</span>,<span class="dv">24</span>,<span class="dv">26</span>,<span class="dv">28</span>)</span>
+<span id="cb133-4"><a href="#cb133-4"></a>)</span>
+<span id="cb133-5"><a href="#cb133-5"></a></span>
+<span id="cb133-6"><a href="#cb133-6"></a>mergeExample2B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb133-7"><a href="#cb133-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"F"</span>),</span>
+<span id="cb133-8"><a href="#cb133-8"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>)</span>
+<span id="cb133-9"><a href="#cb133-9"></a>)</span>
+<span id="cb133-10"><a href="#cb133-10"></a></span>
+<span id="cb133-11"><a href="#cb133-11"></a>mergeExample2 <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
+<span id="cb133-12"><a href="#cb133-12"></a>  mergeExample2A,</span>
+<span id="cb133-13"><a href="#cb133-13"></a>  mergeExample2B,</span>
+<span id="cb133-14"><a href="#cb133-14"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
+<span id="cb133-15"><a href="#cb133-15"></a></span>
+<span id="cb133-16"><a href="#cb133-16"></a>mergeExample2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["player"],"name":[1],"type":["chr"],"align":["left"]},{"label":["points.x"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["points.y"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"A","2":"20","3":"10"},{"1":"B","2":"22","3":"15"},{"1":"C","2":"24","3":"20"},{"1":"D","2":"26","3":"NA"},{"1":"E","2":"28","3":"NA"},{"1":"F","2":"NA","3":"25"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
 <p>When two objects are merged that have different formats, the resulting data object inherits the format of the data object that has more levels of nesting. For instance, consider that you want to merge two objects, object A and object B. Object A is in <code>player</code> form and object B is in <code>player</code>-<code>season</code>-<code>week</code> form. When you merge them, the resulting data object will be in <code>player</code>-<code>season</code>-<code>week</code> form.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1"></a>mergeExample3A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb134-2"><a href="#cb134-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span>),</span>
+<span id="cb134-3"><a href="#cb134-3"></a>  <span class="at">weight =</span> <span class="fu">c</span>(<span class="dv">225</span>,<span class="dv">250</span>,<span class="dv">275</span>,<span class="dv">300</span>,<span class="dv">325</span>)</span>
+<span id="cb134-4"><a href="#cb134-4"></a>)</span>
+<span id="cb134-5"><a href="#cb134-5"></a></span>
+<span id="cb134-6"><a href="#cb134-6"></a>mergeExample3B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb134-7"><a href="#cb134-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
+<span id="cb134-8"><a href="#cb134-8"></a>  <span class="at">season =</span> <span class="fu">c</span>(<span class="dv">2023</span>,<span class="dv">2023</span>,<span class="dv">2024</span>,<span class="dv">2024</span>,<span class="dv">2024</span>,<span class="dv">2024</span>),</span>
+<span id="cb134-9"><a href="#cb134-9"></a>  <span class="at">week =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>)</span>
+<span id="cb134-10"><a href="#cb134-10"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>,<span class="dv">30</span>,<span class="dv">35</span>)</span>
+<span id="cb134-11"><a href="#cb134-11"></a>)</span>
+<span id="cb134-12"><a href="#cb134-12"></a></span>
+<span id="cb134-13"><a href="#cb134-13"></a>mergeExample3 <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
+<span id="cb134-14"><a href="#cb134-14"></a>  mergeExample3A,</span>
+<span id="cb134-15"><a href="#cb134-15"></a>  mergeExample3B,</span>
+<span id="cb134-16"><a href="#cb134-16"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
+<span id="cb134-17"><a href="#cb134-17"></a></span>
+<span id="cb134-18"><a href="#cb134-18"></a>mergeExample3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error: &lt;text&gt;:10:3: unexpected symbol
+9:   week = c(1,2,1,2,3,4)
+10:   points
+      ^</code></pre>
+</div>
+</div>
 </section><section id="sec-mergingData" class="level3" data-number="3.21.2"><h3 data-number="3.21.2" class="anchored" data-anchor-id="sec-mergingData">
 <span class="header-section-number">3.21.2</span> Data Before Merging</h3>
 <p>Here are the data in the <code>players</code> object:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb130"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1"></a>players</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a>players</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1600,7 +1683,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb131"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1"></a><span class="fu">dim</span>(players)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a><span class="fu">dim</span>(players)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 12 10</code></pre>
 </div>
@@ -1608,7 +1691,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <p>The data are structured in ID form. That is, every row in the dataset is uniquely identified by the variable, <code>ID</code>.</p>
 <p>Here are the data in the <code>fantasyPoints</code> object:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb133"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1"></a>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1616,7 +1699,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1"></a><span class="fu">dim</span>(fantasyPoints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a><span class="fu">dim</span>(fantasyPoints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 4 2</code></pre>
 </div>
@@ -1634,12 +1717,12 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21.3.2</span> Full Outer Join</h4>
 <p>A full outer join includes all rows in <code>x</code> <strong>or</strong> <code>y</code>. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using a full outer join (i.e., “full join”):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a>fullJoinData <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
-<span id="cb136-2"><a href="#cb136-2"></a>  players,</span>
-<span id="cb136-3"><a href="#cb136-3"></a>  fantasyPoints,</span>
-<span id="cb136-4"><a href="#cb136-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb136-5"><a href="#cb136-5"></a></span>
-<span id="cb136-6"><a href="#cb136-6"></a>fullJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>fullJoinData <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
+<span id="cb142-2"><a href="#cb142-2"></a>  players,</span>
+<span id="cb142-3"><a href="#cb142-3"></a>  fantasyPoints,</span>
+<span id="cb142-4"><a href="#cb142-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb142-5"><a href="#cb142-5"></a></span>
+<span id="cb142-6"><a href="#cb142-6"></a>fullJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1647,7 +1730,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a><span class="fu">dim</span>(fullJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1"></a><span class="fu">dim</span>(fullJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 14 11</code></pre>
 </div>
@@ -1656,12 +1739,12 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21.3.3</span> Left Outer Join</h4>
 <p>A left outer join includes all rows in <code>x</code>. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using a left outer join (“left join”):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>leftJoinData <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
-<span id="cb139-2"><a href="#cb139-2"></a>  players,</span>
-<span id="cb139-3"><a href="#cb139-3"></a>  fantasyPoints,</span>
-<span id="cb139-4"><a href="#cb139-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb139-5"><a href="#cb139-5"></a></span>
-<span id="cb139-6"><a href="#cb139-6"></a>leftJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>leftJoinData <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb145-2"><a href="#cb145-2"></a>  players,</span>
+<span id="cb145-3"><a href="#cb145-3"></a>  fantasyPoints,</span>
+<span id="cb145-4"><a href="#cb145-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb145-5"><a href="#cb145-5"></a></span>
+<span id="cb145-6"><a href="#cb145-6"></a>leftJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1669,7 +1752,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a><span class="fu">dim</span>(leftJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1"></a><span class="fu">dim</span>(leftJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 12 11</code></pre>
 </div>
@@ -1678,12 +1761,12 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21.3.4</span> Right Outer Join</h4>
 <p>A right outer join includes all rows in <code>y</code>. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using a right outer join (“right join”):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>rightJoinData <span class="ot">&lt;-</span> <span class="fu">right_join</span>(</span>
-<span id="cb142-2"><a href="#cb142-2"></a>  players,</span>
-<span id="cb142-3"><a href="#cb142-3"></a>  fantasyPoints,</span>
-<span id="cb142-4"><a href="#cb142-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb142-5"><a href="#cb142-5"></a></span>
-<span id="cb142-6"><a href="#cb142-6"></a>rightJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1"></a>rightJoinData <span class="ot">&lt;-</span> <span class="fu">right_join</span>(</span>
+<span id="cb148-2"><a href="#cb148-2"></a>  players,</span>
+<span id="cb148-3"><a href="#cb148-3"></a>  fantasyPoints,</span>
+<span id="cb148-4"><a href="#cb148-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb148-5"><a href="#cb148-5"></a></span>
+<span id="cb148-6"><a href="#cb148-6"></a>rightJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1691,7 +1774,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1"></a><span class="fu">dim</span>(rightJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a><span class="fu">dim</span>(rightJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1]  4 11</code></pre>
 </div>
@@ -1700,12 +1783,12 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21.3.5</span> Inner Join</h4>
 <p>An inner join includes all rows that are in <strong>both</strong> <code>x</code> <strong>and</strong> <code>y</code>. An inner join will return one row of <code>x</code> for each matching row of <code>y</code>, and can duplicate values of records on either side (left or right) if <code>x</code> and <code>y</code> have more than one matching record. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using an inner join:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>innerJoinData <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
-<span id="cb145-2"><a href="#cb145-2"></a>  players,</span>
-<span id="cb145-3"><a href="#cb145-3"></a>  fantasyPoints,</span>
-<span id="cb145-4"><a href="#cb145-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb145-5"><a href="#cb145-5"></a></span>
-<span id="cb145-6"><a href="#cb145-6"></a>innerJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a>innerJoinData <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb151-2"><a href="#cb151-2"></a>  players,</span>
+<span id="cb151-3"><a href="#cb151-3"></a>  fantasyPoints,</span>
+<span id="cb151-4"><a href="#cb151-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb151-5"><a href="#cb151-5"></a></span>
+<span id="cb151-6"><a href="#cb151-6"></a>innerJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1713,7 +1796,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1"></a><span class="fu">dim</span>(innerJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a><span class="fu">dim</span>(innerJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1]  2 11</code></pre>
 </div>
@@ -1722,12 +1805,12 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21.3.6</span> Semi Join</h4>
 <p>A semi join is a filter. A left semi join returns all rows from <code>x</code> <strong>with</strong> a match in <code>y</code>. That is, it filters out records from <code>x</code> that are not in <code>y</code>. Unlike an <a href="#innerJoin">inner join</a>, a left semi join will never duplicate rows of <code>x</code>, and it includes columns from only <code>x</code> (not from <code>y</code>). Here is how to merge two data frames using a left semi join:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1"></a>semiJoinData <span class="ot">&lt;-</span> <span class="fu">semi_join</span>(</span>
-<span id="cb148-2"><a href="#cb148-2"></a>  players,</span>
-<span id="cb148-3"><a href="#cb148-3"></a>  fantasyPoints,</span>
-<span id="cb148-4"><a href="#cb148-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb148-5"><a href="#cb148-5"></a></span>
-<span id="cb148-6"><a href="#cb148-6"></a>semiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a>semiJoinData <span class="ot">&lt;-</span> <span class="fu">semi_join</span>(</span>
+<span id="cb154-2"><a href="#cb154-2"></a>  players,</span>
+<span id="cb154-3"><a href="#cb154-3"></a>  fantasyPoints,</span>
+<span id="cb154-4"><a href="#cb154-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb154-5"><a href="#cb154-5"></a></span>
+<span id="cb154-6"><a href="#cb154-6"></a>semiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1735,7 +1818,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a><span class="fu">dim</span>(semiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a><span class="fu">dim</span>(semiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1]  2 10</code></pre>
 </div>
@@ -1744,12 +1827,12 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21.3.7</span> Anti Join</h4>
 <p>An anti join is a filter. A left anti join returns all rows from <code>x</code> <strong>without</strong> a match in <code>y</code>. That is, it filters out records from <code>x</code> that are in <code>y</code>. It returns columns from only <code>x</code> (not from <code>y</code>). Here is how to merge two data frames using a left anti join:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a>antiJoinData <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(</span>
-<span id="cb151-2"><a href="#cb151-2"></a>  players,</span>
-<span id="cb151-3"><a href="#cb151-3"></a>  fantasyPoints,</span>
-<span id="cb151-4"><a href="#cb151-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb151-5"><a href="#cb151-5"></a></span>
-<span id="cb151-6"><a href="#cb151-6"></a>antiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb157"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1"></a>antiJoinData <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(</span>
+<span id="cb157-2"><a href="#cb157-2"></a>  players,</span>
+<span id="cb157-3"><a href="#cb157-3"></a>  fantasyPoints,</span>
+<span id="cb157-4"><a href="#cb157-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb157-5"><a href="#cb157-5"></a></span>
+<span id="cb157-6"><a href="#cb157-6"></a>antiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1757,7 +1840,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a><span class="fu">dim</span>(antiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a><span class="fu">dim</span>(antiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 10 10</code></pre>
 </div>
@@ -1766,11 +1849,11 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.21.3.8</span> Cross Join</h4>
 <p>A cross join combines each row in <code>x</code> with each row in <code>y</code>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a>crossJoinData <span class="ot">&lt;-</span> <span class="fu">cross_join</span>(</span>
-<span id="cb154-2"><a href="#cb154-2"></a>  players,</span>
-<span id="cb154-3"><a href="#cb154-3"></a>  fantasyPoints)</span>
-<span id="cb154-4"><a href="#cb154-4"></a></span>
-<span id="cb154-5"><a href="#cb154-5"></a>crossJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a>crossJoinData <span class="ot">&lt;-</span> <span class="fu">cross_join</span>(</span>
+<span id="cb160-2"><a href="#cb160-2"></a>  players,</span>
+<span id="cb160-3"><a href="#cb160-3"></a>  fantasyPoints)</span>
+<span id="cb160-4"><a href="#cb160-4"></a></span>
+<span id="cb160-5"><a href="#cb160-5"></a>crossJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1778,7 +1861,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a><span class="fu">dim</span>(crossJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a><span class="fu">dim</span>(crossJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 48 12</code></pre>
 </div>
@@ -1788,13 +1871,13 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <p>Depending on the analysis, it may be important to restructure the data to be in long or wide form. When the data are in wide form, each player has only one row. When the data are in long form, each player has multiple rows—e.g., a row for each game. The data structure is called wide or long form because a dataset in wide form has more columns and fewer rows (i.e., it appears wider and shorter), whereas a dataset in long form has more rows and fewer columns (i.e., it appears narrower and taller).</p>
 <p>Here are the original data in long form. The data are structured in “<code>player</code>-<code>season</code>-<code>week</code> form”. That is, every row in the dataset is uniquely identified by the combination of variables, <code>ID</code>, <code>season</code>, and <code>week</code>—these are the keys. This is an example of long form, because each player has multiple rows.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb157"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1"></a>dataLong <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
-<span id="cb157-2"><a href="#cb157-2"></a>  players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>age),</span>
-<span id="cb157-3"><a href="#cb157-3"></a>  fantasyPoints_weekly,</span>
-<span id="cb157-4"><a href="#cb157-4"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ID"</span>)</span>
-<span id="cb157-5"><a href="#cb157-5"></a>)</span>
-<span id="cb157-6"><a href="#cb157-6"></a></span>
-<span id="cb157-7"><a href="#cb157-7"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a>dataLong <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
+<span id="cb163-2"><a href="#cb163-2"></a>  players <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>age),</span>
+<span id="cb163-3"><a href="#cb163-3"></a>  fantasyPoints_weekly,</span>
+<span id="cb163-4"><a href="#cb163-4"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ID"</span>)</span>
+<span id="cb163-5"><a href="#cb163-5"></a>)</span>
+<span id="cb163-6"><a href="#cb163-6"></a></span>
+<span id="cb163-7"><a href="#cb163-7"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1802,11 +1885,11 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb164"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 408  12</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb166"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> [1] "ID"            "name"          "position"      "newVar1"      
  [5] "newVar2"       "factorVar"     "numericVar"    "integerVar"   
@@ -1815,13 +1898,13 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 </div>
 <p>Below, we widen the data by two variables (<code>season</code> and <code>week</code>), using <code>tidyverse</code>, so that the data are now in “<code>player</code> form” (where each row is uniquely identified by the <code>ID</code> variable):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb162"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1"></a>dataWide <span class="ot">&lt;-</span> dataLong <span class="sc">%&gt;%</span> </span>
-<span id="cb162-2"><a href="#cb162-2"></a>  <span class="fu">pivot_wider</span>(</span>
-<span id="cb162-3"><a href="#cb162-3"></a>    <span class="at">names_from =</span> <span class="fu">c</span>(season, week),</span>
-<span id="cb162-4"><a href="#cb162-4"></a>    <span class="at">names_glue =</span> <span class="st">"{.value}_{season}_week{week}"</span>,</span>
-<span id="cb162-5"><a href="#cb162-5"></a>    <span class="at">values_from =</span> fantasyPoints)</span>
-<span id="cb162-6"><a href="#cb162-6"></a></span>
-<span id="cb162-7"><a href="#cb162-7"></a>dataWide</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb168"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1"></a>dataWide <span class="ot">&lt;-</span> dataLong <span class="sc">%&gt;%</span> </span>
+<span id="cb168-2"><a href="#cb168-2"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb168-3"><a href="#cb168-3"></a>    <span class="at">names_from =</span> <span class="fu">c</span>(season, week),</span>
+<span id="cb168-4"><a href="#cb168-4"></a>    <span class="at">names_glue =</span> <span class="st">"{.value}_{season}_week{week}"</span>,</span>
+<span id="cb168-5"><a href="#cb168-5"></a>    <span class="at">values_from =</span> fantasyPoints)</span>
+<span id="cb168-6"><a href="#cb168-6"></a></span>
+<span id="cb168-7"><a href="#cb168-7"></a>dataWide</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1829,11 +1912,11 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a><span class="fu">dim</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb169"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb169-1"><a href="#cb169-1"></a><span class="fu">dim</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 12 43</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb165"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1"></a><span class="fu">names</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb171"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb171-1"><a href="#cb171-1"></a><span class="fu">names</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> [1] "ID"                        "name"                     
  [3] "position"                  "newVar1"                  
@@ -1863,14 +1946,14 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.23</span> Transform Data from Wide to Long</h2>
 <p>Conversely, we can also restructure data from wide to long. Here are the data in long form, after they have been transformed from wide form using <code>tidyverse</code>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb167"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1"></a>dataLong <span class="ot">&lt;-</span> dataWide <span class="sc">%&gt;%</span> </span>
-<span id="cb167-2"><a href="#cb167-2"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb167-3"><a href="#cb167-3"></a>    <span class="at">cols =</span> fantasyPoints_2022_week1<span class="sc">:</span>fantasyPoints_2023_week17,</span>
-<span id="cb167-4"><a href="#cb167-4"></a>    <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"week"</span>),</span>
-<span id="cb167-5"><a href="#cb167-5"></a>    <span class="at">names_pattern =</span> <span class="st">"fantasyPoints_(.*)_week(.*)"</span>,</span>
-<span id="cb167-6"><a href="#cb167-6"></a>    <span class="at">values_to =</span> <span class="st">"fantasyPoints"</span>)</span>
-<span id="cb167-7"><a href="#cb167-7"></a></span>
-<span id="cb167-8"><a href="#cb167-8"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb173"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1"></a>dataLong <span class="ot">&lt;-</span> dataWide <span class="sc">%&gt;%</span> </span>
+<span id="cb173-2"><a href="#cb173-2"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb173-3"><a href="#cb173-3"></a>    <span class="at">cols =</span> fantasyPoints_2022_week1<span class="sc">:</span>fantasyPoints_2023_week17,</span>
+<span id="cb173-4"><a href="#cb173-4"></a>    <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"week"</span>),</span>
+<span id="cb173-5"><a href="#cb173-5"></a>    <span class="at">names_pattern =</span> <span class="st">"fantasyPoints_(.*)_week(.*)"</span>,</span>
+<span id="cb173-6"><a href="#cb173-6"></a>    <span class="at">values_to =</span> <span class="st">"fantasyPoints"</span>)</span>
+<span id="cb173-7"><a href="#cb173-7"></a></span>
+<span id="cb173-8"><a href="#cb173-8"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1878,11 +1961,11 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb168"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb174"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 408  12</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb170"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb176"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> [1] "ID"            "name"          "position"      "newVar1"      
  [5] "newVar2"       "factorVar"     "numericVar"    "integerVar"   
@@ -1893,10 +1976,10 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.24</span> Loops</h2>
 <p>If you want to perform the same computation multiple times, it can be faster to do it in a loop compared to writing out the same computation many times. For instance, here is a loop that runs from 1 to 12 (the number of players in the <code>players</code> object), incrementing by 1 after each iteration. The loop prints each element of a vector (i.e., the player’s name) and the loop index (<code>i</code>) that indicates where the loop is in terms of its iterations:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb172"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(players<span class="sc">$</span>ID)){</span>
-<span id="cb172-2"><a href="#cb172-2"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"The loop is at index:"</span>, i, <span class="at">sep =</span> <span class="st">" "</span>))</span>
-<span id="cb172-3"><a href="#cb172-3"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"My favorite player is:"</span>, players<span class="sc">$</span>name[i], <span class="at">sep =</span> <span class="st">" "</span>))</span>
-<span id="cb172-4"><a href="#cb172-4"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb178"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb178-1"><a href="#cb178-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(players<span class="sc">$</span>ID)){</span>
+<span id="cb178-2"><a href="#cb178-2"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"The loop is at index:"</span>, i, <span class="at">sep =</span> <span class="st">" "</span>))</span>
+<span id="cb178-3"><a href="#cb178-3"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"My favorite player is:"</span>, players<span class="sc">$</span>name[i], <span class="at">sep =</span> <span class="st">" "</span>))</span>
+<span id="cb178-4"><a href="#cb178-4"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] "The loop is at index: 1"
 [1] "My favorite player is: Ken Cussion"
@@ -1928,7 +2011,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.25</span> Session Info</h2>
 <p>At the end of each chapter in which <code>R</code> code is used, I provide the session information, which describes the system and operating system the code was run on and the versions of each package. That way, if you get different results from me, you can see which differ, to help with reproducibility. If you run the (all of) the exact same code as is provided in the text, in the exact same order, with the exact same setup (platform, operating system, package versions, etc.), you should get the exact same answer as is in the text. That is the idea of reproducibility—getting the exact same result with the exact same inputs. Reproducibility is crucial for studies to achieve greater confidence in their findings and to ensure better replicability of findings across studies.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb174"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb180"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
