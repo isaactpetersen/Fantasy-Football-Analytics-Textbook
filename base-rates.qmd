@@ -459,7 +459,7 @@ $$ {#eq-negativeLikelihoodRatio}
 
 Using [Bayes' theorem](#sec-bayesTheorem) (described in @sec-bayesTheorem), solving for posttest odds (based on pretest odds and the [likelihood ratio](#sec-diagnosticLikelihoodRatio), as in @eq-bayes5), and converting odds to probabilities, we can use a Fagan probability nomogram to determine the posttest probability following a test result.
 The calculation of posttest probability is described in INSERT.
-A *probability nomogram* is a way of visually applying [Bayes' theorem](#sec-bayesTheorem) to determine the posttest probability of having a condition based on the [pretest (or prior) probability](#sec-baseRate) and [likelihood ratio](#sec-diagnosticLikelihoodRatio), as depicted in @fig-probabilityNomogram.
+A *probability nomogram* (aka Fagan nomogram) is a way of visually applying [Bayes' theorem](#sec-bayesTheorem) to determine the posttest probability of having a condition based on the [pretest (or prior) probability](#sec-baseRate) and [likelihood ratio](#sec-diagnosticLikelihoodRatio), as depicted in @fig-probabilityNomogram.
 To use a probability nomogram, connect the dots from the starting probability (left line) with the [likelihood ratio](#sec-diagnosticLikelihoodRatio) (middle line) to see the updated probability.
 The updated (posttest) probability is where the connecting line crosses the third, right line.
 
@@ -470,6 +470,9 @@ Probability Nomogram. (Figure retrieved from [https://upload.wikimedia.org/wikip
 :::
 
 For instance, if the starting probability is 0.5% and the [likelihood ratio](#sec-diagnosticLikelihoodRatio) is 10 (e.g., sensitivity = .90, specificity = .91: $\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10$) from a positive test (i.e., [positive likelihood ratio](#sec-positiveLikelihoodRatio)), the updated probability is less than 5%, as depicted in @fig-probabilityNomogramLine.
+
+An interactive probability nomogram is available at the following link: <https://jamaevidence.mhmedical.com/data/calculators/LR_nomogram.html> (archived at <https://perma.cc/Z3SW-QMJ3>).
+
 The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `posttestProbability()` function that estimates the posttest probability of an event, given the [pretest probability](#sec-baseRate) and the [likelihood ratio](#sec-diagnosticLikelihoodRatio), or given the [pretest probability](#sec-baseRate) and the sensitivity (SN) and specificity (SP) of the test.
 
 ```{r}
@@ -517,15 +520,17 @@ petersenlab::nomogrammer(
   pretestProb = .005,
   SN = 0.90,
   SP = 0.91)
+```
 
+The blue line indicates the [posterior probability](#posttestProbability) of the condition given a positive test.
+The pink line indicates the [posterior probability](#posttestProbability) of the condition given a negative test.
+
+```{r}
 petersenlab::nomogrammer(
   pretestProb = .005,
   PLR = 10,
   NLR = 0.11)
 ```
-
-The blue line indicates the [posterior probability](#posttestProbability) of the condition given a positive test.
-The pink line indicates the [posterior probability](#posttestProbability) of the condition given a negative test.
 
 The function can also create a nomogram plot using the true positives (TP), true negatives (TN), false positives (FP), and false negatives (FN):
 
@@ -537,13 +542,14 @@ petersenlab::nomogrammer(
   FN = 50)
 ```
 
+The function can also create a nomogram plot using the sensitivity (SN) and selection rate of the test.
 Here is a nomogram plot from the [HIV example](#sec-baseRatesOverview):
 
 ```{r}
 petersenlab::nomogrammer(
   pretestProb = .003,
   SN = .95,
-  SP = 1 - ((.01 - .95 * .003) / (1 - .003))
+  selectionRate = .01
 )
 ```
 
