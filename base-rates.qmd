@@ -109,6 +109,8 @@ Applied to fantasy football, the probability that a given player will be injured
 
 ### Bayes' Theorem {#sec-bayesTheorem}
 
+#### Standard Formulation {#sec-bayesTheoremStandard}
+
 An alternative way of calculating a [conditional probability](#sec-conditionalProbability) is using the inverse [conditional probability](#sec-conditionalProbability) (instead of the [joint probability](#sec-jointProbability)).
 This is known as Bayes' theorem.
 Bayes' theorem can help us calculate a [conditional probability](#sec-conditionalProbability) of some classification, $C$, given some response, $R$, if we know the inverse [conditional probability](#sec-conditionalProbability) and the [base rate](#sec-baseRate) (marginal probability) of each.
@@ -262,7 +264,7 @@ $$
 \end{aligned}
 $$ {#eq-baseRateUpdated2}
 
-The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains the `pAgivenB()` function that estimates the probability of one event, $A$, given another event, $B$.
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `pAgivenB()` function that estimates the probability of one event, $A$, given another event, $B$.
 
 ```{r}
 petersenlab::pAgivenB(
@@ -283,6 +285,86 @@ As seen in the rearranged formula in @eq-bayes3, the inverse [conditional probab
 If the [base rates](#sec-baseRate) are not equal, we are making at least some prediction errors.
 If $P(C_i) > P(R_i)$, our predictions must include some false negatives.
 If $P(R_i) > P(C_i)$, our predictions must include some false positives.
+
+#### Alternative Formulation {#sec-bayesTheoremAlternative}
+
+Using the law of total probability, we can substitute the calculation of the [marginal probability](#sec-baseRate) ($P(R_i)$) into Bayes' theorem to get an alternative formulation of Bayes' theorem, as in @eq-baseRateUpdated3:
+
+$$
+\begin{aligned}
+  P(C | R) &= \frac{P(R | C) \cdot P(C_i)}{P(R_i)} \\
+  &= \frac{P(R | C) \cdot P(C_i)}{P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i)} \\
+  &= \frac{P(R | C) \cdot P(C_i)}{P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot [1 - P(C_i)]}
+\end{aligned}
+$$ {#eq-baseRateUpdated3}
+
+Instead of using [marginal probability](#sec-baseRate) ([base rate](#sec-baseRate)) of $R$, as in the original formulation of Bayes' theorem, it uses the [conditional probability](#sec-conditionalProbability), $P(R|\text{not } C)$.
+Thus, it uses three terms: two [conditional probabilities](#sec-conditionalProbability)—$P(R|C)$ and $P(R|\text{not } C)$—and one [marginal probability](#sec-baseRate), $P(C_i)$.
+
+Let us see how the alternative formulation of Bayes' theorem applies to the HIV example above.
+We can calculate the probability of HIV given a positive test using three terms: the [conditional probability](#sec-conditionalProbability) that a person with HIV gets a positive test (i.e., [sensitivity](#sec-sensitivity)), the [conditional probability](#sec-conditionalProbability) that a person without HIV gets a positive test (i.e., [false positive rate](#sec-falsePositiveRate)), and the [base rate](#sec-baseRate) of HIV.
+Using the $P(R|\text{not } C)$ calculated in @eq-conditionalProbabilityRevised, the [conditional probability](#sec-conditionalProbability) of HIV given a single positive test is in @eq-bayes4:
+
+$$
+\small
+\begin{aligned}
+  P(C | R) &= \frac{P(R | C) \cdot P(C_i)}{P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot [1 - P(C_i)]} \\
+  &= \frac{\text{sensitivity of test} \times \text{base rate of HIV}}{\text{sensitivity of test} \times \text{base rate of HIV} + \text{false positive rate of test} \times (1 - \text{base rate of HIV})} \\
+  &= \frac{95\% \times .3\%}{95\% \times .3\% + .7171515\% \times (1 - .3\%)} = \frac{.95 \times .003}{.95 \times .003 + .007171515 \times (1 - .003)}\\
+  &= 28.5\%
+\end{aligned}
+$$ {#eq-bayes4}
+
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `pAgivenB()` function that estimates the probability of one event, $A$, given another event, $B$.
+
+```{r}
+pAgivenB(
+  pBgivenA = .95,
+  pA = .003,
+  pBgivenNotA = .007171515)
+
+pAgivenB(
+  pBgivenA = .95,
+  pA = .003,
+  pBgivenNotA = pBgivenNotA(
+    pBgivenA = .95,
+    pA = .003,
+    pB = .01))
+```
+
+To calculate the [conditional probability](#sec-conditionalProbability) of HIV given a second positive test, we update our priors because the person has now tested positive for HIV.
+We update the [prior probability](#sec-baseRate) of HIV ($P(C_i)$) based on the posterior probability of HIV after a positive test ($P(C | R)$) that we calculated above.
+We can calculate the [conditional probability](#sec-conditionalProbability) of HIV given a second positive test using three terms: the [conditional probability](#sec-conditionalProbability) that a person with HIV gets a positive test (i.e., [sensitivity](#sec-sensitivity); which stays the same), the [conditional probability](#sec-conditionalProbability) that a person without HIV gets a positive test (i.e., [false positive rate](#sec-falsePositiveRate); which stays the same), and the updated [marginal probability](#sec-baseRate) of HIV.
+The [conditional probability](#sec-conditionalProbability) of HIV given a second positive test is in @eq-baseRateUpdated4:
+
+$$
+\scriptsize
+\begin{aligned}
+  P(C | R) &= \frac{P(R | C) \cdot P(C_i)}{P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot [1 - P(C_i)]} \\
+  &= \frac{\text{sensitivity of test} \times \text{updated base rate of HIV}}{\text{sensitivity of test} \times \text{updated base rate of HIV} + \text{false positive rate of test} \times (1 - \text{updated base rate of HIV})} \\
+  &= \frac{95\% \times 28.5\%}{95\% \times 28.5\% + .7171515\% \times (1 - 28.5\%)} = \frac{.95 \times .285}{.95 \times .285 + .007171515 \times (1 - .285)}\\
+  &= 98.14\%
+\end{aligned}
+$$ {#eq-baseRateUpdated4}
+
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `pAgivenB()` function that estimates the probability of one event, $A$, given another event, $B$.
+
+```{r}
+pAgivenB(
+  pBgivenA = .95,
+  pA = .285,
+  pBgivenNotA = .007171515)
+
+pAgivenB(
+  pBgivenA = .95,
+  pA = .285,
+  pBgivenNotA = pBgivenNotA(
+    pBgivenA = .95,
+    pA = .003,
+    pB = .01))
+```
+
+#### Interim Summary
 
 In sum, the [marginal probability](#sec-baseRate), including the [prior probability](#sec-baseRate) or [base rate](#sec-baseRate), should be weighed heavily in predictions unless there are sufficient data to indicate otherwise, i.e., to update the posterior probability based on new evidence.
 Bayes' theorem specifies how prior beliefs (i.e., [base rate](#sec-baseRate) informations) should be integrated with the [predictive accuracy](#sec-predictiveValidity) of the evidence to make predictions.
@@ -330,6 +412,7 @@ $$
 $$ {#eq-cabExampleBayesTheorem}
 
 We can compute the term in the denominator ($P(\text{Identified as Blue})$) using the law of total probability (described in @sec-bayesTheorem).
+
 $$
 \begin{aligned}
   P(R_i) &= P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot P(\text{not } C_i)\\
@@ -365,6 +448,77 @@ petersenlab::pAgivenB(
 Thus, there was a 41.4% probability that the car involved in the accident was Blue rather than Green.
 However, when faced with this problem, people tend to [ignore the base rate](#sec-fallaciesBaseRate) and go with the witness [@Kahneman2011].
 According to @Kahneman2011, the most frequent response to this question regarding is that there is an 80% that the car was Blue.
+
+## Nate Silver Examples {#sec-nateSilverExamples}
+
+@Silver2012 provides several examples that leverage the [alternative formulation of Bayes' theorem](#sec-bayesTheoremAlternative) provided in @eq-baseRateUpdated3 and summarized below:
+
+$$
+\begin{aligned}
+  P(C | R) &= \frac{P(R | C) \cdot P(C_i)}{P(R | C) \cdot P(C_i) + P(R | \text{not } C) \cdot [1 - P(C_i)]}
+\end{aligned}
+$$ {#eq-baseRateUpdated3}
+
+In each case, the formula uses three elements to calculate the probability that the hypothesis is true:
+
+1. the [conditional probability](#sec-conditionalProbability) the likelihood of observing the evidence, $R$, given that the hypothesis, $C$, is true (i.e., $P(R|C)$; [sensitivity](#sec-sensitivity))
+1. the [conditional probability](#sec-conditionalProbability) the likelihood of observing the evidence, $R$, given that the hypothesis, $C$, is false (i.e., $P(R | \text{not } C)$; [false positive rate](#sec-falsePositiveRate))
+1. the [marginal probability](#sec-baseRate) (base rate) of the event occurring (i.e., the prior probability of the hypothesis, $C$ being true; $P(C_i)$)
+
+Example 1: You just came home and a strange pair of underwear in your drawer.
+What is the probability that your partner is cheating on you?
+
+- the [prior probability](#sec-baseRate) that your spouse is cheating on you: 4%
+- the [conditional probability](#sec-conditionalProbability) of underwear appearing given that your spouse is cheating on you: 50%
+- the [conditional probability](#sec-conditionalProbability) of underwear appearing given that your spouse is *not* cheating on you: 5%
+
+```{r}
+pAgivenB(
+  pBgivenA = .50,
+  pA = .04,
+  pBgivenNotA = .05)
+```
+
+Example 2: What is the probability that a woman in her 40s has breast cancer if she tested positive on a mammogram?
+
+- the [prior probability](#sec-baseRate) that she has cancer: 1.4%
+- the [conditional probability](#sec-conditionalProbability) that she has a positive test given that she has cancer: 75%
+- the [conditional probability](#sec-conditionalProbability) that she has a positive test given that she does *not* have cancer: 10%
+
+```{r}
+pAgivenB(
+  pBgivenA = .75,
+  pA = .014,
+  pBgivenNotA = .10)
+```
+
+Example 3A: Consider the information we had on 9/11 when the first plane hit the World Trade Center.
+What is the probability that a terror attack occurred given that the first plane hit the World Trade Center?
+
+- the [prior probability](#sec-baseRate) that terrorists crash a plane into a Manhattan skyscraper: 0.005%
+- the [conditional probability](#sec-conditionalProbability) that a plane crashes into a Manhattan skyscraper if terrorists are attacking Manhattan skyscrapers: 100%
+- the [conditional probability](#sec-conditionalProbability) that a plane crashes into a Manhattan skyscraper if terrorists are *not* attacking Manhattan skyscrapers (i.e., it is an accident): 0.008%
+
+```{r}
+pAgivenB(
+  pBgivenA = 1,
+  pA = .00005,
+  pBgivenNotA = .00008)
+```
+
+Example 3A: Now, consider that a second plan just hit the World Trade Center.
+What is the probability that a terror attack occurred given that a second plane hit the World Trade Center?
+
+- the revised [prior probability](#sec-baseRate) that terrorists crash a plane into a Manhattan skyscraper (from Example 3A): 38.46272%
+- the [conditional probability](#sec-conditionalProbability) that a plane crashes into a Manhattan skyscraper if terrorists are attacking Manhattan skyscrapers: 100%
+- the [conditional probability](#sec-conditionalProbability) that a plane crashes into a Manhattan skyscraper if terrorists are *not* attacking Manhattan skyscrapers (i.e., it is an accident): 0.008%
+
+```{r}
+pAgivenB(
+  pBgivenA = 1,
+  pA = .3846272,
+  pBgivenNotA = .00008)
+```
 
 ## Base Rates Applied to Fantasy Football {#sec-baseRateFantasyFootball}
 
