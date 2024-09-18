@@ -1,5 +1,14 @@
 # Download Weekly Projections
 
+# Specify Season and Week Number ----
+
+season <- 2024
+weekNumber <- 3
+
+# Processing ----
+season <- as.character(season)
+weekNumber <- as.character(weekNumber)
+
 # Libraries ----
 library("ffanalytics")
 library("tidyverse")
@@ -71,7 +80,13 @@ players_projections_weekly_average <- players_projections_weekly_average %>%
   add_player_info()
 
 # Save Projected Points ----
+
 save(
   players_projectedPoints_weekly, players_projections_weekly_average,
   file = "./data/players_projectedPoints_weekly.RData"
+)
+
+save(
+  players_projectedPoints_weekly, players_projections_weekly_average,
+  file = paste("./data/players_projectedPoints_weekly_", season, "_", "week", weekNumber, ".RData", sep = "")
 )
