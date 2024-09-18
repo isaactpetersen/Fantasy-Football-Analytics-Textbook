@@ -88,5 +88,5 @@ save(
 
 save(
   players_projectedPoints_weekly, players_projections_weekly_average,
-  file = paste("./data/players_projectedPoints_weekly_", season, "_", "week", weekNumber, ".RData", sep = "")
+  file = paste("./data/by_year/players_projectedPoints_weekly_", season, "_", "week", weekNumber, ".RData", sep = "")
 )
