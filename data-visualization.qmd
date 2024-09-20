@@ -99,7 +99,83 @@ This is consistent with Schwabish's -@Schwabish2021 principles of showing the da
 - use type (i.e., of the text) that is clear, precise, and modest
 - use text that is upper-and-lower case, not all capitals
 
-[CREATE EXAMPLE VISUALIZATION THAT MEETS ALL OF THESE CRITERIA]
+
+An example figure that applies these principles of data visualization is in @fig-exampleDataVisualization.
+
+```{r}
+#| label: fig-exampleDataVisualization
+#| fig-cap: "Example Figure that Applies the Principles of Data Visualization."
+#| code-fold: true
+
+confidenceLevel <- .95 # for 95% confidence interval
+
+player_stats_seasonal_offense_summary <- player_stats_seasonal_offense %>%
+    filter(position_group %in% c("QB","RB","WR","TE")) %>% 
+  group_by(position_group) %>%
+  summarise( 
+    n = sum(!is.na(fantasy_points)),
+    mean = mean(fantasy_points, na.rm = TRUE),
+    sd = sd(fantasy_points, na.rm = TRUE)
+  ) %>%
+  mutate(se = sd/sqrt(n)) %>%
+  mutate(
+    ci_lower = mean - qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se,
+    ci_upper = mean + qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se,
+    positionLabel = case_match(
+      position_group,
+      "QB" ~ "Quarterback",
+      "RB" ~ "Running Back",
+      "WR" ~ "Wide Receiver",
+      "TE" ~ "Tight End"
+      )
+  )
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense_summary %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = positionLabel,
+    y = mean,
+    fill = positionLabel
+    )
+) +
+  geom_bar(
+    stat = "identity") +
+  geom_errorbar(
+    aes(
+      ymin = ci_lower,
+      ymax = ci_upper),
+    width = 0.2,
+    color = "black"
+  ) +
+  gghighlight::gghighlight(
+    positionLabel == "Quarterback",
+    label_key = positionLabel) +
+  labs(
+    x = "Position",
+    y = "Fantasy Points",
+    title = "Quarterbacks Score More Fantasy Points than Other Positions"
+  ) +
+  annotate(
+    "segment",
+    x = 3.5,
+    xend = 3.2,
+    y = 70,
+    yend = 35,
+    color = "blue",
+    linewidth = 1.5,
+    alpha = 0.6,
+    arrow = arrow()) +
+  annotate(
+    "text",
+    x = 2.75,
+    y = 75,
+    label = "Tight Ends score fewer points\nthan other positions",
+    hjust = 0) + # left-justify
+  theme_classic() + 
+  theme(legend.position = "none") +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
 
 ### Creating Data Visualizations in `R` {#sec-dataVisualizationOverviewInR}
 
