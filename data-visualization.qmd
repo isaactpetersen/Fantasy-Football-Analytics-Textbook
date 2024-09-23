@@ -68,7 +68,8 @@ In terms of helpful annotations, you can provide additional text that helps expl
 "Avoiding the spaghetti chart" means avoiding packed charts with too much information that makes them difficult to interpret.
 Spaghetti charts are lines with many lines that, make the plot look like a bunch of spaghetti.
 However, @Schwabish2021 also advocates against using charts of other types that are complicated and difficult to interpret due to too much information, such as complicated maps or bar plots with too many colors, icons, or bars.
-If there are too many lines or series, @Schwabish2021 advocates breaking it up into multiple charts (i.e., facets, trellis charts, or small multiples).
+If there are too many lines or series, @Schwabish2021 advocates [breaking it up into multiple charts](#sec-faceting) (i.e., facets, trellis charts, or small multiples).
+An example of [faceted charts](#sec-faceting) is depicted in @fig-facetedScatterplot.
 "Starting with gray" refers to the idea of using gray as the default color for most lines/points/bars, so that you can use a color to highlight the lines/points/bars of interest.
 In addition, as noted by @Schwabish2021, it is important to treat data as objectively as possible and not to present figures in a biased way as to mislead.
 
@@ -910,6 +911,36 @@ ggplot2::ggplot(
   theme_classic() + 
   theme(legend.position = "none") +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+## Faceting {#sec-faceting}
+
+```{r}
+#| label: fig-facetedScatterplot
+#| fig-cap: "Faceted Scatterplot."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal_offense %>% 
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  aes(
+    x = age,
+    y = fantasy_points)) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(
+    expand = c(0,0)
+  ) +
+  scale_y_continuous(
+    expand = c(0,0),
+    lim = c(0,NA)
+  ) +
+  labs(
+    x = "Player's Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age"
+  ) +
+  theme_bw() +
+  facet_wrap(vars(position_group)) # facet by position_group
 ```
 
 ## Examples {#sec-scatterplotExamples}
