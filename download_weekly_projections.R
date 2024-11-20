@@ -3,7 +3,7 @@
 # Specify Season and Week Number ----
 
 season <- 2024
-weekNumber <- 11
+weekNumber <- 12
 
 # Processing ----
 season <- as.character(season)
