@@ -2935,6 +2935,12 @@ In addition to week-by-week actual player statistics, we can also compute histor
 
 #### Career Statistics {#sec-calculateActualCareerStats}
 
+First, we can compute the players' career statistics using the `calculate_stats()` function from the `nflfastR` package.
+
+TODO: Insert code example.
+
+##### OLD (DELETE CODE BELOW)
+
 First, we can compute the players' career statistics using the `calculate_player_stats()`, `calculate_player_stats_def()`, and `calculate_player_stats_kicking()` functions from the `nflfastR` package for offensive players, defensive players, and kickers, respectively.
 
 ::: {#nte-calculateActualCareerStats .callout-note title="Calculating players' career statistics"}
@@ -3104,6 +3110,57 @@ load(file = "./data/nfl_actualStats_career.RData")
 #### Season-by-Season Statistics {#sec-calculateActualSeasonalStats}
 
 Second, we can compute the players' season-by-season statistics.
+
+TODO: Save/update data file in repo with the data generated from this code, and follow the data file through the rest of the book, updating code as necessary.
+
+```{r}
+#| eval: false
+nfl_actualStats_seasonal_player_raw <- calculate_stats(
+  seasons = TRUE,
+  summary_level = "season",
+  season_type = "REG")
+
+nfl_actualStats_seasonal_team_raw <- calculate_stats(
+  seasons = TRUE,
+  summary_level = "season",
+  stat_type = "team",
+  season_type = "REG")
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_seasonal_player_raw, nfl_actualStats_seasonal_team_raw,
+  file = "./data/nfl_actualStats_seasonal_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load("./data/nfl_actualStats_seasonal_raw.RData")
+```
+
+The `nfl_actualStats_seasonal_player_raw` object is in `player`-`season` form.
+That is, each row should be uniquely identified by the combination of `player_id` and `season`.
+The `nfl_actualStats_seasonal_team_raw` object is in `team`-`season` form.
+That is, each row should be uniquely identified by the combination of `team` and `season`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_seasonal_player <- nfl_actualStats_seasonal_player_raw %>% 
+  rename(team = recent_team) %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+
+nfl_actualStats_seasonal_team <- nfl_actualStats_seasonal_team_raw %>% 
+  select(season, team, everything()) %>% 
+  arrange(season, team)
+load(file = "./data/nfl_actualStats_seasonal.RData")
+```
+
+##### OLD (DELETE CODE BELOW)
 
 ```{r}
 seasons <- unique(nfl_pbp$season)
@@ -3323,6 +3380,33 @@ load(file = "./data/nfl_actualStats_seasonal.RData")
 
 We already load players' week-by-week statistics [above](#sec-downloadActualStats).
 Nevertheless, we could compute players' weekly statistics from the play-by-play data using the following syntax:
+
+TODO:
+
+- Decide whether to use `calculate_stats()` from `nflfastR` or `load_player_stats()` from `nflreadr`.
+- Save/update data file in repo with the data generated from the relevant code, and follow the data file through the rest of the book, updating code as necessary.
+
+```{r}
+#| eval: false
+nfl_actualStats_weekly_raw <- calculate_stats(
+  seasons = TRUE,
+  summary_level = "week")
+
+nfl_actualStats_weekly_defense_raw <- calculate_stats(
+  seasons = TRUE,
+  summary_level = "week",
+  stat_type = "team")
+```
+
+```{r}
+#| include: false
+
+# garbage collection
+rm(nfl_pbp)
+gc()
+```
+
+##### OLD (DELETE CODE BELOW)
 
 ```{r}
 #| eval: false
