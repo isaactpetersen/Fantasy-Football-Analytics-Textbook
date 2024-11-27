@@ -3157,6 +3157,35 @@ nfl_actualStats_seasonal_player <- nfl_actualStats_seasonal_player_raw %>%
 nfl_actualStats_seasonal_team <- nfl_actualStats_seasonal_team_raw %>% 
   select(season, team, everything()) %>% 
   arrange(season, team)
+```
+
+Let's check for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_seasonal_player %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_seasonal_team %>% 
+  group_by(team, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+save(
+  nfl_actualStats_seasonal_player, nfl_actualStats_seasonal_team,
+  file = "./data/nfl_actualStats_seasonal.RData"
+)
+```
+
+```{r}
+#| include: false
+
 load(file = "./data/nfl_actualStats_seasonal.RData")
 ```
 
