@@ -3125,6 +3125,17 @@ nfl_actualStats_seasonal_team_raw <- calculate_stats(
   summary_level = "season",
   stat_type = "team",
   season_type = "REG")
+
+nfl_actualStats_seasonal_player_inclPost_raw <- calculate_stats(
+  seasons = TRUE,
+  summary_level = "season",
+  season_type = "REG+POST")
+
+nfl_actualStats_seasonal_team_inclPost_raw <- calculate_stats(
+  seasons = TRUE,
+  summary_level = "season",
+  stat_type = "team",
+  season_type = "REG+POST")
 ```
 
 ```{r}
@@ -3132,6 +3143,7 @@ nfl_actualStats_seasonal_team_raw <- calculate_stats(
 
 save(
   nfl_actualStats_seasonal_player_raw, nfl_actualStats_seasonal_team_raw,
+  nfl_actualStats_seasonal_player_inclPost_raw, nfl_actualStats_seasonal_team_inclPost_raw,
   file = "./data/nfl_actualStats_seasonal_raw.RData"
 )
 ```
@@ -3163,6 +3175,15 @@ nfl_actualStats_seasonal_player <- nfl_actualStats_seasonal_player_raw %>%
 nfl_actualStats_seasonal_team <- nfl_actualStats_seasonal_team_raw %>% 
   select(season, team, everything()) %>% 
   arrange(season, team)
+
+nfl_actualStats_seasonal_player_inclPost <- nfl_actualStats_seasonal_player_inclPost_raw %>% 
+  rename(team = recent_team) %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+
+nfl_actualStats_seasonal_team_inclPost <- nfl_actualStats_seasonal_team_inclPost_raw %>% 
+  select(season, team, everything()) %>% 
+  arrange(season, team)
 ```
 
 Let's check for duplicate `player` instances:
@@ -3177,6 +3198,16 @@ nfl_actualStats_seasonal_team %>%
   group_by(team, season) %>% 
   filter(n() > 1) %>% 
   head()
+
+nfl_actualStats_seasonal_player_inclPost %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_seasonal_team_inclPost %>% 
+  group_by(team, season) %>% 
+  filter(n() > 1) %>% 
+  head()
 ```
 
 ```{r}
@@ -3185,6 +3216,7 @@ nfl_actualStats_seasonal_team %>%
 
 save(
   nfl_actualStats_seasonal_player, nfl_actualStats_seasonal_team,
+  nfl_actualStats_seasonal_player_inclPost, nfl_actualStats_seasonal_team_inclPost,
   file = "./data/nfl_actualStats_seasonal.RData"
 )
 ```
