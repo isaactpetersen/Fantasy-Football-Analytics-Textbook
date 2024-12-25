@@ -132,7 +132,8 @@ nfl_playerContractYears <- nfl_playerContracts_subset %>%
   dplyr::mutate(contractYear = 1)
 
 # Merge with weekly and seasonal stats data
-player_stats_weekly_offense <- player_stats_weekly_offense %>% 
+player_stats_weekly_offense <- player_stats_weekly %>% 
+  dplyr::filter(position_group %in% c("QB","RB","WR","TE")) %>% 
   dplyr::mutate(merge_name = nflreadr::clean_player_names(player_display_name, lowercase = TRUE))
 #nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal %>% 
 #  mutate(merge_name = nflreadr::clean_player_names(player_display_name, lowercase = TRUE))
@@ -188,6 +189,7 @@ player_statsContracts_seasonal <- player_statsContractsSubset_offense_weekly %>%
     rushing_epa = mean(rushing_epa, na.rm = TRUE),
     receiving_yards = mean(receiving_yards, na.rm = TRUE),
     receiving_epa = mean(receiving_epa, na.rm = TRUE),
+    fantasyPoints = sum(fantasyPoints, na.rm = TRUE), # season total
     contractYear = mean(contractYear, na.rm = TRUE),
     games = n(),
     .groups = "drop_last"
@@ -249,7 +251,7 @@ nfl_contractYearQBRsubset_weekly <- nfl_contractYearQBR_weekly %>%
 # Merge with age and experience
 nfl_contractYearQBRsubset_weekly <- player_statsContractsSubset_offense_weekly %>% 
   dplyr::filter(position == "QB") %>% 
-  dplyr::select(merge_name, season, week, age, years_of_experience) %>% 
+  dplyr::select(merge_name, season, week, age, years_of_experience, fantasyPoints) %>% 
   full_join(
     nfl_contractYearQBRsubset_weekly,
     by = c("merge_name","season", c("week" = "game_week"))
@@ -268,6 +270,7 @@ nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>%
     pts_added = mean(pts_added, na.rm = TRUE),
     epa_pass = mean(pass, na.rm = TRUE),
     qb_plays = sum(qb_plays, na.rm = TRUE), # season total
+    fantasyPoints = sum(fantasyPoints, na.rm = TRUE), # season total
     contractYear = mean(contractYear, na.rm = TRUE),
     games = n(),
     .groups = "drop_last"
@@ -364,7 +367,25 @@ emmeans::emmeans(mixedModelAge_epaPass, "contractYear")
 ```
 
 ```{r}
-# Placeholder for model predicting fantasy points
+mixedModel_fantasyPtsPass <- lmerTest::lmer(
+  fantasyPoints ~ contractYear + (1 | player_id),
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModel_fantasyPtsPass)
+MuMIn::r.squaredGLMM(mixedModel_fantasyPtsPass)
+emmeans::emmeans(mixedModel_fantasyPtsPass, "contractYear")
+
+mixedModelAge_fantasyPtsPass <- lmerTest::lmer(
+  fantasyPoints ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 | player_id), # removed random slopes to address convergence issue
+  data = nfl_contractYearQBR_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_fantasyPtsPass)
+MuMIn::r.squaredGLMM(mixedModelAge_fantasyPtsPass)
+emmeans::emmeans(mixedModelAge_fantasyPtsPass, "contractYear")
 ```
 
 ### RB {#sec-contractYearRB}
@@ -424,7 +445,25 @@ emmeans::emmeans(mixedModelAge_epaRush, "contractYear")
 ```
 
 ```{r}
-# Placeholder for model predicting fantasy points
+mixedModel_fantasyPtsRush <- lmerTest::lmer(
+  fantasyPoints ~ contractYear + (1 | player_id),
+  data = player_statsContractsRB_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModel_fantasyPtsRush)
+MuMIn::r.squaredGLMM(mixedModel_fantasyPtsRush)
+emmeans::emmeans(mixedModel_fantasyPtsRush, "contractYear")
+
+mixedModelAge_fantasyPtsRush <- lmerTest::lmer(
+  fantasyPoints ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = player_statsContractsRB_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_fantasyPtsRush)
+MuMIn::r.squaredGLMM(mixedModelAge_fantasyPtsRush)
+emmeans::emmeans(mixedModelAge_fantasyPtsRush, "contractYear")
 ```
 
 ### WR/TE {#sec-contractYearWRTE}
@@ -484,7 +523,25 @@ emmeans::emmeans(mixedModelAge_epaReceiving, "contractYear")
 ```
 
 ```{r}
-# Placeholder for model predicting fantasy points
+mixedModel_fantasyPtsReceiving <- lmerTest::lmer(
+  fantasyPoints ~ contractYear + (1 | player_id),
+  data = player_statsContractsWRTE_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModel_fantasyPtsReceiving)
+MuMIn::r.squaredGLMM(mixedModel_fantasyPtsReceiving)
+emmeans::emmeans(mixedModel_fantasyPtsReceiving, "contractYear")
+
+mixedModelAge_fantasyPtsReceiving <- lmerTest::lmer(
+  fantasyPoints ~ contractYear + ageCentered20 + ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_id),
+  data = player_statsContractsWRTE_seasonal,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+summary(mixedModelAge_fantasyPtsReceiving)
+MuMIn::r.squaredGLMM(mixedModelAge_fantasyPtsReceiving)
+emmeans::emmeans(mixedModelAge_fantasyPtsReceiving, "contractYear")
 ```
 
 ### QB/RB/WR/TE {#sec-contractYearQBRBWRTE}

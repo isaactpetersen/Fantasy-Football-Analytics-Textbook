@@ -46,6 +46,7 @@ load(file = "./data/nfl_depthCharts_raw.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp_raw.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown_raw.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation_raw.RData", fsep = ""))
+load(file = "./data/nfl_actualStats_position_weekly_raw.RData")
 load(file = "./data/nfl_actualStats_weekly_raw.RData")
 load(file = "./data/nfl_injuries_raw.RData")
 load(file = "./data/nfl_snapCounts_raw.RData")
@@ -66,6 +67,9 @@ load(file = "./data/players_projections_seasonal_raw.RData")
 # Calculated Data - Raw
 load(file = "./data/nfl_actualStats_career_raw.RData")
 load(file = "./data/nfl_actualStats_seasonal_raw.RData")
+load(file = "./data/nfl_actualFantasyPoints_career_raw.RData")
+load(file = "./data/nfl_actualFantasyPoints_seasonal_raw.RData")
+load(file = "./data/nfl_actualFantasyPoints_weekly_raw.RData")
 
 # Downloaded Data - Processed
 load(file = "./data/nfl_players.RData")
@@ -79,6 +83,7 @@ load(file = "./data/nfl_depthCharts.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
+load(file = "./data/nfl_actualStats_position_weekly.RData")
 load(file = "./data/nfl_actualStats_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
@@ -99,6 +104,9 @@ load(file = "./data/players_projectedPoints_seasonal.RData")
 # Calculated Data - Processed
 load(file = "./data/nfl_actualStats_career.RData")
 load(file = "./data/nfl_actualStats_seasonal.RData")
+load(file = "./data/nfl_actualFantasyPoints_career.RData")
+load(file = "./data/nfl_actualFantasyPoints_seasonal.RData")
+load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
 ```
 
 ### Players {#sec-downloadPlayers}
@@ -1276,7 +1284,13 @@ load(file = "./data/nfl_participation.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
 ```
 
-### Historical Weekly Actual Player Statistics {#sec-downloadActualStats}
+### Historical Actual Player Statistics {#sec-downloadActualStats}
+
+#### Career Statistics {#sec-downloadActualCareerStats}
+
+#### Season-by-Season Statistics {#sec-downloadActualSeasonalStats}
+
+#### Week-by-Week Statistics {#sec-downloadActualWeeklyStats}
 
 We can download historical week-by-week actual player statistics using the `load_player_stats()` function from the `nflreadr` package.
 A Data Dictionary for statistics for offensive players is located at the following link: <https://nflreadr.nflverse.com/articles/dictionary_player_stats.html>.
@@ -1306,14 +1320,14 @@ nfl_actualStats_kicking_weekly_raw <- progressr::with_progress(
 
 save(
   nfl_actualStats_offense_weekly_raw, nfl_actualStats_defense_weekly_raw, nfl_actualStats_kicking_weekly_raw,
-  file = "./data/nfl_actualStats_weekly_raw.RData"
+  file = "./data/nfl_actualStats_position_weekly_raw.RData"
 )
 ```
 
 ```{r}
 #| include: false
 
-load(file = "./data/nfl_actualStats_weekly_raw.RData")
+load(file = "./data/nfl_actualStats_position_weekly_raw.RData")
 ```
 
 The `nfl_actualStats_weekly` objects are in `player`-`season`-`week` form.
@@ -1359,14 +1373,14 @@ nfl_actualStats_kicking_weekly %>%
 
 save(
   nfl_actualStats_offense_weekly, nfl_actualStats_defense_weekly, nfl_actualStats_kicking_weekly,
-  file = "./data/nfl_actualStats_weekly.RData"
+  file = "./data/nfl_actualStats_position_weekly.RData"
 )
 ```
 
 ```{r}
 #| include: false
 
-load(file = "./data/nfl_actualStats_weekly.RData")
+load(file = "./data/nfl_actualStats_position_weekly.RData")
 ```
 
 ### Injuries {#sec-injuries}
@@ -2732,7 +2746,8 @@ View the default scoring settings:
 scoring_obj_default
 ```
 
-Now, modify the scoring settings to match our league settings (based on [scoring settings](https://support.nfl.com/hc/en-us/articles/4989179237404-Scoring) for fantasy leagues on NFL.com):
+Now, modify the scoring settings to match your league settings.
+Below, we use the [scoring settings](https://support.nfl.com/hc/en-us/articles/4989179237404-Scoring) for fantasy leagues on NFL.com, which happen to be point-per-reception leagues (i.e., PPR leagues):
 
 ```{r}
 scoring_obj <- scoring_obj_default
@@ -2975,7 +2990,7 @@ save(
 ```{r}
 #| include: false
 
-load("./data/nfl_actualStats_career_raw.RData")
+load(file = "./data/nfl_actualStats_career_raw.RData")
 ```
 
 The `nfl_actualStats_career` objects are in `player` form.
@@ -3113,6 +3128,10 @@ Second, we can compute the players' season-by-season statistics.
 
 TODO: Save/update data file in repo with the data generated from this code, and follow the data file through the rest of the book, updating code as necessary.
 
+::: {#nte-downloadSeasonalActualStats .callout-note title="Downloading season-by-season statistics"}
+Note: the following code takes a while to run.
+:::
+
 ```{r}
 #| eval: false
 nfl_actualStats_seasonal_player_raw <- calculate_stats(
@@ -3151,7 +3170,7 @@ save(
 ```{r}
 #| include: false
 
-load("./data/nfl_actualStats_seasonal_raw.RData")
+load(file = "./data/nfl_actualStats_seasonal_raw.RData")
 ```
 
 A Data Dictionary for the variables is available in the `nfl_stats_variables` object that is returned when running the `calculate_stats()` function:
@@ -3305,7 +3324,7 @@ save(
 ```{r}
 #| include: false
 
-load("./data/nfl_actualStats_seasonal_raw.RData")
+load(file = "./data/nfl_actualStats_seasonal_raw.RData")
 ```
 
 The `nfl_actualStats_seasonal` objects are in `player`-`season` form.
@@ -3453,13 +3472,17 @@ TODO:
 - Decide whether to use `calculate_stats()` from `nflfastR` or `load_player_stats()` from `nflreadr`.
 - Save/update data file in repo with the data generated from the relevant code, and follow the data file through the rest of the book, updating code as necessary.
 
+::: {#nte-downloadWeeklyActualStats .callout-note title="Downloading week-by-week statistics"}
+Note: the following code takes a while to run.
+:::
+
 ```{r}
 #| eval: false
-nfl_actualStats_weekly_raw <- calculate_stats(
+nfl_actualStats_weekly_player_raw <- calculate_stats(
   seasons = TRUE,
   summary_level = "week")
 
-nfl_actualStats_weekly_defense_raw <- calculate_stats(
+nfl_actualStats_weekly_team_raw <- calculate_stats(
   seasons = TRUE,
   summary_level = "week",
   stat_type = "team")
@@ -3471,6 +3494,64 @@ nfl_actualStats_weekly_defense_raw <- calculate_stats(
 # garbage collection
 rm(nfl_pbp)
 gc()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_weekly_player_raw, nfl_actualStats_weekly_team_raw,
+  file = "./data/nfl_actualStats_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_weekly_raw.RData")
+```
+
+The `nfl_actualStats_weekly` objects are in `player`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_weekly_player <- nfl_actualStats_weekly_player_raw %>% 
+  select(player_id, season, week, everything()) %>% 
+  arrange(player_display_name, player_id, season, week)
+
+nfl_actualStats_weekly_team <- nfl_actualStats_weekly_team_raw %>% 
+  select(season, week, team, everything()) %>% 
+  arrange(season, week, team)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+nfl_actualStats_weekly_player %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_weekly_team %>% 
+  group_by(team, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_weekly_player, nfl_actualStats_weekly_team,
+  file = "./data/nfl_actualStats_weekly.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_weekly.RData")
 ```
 
 ##### OLD (DELETE CODE BELOW)
@@ -3503,11 +3584,353 @@ gc()
 
 Specify scoring settings:
 
-#### Weekly {#sec-calculateActualPointsWeekly}
+#### Week-by-Week {#sec-calculateActualPointsWeekly}
 
-#### Seasonal {#sec-calculateActualPointsSeasonal}
+```{r}
+nfl_actualFantasyPoints_player_weekly_seasonalList <- list()
+nfl_actualFantasyPoints_dst_weekly_seasonalList <- list()
+```
+
+::: {#nte-calculateActualFantasyPointsWeekly .callout-note title="Calculating players' week-by-week fantasy points"}
+Note: the following code takes a while to run.
+:::
+
+```{r}
+#| eval: false
+
+#nfl_actualFantasyPoints_weekly_raw <- ffanalytics:::actual_points_scoring(
+#  season = 2023,
+#  summary_level = c("week"),
+#  stat_type = c("player", "dst", "team"), 
+#  season_type = c("REG", "POST", "REG+POST"),
+#  scoring_rules = scoring_obj,
+#  vor_baseline = NULL,
+#  rename_colums = FALSE
+#)
+
+pb <- txtProgressBar(
+  min = 0,
+  max = length(seasons),
+  style = 3)
+
+for(i in 1:length(seasons)){
+  # Compute actual statistics by season
+  nfl_actualFantasyPoints_player_weekly_seasonalList[[i]] <- 
+    ffanalytics:::actual_points_scoring(
+      season = seasons[i],
+      summary_level = c("week"),
+      stat_type = c("player"), 
+      #season_type = c("REG"),
+      scoring_rules = scoring_obj,
+      vor_baseline = NULL,
+      rename_colums = FALSE)
+  
+  nfl_actualFantasyPoints_dst_weekly_seasonalList[[i]] <- 
+    ffanalytics:::actual_points_scoring(
+      season = seasons[i],
+      summary_level = c("week"),
+      stat_type = c("dst"), 
+      #season_type = c("REG"),
+      scoring_rules = scoring_obj,
+      vor_baseline = NULL,
+      rename_colums = FALSE)
+  
+  nfl_actualFantasyPoints_player_weekly_seasonalList[[i]]$season <- seasons[i]
+  nfl_actualFantasyPoints_dst_weekly_seasonalList[[i]]$season <- seasons[i]
+  
+  print(
+    paste("Completed computing actual fantasy points for season: ", seasons[i], sep = ""))
+  
+  # Update the progress bar
+  setTxtProgressBar(pb, i)
+}
+
+# Close the progress bar
+close(pb)
+
+nfl_actualFantasyPoints_player_weekly_raw <- nfl_actualFantasyPoints_player_weekly_seasonalList %>% 
+  dplyr::bind_rows()
+
+nfl_actualFantasyPoints_dst_weekly_raw <- nfl_actualFantasyPoints_dst_weekly_seasonalList %>% 
+  dplyr::bind_rows()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualFantasyPoints_player_weekly_raw, nfl_actualFantasyPoints_dst_weekly_raw,
+  file = "./data/nfl_actualFantasyPoints_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualFantasyPoints_weekly_raw.RData")
+```
+
+The `nfl_actualFantasyPoints_weekly` objects are in `player`-`season`-`week` (or `team`-`season`-`week`) form.
+That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week` (or `team`-`season`-`week`).
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualFantasyPoints_player_weekly <- nfl_actualFantasyPoints_player_weekly_raw %>% 
+  rename(
+    fantasyPoints = raw_points,
+    team = recent_team) %>% 
+  select(player_id, season, week, everything()) %>% 
+  arrange(player_display_name, player_id, season, week)
+
+nfl_actualFantasyPoints_dst_weekly <- nfl_actualFantasyPoints_dst_weekly_raw %>% 
+  rename(
+    fantasyPoints = raw_points,
+    team = recent_team) %>% 
+  select(season, week, team, everything()) %>% 
+  arrange(season, week, team)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+nfl_actualFantasyPoints_player_weekly %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualFantasyPoints_dst_weekly %>% 
+  group_by(team, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualFantasyPoints_player_weekly, nfl_actualFantasyPoints_dst_weekly,
+  file = "./data/nfl_actualFantasyPoints_weekly.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
+```
+
+##### OLD (DELETE CODE BELOW)
+
+```{r}
+#| eval: false
+
+nfl_actualStats_offense_weekly
+nfl_actualStats_defense_weekly
+nfl_actualStats_kicking_weekly
+
+test_weekly_offense <- ffanalytics:::actual_points_scoring(
+  nflr_player_stats_df = nfl_actualStats_offense_weekly %>% filter(season == 2023),
+  nflr_pbp_data = nfl_pbp %>% filter(season == 2023),
+  scoring_rules = scoring_obj,
+  vor_baseline = NULL,
+  rename_colums = TRUE)
+
+test_weekly_defense <- ffanalytics:::actual_points_scoring(
+  nflr_player_stats_df = nfl_actualStats_defense_weekly %>% filter(season == 2023),
+  nflr_pbp_data = nfl_pbp %>% filter(season == 2023),
+  scoring_rules = scoring_obj,
+  vor_baseline = NULL,
+  rename_colums = TRUE)
+
+test_weekly_kicking <- ffanalytics:::actual_points_scoring(
+  nflr_player_stats_df = nfl_actualStats_kicking_weekly %>% filter(season == 2023),
+  nflr_pbp_data = nfl_pbp %>% filter(season == 2023),
+  scoring_rules = scoring_obj,
+  vor_baseline = NULL,
+  rename_colums = TRUE)
+```
+
+#### Season-by-Season {#sec-calculateActualPointsSeasonal}
+
+```{r}
+nfl_actualFantasyPoints_player_seasonal_seasonalList <- list()
+nfl_actualFantasyPoints_dst_seasonal_seasonalList <- list()
+```
+
+::: {#nte-calculateActualFantasyPointsSeasonal .callout-note title="Calculating players' season-by-season fantasy points"}
+Note: the following code takes a while to run.
+:::
+
+```{r}
+#| eval: false
+
+#nfl_actualFantasyPoints_seasonal_raw <- ffanalytics:::actual_points_scoring(
+#  season = 2023,
+#  summary_level = c("season"),
+#  stat_type = c("player", "dst", "team"), 
+#  season_type = c("REG"),
+#  scoring_rules = scoring_obj,
+#  vor_baseline = NULL,
+#  rename_colums = TRUE
+#)
+
+pb <- txtProgressBar(
+  min = 0,
+  max = length(seasons),
+  style = 3)
+
+for(i in 1:length(seasons)){
+  # Compute actual statistics by season
+  nfl_actualFantasyPoints_player_seasonal_seasonalList[[i]] <- 
+    ffanalytics:::actual_points_scoring(
+      season = seasons[i],
+      summary_level = c("season"),
+      stat_type = c("player"), 
+      season_type = c("REG"),
+      scoring_rules = scoring_obj,
+      vor_baseline = NULL,
+      rename_colums = FALSE)
+  
+  nfl_actualFantasyPoints_dst_seasonal_seasonalList[[i]] <- 
+    ffanalytics:::actual_points_scoring(
+      season = seasons[i],
+      summary_level = c("season"),
+      stat_type = c("dst"), 
+      season_type = c("REG"),
+      scoring_rules = scoring_obj,
+      vor_baseline = NULL,
+      rename_colums = FALSE)
+  
+  nfl_actualFantasyPoints_player_seasonal_seasonalList[[i]]$season <- seasons[i]
+  nfl_actualFantasyPoints_dst_seasonal_seasonalList[[i]]$season <- seasons[i]
+  
+  print(
+    paste("Completed computing actual fantasy points for season: ", seasons[i], sep = ""))
+  
+  # Update the progress bar
+  setTxtProgressBar(pb, i)
+}
+
+# Close the progress bar
+close(pb)
+
+nfl_actualFantasyPoints_player_seasonal_raw <- nfl_actualFantasyPoints_player_seasonal_seasonalList %>% 
+  dplyr::bind_rows()
+
+nfl_actualFantasyPoints_dst_seasonal_raw <- nfl_actualFantasyPoints_dst_seasonal_seasonalList %>% 
+  dplyr::bind_rows()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualFantasyPoints_player_seasonal_raw, nfl_actualFantasyPoints_dst_seasonal_raw,
+  file = "./data/nfl_actualFantasyPoints_seasonal_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualFantasyPoints_seasonal_raw.RData")
+```
+
+The `nfl_actualFantasyPoints_seasonal` objects are in `player`-`season` (or `team`-`season`) form.
+That is, each row should be uniquely identified by the combination of `player_id` and `season` (or `team`-`season`).
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualFantasyPoints_player_seasonal <- nfl_actualFantasyPoints_player_seasonal_raw %>% 
+  rename(fantasyPoints = raw_points) %>% 
+  select(player_id, season, everything()) %>% 
+  arrange(player_display_name, player_id, season)
+
+nfl_actualFantasyPoints_dst_seasonal <- nfl_actualFantasyPoints_dst_seasonal_raw %>% 
+  rename(
+    fantasyPoints = raw_points,
+    team = recent_team) %>% 
+  select(season, team, everything()) %>% 
+  arrange(season, team)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+nfl_actualFantasyPoints_player_seasonal %>% 
+  group_by(player_id, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualFantasyPoints_dst_seasonal %>% 
+  group_by(team, season) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualFantasyPoints_player_seasonal, nfl_actualFantasyPoints_dst_seasonal,
+  file = "./data/nfl_actualFantasyPoints_seasonal.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualFantasyPoints_seasonal.RData")
+```
 
 #### Career {#sec-calculateActualPointsCareer}
+
+```{r}
+nfl_actualFantasyPoints_player_career_raw <- nfl_actualFantasyPoints_player_seasonal %>% 
+  group_by(player_id) %>% 
+  summarise(fantasyPoints = sum(fantasyPoints, na.rm = TRUE))
+
+nfl_actualFantasyPoints_player_career_raw <- full_join(
+  nfl_actualFantasyPoints_player_career_raw,
+  nfl_players %>% select(gsis_id, display_name, first_name, last_name, position_group, position),
+  by = c("player_id" = "gsis_id")
+)
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualFantasyPoints_player_career,
+  file = "./data/nfl_actualFantasyPoints_career_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualFantasyPoints_career_raw.RData")
+```
+
+```{r}
+nfl_actualFantasyPoints_player_career <- nfl_actualFantasyPoints_player_career_raw %>% 
+  select(player_id, display_name, first_name, last_name, position_group, position, fantasyPoints)
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualFantasyPoints_player_career,
+  file = "./data/nfl_actualFantasyPoints_career.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualFantasyPoints_career.RData")
+```
 
 ### Player Age and Experience {#sec-calculatePlayerAge}
 
@@ -3515,227 +3938,93 @@ Specify scoring settings:
 
 ```{r}
 # Reshape from wide to long format
-nfl_actualStats_offense_weekly_long <- nfl_actualStats_offense_weekly %>% 
+nfl_actualFantasyPoints_player_weekly_long <- nfl_actualFantasyPoints_player_weekly %>% 
   tidyr::pivot_longer(
     cols = c(team, opponent_team),
     names_to = "role",
     values_to = "team")
 
 # Perform separate inner join operations for the home_team and away_team
-nfl_actualStats_offense_weekly_home <- dplyr::inner_join(
-  nfl_actualStats_offense_weekly_long,
+nfl_actualFantasyPoints_player_weekly_home <- dplyr::inner_join(
+  nfl_actualFantasyPoints_player_weekly_long,
   nfl_schedules,
   by = c("season","week","team" = "home_team")) %>% 
   mutate(home_away = "home_team")
 
-nfl_actualStats_offense_weekly_away <- dplyr::inner_join(
-  nfl_actualStats_offense_weekly_long,
-  nfl_schedules,
-  by = c("season","week","team" = "away_team")) %>% 
-  mutate(home_away = "away_team")
-
-nfl_actualStats_defense_weekly_home <- dplyr::inner_join(
-  nfl_actualStats_defense_weekly,
-  nfl_schedules,
-  by = c("season","week","team" = "home_team")) %>% 
-  mutate(home_away = "home_team")
-
-nfl_actualStats_defense_weekly_away <- dplyr::inner_join(
-  nfl_actualStats_defense_weekly,
-  nfl_schedules,
-  by = c("season","week","team" = "away_team")) %>% 
-  mutate(home_away = "away_team")
-
-nfl_actualStats_kicking_weekly_home <- dplyr::inner_join(
-  nfl_actualStats_kicking_weekly,
-  nfl_schedules,
-  by = c("season","week","team" = "home_team")) %>% 
-  mutate(home_away = "home_team")
-
-nfl_actualStats_kicking_weekly_away <- dplyr::inner_join(
-  nfl_actualStats_kicking_weekly,
+nfl_actualFantasyPoints_player_weekly_away <- dplyr::inner_join(
+  nfl_actualFantasyPoints_player_weekly_long,
   nfl_schedules,
   by = c("season","week","team" = "away_team")) %>% 
   mutate(home_away = "away_team")
 
 # Combine the results of the join operations
-nfl_actualStats_offense_weekly_schedules_long <- dplyr::bind_rows(
-  nfl_actualStats_offense_weekly_home,
-  nfl_actualStats_offense_weekly_away)
-
-nfl_actualStats_defense_weekly_schedules_long <- dplyr::bind_rows(
-  nfl_actualStats_defense_weekly_home,
-  nfl_actualStats_defense_weekly_away)
-
-nfl_actualStats_kicking_weekly_schedules_long <- dplyr::bind_rows(
-  nfl_actualStats_kicking_weekly_home,
-  nfl_actualStats_kicking_weekly_away)
+nfl_actualFantasyPoints_player_weekly_schedules_long <- dplyr::bind_rows(
+  nfl_actualFantasyPoints_player_weekly_home,
+  nfl_actualFantasyPoints_player_weekly_away)
 
 # Reshape from long to wide
-player_game_gameday_offense <- nfl_actualStats_offense_weekly_schedules_long %>%
-  dplyr::distinct(player_id, season, week, game_id, home_away, team, gameday) %>% #, .keep_all = TRUE
-  tidyr::pivot_wider(
-    names_from = home_away,
-    values_from = team)
-
-player_game_gameday_defense <- nfl_actualStats_defense_weekly_schedules_long %>%
-  dplyr::distinct(player_id, season, week, game_id, home_away, team, gameday) %>% #, .keep_all = TRUE
-  tidyr::pivot_wider(
-    names_from = home_away,
-    values_from = team)
-
-player_game_gameday_kicking <- nfl_actualStats_kicking_weekly_schedules_long %>%
+player_game_gameday <- nfl_actualFantasyPoints_player_weekly_schedules_long %>%
   dplyr::distinct(player_id, season, week, game_id, home_away, team, gameday) %>% #, .keep_all = TRUE
   tidyr::pivot_wider(
     names_from = home_away,
     values_from = team)
 
 # Merge player birthdate and the game date
-player_game_birthdate_gameday_offense <- dplyr::left_join(
-  player_game_gameday_offense,
+player_game_birthdate_gameday <- dplyr::left_join(
+  player_game_gameday,
   unique(nfl_players[,c("gsis_id","birth_date")]),
   by = c("player_id" = "gsis_id")
 )
 
-player_game_birthdate_gameday_defense <- dplyr::left_join(
-  player_game_gameday_defense,
-  unique(nfl_players[,c("gsis_id","birth_date")]),
-  by = c("player_id" = "gsis_id")
-)
-
-player_game_birthdate_gameday_kicking <- dplyr::left_join(
-  player_game_gameday_kicking,
-  unique(nfl_players[,c("gsis_id","birth_date")]),
-  by = c("player_id" = "gsis_id")
-)
-
-player_game_birthdate_gameday_offense$birth_date <- lubridate::ymd(player_game_birthdate_gameday_offense$birth_date)
-player_game_birthdate_gameday_offense$gameday <- lubridate::ymd(player_game_birthdate_gameday_offense$gameday)
-
-player_game_birthdate_gameday_defense$birth_date <- lubridate::ymd(player_game_birthdate_gameday_defense$birth_date)
-player_game_birthdate_gameday_defense$gameday <- lubridate::ymd(player_game_birthdate_gameday_defense$gameday)
-
-player_game_birthdate_gameday_kicking$birth_date <- lubridate::ymd(player_game_birthdate_gameday_kicking$birth_date)
-player_game_birthdate_gameday_kicking$gameday <- lubridate::ymd(player_game_birthdate_gameday_kicking$gameday)
+player_game_birthdate_gameday$birth_date <- lubridate::ymd(player_game_birthdate_gameday$birth_date)
+player_game_birthdate_gameday$gameday <- lubridate::ymd(player_game_birthdate_gameday$gameday)
 
 # Calculate player's age for a given week as the difference between their birthdate and the game date
-player_game_birthdate_gameday_offense$age <- lubridate::interval(
-  start = player_game_birthdate_gameday_offense$birth_date,
-  end = player_game_birthdate_gameday_offense$gameday
-) %>% 
-  lubridate::time_length(unit = "years")
-
-player_game_birthdate_gameday_defense$age <- lubridate::interval(
-  start = player_game_birthdate_gameday_defense$birth_date,
-  end = player_game_birthdate_gameday_defense$gameday
-) %>% 
-  lubridate::time_length(unit = "years")
-
-player_game_birthdate_gameday_kicking$age <- lubridate::interval(
-  start = player_game_birthdate_gameday_kicking$birth_date,
-  end = player_game_birthdate_gameday_kicking$gameday
+player_game_birthdate_gameday$age <- lubridate::interval(
+  start = player_game_birthdate_gameday$birth_date,
+  end = player_game_birthdate_gameday$gameday
 ) %>% 
   lubridate::time_length(unit = "years")
 
 # Merge with Pro Football Reference Data on Player Age by Season
-player_game_birthdate_gameday_offense <- player_game_birthdate_gameday_offense %>% 
-  dplyr::left_join(
-    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
-    by = c("player_id" = "gsis_id", "season")
-  )
-
-player_game_birthdate_gameday_defense <- player_game_birthdate_gameday_defense %>% 
-  dplyr::left_join(
-    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
-    by = c("player_id" = "gsis_id", "season")
-  )
-
-player_game_birthdate_gameday_kicking <- player_game_birthdate_gameday_kicking %>% 
+player_game_birthdate_gameday <- player_game_birthdate_gameday %>% 
   dplyr::left_join(
     nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
     by = c("player_id" = "gsis_id", "season")
   )
 
 # Set age as first non-missing value from calculation above or from PFR
-player_game_birthdate_gameday_offense <- player_game_birthdate_gameday_offense %>% 
-  mutate(age = coalesce(age.x, age.y)) %>% 
-  select(-age.x, -age.y)
-
-player_game_birthdate_gameday_defense <- player_game_birthdate_gameday_defense %>% 
-  mutate(age = coalesce(age.x, age.y)) %>% 
-  select(-age.x, -age.y)
-
-player_game_birthdate_gameday_kicking <- player_game_birthdate_gameday_kicking %>% 
+player_game_birthdate_gameday <- player_game_birthdate_gameday %>% 
   mutate(age = coalesce(age.x, age.y)) %>% 
   select(-age.x, -age.y)
 
 # Calculate ageCentered and ageCenteredQuadratic
-player_game_birthdate_gameday_offense$ageCentered20 <- player_game_birthdate_gameday_offense$age - 20
-player_game_birthdate_gameday_offense$ageCentered20Quadratic <- player_game_birthdate_gameday_offense$ageCentered20 ^ 2
-
-player_game_birthdate_gameday_defense$ageCentered20 <- player_game_birthdate_gameday_defense$age - 20
-player_game_birthdate_gameday_defense$ageCentered20Quadratic <- player_game_birthdate_gameday_defense$ageCentered20 ^ 2
-
-player_game_birthdate_gameday_kicking$ageCentered20 <- player_game_birthdate_gameday_kicking$age - 20
-player_game_birthdate_gameday_kicking$ageCentered20Quadratic <- player_game_birthdate_gameday_kicking$ageCentered20 ^ 2
+player_game_birthdate_gameday$ageCentered20 <- player_game_birthdate_gameday$age - 20
+player_game_birthdate_gameday$ageCentered20Quadratic <- player_game_birthdate_gameday$ageCentered20 ^ 2
 
 # Merge with player info
-player_age_offense <- dplyr::left_join(
-  player_game_birthdate_gameday_offense,
-  nfl_players %>% select(-birth_date, -team_abbr, - team_seq),
-  by = c("player_id" = "gsis_id"))
-
-player_age_defense <- dplyr::left_join(
-  player_game_birthdate_gameday_defense,
-  nfl_players %>% select(-birth_date, -team_abbr, - team_seq),
-  by = c("player_id" = "gsis_id"))
-
-player_age_kicking <- dplyr::left_join(
-  player_game_birthdate_gameday_kicking,
+player_age <- dplyr::left_join(
+  player_game_birthdate_gameday,
   nfl_players %>% select(-birth_date, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id"))
 
 # Add game_id to weekly stats to facilitate merging
-nfl_actualStats_game_offense_weekly <- nfl_actualStats_offense_weekly %>% 
+nfl_actualFantasyPoints_player_weekly <- nfl_actualFantasyPoints_player_weekly %>% 
   dplyr::left_join(
-    player_age_offense[,c("season","week","player_id","game_id")],
-    by = c("season","week","player_id"))
-
-nfl_actualStats_game_defense_weekly <- nfl_actualStats_defense_weekly %>% 
-  dplyr::left_join(
-    player_age_offense[,c("season","week","player_id","game_id")],
-    by = c("season","week","player_id"))
-
-nfl_actualStats_game_kicking_weekly <- nfl_actualStats_kicking_weekly %>% 
-  dplyr::left_join(
-    player_age_offense[,c("season","week","player_id","game_id")],
+    player_age[,c("season","week","player_id","game_id")],
     by = c("season","week","player_id"))
 
 # Merge with player weekly stats
-player_stats_weekly_offense <- dplyr::full_join(
-  player_age_offense %>% select(-position, -position_group),
-  nfl_actualStats_game_offense_weekly,
+player_stats_weekly <- dplyr::full_join(
+  player_age %>% select(-position, -position_group),
+  nfl_actualFantasyPoints_player_weekly,
   by = c("season","week","player_id","game_id"))
 
-player_stats_weekly_defense <- dplyr::full_join(
-  player_age_defense %>% select(-position, -position_group),
-  nfl_actualStats_game_defense_weekly,
-  by = c("season","week","player_id","game_id"))
+player_stats_weekly$total_years_of_experience <- as.integer(player_stats_weekly$years_of_experience)
 
-player_stats_weekly_kicking <- dplyr::full_join(
-  player_age_kicking %>% select(-position, -position_group),
-  nfl_actualStats_game_kicking_weekly,
-  by = c("season","week","player_id","game_id"))
+player_stats_weekly$years_of_experience <- NULL
 
-player_stats_weekly_offense$total_years_of_experience <- as.integer(player_stats_weekly_offense$years_of_experience)
-player_stats_weekly_defense$total_years_of_experience <- as.integer(player_stats_weekly_defense$years_of_experience)
-player_stats_weekly_kicking$total_years_of_experience <- as.integer(player_stats_weekly_kicking$years_of_experience)
-
-player_stats_weekly_offense$years_of_experience <- NULL
-player_stats_weekly_defense$years_of_experience <- NULL
-player_stats_weekly_kicking$years_of_experience <- NULL
-
-distinct_seasons_offense <- player_stats_weekly_offense %>%
+distinct_seasons <- player_stats_weekly %>%
   dplyr::select(player_id, season) %>%
   dplyr::distinct() %>% 
   dplyr::left_join(
@@ -3745,63 +4034,17 @@ distinct_seasons_offense <- player_stats_weekly_offense %>%
   dplyr::mutate(total_years_of_experience = as.integer(years_of_experience)) %>% 
   dplyr::select(-years_of_experience)
 
-distinct_seasons_defense <- player_stats_weekly_defense %>%
-  dplyr::select(player_id, season) %>%
-  dplyr::distinct() %>% 
-  dplyr::left_join(
-    nfl_players[,c("gsis_id","years_of_experience")],
-    by = c("player_id" = "gsis_id")
-  ) %>% 
-  dplyr::mutate(total_years_of_experience = as.integer(years_of_experience)) %>% 
-  dplyr::select(-years_of_experience)
-
-distinct_seasons_kicking <- player_stats_weekly_kicking %>%
-  dplyr::select(player_id, season) %>%
-  dplyr::distinct() %>% 
-  dplyr::left_join(
-    nfl_players[,c("gsis_id","years_of_experience")],
-    by = c("player_id" = "gsis_id")
-  ) %>% 
-  dplyr::mutate(total_years_of_experience = as.integer(years_of_experience)) %>% 
-  dplyr::select(-years_of_experience)
-
-years_of_experience_offense <- distinct_seasons_offense %>% 
+years_of_experience <- distinct_seasons %>% 
   dplyr::arrange(player_id, -season) %>% 
   dplyr::group_by(player_id) %>%
   dplyr::mutate(years_of_experience = first(total_years_of_experience) - (row_number() - 1)) %>%
   dplyr::ungroup()
 
-years_of_experience_defense <- distinct_seasons_defense %>% 
-  dplyr::arrange(player_id, -season) %>% 
-  dplyr::group_by(player_id) %>%
-  dplyr::mutate(years_of_experience = first(total_years_of_experience) - (row_number() - 1)) %>%
-  dplyr::ungroup()
+years_of_experience$years_of_experience[which(years_of_experience$years_of_experience < 0)] <- 0
 
-years_of_experience_kicking <- distinct_seasons_kicking %>% 
-  dplyr::arrange(player_id, -season) %>% 
-  dplyr::group_by(player_id) %>%
-  dplyr::mutate(years_of_experience = first(total_years_of_experience) - (row_number() - 1)) %>%
-  dplyr::ungroup()
-
-years_of_experience_offense$years_of_experience[which(years_of_experience_offense$years_of_experience < 0)] <- 0
-years_of_experience_defense$years_of_experience[which(years_of_experience_defense$years_of_experience < 0)] <- 0
-years_of_experience_kicking$years_of_experience[which(years_of_experience_kicking$years_of_experience < 0)] <- 0
-
-player_stats_weekly_offense <- player_stats_weekly_offense %>% 
+player_stats_weekly <- player_stats_weekly %>% 
   dplyr::left_join(
-    years_of_experience_offense[,c("player_id","season","years_of_experience")],
-    by = c("player_id","season")
-  )
-
-player_stats_weekly_defense <- player_stats_weekly_defense %>% 
-  dplyr::left_join(
-    years_of_experience_offense[,c("player_id","season","years_of_experience")],
-    by = c("player_id","season")
-  )
-
-player_stats_weekly_kicking <- player_stats_weekly_kicking %>% 
-  dplyr::left_join(
-    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    years_of_experience[,c("player_id","season","years_of_experience")],
     by = c("player_id","season")
   )
 ```
@@ -3811,39 +4054,23 @@ That is, each row should be uniquely identified by the combination of `player_id
 Let's rearrange the data accordingly:
 
 ```{r}
-player_stats_weekly_offense <- player_stats_weekly_offense %>% 
-  arrange(player_display_name, player_id, season, week)
-
-player_stats_weekly_defense <- player_stats_weekly_defense %>% 
-  arrange(player_display_name, player_id, season, week)
-
-player_stats_weekly_kicking <- player_stats_weekly_kicking %>% 
+player_stats_weekly <- player_stats_weekly %>% 
   arrange(player_display_name, player_id, season, week)
 ```
 
 Let's check for duplicate `player`-`season`-`week` instances:
 
 ```{r}
-player_stats_weekly_offense %>% 
+player_stats_weekly %>% 
   group_by(player_id, season, week) %>% 
   filter(n() > 1) %>% 
   head()
-
-player_stats_weekly_defense %>% 
-  group_by(player_id, season, week) %>% 
-  filter(n() > 1) %>% 
-  head() #todo: fix duplicate instances
-
-player_stats_weekly_kicking %>% 
-  group_by(player_id, season, week) %>% 
-  filter(n() > 1) %>% 
-  head() #todo: fix duplicate instances
 ```
 
 ```{r}
 # Save data
 save(
-  player_stats_weekly_offense, player_stats_weekly_defense, player_stats_weekly_kicking,
+  player_stats_weekly,
   file = "./data/player_stats_weekly.RData"
 )
 ```
@@ -3852,20 +4079,8 @@ save(
 
 ```{r}
 # Merge player info with seasonal stats
-player_stats_seasonal_offense <- dplyr::full_join(
-  nfl_actualStats_offense_seasonal,
-  nfl_players %>% select(-position, -position_group, -team_abbr, - team_seq),
-  by = c("player_id" = "gsis_id")
-)
-
-player_stats_seasonal_defense <- dplyr::full_join(
-  nfl_actualStats_defense_seasonal,
-  nfl_players %>% select(-position, -position_group, -team_abbr, - team_seq),
-  by = c("player_id" = "gsis_id")
-)
-
-player_stats_seasonal_kicking <- dplyr::full_join(
-  nfl_actualStats_kicking_seasonal,
+player_stats_seasonal <- dplyr::full_join(
+  nfl_actualFantasyPoints_player_seasonal,
   nfl_players %>% select(-position, -position_group, -team_abbr, - team_seq),
   by = c("player_id" = "gsis_id")
 )
@@ -3875,104 +4090,40 @@ season_startdate <- nfl_schedules %>%
   dplyr::group_by(season) %>% 
   dplyr::summarise(startdate = min(gameday, na.rm = TRUE))
 
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+player_stats_seasonal <- player_stats_seasonal %>% 
   dplyr::left_join(
     season_startdate,
     by = "season"
   )
 
-player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
-  dplyr::left_join(
-    season_startdate,
-    by = "season"
-  )
-
-player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
-  dplyr::left_join(
-    season_startdate,
-    by = "season"
-  )
-
-player_stats_seasonal_offense$age <- lubridate::interval(
-  start = player_stats_seasonal_offense$birth_date,
-  end = player_stats_seasonal_offense$startdate
-) %>% 
-  lubridate::time_length(unit = "years")
-
-player_stats_seasonal_defense$age <- lubridate::interval(
-  start = player_stats_seasonal_defense$birth_date,
-  end = player_stats_seasonal_defense$startdate
-) %>% 
-  lubridate::time_length(unit = "years")
-
-player_stats_seasonal_kicking$age <- lubridate::interval(
-  start = player_stats_seasonal_kicking$birth_date,
-  end = player_stats_seasonal_kicking$startdate
+player_stats_seasonal$age <- lubridate::interval(
+  start = player_stats_seasonal$birth_date,
+  end = player_stats_seasonal$startdate
 ) %>% 
   lubridate::time_length(unit = "years")
 
 # Merge with Pro Football Reference Data on Player Age by Season
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
-  dplyr::left_join(
-    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
-    by = c("player_id" = "gsis_id", "season")
-  )
-
-player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
-  dplyr::left_join(
-    nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
-    by = c("player_id" = "gsis_id", "season")
-  )
-
-player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
+player_stats_seasonal <- player_stats_seasonal %>% 
   dplyr::left_join(
     nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season), !is.na(age)) %>% select(gsis_id, season, age) %>% unique(),
     by = c("player_id" = "gsis_id", "season")
   )
 
 # Set age as first non-missing value from calculation above or from PFR
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
-  mutate(age = coalesce(age.x, age.y)) %>% 
-  select(-age.x, -age.y)
-
-player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
-  mutate(age = coalesce(age.x, age.y)) %>% 
-  select(-age.x, -age.y)
-
-player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
+player_stats_seasonal <- player_stats_seasonal %>% 
   mutate(age = coalesce(age.x, age.y)) %>% 
   select(-age.x, -age.y)
 
 # Calculate ageCentered and ageCenteredQuadratic
-player_stats_seasonal_offense$ageCentered20 <- player_stats_seasonal_offense$age - 20
-player_stats_seasonal_offense$ageCentered20Quadratic <- player_stats_seasonal_offense$ageCentered20 ^ 2
-
-player_stats_seasonal_defense$ageCentered20 <- player_stats_seasonal_defense$age - 20
-player_stats_seasonal_defense$ageCentered20Quadratic <- player_stats_seasonal_defense$ageCentered20 ^ 2
-
-player_stats_seasonal_kicking$ageCentered20 <- player_stats_seasonal_kicking$age - 20
-player_stats_seasonal_kicking$ageCentered20Quadratic <- player_stats_seasonal_kicking$ageCentered20 ^ 2
+player_stats_seasonal$ageCentered20 <- player_stats_seasonal$age - 20
+player_stats_seasonal$ageCentered20Quadratic <- player_stats_seasonal$ageCentered20 ^ 2
 
 # Years of experience
-player_stats_seasonal_offense$years_of_experience <- NULL
-player_stats_seasonal_defense$years_of_experience <- NULL
-player_stats_seasonal_kicking$years_of_experience <- NULL
+player_stats_seasonal$years_of_experience <- NULL
 
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+player_stats_seasonal <- player_stats_seasonal %>% 
   dplyr::left_join(
-    years_of_experience_offense[,c("player_id","season","years_of_experience")],
-    by = c("player_id","season")
-  )
-
-player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
-  dplyr::left_join(
-    years_of_experience_offense[,c("player_id","season","years_of_experience")],
-    by = c("player_id","season")
-  )
-
-player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
-  dplyr::left_join(
-    years_of_experience_offense[,c("player_id","season","years_of_experience")],
+    years_of_experience[,c("player_id","season","years_of_experience")],
     by = c("player_id","season")
   )
 ```
@@ -3982,15 +4133,7 @@ That is, each row should be uniquely identified by the combination of `player_id
 Let's rearrange the data accordingly:
 
 ```{r}
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
-  select(player_id, season, everything()) %>% 
-  arrange(player_display_name, player_id, season)
-
-player_stats_seasonal_defense <- player_stats_seasonal_defense %>% 
-  select(player_id, season, everything()) %>% 
-  arrange(player_display_name, player_id, season)
-
-player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>% 
+player_stats_seasonal <- player_stats_seasonal %>% 
   select(player_id, season, everything()) %>% 
   arrange(player_display_name, player_id, season)
 ```
@@ -3998,17 +4141,7 @@ player_stats_seasonal_kicking <- player_stats_seasonal_kicking %>%
 Let's check for duplicate `player`-`season` instances:
 
 ```{r}
-player_stats_seasonal_offense %>% 
-  group_by(player_id, season) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-player_stats_seasonal_defense %>% 
-  group_by(player_id, season) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-player_stats_seasonal_kicking %>% 
+player_stats_seasonal %>% 
   group_by(player_id, season) %>% 
   filter(n() > 1) %>% 
   head()
@@ -4017,7 +4150,7 @@ player_stats_seasonal_kicking %>%
 ```{r}
 # Save data
 save(
-  player_stats_seasonal_offense, player_stats_seasonal_defense, player_stats_seasonal_kicking,
+  player_stats_seasonal,
   file = "./data/player_stats_seasonal.RData"
 )
 ```

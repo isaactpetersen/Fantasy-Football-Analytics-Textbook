@@ -117,18 +117,10 @@ Mixed models are a useful approach to account for data with a nested structure s
 ## Fantasy Points Per Season by Position, Age, and Experience {#sec-fantasyPointsByAgeExperience}
 
 ```{r}
-player_stats_seasonal_offense_subset <- player_stats_seasonal_offense %>% 
-  filter(position_group %in% c("QB","RB","WR","TE"))
+player_stats_seasonal_offense_subset <- player_stats_seasonal %>% 
+  dplyr::filter(position_group %in% c("QB","RB","WR","TE") | position %in% c("K"))
 
 player_stats_seasonal_offense_subset$position[which(player_stats_seasonal_offense_subset$position == "HB")] <- "RB"
-
-player_stats_seasonal_kicking_subset <- player_stats_seasonal_kicking %>% 
-  filter(position == "K")
-
-player_stats_seasonal_offense_subset <- bind_rows(
-  player_stats_seasonal_offense_subset,
-  player_stats_seasonal_kicking_subset
-)
 
 player_stats_seasonal_offense_subset$player_idFactor <- factor(player_stats_seasonal_offense_subset$player_id)
 player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seasonal_offense_subset$position)
@@ -207,7 +199,7 @@ Create an object with complete cases for generating the plots of individuals' mo
 player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
   filter(
     !is.na(player_idFactor),
-    !is.na(fantasy_points),
+    !is.na(fantasyPoints),
     !is.na(positionFactor),
     !is.na(ageCentered20),
     !is.na(ageCentered20Quadratic),
@@ -234,11 +226,11 @@ plot_scatterplotFantasyPointsByAgeQB <- ggplot(
     filter(position == "QB") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_point(
     aes(
@@ -248,7 +240,7 @@ plot_scatterplotFantasyPointsByAgeQB <- ggplot(
   geom_smooth(
     mapping = aes(
     x = age,
-    y = fantasy_points),
+    y = fantasyPoints),
     inherit.aes = FALSE
   ) +
   scale_color_viridis(discrete = TRUE) +
@@ -262,14 +254,14 @@ plot_scatterplotFantasyPointsByAgeQB <- ggplot(
 
 ggplotly(
   plot_scatterplotFantasyPointsByAgeQB,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 Based on the [scatterplot](#sec-scatterplot) (and the bivariate association below), Quarterbacks' fantasy points appear to increase with age.
 
 ```{r}
 cor.test(
-  formula = ~ age + fantasy_points,
+  formula = ~ age + fantasyPoints,
   data = player_stats_seasonal_offense_subset %>% filter(position == "QB")
 )
 ```
@@ -289,11 +281,11 @@ plot_scatterplotFantasyPointsByAgeFB <- ggplot(
     filter(position == "FB") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_point(
     aes(
@@ -303,7 +295,7 @@ plot_scatterplotFantasyPointsByAgeFB <- ggplot(
   geom_smooth(
     mapping = aes(
     x = age,
-    y = fantasy_points),
+    y = fantasyPoints),
     inherit.aes = FALSE
   ) +
   scale_color_viridis(discrete = TRUE) +
@@ -317,7 +309,7 @@ plot_scatterplotFantasyPointsByAgeFB <- ggplot(
 
 ggplotly(
   plot_scatterplotFantasyPointsByAgeFB,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 Based on the [scatterplot](#sec-scatterplot), Fullbacks' fantasy points appear to be relatively stable across ages.
@@ -337,11 +329,11 @@ plot_scatterplotFantasyPointsByAgeRB <- ggplot(
     filter(position == "RB") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_point(
     aes(
@@ -351,7 +343,7 @@ plot_scatterplotFantasyPointsByAgeRB <- ggplot(
   geom_smooth(
     mapping = aes(
     x = age,
-    y = fantasy_points),
+    y = fantasyPoints),
     inherit.aes = FALSE
   ) +
   scale_color_viridis(discrete = TRUE) +
@@ -365,7 +357,7 @@ plot_scatterplotFantasyPointsByAgeRB <- ggplot(
 
 ggplotly(
   plot_scatterplotFantasyPointsByAgeRB,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 Based on the [scatterplot](#sec-scatterplot), Running Backs' fantasy points appear to be relatively stable across ages.
@@ -385,11 +377,11 @@ plot_scatterplotFantasyPointsByAgeWR <- ggplot(
     filter(position == "WR") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_point(
     aes(
@@ -399,7 +391,7 @@ plot_scatterplotFantasyPointsByAgeWR <- ggplot(
   geom_smooth(
     mapping = aes(
     x = age,
-    y = fantasy_points),
+    y = fantasyPoints),
     inherit.aes = FALSE
   ) +
   scale_color_viridis(discrete = TRUE) +
@@ -413,7 +405,7 @@ plot_scatterplotFantasyPointsByAgeWR <- ggplot(
 
 ggplotly(
   plot_scatterplotFantasyPointsByAgeWR,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 Based on the [scatterplot](#sec-scatterplot), Wide Receivers' fantasy points appear to be relatively stable across ages.
@@ -433,11 +425,11 @@ plot_scatterplotFantasyPointsByAgeTE <- ggplot(
     filter(position == "TE") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_point(
     aes(
@@ -447,7 +439,7 @@ plot_scatterplotFantasyPointsByAgeTE <- ggplot(
   geom_smooth(
     mapping = aes(
     x = age,
-    y = fantasy_points),
+    y = fantasyPoints),
     inherit.aes = FALSE
   ) +
   scale_color_viridis(discrete = TRUE) +
@@ -461,14 +453,14 @@ plot_scatterplotFantasyPointsByAgeTE <- ggplot(
 
 ggplotly(
   plot_scatterplotFantasyPointsByAgeTE,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 Based on the [scatterplot](#sec-scatterplot) (and the bivariate association below), Tight Ends' fantasy points appear to increase with age.
 
 ```{r}
 cor.test(
-  formula = ~ age + fantasy_points,
+  formula = ~ age + fantasyPoints,
   data = player_stats_seasonal_offense_subset %>% filter(position == "TE")
 )
 ```
@@ -502,11 +494,11 @@ plot_rawFantasyPointsByAgeQB <- ggplot(
     filter(position == "QB") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_line(
     aes(
@@ -524,7 +516,7 @@ plot_rawFantasyPointsByAgeQB <- ggplot(
 
 ggplotly(
   plot_rawFantasyPointsByAgeQB,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 #### Fullbacks {#sec-fantasyPointsByAgeExperienceRawDataFB}
@@ -542,11 +534,11 @@ plot_rawFantasyPointsByAgeFB <- ggplot(
     filter(position == "FB") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_line(
     aes(
@@ -564,7 +556,7 @@ plot_rawFantasyPointsByAgeFB <- ggplot(
 
 ggplotly(
   plot_rawFantasyPointsByAgeFB,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 #### Running Backs {#sec-fantasyPointsByAgeExperienceRawDataRB}
@@ -582,11 +574,11 @@ plot_rawFantasyPointsByAgeRB <- ggplot(
     filter(position == "RB") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_line(
     aes(
@@ -604,7 +596,7 @@ plot_rawFantasyPointsByAgeRB <- ggplot(
 
 ggplotly(
   plot_rawFantasyPointsByAgeRB,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 #### Wide Receivers {#sec-fantasyPointsByAgeExperienceRawDataWR}
@@ -622,11 +614,11 @@ plot_rawFantasyPointsByAgeWR <- ggplot(
     filter(position == "WR") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_line(
     aes(
@@ -644,7 +636,7 @@ plot_rawFantasyPointsByAgeWR <- ggplot(
 
 ggplotly(
   plot_rawFantasyPointsByAgeWR,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 #### Tight Ends {#sec-fantasyPointsByAgeExperienceRawDataTE}
@@ -662,11 +654,11 @@ plot_rawFantasyPointsByAgeTE <- ggplot(
     filter(position == "TE") %>% 
     mutate(
       age = round(age, 2),
-      fantasy_points = round(fantasy_points, 2)
+      fantasyPoints = round(fantasyPoints, 2)
     ),
   mapping = aes(
     x = age,
-    y = fantasy_points,
+    y = fantasyPoints,
     color = player_id)) +
   geom_line(
     aes(
@@ -684,7 +676,7 @@ plot_rawFantasyPointsByAgeTE <- ggplot(
 
 ggplotly(
   plot_rawFantasyPointsByAgeTE,
-  tooltip = c("age","fantasy_points","text","label"))
+  tooltip = c("age","fantasyPoints","text","label"))
 ```
 
 ### Linear Regression Models {#sec-fantasyPointsByAgeExperienceModelsRegression}
@@ -693,7 +685,7 @@ ggplotly(
 
 ```{r}
 pointsPerSeason_nullModel <- lm(
-  fantasy_points ~ 1,
+  fantasyPoints ~ 1,
   data = player_stats_seasonal_offense_subset,
   na.action = "na.exclude"
 )
@@ -738,7 +730,7 @@ ggplot2::ggplot(
 
 ```{r}
 pointsPerSeason_linearRegression <- lm(
-  fantasy_points ~ positionFactor + ageCentered20 + positionFactor:ageCentered20,
+  fantasyPoints ~ positionFactor + ageCentered20 + positionFactor:ageCentered20,
   data = player_stats_seasonal_offense_subset,
   na.action = "na.exclude"
 )
@@ -785,7 +777,7 @@ ggplot2::ggplot(
 
 ```{r}
 pointsPerSeason_quadraticRegression <- lm(
-  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic,
+  fantasyPoints ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic,
   data = player_stats_seasonal_offense_subset,
   na.action = "na.exclude"
 )
@@ -877,7 +869,7 @@ By accounting for which player each observation comes from using mixed models, w
 
 ```{r}
 pointsPerSeason_randomIntercepts <- lmerTest::lmer(
-  fantasy_points ~ 1 + (1 | player_idFactor),
+  fantasyPoints ~ 1 + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -961,7 +953,7 @@ plot_individualFantasyPointsRandomIntercepts <- ggplot(
     data = pointsPerSeason_positionAge_newData %>% 
       mutate(
         age = round(age, 2),
-        fantasy_points = round(fantasyPoints_randomIntercepts, 2)
+        fantasyPoints = round(fantasyPoints_randomIntercepts, 2)
         ),
     inherit.aes = FALSE,
     se = TRUE,
@@ -986,7 +978,7 @@ ggplotly(
 
 ```{r}
 pointsPerSeason_position <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + (1 | player_idFactor),
+  fantasyPoints ~ positionFactor + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -1101,7 +1093,7 @@ ggplotly(
 
 ```{r}
 pointsPerSeason_positionAgeFixedLinearSlopes <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + ageCentered20 + (1 | player_idFactor),
+  fantasyPoints ~ positionFactor + ageCentered20 + (1 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -1209,7 +1201,7 @@ ggplotly(
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearSlopes <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + ageCentered20 + (1 + ageCentered20 | player_idFactor),
+  fantasyPoints ~ positionFactor + ageCentered20 + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -1323,7 +1315,7 @@ ggplotly(
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
+  fantasyPoints ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -1436,7 +1428,7 @@ ggplotly(
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearRandomQuadraticSlopes <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 + ageCentered20Quadratic | player_idFactor),
+  fantasyPoints ~ positionFactor + ageCentered20 + ageCentered20Quadratic + (1 + ageCentered20 + ageCentered20Quadratic | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -1447,7 +1439,7 @@ pointsPerSeason_positionAgeRandomLinearRandomQuadraticSlopes <- lmerTest::lmer(
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
+  fantasyPoints ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -1559,7 +1551,7 @@ ggplotly(
 
 ```{r}
 pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
+  fantasyPoints ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   REML = FALSE,
   control = lmerControl(optimizer = "bobyqa")
@@ -1763,7 +1755,7 @@ num_cores <- detectCores()
 num_cores
 
 pointsPerSeason_gam <- bam( # using bam() instead of gam() for faster estimation due to large size of data
-  fantasy_points ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
+  fantasyPoints ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
   data = player_stats_seasonal_offense_subset,
   nthreads = num_cores
 )
@@ -1864,7 +1856,7 @@ logLik(pointsPerSeason_gam)
 
 ```{r}
 pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
-  fantasy_points ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
+  fantasyPoints ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
   control = lmerControl(optimizer = "bobyqa")
 )
@@ -1879,7 +1871,7 @@ performance::icc(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlope
 AIC(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 
 pointsPerSeasonDepth_gam <- bam( # using bam() instead of gam() for faster estimation due to large size of data
-  fantasy_points ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
+  fantasyPoints ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
   data = player_stats_seasonal_offense_subsetDepth,
   nthreads = num_cores
 )
@@ -1897,11 +1889,11 @@ AIC(pointsPerSeasonDepth_gam)
 #### Determine Response Distribution {#sec-fantasyPointsByAgeExperienceModelsBayesianDistribution}
 
 ```{r}
-player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros <- player_stats_seasonal_offense_subset$fantasyPointsPos <- player_stats_seasonal_offense_subset$fantasy_points
-player_stats_seasonal_offense_subset$fantasyPointsPos[player_stats_seasonal_offense_subset$fantasy_points < 0] <- 0
-player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros[player_stats_seasonal_offense_subset$fantasy_points <= 0] <- 0.01
+player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros <- player_stats_seasonal_offense_subset$fantasyPointsPos <- player_stats_seasonal_offense_subset$fantasyPoints
+player_stats_seasonal_offense_subset$fantasyPointsPos[player_stats_seasonal_offense_subset$fantasyPoints < 0] <- 0
+player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros[player_stats_seasonal_offense_subset$fantasyPoints <= 0] <- 0.01
 
-fantasyPointsVector <- player_stats_seasonal_offense_subset$fantasy_points %>% 
+fantasyPointsVector <- player_stats_seasonal_offense_subset$fantasyPoints %>% 
     na.omit() %>% 
     as.vector()
 
@@ -1918,7 +1910,7 @@ fantasyPointsVectorPosNoZeros[fantasyPointsVector <= 0] <- 0.01
 ggplot2::ggplot(
   data = player_stats_seasonal_offense_subset,
   mapping = aes(
-    x = fantasy_points)
+    x = fantasyPoints)
 ) +
   geom_histogram(
     aes(y = after_stat(density)),
@@ -2004,7 +1996,7 @@ plot(fit.weibull)
 
 ```{r}
 model_normal <- glm(
-  formula = fantasy_points ~ 1,
+  formula = fantasyPoints ~ 1,
   family = gaussian(),
   data = player_stats_seasonal_offense_subset,
   maxit = 100000)
@@ -2027,8 +2019,8 @@ Because the response distribution (i.e., fantasy points) is positively skewed, w
 #### Prepare Data {#sec-fantasyPointsByAgeExperienceModelsBayesianPrepareData}
 
 ```{r}
-player_stats_seasonal_offense_subset$fantasy_points_posOnly <- player_stats_seasonal_offense_subset$fantasy_points
-player_stats_seasonal_offense_subset$fantasy_points_posOnly[which(player_stats_seasonal_offense_subset$fantasy_points_posOnly < 0)] <- 0
+player_stats_seasonal_offense_subset$fantasyPoints_posOnly <- player_stats_seasonal_offense_subset$fantasyPoints
+player_stats_seasonal_offense_subset$fantasyPoints_posOnly[which(player_stats_seasonal_offense_subset$fantasyPoints_posOnly < 0)] <- 0
 ```
 
 #### Specify Model Formula {#sec-fantasyPointsByAgeExperienceModelsBayesianFormula}
@@ -2041,7 +2033,7 @@ Specify model formula:
 #| eval: false
 
 bayesianMixedModelFormula <- brms::bf(
-  fantasy_points_posOnly ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(ageCentered20, player_idFactor, bs = "re") + (1 | player_idFactor)
+  fantasyPoints_posOnly ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(ageCentered20, player_idFactor, bs = "re") + (1 | player_idFactor)
 )
 ```
 

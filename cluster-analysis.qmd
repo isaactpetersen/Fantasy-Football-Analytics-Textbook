@@ -57,11 +57,12 @@ The various types of `mclust` models are provided here:
 #### Prepare Data {#sec-clusterAnalysisExamplePrepareData}
 
 ```{r}
-recentSeason <- max(player_stats_seasonal_offense$season, na.rm = TRUE) # also works: nflreadr::most_recent_season()
+recentSeason <- max(player_stats_seasonal$season, na.rm = TRUE) # also works: nflreadr::most_recent_season()
 recentSeason
 
-player_stats_seasonal_offense_recent <- player_stats_seasonal_offense %>% 
-  filter(season == recentSeason)
+player_stats_seasonal_offense_recent <- player_stats_seasonal %>% 
+  filter(season == recentSeason) %>% 
+  filter(position_group %in% c("QB","RB","WR","TE"))
 
 player_stats_seasonal_offense_recentQB <- player_stats_seasonal_offense_recent %>% 
   filter(position_group == "QB")
@@ -82,7 +83,7 @@ player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recent %
 
 ```{r}
 tiersQB_bic <- mclust::mclustBIC(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
   G = 1:9
 )
 
@@ -91,7 +92,7 @@ summary(tiersQB_bic)
 plot(tiersQB_bic)
 
 tiersQB_icl <- mclust::mclustICL(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
   G = 1:9
 )
 
@@ -100,7 +101,7 @@ summary(tiersQB_icl)
 plot(tiersQB_icl)
 
 tiersQB_boostrap <- mclust::mclustBootstrapLRT(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
   modelName = "V") # variable/unequal variance (for univariate data)
 
 numTiersQB <- as.numeric(summary(tiersQB_boostrap)[,"Length"][1]) # or could specify the number of teams manually
@@ -115,7 +116,7 @@ plot(
 
 ```{r}
 tiersRB_bic <- mclust::mclustBIC(
-  data = player_stats_seasonal_offense_recentRB$fantasy_points,
+  data = player_stats_seasonal_offense_recentRB$fantasyPoints,
   G = 1:9
 )
 
@@ -124,7 +125,7 @@ summary(tiersRB_bic)
 plot(tiersRB_bic)
 
 tiersRB_icl <- mclust::mclustICL(
-  data = player_stats_seasonal_offense_recentRB$fantasy_points,
+  data = player_stats_seasonal_offense_recentRB$fantasyPoints,
   G = 1:9
 )
 
@@ -139,7 +140,7 @@ The model-based bootstrap clustering of Running Backs' fantasy points is unable 
 
 ```{r}
 tiersRB_boostrap <- mclust::mclustBootstrapLRT(
-  data = player_stats_seasonal_offense_recentRB$fantasy_points,
+  data = player_stats_seasonal_offense_recentRB$fantasyPoints,
   modelName = "V") # variable/unequal variance (for univariate data)
 ```
 
@@ -160,7 +161,7 @@ plot(
 
 ```{r}
 tiersWR_bic <- mclust::mclustBIC(
-  data = player_stats_seasonal_offense_recentWR$fantasy_points,
+  data = player_stats_seasonal_offense_recentWR$fantasyPoints,
   G = 1:9
 )
 
@@ -169,7 +170,7 @@ summary(tiersWR_bic)
 plot(tiersWR_bic)
 
 tiersWR_icl <- mclust::mclustICL(
-  data = player_stats_seasonal_offense_recentWR$fantasy_points,
+  data = player_stats_seasonal_offense_recentWR$fantasyPoints,
   G = 1:9
 )
 
@@ -178,7 +179,7 @@ summary(tiersWR_icl)
 plot(tiersWR_icl)
 
 tiersWR_boostrap <- mclust::mclustBootstrapLRT(
-  data = player_stats_seasonal_offense_recentWR$fantasy_points,
+  data = player_stats_seasonal_offense_recentWR$fantasyPoints,
   modelName = "V") # variable/unequal variance (for univariate data)
 
 numTiersWR <- as.numeric(summary(tiersWR_boostrap)[,"Length"][1]) # or could specify the number of teams manually
@@ -193,7 +194,7 @@ plot(
 
 ```{r}
 tiersTE_bic <- mclust::mclustBIC(
-  data = player_stats_seasonal_offense_recentTE$fantasy_points,
+  data = player_stats_seasonal_offense_recentTE$fantasyPoints,
   G = 1:9
 )
 
@@ -202,7 +203,7 @@ summary(tiersTE_bic)
 plot(tiersTE_bic)
 
 tiersTE_icl <- mclust::mclustICL(
-  data = player_stats_seasonal_offense_recentTE$fantasy_points,
+  data = player_stats_seasonal_offense_recentTE$fantasyPoints,
   G = 1:9
 )
 
@@ -211,7 +212,7 @@ summary(tiersTE_icl)
 plot(tiersTE_icl)
 
 tiersTE_boostrap <- mclust::mclustBootstrapLRT(
-  data = player_stats_seasonal_offense_recentTE$fantasy_points,
+  data = player_stats_seasonal_offense_recentTE$fantasyPoints,
   modelName = "V") # variable/unequal variance (for univariate data)
 
 numTiersTE <- as.numeric(summary(tiersTE_boostrap)[,"Length"][1]) # or could specify the number of teams manually
@@ -232,21 +233,21 @@ In our data, all of the following models are equivalent—i.e., they result in t
 #| eval: false
 
 mclust::Mclust(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
   G = numTiersQB,
 )
 
 mclust::Mclust(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
   G = 4,
 )
 
 mclust::Mclust(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
 )
 
 mclust::Mclust(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
   x = tiersQB_bic
 )
 ```
@@ -255,7 +256,7 @@ Let's fit one of these:
 
 ```{r}
 clusterModelQBs <- mclust::Mclust(
-  data = player_stats_seasonal_offense_recentQB$fantasy_points,
+  data = player_stats_seasonal_offense_recentQB$fantasyPoints,
   G = numTiersQB,
 )
 ```
@@ -270,7 +271,7 @@ table(clusterModelQBs$classification)
 
 ```{r}
 clusterModelRBs <- mclust::Mclust(
-  data = player_stats_seasonal_offense_recentRB$fantasy_points,
+  data = player_stats_seasonal_offense_recentRB$fantasyPoints,
   G = numTiersRB,
 )
 ```
@@ -285,7 +286,7 @@ table(clusterModelRBs$classification)
 
 ```{r}
 clusterModelWRs <- mclust::Mclust(
-  data = player_stats_seasonal_offense_recentWR$fantasy_points,
+  data = player_stats_seasonal_offense_recentWR$fantasyPoints,
   G = numTiersWR,
 )
 ```
@@ -300,7 +301,7 @@ table(clusterModelWRs$classification)
 
 ```{r}
 clusterModelTEs <- mclust::Mclust(
-  data = player_stats_seasonal_offense_recentTE$fantasy_points,
+  data = player_stats_seasonal_offense_recentTE$fantasyPoints,
   G = numTiersTE,
 )
 ```
@@ -326,22 +327,18 @@ player_stats_seasonal_offense_recentQB$tier <- clusterModelQBs$classification
 
 player_stats_seasonal_offense_recentQB <- player_stats_seasonal_offense_recentQB %>%
   mutate(
-    tier = factor(case_match( # recode so 1 is highest tier
-      tier,
-      1 ~ 4,
-      2 ~ 3,
-      3 ~ 2,
-      4 ~ 1)))
+    tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
+  )
 
 player_stats_seasonal_offense_recentQB$position_rank <- rank(
-  player_stats_seasonal_offense_recentQB$fantasy_points * -1,
+  player_stats_seasonal_offense_recentQB$fantasyPoints * -1,
   na.last = "keep",
   ties.method = "min")
 
 plot_qbTiers <- ggplot2::ggplot(
   data = player_stats_seasonal_offense_recentQB,
   mapping = aes(
-    x = fantasy_points,
+    x = fantasyPoints,
     y = position_rank,
     color = tier
   )) +
@@ -373,21 +370,18 @@ player_stats_seasonal_offense_recentRB$tier <- clusterModelRBs$classification
 
 player_stats_seasonal_offense_recentRB <- player_stats_seasonal_offense_recentRB %>%
   mutate(
-    tier = factor(case_match( # recode so 1 is highest tier
-      tier,
-      1 ~ 3,
-      2 ~ 2,
-      3 ~ 1)))
+    tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
+  )
 
 player_stats_seasonal_offense_recentRB$position_rank <- rank(
-  player_stats_seasonal_offense_recentRB$fantasy_points * -1,
+  player_stats_seasonal_offense_recentRB$fantasyPoints * -1,
   na.last = "keep",
   ties.method = "min")
 
 plot_rbTiers <- ggplot2::ggplot(
   data = player_stats_seasonal_offense_recentRB,
   mapping = aes(
-    x = fantasy_points,
+    x = fantasyPoints,
     y = position_rank,
     color = tier
   )) +
@@ -419,23 +413,18 @@ player_stats_seasonal_offense_recentWR$tier <- clusterModelWRs$classification
 
 player_stats_seasonal_offense_recentWR <- player_stats_seasonal_offense_recentWR %>%
   mutate(
-    tier = factor(case_match( # recode so 1 is highest tier
-      tier,
-      1 ~ 5,
-      2 ~ 4,
-      3 ~ 3,
-      4 ~ 2,
-      5 ~ 1)))
+    tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
+  )
 
 player_stats_seasonal_offense_recentWR$position_rank <- rank(
-  player_stats_seasonal_offense_recentWR$fantasy_points * -1,
+  player_stats_seasonal_offense_recentWR$fantasyPoints * -1,
   na.last = "keep",
   ties.method = "min")
 
 plot_wrTiers <- ggplot2::ggplot(
   data = player_stats_seasonal_offense_recentWR,
   mapping = aes(
-    x = fantasy_points,
+    x = fantasyPoints,
     y = position_rank,
     color = tier
   )) +
@@ -467,22 +456,18 @@ player_stats_seasonal_offense_recentTE$tier <- clusterModelTEs$classification
 
 player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recentTE %>%
   mutate(
-    tier = factor(case_match( # recode so 1 is highest tier
-      tier,
-      1 ~ 4,
-      2 ~ 3,
-      3 ~ 2,
-      4 ~ 1)))
+    tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
+  )
 
 player_stats_seasonal_offense_recentTE$position_rank <- rank(
-  player_stats_seasonal_offense_recentTE$fantasy_points * -1,
+  player_stats_seasonal_offense_recentTE$fantasyPoints * -1,
   na.last = "keep",
   ties.method = "min")
 
 plot_teTiers <- ggplot2::ggplot(
   data = player_stats_seasonal_offense_recentTE,
   mapping = aes(
-    x = fantasy_points,
+    x = fantasyPoints,
     y = position_rank,
     color = tier
   )) +
@@ -576,7 +561,7 @@ nfl_advancedStatsPFR_career <- left_join(
 )
 
 # Compute Player Stats Per Season
-player_stats_seasonal_careerWRs <- player_stats_seasonal_offense %>% 
+player_stats_seasonal_careerWRs <- player_stats_seasonal %>% 
   filter(position == "WR") %>% 
   group_by(player_id) %>% 
   summarise(

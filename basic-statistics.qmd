@@ -14,6 +14,21 @@ library("grid")
 library("tidyverse")
 ```
 
+### Load Data {#sec-basicStatsLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_seasonal.RData")
+```
+
+We created the `player_stats_seasonal.RData` object in @sec-calculatePlayerAge.
+
 ## Descriptive Statistics {#sec-descriptiveStatistics}
 
 Descriptive statistics are used to describe data.
@@ -84,12 +99,26 @@ Because some projections are outliers, we use a trimmed version of the weighted 
 Below is R code to estimate each:
 
 ```{r}
-#mean(data, na.rm = TRUE)
-#median(data, na.rm = TRUE)
-#DescTools::HodgesLehmann(exampleValues, na.rm = TRUE)
-#petersenlab::Mode(exampleValues)
-#weighted.mean(data, weights, na.rm = TRUE)
-#petersenlab::wthdquantile(data, weights, probs = 0.5)
+mean(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+median(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+DescTools::HodgesLehmann(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+petersenlab::Mode(player_stats_seasonal$fantasyPoints)
+
+weighted.mean(
+  player_stats_seasonal$fantasyPoints,
+  weights = sample( # randomly generate weights (could specify them manually)
+    x = 1:3,
+    size = length(player_stats_seasonal$fantasyPoints),
+    replace = TRUE),
+  na.rm = TRUE)
+
+petersenlab::wthdquantile(
+  player_stats_seasonal$fantasyPoints,
+  w = sample( # randomly generate weights (could specify them manually)
+    x = 1:3,
+    size = length(player_stats_seasonal$fantasyPoints),
+    replace = TRUE),
+  probs = 0.5)
 ```
 
 ### Spread {#sec-descriptiveStatisticsSpread}
@@ -173,34 +202,35 @@ Below is R code to estimate each:
 To estimate multiple indices of center, spread, and shape of the data, you can use the following code:
 
 ```{r}
-#psych::describe(mydata)
+psych::describe(player_stats_seasonal["fantasyPoints"])
 
-#mydata %>% 
-#  summarise(across(
-#      everything(),
-#      .fns = list(
-#        n = ~ length(na.omit(.)),
-#        missingness = ~ mean(is.na(.)) * 100,
-#        M = ~ mean(., na.rm = TRUE),
-#        SD = ~ sd(., na.rm = TRUE),
-#        min = ~ min(., na.rm = TRUE),
-#        max = ~ max(., na.rm = TRUE),
-#        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
-#        IQR = ~ IQR(., na.rm = TRUE),
-#        MAD = ~ mad(., na.rm = TRUE),
-#        median = ~ median(., na.rm = TRUE),
-#        pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
-#        mode = ~ petersenlab::Mode(., multipleModes = "mean"),
-#        skewness = ~ psych::skew(., na.rm = TRUE),
-#        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
-#      .names = "{.col}.{.fn}")) %>%
-#    pivot_longer(
-#      cols = everything(),
-#      names_to = c("variable","index"),
-#      names_sep = "\\.") %>% 
-#    pivot_wider(
-#      names_from = index,
-#      values_from = value)
+player_stats_seasonal %>% 
+  select(age, years_of_experience, fantasyPoints) %>% 
+  summarise(across(
+      everything(),
+      .fns = list(
+        n = ~ length(na.omit(.)),
+        missingness = ~ mean(is.na(.)) * 100,
+        M = ~ mean(., na.rm = TRUE),
+        SD = ~ sd(., na.rm = TRUE),
+        min = ~ min(., na.rm = TRUE),
+        max = ~ max(., na.rm = TRUE),
+        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
+        IQR = ~ IQR(., na.rm = TRUE),
+        MAD = ~ mad(., na.rm = TRUE),
+        median = ~ median(., na.rm = TRUE),
+        pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
+        mode = ~ petersenlab::Mode(., multipleModes = "mean"),
+        skewness = ~ psych::skew(., na.rm = TRUE),
+        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
+      .names = "{.col}.{.fn}")) %>%
+    pivot_longer(
+      cols = everything(),
+      names_to = c("variable","index"),
+      names_sep = "\\.") %>% 
+    pivot_wider(
+      names_from = index,
+      values_from = value)
 ```
 
 ## Scores and Scales {#sec-scoresAndScales}

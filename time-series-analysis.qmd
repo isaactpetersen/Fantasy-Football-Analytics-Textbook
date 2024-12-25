@@ -10,6 +10,7 @@ library("xts")
 library("zoo")
 library("forecast")
 library("brms")
+library("rstan")
 library("plotly")
 library("tidyverse")
 ```
@@ -65,20 +66,20 @@ Adapted from: <https://rc2e.com/timeseriesanalysis> (archived at <https://perma.
 ### Create the Time Series Objects {#sec-createTimeSeriesObjects}
 
 ```{r}
-weeklyFantasyPoints_tomBrady <- player_stats_weekly_offense %>% 
+weeklyFantasyPoints_tomBrady <- player_stats_weekly %>% 
   filter(
     player_id == "00-0019596" | player_display_name == "Tom Brady")
 
-weeklyFantasyPoints_peytonManning <- player_stats_weekly_offense %>% 
+weeklyFantasyPoints_peytonManning <- player_stats_weekly %>% 
   filter(
     player_id == "00-0010346" | player_display_name == "Peyton Manning")
 
 ts_tomBrady <- xts::xts(
-  x = weeklyFantasyPoints_tomBrady["fantasy_points"],
+  x = weeklyFantasyPoints_tomBrady["fantasyPoints"],
   order.by = weeklyFantasyPoints_tomBrady$gameday)
 
 ts_peytonManning <- xts::xts(
-  x = weeklyFantasyPoints_peytonManning["fantasy_points"],
+  x = weeklyFantasyPoints_peytonManning["fantasyPoints"],
   order.by = weeklyFantasyPoints_peytonManning$gameday)
 
 ts_tomBrady
@@ -249,18 +250,10 @@ The Bayesian longitudinal mixed models were estimated in @sec-fantasyPointsByAge
 ### Prepare New Data Object {#sec-timeSeriesBayesianNewData}
 
 ```{r}
-player_stats_seasonal_offense_subset <- player_stats_seasonal_offense %>% 
-  filter(position_group %in% c("QB","RB","WR","TE"))
+player_stats_seasonal_offense_subset <- player_stats_seasonal %>% 
+  dplyr::filter(position_group %in% c("QB","RB","WR","TE") | position %in% c("K"))
 
 player_stats_seasonal_offense_subset$position[which(player_stats_seasonal_offense_subset$position == "HB")] <- "RB"
-
-player_stats_seasonal_kicking_subset <- player_stats_seasonal_kicking %>% 
-  filter(position == "K")
-
-player_stats_seasonal_offense_subset <- bind_rows(
-  player_stats_seasonal_offense_subset,
-  player_stats_seasonal_kicking_subset
-)
 
 player_stats_seasonal_offense_subset$player_idFactor <- factor(player_stats_seasonal_offense_subset$player_id)
 player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seasonal_offense_subset$position)
@@ -270,7 +263,7 @@ player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seaso
 player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
   filter(
     !is.na(player_idFactor),
-    !is.na(fantasy_points),
+    !is.na(fantasyPoints),
     !is.na(positionFactor),
     !is.na(ageCentered20),
     !is.na(ageCentered20Quadratic),

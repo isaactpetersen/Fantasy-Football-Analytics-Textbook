@@ -33,7 +33,7 @@ load(file = "./data/nfl_depthCharts.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
-load(file = "./data/nfl_actualStats_weekly.RData")
+load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
 load(file = "./data/nfl_espnQBR_seasonal.RData")
@@ -69,7 +69,7 @@ load(file = "./data/nfl_depthCharts.RData")
 load(file = "./data/nfl_pbp.RData")
 load(file = "./data/nfl_4thdown.RData")
 load(file = "./data/nfl_participation.RData")
-load(file = "./data/nfl_actualStats_weekly.RData")
+load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
 load(file = "./data/nfl_espnQBR_seasonal.RData")
@@ -197,17 +197,19 @@ varNames <- c(
   names(nfl_pbp),
   names(nfl_4thdown),
   names(nfl_participation),
-  names(nfl_actualStats_offense_weekly),
+  names(nfl_actualFantasyPoints_player_weekly),
   names(nfl_injuries),
   names(nfl_snapCounts),
-  names(nfl_espnQBR),
+  names(nfl_espnQBR_seasonal),
+  names(nfl_espnQBR_weekly),
   names(nfl_nextGenStats_weekly),
   names(nfl_advancedStatsPFR_seasonal),
   names(nfl_advancedStatsPFR_weekly),
   names(nfl_playerContracts),
   names(nfl_ftnCharting),
   names(nfl_playerIDs),
-  names(nfl_rankings),
+  names(nfl_rankings_draft),
+  names(nfl_rankings_weekly),
   names(nfl_expectedFantasyPoints_weekly),
   names(nfl_expectedFantasyPoints_pbp)
 )
@@ -233,8 +235,8 @@ nfl_expectedFantasyPoints_weekly$player_id
 nfl_rankings$id
 
 nfl_combine$pfr_id
-nfl_advancedStatsPFR$pfr_id
-nfl_advancedStatsPFR$pfr_player_id
+nfl_advancedStatsPFR_seasonal$pfr_id
+#nfl_advancedStatsPFR_seasonal$pfr_player_id
 
 nfl_playerIDs$gsis_id
 nfl_playerIDs$pfr_id
@@ -246,16 +248,18 @@ nfl_playerIDs$pfr_id
 # Prepare data for merging
 #-todo: calculate years_of_experience
 ## Use common name for the same (gsis_id) ID variable
-nfl_actualStats_offense_weekly <- nfl_actualStats_offense_weekly %>% 
+nfl_actualFantasyPoints_player_weekly <- nfl_actualFantasyPoints_player_weekly %>% 
   rename(gsis_id = player_id)
 
-nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal %>% 
+nfl_actualFantasyPoints_player_seasonal <- nfl_actualFantasyPoints_player_seasonal %>% 
   rename(gsis_id = player_id)
 
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+player_stats_seasonal_offense <- player_stats_seasonal %>% 
+  filter(position_group %in% c("QB","RB","WR","TE")) %>% 
   rename(gsis_id = player_id)
 
-player_stats_weekly_offense <- player_stats_weekly_offense %>% 
+player_stats_weekly_offense <- player_stats_weekly %>% 
+  filter(position_group %in% c("QB","RB","WR","TE")) %>% 
   rename(gsis_id = player_id)
 
 nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
@@ -334,7 +338,7 @@ nfl_advancedStatsPFR_seasonal %>%
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 #-todo: remove redundant variables
 playerListToMerge <- list(
-  nfl_players %>% filter(!is.na(gsis_id)) %>% select(-season),
+  nfl_players %>% filter(!is.na(gsis_id)),
   nfl_draftPicks %>% filter(!is.na(gsis_id)) %>% select(-season)
 )
 
@@ -438,12 +442,12 @@ seasonalData_lag <- seasonalData %>%
   arrange(gsis_id, season) %>% 
   group_by(gsis_id) %>% 
   mutate(
-    fantasyPoints_lag = lead(fantasy_points)
+    fantasyPoints_lag = lead(fantasyPoints)
   ) %>% 
   ungroup()
 
 seasonalData_lag %>% 
-  select(gsis_id, player_display_name, season, fantasy_points, fantasyPoints_lag)
+  select(gsis_id, player_display_name, season, fantasyPoints, fantasyPoints_lag)
 ```
 
 ### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
@@ -474,7 +478,7 @@ seasonalData_lag_subsetQB <- seasonalData_lag_subset %>%
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     completions:rushing_2pt_conversions, special_teams_tds, contains(".pass"), contains(".rush"))
 
 seasonalData_lag_subsetRB <- seasonalData_lag_subset %>% 
@@ -482,7 +486,7 @@ seasonalData_lag_subsetRB <- seasonalData_lag_subset %>%
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 
 seasonalData_lag_subsetWR <- seasonalData_lag_subset %>% 
@@ -490,7 +494,7 @@ seasonalData_lag_subsetWR <- seasonalData_lag_subset %>%
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 
 seasonalData_lag_subsetTE <- seasonalData_lag_subset %>% 
@@ -498,7 +502,7 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_year, draft_number,
-    fantasy_points, fantasy_points_ppr, fantasyPoints_lag,
+    fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 ```
 
@@ -1152,7 +1156,7 @@ newData_qb <- left_join(
 
 newData_qb %>% 
   arrange(-fantasyPoints_lag) %>% 
-  select(name, fantasyPoints_lag, fantasy_points)
+  select(name, fantasyPoints_lag, fantasyPoints)
 ```
 
 ## Conclusion {#sec-machineLearningConclusion}
