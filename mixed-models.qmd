@@ -1891,17 +1891,17 @@ AIC(pointsPerSeasonDepth_gam)
 #### Determine Response Distribution {#sec-fantasyPointsByAgeExperienceModelsBayesianDistribution}
 
 ```{r}
-player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros <- player_stats_seasonal_offense_subset$fantasyPointsPos <- player_stats_seasonal_offense_subset$fantasyPoints
-player_stats_seasonal_offense_subset$fantasyPointsPos[player_stats_seasonal_offense_subset$fantasyPoints < 0] <- 0
-player_stats_seasonal_offense_subset$fantasyPointsPosNoZeros[player_stats_seasonal_offense_subset$fantasyPoints <= 0] <- 0.01
+player_stats_seasonal_offense_subset$fantasyPoints_posOnlyNoZeros <- player_stats_seasonal_offense_subset$fantasyPoints_posOnly <- player_stats_seasonal_offense_subset$fantasyPoints
+player_stats_seasonal_offense_subset$fantasyPoints_posOnly[player_stats_seasonal_offense_subset$fantasyPoints < 0] <- 0
+player_stats_seasonal_offense_subset$fantasyPoints_posOnlyNoZeros[player_stats_seasonal_offense_subset$fantasyPoints <= 0] <- 0.01
 
 fantasyPointsVector <- player_stats_seasonal_offense_subset$fantasyPoints %>% 
     na.omit() %>% 
     as.vector()
 
-fantasyPointsVectorPosNoZeros <- fantasyPointsVectorPos <- fantasyPointsVector
-fantasyPointsVectorPos[fantasyPointsVector < 0] <- 0
-fantasyPointsVectorPosNoZeros[fantasyPointsVector <= 0] <- 0.01
+fantasyPointsVector_posOnlyNoZeros <- fantasyPointsVector_posOnly <- fantasyPointsVector
+fantasyPointsVector_posOnly[fantasyPointsVector < 0] <- 0
+fantasyPointsVector_posOnlyNoZeros[fantasyPointsVector <= 0] <- 0.01
 ```
 
 ```{r}
@@ -1941,12 +1941,12 @@ fitdistrplus::descdist(fantasyPointsVector)
 fit.norm <- fitdistrplus::fitdist(fantasyPointsVector, "norm")
 
 # positive-only
-fit.exp <- fitdist(fantasyPointsVectorPos, "exp")
+fit.exp <- fitdist(fantasyPointsVector_posOnly, "exp")
 
 # positive and no zeros
-fit.gamma <- fitdistrplus::fitdist(fantasyPointsVectorPosNoZeros, "gamma")
-fit.lognormal <- fitdistrplus::fitdist(fantasyPointsVectorPosNoZeros, "lnorm")
-fit.weibull <- fitdistrplus::fitdist(fantasyPointsVectorPosNoZeros, "weibull")
+fit.gamma <- fitdistrplus::fitdist(fantasyPointsVector_posOnlyNoZeros, "gamma")
+fit.lognormal <- fitdistrplus::fitdist(fantasyPointsVector_posOnlyNoZeros, "lnorm")
+fit.weibull <- fitdistrplus::fitdist(fantasyPointsVector_posOnlyNoZeros, "weibull")
 
 # Model fit
 AIC(fit.norm)
@@ -2004,7 +2004,7 @@ model_normal <- glm(
   maxit = 100000)
 
 model_gamma <- glm(
-  formula = fantasyPointsPosNoZeros ~ 1,
+  formula = fantasyPoints_posOnlyNoZeros ~ 1,
   family = Gamma(),
   data = player_stats_seasonal_offense_subset,
   maxit = 100000)
@@ -2017,13 +2017,6 @@ AIC(model_gamma)
 ```
 
 Because the response distribution (i.e., fantasy points) is positively skewed, we will use a gamma response distribution.
-
-#### Prepare Data {#sec-fantasyPointsByAgeExperienceModelsBayesianPrepareData}
-
-```{r}
-player_stats_seasonal_offense_subset$fantasyPoints_posOnly <- player_stats_seasonal_offense_subset$fantasyPoints
-player_stats_seasonal_offense_subset$fantasyPoints_posOnly[which(player_stats_seasonal_offense_subset$fantasyPoints_posOnly < 0)] <- 0
-```
 
 #### Specify Model Formula {#sec-fantasyPointsByAgeExperienceModelsBayesianFormula}
 
