@@ -226,6 +226,7 @@ ggplot2::ggplot(
   ) +
   labs(
     x = "Fantasy Points",
+    y = "Count",
     title = "Histogram of Fantasy Points"
   ) +
   theme_classic() +
@@ -251,6 +252,7 @@ ggplot2::ggplot(
   geom_density(alpha = 0.7) + # add transparency
   labs(
     x = "Fantasy Points",
+    y = "Density",
     fill = "Position",
     title = "Density Plot of Fantasy Points by Position"
   ) +
@@ -258,9 +260,9 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-### Histogram with Overlaid Density and Rug Plot {#sec-histogramDensity}
+### Density Plot with Histogram and Rug Plot {#sec-densityHistogram}
 
-A histogram of fantasy points with an overlaid density and rug plot is depicted in @fig-histogramDensity.
+A density plot of fantasy points with a histogram and rug plot is depicted in @fig-histogramDensity.
 
 ```{r}
 #| label: fig-histogramDensity
@@ -286,6 +288,45 @@ ggplot2::ggplot(
   geom_rug() +
   labs(
     x = "Fantasy Points",
+    y = "Density",
+    title = "Density Plot of Fantasy Points with Histogram and Rug Plot"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+### Histogram with Overlaid Density and Rug Plot {#sec-histogramDensity}
+
+A histogram of fantasy points with an overlaid density and rug plot is depicted in @fig-histogramDensity.
+
+```{r}
+#| label: fig-histogramDensity
+#| fig-cap: "Histogram with Overlaid Density and Rug Plot."
+#| fig-alt: "Histogram with Overlaid Density and Rug Plot."
+
+binWidth <- 15
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints)
+) +
+  geom_histogram(
+    color = "#000000",
+    fill = "#0099F8",
+    binwidth = binWidth
+  ) +
+  geom_density(
+    aes(y = after_stat(count) * binWidth),
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  labs(
+    x = "Fantasy Points",
+    y = "Count",
     title = "Histogram of Fantasy Points with Overlaid Density and Rug Plot"
   ) +
   theme_classic() +
