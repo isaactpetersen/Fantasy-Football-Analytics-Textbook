@@ -165,10 +165,37 @@ So, it can also be useful to control for time-varying [confounds](#sec-causalDia
 
 One of the plausible alternatives to the inference that `X` causes `Y` is that there are third variable [confounds](#sec-causalDiagramConfounding) that influence both `X` and `Y`, thus explaining why `X` and `Y` are associated, as depicted in Figures [-@fig-correlationAndCausation3] and [-@fig-ZCausesXandY].
 Thus, another approach that can help increase [internal validity](#sec-internalValidity) is to include plausible [confounds](#sec-causalDiagramConfounding) as control variables.
-For instance, if a third variable such as education level might be a [confound](#sec-causalDiagramConfounding) that influences both sports drink consumption and player performance, you could include education level as a [covariate](#sec-covariates) in the model.
-Inclusion of a [covariate](#sec-covariates) attempts to control for the variable by examining the association between the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) while holding the [covariate](#sec-covariates) variables constant.
-For instance, such a model would examine whether, when accounting for education level, there is an association between sports drink consumption and player performance.
+For instance, if a third variable such as education level might be a [confound](#sec-causalDiagramConfounding) that influences both sports drink consumption and player performance, you could include control for a player's education level.
 
+There are several ways to control for a variable:
+
+1. randomization (when possible)
+1. restriction
+1. matching
+1. covariate
+1. stratification
+
+One way to control for a variable—and what is typically considered the most rigorous control—when possible, is to randomize.
+For example, you could randomly assign players to drink sports drink during a game versus water.
+By randomly assigning players to each group, it is expected that, if the groups are large enough, the differences between the groups on all variables besides the [independent](#sec-experiment) and [dependent](#sec-experiment) variables will be approximately equal across both group; thus, any difference in the [dependent variable](#sec-experiment) is thought to be attributable to the manipulation of the [independent variable](#sec-experiment).
+However, sometimes a variable is not able to be manipulated for practical or ethical reasons.
+For instance, if you wanted to control for education level when examining the association between sports drink consumption and performance, you cannot randomly assign players to have lower educational levels (though you could possibly provide an intervention to increase the education levels of a subset of players).
+
+A second way to control for a variable is restriction—e.g., you can select your sample so that it only includes portions/subgroups of a variable.
+For example, you could recruit—as participants—only those players who are college graduates.
+
+Matching means that you match people based on the control variable.
+If you some people consume sports drink whereas others do not, matching would mean finding—for every player included in the study who consumes sports drink—an equivalent player in terms of education who does not consume sports drink.
+
+Another way to control for a variable is to include the variable as a [covariate](#sec-covariates) in the model.
+Inclusion of a [covariate](#sec-covariates) attempts to control for the variable by examining the association between the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) while holding the [covariate](#sec-covariates) variables constant.
+For example, if you want to control for a player's education level in examining the association between sports drink consumption and performance, you could statistically control for player education by including the player's education level as a [covariate](#sec-covariates) in predicting performance.
+Such a model would examine whether, when accounting for education level, there is an association between sports drink consumption and player performance.
+
+Another way to control for a variable is to stratify based on the variable—e.g., you can examine the association between the variables of interest within subgroups of the control variable.
+For instance, taking the example of controlling for a player's education in examining the association between sports drink consumption and performance, you could examine the association between sports drink consumption and performance separately for various education levels: a) high school or lower, b) some college, c) college degree, d) graduate degree.
+
+In each of these examples, you are controlling for player education for purposes of examining the effect of sports drink consumption on performance.
 Failure to control for important third variables can lead to erroneous conclusions, as evidenced by the association depicted in @fig-simpsonParadox.
 In the example, if we did not control for gender, we would infer that there is a positive association between dosage and recovery probability.
 However, when we examine each men and women separately, we learn that the association between dosage and recovery probability is actually negative within each gender group.
@@ -218,7 +245,7 @@ A key tool when describing a research question or hypothesis is to create a conc
 A causal diagram depicts the hypothesized causal processes that link two or more variables.
 A common form of causal diagrams is the directed acyclic graph (DAG).
 DAGs provide a helpful tool to communicate about causal questions and help identify how to avoid bias (i.e., overestimation) in associations between variables due to [confounding](#sec-causalDiagramConfounding) (i.e., common causes) [@Digitale2022].
-For instance, from a DAG, it is possible to determine what variables it is important to control for in order to get unbiased estimates of the association between two variables of interest.
+For instance, from a DAG, it is possible to determine what variables it is important to control for (and how)—and just as importantly, what not to control for—in order to get unbiased estimates of the effect of one variable on another variable or of the association between two variables of interest.
 To create DAGs, you can use the `R` package `dagitty` [@Textor2017] or the associated browser-based extension, DAGitty: <https://dagitty.net> (archived at <https://perma.cc/U9BY-VZE2>).
 Examples of various causal diagrams that could explain why `X` is associated with `Y` are in Figures [-@fig-XCausesY], [-@fig-YCausesX] and [-@fig-ZCausesXandY].
 
@@ -343,7 +370,7 @@ In this example, `X` influences `Y` via `M1` and `M2` (i.e., multiple mediators)
 The `dagitty::impliedConditionalIndependencies()` function identifies variables in the causal diagram that are conditionally independent (i.e., uncorrelated) after controlling for other variables in the model.
 For this causal diagram, `X` is conditionally independent with `Y` because `X` is independent with `Y` when controlling for `M1` and `M2`.
 
-The `dagitty::adjustmentSets()` function identifies variables that would be necessary to control for (i.e., to include as covariates) in order to identify an unbiased estimate of the association (whether the total effect, i.e., `effect = "total"`; or the direct effect, i.e., `effect = "direct"`) between two variables (`exposure` and `outcome`).
+The `dagitty::adjustmentSets()` function identifies variables that would be necessary to control for in order to identify an unbiased estimate of the association (whether the total effect, i.e., `effect = "total"`; or the direct effect, i.e., `effect = "direct"`) between two variables (`exposure` and `outcome`).
 In this case, to identify the unbiased association between `M1` and `Y`, it is important to control for `M2.`
 
 Here is an alternative way of specifying the same diagram (more similar to `lavaan` syntax):
