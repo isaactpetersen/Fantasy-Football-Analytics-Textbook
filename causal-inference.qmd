@@ -9,6 +9,11 @@ library("dagitty")
 library("ggdag")
 ```
 
+### Causation
+
+A causal effect is an effect in which the level of one input variable results in different levels on the outcome variable.
+For instance, for a given player, the extent to which consumption of sports drink influences their performance reflects the difference between how well the player would perform if they consume sports drink compared to how well they would perform if they do not consume sports drink.
+
 ## Correlation Does Not Imply Causation {#sec-correlationCausality}
 
 As described in @sec-correlationCausation, there are several reasons why two variables, `X` and `Y`, might be correlated:
@@ -50,7 +55,7 @@ To meet the third criterion of causality, we need to remove the possibility that
 
 There are multiple approaches to meeting the third criterion of causality, such as by use of [experiments](#sec-causalInferenceExperiment), [longitudinal designs](#sec-causalInferenceLongitudinal), [control variables](#sec-causalInferenceControlVariables), [within-subject designs](#sec-causalInferenceWithinSubject), and [genetically informed designs](#sec-causalInferenceGeneticallyInformed), as described in @sec-approachesCausalInference.
 
-In general, to meet the third criterion of causality, one must consider the counterfactual.
+In general, to meet the third criterion of causality, one must consider the counterfactual—what would have happened "counter to the fact".
 A *counterfactual* is what would have happened in the hypothetical scenario that the cause did not occur [i.e., what would have happened in the absence of the cause; @Shadish2002].
 When engaging in causal inference, it is important to consider what would have happened if the hypothetical cause had actually not occurred.
 It is like an alternate universe where the cause did not happen.
@@ -62,6 +67,7 @@ In such a study, we observe what *did happen* when players received a treatment.
 The counterfactual is knowledge of what *would have happened* to those same players if they simultaneously had not received treatment [@Shadish2002].
 The true causal effect, then, is the difference between what did happen and what would have happened.
 However, we cannot observe a counterfactual.
+This is the fundamental problem of causal inference—we only observe one potential world/outcome/universe.
 That is, we do not know for sure what would have happened to the players who received treatment if those same players had actually not received treatment.
 We have a control group, but the control group does not have the same players as the intervention group, and it is impossible for a person to simultaneously receive and not receive treatment.
 
@@ -166,7 +172,7 @@ So, it can also be useful to control for time-varying [confounds](#sec-causalDia
 
 One of the plausible alternatives to the inference that `X` causes `Y` is that there are third variable [confounds](#sec-causalDiagramConfounding) that influence both `X` and `Y`, thus explaining why `X` and `Y` are associated, as depicted in Figures [-@fig-correlationAndCausation3] and [-@fig-ZCausesXandY].
 Thus, another approach that can help increase [internal validity](#sec-internalValidity) is to include plausible [confounds](#sec-causalDiagramConfounding) as control variables.
-For instance, if a third variable such as education level might be a [confound](#sec-causalDiagramConfounding) that influences both sports drink consumption and player performance, you could include control for a player's education level.
+For instance, if a third variable such as education level might be a [confound](#sec-causalDiagramConfounding) that influences both sports drink consumption and player performance, you could control for a player's education level.
 
 There are several ways to control for a variable:
 
@@ -178,9 +184,13 @@ There are several ways to control for a variable:
 
 One way to control for a variable—and what is typically considered the most rigorous control—when possible, is to randomize (which would make it an [experiment](#sec-causalInferenceExperiment)).
 For example, you could randomly assign players to consume sports drink during a game versus water.
-By randomly assigning players to each group, it is expected that, if the groups are large enough, the differences between the groups on all variables besides the [independent](#sec-experiment) and [dependent](#sec-experiment) variables will be approximately equal across both groups; thus, any difference in the [dependent variable](#sec-experiment) is thought to be attributable to the manipulation of the [independent variable](#sec-experiment).
+By randomly assigning players to each group, it is expected that, if the groups are large enough, the differences between the groups on all variables besides the [independent](#sec-experiment) and [dependent](#sec-experiment) variables will be approximately equal across both groups; thus, such an approach controls for both observed and unobserved [confounds](#sec-causalDiagramConfounding), and any difference in the [dependent variable](#sec-experiment) is thought to be attributable to the manipulation of the [independent variable](#sec-experiment).
 However, sometimes a variable is not able to be manipulated for practical or ethical reasons.
 For instance, if you wanted to control for education level when examining the association between sports drink consumption and performance, you cannot randomly assign players to have lower educational levels (though you could possibly provide an intervention to increase the education levels of a subset of players).
+Thus, observational studies are also necessary.
+
+However, in observational studies, the groups may differ on the [confounding factors](#sec-causalDiagramConfounding); people may choose the level of the they receive.
+Thus, we need to attempt to control for the [confounds](#sec-causalDiagramConfounding); however, in an observational study, we can only potentially adjust for the observed [confounds](#sec-causalDiagramConfounding), unlike in an [experiment](#sec-causalInferenceExperiment) in which we can control for both observed and unobserved [confounds](#sec-causalDiagramConfounding).
 
 A second way to control for a variable is restriction—e.g., you can select your sample so that it only includes portions/subgroups of a variable.
 For example, you could recruit—as participants—only those players who are college graduates.
@@ -210,6 +220,7 @@ Example Where Failing to Control for a Variable (In This Case, Gender) Would Lea
 
 However, it can be problematic to control for variables indiscriminantly [@Spector2010; @Wysocki2022].
 The use of [causal diagrams](#sec-causalDiagrams) can inform which variables are important to be included as control variables, and—just as important—which variables not to include as control variables, as described in @sec-causalDiagrams.
+Another approach that is sometimes used for matching, as a sample weight, or with stratification is the use of propensity scores.
 
 #### Genetically Informed Designs {#sec-causalInferenceGeneticallyInformed}
 
@@ -782,7 +793,7 @@ In this case, controlling for either a) coaching quality and mental health or b)
 
 ### Selection Bias {#sec-causalDiagramSelectionBias}
 
-Selection bias occurs when the selection of participants or their inclusion in analyses depends on the variables being studied.
+Selection bias occurs when the selection of participants or their inclusion in analyses depends on the variables being studied (or on their [colliders](#sec-colliderBias)).
 For instance, if you are conducting a study on the extent to which sports drink consumption influences fantasy points, there would be selection bias if players are less likely to participate in the study if they score fewer fantasy points.
 
 Now, consider a study in which you conduct a randomized controlled trial (RCT; i.e., an [experiment](#sec-experiment)) to evaluate the effect of a new medication on player performance.
