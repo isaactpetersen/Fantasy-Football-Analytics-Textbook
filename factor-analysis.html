@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Isaac T. Petersen">
+<meta name="dcterms.date" content="today">
+<title>21&nbsp; Factor Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./pca.html" rel="next">
+<link href="./cluster-analysis.html" rel="prev">
+<link href="./images/logo.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-1fa1d8026083a9bddc52b4aafc7f818e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-8e00f2f28a1266a720913de837032221.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-ddd431e9f75ca955af8accee01469505.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-9f2e48d73e00c997ec17b18daa718bc5.min.css" rel="prefetch" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-C3SNF7Y0PJ"></script><script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
+</script><script type="application/json" class="js-hypothesis-config">
+{
+  "theme": "clean",
+  "openSidebar": false
+}
+</script><script async="" src="https://hypothes.is/embed.js"></script><script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+<meta property="og:title" content="21&nbsp; Factor Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/images/simpleStructure.png">
+<meta property="og:site_name" content="Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta property="og:image:alt" content="Example of a Factor Matrix That Follows Simple Structure.">
+<meta property="og:image:height" content="822">
+<meta property="og:image:width" content="1020">
+<meta name="twitter:title" content="21&nbsp; Factor Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/images/simpleStructure.png">
+<meta name="twitter:image:alt" content="Example of a Factor Matrix That Follows Simple Structure.">
+<meta name="twitter:image-height" content="822">
+<meta name="twitter:image-width" content="1020">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./factor-analysis.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Factor Analysis</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+<li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
+              <i class="bi bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=%7Curl%7C">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+</div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./fantasy-football.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Intro to Football and Fantasy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started with <code>R</code> for Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./download-football-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Download and Process NFL Football Data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Visualization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./player-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Player Evaluation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./draft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Fantasy Draft</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./research-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Research Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./basic-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Basic Statistics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Correlation Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Multiple Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mixed-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Mixed Models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cognitive-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Heuristics and Cognitive Biases in Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./actuarial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Judgment Versus Actuarial Approaches to Prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./base-rates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Base Rates</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./evaluating-prediction-accuracy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Evaluation of Prediction/Forecasting Accuracy</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mythbusters.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./modern-portfolio-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Modern Portfolio Theory</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Cluster Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./factor-analysis.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Factor Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Data Reduction: Principal Component Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./time-series-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Time Series Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./decision-making.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Decision Making in the Context of Uncertainty</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#sec-factorAnalysisGettingStarted" id="toc-sec-factorAnalysisGettingStarted" class="nav-link active" data-scroll-target="#sec-factorAnalysisGettingStarted"><span class="header-section-number">21.1</span> Getting Started</a>
+  <ul>
+<li><a href="#sec-factorAnalysisLoadPackages" id="toc-sec-factorAnalysisLoadPackages" class="nav-link" data-scroll-target="#sec-factorAnalysisLoadPackages"><span class="header-section-number">21.1.1</span> Load Packages</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-factorAnalysisOverview" id="toc-sec-factorAnalysisOverview" class="nav-link" data-scroll-target="#sec-factorAnalysisOverview"><span class="header-section-number">21.2</span> Overview of Factor Analysis</a></li>
+  <li>
+<a href="#sec-cfa" id="toc-sec-cfa" class="nav-link" data-scroll-target="#sec-cfa"><span class="header-section-number">21.3</span> Exploratory Factor Analysis</a>
+  <ul>
+<li><a href="#sec-factorAnalysisRotation" id="toc-sec-factorAnalysisRotation" class="nav-link" data-scroll-target="#sec-factorAnalysisRotation"><span class="header-section-number">21.3.1</span> Factor Rotation</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-cfa" id="toc-sec-cfa" class="nav-link" data-scroll-target="#sec-cfa"><span class="header-section-number">21.4</span> Confirmatory Factor Analysis</a></li>
+  <li><a href="#sec-factorAnalysisNumFactors" id="toc-sec-factorAnalysisNumFactors" class="nav-link" data-scroll-target="#sec-factorAnalysisNumFactors"><span class="header-section-number">21.5</span> Determining the Number of Factors to Retain</a></li>
+  <li><a href="#sec-interpretingAndUsingLatentFactors" id="toc-sec-interpretingAndUsingLatentFactors" class="nav-link" data-scroll-target="#sec-interpretingAndUsingLatentFactors"><span class="header-section-number">21.6</span> Interpreting and Using Latent Factors</a></li>
+  <li><a href="#sec-factorAnalysisConclusion" id="toc-sec-factorAnalysisConclusion" class="nav-link" data-scroll-target="#sec-factorAnalysisConclusion"><span class="header-section-number">21.7</span> Conclusion</a></li>
+  <li><a href="#sec-factorAnalysisSessionInfo" id="toc-sec-factorAnalysisSessionInfo" class="nav-link" data-scroll-target="#sec-factorAnalysisSessionInfo"><span class="header-section-number">21.8</span> Session Info</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/factor-analysis.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/blob/main/factor-analysis.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><div class="alert alert-info hints-alert">
+  <div class="hints-icon">
+    <i class="fa fa-comments-o"></i>
+  </div>
+  <div class="hints-container">
+    <b>I need your help!</b>
+    <p>
+    I want your feedback to make the book better for you and other readers. If you find typos, errors, or places where the text may be improved, please let me know.
+    The best ways to provide feedback are by <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">GitHub</a> or <a href="https://hypothes.is">hypothes.is</a> annotations.
+    </p>
+
+    <p>
+      <i class="fa fa-github"></i>
+      <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues">Opening an issue</a> or <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/pulls">submitting a pull request</a> on GitHub: <a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook">https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook</a>
+    </p>
+    <p>
+      <img style="display: inline;" src="https://hypothes.is/organizations/__default__/logo" alt="Hypothesis">
+      Adding an annotation using <a href="https://hypothes.is">hypothes.is</a>.
+      To add an annotation, <span style="background-color: #3297FD; color: white">select some text</span> and then click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class="annotator-adder-actions__icon"><path fill="currentColor" fill-rule="nonzero" d="M15 0c.27 0 .505.099.703.297A.961.961 0 0116 1v15l-4-3H1a.974.974 0 01-.703-.29A.953.953 0 010 12V1C0 .719.096.482.29.29A.966.966 0 011 0h14zM7 3l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C4.156 5.229 4 6 4 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188C4.729 8.854 5.082 9 5.5 9c.417 0 .77-.146 1.063-.438C6.854 8.271 7 7.918 7 7.5c0-.417-.146-.77-.438-1.063A1.447 1.447 0 005.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L7 4V3zm5 0l-.469.063c-.312.041-.656.187-1.031.437-.375.25-.719.646-1.031 1.188C9.156 5.229 9 6 9 7l.002.063.006.062a.896.896 0 01.008.11l-.002.074-.006.066a1.447 1.447 0 00.43 1.188c.291.291.645.437 1.062.437.417 0 .77-.146 1.063-.438.291-.291.437-.645.437-1.062 0-.417-.146-.77-.438-1.063A1.447 1.447 0 0010.5 6c-.073 0-.146.005-.219.016-.073.01-.14.026-.203.046.177-1.03.542-1.632 1.094-1.804L12 4V3z"></path></svg></span>
+      symbol on the pop-up menu.
+      To see the annotations of others, click the
+      <span class="svg-icon--inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" class=""><g fill-rule="evenodd"><rect fill="none" stroke="none" x="0" y="0" width="16" height="16"></rect><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12L6 8l4-4"></path></g></svg></span>
+      symbol in the upper right-hand corner of the page.
+    </p>
+  </div>
+</div>
+
+<header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-factorAnalysis" class="quarto-section-identifier"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Factor Analysis</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="sec-factorAnalysisGettingStarted" class="level2" data-number="21.1"><h2 data-number="21.1" class="anchored" data-anchor-id="sec-factorAnalysisGettingStarted">
+<span class="header-section-number">21.1</span> Getting Started</h2>
+<section id="sec-factorAnalysisLoadPackages" class="level3" data-number="21.1.1"><h3 data-number="21.1.1" class="anchored" data-anchor-id="sec-factorAnalysisLoadPackages">
+<span class="header-section-number">21.1.1</span> Load Packages</h3>
+</section></section><section id="sec-factorAnalysisOverview" class="level2" data-number="21.2"><h2 data-number="21.2" class="anchored" data-anchor-id="sec-factorAnalysisOverview">
+<span class="header-section-number">21.2</span> Overview of Factor Analysis</h2>
+<p>Factor analysis involves the estimation of latent variables. Latent variables are ways of studying and operationalizing theoretical constructs that cannot be directly observed or quantified. Factor analysis is a class of latent variable models that is designated to identify the structure of a measure or set of measures, and ideally, a construct or set of constructs. It aims to identify the optimal latent structure for a group of variables. The goal of factor analysis is to identify simple, parsimonious factors that underlie the “junk” (i.e., scores filled with measurement error) that we observe.</p>
+<p>Factor analysis encompasses two general types: <a href="#sec-cfa">confirmatory factor analysis</a> and <a href="#sec-efa">exploratory factor analysis</a>. <a href="#sec-efa"><em>Exploratory factor analysis</em></a> (EFA) is a latent variable modeling approach that is used when the researcher has no a priori hypotheses about how a set of variables is structured. <a href="#sec-efa">EFA</a> seeks to identify the empirically optimal-fitting model in ways that balance accuracy (i.e., variance accounted for) and parsimony (i.e., simplicity). <a href="#sec-cfa"><em>Confirmatory factor analysis</em></a> (CFA) is a latent variable modeling approach that is used when a researcher wants to evaluate how well a hypothesized model fits, and the model can be examined in comparison to alternative models. Using a <a href="#sec-cfa">CFA</a> approach, the researcher can pit models representing two theoretical frameworks against each other to see which better accounts for the observed data.</p>
+<p>Factor analysis involves observed (manifest) variables and unobserved (latent) factors. Factor analysis assumes that the latent factor influences the manifest variables, and the latent factor therefore reflects the common variance among the variables. A factor model potentially includes factor loadings, residuals (errors or disturbances), intercepts/means, covariances, and regression paths. A regression path indicates a hypothesis that one variable (or factor) influences another. The standardized regression coefficient represents the strength of association between the variables or factors. A factor loading is a regression path from a latent factor to an observed (manifest) variable. The standardized factor loading represents the strength of association between the variable and the latent factor. A residual is variance in a variable (or factor) that is unexplained by other variables or factors. An indicator’s intercept is the expected value of the variable when the factor(s) (onto which it loads) is equal to zero. Covariances are the associations between variables (or factors). A covariance path between two variables represents omitted shared cause(s) of the variables. For instance, if you depict a covariance path between two variables, it means that there is a shared cause of the two variables that is omitted from the model (for instance, if the common cause is not known or was not assessed).</p>
+<p>In factor analysis, the relation between an indicator (<span class="math inline">\(\text{X}\)</span>) and its underlying latent factor(s) (<span class="math inline">\(\text{F}\)</span>) can be represented with a regression formula as in <a href="#eq-indicatorLatentAssociation" class="quarto-xref">Equation&nbsp;<span>21.1</span></a>:</p>
+<p><span id="eq-indicatorLatentAssociation"><span class="math display">\[
+\bar{X} = \lambda \cdot \text{F} + \text{Item Intercept} + \text{Error Term}
+\tag{21.1}\]</span></span></p>
+<p>where:</p>
+<ul>
+<li>
+<span class="math inline">\(\text{X}\)</span> is the observed value of the indicator</li>
+<li>
+<span class="math inline">\(\lambda\)</span> is the factor loading, indicating the strength of the association between the indicator and the latent factor(s)</li>
+<li>
+<span class="math inline">\(\text{F}\)</span> is the person’s value on the latent factor(s)</li>
+<li>
+<span class="math inline">\(\text{Item Intercept}\)</span> represents the constant term that accounts for the expected value of the indicator when the latent factor(s) are zero</li>
+<li>
+<span class="math inline">\(\text{Error Term}\)</span> is the residual, indicating the extent of variance in the indicator that is not explained by the latent factor(s)</li>
+</ul>
+<p>When the latent factors are uncorrelated, the (standardized) error term for an indicator is calculated as 1 minus the sum of squared standardized factor loadings for a given item (including cross-loadings). A cross-loadings is when a variable loads onto more than one latent factor.</p>
+<p>Factor analysis is a powerful technique to help identify the factor structure that underlies a measure or construct. However, given the extensive method variance that influences scores on measure, factor analysis (and <a href="pca.html">principal component analysis</a>) tends to extract method factors. Method factors are factors that are related to the methods being assessed rather than the construct of interest. To better estimate construct factors, it is sometimes necessary to estimate both construct and method factors.</p>
+</section><section id="sec-cfa" class="level2" data-number="21.3"><h2 data-number="21.3" class="anchored" data-anchor-id="sec-cfa">
+<span class="header-section-number">21.3</span> Exploratory Factor Analysis</h2>
+<p>Exploratory factor analysis (EFA) is used if you have no a priori hypotheses about the factor structure of the model, but you would like to understand the latent variables represented by your items.</p>
+<p>EFA is partly induced from the data. You feed in the data and let the program build the factor model. You can set some parameters going in, including how to extract or rotate the factors. The factors are extracted from the data without specifying the number and pattern of loadings between the items and the latent factors <span class="citation" data-cites="Bollen2002">(<a href="references.html#ref-Bollen2002" role="doc-biblioref">Bollen, 2002</a>)</span>. All cross-loadings are freely estimated.</p>
+<section id="sec-factorAnalysisRotation" class="level3" data-number="21.3.1"><h3 data-number="21.3.1" class="anchored" data-anchor-id="sec-factorAnalysisRotation">
+<span class="header-section-number">21.3.1</span> Factor Rotation</h3>
+<p>When using EFA or <a href="pca.html">PCA</a>, an important step is, possibly, to rotate the factors to make them more interpretable and simple, which is the whole goal. To interpret the results of a factor analysis, we examine the factor matrix. The columns refer to the different factors; the rows refer to the different observed variables. The cells in the table are the factor loadings—they are basically the correlation between the variable and the factor. Our goal is to achieve a model with simple structure because it is easily interpretable. <em>Simple structure</em> means that every variable loads perfectly on one and only one factor, as operationalized by a matrix of factor loadings with values of one and zero and nothing else. An example of a factor matrix that follows simple structure is depicted in <a href="#fig-simpleStructure" class="quarto-xref">Figure&nbsp;<span>21.1</span></a>.</p>
+<div id="fig-simpleStructure" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Factor Matrix That Follows Simple Structure.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-simpleStructure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/simpleStructure.png" class="img-fluid figure-img" alt="Example of a Factor Matrix That Follows Simple Structure.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-simpleStructure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.1: Example of a Factor Matrix That Follows Simple Structure.
+</figcaption></figure>
+</div>
+<p>An example of a measurement model that follows simple structure is depicted in <a href="#fig-factorSolutionSimpleStructure" class="quarto-xref">Figure&nbsp;<span>21.2</span></a>. Each variable loads onto one and only one factor, which makes it easy to interpret the meaning of each factor, because a given factor represents the common variance among the items that load onto it.</p>
+<div id="fig-factorSolutionSimpleStructure" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Measurement Model That Follows Simple Structure. 'INT' = internalizing problems; 'EXT' = externalizing problems; 'TD' = thought-disordered problems.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-factorSolutionSimpleStructure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/factorSolutionSimpleStructure.png" class="img-fluid figure-img" alt="Example of a Measurement Model That Follows Simple Structure. 'INT' = internalizing problems; 'EXT' = externalizing problems; 'TD' = thought-disordered problems.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factorSolutionSimpleStructure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.2: Example of a Measurement Model That Follows Simple Structure. ‘INT’ = internalizing problems; ‘EXT’ = externalizing problems; ‘TD’ = thought-disordered problems.
+</figcaption></figure>
+</div>
+<p>However, pure simple structure only occurs in simulations, not in real-life data. In reality, our <a href="#measurementModel-sem">measurement model</a> in an unrotated factor analysis model might look like the model in <a href="#fig-factorSolutionUnrotatedExample" class="quarto-xref">Figure&nbsp;<span>21.3</span></a>. In this example, the <a href="#measurementModel-sem">measurement model</a> does not show simple structure because the items have cross-loadings—that is, the items load onto more than one factor. The cross-loadings make it difficult to interpret the factors, because all of the items load onto all of the factors, so the factors are not very distinct from each other, which makes it difficult to interpret what the factors mean.</p>
+<div id="fig-factorSolutionUnrotatedExample" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Measurement Model That Does Not Follow Simple Structure. 'INT' = internalizing problems; 'EXT' = externalizing problems; 'TD' = thought-disordered problems.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-factorSolutionUnrotatedExample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/factorSolutionUnrotatedExample.png" class="img-fluid figure-img" alt="Example of a Measurement Model That Does Not Follow Simple Structure. 'INT' = internalizing problems; 'EXT' = externalizing problems; 'TD' = thought-disordered problems.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factorSolutionUnrotatedExample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.3: Example of a Measurement Model That Does Not Follow Simple Structure. ‘INT’ = internalizing problems; ‘EXT’ = externalizing problems; ‘TD’ = thought-disordered problems.
+</figcaption></figure>
+</div>
+<p>As a result of the challenges of interpretability caused by cross-loadings, factor rotations are often performed. An example of an unrotated factor matrix is in <a href="#fig-factorMatrix" class="quarto-xref">Figure&nbsp;<span>21.4</span></a>.</p>
+<div id="fig-factorMatrix" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Factor Matrix.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-factorMatrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/factorMatrix.png" class="img-fluid figure-img" alt="Example of a Factor Matrix.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factorMatrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.4: Example of a Factor Matrix.
+</figcaption></figure>
+</div>
+<p>In the example factor matrix in <a href="#fig-factorSolutionUnrotated" class="quarto-xref">Figure&nbsp;<span>21.5</span></a>, the factor analysis is not very helpful—it tells us very little because it did not distinguish between the two factors. The variables have similar loadings on Factor 1 and Factor 2. An example of a unrotated factor solution is in Figure @ref(fig:factorSolutionUnrotated). In the figure, all of the variables are in the midst of the quadrants—they are not on the factors’ axes. Thus, the factors are not very informative.</p>
+<div id="fig-factorSolutionUnrotated" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of an Unrotated Factor Solution.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-factorSolutionUnrotated-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/factorSolutionUnrotated.png" class="img-fluid figure-img" alt="Example of an Unrotated Factor Solution.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factorSolutionUnrotated-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.5: Example of an Unrotated Factor Solution.
+</figcaption></figure>
+</div>
+<p>As a result, to improve the interpretability of the factor analysis, we can do what is called rotation. Rotation leverages the idea that there are infinite solutions to the factor analysis model that fit equally well. <em>Rotation</em> involves changing the orientation of the factors by changing the axes so that variables end up with very high (close to one or negative one) or very low (close to zero) loadings, so that it is clear which factors include which variables. That is, rotation rescales the factors and tries to identify the ideal solution (factor) for each variable. It searches for simple structure and keeps searching until it finds a minimum. After rotation, if the rotation was successful for imposing simple structure, each factor will have loadings close to one (or negative one) for some variables and close to zero for other variables. The goal of factor rotation is to achieve simple structure, to help make it easier to interpret the meaning of the factors.</p>
+<p>To perform factor rotation, orthogonal rotations are often used. Orthogonal rotations make the rotated factors uncorrelated. An example of a commonly used orthogonal rotation is varimax rotation. Varimax rotation maximizes the sum of the variance of the squared loadings (i.e., so that items have either a very high or very low loading on a factor) and yields axes with a 90-degree angle.</p>
+<p>An example of a factor matrix following an orthogonal rotation is depicted in <a href="#fig-factorMatrixRotated" class="quarto-xref">Figure&nbsp;<span>21.6</span></a>. An example of a factor solution following an orthogonal rotation is depicted in <a href="#fig-factorSolutionRotated" class="quarto-xref">Figure&nbsp;<span>21.7</span></a>.</p>
+<div id="fig-factorMatrixRotated" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Rotated Factor Matrix.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-factorMatrixRotated-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/factorMatrixRotated.png" class="img-fluid figure-img" alt="Example of a Rotated Factor Matrix.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factorMatrixRotated-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.6: Example of a Rotated Factor Matrix.
+</figcaption></figure>
+</div>
+<div id="fig-factorSolutionRotated" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Rotated Factor Solution.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-factorSolutionRotated-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/factorSolutionRotated.png" class="img-fluid figure-img" alt="Example of a Rotated Factor Solution.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factorSolutionRotated-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.7: Example of a Rotated Factor Solution.
+</figcaption></figure>
+</div>
+<p>An example of a factor matrix from SPSS following an orthogonal rotation is depicted in <a href="#fig-rotatedFactorMatrix" class="quarto-xref">Figure&nbsp;<span>21.8</span></a>.</p>
+<div id="fig-rotatedFactorMatrix" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Rotated Factor Matrix From SPSS.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-rotatedFactorMatrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/rotatedFactorMatrix.png" class="img-fluid figure-img" alt="Example of a Rotated Factor Matrix From SPSS.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rotatedFactorMatrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.8: Example of a Rotated Factor Matrix From SPSS.
+</figcaption></figure>
+</div>
+<p>An example of a factor structure from an orthogonal rotation is in <a href="#fig-orthogonalRotation" class="quarto-xref">Figure&nbsp;<span>21.9</span></a>.</p>
+<div id="fig-orthogonalRotation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Factor Structure From an Orthogonal Rotation.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-orthogonalRotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/FactorAnalysis-08.png" class="img-fluid figure-img" alt="Example of a Factor Structure From an Orthogonal Rotation.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-orthogonalRotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.9: Example of a Factor Structure From an Orthogonal Rotation.
+</figcaption></figure>
+</div>
+<p>Sometimes, however, the two factors and their constituent variables may be correlated. Examples of two correlated factors may be depression and anxiety. When the two factors are correlated in reality, if we make them uncorrelated, this would result in an inaccurate model. Oblique rotation allows for factors to be correlated and yields axes with less an angle of less than 90 degrees. However, if the factors have low correlation (e.g., .2 or less), you can likely continue with orthogonal rotation. Nevertheless, just because an oblique rotation allows for correlated factors does not mean that the factors will be correlated, so oblique rotation provides greater flexibility than orthogonal rotation. An example of a factor structure from an oblique rotation is in <a href="#fig-obliqueRotation" class="quarto-xref">Figure&nbsp;<span>21.10</span></a>. Results from an oblique rotation are more complicated than orthogonal rotation—they provide lots of output and are more complicated to interpret. In addition, oblique rotation might not yield a smooth answer if you have a relatively small sample size.</p>
+<div id="fig-obliqueRotation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Factor Structure From an Oblique Rotation.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-obliqueRotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/FactorAnalysis-09.png" class="img-fluid figure-img" alt="Example of a Factor Structure From an Oblique Rotation.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-obliqueRotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.10: Example of a Factor Structure From an Oblique Rotation.
+</figcaption></figure>
+</div>
+<p>As an example of rotation based on interpretability, consider the Five-Factor Model of Personality (the Big Five), which goes by the acronym, OCEAN: <strong>O</strong>penness, <strong>C</strong>onscientiousness, <strong>E</strong>xtraversion, <strong>A</strong>greeableness, and <strong>N</strong>euroticism. Although the five factors of personality are somewhat correlated, we can use rotation to ensure they are maximally independent. Upon rotation, extraversion and neuroticism are essentially uncorrelated, as depicted in <a href="#fig-factorRotation" class="quarto-xref">Figure&nbsp;<span>21.11</span></a>. The other pole of extraversion is intraversion and the other pole of neuroticism might be emotional stability or calmness.</p>
+<div id="fig-factorRotation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Factor Rotation of Neuroticism and Extraversion.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-factorRotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/factorRotation.png" class="img-fluid figure-img" alt="Example of a Factor Rotation of Neuroticism and Extraversion.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factorRotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.11: Example of a Factor Rotation of Neuroticism and Extraversion.
+</figcaption></figure>
+</div>
+<p>Simple structure is achieved when each variable loads highly onto as few factors as possible (i.e., each item has only one significant or primary loading). Oftentimes this is not the case, so we choose our rotation method in order to decide if the factors can be correlated (an oblique rotation) or if the factors will be uncorrelated (an orthogonal rotation). If the factors are not correlated with each other, use an orthogonal rotation. The correlation between an item and a factor is a factor loading, which is simply a way to ask how much a variable is correlated with the underlying factor. However, its interpretation is more complicated if there are correlated factors!</p>
+<p>An orthogonal rotation (e.g., varimax) can help with simplicity of interpretation because it seeks to yield simple structure without cross-loadings. Cross-loadings are instances where a variable loads onto multiple factors. My recommendation would always be to use an orthogonal rotation if you have reason to believe that finding simple structure in your data is possible; otherwise, the factors are extremely difficult to interpret—what exactly does a cross-loading even mean? However, you should always try an oblique rotation, too, to see how strongly the factors are correlated. Examples of oblique rotations include oblimin and promax.</p>
+</section></section><section id="sec-cfa" class="level2" data-number="21.4"><h2 data-number="21.4" class="anchored" data-anchor-id="sec-cfa">
+<span class="header-section-number">21.4</span> Confirmatory Factor Analysis</h2>
+<p>Confirmatory factor analysis (CFA) is used to (dis)confirm a priori hypotheses about the factor structure of the model. CFA is a test of the hypothesis. In CFA, you specify the model and ask how well this model represents the data. The researcher specifies the number, meaning, associations, and pattern of free parameters in the factor loading matrix <span class="citation" data-cites="Bollen2002">(<a href="references.html#ref-Bollen2002" role="doc-biblioref">Bollen, 2002</a>)</span>. A key advantage of CFA is the ability to directly compare alternative models (i.e., factor structures), which is valuable for theory testing <span class="citation" data-cites="Strauss2009">(<a href="references.html#ref-Strauss2009" role="doc-biblioref">Strauss &amp; Smith, 2009</a>)</span>. For instance, you could use <a href="#cfa">CFA</a> to test whether the variance in several measures’ scores is best explained with one factor or two factors. In CFA, cross-loadings are not estimated unless the researcher specifies them.</p>
+</section><section id="sec-factorAnalysisNumFactors" class="level2" data-number="21.5"><h2 data-number="21.5" class="anchored" data-anchor-id="sec-factorAnalysisNumFactors">
+<span class="header-section-number">21.5</span> Determining the Number of Factors to Retain</h2>
+<p>A goal of factor analysis and <a href="#pca">PCA</a> is simplification or parsimony, while still explaining as much variance as possible. The hope is that you can have fewer factors that explain the associations between the variables than the number of observed variables. But how do you decide on the number of factors?</p>
+<p>There are a number of criteria that one can use to help determine how many factors/components to keep:</p>
+<ul>
+<li>Kaiser-Guttman criterion: in <a href="#pca">PCA</a>, components with eigenvalues greater than 1
+<ul>
+<li>or, for factor analysis, factors with eigenvalues greater than zero</li>
+</ul>
+</li>
+<li>Cattell’s scree test: the “elbow” in a scree plot minus one; sometimes operationalized with optimal coordinates (OC) or the acceleration factor (AF)</li>
+<li>Parallel analysis: factors that explain more variance than randomly simulated data</li>
+<li>
+<a href="#vssPlot">Very simple structure (VSS)</a> criterion: larger is better</li>
+<li>Velicer’s minimum average partial (MAP) test: smaller is better</li>
+<li>Akaike information criterion (AIC): smaller is better</li>
+<li>Bayesian information criterion (BIC): smaller is better</li>
+<li>Sample size-adjusted BIC (SABIC): smaller is better</li>
+<li>Root mean square error of approximation (RMSEA): smaller is better</li>
+<li>Chi-square difference test: smaller is better; a significant test indicates that the more complex model is significantly better fitting than the less complex model</li>
+<li>Standardized root mean square residual (SRMR): smaller is better</li>
+<li>Comparative Fit Index (CFI): larger is better</li>
+<li>Tucker Lewis Index (TLI): larger is better</li>
+</ul>
+<p>There is not necessarily a “correct” criterion to use in determining how many factors to keep, so it is generally recommended that researchers use multiple criteria in combination with theory and interpretability.</p>
+<p>A scree plot provides lots of information. A scree plot has the factor number on the x-axis and the eigenvalue on the y-axis. The eigenvalue is the variance accounted for by a factor; when using a varimax (orthogonal) rotation, an eigenvalue (or factor variance) is calculated as the sum of squared standardized factor (or component) loadings on that factor. An example of a scree plot is in <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>21.12</span></a>.</p>
+<div id="fig-screePlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Scree Plot.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-screePlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/screePlot.png" class="img-fluid figure-img" alt="Example of a Scree Plot.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-screePlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.12: Example of a Scree Plot.
+</figcaption></figure>
+</div>
+<p>The total variance is equal to the number of variables you have, so one eigenvalue is approximately one variable’s worth of variance. The first factor accounts for the most variance, the second factor accounts for the second-most variance, and so on. The more factors you add, the less variance is explained by the additional factor.</p>
+<p>One criterion for how many factors to keep is the Kaiser-Guttman criterion. According to the Kaiser-Guttman criterion, you should keep any factors whose eigenvalue is greater than 1. That is, for the sake of simplicity, parsimony, and data reduction, you should take any factors that explain more than a single variable would explain. According to the Kaiser-Guttman criterion, we would keep three factors from Figure @ref(fig:screePlot) that have eigenvalues greater than 1. The default in SPSS is to retain factors with eigenvalues greater than 1. However, keeping factors whose eigenvalue is greater than 1 is not the most correct rule. If you let SPSS do this, you may get many factors with eigenvalues around 1 (e.g., factors with an eigenvalue ~ 1.0001) that are not adding so much that it is worth the added complexity. The Kaiser-Guttman criterion usually results in keeping too many factors. Factors with small eigenvalues around 1 could reflect error shared across variables. For instance, factors with small eigenvalues could reflect method variance (i.e., method factor), such as a self-report factor that turns up as a factor in factor analysis, but that may be useless to you as a conceptual factor of a construct of interest.</p>
+<p>Another criterion is Cattell’s scree test, which involves selecting the number of factors from looking at the scree plot. “Scree” refers to the rubble of stones at the bottom of a mountain. According to Cattell’s scree test, you should keep the factors before the last steep drop in eigenvalues—i.e., the factors before the rubble, where the slope approaches zero. The beginning of the scree (or rubble), where the slope approaches zero, is called the “elbow” of a scree plot. Using Cattell’s scree test, you retain the number of factors that explain the most variance prior to the explained variance drop-off, because, ultimately, you want to include only as many factors in which you gain substantially more by the inclusion of these factors. That is, you would keep the number of factors at the elbow of the scree plot minus one. If the last steep drop occurs from Factor 4 to Factor 5 and the elbow is at Factor 5, we would keep four factors. In Figure @ref(fig:screePlot), the last steep drop in eigenvalues occurs from Factor 3 to Factor 4; the elbow of the scree plot occurs at Factor 4. We would keep the number of factors at the elbow minus one. Thus, using Cattell’s scree test, we would keep three factors based on Figure @ref(fig:screePlot).</p>
+<p>There are more sophisticated ways of using a scree plot, but they usually end up at a similar decision. Examples of more sophisticated tests include parallel analysis and <a href="#vssPlot">very simple structure (VSS) plots</a>. In a parallel analysis, you examine where the eigenvalues from observed data and random data converge, so you do not retain a factor that explains less variance than would be expected by random chance.</p>
+<p>In general, my recommendation is to use Cattell’s scree test, and then test the factor solutions with plus or minus one factor. You should never accept <a href="#pca">PCA</a> components with eigenvalues less than one (or factors with eigenvalues less than zero), because they are likely to be largely composed of error. If you are using maximum likelihood factor analysis, you can compare the fit of various models with model fit criteria to see which model fits best for its parsimony. A model will always fit better when you add additional parameters or factors, so you examine if there is <em>significant</em> improvement in model fit when adding the additional factor—that is, we keep adding complexity until additional complexity does not buy us much. Always try a factor solution that is one less and one more than suggested by Cattell’s scree test to buffer your final solution because the purpose of factor analysis is to explain things and to have interpretability. Even if all rules or indicators suggest to keep X number of factors, maybe <span class="math inline">\(\pm\)</span> one factor helps clarify things. Even though factor analysis is empirical, theory and interpretatability should also inform decisions.</p>
+</section><section id="sec-interpretingAndUsingLatentFactors" class="level2" data-number="21.6"><h2 data-number="21.6" class="anchored" data-anchor-id="sec-interpretingAndUsingLatentFactors">
+<span class="header-section-number">21.6</span> Interpreting and Using Latent Factors</h2>
+<p>The next step is interpreting the model and latent factors. One data matrix can lead to many different (correct) models—you must choose one based on the factor structure and theory. Use theory to interpret the model and label the factors.</p>
+</section><section id="sec-factorAnalysisConclusion" class="level2" data-number="21.7"><h2 data-number="21.7" class="anchored" data-anchor-id="sec-factorAnalysisConclusion">
+<span class="header-section-number">21.7</span> Conclusion</h2>
+</section><section id="sec-factorAnalysisSessionInfo" class="level2" data-number="21.8"><h2 data-number="21.8" class="anchored" data-anchor-id="sec-factorAnalysisSessionInfo">
+<span class="header-section-number">21.8</span> Session Info</h2>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>R version 4.4.2 (2024-10-31)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 24.04.2 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: UTC
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] htmlwidgets_1.6.4 compiler_4.4.2    fastmap_1.2.0     cli_3.6.4        
+ [5] tools_4.4.2       htmltools_0.5.8.1 rmarkdown_2.29    knitr_1.49       
+ [9] jsonlite_1.9.0    xfun_0.51         digest_0.6.37     rlang_1.1.5      
+[13] evaluate_1.0.3   </code></pre>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Bollen2002" class="csl-entry" role="listitem">
+Bollen, K. A. (2002). Latent variables in psychology and the social sciences. <em>Annual Review of Psychology</em>, <em>53</em>(1), 605–634. <a href="https://doi.org/10.1146/annurev.psych.53.100901.135239">https://doi.org/10.1146/annurev.psych.53.100901.135239</a>
+</div>
+<div id="ref-Corston2000" class="csl-entry" role="listitem">
+Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for <span>Windows</span></em>. Wiley-Blackwell.
+</div>
+<div id="ref-Strauss2009" class="csl-entry" role="listitem">
+Strauss, M. E., &amp; Smith, G. T. (2009). Construct validity: Advances in theory and methodology. <em>Annual Review of Clinical Psychology</em>, <em>5</em>(1), 1–25. <a href="https://doi.org/10.1146/annurev.clinpsy.032408.153639">https://doi.org/10.1146/annurev.clinpsy.032408.153639</a>
+</div>
+</div>
+</section></main><!-- /main --><div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://fantasyfootballanalytics.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script><noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<h3>Feedback</h3>
+
+<div class="feedback">
+    Please consider providing feedback about this textbook, so that I can make it as helpful as possible. You can provide feedback at the following link:
+    
+    <a href="https://forms.gle/LsnVKwqmS1VuxWD18">https://forms.gle/LsnVKwqmS1VuxWD18</a>
+</div>
+
+<h3>Email Notification</h3>
+
+<div class="rmdsale">
+The online version of this book will remain open access. If you want to know when the print version of the book is for sale, enter your email below so I can let you know.
+<br><iframe src="https://docs.google.com/forms/d/e/1FAIpQLSccMKaTBXzMBmcy4myCNQnL8mCgRczh0Eg_Pw3c15bork7-xQ/viewform?embedded=true" width="640" height="750" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+
+</div>
+<script id="dsq-count-scr" src="//fantasyfootballanalytics.disqus.com/count.js" async=""></script><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/isaactpetersen\.github\.io\/Fantasy-Football-Analytics-Textbook");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./cluster-analysis.html" class="pagination-link" aria-label="Cluster Analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Cluster Analysis</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./pca.html" class="pagination-link" aria-label="Data Reduction: Principal Component Analysis">
+        <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Data Reduction: Principal Component Analysis</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>“Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R” was written by <a href="https://psychology.uiowa.edu/people/isaac-petersen">Isaac T. Petersen</a>.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/factor-analysis.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/blob/main/factor-analysis.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
