@@ -81,7 +81,7 @@ ggplot2::ggplot(
   ggplot2::theme_classic()
 ```
 
-Adapted from Ben Baldwin: https://www.nfl4th.com/articles/4th-down-research.html
+Adapted from Ben Baldwin: https://www.nfl4th.com/articles/4th-down-research.html (archived at <https://perma.cc/S5D8-3NCU>)
 
 ```{r}
 # labels on the plot
@@ -95,24 +95,43 @@ text_df <- tibble(
 
 nfl_4thdown %>%
   filter(vegas_wp > .2, between(go_boost, -10, 10), season %in% c(2014, 2024)) %>%
-  ggplot(aes(go_boost, go, color = as.factor(season))) + 
+  ggplot(
+    aes(
+      x = go_boost,
+      y = go,
+      color = as.factor(season))) + 
   ggtext::geom_richtext(
     data = text_df,   
-    aes(x, y, label = label, angle = angle), 
+    aes(
+      x,
+      y,
+      label = label,
+      angle = angle), 
     color = "black",
     fill = NA,
     label.color = NA,
     size = 5) + 
   geom_vline(xintercept = 0) +
-  stat_smooth(method = "gam", method.args = list(gamma = 1), formula = y ~ s(x, bs = "cs", k = 10), show.legend = F, se = F, linewidth = 4) +
+  stat_smooth(
+    method = "gam",
+    method.args = list(gamma = 1),
+    formula = y ~ s(x, bs = "cs", k = 10),
+    show.legend = FALSE,
+    se = FALSE,
+    linewidth = 4) +
   # this is just to get the plot to draw the full 0 to 100 range
-  geom_hline(yintercept = 100, alpha = 0) +
-  geom_hline(yintercept = 0, alpha = 0) +
+  geom_hline(
+    yintercept = 100,
+    alpha = 0) +
+  geom_hline(
+    yintercept = 0,
+    alpha = 0) +
   ggplot2::theme_classic() +
-  labs(x = "Gain in win probability by going for it",
-       y = "Go-for-it percentage",
-       subtitle = "4th down decisions in 2024 versus 2014, win prob. > 20%",
-       title = glue::glue("How <span style='color:red'>math</span> is changing football")) +
+  labs(
+    x = "Gain in win probability by going for it",
+    y = "Go-for-it percentage",
+    subtitle = "4th down decisions in 2024 versus 2014, win prob. > 20%",
+    title = glue::glue("How <span style='color:red'>math</span> is changing football")) +
   theme(
     legend.position = "none",
     plot.title = element_markdown(size = 22, hjust = 0.5),
@@ -120,20 +139,46 @@ nfl_4thdown %>%
     axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold")
   ) +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 4), limits = c(0, 100), expand = c(0,0)) +
-  scale_x_continuous(breaks = scales::pretty_breaks(n = 10), limits = c(-10, 10), expand = c(0,0)) +
-  annotate("text", x= -1.2, y= 70, label = "Should\nkick", color="black", size = 5) +
-  annotate("text", x= 1.2, y= 70, label = "Should\ngo for it", color="black", size = 5) +
+  scale_y_continuous(
+    breaks = scales::pretty_breaks(n = 4),
+    limits = c(0, 100),
+    expand = c(0,0)) +
+  scale_x_continuous(
+    breaks = scales::pretty_breaks(n = 10),
+    limits = c(-10, 10),
+    expand = c(0,0)) +
+  annotate(
+    "text",
+    x = -1.2,
+    y = 70,
+    label = "Should\nkick",
+    color = "black",
+    size = 5) +
+  annotate(
+    "text",
+    x = 1.2,
+    y = 70,
+    label = "Should\ngo for it",
+    color = "black",
+    size = 5) +
   geom_segment(
-    aes(x = -.1, y = 80, xend = -2, yend = 80),
+    aes(
+      x = -.1,
+      y = 80,
+      xend = -2,
+      yend = 80),
     arrow = arrow(length = unit(0.05, "npc")),
-    color = "black", linewidth = 2
-    ) +
+    color = "black",
+    linewidth = 2) +
   geom_segment(
-    aes(x = .1, y = 80, xend = 2, yend = 80),
+    aes(
+      x = .1,
+      y = 80,
+      xend = 2,
+      yend = 80),
     arrow = arrow(length = unit(0.05, "npc")),
-    color = "black", linewidth = 2
-  )
+    color = "black",
+    linewidth = 2)
 ```
 
 ## Conclusion {#sec-sportsCognitivePsychologyConclusion}
