@@ -149,8 +149,8 @@ ggplot2::ggplot(
     limits = c(0, NA)
   ) +
   scale_x_continuous(
-    minor_breaks = seq(1995, 3000, 1),
-    breaks = seq(1995, 3000, 5)
+    minor_breaks = seq(0, 3000, 1),
+    breaks = seq(0, 3000, 5)
   ) +
   labs(
     x = "Season",
@@ -169,7 +169,9 @@ As depicted in the @fig-goForItPercentageByWinProbChange (which was adapted from
 
 # labels on the plot
 text_df <- tibble(
-  label = c("NFL coaches<br>in <span style='color:#00BFC4'>**2021**</span>", "NFL coaches<br>in <span style='color:#F8766D'>**2017**</span>"),
+  label = c(
+    "NFL coaches<br>in <span style='color:#00BFC4'>**2021**</span>",
+    "NFL coaches<br>in <span style='color:#F8766D'>**2017**</span>"),
   x = c(6, 8.2),
   y = c(90, 37),
   angle = c(10, 10),
@@ -177,7 +179,10 @@ text_df <- tibble(
 )
 
 nfl_4thdown %>%
-  filter(vegas_wp > .2, between(go_boost, -10, 10), season %in% c(2017, 2021)) %>%
+  filter(
+    vegas_wp > .2,
+    between(go_boost, -10, 10),
+    season %in% c(2017, 2021)) %>%
   ggplot(
     aes(
       x = go_boost,
@@ -217,19 +222,29 @@ nfl_4thdown %>%
     title = glue::glue("How <span style='color:red'>math</span> is changing football")) +
   theme(
     legend.position = "none",
-    plot.title = element_markdown(size = 22, hjust = 0.5),
-    plot.subtitle = element_markdown(size = 14, hjust = 0.5),
-    axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 14, face = "bold", angle = 0, vjust = 0.5) # horizontal y-axis title
+    plot.title = element_markdown(
+      size = 22,
+      hjust = 0.5),
+    plot.subtitle = element_markdown(
+      size = 14,
+      hjust = 0.5),
+    axis.title.x = element_text(
+      size = 14,
+      face = "bold"),
+    axis.title.y = element_text(
+      size = 14,
+      face = "bold",
+      angle = 0, # horizontal y-axis title
+      vjust = 0.5)
   ) +
   scale_y_continuous(
     breaks = scales::pretty_breaks(n = 4),
     limits = c(0, 100),
-    expand = c(0,0)) +
+    expand = c(0, 0)) +
   scale_x_continuous(
     breaks = scales::pretty_breaks(n = 10),
     limits = c(-10, 10),
-    expand = c(0,0)) +
+    expand = c(0, 0)) +
   annotate(
     "text",
     x = -1.2,
@@ -244,21 +259,21 @@ nfl_4thdown %>%
     label = "Should\ngo for it",
     color = "black",
     size = 5) +
-  geom_segment(
-    aes(
-      x = -.1,
-      y = 80,
-      xend = -2,
-      yend = 80),
+  annotate(
+    "segment",
+    x = -.1,
+    y = 80,
+    xend = -2,
+    yend = 80,
     arrow = arrow(length = unit(0.05, "npc")),
     color = "black",
     linewidth = 2) +
-  geom_segment(
-    aes(
-      x = .1,
-      y = 80,
-      xend = 2,
-      yend = 80),
+  annotate(
+    "segment",
+    x = .1,
+    y = 80,
+    xend = 2,
+    yend = 80,
     arrow = arrow(length = unit(0.05, "npc")),
     color = "black",
     linewidth = 2)
