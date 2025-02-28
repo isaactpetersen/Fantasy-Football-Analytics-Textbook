@@ -56,22 +56,21 @@ Moreover, star players rest more games.
 Here is an article on how Shane Battier, who was not the quickest, fastest, or most athletic player, used analytics successfully to guard players who were quicker or more athletic than him: <https://www.nytimes.com/2009/02/15/magazine/15Battier-t.html> (archived at <https://web.archive.org/web/20250219225627/https://www.nytimes.com/2009/02/15/magazine/15Battier-t.html>).
 
 Football has also seen greater use of analytics, although its uptake has been somewhat slower than in many other sports.
-When asked about how he makes the decision about whether to go for two after a touchdown, Steelers Head Coach Mike Tomlin stated:
+When asked about how he makes the decision about whether to go for a two-point conversion after a touchdown, Steelers Head Coach Mike Tomlin stated:
 
 > We work a menu of plays in that area over the course of the week.
 > We rank them at the latter part of the week, and then we get into the stadium and we play it by ear.
-> A lot of it has to do with the feel or the flow of the game.
-> Maybe what personnel group we think they're going to match our personnel group with.
+> A lot of it has to do with the feel or the flow of the game—maybe what personnel group we think they're going to match our personnel group with.
 > As we start to play and work the ball down the field on the drives that produce the touchdowns before the point after, we have a little inclination of what their personality might be at least in terms of matching our personnel.
 > All of those things weigh into the decision.
 > It legitimately is a feel thing.
 > I think that's why you play the game.
-> You can take analytics to baseball and things like that but football is always going to be football.
+> You can take analytics to baseball and things like that, but football is always going to be football.
 > I got a lot of respect for analytics and numbers, but I'm not going to make judgments based on those numbers.
 > The game is the game.
 > It's an emotional one played by emotional and driven men.
 > That's an element of the game you can't measure.
-> Often times decisions such as that weigh heavily into the equation.
+> Oftentimes, decisions such as that weigh heavily into the equation.
 > 
 > --- [Steelers Head Coach Mike Tomlin, 2015](https://steelersdepot.com/2015/09/tomlin-prefers-feel-over-analytics/) (archived at <https://perma.cc/7CHJ-BTWX>)
 
@@ -86,7 +85,7 @@ Some dismiss analytics entirely.
 
 ::: {.content-visible when-format="html:js"}
 
-For instance, here is a video clip of a football commentator, Mike Patrick, making fun of people who compile statistics for informing decision-making in football, calling the people who compile the numbers "guys who wear socks with flip-flops."
+For instance, here is a video clip of a football commentator, Mike Patrick, making fun of people who compile statistics for informing decision-making in football, calling the people who compile the numbers "guys who wear socks with flip-flops", suggesting that people who compile analytics to make recommendations in football are out of touch with the realities of football and do not have the same on-the-field understanding as the coaches and players.
 
 ![Football Commentator Making Fun of Analytics in Football. From: <https://streamable.com/1hw8>.](images/commentatorOnAnalytics.mp4){width=100%}\
 
@@ -107,7 +106,14 @@ As noted in @sec-cognitiveBiasesRiskAversion, when it is possible to experience 
 According to this idea, in the case of failing to successfully convert on fourth down, coaches do not want to have to defend their decision to go for it to the media or the owner or general manager.
 That is, they may often play *not to lose*, rather than to win, in order to keep their job.
 
+Rates of going for it on fourth down were low until 2017.
+After the 2017 season, rates of going for it on fourth down increased dramatically, as depicted in @fig-4thDownAttemptsByYear.
+
 ```{r}
+#| label: fig-4thDownAttemptsByYear
+#| fig-cap: "The Proportion of Fourth Downs That are Attempts to go for it (Rather Than Punts or Field Goals)."
+#| fig-alt: "The Proportion of Fourth Downs That are Attempts to go for it (Rather Than Punts or Field Goals)."
+
 nfl_pbp4thDown <- nfl_pbp %>% 
   filter(down == 4) %>% 
   filter(!(play_type %in% c("no_play","qb_kneel")))
@@ -142,20 +148,30 @@ ggplot2::ggplot(
   scale_y_continuous(
     limits = c(0, NA)
   ) +
+  scale_x_continuous(
+    minor_breaks = seq(1995, 3000, 1),
+    breaks = seq(1995, 3000, 5)
+  ) +
   ggplot2::labs(
     x = "Season",
     y = "Proportion of 4th Down Plays that are Attempts (to Get the First Down)",
     title = "4th Down Attempts (Proportion) by Season",
   ) +
-  ggplot2::theme_classic()
+  ggplot2::theme_classic() +
+  theme()
 ```
 
-Adapted from Ben Baldwin: <https://www.nfl4th.com/articles/4th-down-research.html> (archived at <https://perma.cc/S5D8-3NCU>)
+
+As depicted in the @fig-goForItPercentageByWinProbChange (which was adapted from a [figure by Ben Baldwin](https://www.nfl4th.com/articles/4th-down-research.html); archived at <https://perma.cc/S5D8-3NCU>), teams went for it on fourth down about twice as often in 2021 compared to 2017, when teams would increase their win probably by going for it.
 
 ```{r}
+#| label: fig-goForItPercentageByWinProbChange
+#| fig-cap: "Go-For-It Percentage on Fourth Downs in 2021 Versus 2017 as a Function of the Change in Win Probability for Going for it. To remove desperation fourth down attempts, the figure focuses on just plays in which the estimated win probability for the offensive team (given the current situation at the start of the given play and incorporating the pre-game Vegas line) was greater than 20%."
+#| fig-alt: "Go-For-It Percentage on Fourth Downs in 2021 Versus 2017 as a Function of the Change in Win Probability for Going for it. To remove desperation fourth down attempts, the figure focuses on just plays in which the estimated win probability for the offensive team (given the current situation at the start of the given play and incorporating the pre-game Vegas line) was greater than 20%."
+
 # labels on the plot
 text_df <- tibble(
-  label = c("NFL coaches<br>in <span style='color:#00BFC4'>**2024**</span>", "NFL coaches<br>in <span style='color:#F8766D'>**2014**</span>"),
+  label = c("NFL coaches<br>in <span style='color:#00BFC4'>**2021**</span>", "NFL coaches<br>in <span style='color:#F8766D'>**2017**</span>"),
   x = c(6, 8.2),
   y = c(80, 37),
   angle = c(10, 10),
@@ -163,23 +179,12 @@ text_df <- tibble(
 )
 
 nfl_4thdown %>%
-  filter(vegas_wp > .2, between(go_boost, -10, 10), season %in% c(2014, 2024)) %>%
+  filter(vegas_wp > .2, between(go_boost, -10, 10), season %in% c(2017, 2021)) %>%
   ggplot(
     aes(
       x = go_boost,
       y = go,
       color = as.factor(season))) + 
-  ggtext::geom_richtext(
-    data = text_df,
-    aes(
-      x,
-      y,
-      label = label,
-      angle = angle),
-    color = "black",
-    fill = NA,
-    label.color = NA,
-    size = 5) + 
   geom_vline(xintercept = 0) +
   stat_smooth(
     method = "gam",
@@ -195,11 +200,22 @@ nfl_4thdown %>%
   geom_hline(
     yintercept = 0,
     alpha = 0) +
+  ggtext::geom_richtext(
+    data = text_df,
+    aes(
+      x,
+      y,
+      label = label,
+      angle = angle),
+    color = "black",
+    fill = NA,
+    label.color = NA,
+    size = 5) + 
   ggplot2::theme_classic() +
   labs(
     x = "Gain in win probability by going for it",
     y = "Go-for-it percentage",
-    subtitle = "4th down decisions in 2024 versus 2014, win prob. > 20%",
+    subtitle = "4th down decisions in 2021 versus 2017, win prob. > 20%",
     title = glue::glue("How <span style='color:red'>math</span> is changing football")) +
   theme(
     legend.position = "none",
