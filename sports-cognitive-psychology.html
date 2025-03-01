@@ -515,8 +515,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span id="cb3-33"><a href="#cb3-33"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)</span>
 <span id="cb3-34"><a href="#cb3-34"></a>  ) <span class="sc">+</span></span>
 <span id="cb3-35"><a href="#cb3-35"></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb3-36"><a href="#cb3-36"></a>    <span class="at">minor_breaks =</span> <span class="fu">seq</span>(<span class="dv">1995</span>, <span class="dv">3000</span>, <span class="dv">1</span>),</span>
-<span id="cb3-37"><a href="#cb3-37"></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">1995</span>, <span class="dv">3000</span>, <span class="dv">5</span>)</span>
+<span id="cb3-36"><a href="#cb3-36"></a>    <span class="at">minor_breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3000</span>, <span class="dv">1</span>),</span>
+<span id="cb3-37"><a href="#cb3-37"></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3000</span>, <span class="dv">5</span>)</span>
 <span id="cb3-38"><a href="#cb3-38"></a>  ) <span class="sc">+</span></span>
 <span id="cb3-39"><a href="#cb3-39"></a>  <span class="fu">labs</span>(</span>
 <span id="cb3-40"><a href="#cb3-40"></a>    <span class="at">x =</span> <span class="st">"Season"</span>,</span>
@@ -539,99 +539,114 @@ Figure&nbsp;25.1: The Proportion of Fourth Downs That are Attempts to go for it 
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># labels on the plot</span></span>
 <span id="cb4-2"><a href="#cb4-2"></a>text_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb4-3"><a href="#cb4-3"></a>  <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#00BFC4'&gt;**2021**&lt;/span&gt;"</span>, <span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#F8766D'&gt;**2017**&lt;/span&gt;"</span>),</span>
-<span id="cb4-4"><a href="#cb4-4"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="fl">8.2</span>),</span>
-<span id="cb4-5"><a href="#cb4-5"></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">90</span>, <span class="dv">37</span>),</span>
-<span id="cb4-6"><a href="#cb4-6"></a>  <span class="at">angle =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>),</span>
-<span id="cb4-7"><a href="#cb4-7"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"black"</span>)</span>
-<span id="cb4-8"><a href="#cb4-8"></a>)</span>
-<span id="cb4-9"><a href="#cb4-9"></a></span>
-<span id="cb4-10"><a href="#cb4-10"></a>nfl_4thdown <span class="sc">%&gt;%</span></span>
-<span id="cb4-11"><a href="#cb4-11"></a>  <span class="fu">filter</span>(vegas_wp <span class="sc">&gt;</span> .<span class="dv">2</span>, <span class="fu">between</span>(go_boost, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>), season <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2017</span>, <span class="dv">2021</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb4-12"><a href="#cb4-12"></a>  <span class="fu">ggplot</span>(</span>
-<span id="cb4-13"><a href="#cb4-13"></a>    <span class="fu">aes</span>(</span>
-<span id="cb4-14"><a href="#cb4-14"></a>      <span class="at">x =</span> go_boost,</span>
-<span id="cb4-15"><a href="#cb4-15"></a>      <span class="at">y =</span> go,</span>
-<span id="cb4-16"><a href="#cb4-16"></a>      <span class="at">color =</span> <span class="fu">as.factor</span>(season))) <span class="sc">+</span> </span>
-<span id="cb4-17"><a href="#cb4-17"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb4-18"><a href="#cb4-18"></a>  <span class="fu">stat_smooth</span>(</span>
-<span id="cb4-19"><a href="#cb4-19"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
-<span id="cb4-20"><a href="#cb4-20"></a>    <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">gamma =</span> <span class="dv">1</span>),</span>
-<span id="cb4-21"><a href="#cb4-21"></a>    <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x, <span class="at">bs =</span> <span class="st">"cs"</span>, <span class="at">k =</span> <span class="dv">10</span>),</span>
-<span id="cb4-22"><a href="#cb4-22"></a>    <span class="at">show.legend =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb4-23"><a href="#cb4-23"></a>    <span class="at">se =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb4-24"><a href="#cb4-24"></a>    <span class="at">linewidth =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
-<span id="cb4-25"><a href="#cb4-25"></a>  <span class="co"># this is just to get the plot to draw the full 0 to 100 range</span></span>
-<span id="cb4-26"><a href="#cb4-26"></a>  <span class="fu">geom_hline</span>(</span>
-<span id="cb4-27"><a href="#cb4-27"></a>    <span class="at">yintercept =</span> <span class="dv">100</span>,</span>
-<span id="cb4-28"><a href="#cb4-28"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb4-29"><a href="#cb4-29"></a>  <span class="fu">geom_hline</span>(</span>
-<span id="cb4-30"><a href="#cb4-30"></a>    <span class="at">yintercept =</span> <span class="dv">0</span>,</span>
-<span id="cb4-31"><a href="#cb4-31"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb4-32"><a href="#cb4-32"></a>  ggtext<span class="sc">::</span><span class="fu">geom_richtext</span>(</span>
-<span id="cb4-33"><a href="#cb4-33"></a>    <span class="at">data =</span> text_df,</span>
-<span id="cb4-34"><a href="#cb4-34"></a>    <span class="fu">aes</span>(</span>
-<span id="cb4-35"><a href="#cb4-35"></a>      x,</span>
-<span id="cb4-36"><a href="#cb4-36"></a>      y,</span>
-<span id="cb4-37"><a href="#cb4-37"></a>      <span class="at">label =</span> label,</span>
-<span id="cb4-38"><a href="#cb4-38"></a>      <span class="at">angle =</span> angle),</span>
-<span id="cb4-39"><a href="#cb4-39"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb4-40"><a href="#cb4-40"></a>    <span class="at">fill =</span> <span class="cn">NA</span>,</span>
-<span id="cb4-41"><a href="#cb4-41"></a>    <span class="at">label.color =</span> <span class="cn">NA</span>,</span>
-<span id="cb4-42"><a href="#cb4-42"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span> </span>
-<span id="cb4-43"><a href="#cb4-43"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb4-44"><a href="#cb4-44"></a>  <span class="fu">labs</span>(</span>
-<span id="cb4-45"><a href="#cb4-45"></a>    <span class="at">x =</span> <span class="st">"Gain in win probability by going for it"</span>,</span>
-<span id="cb4-46"><a href="#cb4-46"></a>    <span class="at">y =</span> <span class="st">"Go-for-it percentage"</span>,</span>
-<span id="cb4-47"><a href="#cb4-47"></a>    <span class="at">subtitle =</span> <span class="st">"4th down decisions in 2021 versus 2017, win prob. &gt; 20%"</span>,</span>
-<span id="cb4-48"><a href="#cb4-48"></a>    <span class="at">title =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"How &lt;span style='color:red'&gt;math&lt;/span&gt; is changing football"</span>)) <span class="sc">+</span></span>
-<span id="cb4-49"><a href="#cb4-49"></a>  <span class="fu">theme</span>(</span>
-<span id="cb4-50"><a href="#cb4-50"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
-<span id="cb4-51"><a href="#cb4-51"></a>    <span class="at">plot.title =</span> <span class="fu">element_markdown</span>(<span class="at">size =</span> <span class="dv">22</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
-<span id="cb4-52"><a href="#cb4-52"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_markdown</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
-<span id="cb4-53"><a href="#cb4-53"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
-<span id="cb4-54"><a href="#cb4-54"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>) <span class="co"># horizontal y-axis title</span></span>
-<span id="cb4-55"><a href="#cb4-55"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-56"><a href="#cb4-56"></a>  <span class="fu">scale_y_continuous</span>(</span>
-<span id="cb4-57"><a href="#cb4-57"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">4</span>),</span>
-<span id="cb4-58"><a href="#cb4-58"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>),</span>
-<span id="cb4-59"><a href="#cb4-59"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb4-60"><a href="#cb4-60"></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb4-61"><a href="#cb4-61"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
-<span id="cb4-62"><a href="#cb4-62"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
-<span id="cb4-63"><a href="#cb4-63"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb4-64"><a href="#cb4-64"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb4-65"><a href="#cb4-65"></a>    <span class="st">"text"</span>,</span>
-<span id="cb4-66"><a href="#cb4-66"></a>    <span class="at">x =</span> <span class="sc">-</span><span class="fl">1.2</span>,</span>
-<span id="cb4-67"><a href="#cb4-67"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
-<span id="cb4-68"><a href="#cb4-68"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">kick"</span>,</span>
-<span id="cb4-69"><a href="#cb4-69"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb4-70"><a href="#cb4-70"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb4-71"><a href="#cb4-71"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb4-72"><a href="#cb4-72"></a>    <span class="st">"text"</span>,</span>
-<span id="cb4-73"><a href="#cb4-73"></a>    <span class="at">x =</span> <span class="fl">1.2</span>,</span>
-<span id="cb4-74"><a href="#cb4-74"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
-<span id="cb4-75"><a href="#cb4-75"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">go for it"</span>,</span>
-<span id="cb4-76"><a href="#cb4-76"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb4-77"><a href="#cb4-77"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb4-78"><a href="#cb4-78"></a>  <span class="fu">geom_segment</span>(</span>
-<span id="cb4-79"><a href="#cb4-79"></a>    <span class="fu">aes</span>(</span>
-<span id="cb4-80"><a href="#cb4-80"></a>      <span class="at">x =</span> <span class="sc">-</span>.<span class="dv">1</span>,</span>
-<span id="cb4-81"><a href="#cb4-81"></a>      <span class="at">y =</span> <span class="dv">80</span>,</span>
-<span id="cb4-82"><a href="#cb4-82"></a>      <span class="at">xend =</span> <span class="sc">-</span><span class="dv">2</span>,</span>
-<span id="cb4-83"><a href="#cb4-83"></a>      <span class="at">yend =</span> <span class="dv">80</span>),</span>
-<span id="cb4-84"><a href="#cb4-84"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
-<span id="cb4-85"><a href="#cb4-85"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb4-86"><a href="#cb4-86"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb4-87"><a href="#cb4-87"></a>  <span class="fu">geom_segment</span>(</span>
-<span id="cb4-88"><a href="#cb4-88"></a>    <span class="fu">aes</span>(</span>
-<span id="cb4-89"><a href="#cb4-89"></a>      <span class="at">x =</span> .<span class="dv">1</span>,</span>
-<span id="cb4-90"><a href="#cb4-90"></a>      <span class="at">y =</span> <span class="dv">80</span>,</span>
-<span id="cb4-91"><a href="#cb4-91"></a>      <span class="at">xend =</span> <span class="dv">2</span>,</span>
-<span id="cb4-92"><a href="#cb4-92"></a>      <span class="at">yend =</span> <span class="dv">80</span>),</span>
-<span id="cb4-93"><a href="#cb4-93"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
-<span id="cb4-94"><a href="#cb4-94"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb4-95"><a href="#cb4-95"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="at">label =</span> <span class="fu">c</span>(</span>
+<span id="cb4-4"><a href="#cb4-4"></a>    <span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#00BFC4'&gt;**2021**&lt;/span&gt;"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5"></a>    <span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#F8766D'&gt;**2017**&lt;/span&gt;"</span>),</span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="fl">8.2</span>),</span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">90</span>, <span class="dv">37</span>),</span>
+<span id="cb4-8"><a href="#cb4-8"></a>  <span class="at">angle =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"black"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11"></a></span>
+<span id="cb4-12"><a href="#cb4-12"></a>nfl_4thdown <span class="sc">%&gt;%</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>  <span class="fu">filter</span>(</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    vegas_wp <span class="sc">&gt;</span> .<span class="dv">2</span>,</span>
+<span id="cb4-15"><a href="#cb4-15"></a>    <span class="fu">between</span>(go_boost, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb4-16"><a href="#cb4-16"></a>    season <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2017</span>, <span class="dv">2021</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb4-18"><a href="#cb4-18"></a>    <span class="fu">aes</span>(</span>
+<span id="cb4-19"><a href="#cb4-19"></a>      <span class="at">x =</span> go_boost,</span>
+<span id="cb4-20"><a href="#cb4-20"></a>      <span class="at">y =</span> go,</span>
+<span id="cb4-21"><a href="#cb4-21"></a>      <span class="at">color =</span> <span class="fu">as.factor</span>(season))) <span class="sc">+</span> </span>
+<span id="cb4-22"><a href="#cb4-22"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb4-23"><a href="#cb4-23"></a>  <span class="fu">stat_smooth</span>(</span>
+<span id="cb4-24"><a href="#cb4-24"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb4-25"><a href="#cb4-25"></a>    <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">gamma =</span> <span class="dv">1</span>),</span>
+<span id="cb4-26"><a href="#cb4-26"></a>    <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x, <span class="at">bs =</span> <span class="st">"cs"</span>, <span class="at">k =</span> <span class="dv">10</span>),</span>
+<span id="cb4-27"><a href="#cb4-27"></a>    <span class="at">show.legend =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb4-28"><a href="#cb4-28"></a>    <span class="at">se =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb4-29"><a href="#cb4-29"></a>    <span class="at">linewidth =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb4-30"><a href="#cb4-30"></a>  <span class="co"># this is just to get the plot to draw the full 0 to 100 range</span></span>
+<span id="cb4-31"><a href="#cb4-31"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb4-32"><a href="#cb4-32"></a>    <span class="at">yintercept =</span> <span class="dv">100</span>,</span>
+<span id="cb4-33"><a href="#cb4-33"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb4-34"><a href="#cb4-34"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb4-35"><a href="#cb4-35"></a>    <span class="at">yintercept =</span> <span class="dv">0</span>,</span>
+<span id="cb4-36"><a href="#cb4-36"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb4-37"><a href="#cb4-37"></a>  ggtext<span class="sc">::</span><span class="fu">geom_richtext</span>(</span>
+<span id="cb4-38"><a href="#cb4-38"></a>    <span class="at">data =</span> text_df,</span>
+<span id="cb4-39"><a href="#cb4-39"></a>    <span class="fu">aes</span>(</span>
+<span id="cb4-40"><a href="#cb4-40"></a>      x,</span>
+<span id="cb4-41"><a href="#cb4-41"></a>      y,</span>
+<span id="cb4-42"><a href="#cb4-42"></a>      <span class="at">label =</span> label,</span>
+<span id="cb4-43"><a href="#cb4-43"></a>      <span class="at">angle =</span> angle),</span>
+<span id="cb4-44"><a href="#cb4-44"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-45"><a href="#cb4-45"></a>    <span class="at">fill =</span> <span class="cn">NA</span>,</span>
+<span id="cb4-46"><a href="#cb4-46"></a>    <span class="at">label.color =</span> <span class="cn">NA</span>,</span>
+<span id="cb4-47"><a href="#cb4-47"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span> </span>
+<span id="cb4-48"><a href="#cb4-48"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb4-49"><a href="#cb4-49"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-50"><a href="#cb4-50"></a>    <span class="at">x =</span> <span class="st">"Gain in win probability by going for it"</span>,</span>
+<span id="cb4-51"><a href="#cb4-51"></a>    <span class="at">y =</span> <span class="st">"Go-for-it percentage"</span>,</span>
+<span id="cb4-52"><a href="#cb4-52"></a>    <span class="at">subtitle =</span> <span class="st">"4th down decisions in 2021 versus 2017, win prob. &gt; 20%"</span>,</span>
+<span id="cb4-53"><a href="#cb4-53"></a>    <span class="at">title =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"How &lt;span style='color:red'&gt;math&lt;/span&gt; is changing football"</span>)) <span class="sc">+</span></span>
+<span id="cb4-54"><a href="#cb4-54"></a>  <span class="fu">theme</span>(</span>
+<span id="cb4-55"><a href="#cb4-55"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb4-56"><a href="#cb4-56"></a>    <span class="at">plot.title =</span> <span class="fu">element_markdown</span>(</span>
+<span id="cb4-57"><a href="#cb4-57"></a>      <span class="at">size =</span> <span class="dv">22</span>,</span>
+<span id="cb4-58"><a href="#cb4-58"></a>      <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb4-59"><a href="#cb4-59"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_markdown</span>(</span>
+<span id="cb4-60"><a href="#cb4-60"></a>      <span class="at">size =</span> <span class="dv">14</span>,</span>
+<span id="cb4-61"><a href="#cb4-61"></a>      <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb4-62"><a href="#cb4-62"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(</span>
+<span id="cb4-63"><a href="#cb4-63"></a>      <span class="at">size =</span> <span class="dv">14</span>,</span>
+<span id="cb4-64"><a href="#cb4-64"></a>      <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb4-65"><a href="#cb4-65"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(</span>
+<span id="cb4-66"><a href="#cb4-66"></a>      <span class="at">size =</span> <span class="dv">14</span>,</span>
+<span id="cb4-67"><a href="#cb4-67"></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
+<span id="cb4-68"><a href="#cb4-68"></a>      <span class="at">angle =</span> <span class="dv">0</span>, <span class="co"># horizontal y-axis title</span></span>
+<span id="cb4-69"><a href="#cb4-69"></a>      <span class="at">vjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb4-70"><a href="#cb4-70"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-71"><a href="#cb4-71"></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb4-72"><a href="#cb4-72"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">4</span>),</span>
+<span id="cb4-73"><a href="#cb4-73"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>),</span>
+<span id="cb4-74"><a href="#cb4-74"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb4-75"><a href="#cb4-75"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb4-76"><a href="#cb4-76"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
+<span id="cb4-77"><a href="#cb4-77"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb4-78"><a href="#cb4-78"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb4-79"><a href="#cb4-79"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-80"><a href="#cb4-80"></a>    <span class="st">"text"</span>,</span>
+<span id="cb4-81"><a href="#cb4-81"></a>    <span class="at">x =</span> <span class="sc">-</span><span class="fl">1.2</span>,</span>
+<span id="cb4-82"><a href="#cb4-82"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
+<span id="cb4-83"><a href="#cb4-83"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">kick"</span>,</span>
+<span id="cb4-84"><a href="#cb4-84"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-85"><a href="#cb4-85"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb4-86"><a href="#cb4-86"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-87"><a href="#cb4-87"></a>    <span class="st">"text"</span>,</span>
+<span id="cb4-88"><a href="#cb4-88"></a>    <span class="at">x =</span> <span class="fl">1.2</span>,</span>
+<span id="cb4-89"><a href="#cb4-89"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
+<span id="cb4-90"><a href="#cb4-90"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">go for it"</span>,</span>
+<span id="cb4-91"><a href="#cb4-91"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-92"><a href="#cb4-92"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb4-93"><a href="#cb4-93"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-94"><a href="#cb4-94"></a>    <span class="st">"segment"</span>,</span>
+<span id="cb4-95"><a href="#cb4-95"></a>    <span class="at">x =</span> <span class="sc">-</span>.<span class="dv">1</span>,</span>
+<span id="cb4-96"><a href="#cb4-96"></a>    <span class="at">y =</span> <span class="dv">80</span>,</span>
+<span id="cb4-97"><a href="#cb4-97"></a>    <span class="at">xend =</span> <span class="sc">-</span><span class="dv">2</span>,</span>
+<span id="cb4-98"><a href="#cb4-98"></a>    <span class="at">yend =</span> <span class="dv">80</span>,</span>
+<span id="cb4-99"><a href="#cb4-99"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
+<span id="cb4-100"><a href="#cb4-100"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-101"><a href="#cb4-101"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb4-102"><a href="#cb4-102"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-103"><a href="#cb4-103"></a>    <span class="st">"segment"</span>,</span>
+<span id="cb4-104"><a href="#cb4-104"></a>    <span class="at">x =</span> .<span class="dv">1</span>,</span>
+<span id="cb4-105"><a href="#cb4-105"></a>    <span class="at">y =</span> <span class="dv">80</span>,</span>
+<span id="cb4-106"><a href="#cb4-106"></a>    <span class="at">xend =</span> <span class="dv">2</span>,</span>
+<span id="cb4-107"><a href="#cb4-107"></a>    <span class="at">yend =</span> <span class="dv">80</span>,</span>
+<span id="cb4-108"><a href="#cb4-108"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
+<span id="cb4-109"><a href="#cb4-109"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-110"><a href="#cb4-110"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-goForItPercentageByWinProbChange" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Go-For-It Percentage on Fourth Downs in 2021 Versus 2017 as a Function of the Change in Win Probability for Going for it. To remove desperation fourth down attempts, the figure focuses on just plays in which the estimated win probability for the offensive team (given the current situation at the start of the given play and incorporating the pre-game Vegas line) was greater than 20%.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-goForItPercentageByWinProbChange-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
