@@ -696,6 +696,8 @@ ggplotly(
 
 #### Null Model {#sec-fantasyPointsByAgeExperienceModelsRegressionNull}
 
+We can estimate model fit using the `MuMIn` package [@R-MuMIn]:
+
 ```{r}
 pointsPerSeason_nullModel <- lm(
   fantasyPoints ~ 1,
@@ -835,6 +837,8 @@ ggplot2::ggplot(
 
 #### Compare Models {#sec-fantasyPointsByAgeExperienceModelsRegressionCompare}
 
+We compare models using the `bbmle` [@R-bbmle] and `MuMIn` [@R-MuMIn] packages.
+
 ```{r}
 anova(
   pointsPerSeason_linearRegression,
@@ -879,6 +883,8 @@ logLik(pointsPerSeason_quadraticRegression)
 By accounting for which player each observation comes from using mixed models, we can examine the association between age and fantasy points in a more meaningful way, without violating the [assumption in multiple regression](#sec-assumptionsRegression) that the observations are independent (i.e., that the residuals are uncorrelated).
 
 #### Random Intercepts Model {#sec-fantasyPointsByAgeExperienceModelsIntercepts}
+
+We estimate the multilevel models using the `lmerTest` package [@R-lmerTest], which is an extension of the `lme4` package [@R-lme4; @Bates2015_packages]:
 
 ```{r}
 pointsPerSeason_randomIntercepts <- lmerTest::lmer(
@@ -988,6 +994,8 @@ ggplotly(
 ```
 
 #### Random Intercepts Model with Position as Fixed-Effect Predictor {#sec-fantasyPointsByAgeExperienceModelsPosition}
+
+We use the `emmeans` package [@R-emmeans] to determine the model-implied number of points per season by position.
 
 ```{r}
 pointsPerSeason_position <- lmerTest::lmer(
@@ -1672,6 +1680,8 @@ bbmle::AICtab(lmAndMixedModels)
 
 ###### Corrected Akaike Information Criterion (AICc) {#sec-fantasyPointsByAgeExperienceModelsAgeCompareAICc}
 
+We compute model fit using the using the `AICcmodavg` [@R-AICcmodavg], `bbmle` [@R-bbmle], and `MuMIn` [@R-MuMIn] packages
+
 ```{r}
 #AICcmodavg::aictab(lmVsMixedModel) # throws error (can't mix lm with lmer)
 bbmle::AICctab(lmVsMixedModel)
@@ -1941,6 +1951,8 @@ ggplot2::ggplot(
   theme_classic()
 ```
 
+We can use the `fitdistrplus` package [@R-fitdistrplus; @DelignetteMuller2015_packages]:
+
 ```{r}
 #| label: fig-cullenFreyGraphy
 #| fig-cap: "Cullen and Frey Graph."
@@ -2035,7 +2047,8 @@ Because the response distribution (i.e., fantasy points) is positively skewed, w
 
 #### Specify Model Formula {#sec-fantasyPointsByAgeExperienceModelsBayesianFormula}
 
-Information about smooth terms in the `mgcv` package is provided at the following link: <https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.terms.html>.
+Information about smooth terms in the `mgcv` package [@R-mgcv; @Wood2017] is provided at the following link: <https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.terms.html>.
+We estimate the model using the `brms` package [@R-brms; @Buerkner2017_packages; @Buerkner2018_packages], which provides an interface to the `rstan` package [@R-rstan].
 
 Specify model formula:
 
@@ -2059,6 +2072,8 @@ If you just want to save time and load the model object instead of running the m
 load(url("https://osf.io/download/q6rjf/"))
 ```
 :::
+
+We use the `cmdstanr` backend [@R-cmdstanr] and threading using the `parellely` package [@R-parallelly] for parallel (faster) processing:
 
 ```{r}
 #| eval: false
