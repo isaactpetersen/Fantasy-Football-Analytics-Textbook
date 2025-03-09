@@ -334,6 +334,8 @@ nfl_advancedStatsPFR_seasonal %>%
 
 ### Merge Data {#sec-machineLearningMergeData}
 
+To merge data, we use the `powerjoin` package [@R-powerjoin]:
+
 ```{r}
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 #-todo: remove redundant variables
@@ -605,6 +607,7 @@ Below, we impute the training data (and all data) separately by position.
 We then use the imputed training data to make out-of-sample predictions to fill in the missing data for the testing data.
 We do not want to impute the training and testing data together so that we can keep them separate for the purposes of cross-validation.
 However, we impute all data (training and test data together) for purposes of making out-of-sample predictions from the machine learning models to predict players' performance next season (when actuals are not yet available for evaluating their accuracy).
+To impute data, we use the `missRanger` package [@R-missRanger].
 
 ::: {#nte-machineLearningImputeMissingData .callout-note title="Impute missing data for machine learning"}
 Note: the following code takes a while to run.
@@ -846,6 +849,9 @@ num_cores
 
 #### Cross-Sectional Data {#sec-randomForestCrossSectionalData}
 
+We use the `caret` package [@R-caret].
+We use the `parallel` [@R-parallel] and `doParallel` [@R-doParallel] packages for parallel (faster) processing.
+
 ```{r}
 cl <- parallel::makeCluster(num_cores)
 doParallel::registerDoParallel(cl)
@@ -988,6 +994,8 @@ smerf$OOB # OOB error at each iteration
 
 ### Combining Tree-Boosting with Mixed Models {#sec-treeBoosting}
 
+To combine tree-boosting with mixed models, we use the `gpboost` package [@gpboost].
+
 Adapted from here:
 <https://towardsdatascience.com/mixed-effects-machine-learning-for-longitudinal-panel-data-with-gpboost-part-iii-523bb38effc>
 
@@ -1037,7 +1045,7 @@ param_grid_qb <- list(
 
 other_params_qb <- list(num_leaves = 2^10)
 
-gp_model_qb <- GPModel(
+gp_model_qb <- gpboost::GPModel(
   group_data = data_train_qb_matrix[,"gsis_id"],
   likelihood = model_likelihood,
   group_rand_coef_data = cbind(
@@ -1045,13 +1053,13 @@ gp_model_qb <- GPModel(
     data_train_qb_matrix[,"ageCentered20Quadratic"]),
   ind_effect_group_rand_coef = c(1,1))
 
-gp_data_qb <- gpb.Dataset(
+gp_data_qb <- gpboost::gpb.Dataset(
   data = data_train_qb_matrix[,pred_vars_qb],
   categorical_feature = pred_vars_qb_categorical,
   label = data_train_qb_matrix[,"fantasyPoints_lag"])
 
 # Find optimal tuning parameters
-opt_params_qb <- gpb.grid.search.tune.parameters(
+opt_params_qb <- gpboost::gpb.grid.search.tune.parameters(
   param_grid = param_grid_qb,
   params = other_params_qb,
   num_try_random = NULL,
@@ -1069,7 +1077,7 @@ opt_params_qb
 #### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
 
 ```{r}
-gp_model_qb <- GPModel(
+gp_model_qb <- gpboost::GPModel(
   group_data = data_train_qb_matrix[,"gsis_id"],
   likelihood = model_likelihood,
   group_rand_coef_data = cbind(
@@ -1077,7 +1085,7 @@ gp_model_qb <- GPModel(
     data_train_qb_matrix[,"ageCentered20Quadratic"]),
   ind_effect_group_rand_coef = c(1,1))
 
-gp_data_qb <- gpb.Dataset(
+gp_data_qb <- gpboost::gpb.Dataset(
   data = data_train_qb_matrix[,pred_vars_qb],
   categorical_feature = pred_vars_qb_categorical,
   label = data_train_qb_matrix[,"fantasyPoints_lag"])
@@ -1098,7 +1106,7 @@ nrounds_qb <- 7000 # identify optimal number of trees through iteration and cros
 #### Fit Model {#sec-treeBoostingFitModel}
 
 ```{r}
-gp_model_fit_qb <- gpb.train(
+gp_model_fit_qb <- gpboost::gpb.train(
   data = gp_data_qb,
   gp_model = gp_model_qb,
   nrounds = nrounds_qb,
