@@ -473,9 +473,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_pbp.RData"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_4thdown.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-</div>
+</details>
 </div>
 </section></section><section id="sec-sportsCognitivePsychologyOverview" class="level2" data-number="25.2"><h2 data-number="25.2" class="anchored" data-anchor-id="sec-sportsCognitivePsychologyOverview">
 <span class="header-section-number">25.2</span> Overview</h2>
@@ -502,66 +500,66 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <p>It had been known for a long time that going for it on fourth down would frequently increase a team’s chances of winning. Despite that, historically, teams rarely went for it on fourth down and elected to punt or kick a field goal instead. It is curious that there was such a discrepancy between the decisions that would maximize teams’ winning percentage and the decisions coaches actually made. In many fourth down situations, by punting the ball, coaches actively and systematically made decisions that reduced their team’s chances of winning. One potential explanation for the discrepancy is because of coaches’ risk aversion. As noted in <a href="cognitive-bias.html#sec-cognitiveBiasesRiskAversion" class="quarto-xref"><span>Section 14.4.10</span></a>, when it is possible to experience either a gain or a loss from a decision, <a href="cognitive-bias.html#sec-cognitiveBiasesLossAversion">loss aversion bias</a> tends to lead people to make risk-averse decisions <span class="citation" data-cites="Kahneman2011">(<a href="references.html#ref-Kahneman2011" role="doc-biblioref">Kahneman, 2011</a>)</span>. According to this idea, in the case of failing to successfully convert on fourth down, coaches do not want to have to defend their decision to go for it to the media or the owner or general manager. That is, they may often play <em>not to lose</em>, rather than to win, in order to keep their job. However, in many cases, this is the wrong choice <span class="citation" data-cites="Moskowitz2011">(<a href="references.html#ref-Moskowitz2011" role="doc-biblioref">Moskowitz &amp; Wertheim, 2011</a>)</span>.</p>
 <p>Rates of going for it on fourth down in the NFL were low until 2017. After the 2017 season, rates of going for it on fourth down increased dramatically, as depicted in <a href="#fig-4thDownAttemptsByYear" class="quarto-xref">Figure&nbsp;<span>25.1</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>nfl_pbp4thDown <span class="ot">&lt;-</span> nfl_pbp <span class="sc">%&gt;%</span> </span>
-<span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">filter</span>(down <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"no_play"</span>,<span class="st">"qb_kneel"</span>)))</span>
-<span id="cb4-4"><a href="#cb4-4"></a></span>
-<span id="cb4-5"><a href="#cb4-5"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt[<span class="fu">which</span>(nfl_pbp4thDown<span class="sc">$</span>play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"field_goal"</span>,<span class="st">"punt"</span>))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt[<span class="fu">which</span>(nfl_pbp4thDown<span class="sc">$</span>play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"pass"</span>,<span class="st">"run"</span>))] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a></span>
-<span id="cb4-9"><a href="#cb4-9"></a>nfl_pbp4thDownPlotData <span class="ot">&lt;-</span> nfl_pbp4thDown <span class="sc">%&gt;%</span> </span>
-<span id="cb4-10"><a href="#cb4-10"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(goForIt)) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-11"><a href="#cb4-11"></a>  <span class="fu">group_by</span>(season) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-12"><a href="#cb4-12"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb4-13"><a href="#cb4-13"></a>    <span class="at">goForItPct =</span> <span class="fu">mean</span>(goForIt, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb4-14"><a href="#cb4-14"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
-<span id="cb4-15"><a href="#cb4-15"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(goForIt),</span>
-<span id="cb4-16"><a href="#cb4-16"></a>    <span class="at">se =</span> sd <span class="sc">/</span> n</span>
-<span id="cb4-17"><a href="#cb4-17"></a>  )</span>
-<span id="cb4-18"><a href="#cb4-18"></a></span>
-<span id="cb4-19"><a href="#cb4-19"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
-<span id="cb4-20"><a href="#cb4-20"></a>  <span class="at">data =</span> nfl_pbp4thDownPlotData,</span>
-<span id="cb4-21"><a href="#cb4-21"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
-<span id="cb4-22"><a href="#cb4-22"></a>    <span class="at">x =</span> season,</span>
-<span id="cb4-23"><a href="#cb4-23"></a>    <span class="at">y =</span> goForItPct)) <span class="sc">+</span></span>
-<span id="cb4-24"><a href="#cb4-24"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb4-25"><a href="#cb4-25"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb4-26"><a href="#cb4-26"></a>  <span class="fu">geom_ribbon</span>(</span>
-<span id="cb4-27"><a href="#cb4-27"></a>    <span class="fu">aes</span>(</span>
-<span id="cb4-28"><a href="#cb4-28"></a>      <span class="at">y =</span> goForItPct,</span>
-<span id="cb4-29"><a href="#cb4-29"></a>      <span class="at">ymin =</span> goForItPct <span class="sc">-</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>se,</span>
-<span id="cb4-30"><a href="#cb4-30"></a>      <span class="at">ymax =</span> goForItPct <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>se),</span>
-<span id="cb4-31"><a href="#cb4-31"></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb4-32"><a href="#cb4-32"></a>  <span class="fu">scale_y_continuous</span>(</span>
-<span id="cb4-33"><a href="#cb4-33"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)</span>
-<span id="cb4-34"><a href="#cb4-34"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-35"><a href="#cb4-35"></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb4-36"><a href="#cb4-36"></a>    <span class="at">minor_breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3000</span>, <span class="dv">1</span>),</span>
-<span id="cb4-37"><a href="#cb4-37"></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3000</span>, <span class="dv">5</span>)</span>
-<span id="cb4-38"><a href="#cb4-38"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-39"><a href="#cb4-39"></a>  <span class="fu">labs</span>(</span>
-<span id="cb4-40"><a href="#cb4-40"></a>    <span class="at">x =</span> <span class="st">"Season"</span>,</span>
-<span id="cb4-41"><a href="#cb4-41"></a>    <span class="at">y =</span> <span class="st">"Proportion of 4th Down Plays that</span><span class="sc">\n</span><span class="st">are Attempts (to Get the First Down)"</span>,</span>
-<span id="cb4-42"><a href="#cb4-42"></a>    <span class="at">title =</span> <span class="st">"4th Down Attempts (Proportion) by Season"</span>,</span>
-<span id="cb4-43"><a href="#cb4-43"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-44"><a href="#cb4-44"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span> <span class="co"># horizontal y-axis title</span></span>
-<span id="cb4-45"><a href="#cb4-45"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb4-46"><a href="#cb4-46"></a>    <span class="st">"segment"</span>,</span>
-<span id="cb4-47"><a href="#cb4-47"></a>    <span class="at">x =</span> <span class="dv">2015</span>,</span>
-<span id="cb4-48"><a href="#cb4-48"></a>    <span class="at">xend =</span> <span class="dv">2017</span>,</span>
-<span id="cb4-49"><a href="#cb4-49"></a>    <span class="at">y =</span> <span class="fl">0.08</span>,</span>
-<span id="cb4-50"><a href="#cb4-50"></a>    <span class="at">yend =</span> <span class="fl">0.123</span>,</span>
-<span id="cb4-51"><a href="#cb4-51"></a>    <span class="at">color =</span> <span class="st">"blue"</span>,</span>
-<span id="cb4-52"><a href="#cb4-52"></a>    <span class="at">linewidth =</span> <span class="fl">1.5</span>,</span>
-<span id="cb4-53"><a href="#cb4-53"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span>,</span>
-<span id="cb4-54"><a href="#cb4-54"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>()) <span class="sc">+</span></span>
-<span id="cb4-55"><a href="#cb4-55"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb4-56"><a href="#cb4-56"></a>    <span class="st">"text"</span>,</span>
-<span id="cb4-57"><a href="#cb4-57"></a>    <span class="at">x =</span> <span class="dv">2015</span>,</span>
-<span id="cb4-58"><a href="#cb4-58"></a>    <span class="at">y =</span> <span class="fl">0.07</span>,</span>
-<span id="cb4-59"><a href="#cb4-59"></a>    <span class="at">label =</span> <span class="st">"Rapid increases in 4th down</span><span class="sc">\n</span><span class="st">attempts after the 2017 season"</span>,</span>
-<span id="cb4-60"><a href="#cb4-60"></a>    <span class="at">hjust =</span> <span class="fl">0.5</span>) <span class="co"># center</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>nfl_pbp4thDown <span class="ot">&lt;-</span> nfl_pbp <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">filter</span>(down <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"no_play"</span>,<span class="st">"qb_kneel"</span>)))</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt[<span class="fu">which</span>(nfl_pbp4thDown<span class="sc">$</span>play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"field_goal"</span>,<span class="st">"punt"</span>))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt[<span class="fu">which</span>(nfl_pbp4thDown<span class="sc">$</span>play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"pass"</span>,<span class="st">"run"</span>))] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a></span>
+<span id="cb3-9"><a href="#cb3-9"></a>nfl_pbp4thDownPlotData <span class="ot">&lt;-</span> nfl_pbp4thDown <span class="sc">%&gt;%</span> </span>
+<span id="cb3-10"><a href="#cb3-10"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(goForIt)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="fu">group_by</span>(season) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-12"><a href="#cb3-12"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb3-13"><a href="#cb3-13"></a>    <span class="at">goForItPct =</span> <span class="fu">mean</span>(goForIt, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-14"><a href="#cb3-14"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb3-15"><a href="#cb3-15"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(goForIt),</span>
+<span id="cb3-16"><a href="#cb3-16"></a>    <span class="at">se =</span> sd <span class="sc">/</span> n</span>
+<span id="cb3-17"><a href="#cb3-17"></a>  )</span>
+<span id="cb3-18"><a href="#cb3-18"></a></span>
+<span id="cb3-19"><a href="#cb3-19"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb3-20"><a href="#cb3-20"></a>  <span class="at">data =</span> nfl_pbp4thDownPlotData,</span>
+<span id="cb3-21"><a href="#cb3-21"></a>  ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb3-22"><a href="#cb3-22"></a>    <span class="at">x =</span> season,</span>
+<span id="cb3-23"><a href="#cb3-23"></a>    <span class="at">y =</span> goForItPct)) <span class="sc">+</span></span>
+<span id="cb3-24"><a href="#cb3-24"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb3-26"><a href="#cb3-26"></a>  <span class="fu">geom_ribbon</span>(</span>
+<span id="cb3-27"><a href="#cb3-27"></a>    <span class="fu">aes</span>(</span>
+<span id="cb3-28"><a href="#cb3-28"></a>      <span class="at">y =</span> goForItPct,</span>
+<span id="cb3-29"><a href="#cb3-29"></a>      <span class="at">ymin =</span> goForItPct <span class="sc">-</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>se,</span>
+<span id="cb3-30"><a href="#cb3-30"></a>      <span class="at">ymax =</span> goForItPct <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>se),</span>
+<span id="cb3-31"><a href="#cb3-31"></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb3-32"><a href="#cb3-32"></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb3-33"><a href="#cb3-33"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)</span>
+<span id="cb3-34"><a href="#cb3-34"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-35"><a href="#cb3-35"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb3-36"><a href="#cb3-36"></a>    <span class="at">minor_breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3000</span>, <span class="dv">1</span>),</span>
+<span id="cb3-37"><a href="#cb3-37"></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3000</span>, <span class="dv">5</span>)</span>
+<span id="cb3-38"><a href="#cb3-38"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-39"><a href="#cb3-39"></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-40"><a href="#cb3-40"></a>    <span class="at">x =</span> <span class="st">"Season"</span>,</span>
+<span id="cb3-41"><a href="#cb3-41"></a>    <span class="at">y =</span> <span class="st">"Proportion of 4th Down Plays that</span><span class="sc">\n</span><span class="st">are Attempts (to Get the First Down)"</span>,</span>
+<span id="cb3-42"><a href="#cb3-42"></a>    <span class="at">title =</span> <span class="st">"4th Down Attempts (Proportion) by Season"</span>,</span>
+<span id="cb3-43"><a href="#cb3-43"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-44"><a href="#cb3-44"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span> <span class="co"># horizontal y-axis title</span></span>
+<span id="cb3-45"><a href="#cb3-45"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb3-46"><a href="#cb3-46"></a>    <span class="st">"segment"</span>,</span>
+<span id="cb3-47"><a href="#cb3-47"></a>    <span class="at">x =</span> <span class="dv">2015</span>,</span>
+<span id="cb3-48"><a href="#cb3-48"></a>    <span class="at">xend =</span> <span class="dv">2017</span>,</span>
+<span id="cb3-49"><a href="#cb3-49"></a>    <span class="at">y =</span> <span class="fl">0.08</span>,</span>
+<span id="cb3-50"><a href="#cb3-50"></a>    <span class="at">yend =</span> <span class="fl">0.123</span>,</span>
+<span id="cb3-51"><a href="#cb3-51"></a>    <span class="at">color =</span> <span class="st">"blue"</span>,</span>
+<span id="cb3-52"><a href="#cb3-52"></a>    <span class="at">linewidth =</span> <span class="fl">1.5</span>,</span>
+<span id="cb3-53"><a href="#cb3-53"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span>,</span>
+<span id="cb3-54"><a href="#cb3-54"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>()) <span class="sc">+</span></span>
+<span id="cb3-55"><a href="#cb3-55"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb3-56"><a href="#cb3-56"></a>    <span class="st">"text"</span>,</span>
+<span id="cb3-57"><a href="#cb3-57"></a>    <span class="at">x =</span> <span class="dv">2015</span>,</span>
+<span id="cb3-58"><a href="#cb3-58"></a>    <span class="at">y =</span> <span class="fl">0.07</span>,</span>
+<span id="cb3-59"><a href="#cb3-59"></a>    <span class="at">label =</span> <span class="st">"Rapid increases in 4th down</span><span class="sc">\n</span><span class="st">attempts after the 2017 season"</span>,</span>
+<span id="cb3-60"><a href="#cb3-60"></a>    <span class="at">hjust =</span> <span class="fl">0.5</span>) <span class="co"># center</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-4thDownAttemptsByYear" class="quarto-float quarto-figure quarto-figure-center anchored" alt="The Proportion of Fourth Downs That are Attempts to Go for it (Rather Than Punts or Field Goals).">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-4thDownAttemptsByYear-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -573,120 +571,127 @@ Figure&nbsp;25.1: The Proportion of Fourth Downs That are Attempts to Go for it 
 </div>
 </div>
 </div>
-<p>As depicted in the <span class="quarto-unresolved-ref">?fig-goForItPercentageByWinProbChange</span> [which was adapted from a <a href="https://www.nfl4th.com/articles/4th-down-research.html">figure by Ben Baldwin</a>; <span class="citation" data-cites="R-nfl4th">Baldwin (<a href="references.html#ref-R-nfl4th" role="doc-biblioref">2023</a>)</span>; archived at <a href="https://perma.cc/S5D8-3NCU" class="uri">https://perma.cc/S5D8-3NCU</a>], teams went for it on fourth down nearly twice as often in 2021 compared to 2017, when when their win probability was at least 20% (given the current situation at the start of the given play) and they would increase their win probably by going for it. We use the <code>ggtext</code> package <span class="citation" data-cites="R-ggtext">(<a href="references.html#ref-R-ggtext" role="doc-biblioref">Wilke &amp; Wiernik, 2022</a>)</span> to annotate text:</p>
+<p>As depicted in the <a href="#fig-goForItPercentageByWinProbChange" class="quarto-xref">Figure&nbsp;<span>25.2</span></a> [which was adapted from a <a href="https://www.nfl4th.com/articles/4th-down-research.html">figure by Ben Baldwin</a>; <span class="citation" data-cites="R-nfl4th">Baldwin (<a href="references.html#ref-R-nfl4th" role="doc-biblioref">2023</a>)</span>; archived at <a href="https://perma.cc/S5D8-3NCU" class="uri">https://perma.cc/S5D8-3NCU</a>], teams went for it on fourth down nearly twice as often in 2021 compared to 2017, when when their win probability was at least 20% (given the current situation at the start of the given play) and they would increase their win probably by going for it. We use the <code>ggtext</code> package <span class="citation" data-cites="R-ggtext">(<a href="references.html#ref-R-ggtext" role="doc-biblioref">Wilke &amp; Wiernik, 2022</a>)</span> to annotate text:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># labels on the plot</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>text_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb5-3"><a href="#cb5-3"></a>  <span class="at">label =</span> <span class="fu">c</span>(</span>
-<span id="cb5-4"><a href="#cb5-4"></a>    <span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#00BFC4'&gt;**2021**&lt;/span&gt;"</span>,</span>
-<span id="cb5-5"><a href="#cb5-5"></a>    <span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#F8766D'&gt;**2017**&lt;/span&gt;"</span>),</span>
-<span id="cb5-6"><a href="#cb5-6"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">7</span>),</span>
-<span id="cb5-7"><a href="#cb5-7"></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="fl">87.5</span>, <span class="fl">22.5</span>),</span>
-<span id="cb5-8"><a href="#cb5-8"></a>  <span class="at">angle =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>),</span>
-<span id="cb5-9"><a href="#cb5-9"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"black"</span>)</span>
-<span id="cb5-10"><a href="#cb5-10"></a>)</span>
-<span id="cb5-11"><a href="#cb5-11"></a></span>
-<span id="cb5-12"><a href="#cb5-12"></a>nfl_4thdown <span class="sc">%&gt;%</span></span>
-<span id="cb5-13"><a href="#cb5-13"></a>  <span class="fu">filter</span>(</span>
-<span id="cb5-14"><a href="#cb5-14"></a>    vegas_wp <span class="sc">&gt;</span> .<span class="dv">2</span>,</span>
-<span id="cb5-15"><a href="#cb5-15"></a>    <span class="fu">between</span>(go_boost, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
-<span id="cb5-16"><a href="#cb5-16"></a>    season <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2017</span>, <span class="dv">2021</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb5-17"><a href="#cb5-17"></a>  <span class="fu">ggplot</span>(</span>
-<span id="cb5-18"><a href="#cb5-18"></a>    <span class="fu">aes</span>(</span>
-<span id="cb5-19"><a href="#cb5-19"></a>      <span class="at">x =</span> go_boost,</span>
-<span id="cb5-20"><a href="#cb5-20"></a>      <span class="at">y =</span> go,</span>
-<span id="cb5-21"><a href="#cb5-21"></a>      <span class="at">color =</span> <span class="fu">as.factor</span>(season))) <span class="sc">+</span> </span>
-<span id="cb5-22"><a href="#cb5-22"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb5-23"><a href="#cb5-23"></a>  <span class="fu">stat_smooth</span>(</span>
-<span id="cb5-24"><a href="#cb5-24"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
-<span id="cb5-25"><a href="#cb5-25"></a>    <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">gamma =</span> <span class="dv">1</span>),</span>
-<span id="cb5-26"><a href="#cb5-26"></a>    <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x, <span class="at">bs =</span> <span class="st">"cs"</span>, <span class="at">k =</span> <span class="dv">10</span>),</span>
-<span id="cb5-27"><a href="#cb5-27"></a>    <span class="at">show.legend =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb5-28"><a href="#cb5-28"></a>    <span class="at">se =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb5-29"><a href="#cb5-29"></a>    <span class="at">linewidth =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
-<span id="cb5-30"><a href="#cb5-30"></a>  <span class="co"># this is just to get the plot to draw the full 0 to 100 range</span></span>
-<span id="cb5-31"><a href="#cb5-31"></a>  <span class="fu">geom_hline</span>(</span>
-<span id="cb5-32"><a href="#cb5-32"></a>    <span class="at">yintercept =</span> <span class="dv">100</span>,</span>
-<span id="cb5-33"><a href="#cb5-33"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb5-34"><a href="#cb5-34"></a>  <span class="fu">geom_hline</span>(</span>
-<span id="cb5-35"><a href="#cb5-35"></a>    <span class="at">yintercept =</span> <span class="dv">0</span>,</span>
-<span id="cb5-36"><a href="#cb5-36"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb5-37"><a href="#cb5-37"></a>  ggtext<span class="sc">::</span><span class="fu">geom_richtext</span>(</span>
-<span id="cb5-38"><a href="#cb5-38"></a>    <span class="at">data =</span> text_df,</span>
-<span id="cb5-39"><a href="#cb5-39"></a>    <span class="fu">aes</span>(</span>
-<span id="cb5-40"><a href="#cb5-40"></a>      x,</span>
-<span id="cb5-41"><a href="#cb5-41"></a>      y,</span>
-<span id="cb5-42"><a href="#cb5-42"></a>      <span class="at">label =</span> label,</span>
-<span id="cb5-43"><a href="#cb5-43"></a>      <span class="at">angle =</span> angle),</span>
-<span id="cb5-44"><a href="#cb5-44"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb5-45"><a href="#cb5-45"></a>    <span class="at">fill =</span> <span class="cn">NA</span>,</span>
-<span id="cb5-46"><a href="#cb5-46"></a>    <span class="at">label.color =</span> <span class="cn">NA</span>,</span>
-<span id="cb5-47"><a href="#cb5-47"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span> </span>
-<span id="cb5-48"><a href="#cb5-48"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb5-49"><a href="#cb5-49"></a>  <span class="fu">labs</span>(</span>
-<span id="cb5-50"><a href="#cb5-50"></a>    <span class="at">x =</span> <span class="st">"Gain in win probability by going for it"</span>,</span>
-<span id="cb5-51"><a href="#cb5-51"></a>    <span class="at">y =</span> <span class="st">"Go-for-it percentage"</span>,</span>
-<span id="cb5-52"><a href="#cb5-52"></a>    <span class="at">subtitle =</span> <span class="st">"4th down decisions in 2021 versus 2017, win prob. &gt; 20%"</span>,</span>
-<span id="cb5-53"><a href="#cb5-53"></a>    <span class="at">title =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"How &lt;span style='color:red'&gt;math&lt;/span&gt; is changing football"</span>)) <span class="sc">+</span></span>
-<span id="cb5-54"><a href="#cb5-54"></a>  <span class="fu">theme</span>(</span>
-<span id="cb5-55"><a href="#cb5-55"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
-<span id="cb5-56"><a href="#cb5-56"></a>    <span class="at">plot.title =</span> <span class="fu">element_markdown</span>(</span>
-<span id="cb5-57"><a href="#cb5-57"></a>      <span class="at">size =</span> <span class="dv">22</span>,</span>
-<span id="cb5-58"><a href="#cb5-58"></a>      <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
-<span id="cb5-59"><a href="#cb5-59"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_markdown</span>(</span>
-<span id="cb5-60"><a href="#cb5-60"></a>      <span class="at">size =</span> <span class="fl">13.5</span>,</span>
-<span id="cb5-61"><a href="#cb5-61"></a>      <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
-<span id="cb5-62"><a href="#cb5-62"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(</span>
-<span id="cb5-63"><a href="#cb5-63"></a>      <span class="at">size =</span> <span class="dv">14</span>,</span>
-<span id="cb5-64"><a href="#cb5-64"></a>      <span class="at">face =</span> <span class="st">"bold"</span>),</span>
-<span id="cb5-65"><a href="#cb5-65"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(</span>
-<span id="cb5-66"><a href="#cb5-66"></a>      <span class="at">size =</span> <span class="dv">14</span>,</span>
-<span id="cb5-67"><a href="#cb5-67"></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
-<span id="cb5-68"><a href="#cb5-68"></a>      <span class="at">angle =</span> <span class="dv">0</span>, <span class="co"># horizontal y-axis title</span></span>
-<span id="cb5-69"><a href="#cb5-69"></a>      <span class="at">vjust =</span> <span class="fl">0.5</span>)</span>
-<span id="cb5-70"><a href="#cb5-70"></a>  ) <span class="sc">+</span></span>
-<span id="cb5-71"><a href="#cb5-71"></a>  <span class="fu">scale_y_continuous</span>(</span>
-<span id="cb5-72"><a href="#cb5-72"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">4</span>),</span>
-<span id="cb5-73"><a href="#cb5-73"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>),</span>
-<span id="cb5-74"><a href="#cb5-74"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb5-75"><a href="#cb5-75"></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb5-76"><a href="#cb5-76"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
-<span id="cb5-77"><a href="#cb5-77"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
-<span id="cb5-78"><a href="#cb5-78"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb5-79"><a href="#cb5-79"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb5-80"><a href="#cb5-80"></a>    <span class="st">"text"</span>,</span>
-<span id="cb5-81"><a href="#cb5-81"></a>    <span class="at">x =</span> <span class="sc">-</span><span class="fl">1.5</span>,</span>
-<span id="cb5-82"><a href="#cb5-82"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
-<span id="cb5-83"><a href="#cb5-83"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">kick"</span>,</span>
-<span id="cb5-84"><a href="#cb5-84"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb5-85"><a href="#cb5-85"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb5-86"><a href="#cb5-86"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb5-87"><a href="#cb5-87"></a>    <span class="st">"text"</span>,</span>
-<span id="cb5-88"><a href="#cb5-88"></a>    <span class="at">x =</span> <span class="fl">1.75</span>,</span>
-<span id="cb5-89"><a href="#cb5-89"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
-<span id="cb5-90"><a href="#cb5-90"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">go for it"</span>,</span>
-<span id="cb5-91"><a href="#cb5-91"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb5-92"><a href="#cb5-92"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb5-93"><a href="#cb5-93"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb5-94"><a href="#cb5-94"></a>    <span class="st">"segment"</span>,</span>
-<span id="cb5-95"><a href="#cb5-95"></a>    <span class="at">x =</span> <span class="sc">-</span>.<span class="dv">1</span>,</span>
-<span id="cb5-96"><a href="#cb5-96"></a>    <span class="at">y =</span> <span class="dv">80</span>,</span>
-<span id="cb5-97"><a href="#cb5-97"></a>    <span class="at">xend =</span> <span class="sc">-</span><span class="dv">2</span>,</span>
-<span id="cb5-98"><a href="#cb5-98"></a>    <span class="at">yend =</span> <span class="dv">80</span>,</span>
-<span id="cb5-99"><a href="#cb5-99"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
-<span id="cb5-100"><a href="#cb5-100"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb5-101"><a href="#cb5-101"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb5-102"><a href="#cb5-102"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb5-103"><a href="#cb5-103"></a>    <span class="st">"segment"</span>,</span>
-<span id="cb5-104"><a href="#cb5-104"></a>    <span class="at">x =</span> .<span class="dv">1</span>,</span>
-<span id="cb5-105"><a href="#cb5-105"></a>    <span class="at">y =</span> <span class="dv">80</span>,</span>
-<span id="cb5-106"><a href="#cb5-106"></a>    <span class="at">xend =</span> <span class="dv">2</span>,</span>
-<span id="cb5-107"><a href="#cb5-107"></a>    <span class="at">yend =</span> <span class="dv">80</span>,</span>
-<span id="cb5-108"><a href="#cb5-108"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
-<span id="cb5-109"><a href="#cb5-109"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
-<span id="cb5-110"><a href="#cb5-110"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error: object 'nfl_4thdown' not found</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># labels on the plot</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>text_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="at">label =</span> <span class="fu">c</span>(</span>
+<span id="cb4-4"><a href="#cb4-4"></a>    <span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#00BFC4'&gt;**2021**&lt;/span&gt;"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5"></a>    <span class="st">"NFL coaches&lt;br&gt;in &lt;span style='color:#F8766D'&gt;**2017**&lt;/span&gt;"</span>),</span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">7</span>),</span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="fl">87.5</span>, <span class="fl">22.5</span>),</span>
+<span id="cb4-8"><a href="#cb4-8"></a>  <span class="at">angle =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"black"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11"></a></span>
+<span id="cb4-12"><a href="#cb4-12"></a>nfl_4thdown <span class="sc">%&gt;%</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>  <span class="fu">filter</span>(</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    vegas_wp <span class="sc">&gt;</span> .<span class="dv">2</span>,</span>
+<span id="cb4-15"><a href="#cb4-15"></a>    <span class="fu">between</span>(go_boost, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb4-16"><a href="#cb4-16"></a>    season <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2017</span>, <span class="dv">2021</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb4-18"><a href="#cb4-18"></a>    <span class="fu">aes</span>(</span>
+<span id="cb4-19"><a href="#cb4-19"></a>      <span class="at">x =</span> go_boost,</span>
+<span id="cb4-20"><a href="#cb4-20"></a>      <span class="at">y =</span> go,</span>
+<span id="cb4-21"><a href="#cb4-21"></a>      <span class="at">color =</span> <span class="fu">as.factor</span>(season))) <span class="sc">+</span> </span>
+<span id="cb4-22"><a href="#cb4-22"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb4-23"><a href="#cb4-23"></a>  <span class="fu">stat_smooth</span>(</span>
+<span id="cb4-24"><a href="#cb4-24"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb4-25"><a href="#cb4-25"></a>    <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">gamma =</span> <span class="dv">1</span>),</span>
+<span id="cb4-26"><a href="#cb4-26"></a>    <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x, <span class="at">bs =</span> <span class="st">"cs"</span>, <span class="at">k =</span> <span class="dv">10</span>),</span>
+<span id="cb4-27"><a href="#cb4-27"></a>    <span class="at">show.legend =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb4-28"><a href="#cb4-28"></a>    <span class="at">se =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb4-29"><a href="#cb4-29"></a>    <span class="at">linewidth =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb4-30"><a href="#cb4-30"></a>  <span class="co"># this is just to get the plot to draw the full 0 to 100 range</span></span>
+<span id="cb4-31"><a href="#cb4-31"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb4-32"><a href="#cb4-32"></a>    <span class="at">yintercept =</span> <span class="dv">100</span>,</span>
+<span id="cb4-33"><a href="#cb4-33"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb4-34"><a href="#cb4-34"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb4-35"><a href="#cb4-35"></a>    <span class="at">yintercept =</span> <span class="dv">0</span>,</span>
+<span id="cb4-36"><a href="#cb4-36"></a>    <span class="at">alpha =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb4-37"><a href="#cb4-37"></a>  ggtext<span class="sc">::</span><span class="fu">geom_richtext</span>(</span>
+<span id="cb4-38"><a href="#cb4-38"></a>    <span class="at">data =</span> text_df,</span>
+<span id="cb4-39"><a href="#cb4-39"></a>    <span class="fu">aes</span>(</span>
+<span id="cb4-40"><a href="#cb4-40"></a>      x,</span>
+<span id="cb4-41"><a href="#cb4-41"></a>      y,</span>
+<span id="cb4-42"><a href="#cb4-42"></a>      <span class="at">label =</span> label,</span>
+<span id="cb4-43"><a href="#cb4-43"></a>      <span class="at">angle =</span> angle),</span>
+<span id="cb4-44"><a href="#cb4-44"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-45"><a href="#cb4-45"></a>    <span class="at">fill =</span> <span class="cn">NA</span>,</span>
+<span id="cb4-46"><a href="#cb4-46"></a>    <span class="at">label.color =</span> <span class="cn">NA</span>,</span>
+<span id="cb4-47"><a href="#cb4-47"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span> </span>
+<span id="cb4-48"><a href="#cb4-48"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb4-49"><a href="#cb4-49"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-50"><a href="#cb4-50"></a>    <span class="at">x =</span> <span class="st">"Gain in win probability by going for it"</span>,</span>
+<span id="cb4-51"><a href="#cb4-51"></a>    <span class="at">y =</span> <span class="st">"Go-for-it percentage"</span>,</span>
+<span id="cb4-52"><a href="#cb4-52"></a>    <span class="at">subtitle =</span> <span class="st">"4th down decisions in 2021 versus 2017, win prob. &gt; 20%"</span>,</span>
+<span id="cb4-53"><a href="#cb4-53"></a>    <span class="at">title =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"How &lt;span style='color:red'&gt;math&lt;/span&gt; is changing football"</span>)) <span class="sc">+</span></span>
+<span id="cb4-54"><a href="#cb4-54"></a>  <span class="fu">theme</span>(</span>
+<span id="cb4-55"><a href="#cb4-55"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb4-56"><a href="#cb4-56"></a>    <span class="at">plot.title =</span> <span class="fu">element_markdown</span>(</span>
+<span id="cb4-57"><a href="#cb4-57"></a>      <span class="at">size =</span> <span class="dv">22</span>,</span>
+<span id="cb4-58"><a href="#cb4-58"></a>      <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb4-59"><a href="#cb4-59"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_markdown</span>(</span>
+<span id="cb4-60"><a href="#cb4-60"></a>      <span class="at">size =</span> <span class="fl">13.5</span>,</span>
+<span id="cb4-61"><a href="#cb4-61"></a>      <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb4-62"><a href="#cb4-62"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(</span>
+<span id="cb4-63"><a href="#cb4-63"></a>      <span class="at">size =</span> <span class="dv">14</span>,</span>
+<span id="cb4-64"><a href="#cb4-64"></a>      <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb4-65"><a href="#cb4-65"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(</span>
+<span id="cb4-66"><a href="#cb4-66"></a>      <span class="at">size =</span> <span class="dv">14</span>,</span>
+<span id="cb4-67"><a href="#cb4-67"></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
+<span id="cb4-68"><a href="#cb4-68"></a>      <span class="at">angle =</span> <span class="dv">0</span>, <span class="co"># horizontal y-axis title</span></span>
+<span id="cb4-69"><a href="#cb4-69"></a>      <span class="at">vjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb4-70"><a href="#cb4-70"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-71"><a href="#cb4-71"></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb4-72"><a href="#cb4-72"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">4</span>),</span>
+<span id="cb4-73"><a href="#cb4-73"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>),</span>
+<span id="cb4-74"><a href="#cb4-74"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb4-75"><a href="#cb4-75"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb4-76"><a href="#cb4-76"></a>    <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
+<span id="cb4-77"><a href="#cb4-77"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb4-78"><a href="#cb4-78"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb4-79"><a href="#cb4-79"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-80"><a href="#cb4-80"></a>    <span class="st">"text"</span>,</span>
+<span id="cb4-81"><a href="#cb4-81"></a>    <span class="at">x =</span> <span class="sc">-</span><span class="fl">1.5</span>,</span>
+<span id="cb4-82"><a href="#cb4-82"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
+<span id="cb4-83"><a href="#cb4-83"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">kick"</span>,</span>
+<span id="cb4-84"><a href="#cb4-84"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-85"><a href="#cb4-85"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb4-86"><a href="#cb4-86"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-87"><a href="#cb4-87"></a>    <span class="st">"text"</span>,</span>
+<span id="cb4-88"><a href="#cb4-88"></a>    <span class="at">x =</span> <span class="fl">1.75</span>,</span>
+<span id="cb4-89"><a href="#cb4-89"></a>    <span class="at">y =</span> <span class="dv">70</span>,</span>
+<span id="cb4-90"><a href="#cb4-90"></a>    <span class="at">label =</span> <span class="st">"Should</span><span class="sc">\n</span><span class="st">go for it"</span>,</span>
+<span id="cb4-91"><a href="#cb4-91"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-92"><a href="#cb4-92"></a>    <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb4-93"><a href="#cb4-93"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-94"><a href="#cb4-94"></a>    <span class="st">"segment"</span>,</span>
+<span id="cb4-95"><a href="#cb4-95"></a>    <span class="at">x =</span> <span class="sc">-</span>.<span class="dv">1</span>,</span>
+<span id="cb4-96"><a href="#cb4-96"></a>    <span class="at">y =</span> <span class="dv">80</span>,</span>
+<span id="cb4-97"><a href="#cb4-97"></a>    <span class="at">xend =</span> <span class="sc">-</span><span class="dv">2</span>,</span>
+<span id="cb4-98"><a href="#cb4-98"></a>    <span class="at">yend =</span> <span class="dv">80</span>,</span>
+<span id="cb4-99"><a href="#cb4-99"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
+<span id="cb4-100"><a href="#cb4-100"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-101"><a href="#cb4-101"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb4-102"><a href="#cb4-102"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb4-103"><a href="#cb4-103"></a>    <span class="st">"segment"</span>,</span>
+<span id="cb4-104"><a href="#cb4-104"></a>    <span class="at">x =</span> .<span class="dv">1</span>,</span>
+<span id="cb4-105"><a href="#cb4-105"></a>    <span class="at">y =</span> <span class="dv">80</span>,</span>
+<span id="cb4-106"><a href="#cb4-106"></a>    <span class="at">xend =</span> <span class="dv">2</span>,</span>
+<span id="cb4-107"><a href="#cb4-107"></a>    <span class="at">yend =</span> <span class="dv">80</span>,</span>
+<span id="cb4-108"><a href="#cb4-108"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">"npc"</span>)),</span>
+<span id="cb4-109"><a href="#cb4-109"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-110"><a href="#cb4-110"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-goForItPercentageByWinProbChange" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Go-For-It Percentage on Fourth Downs in 2021 Versus 2017 as a Function of the Change in Win Probability for Going for it. To remove desperation fourth down attempts, the figure focuses on just plays in which the estimated win probability for the offensive team (given the current situation at the start of the given play and incorporating the pre-game Vegas line) was greater than 20%.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-goForItPercentageByWinProbChange-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="sports-cognitive-psychology_files/figure-html/fig-goForItPercentageByWinProbChange-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;25.2: Go-For-It Percentage on Fourth Downs in 2021 Versus 2017 as a Function of the Change in Win Probability for Going for it. To remove desperation fourth down attempts, the figure focuses on just plays in which the estimated win probability for the offensive team (given the current situation at the start of the given play and incorporating the pre-game Vegas line) was greater than 20%."><img src="sports-cognitive-psychology_files/figure-html/fig-goForItPercentageByWinProbChange-1.png" class="img-fluid figure-img" alt="Go-For-It Percentage on Fourth Downs in 2021 Versus 2017 as a Function of the Change in Win Probability for Going for it. To remove desperation fourth down attempts, the figure focuses on just plays in which the estimated win probability for the offensive team (given the current situation at the start of the given play and incorporating the pre-game Vegas line) was greater than 20%." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-goForItPercentageByWinProbChange-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;25.2: Go-For-It Percentage on Fourth Downs in 2021 Versus 2017 as a Function of the Change in Win Probability for Going for it. To remove desperation fourth down attempts, the figure focuses on just plays in which the estimated win probability for the offensive team (given the current situation at the start of the given play and incorporating the pre-game Vegas line) was greater than 20%.
+</figcaption></figure>
+</div>
 </div>
 </div>
 <p>NFL teams were later to implement analytics into their decision making than even teams at lower levels of the sport. Some high school teams, such as the Pulaski Academy Bruins (Little Rock, AR), coached by Kevin Kelley, consistently went for it on fourth down well before 2017 <span class="citation" data-cites="Moskowitz2011">(<a href="references.html#ref-Moskowitz2011" role="doc-biblioref">Moskowitz &amp; Wertheim, 2011</a>)</span>.</p>
@@ -705,10 +710,10 @@ Figure&nbsp;25.1: The Proportion of Fourth Downs That are Attempts to Go for it 
 <p>Here is an analysis by the New York Times on when to go for it on fourth down: <a href="https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html" class="uri">https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html</a> [<span class="citation" data-cites="NYT2014">NYT 4th Down Bot (<a href="references.html#ref-NYT2014" role="doc-biblioref">2014</a>)</span>; archived at <a href="https://perma.cc/KA9Y-BRUD" class="uri">https://perma.cc/KA9Y-BRUD</a>]. Here is a fourth down calculator: <a href="https://rbsdm.com/stats/fourth_calculator/" class="uri">https://rbsdm.com/stats/fourth_calculator/</a>.</p>
 <div id="fig-4thDownAnalysis" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Analysis of When to Go for it on Fourth Down Versus What Coaches Actually Do on 4th Down (From 2014).">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-4thDownAnalysis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/4thDownAnalysis.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;25.2: Analysis of When to Go for it on Fourth Down Versus What Coaches Actually Do on 4th Down (From 2014). Retrieved from https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html (archived at https://perma.cc/KA9Y-BRUD)."><img src="images/4thDownAnalysis.png" class="img-fluid figure-img" alt="Analysis of When to Go for it on Fourth Down Versus What Coaches Actually Do on 4th Down (From 2014)."></a>
+<a href="images/4thDownAnalysis.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;25.3: Analysis of When to Go for it on Fourth Down Versus What Coaches Actually Do on 4th Down (From 2014). Retrieved from https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html (archived at https://perma.cc/KA9Y-BRUD)."><img src="images/4thDownAnalysis.png" class="img-fluid figure-img" alt="Analysis of When to Go for it on Fourth Down Versus What Coaches Actually Do on 4th Down (From 2014)."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-4thDownAnalysis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;25.2: Analysis of When to Go for it on Fourth Down Versus What Coaches Actually Do on 4th Down (From 2014). Retrieved from <a href="https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html" class="uri">https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html</a> (archived at <a href="https://perma.cc/KA9Y-BRUD" class="uri">https://perma.cc/KA9Y-BRUD</a>).
+Figure&nbsp;25.3: Analysis of When to Go for it on Fourth Down Versus What Coaches Actually Do on 4th Down (From 2014). Retrieved from <a href="https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html" class="uri">https://www.nytimes.com/2014/09/05/upshot/4th-down-when-to-go-for-it-and-why.html</a> (archived at <a href="https://perma.cc/KA9Y-BRUD" class="uri">https://perma.cc/KA9Y-BRUD</a>).
 </figcaption></figure>
 </div>
 <p>In addition to punting on fourth down, <a href="cognitive-bias.html#sec-cognitiveBiasesLossAversion">loss aversion bias</a> may lead coaches to make more conservative play-calling, in general, such as running the ball when passing would tend to be more advantageous.</p>
@@ -724,6 +729,23 @@ Figure&nbsp;25.2: Analysis of When to Go for it on Fourth Down Versus What Coach
 <p>The belief in the “hot hand” is described in <a href="cognitive-bias.html#sec-fallaciesHotHand" class="quarto-xref"><span>Section 14.5.3</span></a>.</p>
 </section></section><section id="sec-psychologicalFactorsPerformance" class="level2" data-number="25.5"><h2 data-number="25.5" class="anchored" data-anchor-id="sec-psychologicalFactorsPerformance">
 <span class="header-section-number">25.5</span> Psychological Factors in Player Performance</h2>
+<p>The Yerkes–Dodson law describes the association between arousal and performance, as depicted in <a href="#fig-yerkesDodsonLaw" class="quarto-xref">Figure&nbsp;<span>25.4</span></a>. For simple tasks, performance tends to increase with arousal. For difficult tasks, there is an inverted-U-shaped association between arousal and performance, as depicted in <a href="#fig-hebbianYerkesDodsonLaw" class="quarto-xref">Figure&nbsp;<span>25.5</span></a>. For difficult tasks, too little arousal is bad because it leads to insufficient attention on the task at hand; however, too much arousal is also bad because anxiety can impair performance through its negative effects on attention (e.g., “tunnel vision”), memory, decision making, problem-solving, and multitasking. That is, there is an optimal range of arousal for challenging tasks, such as those in sports.</p>
+<div id="fig-yerkesDodsonLaw" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Yerkes–Dodson law. (Figure retrieved from https://en.wikipedia.org/wiki/File:OriginalYerkesDodson.svg)">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-yerkesDodsonLaw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/YerkesDodson.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;25.4: Yerkes–Dodson law. For simple tasks, performance increases with arousal. For difficult tasks, there is an inverted-U-shaped association between arousal and performance such that too little and too much arousal impairs performance. (Figure from https://en.wikipedia.org/wiki/File:OriginalYerkesDodson.svg.)"><img src="images/YerkesDodson.png" class="img-fluid figure-img" style="width:50.0%" alt="Yerkes–Dodson law. (Figure retrieved from https://en.wikipedia.org/wiki/File:OriginalYerkesDodson.svg)"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yerkesDodsonLaw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;25.4: Yerkes–Dodson law. For simple tasks, performance increases with arousal. For difficult tasks, there is an inverted-U-shaped association between arousal and performance such that too little and too much arousal impairs performance. (Figure from <a href="https://en.wikipedia.org/wiki/File:OriginalYerkesDodson.svg">https://en.wikipedia.org/wiki/File:OriginalYerkesDodson.svg</a>.)
+</figcaption></figure>
+</div>
+<div id="fig-hebbianYerkesDodsonLaw" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Yerkes–Dodson law. (Figure retrieved from https://en.wikipedia.org/wiki/File:HebbianYerkesDodson.svg)">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-hebbianYerkesDodsonLaw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/HebbianYerkesDodson.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;25.5: Yerkes–Dodson law for difficult tasks. For difficult tasks, there is an inverted-U-shaped association between arousal and performance. Too little arousal is bad because it leads to insufficient attention on the task at hand; by contrast, too much arousal is also bad because anxiety can impair performance through its negative effects on attention (e.g., “tunnel vision”), memory, decision making, problem-solving, and multitasking. (Figure from https://en.wikipedia.org/wiki/File:HebbianYerkesDodson.svg.)"><img src="images/HebbianYerkesDodson.png" class="img-fluid figure-img" style="width:50.0%" alt="Yerkes–Dodson law. (Figure retrieved from https://en.wikipedia.org/wiki/File:HebbianYerkesDodson.svg)"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hebbianYerkesDodsonLaw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;25.5: Yerkes–Dodson law for difficult tasks. For difficult tasks, there is an inverted-U-shaped association between arousal and performance. Too little arousal is bad because it leads to insufficient attention on the task at hand; by contrast, too much arousal is also bad because anxiety can impair performance through its negative effects on attention (e.g., “tunnel vision”), memory, decision making, problem-solving, and multitasking. (Figure from <a href="https://en.wikipedia.org/wiki/File:HebbianYerkesDodson.svg">https://en.wikipedia.org/wiki/File:HebbianYerkesDodson.svg</a>.)
+</figcaption></figure>
+</div>
 </section><section id="sec-expertPerformanceAutomaticity" class="level2" data-number="25.6"><h2 data-number="25.6" class="anchored" data-anchor-id="sec-expertPerformanceAutomaticity">
 <span class="header-section-number">25.6</span> Expert Performance and Automaticity</h2>
 <p>This section was adapted from course materials from <span class="citation" data-cites="Motz2018">Motz (<a href="references.html#ref-Motz2018" role="doc-biblioref">2018</a>)</span>.</p>
@@ -743,7 +765,7 @@ Figure&nbsp;25.2: Analysis of When to Go for it on Fourth Down Versus What Coach
 </section><section id="sec-sportsCognitivePsychologySessionInfo" class="level2" data-number="25.8"><h2 data-number="25.8" class="anchored" data-anchor-id="sec-sportsCognitivePsychologySessionInfo">
 <span class="header-section-number">25.8</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.3 (2025-02-28)
 Platform: x86_64-pc-linux-gnu
@@ -771,17 +793,19 @@ other attached packages:
  [9] tibble_3.2.1    ggplot2_3.5.1   tidyverse_2.0.0 nflreadr_1.4.1 
 
 loaded via a namespace (and not attached):
- [1] gtable_0.3.6      jsonlite_1.9.1    compiler_4.4.3    Rcpp_1.0.14      
- [5] tidyselect_1.2.1  xml2_1.3.8        scales_1.3.0      yaml_2.3.10      
- [9] fastmap_1.2.0     R6_2.6.1          labeling_0.4.3    generics_0.1.3   
-[13] knitr_1.50        htmlwidgets_1.6.4 munsell_0.5.1     pillar_1.10.1    
-[17] tzdb_0.5.0        rlang_1.1.5       stringi_1.8.4     cachem_1.1.0     
-[21] xfun_0.51         timechange_0.3.0  memoise_2.0.1     cli_3.6.4        
-[25] withr_3.0.2       magrittr_2.0.3    gridtext_0.1.5    digest_0.6.37    
-[29] grid_4.4.3        hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5      
-[33] evaluate_1.0.3    glue_1.8.0        data.table_1.17.0 farver_2.1.2     
-[37] colorspace_2.1-1  rmarkdown_2.29    tools_4.4.3       pkgconfig_2.0.3  
-[41] htmltools_0.5.8.1</code></pre>
+ [1] generics_0.1.3    xml2_1.3.8        stringi_1.8.7     lattice_0.22-6   
+ [5] hms_1.1.3         digest_0.6.37     magrittr_2.0.3    evaluate_1.0.3   
+ [9] grid_4.4.3        timechange_0.3.0  fastmap_1.2.0     Matrix_1.7-2     
+[13] jsonlite_2.0.0    mgcv_1.9-1        scales_1.3.0      cli_3.6.4        
+[17] rlang_1.1.5       litedown_0.6      commonmark_1.9.5  munsell_0.5.1    
+[21] splines_4.4.3     withr_3.0.2       cachem_1.1.0      yaml_2.3.10      
+[25] tools_4.4.3       tzdb_0.5.0        memoise_2.0.1     colorspace_2.1-1 
+[29] vctrs_0.6.5       R6_2.6.1          lifecycle_1.0.4   htmlwidgets_1.6.4
+[33] pkgconfig_2.0.3   pillar_1.10.1     gtable_0.3.6      data.table_1.17.0
+[37] glue_1.8.0        Rcpp_1.0.14       xfun_0.51         tidyselect_1.2.1 
+[41] knitr_1.50        farver_2.1.2      htmltools_0.5.8.1 nlme_3.1-167     
+[45] rmarkdown_2.29    labeling_0.4.3    compiler_4.4.3    markdown_2.0     
+[49] gridtext_0.1.5   </code></pre>
 </div>
 </div>
 
