@@ -56,12 +56,12 @@ $$ {#eq-IQR}
 #| code-fold: true
 
 exampleValues <- c(0, 0, 10, 15, 20, 30, 1000)
-exampleValues_mean <- apa(mean(exampleValues), 2)
+exampleValues_mean <- mean(exampleValues)
 ```
 
 That is, to compute the mean, sum all of the values and divide by the number of values ($n$).
 One issue with the mean is that it is sensitive to extreme (outlying) values.
-For instance, the mean of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_mean`.
+For instance, the mean of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} petersenlab::apa(exampleValues_mean, decimals = 2)`.
 
 ```{r}
 #| code-fold: true
@@ -82,6 +82,7 @@ exampleValues_pseudomedian <- DescTools::HodgesLehmann(exampleValues)
 The Hodges-Lehmann statistic (aka pseudomedian) is computed as the median of all pairwise means, and it is also robust to outliers.
 The pseudomedian can be computed using the `DescTools` package [@R-DescTools].
 The pseudomedian of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_pseudomedian`.
+The pseudomedian is an example of a robust average—an index of the center of a distribution that is less sensitive to outliers.
 
 ```{r}
 #| code-fold: true
@@ -99,12 +100,33 @@ Because some projections are outliers, we use a trimmed version of the weighted 
 
 Below is R code to estimate each:
 
+- mean:
+
 ```{r}
 mean(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
-median(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
-DescTools::HodgesLehmann(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
-petersenlab::Mode(player_stats_seasonal$fantasyPoints)
+```
 
+- median:
+
+```{r}
+median(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- Hodges-Lehmann statistic (aka pseudomedian):
+
+```{r}
+DescTools::HodgesLehmann(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- mode:
+
+```{r}
+petersenlab::Mode(player_stats_seasonal$fantasyPoints)
+```
+
+- weighted mean:
+
+```{r}
 weighted.mean(
   player_stats_seasonal$fantasyPoints,
   weights = sample( # randomly generate weights (could specify them manually)
@@ -112,7 +134,11 @@ weighted.mean(
     size = length(player_stats_seasonal$fantasyPoints),
     replace = TRUE),
   na.rm = TRUE)
+```
 
+- weighted median:
+
+```{r}
 petersenlab::wthdquantile(
   player_stats_seasonal$fantasyPoints,
   w = sample( # randomly generate weights (could specify them manually)
@@ -172,8 +198,43 @@ Compared to the standard deviation, the median absolute deviation is more robust
 
 Below is R code to estimate each:
 
-```{r}
+- standard deviation:
 
+```{r}
+sd(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- variance:
+
+```{r}
+var(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- range:
+
+```{r}
+range(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+
+max(player_stats_seasonal$fantasyPoints, na.rm = TRUE) - min(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- minimum and maximum:
+
+```{r}
+min(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+max(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- interquartile range (IQR):
+
+```{r}
+IQR(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- median absolute deviation:
+
+```{r}
+mad(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
 ### Shape {#sec-descriptiveStatisticsShape}
@@ -194,8 +255,16 @@ Fantasy points tend to have a leptokurtic distribution.
 
 Below is R code to estimate each:
 
-```{r}
+- skewness:
 
+```{r}
+psych::skew(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- kurtosis:
+
+```{r}
+psych::kurtosi(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
 ### Combination {#sec-descriptiveStatisticsCombination}
@@ -206,8 +275,8 @@ To estimate multiple indices of center, spread, and shape of the data, you can u
 psych::describe(player_stats_seasonal["fantasyPoints"])
 
 player_stats_seasonal %>% 
-  select(age, years_of_experience, fantasyPoints) %>% 
-  summarise(across(
+  dplyr::select(age, years_of_experience, fantasyPoints) %>% 
+  dplyr::summarise(across(
       everything(),
       .fns = list(
         n = ~ length(na.omit(.)),
@@ -225,11 +294,11 @@ player_stats_seasonal %>%
         skewness = ~ psych::skew(., na.rm = TRUE),
         kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
       .names = "{.col}.{.fn}")) %>%
-    pivot_longer(
+    tidyr::pivot_longer(
       cols = everything(),
       names_to = c("variable","index"),
       names_sep = "\\.") %>% 
-    pivot_wider(
+    tidyr::pivot_wider(
       names_from = index,
       values_from = value)
 ```
