@@ -580,26 +580,26 @@ players[,!(names(players) %in% dropVars)]
 
 ```{r}
 players %>%
-  select(name, age)
+  dplyr::select(name, age)
 
 players %>%
-  select(name:age)
+  dplyr::select(name:age)
 
 players %>%
-  select(all_of(subsetVars))
+  dplyr::select(all_of(subsetVars))
 ```
 
 Or, to drop columns:
 
 ```{r}
 players %>%
-  select(-name, -age)
+  dplyr::select(-name, -age)
 
 players %>%
-  select(-c(name:age))
+  dplyr::select(-c(name:age))
 
 players %>%
-  select(-all_of(dropVars))
+  dplyr::select(-all_of(dropVars))
 ```
 
 ### Particular Rows {#sec-subsetParticularRows}
@@ -645,8 +645,8 @@ players[which(players$position == "RB"), subsetVars]
 
 ```{r}
 players %>%
-  filter(position == "RB") %>%
-  select(all_of(subsetVars))
+  dplyr::filter(position == "RB") %>%
+  dplyr::select(all_of(subsetVars))
 ```
 
 ## View Data {#sec-viewData}
@@ -757,7 +757,7 @@ Recode multiple variables:
 
 ```{r}
 players %>%
-  mutate(across(c(
+  dplyr::mutate(across(c(
     oldVar1:oldVar2),
     ~ case_match(
       .,
@@ -769,7 +769,7 @@ players %>%
 
 ```{r}
 players <- players %>% 
-  rename(
+  dplyr::rename(
     newVar1 = oldVar1,
     newVar2 = oldVar2)
 ```
@@ -783,7 +783,7 @@ varNamesFrom <- c("oldVar1","oldVar2")
 varNamesTo <- c("newVar1","newVar2")
 
 players <- players %>% 
-  rename_with(~ varNamesTo, all_of(varNamesFrom))
+  dplyr::rename_with(~ varNamesTo, all_of(varNamesFrom))
 ```
 
 ## Convert the Types of Variables {#convertVarTypes}
@@ -801,18 +801,20 @@ Multiple variables:
 
 ```{r}
 players %>%
-  mutate(across(c(
+  dplyr::mutate(across(c(
     ID,
     age),
     as.numeric))
 
 players %>%
-  mutate(across(
+  dplyr::mutate(across(
     age:newVar1,
     as.character))
 
 players %>%
-  mutate(across(where(is.factor), as.character))
+  dplyr::mutate(across(
+    where(is.factor),
+    as.character))
 ```
 
 ## Merging/Joins {#sec-merging}
@@ -862,7 +864,7 @@ mergeExample1B <- data.frame(
   points = c(10,15,20,25)
 )
 
-mergeExample1 <- full_join(
+mergeExample1 <- dplyr::full_join(
   mergeExample1A,
   mergeExample1B,
   by = "player")
@@ -890,7 +892,7 @@ mergeExample2B <- data.frame(
   points = c(10,15,20,25)
 )
 
-mergeExample2 <- full_join(
+mergeExample2 <- dplyr::full_join(
   mergeExample2A,
   mergeExample2B,
   by = "player")
@@ -916,7 +918,7 @@ mergeExample3B <- data.frame(
   points = c(10,15,20,25,30,35)
 )
 
-mergeExample3 <- full_join(
+mergeExample3 <- dplyr::full_join(
   mergeExample3A,
   mergeExample3B,
   by = "player")
@@ -966,7 +968,7 @@ It returns columns from `x` and `y`.
 Here is how to merge two data frames using a full outer join (i.e., "full join"):
 
 ```{r}
-fullJoinData <- full_join(
+fullJoinData <- dplyr::full_join(
   players,
   fantasyPoints,
   by = "ID")
@@ -983,7 +985,7 @@ It returns columns from `x` and `y`.
 Here is how to merge two data frames using a left outer join ("left join"):
 
 ```{r}
-leftJoinData <- left_join(
+leftJoinData <- dplyr::left_join(
   players,
   fantasyPoints,
   by = "ID")
@@ -1000,7 +1002,7 @@ It returns columns from `x` and `y`.
 Here is how to merge two data frames using a right outer join ("right join"):
 
 ```{r}
-rightJoinData <- right_join(
+rightJoinData <- dplyr::right_join(
   players,
   fantasyPoints,
   by = "ID")
@@ -1018,7 +1020,7 @@ It returns columns from `x` and `y`.
 Here is how to merge two data frames using an inner join:
 
 ```{r}
-innerJoinData <- inner_join(
+innerJoinData <- dplyr::inner_join(
   players,
   fantasyPoints,
   by = "ID")
@@ -1037,7 +1039,7 @@ Unlike an [inner join](#innerJoin), a left semi join will never duplicate rows o
 Here is how to merge two data frames using a left semi join:
 
 ```{r}
-semiJoinData <- semi_join(
+semiJoinData <- dplyr::semi_join(
   players,
   fantasyPoints,
   by = "ID")
@@ -1056,7 +1058,7 @@ It returns columns from only `x` (not from `y`).
 Here is how to merge two data frames using a left anti join:
 
 ```{r}
-antiJoinData <- anti_join(
+antiJoinData <- dplyr::anti_join(
   players,
   fantasyPoints,
   by = "ID")
@@ -1071,7 +1073,7 @@ dim(antiJoinData)
 A cross join combines each row in `x` with each row in `y`.
 
 ```{r}
-crossJoinData <- cross_join(
+crossJoinData <- dplyr::cross_join(
   players,
   fantasyPoints)
 
@@ -1093,8 +1095,8 @@ That is, every row in the dataset is uniquely identified by the combination of v
 This is an example of long form, because each player has multiple rows.
 
 ```{r}
-dataLong <- full_join(
-  players %>% select(-age),
+dataLong <- dplyr::full_join(
+  players %>% dplyr::select(-age),
   fantasyPoints_weekly,
   by = c("ID")
 )
@@ -1110,7 +1112,7 @@ Below, we widen the data by two variables (`season` and `week`), using `tidyvers
 
 ```{r}
 dataWide <- dataLong %>% 
-  pivot_wider(
+  tidyr::pivot_wider(
     names_from = c(season, week),
     names_glue = "{.value}_{season}_week{week}",
     values_from = fantasyPoints)
@@ -1129,7 +1131,7 @@ Here are the data in long form, after they have been transformed from wide form 
 
 ```{r}
 dataLong <- dataWide %>% 
-  pivot_longer(
+  tidyr::pivot_longer(
     cols = fantasyPoints_2022_week1:fantasyPoints_2023_week17,
     names_to = c("season", "week"),
     names_pattern = "fantasyPoints_(.*)_week(.*)",
