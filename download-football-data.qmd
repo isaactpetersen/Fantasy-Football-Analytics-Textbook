@@ -2950,183 +2950,9 @@ load(file = "./data/players_projectedPoints_weekly.RData")
 
 In addition to week-by-week actual player statistics, we can also compute historical actual player statistics as a function of different timeframes, including season-by-season and career statistics.
 
-#### Career Statistics {#sec-calculateActualCareerStats}
-
-First, we can compute the players' career statistics using the `calculate_stats()` function from the `nflfastR` package [@R-nflfastR].
-
-TODO: Insert code example.
-
-##### OLD (DELETE CODE BELOW)
-
-First, we can compute the players' career statistics using the `calculate_player_stats()`, `calculate_player_stats_def()`, and `calculate_player_stats_kicking()` functions from the `nflfastR` package [@R-nflfastR] for offensive players, defensive players, and kickers, respectively.
-
-::: {#nte-calculateActualCareerStats .callout-note title="Calculating players' career statistics"}
-Note: the following code takes a while to run.
-:::
-
-```{r}
-#| eval: false
-
-nfl_actualStats_offense_career_raw <- nflfastR::calculate_player_stats(
-  nfl_pbp,
-  weekly = FALSE)
-
-nfl_actualStats_defense_career_raw <- nflfastR::calculate_player_stats_def(
-  nfl_pbp,
-  weekly = FALSE)
-
-nfl_actualStats_kicking_career_raw <- nflfastR::calculate_player_stats_kicking(
-  nfl_pbp,
-  weekly = FALSE)
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_actualStats_offense_career_raw, nfl_actualStats_defense_career_raw, nfl_actualStats_kicking_career_raw,
-  file = "./data/nfl_actualStats_career_raw.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_actualStats_career_raw.RData")
-```
-
-The `nfl_actualStats_career` objects are in `player` form.
-That is, each row should be uniquely identified by the combination of `player_id`.
-Let's rearrange the data accordingly:
-
-```{r}
-nfl_actualStats_offense_career <- nfl_actualStats_offense_career_raw %>% 
-  arrange(player_display_name, player_id)
-
-nfl_actualStats_defense_career <- nfl_actualStats_defense_career_raw %>% 
-  arrange(player_display_name, player_id)
-
-nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career_raw %>% 
-  arrange(player_display_name, player_id)
-```
-
-Let's check for duplicate `player` instances:
-
-```{r}
-nfl_actualStats_offense_career %>% 
-  group_by(player_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-nfl_actualStats_defense_career %>% 
-  group_by(player_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-nfl_actualStats_kicking_career %>% 
-  group_by(player_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-```
-
-Let's do some data cleanup:
-
-```{r}
-# Sum statistics across a player's years with multiple teams
-nfl_actualStats_defense_career <- nfl_actualStats_defense_career %>% 
-  group_by(player_id) %>% 
-  summarise(
-    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
-    .groups = "drop"
-  )
-
-nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
-  group_by(player_id) %>% 
-  summarise(
-    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
-    .groups = "drop"
-  )
-
-# Re-calculate percentage stats
-nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
-  mutate(
-    fg_pct = fg_made / fg_att,
-    pat_pct = pat_made / pat_att
-  )
-
-# Merge data back with player info
-nfl_actualStats_defense_career_raw_playerInfo <- nfl_actualStats_defense_career_raw %>% 
-  select(player_id, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
-  unique() %>% 
-  group_by(player_id) %>% 
-  slice_head(n = 1) %>% 
-  ungroup()
-
-nfl_actualStats_kicking_career_raw_playerInfo <- nfl_actualStats_kicking_career_raw %>% 
-  select(player_id, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
-  unique() %>% 
-  group_by(player_id) %>% 
-  slice_head(n = 1) %>% 
-  ungroup()
-
-nfl_actualStats_defense_career <- nfl_actualStats_defense_career_raw_playerInfo %>% 
-  right_join(
-    nfl_actualStats_defense_career,
-    by = "player_id"
-  )
-
-nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career_raw_playerInfo %>% 
-  right_join(
-    nfl_actualStats_kicking_career,
-    by = "player_id"
-  )
-
-# Rearrange data
-nfl_actualStats_defense_career <- nfl_actualStats_defense_career %>% 
-  arrange(player_display_name, player_id)
-
-nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
-  arrange(player_display_name, player_id)
-```
-
-Let's check again for duplicate `player` instances:
-
-```{r}
-nfl_actualStats_offense_career %>% 
-  group_by(player_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-nfl_actualStats_defense_career %>% 
-  group_by(player_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-nfl_actualStats_kicking_career %>% 
-  group_by(player_id) %>% 
-  filter(n() > 1) %>% 
-  head()
-```
-
-```{r}
-#| eval: false
-#| include: false
-
-save(
-  nfl_actualStats_offense_career, nfl_actualStats_defense_career, nfl_actualStats_kicking_career,
-  file = "./data/nfl_actualStats_career.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_actualStats_career.RData")
-```
-
 #### Season-by-Season Statistics {#sec-calculateActualSeasonalStats}
 
-Second, we can compute the players' season-by-season statistics.
+First, we can compute the players' season-by-season statistics.
 
 TODO: Save/update data file in repo with the data generated from this code, and follow the data file through the rest of the book, updating code as necessary.
 
@@ -3136,23 +2962,23 @@ Note: the following code takes a while to run.
 
 ```{r}
 #| eval: false
-nfl_actualStats_seasonal_player_raw <- calculate_stats(
+nfl_actualStats_seasonal_player_raw <- nflfastR::calculate_stats(
   seasons = TRUE,
   summary_level = "season",
   season_type = "REG")
 
-nfl_actualStats_seasonal_team_raw <- calculate_stats(
+nfl_actualStats_seasonal_team_raw <- nflfastR::calculate_stats(
   seasons = TRUE,
   summary_level = "season",
   stat_type = "team",
   season_type = "REG")
 
-nfl_actualStats_seasonal_player_inclPost_raw <- calculate_stats(
+nfl_actualStats_seasonal_player_inclPost_raw <- nflfastR::calculate_stats(
   seasons = TRUE,
   summary_level = "season",
   season_type = "REG+POST")
 
-nfl_actualStats_seasonal_team_inclPost_raw <- calculate_stats(
+nfl_actualStats_seasonal_team_inclPost_raw <- nflfastR::calculate_stats(
   seasons = TRUE,
   summary_level = "season",
   stat_type = "team",
@@ -3464,6 +3290,284 @@ save(
 load(file = "./data/nfl_actualStats_seasonal.RData")
 ```
 
+#### Career Statistics {#sec-calculateActualCareerStats}
+
+Second, we can compute the players' career statistics using the `calculate_stats()` function from the `nflfastR` package [@R-nflfastR].
+
+```{r}
+# Compute Player Stats by Career
+playerVars <- nfl_actualStats_seasonal_player %>% 
+  select(games:fantasy_points_ppr) %>% 
+  names()
+
+weightedAverageVars_byGames <- c(
+  "passing_epa","rushing_epa","receiving_epa",
+  "target_share","air_yards_share"
+)
+
+weightedAverageVars_byAttempts <- c(
+  "passing_cpoe"
+)
+
+weightedAverageVars_byTargets <- c(
+  "wopr"
+)
+
+concatenateVars <- c(
+  "fg_made_list","fg_missed_list","fg_blocked_list","gwfg_distance_list"
+)
+
+recomputeVars <- c(
+  "pacr", # passing_yards / passing_air_yards
+  "racr", # receiving_yards / receiving_air_yards
+  "fg_pct", # fg_made / fg_att
+  "pat_pct" # pat_att / pat_made
+)
+
+sumVars <- playerVars[playerVars %ni% c(
+  weightedAverageVars_byGames, weightedAverageVars_byAttempts, weightedAverageVars_byTargets, concatenateVars, recomputeVars)]
+
+nfl_actualStats_career_player <- nfl_actualStats_seasonal_player %>% 
+  group_by(player_id) %>% 
+  summarise(
+    across(all_of(weightedAverageVars_byGames), ~ weighted.mean(.x, w = games, na.rm = TRUE)),
+    across(all_of(weightedAverageVars_byAttempts), ~ weighted.mean(.x, w = attempts, na.rm = TRUE)),
+    across(all_of(weightedAverageVars_byTargets), ~ weighted.mean(.x, w = targets, na.rm = TRUE)),
+    across(all_of(concatenateVars), ~ paste(.x[!is.na(.x)], collapse = ";")),
+    across(all_of(sumVars), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop") %>% 
+  mutate(
+    pacr = passing_yards / passing_air_yards,
+    racr = receiving_yards / receiving_air_yards,
+    fg_pct = fg_made / fg_att,
+    pat_pct = pat_att / pat_made
+  )
+
+nfl_actualStats_career_player$fg_made_list[which(nfl_actualStats_career_player$fg_made_list == "")] <- NA
+nfl_actualStats_career_player$fg_missed_list[which(nfl_actualStats_career_player$fg_missed_list == "")] <- NA
+nfl_actualStats_career_player$fg_blocked_list[which(nfl_actualStats_career_player$fg_blocked_list == "")] <- NA
+nfl_actualStats_career_player$gwfg_distance_list[which(nfl_actualStats_career_player$gwfg_distance_list == "")] <- NA
+
+nfl_actualStats_career_player_inclPost <- nfl_actualStats_seasonal_player_inclPost %>% 
+  group_by(player_id) %>% 
+  summarise(
+    across(all_of(weightedAverageVars_byGames), ~ weighted.mean(.x, w = games, na.rm = TRUE)),
+    across(all_of(weightedAverageVars_byAttempts), ~ weighted.mean(.x, w = attempts, na.rm = TRUE)),
+    across(all_of(weightedAverageVars_byTargets), ~ weighted.mean(.x, w = targets, na.rm = TRUE)),
+    across(all_of(concatenateVars), ~ paste(.x[!is.na(.x)], collapse = ";")),
+    across(all_of(sumVars), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop") %>% 
+  mutate(
+    pacr = passing_yards / passing_air_yards,
+    racr = receiving_yards / receiving_air_yards,
+    fg_pct = fg_made / fg_att,
+    pat_pct = pat_att / pat_made
+  )
+
+nfl_actualStats_career_player_inclPost$fg_made_list[which(nfl_actualStats_career_player_inclPost$fg_made_list == "")] <- NA
+nfl_actualStats_career_player_inclPost$fg_missed_list[which(nfl_actualStats_career_player_inclPost$fg_missed_list == "")] <- NA
+nfl_actualStats_career_player_inclPost$fg_blocked_list[which(nfl_actualStats_career_player_inclPost$fg_blocked_list == "")] <- NA
+nfl_actualStats_career_player_inclPost$gwfg_distance_list[which(nfl_actualStats_career_player_inclPost$gwfg_distance_list == "")] <- NA
+```
+
+Let's check for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_career_player %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_career_player_inclPost %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_career_player, nfl_actualStats_career_player_inclPost,
+  file = "./data/nfl_actualStats_career.RData"
+)
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = "./data/nfl_actualStats_career.RData")
+```
+
+##### OLD (DELETE CODE BELOW)
+
+First, we can compute the players' career statistics using the `calculate_player_stats()`, `calculate_player_stats_def()`, and `calculate_player_stats_kicking()` functions from the `nflfastR` package [@R-nflfastR] for offensive players, defensive players, and kickers, respectively.
+
+::: {#nte-calculateActualCareerStats .callout-note title="Calculating players' career statistics"}
+Note: the following code takes a while to run.
+:::
+
+```{r}
+#| eval: false
+
+nfl_actualStats_offense_career_raw <- nflfastR::calculate_player_stats(
+  nfl_pbp,
+  weekly = FALSE)
+
+nfl_actualStats_defense_career_raw <- nflfastR::calculate_player_stats_def(
+  nfl_pbp,
+  weekly = FALSE)
+
+nfl_actualStats_kicking_career_raw <- nflfastR::calculate_player_stats_kicking(
+  nfl_pbp,
+  weekly = FALSE)
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_offense_career_raw, nfl_actualStats_defense_career_raw, nfl_actualStats_kicking_career_raw,
+  file = "./data/nfl_actualStats_career_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_career_raw.RData")
+```
+
+The `nfl_actualStats_career` objects are in `player` form.
+That is, each row should be uniquely identified by the combination of `player_id`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_offense_career <- nfl_actualStats_offense_career_raw %>% 
+  arrange(player_display_name, player_id)
+
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career_raw %>% 
+  arrange(player_display_name, player_id)
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career_raw %>% 
+  arrange(player_display_name, player_id)
+```
+
+Let's check for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_offense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_defense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_kicking_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Sum statistics across a player's years with multiple teams
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career %>% 
+  group_by(player_id) %>% 
+  summarise(
+    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
+  group_by(player_id) %>% 
+  summarise(
+    across(where(is.numeric), ~ sum(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+# Re-calculate percentage stats
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
+  mutate(
+    fg_pct = fg_made / fg_att,
+    pat_pct = pat_made / pat_att
+  )
+
+# Merge data back with player info
+nfl_actualStats_defense_career_raw_playerInfo <- nfl_actualStats_defense_career_raw %>% 
+  select(player_id, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
+  unique() %>% 
+  group_by(player_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+
+nfl_actualStats_kicking_career_raw_playerInfo <- nfl_actualStats_kicking_career_raw %>% 
+  select(player_id, player_name, player_display_name, position, position_group, team, headshot_url) %>% 
+  unique() %>% 
+  group_by(player_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
+
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career_raw_playerInfo %>% 
+  right_join(
+    nfl_actualStats_defense_career,
+    by = "player_id"
+  )
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career_raw_playerInfo %>% 
+  right_join(
+    nfl_actualStats_kicking_career,
+    by = "player_id"
+  )
+
+# Rearrange data
+nfl_actualStats_defense_career <- nfl_actualStats_defense_career %>% 
+  arrange(player_display_name, player_id)
+
+nfl_actualStats_kicking_career <- nfl_actualStats_kicking_career %>% 
+  arrange(player_display_name, player_id)
+```
+
+Let's check again for duplicate `player` instances:
+
+```{r}
+nfl_actualStats_offense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_defense_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_kicking_career %>% 
+  group_by(player_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+#| include: false
+
+save(
+  nfl_actualStats_offense_career, nfl_actualStats_defense_career, nfl_actualStats_kicking_career,
+  file = "./data/nfl_actualStats_career.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_career.RData")
+```
+
 #### Week-by-Week Statistics {#sec-calculateActualWeeklyStats}
 
 We already load players' week-by-week statistics [above](#sec-downloadActualStats).
@@ -3480,11 +3584,11 @@ Note: the following code takes a while to run.
 
 ```{r}
 #| eval: false
-nfl_actualStats_weekly_player_raw <- calculate_stats(
+nfl_actualStats_weekly_player_raw <- nflfastR::calculate_stats(
   seasons = TRUE,
   summary_level = "week")
 
-nfl_actualStats_weekly_team_raw <- calculate_stats(
+nfl_actualStats_weekly_team_raw <- nflfastR::calculate_stats(
   seasons = TRUE,
   summary_level = "week",
   stat_type = "team")
