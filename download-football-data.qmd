@@ -135,13 +135,39 @@ load(file = "./data/nfl_players_raw.RData")
 
 The `nfl_players` object is in `player` form.
 That is, each row should be uniquely identified by `gsis_id`.
-Let's rearrange the data accordingly:
+Let's rearrange the data accordingly by player.
 
 ```{r}
 nfl_players <- nfl_players_raw %>% 
   select(gsis_id, everything()) %>% 
   arrange(display_name)
 ```
+
+In this case, I arrange the data by player using `display_name`.
+You could arrange by `gsis_id` (or any other variable, for that matter), but `gsis_id` is fairly unintelligible by itself.
+For instance, here are the first 6 players by ID according to `gsis_id`:
+
+```{r}
+head(nfl_players_raw$gsis_id)
+```
+
+Note how it is unclear who these players are until you combine this column with other, more relevant information.
+Thus, I prefer to sort by a variable that is more interpretable, such as a player's name.
+Here are the first six players by name according to `display_name`:
+
+```{r}
+head(nfl_players_raw$display_name)
+```
+
+Note how it is more clear, at a glance and without additional, who these players are.
+
+In data analysis, the variable(s) that are used to sort the dataframe are primarily chosen for aesthetic or usability purposes.
+Many data analysis approaches do not depend on the order of the rows in the data.
+However, the sorting of the dataframe may influence data wrangling operations.
+Thus, when performing data wrangling operations it may be prudent to make sure to re-sort the data to the desired format before performing such operations.
+
+Regardless of which variable(s) are used to sort the dataframe, it is important to know which variable(s) uniquely identify the rows because that will influence approaches to [merge](#sec-merging) the data with other dataframes.
+For instance, it would be preferable to merge two data objects based on the player ID (`gsis_id`) rather than the player name (`display_name`), because multiple players share the same name, which can lead the [merge](#sec-merging) operation not to know which player from the first dataframe goes with which player from the second dataframe when both players have the same name (despite different having different player IDs).
 
 Let's check for duplicate `player` instances:
 
