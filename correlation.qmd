@@ -624,55 +624,12 @@ pearson_test <- cor.test(
 pearson_r <- pearson_test$estimate
 pearson_df <- pearson_test$parameter
 pearson_p <- pearson_test$p.value
-
-#pValue <- function(value, digits = 3){
-#    if(value < .001){
-#      newValue <- " < .001"
-#    } else {
-#      newValue <- paste(
-#        " = ",
-#        petersenlab::suppressLeadingZero(specify_decimal(value, digits)),
-#        sep = "")
-#    }
-#  
-#    return(newValue)
-#  }
-#
-#textCorrelation <- function(x, y, decimals = 2){
-#  substitute(
-#  paste(
-#    italic(r), "(", valueDF, ")",  " = ", valueR,
-#    ", ", italic(p), valueP,
-#    sep = ""),
-#  list(
-#    valueR = noquote(sub("0.", ".", sprintf("%.2f", round(cor.test(x, y)$estimate[[1]], decimals)))),
-#    valueDF = cor.test(x, y)$parameter[[1]],
-#    valueP = pValue(cor.test(x, y)$p.value[[1]])
-#    )
-#  )
-#}
-#
-#textCorrelation <- function(x, y, decimals = 2){
-#  substitute(
-#  paste(
-#    r, "(", valueDF, ")",  " = ", valueR,
-#    ", ", p, valueP,
-#    sep = ""),
-#  list(
-#    valueR = noquote(sub("0.", ".", sprintf("%.2f", round(cor.test(x, y)$estimate[[1]], decimals)))),
-#    valueDF = cor.test(x, y)$parameter[[1]],
-#    valueP = pValue(cor.test(x, y)$p.value[[1]])
-#    )
-#  )
-#}
-#
-#textCorrelation(player_stats_seasonal$height, player_stats_seasonal$fantasyPoints)
 ```
 
 The $r$ value (`{r} petersenlab::apa(pearson_r, decimals = 2, leading = FALSE)`) is slightly negative.
 The [effect size](#sec-practicalSignificance) of the association is small—for what is considered a small, medium, and large effect size for $r$ values, see @sec-effectSizeThresholds.
 The $p$-value is less than .05, so it is a statistically significant correlation.
-We could report this finding as follows: There was a statistically significant, weak negative association between height and fantasy points ($r(`{r} pearson_df`) = `{r} noquote(petersenlab::apa(pearson_r, decimals = 2, leading = FALSE))`$, $p < .001$); the taller a player was, the fewer fantasy points they tended to score.
+We could report this finding as follows: There was a statistically significant, weak negative association between height and fantasy points ($r(`r pearson_df`) = `r petersenlab::apa(pearson_r, decimals = 2, leading = FALSE)`$, $p `r petersenlab::pValue(pearson_p)`$); the taller a player was, the fewer fantasy points they tended to score.
 
 Now let's examine the association separately by position.
 Here is the association for Quarterbacks:
@@ -719,24 +676,134 @@ The sign of the association was positive for each position, suggesting that, for
 However, the [effect size](#sec-practicalSignificance) is small.
 Moreover, as described in @sec-correlation-correlationAndCausation, just because there is an association between variables does not mean that the association reflects a causal effect.
 
-Please note that the $p$-value for a correlation assumes that the observations are independent—in particular, that the residuals are not correlated.
-However, the observations are not independent in the `player_stats_seasonal` dataframe used above, because the same player has multiple rows—one row corresponding to each season they played.
-This non-independence violates the traditional assumptions of the significance test of a correlation.
-We could address this assumption by analyzing only one season from each player.
-However, for simplicity, we present results from the whole dataframe.
-In @sec-mixedModels, we discuss [mixed model](#sec-mixedModels) approaches that handle repeated measures and other data that violate assumptions of non-independence that are shared by correlation and [multiple regression](#sec-multipleRegression); assumptions of [multiple regression](#sec-multipleRegression) are described in @sec-assumptionsRegression.
+### Rank Correlation: Spearman's Rho ($\rho$) {#sec-correlationExamplesSpearman}
 
-### Spearman Correlation {#sec-correlationExamplesSpearman}
+Spearman's rho ($\rho$) is a rank correlation.
+Spearman's rho does not assume that the data are [interval](#sec-interval) or [ratio](#sec-ratio) level of measurement.
+Unlike [Pearson correlation](sec-correlationExamplesPearson), Spearman's rho allows estimating associations among variables that are [ordinal](#sec-ordinal) level of measurement.
+
+For instance, using Spearman's rho, we could examine the association between a player's draft round and their fantasy points, because draft round is an [ordinal](#sec-ordinal) variable:
+
+```{r}
+cor(
+  player_stats_seasonal[,c("draftround","fantasyPoints")],
+  use = "pairwise.complete.obs",
+  method = "spearman")
+
+cor.test(
+  ~ draftround + fantasyPoints,
+  data = player_stats_seasonal,
+  method = "spearman"
+)
+```
+
+```{r}
+#| include: false
+
+spearman_test <- cor.test(
+  ~ draftround + fantasyPoints,
+  data = player_stats_seasonal,
+  method = "spearman"
+)
+
+spearman_r <- spearman_test$estimate
+spearman_df <- cor.test(
+  ~ draftround + fantasyPoints,
+  data = player_stats_seasonal)$parameter
+spearman_p <- spearman_test$p.value
+```
+
+Using Spearman's rho, there is a negative association between draft round and fantasy points ($r(`r spearman_df`) = `r petersenlab::apa(spearman_r, decimals = 2, leading = FALSE)`$, $p `r petersenlab::pValue(spearman_p)`$); unsurprisingly, the earlier the round a player is drafted, the more fantasy points they tend to score.
+
+### Partial Correlation {#sec-correlationExamplesNonlinear}
 
 ### Nonlinear Correlation {#sec-correlationExamplesNonlinear}
 
 A nonlinear correlation can be estimated using the xi ($\xi$) coefficient from the `XICOR` package [@R-XICOR; @Chatterjee2021]:
 
+```{r}
+set.seed(52242) # for reproducibility
+
+XICOR::xicor(
+  player_stats_seasonal$height,
+  player_stats_seasonal$fantasyPoints,
+  pvalue = TRUE
+)
+
+set.seed(52242) # for reproducibility
+
+XICOR::calculateXI(
+  player_stats_seasonal$height,
+  player_stats_seasonal$fantasyPoints)
+```
+
 ### Correlation Matrix {#sec-correlationExamplesMatrix}
+
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `cor.table()` function that generates a correlation matrix of variables, including the $r$ value, number of observations ($n$), and $p$-value for each association.
+Here is a Pearson correlation matrix:
+
+```{r}
+petersenlab::cor.table(
+  player_stats_seasonal[,c("height","weight","fantasyPoints")]
+)
+```
+
+Here is a Spearman correlation matrix:
+
+```{r}
+petersenlab::cor.table(
+  player_stats_seasonal[,c("height","weight","fantasyPoints")],
+  correlation = "spearman"
+)
+```
+
+Here is a correlation matrix of variables that includes just the $r$ value and asterisks denoting the statistical significance of the association, for greater concision: $^\dagger p < .1$; $^* p < .05$; $^{**} p < .01$; $^{***} p < .001$.
+
+
+```{r}
+petersenlab::cor.table(
+  player_stats_seasonal[,c("height","weight","fantasyPoints")],
+  type = "manuscript" # include r values and asterisks
+)
+```
+
+Here is a correlation matrix of variables that includes just the $r$ value for even greater concision.
+
+```{r}
+petersenlab::cor.table(
+  player_stats_seasonal[,c("height","weight","fantasyPoints")],
+  type = "manuscriptBig" # include just r values
+)
+```
+
+Here is a partial correlation matrix, controlling for the player's age:
+
+```{r}
+petersenlab::partialcor.table(
+  player_stats_seasonal[,c("height","weight","fantasyPoints")],
+  z = player_stats_seasonal$age # control for the player's age
+)
+```
 
 ### Correlogram {#sec-correlationExamplesCorrelogram}
 
+## Addressing Non-Independence of Observations {#sec-correlationNonIndependence}
+
+Please note that the $p$-value for a correlation assumes that the observations are independent—in particular, that the residuals are not correlated.
+However, the observations are not independent in the `player_stats_seasonal` dataframe used above, because the same player has multiple rows—one row corresponding to each season they played.
+This non-independence violates the traditional assumptions of the significance test of a correlation.
+We could address this assumption by analyzing only one season from each player or by estimating the significance of the correlation coefficient using cluster-robust standard errors.
+For simplicity, we present results above from the whole dataframe.
+In @sec-mixedModels, we discuss [mixed model](#sec-mixedModels) approaches that handle repeated measures and other data that violate assumptions of non-independence that are shared by correlation and [multiple regression](#sec-multipleRegression); assumptions of [multiple regression](#sec-multipleRegression) are described in @sec-assumptionsRegression.
+Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors.
+
+```{r}
+
+```
+
 ## Impact of Outliers {#sec-correlationOutliers}
+
+### Examining Robust Correlation {#sec-correlationRobust}
 
 ## Impact of Restricted Range {#sec-correlationRestrictedRange}
 
