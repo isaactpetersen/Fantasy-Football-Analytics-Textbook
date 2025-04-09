@@ -11,6 +11,7 @@ library("psych")
 library("DescTools")
 library("psych")
 library("corrplot")
+library("correlation")
 library("tidyverse")
 ```
 
@@ -973,6 +974,17 @@ psych::partial.r(
 
 ### Nonlinear Correlation {#sec-correlationExamplesNonlinear}
 
+An example of a nonlinear correlation is a distance correlation and the xi ($\xi$) coefficient.
+These estimates of nonlinear correlation only range from 0–1 (where 0 represents no association and 1 represents a strong association), so they are interpreted differently than a traditional correlation coefficient (which can be negative).
+We can estimate a distance correlation using the `correlation()` function of the correlation package [@R-correlation; @Makowski2020].
+
+```{r}
+correlation(
+  data = player_stats_seasonal %>% select(draftround, fantasyPoints),
+  method = "distance"
+)
+```
+
 A nonlinear correlation can be estimated using the xi ($\xi$) coefficient from the `XICOR` package [@R-XICOR; @Chatterjee2021]:
 
 ```{r}
@@ -1066,9 +1078,218 @@ In section @sec-multipleRegressionNonIndependence, we demonstrate how to account
 
 ## Impact of Outliers {#sec-correlationOutliers}
 
+The correlation coefficient is strongly impacted by outliers—i.e., extreme (i.e., very large or very small) values relative to the other observations.
+Consider the following example:
+
+```{r}
+set.seed(52242)
+
+v1 <- rnorm(10)
+v2 <- rnorm(10)
+
+cor.test(
+  v1,
+  v2
+)
+```
+
+The associated scatterplot and best-fit line is in @fig-plotWithoutOutliers.
+
+```{r}
+#| label: fig-plotWithoutOutliers
+#| fig-cap: "Scatterplot Without Strong Outliers."
+#| fig-alt: "Scatterplot Without Strong Outliers."
+#| code-fold: true
+
+plot(
+  v1,
+  v2
+)
+
+petersenlab::addText(
+  v1,
+  v2,
+  ycoord = 0.7
+)
+
+abline(lm(
+  v2 ~ v1),
+  col = "black")
+```
+
+Now, let's add one outlier.
+
+```{r}
+v1[length(v1) + 1] <- 4
+v2[length(v2) + 1] <- 4
+
+cor.test(
+  v1,
+  v2
+)
+```
+
+The associated scatterplot and best-fit line for the updated data are in @fig-plotWithOutlier.
+
+```{r}
+#| label: fig-plotWithOutlier
+#| fig-cap: "Scatterplot With Outlier."
+#| fig-alt: "Scatterplot With Outlier."
+#| code-fold: true
+
+plot(
+  v1,
+  v2
+)
+
+petersenlab::addText(
+  v1,
+  v2
+)
+
+points(
+  v1[length(v1)],
+  v2[length(v2)],
+  pch = 19,
+  col = "red"
+)
+
+text(
+  x = 3.8,
+  y = 3.8,
+  labels = "outlier")
+
+abline(lm(
+  v2 ~ v1),
+  col = "black")
+```
+
+Note how the association was not close to being statistically significant with the outlier, but with the outlier added, the association is statistically significant.
+One way to combat this is to use methods for estimating the association between variables that are robust to (i.e., less impacted by) outliers.
+In the next section, we describe robust correlation methods.
+
 ### Examining Robust Correlation {#sec-correlationRobust}
 
+There are various approaches to estimating correlation in the presence of outliers—so-called *robust correlation* methods.
+
+One approach is the biweight midcorrelation, which is based on the median rather than the mean, and is thus less sensitive to outliers.
+Another approach is the percentage bend correlation, which gives less weight to observations that are farther away from the median.
+We can estimate the each using the `correlation()` function of the correlation package [@R-correlation; @Makowski2020].
+
+```{r}
+correlation(
+  data = data.frame(v1, v2),
+  method = "biweight"
+)
+
+correlation(
+  data = data.frame(v1, v2),
+  method = "percentage"
+)
+```
+
 ## Impact of Restricted Range {#sec-correlationRestrictedRange}
+
+In addition to being [impacted by outliers](#sec-correlationOutliers), correlations can also be greatly impacted by restricted variability or restricted range [@Petersen2024a; @PetersenPrinciplesPsychAssessment].
+Correlation depends on variability; if there is no or limited variability, it can be difficult to detect an association with another variable.
+Thus, if a variable has restricted range—such as owing to a floor effect or ceiling effect—that tends to artificially weaken associations.
+For instance, a floor effect is one in which many of the scores are the lowest possible score.
+By contrast, a ceiling effect is one in which many of the scores are the highest possible score.
+
+Consider the following association between air yards share and receiving yards:
+
+```{r}
+cor.test(
+  player_stats_seasonal$air_yards_share,
+  player_stats_seasonal$receiving_yards
+)
+```
+
+There is a statistically significant, moderate positive association between air yards share and receiving yards, as depicted in @fig-scatterplotWithoutRangeRestriction.
+
+```{r}
+#| label: fig-scatterplotWithoutRangeRestriction
+#| fig-cap: "Scatterplot of Player Receiving Yards (Season) by Air Yard Share. The best-fit line is in black."
+#| fig-alt: "Scatterplot of Player Receiving Yards (Season) by Air Yard Share. The best-fit line is in black."
+#| code-fold: true
+
+plot_scatterplotWithoutRangeRestriction <- ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(air_yards_share > 0),
+  aes(
+    x = air_yards_share,
+    y = receiving_yards)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season), # add season for mouse over tooltip
+    alpha = 0.10) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  #geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Air Yards Share",
+    y = "Receiving Yards",
+    title = "Receiving Yards (Season) by Air Yards Share",
+    subtitle = "(Among Players with Air Yards Share > 0)"
+  ) +
+  theme_classic()
+
+plotly::ggplotly(plot_scatterplotWithoutRangeRestriction)
+```
+
+Now, consider the same association when we restrict the range to examine only those players whose air yards share was more than 25 (thus resulting in less variability):
+
+```{r}
+cor.test(
+  player_stats_seasonal %>% 
+    filter(air_yards_share > 25) %>% 
+    select(air_yards_share) %>% 
+    pull(),
+  player_stats_seasonal %>% 
+    filter(air_yards_share > 25) %>% 
+    select(receiving_yards) %>% 
+    pull()
+)
+```
+
+The association is no longer statistically significant, and the association is weak in terms of [effect size](#sec-effectSizeThresholds), as depicted in @fig-scatterplotWithRangeRestriction.
+
+```{r}
+#| label: fig-scatterplotWithRangeRestriction
+#| fig-cap: "Scatterplot of Player Receiving Yards (Season) by Target Share. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+#| fig-alt: "Scatterplot of Player Receiving Yards (Season) by Target Share. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+#| code-fold: true
+
+plot_scatterplotWithRangeRestriction <- ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(air_yards_share > 25),
+  aes(
+    x = air_yards_share,
+    y = receiving_yards)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season)) + # add season for mouse over tooltip)
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  #geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Air Yards Share",
+    y = "Receiving Yards",
+    title = "Receiving Yards (Season) by Air Yards Share",
+    subtitle = "(Among Players with Air Yards Share > 25)"
+  ) +
+  theme_classic()
+
+plotly::ggplotly(plot_scatterplotWithRangeRestriction)
+```
 
 ## Correlation Does Not Imply Causation {#sec-correlation-correlationAndCausation}
 
