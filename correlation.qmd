@@ -677,6 +677,79 @@ The sign of the association was positive for each position, suggesting that, for
 However, the [effect size](#sec-practicalSignificance) is small.
 Moreover, as described in @sec-correlation-correlationAndCausation, just because there is an association between variables does not mean that the association reflects a causal effect.
 
+### Scatterplot with Best-Fit Line
+
+A scatterplot with best-fit line
+
+```{r}
+#| label: fig-scatterplotWithBestFitLine
+#| fig-cap: "Scatterplot of Fantasy Points (Season) by Player Height With Best-Fit Line."
+#| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height With Best-Fit Line."
+
+plot_scatterplot <- ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("QB","RB","WR","TE")),
+  aes(
+    x = height,
+    y = fantasyPoints)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season), # add season for mouse over tooltip
+    alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Height (Inches)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Height",
+    subtitle = "(Among QBs, RBs, WRs, and TEs)"
+  ) +
+  theme_classic()
+
+plotly::ggplotly(plot_scatterplot)
+```
+
+```{r}
+#| label: fig-scatterplotByPositionWithBestFitLine
+#| fig-cap: "Scatterplot of Fantasy Points (Season) by Player Height and Position With Best-Fit Line."
+#| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height and Position With Best-Fit Line."
+
+plot_scatterplotByPosition <- ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("QB","RB","WR","TE")),
+  aes(
+    x = height,
+    y = fantasyPoints,
+    color = position,
+    fill = position)) +
+  geom_point(
+    aes(
+      text = player_display_name, # add player name for mouse over tooltip
+      label = season), # add season for mouse over tooltip
+    alpha = 0.7) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth(
+    method = "loess",
+    span = 0.5) +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Height (Inches)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Height and Position"
+  ) +
+  theme_classic()
+
+plotly::ggplotly(plot_scatterplotByPosition)
+```
+
 ### Rank Correlation: Spearman's Rho ($\rho$) {#sec-correlationExamplesSpearman}
 
 Spearman's rho ($\rho$) is a rank correlation.
@@ -808,11 +881,7 @@ This non-independence violates the traditional assumptions of the significance t
 We could address this assumption by analyzing only one season from each player or by estimating the significance of the correlation coefficient using cluster-robust standard errors.
 For simplicity, we present results above from the whole dataframe.
 In @sec-mixedModels, we discuss [mixed model](#sec-mixedModels) approaches that handle repeated measures and other data that violate assumptions of non-independence that are shared by correlation and [multiple regression](#sec-multipleRegression); assumptions of [multiple regression](#sec-multipleRegression) are described in @sec-assumptionsRegression.
-Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors.
-
-```{r}
-
-```
+In section @sec-multipleRegressionNonIndependence, we demonstrate how to account for non-independence of observations using cluster-robust standard errors.
 
 ## Impact of Outliers {#sec-correlationOutliers}
 
