@@ -43,7 +43,7 @@ If a nonlinear association is present, other indices like xi [$\xi$; @Chatterjee
 
 ## The Correlation Coefficient ($r$)
 
-The formula for the correlation coefficient\index{correlation} is in @eq-pearsonCorrelation.
+The formula for the ([Pearson](#sec-correlationExamplesPearson)) correlation coefficient\index{correlation} is in @eq-pearsonCorrelation.
 As noted in @sec-statisticalTestsPartitionedVariance, the correlation coefficient can be thought of as the ratio of shared variance (i.e., covariance) to total variance, as in @eq-correlationPartitionedVariance.
 
 The correlation coefficient ranges from −1.0 to +1.0.\index{correlation}
@@ -479,6 +479,124 @@ p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 +
 ```
 
 An interactive visualization by @Magnusson2023 on interpreting correlations is at the following link: <https://rpsychologist.com/correlation/> (archived at <https://perma.cc/G8YR-VCM4>)
+
+Keep in mind that the ([Pearson](#sec-correlationExamplesPearson)) correlation examines the strength of the *linear* association between two variables.\index{correlation}
+If the association between two variables is nonlinear, the ([Pearson](#sec-correlationExamplesPearson)) correlation provides the strength of the linear trend and may not provide a meaningful index of the strength of the association between the variables.\index{correlation}
+For instance, Anscombe's quartet includes four sets of data that have nearly identical basic descriptive statistics (see Tables [-@tbl-anscombe] and [-@tbl-anscombeStats]), including the same bivariate correlation, yet have very different distributions and whose association takes very different forms (see Figure \@ref(fig:anscombeQuartet)).\index{correlation}
+
+| x1 | y1    | x2 | y2   | x3 | y3    | x4 | y4   |
+|----|-------|----|------|----|-------|----|------|
+| 10 | 8.04  | 10 | 9.14 | 10 | 7.46  | 8  | 6.58 |
+| 8  | 6.95  | 8  | 8.14 | 8  | 6.77  | 8  | 5.76 |
+| 13 | 7.58  | 13 | 8.74 | 13 | 12.74 | 8  | 7.71 |
+| 9  | 8.81  | 9  | 8.77 | 9  | 7.11  | 8  | 8.84 |
+| 11 | 8.33  | 11 | 9.26 | 11 | 7.81  | 8  | 8.47 |
+| 14 | 9.96  | 14 | 8.1  | 14 | 8.84  | 8  | 7.04 |
+| 6  | 7.24  | 6  | 6.13 | 6  | 6.08  | 8  | 5.25 |
+| 4  | 4.26  | 4  | 3.1  | 4  | 5.39  | 19 | 12.5 |
+| 12 | 10.84 | 12 | 9.13 | 12 | 8.15  | 8  | 5.56 |
+| 7  | 4.82  | 7  | 7.26 | 7  | 6.42  | 8  | 7.91 |
+| 5  | 5.68  | 5  | 4.74 | 5  | 5.73  | 8  | 6.89 |
+
+: Anscombe's Quartet {#tbl-anscombe}
+
+| Property                     | Value        |
+|------------------------------|--------------|
+| Sample size                  | 11           |
+| Mean of X                    | 9.0          |
+| Mean of Y                    | ~7.5         |
+| Variance of X                | 11.0         |
+| Variance of Y                | ~4.1         |
+| Equation of regression line  | Y = 3 + 0.5X |
+| Standard error of slope      | 0.118        |
+| One-sample t-statistic       | 4.24         |
+| Sum of squares of X          | 110.0        |
+| Regression sum of squares    | 27.50        |
+| Residual sum of squares of Y | 13.75        |
+| Correlation coefficient      | .816         |
+| Coefficient of determination | .67          |
+
+: Descriptive Statistics of Anscombe's Quartet {#tbl-anscombeStats}
+
+```{r}
+#| label: fig-anscombeQuartet
+#| fig-cap: "Anscombe's Quartet."
+#| fig-alt: "Anscombe's Quartet."
+#| code-fold: true
+
+anscombe
+
+par(mfrow = c(2,2))
+
+plot(
+  anscombe$x1,
+  anscombe$y1,
+  xlab = "x",
+  ylab = "y",
+  xlim = c(0,20),
+  ylim = c(0,15),
+  main = 
+    substitute(
+      paste(italic(r), " = ", x, sep = ""),
+      list(x = round(cor.test(x = anscombe$x1, y = anscombe$y1)$estimate, 2))))
+
+abline(lm(
+  y1 ~ x1,
+  data = anscombe),
+  col = "black",
+  lty = 2)
+
+plot(
+  anscombe$x2,
+  anscombe$y2,
+  xlab = "x",
+  ylab = "y",
+  xlim = c(0,20),
+  ylim = c(0,15),
+  main = substitute(
+    paste(italic(r), " = ", x, sep = ""),
+    list(x = round(cor.test(x = anscombe$x2, y = anscombe$y2)$estimate, 2))))
+
+abline(lm(
+  y2 ~ x2,
+  data = anscombe),
+  col = "black",
+  lty = 2)
+
+plot(
+  anscombe$x3,
+  anscombe$y3,
+  xlab = "x",
+  ylab = "y",
+  xlim = c(0,20),
+  ylim = c(0,15),
+  main = substitute(
+    paste(italic(r), " = ", x, sep = ""),
+    list(x = round(cor.test(x = anscombe$x3, y = anscombe$y3)$estimate, 2))))
+
+abline(lm(
+  y3 ~ x3,
+  data = anscombe),
+  col = "black",
+  lty = 2)
+
+plot(
+  anscombe$x4,
+  anscombe$y4,
+  xlab = "x",
+  ylab = "y",
+  xlim = c(0,20),
+  ylim = c(0,15),
+  main = substitute(
+    paste(italic(r), " = ", x, sep = ""),
+    list(x = round(cor.test(x = anscombe$x4, y = anscombe$y4)$estimate, 2))))
+
+abline(lm(
+  y4 ~ x4,
+  data = anscombe),
+  col = "black",
+  lty = 2)
+```
 
 ## Examples {#sec-correlationExamples}
 
