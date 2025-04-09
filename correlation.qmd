@@ -9,6 +9,7 @@ library("petersenlab")
 library("XICOR")
 library("psych")
 library("DescTools")
+library("psych")
 library("corrplot")
 library("tidyverse")
 ```
@@ -679,12 +680,12 @@ Moreover, as described in @sec-correlation-correlationAndCausation, just because
 
 ### Scatterplot with Best-Fit Line
 
-A scatterplot with best-fit line
+A scatterplot with best-fit line is in @fig-scatterplotWithBestFitLine.
 
 ```{r}
 #| label: fig-scatterplotWithBestFitLine
-#| fig-cap: "Scatterplot of Fantasy Points (Season) by Player Height With Best-Fit Line."
-#| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height With Best-Fit Line."
+#| fig-cap: "Scatterplot of Fantasy Points (Season) by Player Height With Best-Fit Line. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+#| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height With Best-Fit Line. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
 
 plot_scatterplot <- ggplot2::ggplot(
   data = player_stats_seasonal %>% filter(position %in% c("QB","RB","WR","TE")),
@@ -714,10 +715,14 @@ plot_scatterplot <- ggplot2::ggplot(
 plotly::ggplotly(plot_scatterplot)
 ```
 
+Examining the linear line of best fit, we would see that there is a slight negative slope, consistent with a weak negative association.
+However, the nonlinear best-fit line suggests that there may be an inverted-U-shaped association, which might suggest that there may be an "optimal range of height," where being too tall or too short may be a disadvantage.
+We now examine the association between height and fantasy points separately by position in @fig-scatterplotByPositionWithBestFitLine.
+
 ```{r}
 #| label: fig-scatterplotByPositionWithBestFitLine
-#| fig-cap: "Scatterplot of Fantasy Points (Season) by Player Height and Position With Best-Fit Line."
-#| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height and Position With Best-Fit Line."
+#| fig-cap: "Scatterplot of Fantasy Points (Season) by Player Height and Position With Best-Fit Line. The linear best-fit line for each position is in black. The nonlinear best-fit line for each group is represented by the color line."
+#| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height and Position With Best-Fit Line. The linear best-fit line for each position is in black. The nonlinear best-fit line for each group is represented by the color line."
 
 plot_scatterplotByPosition <- ggplot2::ggplot(
   data = player_stats_seasonal %>% filter(position %in% c("QB","RB","WR","TE")),
@@ -745,10 +750,45 @@ plot_scatterplotByPosition <- ggplot2::ggplot(
     y = "Fantasy Points (Season)",
     title = "Fantasy Points (Season) by Player Height and Position"
   ) +
+  guides(fill = "none") +
   theme_classic()
 
 plotly::ggplotly(plot_scatterplotByPosition)
 ```
+
+Examining the association between height and fantasy points separately by position, it appears that there is an inverted-U-shaped associations for Wide Receivers, a relatively flat association for Running Backs and Tight Ends, and a nonlinear association among Quarterbacks.
+Interestingly, the best-fit lines suggest that the different positions have different height ranges, which is confirmed in @fig-ridgelinePlotPlayerHeightByPosition.
+
+```{r}
+#| label: fig-ridgelinePlotPlayerHeightByPosition
+#| fig-cap: "Ridgeline Plot of Player Height by Position."
+#| fig-alt: "Ridgeline Plot of Player Height by Position."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = height,
+    y = position,
+    group = position,
+    fill = position)
+) +
+  ggridges::geom_density_ridges(
+    bandwidth = 0.6
+  ) +
+  labs(
+    x = "Height (inches)",
+    y = "Position",
+    title = "Ridgeline Plot of Player Height by Position"
+  ) +
+  theme_classic() + 
+  theme(
+    legend.position = "none",
+    axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+According to the distributions of player height by position (among Quarterbacks, Running Backs, Wide Receivers, and Tight Ends), Running Backs tend to be the shortest, followed by Wide Receivers; Tight Ends tend to be the tallest, followed by Quarterbacks.
+Wide Receivers showed the greatest variability; some were quite short, whereas others were quite tall.
 
 ### Rank Correlation: Spearman's Rho ($\rho$) {#sec-correlationExamplesSpearman}
 
@@ -789,7 +829,29 @@ spearman_p <- spearman_test$p.value
 
 Using Spearman's rho, there is a negative association between draft round and fantasy points ($r(`r spearman_df`) = `r petersenlab::apa(spearman_r, decimals = 2, leading = FALSE)`$, $p `r petersenlab::pValue(spearman_p)`$); unsurprisingly, the earlier the round a player is drafted, the more fantasy points they tend to score.
 
-### Partial Correlation {#sec-correlationExamplesNonlinear}
+### Partial Correlation {#sec-correlationExamplesPartial}
+
+A partial correlation examines the association between variables after controlling for one or more variables.
+Below, we examine a partial [Pearson correlation](#sec-correlationExamplesPearson) between height and fantasy points after controlling for age.
+
+```{r}
+psych::partial.r(
+  data = player_stats_seasonal,
+  x = c("height","fantasyPoints"),
+  y = "age"
+)
+```
+
+Below, we examine a partial [Spearman's rho rank correlation](#sec-correlationExamplesSpearman) between height and fantasy points after controlling for age.
+
+```{r}
+psych::partial.r(
+  data = player_stats_seasonal,
+  x = c("draftround","fantasyPoints"),
+  y = "age",
+  method = "spearman"
+)
+```
 
 ### Nonlinear Correlation {#sec-correlationExamplesNonlinear}
 
