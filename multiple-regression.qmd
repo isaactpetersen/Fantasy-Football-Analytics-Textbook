@@ -7,6 +7,9 @@
 ```{r}
 library("petersenlab")
 library("rms")
+library("lavaan")
+library("mice")
+library("brms")
 library("tidyverse")
 library("knitr")
 ```
@@ -251,9 +254,10 @@ Statistical models applied to big data (e.g., data with many [predictor variable
 So, even though an overfitting statistical model appears to be accurate because it is accounting for more variance, it is not actually that accurate—it will predict new data less accurately than how accurately it accounts for the data with which the model was built.
 In the case of fantasy football analytics, this is especially relevant because there are hundreds if not thousands of variables we could consider for inclusion and many, many players when considering historical data.
 
-Consider an example where you develop an algorithm to predict players' fantasy performance based on 2023 data using hundreds of [predictor variables](#sec-correlationalStudy).
+Consider an example where you develop an algorithm to predict players' fantasy performance based on 2024 data using hundreds of [predictor variables](#sec-correlationalStudy).
 To some extent, these [predictor variables](#sec-correlationalStudy) will likely account for true variance (i.e., signal) and error variance (i.e., noise).
-If we were to apply the same algorithm based on the 2023 prediction model to 2024 data, the prediction model would likely predict less accurately than with 2023 data.
+If we were to apply the same algorithm based on the 2024 prediction model to 2025 data, the prediction model would likely predict less accurately than with 2024 data.
+The regression coefficients tend to become weaker when applied to new data, a phenomenon called [shrinkage](#sec-shrinkage), which is described in @sec-shrinkage.
 The regression coefficients in the [FILL IN]
 
 In @fig-overfittingModel, the blue line represents the true distribution of the data, and the red line is an overfitting model:
@@ -324,11 +328,13 @@ lines(
 
 Covariates are variables that you include in the statistical model to try to control for them so you can better isolate the unique contribution of the [predictor variable](#sec-correlationalStudy)(s) in relation to the [outcome variable](#sec-correlationalStudy).
 Use of covariates examines the association between the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) when holding people's level constant on the covariates.
-Inclusion of confounds as covariates allows potentially gaining a more accurate estimate of the causal effect of the [predictor variable](#sec-correlationalStudy) on the [outcome variable](#sec-correlationalStudy).
-Ideally, you want to include any and all confounds as covariates.
-As described in @sec-correlationCausation, confounds are third variables that influence both the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) and explain their association.
-Covariates are potentially (but not necessarily) confounds.
-For instance, you might include the player's age as a covariate in a model that examines whether a player's 40-yard dash time at the NFL Combine predicts their fantasy points in their rookie year, but it may not be a confound.
+Inclusion of [confounds](#sec-causalDiagramConfounding) as covariates allows potentially gaining a more accurate estimate of the causal effect of the [predictor variable](#sec-correlationalStudy) on the [outcome variable](#sec-correlationalStudy).
+Ideally, you want to include any and all [confounds](#sec-causalDiagramConfounding) as covariates.
+As described in @sec-correlationCausation, [confounds](#sec-causalDiagramConfounding) are third variables that influence both the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) and explain their association.
+Covariates are potentially (but not necessarily) [confounds](#sec-causalDiagramConfounding).
+For instance, you might include the player's age as a covariate in a model that examines whether a player's 40-yard dash time at the NFL Combine predicts their fantasy points in their rookie year, but it may not be a [confound](#sec-causalDiagramConfounding).
+
+## Examples {#sec-multipleRegressionExamples}
 
 ## Multicollinearity {#sec-multipleRegressionMulticollinearity}
 
@@ -392,6 +398,24 @@ You can also examine indices such as variance inflation factor (VIF).
 
 To address multicollinearity, you can drop a redundant predictor or you can also use principal component analysis or factor analysis of the predictors to reduce the predictors down to a smaller number of meaningful predictors.
 For a meaningful answer in a regression framework that is precise and confident, you need a low level of intercorrelation among predictors, unless you have a very large sample size.
+
+## Handling of Missing Data {#sec-multipleRegressionMissingness}
+
+An important consideration in multiple regression is how missing data are handled.
+Multiple regression in `R` using the `lm()` function applies listwise deletion.
+*Listwise deletion* removes any row (in the data file) from analysis that has a missing value on the [outcome variable](#sec-correlationalStudy) or any of the [predictor variables](#sec-correlationalStudy).
+Removing all rows from analysis that have any missingness in the model variables can be a problem because missingness is often not completely at random—missingness often occurs systematically (i.e., for a reason).
+For instance, participants may be less likely to have data for all variables if they are from a lower socioeconomic status background and do not have the time to participate in all study procedures.
+Thus, applying listwise deletion, we might systematically exclude participants from lower socioeconomic status backgrounds (or other groups), which could lead to less generalizable inferences.
+
+It is thus important to consider approaches to handle missingness.
+Various approaches to handle missingness include pairwise deletion (aka available-case analysis), multiple imputation, and full information maximum likelihood (FIML).
+
+### Pairwise Deletion {#sec-multipleRegressionPairwiseDeletion}
+
+### Multiple Imputation {#sec-multipleRegressionMultipleImputation}
+
+### Full Information Maximum Likelihood {#sec-multipleRegressionFIML}
 
 ## Addressing Non-Independence of Observations {#sec-multipleRegressionNonIndependence}
 
