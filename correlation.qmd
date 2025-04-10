@@ -530,7 +530,7 @@ anscombe
 #| fig-cap: "Anscombe's Quartet."
 #| fig-alt: "Anscombe's Quartet."
 #| fig-height: 6
-#| fig-height: 6
+#| fig-width: 6
 #| code-fold: true
 
 par(mfrow = c(2,2))
@@ -1202,95 +1202,94 @@ Thus, if a variable has restricted range—such as owing to a floor effect or ce
 For instance, a floor effect is one in which many of the scores are the lowest possible score.
 By contrast, a ceiling effect is one in which many of the scores are the highest possible score.
 
-Consider the following association between air yards share and receiving yards:
+Consider the following association between passing attempts and expected points added (EPA) via passing.
+Expected points added from a given play is calculated as the difference between a team's expected points before the play and the team's expected points after the play.
+This can be summed across all passing plays to determine a player's EPA from passing during a given season.
 
 ```{r}
 cor.test(
-  player_stats_seasonal$air_yards_share,
-  player_stats_seasonal$receiving_yards
+  player_stats_seasonal$attempts,
+  player_stats_seasonal$passing_epa
 )
 ```
 
-There is a statistically significant, moderate positive association between air yards share and receiving yards, as depicted in @fig-scatterplotWithoutRangeRestriction.
+There is a statistically significant, moderate positive association between passing attempts and expected points added (EPA) via passing, as depicted in @fig-scatterplotWithoutRangeRestriction.
 
 ```{r}
 #| label: fig-scatterplotWithoutRangeRestriction
-#| fig-cap: "Scatterplot of Player Receiving Yards (Season) by Air Yard Share. The best-fit line is in black."
-#| fig-alt: "Scatterplot of Player Receiving Yards (Season) by Air Yard Share. The best-fit line is in black."
+#| fig-cap: "Scatterplot of Player Passing Expected Points Added (Season) by Passing Attempts, Without Range Restriction. The best-fit line is in blue."
+#| fig-alt: "Scatterplot of Player Passing Expected Points Added (Season) by Passing Attempts, Without Range Restriction. The best-fit line is in blue."
 #| code-fold: true
 
 plot_scatterplotWithoutRangeRestriction <- ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(air_yards_share > 0),
+  data = player_stats_seasonal,
   aes(
-    x = air_yards_share,
-    y = receiving_yards)) +
+    x = attempts,
+    y = passing_epa)) +
   geom_point(
     aes(
       text = player_display_name, # add player name for mouse over tooltip
       label = season), # add season for mouse over tooltip
-    alpha = 0.10) +
+    alpha = 0.3) +
   geom_smooth(
-    method = "lm",
-    color = "black") +
+    method = "lm") +
   #geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
     expand = FALSE) +
   labs(
-    x = "Air Yards Share",
-    y = "Receiving Yards",
-    title = "Receiving Yards (Season) by Air Yards Share",
-    subtitle = "(Among Players with Air Yards Share > 0)"
+    x = "Player's Passing Attempts",
+    y = "Player's Expected Points Added (EPA) via Passing",
+    title = "Player's Passing Expected Points Added (EPA)\nby Passing Attempts (Season)",
+    #subtitle = ""
   ) +
   theme_classic()
 
 plotly::ggplotly(plot_scatterplotWithoutRangeRestriction)
 ```
 
-Now, consider the same association when we restrict the range to examine only those players whose air yards share was more than 25 (thus resulting in less variability):
+Now, consider the same association when we restrict the range to examine only those players who had fewer than 450 pass attempts in a season (thus resulting in less variability):
 
 ```{r}
 cor.test(
   player_stats_seasonal %>% 
-    filter(air_yards_share > 25) %>% 
-    select(air_yards_share) %>% 
+    filter(attempts < 450) %>% 
+    select(attempts) %>% 
     pull(),
   player_stats_seasonal %>% 
-    filter(air_yards_share > 25) %>% 
-    select(receiving_yards) %>% 
+    filter(attempts < 450) %>% 
+    select(passing_epa) %>% 
     pull()
 )
 ```
 
-The association is no longer statistically significant, and the association is weak in terms of [effect size](#sec-effectSizeThresholds), as depicted in @fig-scatterplotWithRangeRestriction.
+The association is no longer positive and is weak in terms of [effect size](#sec-effectSizeThresholds), as depicted in @fig-scatterplotWithRangeRestriction.
 
 ```{r}
 #| label: fig-scatterplotWithRangeRestriction
-#| fig-cap: "Scatterplot of Player Receiving Yards (Season) by Target Share. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
-#| fig-alt: "Scatterplot of Player Receiving Yards (Season) by Target Share. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+#| fig-cap: "Scatterplot of Player Passing Expected Points Added (Season) by Passing Attempts, With Range Restriction. The best-fit line is in blue."
+#| fig-alt: "Scatterplot of Player Passing Expected Points Added (Season) by Passing Attempts, With Range Restriction. The best-fit line is in blue."
 #| code-fold: true
 
 plot_scatterplotWithRangeRestriction <- ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(air_yards_share > 25),
+  data = player_stats_seasonal %>% filter(attempts < 450),
   aes(
-    x = air_yards_share,
-    y = receiving_yards)) +
+    x = attempts,
+    y = passing_epa)) +
   geom_point(
     aes(
       text = player_display_name, # add player name for mouse over tooltip
-      label = season)) + # add season for mouse over tooltip)
+      label = season), # add season for mouse over tooltip
+    alpha = 0.3) +
   geom_smooth(
-    method = "lm",
-    color = "black") +
+    method = "lm") +
   #geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
     expand = FALSE) +
   labs(
-    x = "Air Yards Share",
-    y = "Receiving Yards",
-    title = "Receiving Yards (Season) by Air Yards Share",
-    subtitle = "(Among Players with Air Yards Share > 25)"
+    x = "Player's Passing Attempts",
+    y = "Player's Expected Points Added (EPA) via Passing",
+    title = "Player's Passing Expected Points Added (EPA)\nby Passing Attempts (Season)",
+    subtitle = "(Among Players with < 450 Passing Attempts)"
   ) +
   theme_classic()
 
