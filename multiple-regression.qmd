@@ -7,6 +7,7 @@
 ```{r}
 library("petersenlab")
 library("rms")
+library("car")
 library("lavaan")
 library("mice")
 library("brms")
@@ -131,6 +132,17 @@ Standardized regression coefficients—though not the case in all instances—te
 Thus, standardized regression coefficients tend to be more comparable across variables and models compared to unstandardized regression coefficients.
 In this way, standardized regression coefficients provide a meaningful index of [effect size](#sec-practicalSignificance).
 
+The *standard error* of a regression coefficient represents the uncertainty of the parameter.
+If we have less uncertainty (i.e., more confidence) about the parameter, the standard error will be small.
+If we have more uncertainty (i.e., less confidence) about the parameter, the standard error will be large.
+If we used the same sampling procedure repeatedly and calculated the regression coefficient each time, the true parameter in the population would fall 68% of the time within the interval of:  $[\text{model parameter estimate for the regression coefficient} \pm 1 \text{ standard error}]$ .
+
+A *confidence interval* represents a range of plausible values such that, with repeated sampling, the true value falls within a given interval with some confidence.
+Our parameter estimate for the regression coefficient, plus or minus 1 standard error, reflects the 68% confidence interval for the coefficient.
+The 95% confidence interval is computed as the parameter estimated plus or minus 1.96 standard errors.
+For instance, if the parameter estimate for the regression coefficient is 0.50, and the standard error is 0.10, the 95% confidence interval is [0.30, 0.70]: $0.5 - (1.96 \times 0.10) = 0.3$; $0.5 + (1.96 \times 0.10) = 0.7$.
+That is, if we used the same sample procedure repeatedly, the true value of the regression coefficient would be expected to be 95% of the time somewhere between 0.30 to 0.70.
+
 ## Assumptions of Multiple Regression {#sec-assumptionsRegression}
 
 Linear regression models make the following assumptions:
@@ -140,7 +152,11 @@ Linear regression models make the following assumptions:
 - the residuals are independent; they are uncorrelated with each other
 - the residuals are normally distributed
 
-### Evaluating the Assumptions of Multiple Regression {#sec-assumptionsRegressionEvaluating}
+Homoscedasticity of the residuals means that the variance of the residuals does not differ as a function of the outcome variable or as a function of the predictor variables (i.e., the residuals show constant variance as a function of outcome/predictors).
+
+### Evaluating Assumptions of Multiple Regression {#sec-assumptionsRegressionEvaluating}
+
+
 
 ## Coefficient of Determination ($R^2$) {#sec-multipleRegressionRSquared}
 
@@ -256,7 +272,7 @@ In the case of fantasy football analytics, this is especially relevant because t
 
 Consider an example where you develop an algorithm to predict players' fantasy performance based on 2024 data using hundreds of [predictor variables](#sec-correlationalStudy).
 To some extent, these [predictor variables](#sec-correlationalStudy) will likely account for true variance (i.e., signal) and error variance (i.e., noise).
-If we were to apply the same algorithm based on the 2024 prediction model to 2025 data, the prediction model would likely predict less accurately than with 2024 data.
+If we were to apply the same algorithm based on the `r as.integer(format(Sys.Date(), "%Y")) - 1` prediction model to `r as.integer(format(Sys.Date(), "%Y"))` data, the prediction model would likely predict less accurately than with `r as.integer(format(Sys.Date(), "%Y")) - 1` data.
 The regression coefficients tend to become weaker when applied to new data, a phenomenon called [shrinkage](#sec-shrinkage), which is described in @sec-shrinkage.
 The regression coefficients in the [FILL IN]
 
@@ -335,6 +351,385 @@ Covariates are potentially (but not necessarily) [confounds](#sec-causalDiagramC
 For instance, you might include the player's age as a covariate in a model that examines whether a player's 40-yard dash time at the NFL Combine predicts their fantasy points in their rookie year, but it may not be a [confound](#sec-causalDiagramConfounding).
 
 ## Examples {#sec-multipleRegressionExamples}
+
+Let's say we want to use a number of variables to predict a wide receiver's fantasy performance.
+We want to consider several predictors, including the player's age, height, weight, and target share.
+We have only a few predictors and our sample size is large enough such that [overfitting](#sec-overfitting) is not likely a concern.
+
+Let's first examine the bivariate association of each using a scatterplot to evaluate for any potential nonlinearity, as depicted in @fig-scatterplots.
+
+```{r}
+#| layout-ncol: 2
+#| label: fig-scatterplots
+#| fig-cap: "Scatterplots With Fantasy Points (Season) Among Wide Receivers. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+#| fig-alt: "Scatterplots With Fantasy Points (Season) Among Wide Receivers. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+#| fig-subcap:
+#|   - "Age"
+#|   - "Height"
+#|   - "Weight"
+#|   - "Target Share"
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = age,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Age (Years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = height,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Height (Inches)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Height",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = weight,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Weight (Pounds)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Weight",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = target_share,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Target Share",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Target Share",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+```
+
+There are some suggestions of potential nonlinearity, such as an inverted-U-shaped association between height and fantasy points, suggesting that there may an optimal range for height among Wide Receivers—being too short or too tall could be a disadvantage.
+In addition, target share shows a weakening association as target share increases.
+Thus, after evaluating the linear association between the predictors and outcome, we will also examine the possibility for curvilinear associations.
+
+First, let's estimate a multiple regression model with only linear terms:
+
+```{r}
+linearRegressionModel <- lm(
+  fantasyPoints ~ age + height + weight + target_share,
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+```
+
+Here are the model results:
+
+```{r}
+summary(linearRegressionModel)
+```
+
+The only terms that are significantly associated with fantasy performance among Wide Receivers are weight and target share, both of which showed a positive association with fantasy points.
+If we want to obtain standardized regression coefficients, we can standardize the outcome variable and each predictor variable using the `scale()` function:
+
+```{r}
+linearRegressionModelStandardized <- lm(
+  scale(fantasyPoints) ~ scale(age) + scale(height) + scale(weight) + scale(target_share),
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+
+summary(linearRegressionModelStandardized)
+```
+
+Target share has a large [effect size](#sec-practicalSignificance).
+All of the other predictors have small effect sizes.
+
+Now let's consider whether any of the terms show curvilinear associations with fantasy points by adding quadratic terms:
+
+```{r}
+quadraticTermsRegressionModel <- lm(
+  fantasyPoints ~ age + I(age^2) + height + I(height^2) + weight + I(weight^2) + target_share + I(target_share^2),
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+
+summary(quadraticTermsRegressionModel)
+```
+
+Only the quadratic term for target share shows a significant association.
+If we wanted to visualize the shape of the model-implied association between target share and fantasy points, we could generate the model-implied predictions using the data range that we want to visualize.
+
+```{r}
+newdata <- data.frame(
+  target_share = seq(
+    from = min(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")], na.rm = TRUE),
+    to = max(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")], na.rm = TRUE),
+    length.out = 1000
+  )
+)
+
+newdata$age <- mean(player_stats_seasonal$age[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
+newdata$height <- mean(player_stats_seasonal$height[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
+newdata$weight <- mean(player_stats_seasonal$weight[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
+```
+
+```{r}
+newdata$fantasyPoints <- predict(
+  quadraticTermsRegressionModel,
+  newdata = newdata
+)
+```
+
+We can depict the model-implied predictions of fantasy points as a function of target share, as shown in @fig-modelImpliedPredictionsQuadraticRegression.
+
+```{r}
+#| label: fig-modelImpliedPredictionsQuadraticRegression
+#| fig-cap: "Model-Implied Predictions of A Wide Receiver's Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model."
+#| fig-alt: "Model-Implied Predictions of A Wide Receiver's Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model."
+
+ggplot2::ggplot(
+  data = newdata,
+  aes(
+    x = target_share,
+    y = fantasyPoints)) +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Target Share",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Target Share",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+```
+
+### Evaluating and Addressing Assumptions {#sec-multipleRegressionExamplesAddressingAssumptions}
+
+The assumptions for multiple regression are described in @sec-assumptionsRegression.
+I describe ways to evaluate assumptions in @sec-assumptionsRegressionEvaluating.
+
+As a reminder, here are four assumptions:
+
+- there is a linear association between the predictor variables and the outcome variable
+- there is homoscedasticity of the residuals; the residuals do not differ as a function of the predictor variables or as a function of the outcome variable
+- the residuals are independent; they are uncorrelated with each other
+- the residuals are normally distributed
+
+#### Linear Association {#sec-multipleRegressionExamplesAddressingAssumptionsLinearAssociation}
+
+We evaluated the shape of the association between the predictor variables and the outcome variables using scatterplots.
+We accounted for potential curvilinearity with a quadratic term.
+Other ways to account for nonlinearity, in addition to polynomials (e.g., quadratic, cubic, quartic, or higher-degree terms), include transforming predictors (e.g., log, square root, inverse, exponential transform), splines/piecewise regression, and generalized additive models.
+
+We can also evaluate residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), and added-variable plots (@fig-addedVariablePlots), to evaluate for potential nonlinearity.
+For evaluating linearity, we would expect minimal bend/curvature in the lines.
+
+```{r}
+#| label: fig-marginalModelPlots
+#| fig-cap: "Marginal Model Plots."
+#| fig-alt: "Marginal Model Plots."
+
+car::marginalModelPlots(
+  quadraticTermsRegressionModel,
+  sd = TRUE,
+  id = TRUE)
+```
+
+```{r}
+#| label: fig-addedVariablePlots
+#| fig-cap: "Added-Variable Plots."
+#| fig-alt: "Added-Variable Plots."
+
+car::avPlots(
+  quadraticTermsRegressionModel,
+  id = TRUE)
+```
+
+The marginal model plots (@fig-marginalModelPlots) and residual plots (@fig-residualPlots) suggest that the nonlinearity of the association between target share and fantasy points may not be fully captured by the quadratic term.
+Thus, we may need to apply a different approach to handling the nonlinear association between target share and fantasy points.
+
+One approach we can take is to transform the `target_shares` variable to be more normally distributed.
+
+The histogram for the raw `target_shares` variable is in @fig-histogramTargetShare.
+
+```{r}
+#| label: fig-histogramTargetShare
+#| fig-cap: "Histogram of Target Share."
+#| fig-alt: "Histogram of Target Share."
+
+hist(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")])
+```
+
+The variable shows a strong positive skew.
+To address a strong positive skew, we can use a log transformation.
+The histogram of the log-transformed variable is in @fig-histogramTargetSharesLog.
+
+```{r}
+#| label: fig-histogramTargetSharesTransformed
+#| fig-cap: "Histogram of Target Share, Transformed."
+#| fig-alt: "Histogram of Target Share, Transformed."
+
+hist(log(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")] + 1))
+```
+
+Now we can re-fit the model with the log-transformed variable.
+
+```{r}
+linearRegressionModel_logTargetShare <- lm(
+  fantasyPoints ~ age + I(age^2) + height + I(height^2) + weight + I(weight^2) + I(log(target_share + 1)),
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+
+summary(linearRegressionModel_logTargetShare)
+```
+
+Target share shows a more linear association with fantasy points after log-transforming it (albeit still not perfect), as depicted in Figures [-@fig-marginalModelPlotsLogTransformed], [-@fig-addedVariablePlotsLogTransformed], and [-@fig-residualPlotsLogTransformed].
+
+```{r}
+#| label: fig-marginalModelPlotsLogTransformed
+#| fig-cap: "Marginal Model Plots After Log Transformation of Target Share."
+#| fig-alt: "Marginal Model Plots After Log Transformation of Target Share."
+
+car::marginalModelPlots(
+  linearRegressionModel_logTargetShare,
+  sd = TRUE,
+  id = TRUE)
+```
+
+```{r}
+#| label: fig-addedVariablePlotsLogTransformed
+#| fig-cap: "Added-Variable Plots After Log Transformation of Target Share."
+#| fig-alt: "Added-Variable Plots After Log Transformation of Target Share."
+
+car::avPlots(
+  linearRegressionModel_logTargetShare,
+  id = TRUE)
+```
+
+```{r}
+#| label: fig-residualPlotsLogTransformed
+#| fig-cap: "Residual Plots After Log Transformation of Target Share."
+#| fig-alt: "Residual Plots After Log Transformation of Target Share."
+
+car::residualPlots(
+  linearRegressionModel_logTargetShare,
+  id = TRUE)
+```
+
+#### Homoscedasticity {#sec-multipleRegressionExamplesAddressingAssumptionsHomoscedasticity}
+
+To evaluate homoscedasticity, we can evaluate residual plots (@fig-residualPlots).
+In residual plots, you want a constant spread of residuals versus fitted values—you do not want the residuals to show a fan or cone shape.
+
+```{r}
+#| label: fig-residualPlots
+#| fig-cap: "Residual Plots."
+#| fig-alt: "Residual Plots."
+
+car::residualPlots(
+  quadraticTermsRegressionModel,
+  id = TRUE)
+```
+
+In this example, the residuals appear to increase as a function of the fitted values.
+To handle this, we may need to transform the outcome variable to be more normally distributed.
+
+The histogram for target share is in @fig-histogramFantasyPoints
+
+```{r}
+#| label: fig-histogramFantasyPoints
+#| fig-cap: "Histogram of Fantasy Points (Among Wide Receivers)."
+#| fig-alt: "Histogram of Fantasy Points (Among Wide Receivers)."
+
+hist(player_stats_seasonal$fantasyPoints[which(player_stats_seasonal$position == "WR")])
+```
+
+The histogram of the transformed variable is in @fig-histogramFantasyPointsTransformed.
+
+```{r}
+#| label: fig-histogramFantasyPointsTransformed
+#| fig-cap: "Histogram of Fantasy Points (Among Wide Receivers), Transformed."
+#| fig-alt: "Histogram of Fantasy Points (Among Wide Receivers), Transformed."
+
+hist(player_stats_seasonal$fantasyPoints[which(player_stats_seasonal$position == "WR")])
+```
+
+Now we can refit the model.
+
+```{r}
+linearRegressionModel_outcomeTransformed <- lm(
+  fantasyPoints ~ age + height + weight + I(log(target_share + 1)),
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+
+summary(linearRegressionModel_outcomeTransformed)
+```
+
+The residual plots are in @fig-residualPlotsOutcomeTransformed.
+
+```{r}
+#| label: fig-residualPlotsOutcomeTransformed
+#| fig-cap: "Residual Plots After Transformation of Fantasy Points."
+#| fig-alt: "Residual Plots After Transformation of Fantasy Points."
+
+car::residualPlots(
+  linearRegressionModel_outcomeTransformed,
+  id = TRUE)
+```
+
+#### Uncorrelated Residuals {#sec-multipleRegressionExamplesAddressingAssumptionsUncorrelatedResiduals}
+
+#### Normally Distributed Residuals {#sec-multipleRegressionExamplesAddressingAssumptionsNormallyDistributedResiduals}
 
 ## Multicollinearity {#sec-multipleRegressionMulticollinearity}
 
