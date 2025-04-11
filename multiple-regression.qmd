@@ -14,6 +14,7 @@ library("performance")
 library("lavaan")
 library("mice")
 library("miceadds")
+library("interactions")
 library("brms")
 library("tidyverse")
 library("knitr")
@@ -969,7 +970,6 @@ pred[Y, "age"] <- 2 # random effect predictor
 pred[Y, Y] <- 1 # fixed effect predictor
 
 diag(pred) <- 0
-pred
 ```
 
 Now, let's run the imputation:
@@ -1095,6 +1095,82 @@ When examining moderation in multiple regression, several steps are important:
 Calculate the interaction term as the multiplication of the mean-centered predictor variables.
 Mean-centering the predictor variables when computing the interaction term is important for addressing issues regarding [multicollinearity](#sec-multipleRegressionMulticollinearity) [@Iacobucci2016].
 - When including an interaction term in the model, make sure also to include the main effects.
+
+First, we mean-center the predictors.
+In this case, we center the predictors around the mean of height and weight for Wide Receivers:
+
+```{r}
+player_stats_seasonal$height_centered <- player_stats_seasonal$height - mean(player_stats_seasonal$height[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
+player_stats_seasonal$weight_centered <- player_stats_seasonal$weight - mean(player_stats_seasonal$weight[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
+```
+
+Then, we compute the interaction term as the multiplication of the two centered predictors:
+
+```{r}
+player_stats_seasonal$heightXweight <- player_stats_seasonal$height_centered * player_stats_seasonal$weight_centered
+```
+
+Then, we fit the moderated multiple regression model:
+
+```{r}
+moderationModel <- lm(
+  fantasyPoints_transformed ~ height_centered + weight_centered + height_centered:weight_centered,
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+
+summary(moderationModel)
+```
+
+This model is equivalent to the model that includes the interaction term explicitly:
+
+```{r}
+#| eval: false
+
+moderationModel <- lm(
+  fantasyPoints_transformed ~ height_centered + weight_centered + heightXweight,
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+
+summary(moderationModel)
+```
+
+Now, we can visualize the interaction to understand it.
+We create an interaction plot (@fig-interactionPlot) and Johnson-Neyman plot (@fig-johnsonNeymanPlot) using the `interactions` package [@R-interactions].
+
+```{r}
+#| label: fig-interactionPlot
+#| fig-cap: "Interaction Plot from Moderated Multiple Regression."
+#| fig-alt: "Interaction Plot from Moderated Multiple Regression."
+
+interactions::interact_plot(
+  moderationModel,
+  pred = height_centered,
+  modx = weight_centered)
+```
+
+```{r}
+#| label: fig-johnsonNeymanPlot
+#| fig-cap: "Johnson-Neyman Plot from Moderated Multiple Regression."
+#| fig-alt: "Johnson-Neyman Plot from Moderated Multiple Regression."
+
+interactions::johnson_neyman(
+  moderationModel,
+  pred = height_centered,
+  modx = weight_centered,
+  alpha = .05)
+```
+
+Here is a simple slopes analysis:
+
+```{r}
+interactions::sim_slopes(
+  moderationModel,
+  pred = height_centered,
+  modx = weight_centered,
+  johnson_neyman = FALSE)
+```
 
 ## Mediation {#sec-multipleRegressionMediation}
 
