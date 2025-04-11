@@ -582,7 +582,7 @@ We evaluated the shape of the association between the predictor variables and th
 We accounted for potential curvilinearity with a quadratic term.
 Other ways to account for nonlinearity, in addition to polynomials (e.g., quadratic, cubic, quartic, or higher-degree terms), include transforming predictors (e.g., log, square root, inverse, exponential transform), splines/piecewise regression, and generalized additive models.
 
-We can also evaluate residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), and added-variable plots (@fig-addedVariablePlots), to evaluate for potential nonlinearity.
+We can also evaluate residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), and added-variable plots (@fig-addedVariablePlots) from the `car` package [@Fox2019; @R-car], to evaluate for potential nonlinearity.
 For evaluating linearity, we would expect minimal bend/curvature in the lines.
 
 ```{r}
@@ -759,7 +759,7 @@ The residuals show more constant variance after transforming the outcome variabl
 #### Uncorrelated Residuals {#sec-multipleRegressionExamplesAddressingAssumptionsUncorrelatedResiduals}
 
 To determine if residuals are correlated given the nested structure of the data, we can examine the proportion of variance that is attributable to the particular player.
-To do this, we can estimate the intraclass correlation coefficient (ICC) from a [mixed model](#sec-mixedModels).
+To do this, we can estimate the intraclass correlation coefficient (ICC) from a [mixed model](#sec-mixedModels) using the `performance` package [@Ludecke2021; @R-performance].
 
 ```{r}
 mixedModel <- lmer(
@@ -881,6 +881,8 @@ Various approaches to handle missingness include pairwise deletion (aka availabl
 
 ### Pairwise Deletion {#sec-multipleRegressionPairwiseDeletion}
 
+We can estimate a regression model that uses pairwise deletion using the `lavaan` package [@Rosseel2012; @R-lavaan].
+
 ```{r}
 player_stats_seasonal$target_share_log <- log(player_stats_seasonal$target_share + 1)
 
@@ -898,7 +900,7 @@ pairwiseRegression_syntax <- '
   fantasyPoints_transformed ~ 1
 '
 
-pairwiseRegression_fit <- lavaan(
+pairwiseRegression_fit <- lavaan::lavaan(
   pairwiseRegression_syntax,
   sample.mean = varMeans,
   sample.cov = varCovariances,
@@ -912,6 +914,8 @@ summary(
 ```
 
 ### Multiple Imputation {#sec-multipleRegressionMultipleImputation}
+
+We can multiply impute data using the `mice` package [@vanBuuren2011; @R-mice].
 
 ```{r}
 numImputations <- 5
@@ -933,7 +937,7 @@ varsToImpute <- c("age","height","weight","target_share")
 Y <- varsToImpute
 ```
 
-Now, let's specify the imputation method:
+Now, let's specify the imputation method—we use the two-level predictive mean matching (`2l.pmm`) method from the `miceadds` package [@R-miceadds] to account for the nonindependent data (owing to multiple seasons per player):
 
 ```{r}
 meth <- make.method(dataToImpute)
@@ -971,7 +975,7 @@ pred
 Now, let's run the imputation:
 
 ```{r}
-imp <- mice(
+imp <- mice::mice(
   as.data.frame(dataToImpute),
   method = meth,
   predictorMatrix = pred,
@@ -1035,6 +1039,8 @@ summary(pool(imp_regression))
 
 ### Full Information Maximum Likelihood {#sec-multipleRegressionFIML}
 
+We can estimate a regression model that uses full information maximum likelihood using the `lavaan` package [@Rosseel2012; @R-lavaan].
+
 ```{r}
 fimlRegression_syntax <- '
   fantasyPoints_transformed ~ age + height + weight + target_share_log
@@ -1063,7 +1069,7 @@ This non-independence violates the traditional assumptions of the significance o
 We could address this assumption by analyzing only one season from each player or by estimating the significance of the regression coefficients using cluster-robust standard errors.
 For simplicity in the models above, we present results above from the whole dataframe.
 In @sec-mixedModels, we discuss [mixed model](#sec-mixedModels) approaches that handle repeated measures and other data that violate assumptions of non-independence.
-Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors.
+Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors with the `rms` package [@R-rms].
 
 ```{r}
 player_stats_seasonal_subset <- player_stats_seasonal %>% 
