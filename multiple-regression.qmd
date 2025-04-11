@@ -8,8 +8,12 @@
 library("petersenlab")
 library("rms")
 library("car")
+library("caret")
+library("lme4")
+library("performance")
 library("lavaan")
 library("mice")
+library("miceadds")
 library("brms")
 library("tidyverse")
 library("knitr")
@@ -156,7 +160,16 @@ Homoscedasticity of the residuals means that the variance of the residuals does 
 
 ### Evaluating Assumptions of Multiple Regression {#sec-assumptionsRegressionEvaluating}
 
+To evaluate the shape of the association between the predictor variables and the outcome variable, we can examine scatterplots, residual plots, marginal model plots, and added-variable plots.
 
+To evaluate homoscedasticity, we can evaluate residual plots (@fig-residualPlots).
+In residual plots, homoscedasticity is identified as a constant spread of residuals versus fitted values—the residuals do not show a fan or cone shape.
+
+To determine if residuals are correlated by a grouping level, we can examine the proportion of variance that is attributable to the grouping level using the intraclass correlation coefficient (ICC) from a [mixed model](#sec-mixedModels).
+The greater the ICC value, the more variance is accounted for by the grouping level, and the more the residuals are intercorrelated.
+
+We can examine whether residuals are normally distributed using quantile–quantile (QQ) plots and probability–probability (PP) plots.
+If the residuals are normally distributed, they should stay close to the diagonal reference line.
 
 ## Coefficient of Determination ($R^2$) {#sec-multipleRegressionRSquared}
 
@@ -683,7 +696,7 @@ car::residualPlots(
 In this example, the residuals appear to increase as a function of the fitted values.
 To handle this, we may need to transform the outcome variable to be more normally distributed.
 
-The histogram for target share is in @fig-histogramFantasyPoints
+The histogram for raw fantasy points is in @fig-histogramFantasyPoints.
 
 ```{r}
 #| label: fig-histogramFantasyPoints
@@ -693,6 +706,20 @@ The histogram for target share is in @fig-histogramFantasyPoints
 hist(player_stats_seasonal$fantasyPoints[which(player_stats_seasonal$position == "WR")])
 ```
 
+Let's use a Yeo-Johnson transformation of fantasy points:
+
+```{r}
+yjTransformed <- caret::preProcess(
+  player_stats_seasonal["fantasyPoints"],
+  method = c("YeoJohnson"))
+
+yjTransformed
+
+player_stats_seasonal$fantasyPoints_transformed <- predict(
+  yjTransformed,
+  newdata = player_stats_seasonal["fantasyPoints"])$fantasyPoints
+```
+
 The histogram of the transformed variable is in @fig-histogramFantasyPointsTransformed.
 
 ```{r}
@@ -700,14 +727,14 @@ The histogram of the transformed variable is in @fig-histogramFantasyPointsTrans
 #| fig-cap: "Histogram of Fantasy Points (Among Wide Receivers), Transformed."
 #| fig-alt: "Histogram of Fantasy Points (Among Wide Receivers), Transformed."
 
-hist(player_stats_seasonal$fantasyPoints[which(player_stats_seasonal$position == "WR")])
+hist(player_stats_seasonal$fantasyPoints_transformed[which(player_stats_seasonal$position == "WR")])
 ```
 
 Now we can refit the model.
 
 ```{r}
 linearRegressionModel_outcomeTransformed <- lm(
-  fantasyPoints ~ age + height + weight + I(log(target_share + 1)),
+  fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
   data = player_stats_seasonal %>% filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
@@ -727,9 +754,49 @@ car::residualPlots(
   id = TRUE)
 ```
 
+The residuals show more constant variance after transforming the outcome variable.
+
 #### Uncorrelated Residuals {#sec-multipleRegressionExamplesAddressingAssumptionsUncorrelatedResiduals}
 
+To determine if residuals are correlated given the nested structure of the data, we can examine the proportion of variance that is attributable to the particular player.
+To do this, we can estimate the intraclass correlation coefficient (ICC) from a [mixed model](#sec-mixedModels).
+
+```{r}
+mixedModel <- lmer(
+  fantasyPoints_transformed ~ 1 + (1 | player_id),
+  data = player_stats_seasonal)
+
+performance::icc(mixedModel)
+```
+
+The ICC indicates that over half of the variance is attribute to between-player variance, so it would be important to account for the player-specific variance using a [mixed model](#sec-mixedModels).
+For simplicity, we focus on multiple regression models in this chapter; mixed models are described in @sec-mixedModels.
+
 #### Normally Distributed Residuals {#sec-multipleRegressionExamplesAddressingAssumptionsNormallyDistributedResiduals}
+
+We can examine whether residuals are normally distributed using quantile–quantile (QQ) plots and probability–probability (PP) plots, as in Figures [-@fig-qqPlot] and [-@fig-ppPlot].
+If the residuals are normally distributed, they should stay close to the diagonal reference line.
+
+```{r}
+#| label: fig-qqPlot
+#| fig-cap: "Residual Plots After Transformation of Fantasy Points."
+#| fig-alt: "Residual Plots After Transformation of Fantasy Points."
+
+car::qqPlot(
+  linearRegressionModel_outcomeTransformed,
+  main = "QQ Plot",
+  id = TRUE)
+```
+
+
+```{r}
+#| label: fig-ppPlot
+#| fig-cap: "Residual Plots After Transformation of Fantasy Points."
+#| fig-alt: "Residual Plots After Transformation of Fantasy Points."
+
+petersenlab::ppPlot(
+  linearRegressionModel_outcomeTransformed)
+```
 
 ## Multicollinearity {#sec-multipleRegressionMulticollinearity}
 
@@ -789,7 +856,13 @@ In general, multicollinearity increases the uncertainty (i.e., standard errors a
 Any [predictor variables](#sec-correlationalStudy) that have a correlation above ~ $r = .30$ with each other could have an impact on the confidence interval of the regression coefficient.
 As the correlations among the [predictor variables](#sec-correlationalStudy) increase, the chance of getting an arbitrary answer increases, sometimes called "bouncing betas."
 So, it is important to examine a correlation matrix of the [predictor variables](#sec-correlationalStudy) before putting them in the same regression model.
-You can also examine indices such as variance inflation factor (VIF).
+You can also examine indices such as variance inflation factor (VIF), where a value greater than 5 or 10 indicates multicollinearity.
+
+Here is the VIF from our earlier model:
+
+```{r}
+car::vif(linearRegressionModel_outcomeTransformed)
+```
 
 To address multicollinearity, you can drop a redundant predictor or you can also use principal component analysis or factor analysis of the predictors to reduce the predictors down to a smaller number of meaningful predictors.
 For a meaningful answer in a regression framework that is precise and confident, you need a low level of intercorrelation among predictors, unless you have a very large sample size.
@@ -808,9 +881,179 @@ Various approaches to handle missingness include pairwise deletion (aka availabl
 
 ### Pairwise Deletion {#sec-multipleRegressionPairwiseDeletion}
 
+```{r}
+player_stats_seasonal$target_share_log <- log(player_stats_seasonal$target_share + 1)
+
+modelData <- player_stats_seasonal %>% 
+  filter(position %in% c("WR")) %>% 
+  select(fantasyPoints_transformed, age, height, weight, target_share_log)
+
+numObs <- sum(complete.cases(modelData))
+varMeans <- colMeans(modelData, na.rm = TRUE)
+varCovariances <- cov(modelData, use = "pairwise.complete.obs")
+
+pairwiseRegression_syntax <- '
+  fantasyPoints_transformed ~ age + height + weight + target_share_log
+  fantasyPoints_transformed ~~ fantasyPoints_transformed
+  fantasyPoints_transformed ~ 1
+'
+
+pairwiseRegression_fit <- lavaan(
+  pairwiseRegression_syntax,
+  sample.mean = varMeans,
+  sample.cov = varCovariances,
+  sample.nobs = numObs
+)
+
+summary(
+  pairwiseRegression_fit,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
 ### Multiple Imputation {#sec-multipleRegressionMultipleImputation}
 
+```{r}
+numImputations <- 5
+
+dataToImpute <- player_stats_seasonal %>% 
+  filter(position %in% c("WR")) %>% 
+  select(player_id, where(is.numeric)) %>% 
+  select(
+    player_id:games, carries:wopr, fantasy_points, fantasy_points_ppr,
+    rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,
+    rush_100_yds:draftround, height:target_share_log) %>% 
+  select(-c(fantasy_points_ppr, ageCentered20, target_share_log)) # drop collinear variables
+
+predictors <- c("targets","receiving_yards","receiving_air_yards","receiving_yards_after_catch","receiving_first_downs","racr")
+
+dataToImpute$player_id_integer <- as.integer(as.factor(dataToImpute$player_id))
+
+varsToImpute <- c("age","height","weight","target_share")
+Y <- varsToImpute
+```
+
+Now, let's specify the imputation method:
+
+```{r}
+meth <- make.method(dataToImpute)
+meth[1:length(meth)] <- ""
+meth[Y] <- "2l.pmm" # specify the imputation method here; this can differ by outcome variable
+```
+
+Now, let's specify the prediction matrix.
+A predictor matrix is a matrix of values, where:
+
+- columns with non-zero values are predictors of the variable specified in the given row
+- the diagonal of the predictor matrix should be zero because a variable cannot predict itself
+
+The values are:
+
+- NOT a predictor of the outcome: `0`
+- cluster variable: `-2`
+- fixed effect of predictor: `1`
+- fixed effect and random effect of predictor: `2`
+- include cluster mean of predictor in addition to fixed effect of predictor: `3`
+- include cluster mean of predictor in addition to fixed effect and random effect of predictor: `4`
+
+```{r}
+pred <- make.predictorMatrix(dataToImpute)
+pred[1:nrow(pred), 1:ncol(pred)] <- 0
+pred[Y, "player_id_integer"] <- (-2) # cluster variable
+pred[Y, predictors] <- 1 # fixed effect predictors
+pred[Y, "age"] <- 2 # random effect predictor
+pred[Y, Y] <- 1 # fixed effect predictor
+
+diag(pred) <- 0
+pred
+```
+
+Now, let's run the imputation:
+
+```{r}
+imp <- mice(
+  as.data.frame(dataToImpute),
+  method = meth,
+  predictorMatrix = pred,
+  m = numImputations,
+  maxit = 5, # generally use 100 maximum iterations; this example uses 5 for speed
+  seed = 52242)
+```
+
+Below are some imputation diagnostics.
+Trace plots are in @fig-miTracePlots.
+
+```{r}
+#| label: fig-miTracePlots
+#| fig-cap: "Trace plots from multiple imputation."
+#| fig-alt: "Trace plots from multiple imputation."
+
+plot(imp, c("target_share"))
+```
+
+A density plot is in @fig-miDensityPlot.
+
+```{r}
+#| label: fig-miDensityPlot
+#| fig-cap: "Density plot from multiple imputation."
+#| fig-alt: "Density plot from multiple imputation."
+
+densityplot(imp, ~ target_share)
+```
+
+The imputated data does not match well the distribution of the observed data.
+Thus, it may be necessary to select a different imputation method for more accurate imputation.
+
+Now, let's do some post-processing:
+
+```{r}
+imp_long <- complete(
+  imp,
+  action = "long",
+  include = TRUE)
+
+imp_long$target_share_log <- log(imp_long$target_share + 1)
+
+imp_long$fantasyPoints_transformed <- predict(
+  yjTransformed,
+  newdata = imp_long["fantasyPoints"])$fantasyPoints
+
+imp_mids <- as.mids(imp_long)
+```
+
+Now let's estimate multiple regression with the multiply imputed data:
+
+```{r}
+imp_regression <- with(
+  imp_mids,
+  lm(
+    fantasyPoints_transformed ~ age + height + weight + target_share_log)
+  )
+
+summary(pool(imp_regression))
+```
+
 ### Full Information Maximum Likelihood {#sec-multipleRegressionFIML}
+
+```{r}
+fimlRegression_syntax <- '
+  fantasyPoints_transformed ~ age + height + weight + target_share_log
+  fantasyPoints_transformed ~~ fantasyPoints_transformed
+  fantasyPoints_transformed ~ 1
+'
+
+fimlRegression_fit <- sem(
+  fimlRegression_syntax,
+  data = player_stats_seasonal,
+  missing = "ML",
+  fixed.x = FALSE
+)
+
+summary(
+  fimlRegression_fit,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
 
 ## Addressing Non-Independence of Observations {#sec-multipleRegressionNonIndependence}
 
@@ -827,7 +1070,7 @@ player_stats_seasonal_subset <- player_stats_seasonal %>%
   filter(!is.na(player_id))
 
 rms::robcov(rms::ols(
-  fantasyPoints ~ height,
+  fantasyPoints_transformed ~ age + height + weight + target_share_log,
   data = player_stats_seasonal_subset,
   x = TRUE,
   y = TRUE),
@@ -850,6 +1093,16 @@ Mean-centering the predictor variables when computing the interaction term is im
 ## Mediation {#sec-multipleRegressionMediation}
 
 ## Bayesian Multiple Regression {#sec-multipleRegressionBayesian}
+
+```{r}
+bayesianMultipleRegressionModel <- brm(
+  formula = fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  family = gaussian()
+)
+
+summary(bayesianMultipleRegressionModel)
+```
 
 ## Conclusion {#sec-multipleRegressionConclusion}
 
