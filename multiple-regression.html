@@ -1017,7 +1017,7 @@ Figure&nbsp;11.4: Scatterplots With Fantasy Points (Season) Among Wide Receivers
 <section id="sec-multipleRegressionExamplesAddressingAssumptionsLinearAssociation" class="level4" data-number="11.8.1.1"><h4 data-number="11.8.1.1" class="anchored" data-anchor-id="sec-multipleRegressionExamplesAddressingAssumptionsLinearAssociation">
 <span class="header-section-number">11.8.1.1</span> Linear Association</h4>
 <p>We evaluated the shape of the association between the predictor variables and the outcome variables using scatterplots. We accounted for potential curvilinearity with a quadratic term. Other ways to account for nonlinearity, in addition to polynomials (e.g., quadratic, cubic, quartic, or higher-degree terms), include transforming predictors (e.g., log, square root, inverse, exponential transform), splines/piecewise regression, and generalized additive models.</p>
-<p>We can also evaluate residual plots (<span class="quarto-unresolved-ref">?fig-residualPlots</span>), marginal model plots (<span class="quarto-unresolved-ref">?fig-marginalModelPlots</span>), and added-variable plots (<span class="quarto-unresolved-ref">?fig-addedVariablePlots</span>), to evaluate for potential nonlinearity. For evaluating linearity, we would expect minimal bend/curvature in the lines.</p>
+<p>We can also evaluate residual plots (<span class="quarto-unresolved-ref">?fig-residualPlots</span>), marginal model plots (<span class="quarto-unresolved-ref">?fig-marginalModelPlots</span>), and added-variable plots (<span class="quarto-unresolved-ref">?fig-addedVariablePlots</span>) from the <code>car</code> package <span class="citation" data-cites="Fox2019 R-car">(<a href="references.html#ref-R-car" role="doc-biblioref">Fox et al., 2024</a>; <a href="references.html#ref-Fox2019" role="doc-biblioref">Fox &amp; Weisberg, 2019</a>)</span>, to evaluate for potential nonlinearity. For evaluating linearity, we would expect minimal bend/curvature in the lines.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a>car<span class="sc">::</span><span class="fu">marginalModelPlots</span>(</span>
 <span id="cb29-2"><a href="#cb29-2"></a>  quadraticTermsRegressionModel,</span>
@@ -1195,7 +1195,7 @@ Figure&nbsp;11.8: Histogram of Fantasy Points (Among Wide Receivers), Transforme
 <p>The residuals show more constant variance after transforming the outcome variable.</p>
 </section><section id="sec-multipleRegressionExamplesAddressingAssumptionsUncorrelatedResiduals" class="level4" data-number="11.8.1.3"><h4 data-number="11.8.1.3" class="anchored" data-anchor-id="sec-multipleRegressionExamplesAddressingAssumptionsUncorrelatedResiduals">
 <span class="header-section-number">11.8.1.3</span> Uncorrelated Residuals</h4>
-<p>To determine if residuals are correlated given the nested structure of the data, we can examine the proportion of variance that is attributable to the particular player. To do this, we can estimate the intraclass correlation coefficient (ICC) from a <a href="mixed-models.html">mixed model</a>.</p>
+<p>To determine if residuals are correlated given the nested structure of the data, we can examine the proportion of variance that is attributable to the particular player. To do this, we can estimate the intraclass correlation coefficient (ICC) from a <a href="mixed-models.html">mixed model</a> using the <code>performance</code> package <span class="citation" data-cites="Ludecke2021 R-performance">(<a href="references.html#ref-Ludecke2021" role="doc-biblioref">Lüdecke et al., 2021</a>, <a href="references.html#ref-R-performance" role="doc-biblioref">2025</a>)</span>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>mixedModel <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
 <span id="cb58-2"><a href="#cb58-2"></a>  fantasyPoints_transformed <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> player_id),</span>
@@ -1321,6 +1321,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 <p>It is thus important to consider approaches to handle missingness. Various approaches to handle missingness include pairwise deletion (aka available-case analysis), multiple imputation, and full information maximum likelihood (FIML).</p>
 <section id="sec-multipleRegressionPairwiseDeletion" class="level3" data-number="11.10.1"><h3 data-number="11.10.1" class="anchored" data-anchor-id="sec-multipleRegressionPairwiseDeletion">
 <span class="header-section-number">11.10.1</span> Pairwise Deletion</h3>
+<p>We can estimate a regression model that uses pairwise deletion using the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012 R-lavaan">(<a href="references.html#ref-Rosseel2012" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1"></a>player_stats_seasonal<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(player_stats_seasonal<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
 <span id="cb65-2"><a href="#cb65-2"></a></span>
@@ -1338,7 +1339,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 <span id="cb65-14"><a href="#cb65-14"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
 <span id="cb65-15"><a href="#cb65-15"></a><span class="st">'</span></span>
 <span id="cb65-16"><a href="#cb65-16"></a></span>
-<span id="cb65-17"><a href="#cb65-17"></a>pairwiseRegression_fit <span class="ot">&lt;-</span> <span class="fu">lavaan</span>(</span>
+<span id="cb65-17"><a href="#cb65-17"></a>pairwiseRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">lavaan</span>(</span>
 <span id="cb65-18"><a href="#cb65-18"></a>  pairwiseRegression_syntax,</span>
 <span id="cb65-19"><a href="#cb65-19"></a>  <span class="at">sample.mean =</span> varMeans,</span>
 <span id="cb65-20"><a href="#cb65-20"></a>  <span class="at">sample.cov =</span> varCovariances,</span>
@@ -1358,6 +1359,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 </div>
 </section><section id="sec-multipleRegressionMultipleImputation" class="level3" data-number="11.10.2"><h3 data-number="11.10.2" class="anchored" data-anchor-id="sec-multipleRegressionMultipleImputation">
 <span class="header-section-number">11.10.2</span> Multiple Imputation</h3>
+<p>We can multiply impute data using the <code>mice</code> package <span class="citation" data-cites="vanBuuren2011 R-mice">(<a href="references.html#ref-vanBuuren2011" role="doc-biblioref">van Buuren &amp; Groothuis-Oudshoorn, 2011</a>, <a href="references.html#ref-R-mice" role="doc-biblioref">2024</a>)</span>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1"></a>numImputations <span class="ot">&lt;-</span> <span class="dv">5</span></span>
 <span id="cb69-2"><a href="#cb69-2"></a></span>
@@ -1378,7 +1380,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 <span id="cb69-17"><a href="#cb69-17"></a>Y <span class="ot">&lt;-</span> varsToImpute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Now, let’s specify the imputation method:</p>
+<p>Now, let’s specify the imputation method—we use the two-level predictive mean matching (<code>2l.pmm</code>) method from the <code>miceadds</code> package <span class="citation" data-cites="R-miceadds">(<a href="references.html#ref-R-miceadds" role="doc-biblioref">Robitzsch et al., 2024</a>)</span> to account for the nonindependent data (owing to multiple seasons per player):</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1"></a>meth <span class="ot">&lt;-</span> <span class="fu">make.method</span>(dataToImpute)</span>
 <span id="cb70-2"><a href="#cb70-2"></a>meth[<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(meth)] <span class="ot">&lt;-</span> <span class="st">""</span></span>
@@ -2155,7 +2157,7 @@ player_id_integer                           0</code></pre>
 </div>
 <p>Now, let’s run the imputation:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1"></a>imp <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">mice</span>(</span>
 <span id="cb73-2"><a href="#cb73-2"></a>  <span class="fu">as.data.frame</span>(dataToImpute),</span>
 <span id="cb73-3"><a href="#cb73-3"></a>  <span class="at">method =</span> meth,</span>
 <span id="cb73-4"><a href="#cb73-4"></a>  <span class="at">predictorMatrix =</span> pred,</span>
@@ -2240,6 +2242,7 @@ player_id_integer                           0</code></pre>
 </div>
 </section><section id="sec-multipleRegressionFIML" class="level3" data-number="11.10.3"><h3 data-number="11.10.3" class="anchored" data-anchor-id="sec-multipleRegressionFIML">
 <span class="header-section-number">11.10.3</span> Full Information Maximum Likelihood</h3>
+<p>We can estimate a regression model that uses full information maximum likelihood using the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012 R-lavaan">(<a href="references.html#ref-Rosseel2012" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1"></a>fimlRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
 <span id="cb84-2"><a href="#cb84-2"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
@@ -2281,7 +2284,7 @@ player_id_integer                           0</code></pre>
 </div>
 </section></section><section id="sec-multipleRegressionNonIndependence" class="level2" data-number="11.11"><h2 data-number="11.11" class="anchored" data-anchor-id="sec-multipleRegressionNonIndependence">
 <span class="header-section-number">11.11</span> Addressing Non-Independence of Observations</h2>
-<p>Please note that the <span class="math inline">\(p\)</span>-value for regression coefficients assumes that the observations are independent—in particular, that the residuals are not correlated. However, the observations are not independent in the <code>player_stats_seasonal</code> dataframe used above, because the same player has multiple rows—one row corresponding to each season they played. This non-independence violates the traditional assumptions of the significance of regression coefficients. We could address this assumption by analyzing only one season from each player or by estimating the significance of the regression coefficients using cluster-robust standard errors. For simplicity in the models above, we present results above from the whole dataframe. In <a href="mixed-models.html" class="quarto-xref"><span>Chapter 12</span></a>, we discuss <a href="mixed-models.html">mixed model</a> approaches that handle repeated measures and other data that violate assumptions of non-independence. Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors.</p>
+<p>Please note that the <span class="math inline">\(p\)</span>-value for regression coefficients assumes that the observations are independent—in particular, that the residuals are not correlated. However, the observations are not independent in the <code>player_stats_seasonal</code> dataframe used above, because the same player has multiple rows—one row corresponding to each season they played. This non-independence violates the traditional assumptions of the significance of regression coefficients. We could address this assumption by analyzing only one season from each player or by estimating the significance of the regression coefficients using cluster-robust standard errors. For simplicity in the models above, we present results above from the whole dataframe. In <a href="mixed-models.html" class="quarto-xref"><span>Chapter 12</span></a>, we discuss <a href="mixed-models.html">mixed model</a> approaches that handle repeated measures and other data that violate assumptions of non-independence. Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors with the <code>rms</code> package <span class="citation" data-cites="R-rms">(<a href="references.html#ref-R-rms" role="doc-biblioref">Harrell, Jr., 2025</a>)</span>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb89"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1"></a>player_stats_seasonal_subset <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
 <span id="cb89-2"><a href="#cb89-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id))</span>
@@ -2723,14 +2726,44 @@ loaded via a namespace (and not attached):
 <div id="ref-Corston2000" class="csl-entry" role="listitem">
 Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for <span>Windows</span></em>. Wiley-Blackwell.
 </div>
+<div id="ref-Fox2019" class="csl-entry" role="listitem">
+Fox, J., &amp; Weisberg, S. (2019). <em>An <span>R</span> companion to applied regression</em> (Third). Sage. <a href="https://www.john-fox.ca/Companion/">https://www.john-fox.ca/Companion/</a>
+</div>
+<div id="ref-R-car" class="csl-entry" role="listitem">
+Fox, J., Weisberg, S., &amp; Price, B. (2024). <em><span class="nocase">car</span>: Companion to applied regression</em>. <a href="https://r-forge.r-project.org/projects/car/">https://r-forge.r-project.org/projects/car/</a>
+</div>
+<div id="ref-R-rms" class="csl-entry" role="listitem">
+Harrell, Jr., F. E. (2025). <em><span class="nocase">rms</span>: Regression modeling strategies</em>. <a href="https://hbiostat.org/R/rms/">https://hbiostat.org/R/rms/</a>
+</div>
 <div id="ref-Iacobucci2016" class="csl-entry" role="listitem">
 Iacobucci, D., Schneider, M. J., Popovich, D. L., &amp; Bakamitsos, G. A. (2016). Mean centering helps alleviate <span>“micro”</span> but not <span>“macro”</span> multicollinearity. <em>Behavior Research Methods</em>, <em>48</em>(4), 1308–1317. <a href="https://doi.org/10.3758/s13428-015-0624-x">https://doi.org/10.3758/s13428-015-0624-x</a>
+</div>
+<div id="ref-Ludecke2021" class="csl-entry" role="listitem">
+Lüdecke, D., Ben-Shachar, M. S., Patil, I., Waggoner, P., &amp; Makowski, D. (2021). <span class="nocase">performance</span>: An <span>R</span> package for assessment, comparison and testing of statistical models. <em>Journal of Open Source Software</em>, <em>6</em>(60), 3139. <a href="https://doi.org/10.21105/joss.03139">https://doi.org/10.21105/joss.03139</a>
+</div>
+<div id="ref-R-performance" class="csl-entry" role="listitem">
+Lüdecke, D., Makowski, D., Ben-Shachar, M. S., Patil, I., Waggoner, P., Wiernik, B. M., &amp; Thériault, R. (2025). <em><span class="nocase">performance</span>: Assessment of regression models performance</em>. <a href="https://easystats.github.io/performance/">https://easystats.github.io/performance/</a>
 </div>
 <div id="ref-Petersen2024a" class="csl-entry" role="listitem">
 Petersen, I. T. (2024). <em>Principles of psychological assessment: With applied examples in <span>R</span></em>. <span>Chapman and Hall/CRC</span>. <a href="https://doi.org/10.1201/9781003357421">https://doi.org/10.1201/9781003357421</a>
 </div>
 <div id="ref-PetersenPrinciplesPsychAssessment" class="csl-entry" role="listitem">
 Petersen, I. T. (2025). <em>Principles of psychological assessment: With applied examples in <span>R</span></em>. University of Iowa Libraries. <a href="https://doi.org/10.25820/work.007199">https://doi.org/10.25820/work.007199</a>
+</div>
+<div id="ref-R-miceadds" class="csl-entry" role="listitem">
+Robitzsch, A., Grund, S., &amp; Henke, T. (2024). <em><span class="nocase">miceadds</span>: Some additional multiple imputation functions, especially for <span class="nocase">mice</span></em>. <a href="https://github.com/alexanderrobitzsch/miceadds">https://github.com/alexanderrobitzsch/miceadds</a>
+</div>
+<div id="ref-Rosseel2012" class="csl-entry" role="listitem">
+Rosseel, Y. (2012). <span class="nocase">lavaan</span>: An <span>R</span> package for structural equation modeling. <em>Journal of Statistical Software</em>, <em>48</em>(2), 1–36. <a href="https://doi.org/10.18637/jss.v048.i02">https://doi.org/10.18637/jss.v048.i02</a>
+</div>
+<div id="ref-R-lavaan" class="csl-entry" role="listitem">
+Rosseel, Y., Jorgensen, T. D., &amp; De Wilde, L. (2024). <em><span class="nocase">lavaan</span>: Latent variable analysis</em>. <a href="https://lavaan.ugent.be">https://lavaan.ugent.be</a>
+</div>
+<div id="ref-vanBuuren2011" class="csl-entry" role="listitem">
+van Buuren, S., &amp; Groothuis-Oudshoorn, K. (2011). <span class="nocase">mice</span>: Multivariate imputation by chained equations in <span>R</span>. <em>Journal of Statistical Software</em>, <em>45</em>(3), 1–67. <a href="https://doi.org/10.18637/jss.v045.i03">https://doi.org/10.18637/jss.v045.i03</a>
+</div>
+<div id="ref-R-mice" class="csl-entry" role="listitem">
+van Buuren, S., &amp; Groothuis-Oudshoorn, K. (2024). <em><span class="nocase">mice</span>: Multivariate imputation by chained equations</em>. <a href="https://github.com/amices/mice">https://github.com/amices/mice</a>
 </div>
 </div>
 </section></main><!-- /main --><h3>Feedback</h3>
