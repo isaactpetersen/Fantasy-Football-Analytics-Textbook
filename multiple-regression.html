@@ -1519,7 +1519,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 \end{aligned}
 \tag{11.5}\]</span></span></p>
 <p>Then, what are the regression coefficients? We do not know what are the correct regression coefficients because each of the possibilities fits the data equally well. Thus, when estimating the regression model, we could obtain arbitrary estimates of the regression coefficients with an enormous standard error around each estimate. In general, multicollinearity increases the uncertainty (i.e., standard errors and confidence intervals) around the parameter estimates. Any <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> that have a correlation above ~ <span class="math inline">\(r = .30\)</span> with each other could have an impact on the confidence interval of the regression coefficient. As the correlations among the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> increase, the chance of getting an arbitrary answer increases, sometimes called “bouncing betas.” So, it is important to examine a correlation matrix of the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> before putting them in the same regression model. You can also examine indices such as variance inflation factor (VIF), where a value greater than 5 or 10 indicates multicollinearity.</p>
-<p>Here is the VIF from our earlier model:</p>
+<p>Here are the VIFs from our earlier model:</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>car<span class="sc">::</span><span class="fu">vif</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
@@ -2029,10 +2029,35 @@ Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD):
 <span id="cb66-2"><a href="#cb66-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
 <span id="cb66-3"><a href="#cb66-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
 <span id="cb66-4"><a href="#cb66-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
-<span id="cb66-5"><a href="#cb66-5"></a>)</span>
-<span id="cb66-6"><a href="#cb66-6"></a></span>
-<span id="cb66-7"><a href="#cb66-7"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb66-5"><a href="#cb66-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code> Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)) 
+   Data: player_stats_seasonal %&gt;% filter(position %in% c(" (Number of observations: 4251) 
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+         total post-warmup draws = 4000
+
+Regression Coefficients:
+                   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept              3.01      0.56     1.88     4.07 1.00     3493     3112
+age                    0.01      0.01    -0.00     0.02 1.00     4178     2964
+height                -0.03      0.01    -0.04    -0.01 1.00     3420     2672
+weight                 0.00      0.00     0.00     0.01 1.00     3761     3288
+Ilogtarget_shareP1     4.49      0.03     4.44     4.55 1.00     3979     3036
+
+Further Distributional Parameters:
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     1.06      0.01     1.03     1.08 1.00     3787     2977
+
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+</div>
 </div>
 </section><section id="sec-multipleRegressionConclusion" class="level2" data-number="11.16"><h2 data-number="11.16" class="anchored" data-anchor-id="sec-multipleRegressionConclusion">
 <span class="header-section-number">11.16</span> Conclusion</h2>
@@ -2040,9 +2065,9 @@ Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD):
 </section><section id="sec-multipleRegressionSessionInfo" class="level2" data-number="11.17"><h2 data-number="11.17" class="anchored" data-anchor-id="sec-multipleRegressionSessionInfo">
 <span class="header-section-number">11.17</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>R version 4.4.3 (2025-02-28)
+<pre><code>R version 4.5.0 (2025-04-11)
 Platform: x86_64-pc-linux-gnu
 Running under: Ubuntu 24.04.2 LTS
 
@@ -2067,15 +2092,15 @@ other attached packages:
  [5] dplyr_1.1.4        purrr_1.0.4        readr_2.1.5        tidyr_1.3.1       
  [9] tibble_3.2.1       tidyverse_2.0.0    brms_2.22.0        Rcpp_1.0.14       
 [13] interactions_1.2.0 miceadds_3.17-44   mice_3.17.0        lavaan_0.6-19     
-[17] performance_0.13.0 lme4_1.1-37        Matrix_1.7-2       caret_7.0-1       
+[17] performance_0.13.0 lme4_1.1-37        Matrix_1.7-3       caret_7.0-1       
 [21] lattice_0.22-6     ggplot2_3.5.2      car_3.1-3          carData_3.0-5     
 [25] rms_8.0-0          Hmisc_5.2-3        petersenlab_1.1.3 
 
 loaded via a namespace (and not attached):
-  [1] splines_4.4.3        polspline_1.1.25     hardhat_1.4.1       
+  [1] splines_4.5.0        polspline_1.1.25     hardhat_1.4.1       
   [4] pROC_1.18.5          rpart_4.1.24         lifecycle_1.0.4     
   [7] Rdpack_2.6.4         StanHeaders_2.32.10  processx_3.8.6      
- [10] globals_0.16.3       MASS_7.3-64          insight_1.1.0       
+ [10] globals_0.16.3       MASS_7.3-65          insight_1.1.0       
  [13] backports_1.5.0      magrittr_2.0.3       rmarkdown_2.29      
  [16] yaml_2.3.10          pkgbuild_1.4.7       DBI_1.2.3           
  [19] minqa_1.2.8          RColorBrewer_1.1-3   multcomp_1.4-28     
@@ -2086,10 +2111,10 @@ loaded via a namespace (and not attached):
  [34] bridgesampling_1.1-2 parallelly_1.43.0    codetools_0.2-20    
  [37] tidyselect_1.2.1     shape_1.4.6.1        bayesplot_1.12.0    
  [40] farver_2.1.2         broom.mixed_0.2.9.6  matrixStats_1.5.0   
- [43] stats4_4.4.3         base64enc_0.1-3      jsonlite_2.0.0      
+ [43] stats4_4.5.0         base64enc_0.1-3      jsonlite_2.0.0      
  [46] mitml_0.4-5          Formula_1.2-5        survival_3.8-3      
  [49] iterators_1.0.14     emmeans_1.11.0       foreach_1.5.2       
- [52] tools_4.4.3          glue_1.8.0           mnormt_2.1.1        
+ [52] tools_4.5.0          glue_1.8.0           mnormt_2.1.1        
  [55] prodlim_2024.06.25   gridExtra_2.3        pan_1.9             
  [58] xfun_0.52            mgcv_1.9-1           distributional_0.5.0
  [61] loo_2.8.0            withr_3.0.2          fastmap_1.2.0       
@@ -2103,12 +2128,12 @@ loaded via a namespace (and not attached):
  [85] scales_1.3.0         posterior_1.6.1      gower_1.0.2         
  [88] reformulas_0.4.0     rstudioapi_0.17.1    tzdb_0.5.0          
  [91] reshape2_1.4.4       curl_6.2.2           coda_0.19-4.1       
- [94] checkmate_2.3.2      nlme_3.1-167         nloptr_2.2.1        
- [97] zoo_1.8-14           parallel_4.4.3       foreign_0.8-88      
-[100] pillar_1.10.2        grid_4.4.3           vctrs_0.6.5         
-[103] jomo_2.7-6           xtable_1.8-4         cluster_2.1.8       
+ [94] checkmate_2.3.2      nlme_3.1-168         nloptr_2.2.1        
+ [97] zoo_1.8-14           parallel_4.5.0       foreign_0.8-90      
+[100] pillar_1.10.2        grid_4.5.0           vctrs_0.6.5         
+[103] jomo_2.7-6           xtable_1.8-4         cluster_2.1.8.1     
 [106] htmlTable_2.4.3      evaluate_1.0.3       pbivnorm_0.6.0      
-[109] mvtnorm_1.3-3        cli_3.6.4            compiler_4.4.3      
+[109] mvtnorm_1.3-3        cli_3.6.4            compiler_4.5.0      
 [112] rlang_1.1.6          rstantools_2.4.0     future.apply_1.11.3 
 [115] labeling_0.4.3       ps_1.9.0             plyr_1.8.9          
 [118] stringi_1.8.7        rstan_2.32.7         psych_2.5.3         
