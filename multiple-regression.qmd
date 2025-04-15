@@ -1390,6 +1390,123 @@ interactions::sim_slopes(
 
 ## Mediation {#sec-multipleRegressionMediation}
 
+A mediation model takes the following general form in the `lavaan` package [@Rosseel2012; @R-lavaan].
+
+```{r}
+#| eval: false
+
+mediationModel <- '
+  # direct effect (cPrime)
+  Y ~ direct*X
+  
+  # mediator
+  M ~ a*X
+  Y ~ b*M
+  
+  # indirect effect = a*b
+  indirect := a*b
+  
+  # total effect (c)
+  total := direct + indirect
+'
+```
+
+Let's substitute in our [predictor](#sec-correlationalStudy), [outcome](#sec-correlationalStudy), and hypothesized [mediator](#sec-mediation).
+In this case, we predict that receiving touchdowns partially accounts for the association between Wide Receiver's target share and their fantasy points.
+This is a silly example because fantasy points are derived, in part, from touchdowns, so of course touchdowns will partially account for almost any effect on Wide Receivers' fantasy points.
+This example is merely for demonstrating the process of developing and examining a mediation model.
+
+```{r}
+mediationModel <- '
+  # direct effect (cPrime)
+  fantasyPoints_transformed ~ direct*target_share
+  
+  # mediator
+  receiving_tds ~ a*target_share
+  fantasyPoints_transformed ~ b*receiving_tds
+  
+  # indirect effect = a*b
+  indirect := a*b
+  
+  # total effect (c)
+  total := direct + indirect
+'
+```
+
+To get a robust estimate of the indirect effect, we obtain bootstrapped estimates from 1,000 bootstrap draws.
+Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, but this example uses only 1,000 bootstrap draws for a shorter runtime.
+
+```{r}
+mediationFit <- sem(
+  mediationModel,
+  data = player_stats_seasonal,
+  se = "bootstrap",
+  bootstrap = 1000, # generally use 10,000 bootstrap draws; this example uses 1,000 for speed
+  parallel = "multicore", # parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC
+  iseed = 52242, # for reproducibility
+  missing = "ML",
+  estimator = "ML",
+  std.lv = TRUE,
+  fixed.x = FALSE)
+```
+
+Here are the model results:
+
+```{r}
+summary(
+  mediationFit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
+We can also estimate a model with multiple hypothesized [mediator](#sec-mediations):
+
+```{r}
+multipleMediatorModel <- '
+  # direct effect (cPrime)
+  fantasyPoints_transformed ~ direct*target_share
+  
+  # mediator
+  receiving_tds ~ a1*target_share
+  receiving_yards ~ a2*target_share
+  
+  fantasyPoints_transformed ~ b1*receiving_tds + b1*receiving_yards
+  
+  # indirect effect = a*b
+  indirect1 := a1*b1
+  indirect2 := a2*b2
+  indirectTotal := indirect1 + indirect2
+  
+  # total effect (c)
+  total := direct + indirectTotal
+'
+```
+
+```{r}
+multipleMediatorFit <- sem(
+  multipleMediatorModel,
+  data = player_stats_seasonal,
+  se = "bootstrap",
+  bootstrap = 1000, # generally use 10,000 bootstrap draws; this example uses 1,000 for speed
+  parallel = "multicore", # parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC
+  iseed = 52242, # for reproducibility
+  missing = "ML",
+  estimator = "ML",
+  std.lv = TRUE,
+  fixed.x = FALSE)
+```
+
+Here are the model results:
+
+```{r}
+summary(
+  multipleMediatorFit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
 ## Bayesian Multiple Regression {#sec-multipleRegressionBayesian}
 
 ```{r}
