@@ -164,7 +164,7 @@ However, there are additional assumptions of multiple regression, including ones
 For instance, the variables included should reflect causal process such that the [predictor variables](#sec-correlationalStudy) influence the [outcome variable](#sec-correlationalStudy), and not the other way around.
 That is, the [outcome variable](#sec-correlationalStudy) should not influence the [predictor variables](#sec-correlationalStudy) (i.e., there should be no reverse causation).
 In addition, it is important control for any [confound(s)](#sec-causalDiagramConfounding).
-If a [confound](#sec-causalDiagramConfounding) is not controlled for, this is called omitted-variable bias, and it leads the researcher to incorrectly attribute the effects of the omitted variable to the included variables.
+If a [confound](#sec-causalDiagramConfounding) is not controlled for, this is called *omitted-variable bias*, and it leads the researcher to incorrectly attribute the effects of the omitted variable to the included variables.
 
 ### Evaluating Assumptions of Multiple Regression {#sec-assumptionsRegressionEvaluating}
 
@@ -387,9 +387,183 @@ Let's say we want to use a number of variables to predict a wide receiver's fant
 We want to consider several [predictors](#sec-correlationalStudy), including the player's age, height, weight, and target share.
 We have only a few [predictors](#sec-correlationalStudy) and our sample size is large enough such that [overfitting](#sec-overfitting) is not likely a concern.
 
+#### Examine Descriptive Statistics {#sec-multipleRegressionFantasyPointsWRsDescriptive}
+
+Let's first examine [descriptive statistics](#sec-descriptiveStatistics) of the predictor and outcome variables.
+
+```{r}
+player_stats_seasonal %>% 
+  dplyr::select(fantasyPoints, age, height, weight, target_share) %>% 
+  dplyr::summarise(across(
+      everything(),
+      .fns = list(
+        n = ~ length(na.omit(.)),
+        missingness = ~ mean(is.na(.)) * 100,
+        M = ~ mean(., na.rm = TRUE),
+        SD = ~ sd(., na.rm = TRUE),
+        min = ~ min(., na.rm = TRUE),
+        max = ~ max(., na.rm = TRUE),
+        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
+        IQR = ~ IQR(., na.rm = TRUE),
+        MAD = ~ mad(., na.rm = TRUE),
+        median = ~ median(., na.rm = TRUE),
+        pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
+        mode = ~ petersenlab::Mode(., multipleModes = "mean"),
+        skewness = ~ psych::skew(., na.rm = TRUE),
+        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
+      .names = "{.col}.{.fn}")) %>%
+    tidyr::pivot_longer(
+      cols = everything(),
+      names_to = c("variable","index"),
+      names_sep = "\\.") %>% 
+    tidyr::pivot_wider(
+      names_from = index,
+      values_from = value)
+```
+
+Let's also examine the distributions of the variables using a [density plot](#sec-ridgelinePlot), as depicted in @fig-densityPlotMultipleRegressionVars.
+
+```{r}
+#| layout: [[100], [50, 50], [50, 50]]
+#| label: fig-densityPlotMultipleRegressionVars
+#| fig-cap: "Density Plot of Model Variables (i.e., Predictor and Outcome Variables)."
+#| fig-alt: "Density Plot of Model Variables (i.e., Predictor and Outcome Variables)."
+#| fig-subcap:
+#|   - "Fantasy Points"
+#|   - "Age"
+#|   - "Height"
+#|   - "Weight"
+#|   - "Target Share"
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("WR")),
+  mapping = aes(
+    x = fantasyPoints)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  labs(
+    x = "Fantasy Points",
+    y = "Density",
+    title = "Density Plot of Fantasy Points with Histogram and Rug Plot"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("WR")),
+  mapping = aes(
+    x = age)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  labs(
+    x = "Age (years)",
+    y = "Density",
+    title = "Density Plot of Player Age with Histogram and Rug Plot"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("WR")),
+  mapping = aes(
+    x = height)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  labs(
+    x = "Fantasy Points",
+    y = "Height (inches)",
+    title = "Density Plot of Player Height with Histogram and Rug Plot"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("WR")),
+  mapping = aes(
+    x = weight)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  labs(
+    x = "Weight (pounds)",
+    y = "Density",
+    title = "Density Plot of Player Weight with Histogram and Rug Plot"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("WR")),
+  mapping = aes(
+    x = target_share)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  labs(
+    x = "Target Share",
+    y = "Density",
+    title = "Density Plot of Target Share with Histogram and Rug Plot"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
 #### Examine Bivariate Associations {#sec-multipleRegressionFantasyPointsWRsBivariate}
 
-Let's first examine the bivariate association of each using a scatterplot to evaluate for any potential nonlinearity, as depicted in @fig-scatterplots.
+Then, let's examine the bivariate association of each using a scatterplot to evaluate for any potential nonlinearity, as depicted in @fig-scatterplots.
 
 ```{r}
 #| layout-ncol: 2
@@ -493,7 +667,7 @@ Thus, after evaluating the linear association between the [predictors](#sec-corr
 
 #### Estimate Multiple Regression Model {#sec-multipleRegressionFantasyPointsWRsModel}
 
-First, let's estimate a multiple regression model with only linear terms:
+Now that we have examined [descriptive statistics](#sec-descriptiveStatistics) and bivariate associations, let's first estimate a multiple regression model with only linear terms:
 
 ```{r}
 linearRegressionModel <- lm(
@@ -601,6 +775,9 @@ ggplot2::ggplot(
   ) +
   theme_classic()
 ```
+
+We could also generate the model-implied prediction of fantasy points for any value of the [predictor variables](#sec-correlationalStudy).
+For instance, here are the number of fantasy points expected for a Wide Receiver who is 23 years old, who is 6'2" tall (72 inches), and weighs
 
 #### Evaluating and Addressing Assumptions {#sec-multipleRegressionExamplesAddressingAssumptions}
 
