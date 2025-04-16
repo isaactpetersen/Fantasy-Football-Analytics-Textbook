@@ -677,6 +677,12 @@ linearRegressionModel <- lm(
 )
 ```
 
+The model formula is in @eq-linearRegressionModel:
+
+$$
+\text{fantasy points} = \beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{height} + \beta_3 \cdot \text{weight} + \beta_4 \cdot \text{target share} + \epsilon
+$$ {#eq-linearRegressionModel}
+
 Here are the model results:
 
 ```{r}
@@ -723,7 +729,20 @@ quadraticTermsRegressionModel <- lm(
   data = player_stats_seasonal %>% filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
+```
 
+The model formula is in @eq-quadraticTermsRegressionModel:
+
+$$
+\begin{aligned}
+  \text{fantasy points} &= \beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
+  &\phantom{=} \beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon
+\end{aligned}
+$$ {#eq-quadraticTermsRegressionModel}
+
+Here are the model results:
+
+```{r}
 summary(quadraticTermsRegressionModel)
 ```
 
@@ -806,6 +825,42 @@ predictedValue <- predict(
 ```
 
 The player would be expected to score `r petersenlab::apa(predictedValue, decimals = 0)` fantasy points.
+
+We can calculate this by substituting in the regression coefficients and predictor values:
+
+Here is the computation:
+
+```{r}
+age <- 23
+height <- 72
+weight <- 200
+target_share <- 3
+
+beta0 <- coef(quadraticTermsRegressionModel)["(Intercept)"]
+beta1 <- coef(quadraticTermsRegressionModel)["age"]
+beta2 <- coef(quadraticTermsRegressionModel)["I(age^2)"]
+beta3 <- coef(quadraticTermsRegressionModel)["height"]
+beta4 <- coef(quadraticTermsRegressionModel)["I(height^2)"]
+beta5 <- coef(quadraticTermsRegressionModel)["weight"]
+beta6 <- coef(quadraticTermsRegressionModel)["I(weight^2)"]
+beta7 <- coef(quadraticTermsRegressionModel)["target_share"]
+beta8 <- coef(quadraticTermsRegressionModel)["I(target_share^2)"]
+
+predictedFantasyPoints <- beta0 + beta1*age + beta2*(age^2) + beta3*height + beta4*(height^2) + beta5*weight + beta6*(weight^2) + beta7*target_share + beta8*(target_share^2)
+predictedFantasyPoints
+```
+
+The model formula with substituted values is in @eq-quadraticTermsRegressionModelSubstitute:
+
+$$
+\begin{aligned}
+  \text{fantasy points} &= \beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
+  &\phantom{=} \beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon \\
+  &= `r petersenlab::apa(beta0, decimals = 2)` + `r petersenlab::apa(beta1, decimals = 2)` \cdot \text{age} + `r petersenlab::apa(beta2, decimals = 2)` \cdot \text{age}^2 + `r petersenlab::apa(beta3, decimals = 2)` \cdot \text{height} + `r petersenlab::apa(beta4, decimals = 2)` \cdot \text{height}^2 + \\
+  &\phantom{=} `r petersenlab::apa(beta5, decimals = 2)` \cdot \text{weight} + `r petersenlab::apa(beta6, decimals = 2)` \cdot \text{weight}^2 + `r petersenlab::apa(beta7, decimals = 2)` \cdot \text{target share} + `r petersenlab::apa(beta8, decimals = 2)` \cdot \text{target share}^2 + \epsilon \\
+  &= `r petersenlab::apa(predictedFantasyPoints, decimals = 2)`
+\end{aligned}
+$$ {#eq-quadraticTermsRegressionModelSubstitute}
 
 #### Evaluating and Addressing Assumptions {#sec-multipleRegressionExamplesAddressingAssumptions}
 
