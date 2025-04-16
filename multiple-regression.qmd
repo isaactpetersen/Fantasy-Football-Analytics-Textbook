@@ -116,6 +116,8 @@ y = \beta_0 + \beta_1x_1 + \beta_2x_2 + ... + \beta_px_p + \epsilon
 $$ {#eq-multipleRegression}
 
 where $p$ is the number of [predictor variables](#sec-correlationalStudy).
+Multiple regression is basically a weighted sum of the [predictor variables](#sec-correlationalStudy), and adding an intercept.
+Under the hood, multiple regression seeks to identify the best weight for each [predictor](#sec-correlationalStudy).
 
 ## Components {#sec-multipleRegressionComponents}
 
@@ -706,6 +708,25 @@ linearRegressionModel_rsquared <- summary(linearRegressionModel)$r.squared
 
 The model explained `r petersenlab::apa(linearRegressionModel_rsquared * 100, decimals = 0)`% of the variability in fantasy points (i.e., $R^2 = `r petersenlab::apa(linearRegressionModel_rsquared, decimals = 2, leading = FALSE)`$).
 
+```{r}
+#| include: false
+
+linearRegressionModel_beta0 <- coef(quadraticTermsRegressionModel)[["(Intercept)"]]
+linearRegressionModel_beta1 <- coef(quadraticTermsRegressionModel)[["age"]]
+linearRegressionModel_beta2 <- coef(quadraticTermsRegressionModel)[["height"]]
+linearRegressionModel_beta3 <- coef(quadraticTermsRegressionModel)[["weight"]]
+linearRegressionModel_beta4 <- coef(quadraticTermsRegressionModel)[["target_share"]]
+```
+
+The model formula with substituted values is in @eq-linearRegressionModelSubstitute:
+
+$$
+\begin{aligned}
+  \text{fantasy points} = &\beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{height} + \beta_3 \cdot \text{weight} + \beta_4 \cdot \text{target share} + \epsilon \\
+  = &`r petersenlab::apa(linearRegressionModel_beta0, decimals = 2)` + `r petersenlab::apa(linearRegressionModel_beta1, decimals = 2)` \cdot \text{age} + `r petersenlab::apa(linearRegressionModel_beta2, decimals = 2)` \cdot \text{height} + `r petersenlab::apa(linearRegressionModel_beta3, decimals = 2)` \cdot \text{weight} + `r petersenlab::apa(linearRegressionModel_beta4, decimals = 2)` \cdot \text{target share} + \epsilon
+\end{aligned}
+$$ {#eq-linearRegressionModelSubstitute}
+
 If we want to obtain standardized regression coefficients, we can standardize the [outcome variable](#sec-correlationalStudy) and each [predictor variable](#sec-correlationalStudy) using the `scale()` function:
 
 ```{r}
@@ -735,8 +756,8 @@ The model formula is in @eq-quadraticTermsRegressionModel:
 
 $$
 \begin{aligned}
-  \text{fantasy points} &= \beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
-  &\phantom{=} \beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon
+  \text{fantasy points} \; = \; &\beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
+  &\beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon
 \end{aligned}
 $$ {#eq-quadraticTermsRegressionModel}
 
@@ -836,15 +857,15 @@ height <- 72
 weight <- 200
 target_share <- 3
 
-beta0 <- coef(quadraticTermsRegressionModel)["(Intercept)"]
-beta1 <- coef(quadraticTermsRegressionModel)["age"]
-beta2 <- coef(quadraticTermsRegressionModel)["I(age^2)"]
-beta3 <- coef(quadraticTermsRegressionModel)["height"]
-beta4 <- coef(quadraticTermsRegressionModel)["I(height^2)"]
-beta5 <- coef(quadraticTermsRegressionModel)["weight"]
-beta6 <- coef(quadraticTermsRegressionModel)["I(weight^2)"]
-beta7 <- coef(quadraticTermsRegressionModel)["target_share"]
-beta8 <- coef(quadraticTermsRegressionModel)["I(target_share^2)"]
+beta0 <- coef(quadraticTermsRegressionModel)[["(Intercept)"]]
+beta1 <- coef(quadraticTermsRegressionModel)[["age"]]
+beta2 <- coef(quadraticTermsRegressionModel)[["I(age^2)"]]
+beta3 <- coef(quadraticTermsRegressionModel)[["height"]]
+beta4 <- coef(quadraticTermsRegressionModel)[["I(height^2)"]]
+beta5 <- coef(quadraticTermsRegressionModel)[["weight"]]
+beta6 <- coef(quadraticTermsRegressionModel)[["I(weight^2)"]]
+beta7 <- coef(quadraticTermsRegressionModel)[["target_share"]]
+beta8 <- coef(quadraticTermsRegressionModel)[["I(target_share^2)"]]
 
 predictedFantasyPoints <- beta0 + beta1*age + beta2*(age^2) + beta3*height + beta4*(height^2) + beta5*weight + beta6*(weight^2) + beta7*target_share + beta8*(target_share^2)
 predictedFantasyPoints
@@ -854,11 +875,11 @@ The model formula with substituted values is in @eq-quadraticTermsRegressionMode
 
 $$
 \begin{aligned}
-  \text{fantasy points} &= \beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
-  &\phantom{=} \beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon \\
-  &= `r petersenlab::apa(beta0, decimals = 2)` + `r petersenlab::apa(beta1, decimals = 2)` \cdot \text{age} + `r petersenlab::apa(beta2, decimals = 2)` \cdot \text{age}^2 + `r petersenlab::apa(beta3, decimals = 2)` \cdot \text{height} + `r petersenlab::apa(beta4, decimals = 2)` \cdot \text{height}^2 + \\
-  &\phantom{=} `r petersenlab::apa(beta5, decimals = 2)` \cdot \text{weight} + `r petersenlab::apa(beta6, decimals = 2)` \cdot \text{weight}^2 + `r petersenlab::apa(beta7, decimals = 2)` \cdot \text{target share} + `r petersenlab::apa(beta8, decimals = 2)` \cdot \text{target share}^2 + \epsilon \\
-  &= `r petersenlab::apa(predictedFantasyPoints, decimals = 2)`
+  \text{fantasy points} \; = \; &\beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
+  &\beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon \\
+  = &`r petersenlab::apa(beta0, decimals = 2)` + `r petersenlab::apa(beta1, decimals = 2)` \cdot \text{age} + `r petersenlab::apa(beta2, decimals = 2)` \cdot \text{age}^2 + `r petersenlab::apa(beta3, decimals = 2)` \cdot \text{height} + `r petersenlab::apa(beta4, decimals = 2)` \cdot \text{height}^2 + \\
+  &`r petersenlab::apa(beta5, decimals = 2)` \cdot \text{weight} + `r petersenlab::apa(beta6, decimals = 2)` \cdot \text{weight}^2 + `r petersenlab::apa(beta7, decimals = 2)` \cdot \text{target share} + `r petersenlab::apa(beta8, decimals = 2)` \cdot \text{target share}^2 + \epsilon \\
+  = &`r petersenlab::apa(predictedFantasyPoints, decimals = 2)`
 \end{aligned}
 $$ {#eq-quadraticTermsRegressionModelSubstitute}
 
