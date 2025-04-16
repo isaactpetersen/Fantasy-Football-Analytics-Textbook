@@ -838,7 +838,7 @@ hist(player_stats_seasonal$target_share[which(player_stats_seasonal$position == 
 
 The variable shows a strong positive skew.
 To address a strong positive skew, we can use a log transformation.
-The histogram of the log-transformed variable is in @fig-histogramTargetSharesLog.
+The histogram of the log-transformed variable is in @fig-histogramTargetSharesTransformed.
 
 ```{r}
 #| label: fig-histogramTargetSharesTransformed
@@ -1439,14 +1439,13 @@ Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, b
 ```{r}
 mediationFit <- sem(
   mediationModel,
-  data = player_stats_seasonal,
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
   se = "bootstrap",
   bootstrap = 1000, # generally use 10,000 bootstrap draws; this example uses 1,000 for speed
   parallel = "multicore", # parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC
   iseed = 52242, # for reproducibility
   missing = "ML",
   estimator = "ML",
-  std.lv = TRUE,
   fixed.x = FALSE)
 ```
 
@@ -1486,14 +1485,13 @@ multipleMediatorModel <- '
 ```{r}
 multipleMediatorFit <- sem(
   multipleMediatorModel,
-  data = player_stats_seasonal,
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
   se = "bootstrap",
   bootstrap = 1000, # generally use 10,000 bootstrap draws; this example uses 1,000 for speed
   parallel = "multicore", # parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC
   iseed = 52242, # for reproducibility
   missing = "ML",
   estimator = "ML",
-  std.lv = TRUE,
   fixed.x = FALSE)
 ```
 
