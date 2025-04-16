@@ -561,7 +561,7 @@ Figure&nbsp;11.1: A Regression Best-Fit Line.
 <p><span id="eq-multipleRegression"><span class="math display">\[
 y = \beta_0 + \beta_1x_1 + \beta_2x_2 + ... + \beta_px_p + \epsilon
 \tag{11.2}\]</span></span></p>
-<p>where <span class="math inline">\(p\)</span> is the number of <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>.</p>
+<p>where <span class="math inline">\(p\)</span> is the number of <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>. Multiple regression is basically a weighted sum of the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>, and adding an intercept. Under the hood, multiple regression seeks to identify the best weight for each <a href="research-methods.html#sec-correlationalStudy">predictor</a>.</p>
 </section><section id="sec-multipleRegressionComponents" class="level2" data-number="11.3"><h2 data-number="11.3" class="anchored" data-anchor-id="sec-multipleRegressionComponents">
 <span class="header-section-number">11.3</span> Components</h2>
 <ul>
@@ -1205,6 +1205,13 @@ F-statistic:  4817 on 4 and 4246 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <p>The model explained 82% of the variability in fantasy points (i.e., <span class="math inline">\(R^2 = .82\)</span>).</p>
+<p>The model formula with substituted values is in <a href="#eq-linearRegressionModelSubstitute" class="quarto-xref">Equation&nbsp;<span>11.6</span></a>:</p>
+<p><span id="eq-linearRegressionModelSubstitute"><span class="math display">\[
+\begin{aligned}
+  \text{fantasy points} = &amp;\beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{height} + \beta_3 \cdot \text{weight} + \beta_4 \cdot \text{target share} + \epsilon \\
+  = &amp;10.46 + 0.22 \cdot \text{age} + -0.58 \cdot \text{height} + 0.17 \cdot \text{weight} + 50.70 \cdot \text{target share} + \epsilon
+\end{aligned}
+\tag{11.6}\]</span></span></p>
 <p>If we want to obtain standardized regression coefficients, we can standardize the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> and each <a href="research-methods.html#sec-correlationalStudy">predictor variable</a> using the <code><a href="https://rdrr.io/r/base/scale.html">scale()</a></code> function:</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>linearRegressionModelStandardized <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
@@ -1251,13 +1258,13 @@ F-statistic:  4817 on 4 and 4246 DF,  p-value: &lt; 2.2e-16</code></pre>
 <span id="cb16-5"><a href="#cb16-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>The model formula is in <a href="#eq-quadraticTermsRegressionModel" class="quarto-xref">Equation&nbsp;<span>11.6</span></a>:</p>
+<p>The model formula is in <a href="#eq-quadraticTermsRegressionModel" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>:</p>
 <p><span id="eq-quadraticTermsRegressionModel"><span class="math display">\[
 \begin{aligned}
-  \text{fantasy points} &amp;= \beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
-  &amp;\phantom{=} \beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon
+  \text{fantasy points} \; = \; &amp;\beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
+  &amp;\beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon
 \end{aligned}
-\tag{11.6}\]</span></span></p>
+\tag{11.7}\]</span></span></p>
 <p>Here are the model results:</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="fu">summary</span>(quadraticTermsRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1369,33 +1376,32 @@ Figure&nbsp;11.6: Model-Implied Predictions of A Wide Receiver’s Fantasy Point
 <span id="cb24-3"><a href="#cb24-3"></a>weight <span class="ot">&lt;-</span> <span class="dv">200</span></span>
 <span id="cb24-4"><a href="#cb24-4"></a>target_share <span class="ot">&lt;-</span> <span class="dv">3</span></span>
 <span id="cb24-5"><a href="#cb24-5"></a></span>
-<span id="cb24-6"><a href="#cb24-6"></a>beta0 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"(Intercept)"</span>]</span>
-<span id="cb24-7"><a href="#cb24-7"></a>beta1 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"age"</span>]</span>
-<span id="cb24-8"><a href="#cb24-8"></a>beta2 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"I(age^2)"</span>]</span>
-<span id="cb24-9"><a href="#cb24-9"></a>beta3 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"height"</span>]</span>
-<span id="cb24-10"><a href="#cb24-10"></a>beta4 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"I(height^2)"</span>]</span>
-<span id="cb24-11"><a href="#cb24-11"></a>beta5 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"weight"</span>]</span>
-<span id="cb24-12"><a href="#cb24-12"></a>beta6 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"I(weight^2)"</span>]</span>
-<span id="cb24-13"><a href="#cb24-13"></a>beta7 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"target_share"</span>]</span>
-<span id="cb24-14"><a href="#cb24-14"></a>beta8 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[<span class="st">"I(target_share^2)"</span>]</span>
+<span id="cb24-6"><a href="#cb24-6"></a>beta0 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"(Intercept)"</span>]]</span>
+<span id="cb24-7"><a href="#cb24-7"></a>beta1 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"age"</span>]]</span>
+<span id="cb24-8"><a href="#cb24-8"></a>beta2 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"I(age^2)"</span>]]</span>
+<span id="cb24-9"><a href="#cb24-9"></a>beta3 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"height"</span>]]</span>
+<span id="cb24-10"><a href="#cb24-10"></a>beta4 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"I(height^2)"</span>]]</span>
+<span id="cb24-11"><a href="#cb24-11"></a>beta5 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"weight"</span>]]</span>
+<span id="cb24-12"><a href="#cb24-12"></a>beta6 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"I(weight^2)"</span>]]</span>
+<span id="cb24-13"><a href="#cb24-13"></a>beta7 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"target_share"</span>]]</span>
+<span id="cb24-14"><a href="#cb24-14"></a>beta8 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"I(target_share^2)"</span>]]</span>
 <span id="cb24-15"><a href="#cb24-15"></a></span>
 <span id="cb24-16"><a href="#cb24-16"></a>predictedFantasyPoints <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1<span class="sc">*</span>age <span class="sc">+</span> beta2<span class="sc">*</span>(age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> beta3<span class="sc">*</span>height <span class="sc">+</span> beta4<span class="sc">*</span>(height<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> beta5<span class="sc">*</span>weight <span class="sc">+</span> beta6<span class="sc">*</span>(weight<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> beta7<span class="sc">*</span>target_share <span class="sc">+</span> beta8<span class="sc">*</span>(target_share<span class="sc">^</span><span class="dv">2</span>)</span>
 <span id="cb24-17"><a href="#cb24-17"></a>predictedFantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>(Intercept) 
-   171.3862 </code></pre>
+<pre><code>[1] 171.3862</code></pre>
 </div>
 </div>
-<p>The model formula with substituted values is in <a href="#eq-quadraticTermsRegressionModelSubstitute" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>:</p>
+<p>The model formula with substituted values is in <a href="#eq-quadraticTermsRegressionModelSubstitute" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>:</p>
 <p><span id="eq-quadraticTermsRegressionModelSubstitute"><span class="math display">\[
 \begin{aligned}
-  \text{fantasy points} &amp;= \beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
-  &amp;\phantom{=} \beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon \\
-  &amp;= 78.94 + 1.91 \cdot \text{age} + -0.03 \cdot \text{age}^2 + -0.50 \cdot \text{height} + 0.00 \cdot \text{height}^2 + \\
-  &amp;\phantom{=} -0.89 \cdot \text{weight} + 0.00 \cdot \text{weight}^2 + 70.83 \cdot \text{target share} + -4.21 \cdot \text{target share}^2 + \epsilon \\
-  &amp;= 171.39
+  \text{fantasy points} \; = \; &amp;\beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
+  &amp;\beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon \\
+  = &amp;78.94 + 1.91 \cdot \text{age} + -0.03 \cdot \text{age}^2 + -0.50 \cdot \text{height} + 0.00 \cdot \text{height}^2 + \\
+  &amp;-0.89 \cdot \text{weight} + 0.00 \cdot \text{weight}^2 + 70.83 \cdot \text{target share} + -4.21 \cdot \text{target share}^2 + \epsilon \\
+  = &amp;171.39
 \end{aligned}
-\tag{11.7}\]</span></span></p>
+\tag{11.8}\]</span></span></p>
 </section><section id="sec-multipleRegressionExamplesAddressingAssumptions" class="level4" data-number="11.8.1.4"><h4 data-number="11.8.1.4" class="anchored" data-anchor-id="sec-multipleRegressionExamplesAddressingAssumptions">
 <span class="header-section-number">11.8.1.4</span> Evaluating and Addressing Assumptions</h4>
 <p>The assumptions for multiple regression are described in <a href="#sec-assumptionsRegression" class="quarto-xref"><span>Section 11.4</span></a>. I describe ways to evaluate assumptions in <a href="#sec-assumptionsRegressionEvaluating" class="quarto-xref"><span>Section 11.4.1</span></a>.</p>
@@ -1835,7 +1841,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 </figure>
 </div>
 </div>
-<p>The second <a href="research-methods.html#sec-correlationalStudy">predictor variable</a> is not very good—it is exactly twice the value of the first <a href="research-methods.html#sec-correlationalStudy">predictor variable</a>; thus, the two <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> are perfectly correlated (i.e., <span class="math inline">\(r = 1.0\)</span>). This means that there are different prediction equation possibilities that are equally good—see Equations in <a href="#eq-multicollinearity" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>:</p>
+<p>The second <a href="research-methods.html#sec-correlationalStudy">predictor variable</a> is not very good—it is exactly twice the value of the first <a href="research-methods.html#sec-correlationalStudy">predictor variable</a>; thus, the two <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> are perfectly correlated (i.e., <span class="math inline">\(r = 1.0\)</span>). This means that there are different prediction equation possibilities that are equally good—see Equations in <a href="#eq-multicollinearity" class="quarto-xref">Equation&nbsp;<span>11.9</span></a>:</p>
 <p><span id="eq-multicollinearity"><span class="math display">\[
 \begin{aligned}
   2x_2 &amp;= y \\
@@ -1847,7 +1853,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
   ...
 &amp;= y
 \end{aligned}
-\tag{11.8}\]</span></span></p>
+\tag{11.9}\]</span></span></p>
 <p>Then, what are the regression coefficients? We do not know what are the correct regression coefficients because each of the possibilities fits the data equally well. Thus, when estimating the regression model, we could obtain arbitrary estimates of the regression coefficients with an enormous standard error around each estimate. In general, multicollinearity increases the uncertainty (i.e., standard errors and confidence intervals) around the parameter estimates. Any <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> that have a correlation above ~ <span class="math inline">\(r = .30\)</span> with each other could have an impact on the confidence interval of the regression coefficient. As the correlations among the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> increase, the chance of getting an arbitrary answer increases, sometimes called “bouncing betas.” So, it is important to examine a correlation matrix of the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> before putting them in the same regression model. You can also examine indices such as variance inflation factor (VIF), where a value greater than 5 or 10 indicates multicollinearity.</p>
 <p>Here are the VIFs from our earlier model:</p>
 <div class="cell">
