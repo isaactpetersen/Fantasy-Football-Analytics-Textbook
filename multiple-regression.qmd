@@ -148,7 +148,7 @@ A *confidence interval* represents a range of plausible values such that, with r
 Our parameter estimate for the regression coefficient, plus or minus 1 standard error, reflects the 68% confidence interval for the coefficient.
 The 95% confidence interval is computed as the parameter estimated plus or minus 1.96 standard errors.
 For instance, if the parameter estimate for the regression coefficient is 0.50, and the standard error is 0.10, the 95% confidence interval is [0.30, 0.70]: $0.5 - (1.96 \times 0.10) = 0.3$; $0.5 + (1.96 \times 0.10) = 0.7$.
-That is, if we used the same sample procedure repeatedly, the true value of the regression coefficient would be expected to be 95% of the time somewhere between 0.30 to 0.70.
+That is, if we used the same sampling procedure repeatedly, the true value of the regression coefficient would be expected to be 95% of the time somewhere between 0.30 to 0.70.
 
 ## Assumptions of Multiple Regression {#sec-assumptionsRegression}
 
@@ -160,26 +160,166 @@ Linear regression models make the following assumptions:
 - the residuals are normally distributed
 
 Homoscedasticity of the residuals means that the variance of the residuals does not differ as a function of the [outcome variable](#sec-correlationalStudy) or as a function of the [predictor variable](#sec-correlationalStudy) (i.e., the residuals show constant variance as a function of [outcome](#sec-correlationalStudy)/[predictors](#sec-correlationalStudy)).
+If the residuals differ as a function of the [outcome](#sec-correlationalStudy) or [predictor](#sec-correlationalStudy) variable, this is called heterotoscedasticity.
 
 Those are some of the key assumptions of multiple regression.
 However, there are additional assumptions of multiple regression, including ones discussed in the chapter on [Causal Inference](#sec-causalInference).
-For instance, the variables included should reflect causal process such that the [predictor variables](#sec-correlationalStudy) influence the [outcome variable](#sec-correlationalStudy), and not the other way around.
+For instance, the variables included should reflect a causal process such that the [predictor variables](#sec-correlationalStudy) influence the [outcome variable](#sec-correlationalStudy), and not the other way around.
 That is, the [outcome variable](#sec-correlationalStudy) should not influence the [predictor variables](#sec-correlationalStudy) (i.e., there should be no reverse causation).
 In addition, it is important control for any [confound(s)](#sec-causalDiagramConfounding).
 If a [confound](#sec-causalDiagramConfounding) is not controlled for, this is called *omitted-variable bias*, and it leads the researcher to incorrectly attribute the effects of the omitted variable to the included variables.
 
-### Evaluating Assumptions of Multiple Regression {#sec-assumptionsRegressionEvaluating}
+### Evaluating and Addressing Assumptions of Multiple Regression {#sec-assumptionsRegressionEvaluating}
 
-To evaluate the shape of the association between the [predictor variables](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy), we can examine scatterplots, residual plots, marginal model plots, and added-variable plots.
+#### Linear Association {#sec-assumptionsRegressionEvaluatingLinearAssociation}
+
+To evaluate the shape of the association between the [predictor variables](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy), we can examine [scatterplots](#sec-scatterplot), residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), added-variable plots (@fig-addedVariablePlots), and component-plus-residual plots (@fig-componentPlusResidualPlots).
+Residual plots depict the residuals (errors) on the y-axis as a function of the fitted values or a specific [predictor](#sec-correlationalStudy) on the x-axis.
+Marginal model plots are basically glorified [scatterplots](#sec-scatterplot) that depict the [outcome variable](#sec-correlationalStudy) (both in terms of observed values and model-fitted values) on the y-axis and the [predictor variables](#sec-correlationalStudy) on the x-axis.
+Added-variable plots depict the *unique* association of each [predictor variables](#sec-correlationalStudy) with the [outcome variable](#sec-correlationalStudy) when controlling for all the other [predictor variables](#sec-correlationalStudy) in the model.
+Component-plus-residual plots depict partial residuals on the y-axis as a function of each [predictor variable](#sec-correlationalStudy) on the x-axis, where a partial residual for a given [predictor](#sec-correlationalStudy) is the effect of a given predictor (thus controlling for all the other [predictor variables](#sec-correlationalStudy) in the model) plus the residual from the full model.
+
+If the shape of the association is nonlinear (as indicated by any of these plots), various approaches may be necessary such as including nonlinear terms (e.g., polynomial terms such as quadratic, cubic, quartic, or higher-degree terms), transforming the [predictors](#sec-correlationalStudy) (e.g., log, square root, inverse, exponential, Box-Cox, Yeo-Johnson transform), use of splines/piecewise regression, and generalized additive models.
+
+#### Homoscedasticity {#sec-assumptionsRegressionEvaluatingHomoscedasticity}
 
 To evaluate homoscedasticity, we can evaluate residual plots (@fig-residualPlots).
 In residual plots, homoscedasticity is identified as a constant spread of residuals versus fitted values—the residuals do not show a fan or cone shape.
+If there is heteroscedasticity, it may be necessary to transform the [outcome variable](#sec-correlationalStudy) to be more normally distributed.
+
+#### Uncorrelated Residuals {#sec-assumptionsRegressionEvaluatingUncorrelatedResiduals}
 
 To determine if residuals are correlated by a grouping level, we can examine the proportion of variance that is attributable to the grouping level using the intraclass correlation coefficient (ICC) from a [mixed model](#sec-mixedModels).
 The greater the ICC value, the more variance is accounted for by the grouping level, and the more the residuals are intercorrelated.
+If the residuals are intercorrelated, it may be necessary to account for the grouping structure of the data using a [mixed model](#sec-mixedModels).
 
-We can examine whether residuals are normally distributed using quantile–quantile (QQ) plots and probability–probability (PP) plots.
-If the residuals are normally distributed, they should stay close to the diagonal reference line.
+#### Normally Distributed Residuals {#sec-assumptionsRegressionEvaluatingNormallyDistributedResiduals}
+
+To examine whether residuals are normally distributed, we can examine quantile–quantile (QQ) plots and probability–probability (PP) plots.
+QQ plots are particularly useful for identifying deviations from normality in the tails of the distribution; PP plots are particularly useful for identifying deviations from normality in the center of the distribution.
+Researchers tend to be more concerned about the tails of the distribution, because extreme values tend to have a greater impact on inferences.
+Various examples of QQ plots and deviations from normality are depicted in @fig-distributionQQplots.
+If the residuals are normally distributed, they will stay close to the diagonal reference line of the QQ and PP plots.
+
+```{r}
+#| label: fig-distributionQQplots
+#| fig-cap: "Quantile–Quantile (QQ) Plots of Various Distributions."
+#| fig-alt: "Quantile–Quantile (QQ) Plots of Various Distributions."
+#| fig-subcap:
+#|   - "Normal Distribution"
+#|   - "Normal Distribution"
+#|   - "Bimodal Distribution"
+#|   - "Bimodal Distribution"
+#|   - "Negatively Skewed Distribution"
+#|   - "Negatively Skewed Distribution"
+#|   - "Positively Skewed Distribution"
+#|   - "Positively Skewed Distribution"
+#|   - "Platykurtic (Light-Tailed) Distribution"
+#|   - "Platykurtic (Light-Tailed) Distribution"
+#|   - "Lepokurtic (Heavy-Tailed) Distribution"
+#|   - "Lepokurtic (Heavy-Tailed) Distribution"
+#| code-fold: true
+
+set.seed(52242)
+
+sampleSize <- 10000
+
+distribution_normal <- rnorm(
+  sampleSize,
+  mean = 0,
+  sd = 1)
+
+distribution_bimodal <- c(
+  rnorm(
+    sampleSize/2,
+    mean = -2,
+    sd = 1),
+  rnorm(
+    sampleSize/2,
+    mean = 2,
+    sd = 1))
+
+distribution_negativeSkew <- -rlnorm(
+  sampleSize,
+  meanlog = 0,
+  sdlog = 1)
+
+distribution_positiveSkew <- rlnorm(
+  sampleSize,
+  meanlog = 0,
+  sdlog = 1)
+
+distribution_lightTailed <- runif(
+  sampleSize,
+  min = -2,
+  max = 2)
+
+distribution_heavyTailed <- rt(
+  sampleSize,
+  df = 2)
+
+hist(
+  distribution_normal,
+  main = "Normal Distribution",
+  col = "skyblue")
+
+car::qqPlot(
+  distribution_normal,
+  main = "QQ Plot",
+  id = TRUE)
+
+hist(
+  distribution_bimodal,
+  main = "Bimodal",
+  col = "skyblue")
+
+car::qqPlot(
+  distribution_bimodal,
+  main = "QQ Plot",
+  id = TRUE)
+
+hist(
+  distribution_negativeSkew,
+  main = "Negatively Skewed",
+  col = "skyblue")
+
+car::qqPlot(
+  distribution_negativeSkew,
+  main = "QQ Plot",
+  id = TRUE)
+
+hist(
+  distribution_positiveSkew,
+  main = "Positively Skewed",
+  col = "skyblue")
+
+car::qqPlot(
+  distribution_positiveSkew,
+  main = "QQ Plot",
+  id = TRUE)
+
+hist(
+  distribution_lightTailed,
+  main = "Platykurtic (Light Tailed)",
+  col = "skyblue")
+
+car::qqPlot(
+  distribution_lightTailed,
+  main = "QQ Plot",
+  id = TRUE)
+
+hist(
+  distribution_heavyTailed,
+  main = "Leptokurtic (Heavy Tailed)",
+  col = "skyblue")
+
+car::qqPlot(
+  distribution_heavyTailed,
+  main = "QQ Plot",
+  id = TRUE)
+```
+
+If the residuals are not normally distributed (i.e., they do not stay close to the diagonal reference line of the QQ and PP plots), it may be necessary to transform the [outcome variable](#sec-correlationalStudy) to be more normally distributed or to use a generalized linear model (GLM) that more closely matches the distribution of the [outcome variable](#sec-correlationalStudy) (e.g., Poisson, binomial, gamma).
 
 ## How Much Variance the Model Explains {#sec-multipleRegressionExplainedVariance}
 
@@ -565,7 +705,7 @@ ggplot2::ggplot(
 
 #### Examine Bivariate Associations {#sec-multipleRegressionFantasyPointsWRsBivariate}
 
-Then, let's examine the bivariate association of each using a scatterplot to evaluate for any potential nonlinearity, as depicted in @fig-scatterplots.
+Then, let's examine the bivariate association of each using a [scatterplot](#sec-scatterplot) to evaluate for any potential nonlinearity, as depicted in @fig-scatterplots.
 
 ```{r}
 #| layout-ncol: 2
@@ -896,11 +1036,11 @@ As a reminder, here are four assumptions:
 
 ##### Linear Association {#sec-multipleRegressionExamplesAddressingAssumptionsLinearAssociation}
 
-We evaluated the shape of the association between the [predictor variables](#sec-correlationalStudy) and the [outcome variables](#sec-correlationalStudy) using scatterplots.
-We accounted for potential curvilinearity with a quadratic term.
-Other ways to account for nonlinearity, in addition to polynomials (e.g., quadratic, cubic, quartic, or higher-degree terms), include transforming [predictors](#sec-correlationalStudy) (e.g., log, square root, inverse, exponential transform), splines/piecewise regression, and generalized additive models.
+We evaluated the shape of the association between the [predictor variables](#sec-correlationalStudy) and the [outcome variables](#sec-correlationalStudy) using [scatterplots](#sec-scatterplot).
+We accounted for potential curvilinearity in the associations with a quadratic term.
+Other ways to account for nonlinearity, in addition to polynomials, include transforming [predictors](#sec-correlationalStudy), use of splines/piecewise regression, and generalized additive models.
 
-We can also evaluate residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), and added-variable plots (@fig-addedVariablePlots) from the `car` package [@Fox2019_packages; @R-car], to evaluate for potential nonlinearity.
+To evaluate for potential nonlinearity in the associations, we can also evaluate residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), and added-variable plots (@fig-addedVariablePlots), and component-plus-residual plots (@fig-componentPlusResidualPlots) from the `car` package [@Fox2019_packages; @R-car].
 For evaluating linearity, we would expect minimal bend/curvature in the lines.
 
 ```{r}
@@ -924,7 +1064,18 @@ car::avPlots(
   id = TRUE)
 ```
 
-The marginal model plots (@fig-marginalModelPlots) and residual plots (@fig-residualPlots) suggest that the nonlinearity of the association between target share and fantasy points may not be fully captured by the quadratic term.
+```{r}
+#| label: fig-componentPlusResidualPlots
+#| fig-cap: "Component-Plus-Residual Plots."
+#| fig-alt: "Component-Plus-Residual Plots."
+
+car::crPlots(
+  quadraticTermsRegressionModel,
+  sd = TRUE,
+  id = TRUE)
+```
+
+The marginal model plots (@fig-marginalModelPlots), residual plots (@fig-residualPlots), and  component-plus-residual plots (@fig-componentPlusResidualPlots) suggest that the nonlinearity of the association between target share and fantasy points may not be fully captured by the quadratic term.
 Thus, we may need to apply a different approach to handling the nonlinear association between target share and fantasy points.
 
 One approach we can take is to transform the `target_shares` variable to be more normally distributed.
@@ -936,7 +1087,9 @@ The histogram for the raw `target_shares` variable is in @fig-histogramTargetSha
 #| fig-cap: "Histogram of Target Share."
 #| fig-alt: "Histogram of Target Share."
 
-hist(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")])
+hist(
+  player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")],
+  main = "Histogram of Target Share")
 ```
 
 The variable shows a strong positive skew.
@@ -948,7 +1101,9 @@ The histogram of the log-transformed variable is in @fig-histogramTargetSharesTr
 #| fig-cap: "Histogram of Target Share, Transformed."
 #| fig-alt: "Histogram of Target Share, Transformed."
 
-hist(log(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")] + 1))
+hist(
+  log(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")] + 1),
+  "Histogram of Target Share (Log Transformed)")
 ```
 
 Now we can re-fit the model with the log-transformed variable.
@@ -963,7 +1118,7 @@ linearRegressionModel_logTargetShare <- lm(
 summary(linearRegressionModel_logTargetShare)
 ```
 
-Target share shows a more linear association with fantasy points after log-transforming it (albeit still not perfect), as depicted in Figures [-@fig-marginalModelPlotsLogTransformed], [-@fig-addedVariablePlotsLogTransformed], and [-@fig-residualPlotsLogTransformed].
+Target share shows a more linear association with fantasy points after log-transforming it (albeit still not perfect), as depicted in Figures [-@fig-marginalModelPlotsLogTransformed], [-@fig-addedVariablePlotsLogTransformed], [-@fig-componentPlusResidualPlotsLogTransformed], and [-@fig-residualPlotsLogTransformed].
 
 ```{r}
 #| label: fig-marginalModelPlotsLogTransformed
@@ -982,6 +1137,16 @@ car::marginalModelPlots(
 #| fig-alt: "Added-Variable Plots After Log Transformation of Target Share."
 
 car::avPlots(
+  linearRegressionModel_logTargetShare,
+  id = TRUE)
+```
+
+```{r}
+#| label: fig-componentPlusResidualPlotsLogTransformed
+#| fig-cap: "Component-Plus-Residual Plots After Log Transformation of Target Share."
+#| fig-alt: "Component-Plus-Residual Plots After Log Transformation of Target Share."
+
+car::crPlots(
   linearRegressionModel_logTargetShare,
   id = TRUE)
 ```
@@ -1021,9 +1186,13 @@ The histogram for raw fantasy points is in @fig-histogramFantasyPoints.
 #| fig-cap: "Histogram of Fantasy Points (Among Wide Receivers)."
 #| fig-alt: "Histogram of Fantasy Points (Among Wide Receivers)."
 
-hist(player_stats_seasonal$fantasyPoints[which(player_stats_seasonal$position == "WR")])
+hist(
+  player_stats_seasonal$fantasyPoints[which(player_stats_seasonal$position == "WR")],
+  main = "Histogram of Fantasy Points")
 ```
 
+We can apply a Yeo-Johnson transformation to the [outcome variable](#sec-correlationalStudy) to generate a more normally distributed variable.
+A Yeo-Johnson transformation estimates the optimal transformation to make the variable more normally distributed.
 Let's use a Yeo-Johnson transformation of fantasy points:
 
 ```{r}
@@ -1045,7 +1214,9 @@ The histogram of the transformed variable is in @fig-histogramFantasyPointsTrans
 #| fig-cap: "Histogram of Fantasy Points (Among Wide Receivers), Transformed."
 #| fig-alt: "Histogram of Fantasy Points (Among Wide Receivers), Transformed."
 
-hist(player_stats_seasonal$fantasyPoints_transformed[which(player_stats_seasonal$position == "WR")])
+hist(
+  player_stats_seasonal$fantasyPoints_transformed[which(player_stats_seasonal$position == "WR")],
+  main = "Histogram of Fantasy Points (Transformed)")
 ```
 
 Now we can refit the model.
@@ -1367,7 +1538,7 @@ fimlRegression_syntax <- '
   fantasyPoints_transformed ~ 1
 '
 
-fimlRegression_fit <- sem(
+fimlRegression_fit <- lavaan::sem(
   fimlRegression_syntax,
   data = player_stats_seasonal,
   missing = "ML",
@@ -1540,7 +1711,7 @@ To get a robust estimate of the indirect effect, we obtain bootstrapped estimate
 Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, but this example uses only 1,000 bootstrap draws for a shorter runtime.
 
 ```{r}
-mediationFit <- sem(
+mediationFit <- lavaan::sem(
   mediationModel,
   data = player_stats_seasonal %>% filter(position %in% c("WR")),
   se = "bootstrap",
@@ -1586,7 +1757,7 @@ multipleMediatorModel <- '
 ```
 
 ```{r}
-multipleMediatorFit <- sem(
+multipleMediatorFit <- lavaan::sem(
   multipleMediatorModel,
   data = player_stats_seasonal %>% filter(position %in% c("WR")),
   se = "bootstrap",
