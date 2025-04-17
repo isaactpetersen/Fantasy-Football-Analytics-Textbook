@@ -183,9 +183,14 @@ If the shape of the association is nonlinear (as indicated by any of these plots
 
 #### Homoscedasticity {#sec-assumptionsRegressionEvaluatingHomoscedasticity}
 
-To evaluate homoscedasticity, we can evaluate residual plots (@fig-residualPlots).
-In residual plots, homoscedasticity is identified as a constant spread of residuals versus fitted values—the residuals do not show a fan or cone shape.
+To evaluate homoscedasticity, we can evaluate a residual plot (@fig-residualPlots) and spread-level plot (@fig-spreadLevelPlot).
+A residual plot depicts the residuals on the y-axis as a function of the model's fitted values on the x-axis.
+Homoscedasticity in a residual plot is identified as a constant spread of residuals versus fitted values—the residuals do not show a fan or cone shape; a fan or cone shape indicates heteroscedasticity.
+A spread-level plot depicts the log of the absolute value of studentized residuals on the y-axis as a function of the log of the model's fitted values on the x-axis.
+Homoscedasticity in a spread-level plot is identified as a flat slope; a slope that differs from zero indicates heteroscedasticity.
+
 If there is heteroscedasticity, it may be necessary to transform the [outcome variable](#sec-correlationalStudy) to be more normally distributed.
+The spread-level plot provides a suggested power transformation to transform the [outcome variable](#sec-correlationalStudy) so that the spread of residuals becomes more uniform across the fitted values.
 
 #### Uncorrelated Residuals {#sec-assumptionsRegressionEvaluatingUncorrelatedResiduals}
 
@@ -1164,8 +1169,8 @@ car::residualPlots(
 
 ##### Homoscedasticity {#sec-multipleRegressionExamplesAddressingAssumptionsHomoscedasticity}
 
-To evaluate homoscedasticity, we can evaluate residual plots (@fig-residualPlots).
-In residual plots, you want a constant spread of residuals versus fitted values—you do not want the residuals to show a fan or cone shape.
+To evaluate homoscedasticity, we can evaluate a residual plot (@fig-residualPlots) and spread-level plot (@fig-spreadLevelPlots).
+In a residual plot, you want a constant spread of residuals versus fitted values—you do not want the residuals to show a fan or cone shape.
 
 ```{r}
 #| label: fig-residualPlots
@@ -1173,6 +1178,18 @@ In residual plots, you want a constant spread of residuals versus fitted values�
 #| fig-alt: "Residual Plots."
 
 car::residualPlots(
+  quadraticTermsRegressionModel,
+  id = TRUE)
+```
+
+In a spread-level plot, you want a flat (zero) slope—you do not want a positive or negative slope.
+
+```{r}
+#| label: fig-spreadLevelPlot
+#| fig-cap: "Spread-Level Plot."
+#| fig-alt: "Spread-Level Plot."
+
+car::spreadLevelPlot(
   quadraticTermsRegressionModel,
   id = TRUE)
 ```
@@ -1232,7 +1249,7 @@ linearRegressionModel_outcomeTransformed <- lm(
 summary(linearRegressionModel_outcomeTransformed)
 ```
 
-The residual plots are in @fig-residualPlotsOutcomeTransformed.
+The residual plot is in @fig-residualPlotsOutcomeTransformed.
 
 ```{r}
 #| label: fig-residualPlotsOutcomeTransformed
@@ -1240,6 +1257,18 @@ The residual plots are in @fig-residualPlotsOutcomeTransformed.
 #| fig-alt: "Residual Plots After Transformation of Fantasy Points."
 
 car::residualPlots(
+  linearRegressionModel_outcomeTransformed,
+  id = TRUE)
+```
+
+The spread-level plot is in @fig-spreadLevelPlotOutcomeTransformed.
+
+```{r}
+#| label: fig-spreadLevelPlotOutcomeTransformed
+#| fig-cap: "Spread-Level Plot After Transformation of Fantasy Points."
+#| fig-alt: "Spread-Level Plot After Transformation of Fantasy Points."
+
+car::spreadLevelPlot(
   linearRegressionModel_outcomeTransformed,
   id = TRUE)
 ```
