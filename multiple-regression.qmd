@@ -174,11 +174,75 @@ If a [confound](#sec-causalDiagramConfounding) is not controlled for, this is ca
 
 #### Linear Association {#sec-assumptionsRegressionEvaluatingLinearAssociation}
 
-To evaluate the shape of the association between the [predictor variables](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy), we can examine [scatterplots](#sec-scatterplot), residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), added-variable plots (@fig-addedVariablePlots), and component-plus-residual plots (@fig-componentPlusResidualPlots).
+To evaluate the shape of the association between the [predictor variables](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy), we can examine [scatterplots](#sec-scatterplot) (@fig-linearNonlinearAssociations), residual plots (@fig-residualPlots), marginal model plots (@fig-marginalModelPlots), added-variable plots (@fig-addedVariablePlots), and component-plus-residual plots (@fig-componentPlusResidualPlots).
 Residual plots depict the residuals (errors) on the y-axis as a function of the fitted values or a specific [predictor](#sec-correlationalStudy) on the x-axis.
 Marginal model plots are basically glorified [scatterplots](#sec-scatterplot) that depict the [outcome variable](#sec-correlationalStudy) (both in terms of observed values and model-fitted values) on the y-axis and the [predictor variables](#sec-correlationalStudy) on the x-axis.
 Added-variable plots depict the *unique* association of each [predictor variables](#sec-correlationalStudy) with the [outcome variable](#sec-correlationalStudy) when controlling for all the other [predictor variables](#sec-correlationalStudy) in the model.
 Component-plus-residual plots depict partial residuals on the y-axis as a function of each [predictor variable](#sec-correlationalStudy) on the x-axis, where a partial residual for a given [predictor](#sec-correlationalStudy) is the effect of a given predictor (thus controlling for all the other [predictor variables](#sec-correlationalStudy) in the model) plus the residual from the full model.
+
+Examples of linear and nonlinear associations are depicted with [scatterplots](#sec-scatterplot) in @fig-linearNonlinearAssociations.
+
+```{r}
+#| layout-ncol: 2
+#| label: fig-linearNonlinearAssociations
+#| fig-cap: "Example Associations Depicted With Scatterplots."
+#| fig-alt: "Example Associations Depicted With Scatterplots."
+#| fig-subcap:
+#|   - "Example of a Linear Association"
+#|   - "Example of a Nonlinear Association"
+#| code-fold: true
+
+set.seed(52242)
+
+sampleSize <- 1000
+quadraticX <- runif(
+  sampleSize,
+  min = -4,
+  max = 4)
+linearY <- quadraticX + rnorm(sampleSize, mean = 0, sd = 0.5)
+quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
+quadraticData <- cbind(quadraticX, quadraticY) %>%
+  data.frame %>%
+  arrange(quadraticX)
+
+quadraticModel <- lm(
+  quadraticY ~ quadraticX + I(quadraticX ^ 2),
+  data = quadraticData)
+
+quadraticNewData <- data.frame(
+  quadraticX = seq(
+    from = min(quadraticData$quadraticX),
+    to = max(quadraticData$quadraticY),
+    length.out = sampleSize))
+
+quadraticNewData$quadraticY <- predict(
+  quadraticModel,
+  newdata = quadraticNewData)
+
+plot(
+  x = quadraticData$quadraticX,
+  y = quadraticData$quadraticY,
+  xlab = "",
+  ylab = "",
+  main = "Nonlinear Association")
+
+lines(
+  quadraticNewData$quadraticY ~ quadraticNewData$quadraticX,
+  lwd = 2,
+  col = "blue")
+
+plot(
+  x = quadraticX,
+  y = linearY,
+  xlab = "",
+  ylab = "",
+  main = "Linear Association")
+
+abline(
+  lm(linearY ~ quadraticX),
+  lwd = 2,
+  col = "blue")
+```
 
 If the shape of the association is nonlinear (as indicated by any of these plots), various approaches may be necessary such as including nonlinear terms (e.g., polynomial terms such as quadratic, cubic, quartic, or higher-degree terms), transforming the [predictors](#sec-correlationalStudy) (e.g., log, square root, inverse, exponential, Box-Cox, Yeo-Johnson transform), use of splines/piecewise regression, and generalized additive models.
 
@@ -186,9 +250,83 @@ If the shape of the association is nonlinear (as indicated by any of these plots
 
 To evaluate homoscedasticity, we can evaluate a residual plot (@fig-residualPlots) and spread-level plot (@fig-spreadLevelPlot).
 A residual plot depicts the residuals on the y-axis as a function of the model's fitted values on the x-axis.
-Homoscedasticity in a residual plot is identified as a constant spread of residuals versus fitted values—the residuals do not show a fan or cone shape; a fan or cone shape indicates heteroscedasticity.
+Homoscedasticity in a residual plot is identified as a constant spread of residuals versus fitted values—the residuals do not show a fan, cone, or bow-tie shape; a fan, cone, or bow-tie shape indicates heteroscedasticity.
+In a residual plot, a fan or cone shape indicates increasing or decreasing variance in the residuals as a function of the fitted values; a bow-tie shape indicates that the residuals are smallest in the middle of the fitted values and greatest on the extremes of the fitted values.
 A spread-level plot depicts the log of the absolute value of studentized residuals on the y-axis as a function of the log of the model's fitted values on the x-axis.
 Homoscedasticity in a spread-level plot is identified as a flat slope; a slope that differs from zero indicates heteroscedasticity.
+
+```{r}
+#| layout: [[100], [50, 50]]
+#| label: fig-homscedasticityHeteroscedasticity
+#| fig-cap: "Example of Homoscedasticity and Heteroscedasticity in Residual Plots."
+#| fig-alt: "Example of Homoscedasticity and Heteroscedasticity in Residual Plots."
+#| fig-subcap:
+#|   - "Homoscedasticity"
+#|   - "Fan-Shaped Heteroscedasticity"
+#|   - "Bow-Tie-Shaped Heteroscedasticity"
+#| code-fold: true
+
+set.seed(52242)
+
+# 1. Homoscedasticity
+sampleSize <- 1000
+x1 <- runif(sampleSize, 0, 10)
+y1 <- 3 + 2 * x1 + rnorm(sampleSize, mean = 0, sd = 2)
+fit1 <- lm(y1 ~ x1)
+res1 <- resid(fit1)
+fitted1 <- fitted(fit1)
+
+# 2. Fan-shaped heteroscedasticity
+x2 <- runif(sampleSize, 0, 10)
+y2 <- 3 + 2 * x2 + rnorm(sampleSize, mean = 0, sd = 0.5 * x2) # increasing variance
+fit2 <- lm(y2 ~ x2)
+res2 <- resid(fit2)
+fitted2 <- fitted(fit2)
+
+# 3. Bow-tie-shaped heteroscedasticity
+x3 <- runif(sampleSize, 0, 10)
+sd3 <- abs(x3 - 5) + 0.5  # variance smallest in middle, higher on edges
+y3 <- 3 + 2 * x3 + rnorm(sampleSize, mean = 0, sd = sd3)
+fit3 <- lm(y3 ~ x3)
+res3 <- resid(fit3)
+fitted3 <- fitted(fit3)
+
+plot(
+  fitted1,
+  res1,
+  main = "Homoscedasticity",
+  xlab = "Fitted value",
+  ylab = "Residual")
+
+abline(
+  h = 0,
+  lwd = 2,
+  col = "blue")
+
+plot(
+  fitted2,
+  res2,
+  main = "Fan-Shaped Heteroscedasticity",
+  xlab = "Fitted value",
+  ylab = "Residual")
+
+abline(
+  h = 0,
+  lwd = 2,
+  col = "blue")
+
+plot(
+  fitted3,
+  res3,
+  main = "Bow-Tie-Shaped Heteroscedasticity",
+  xlab = "Fitted value",
+  ylab = "Residual")
+
+abline(
+  h = 0,
+  lwd = 2,
+  col = "blue")
+```
 
 If there is heteroscedasticity, it may be necessary to transform the [outcome variable](#sec-correlationalStudy) to be more normally distributed.
 The spread-level plot provides a suggested power transformation to transform the [outcome variable](#sec-correlationalStudy) so that the spread of residuals becomes more uniform across the fitted values.
