@@ -17,6 +17,7 @@ library("rstan")
 library("brms")
 library("cmdstanr") # todo: install.packages("cmdstanr", repos = c("https://stan-dev.r-universe.dev", getOption("repos"))); check_cmdstan_toolchain(); cmdstanr::install_cmdstan()
 library("fitdistrplus")
+library("performance")
 library("parallel")
 library("parallelly")
 library("plotly")
@@ -1771,6 +1772,56 @@ logLik(pointsPerSeason_positionAgeFixedLinearSlopes)
 logLik(pointsPerSeason_positionAgeRandomLinearSlopes)
 logLik(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 logLik(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+```
+
+#### Diagnostic Plots {#sec-fantasyPointsByAgeExperienceModelsDiagnosticPlots}
+
+##### Plot of Residuals {#sec-fantasyPointsByAgeExperienceModelsResidualPlot}
+
+```{r}
+plot(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+
+plot(
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
+  type = c("p","smooth"),
+  col.line = 1)
+```
+
+##### Scale-Location Plot {#sec-fantasyPointsByAgeExperienceModelsScaleLocationPlot}
+
+```{r}
+plot(
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
+  sqrt(abs(resid(.))) ~ fitted(.),
+  type = c("p","smooth"),
+  col.line = 1)
+```
+
+##### Quantile–Quantile (QQ) Plot {#sec-fantasyPointsByAgeExperienceModelsQQPlot}
+
+```{r}
+qqnorm(resid(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience))
+qqline(resid(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience))
+```
+
+##### Probability–Probability (PP) Plots {#sec-fantasyPointsByAgeExperienceModelsDiagnosticPPPlots}
+
+```{r}
+petersenlab::ppPlot(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+```
+
+##### Residuals Versus Leverage Plot {#sec-fantasyPointsByAgeExperienceModelsResidualsVsLeveragePlot}
+
+```{r}
+plot(
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
+  rstudent(.) ~ hatvalues(.))
+```
+
+##### Other Diagnostic Plots {#sec-fantasyPointsByAgeExperienceModelsOtherDiagnosticPlots}
+
+```{r}
+performance::check_model(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 ```
 
 ##### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
