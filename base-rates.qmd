@@ -6,7 +6,27 @@
 
 ```{r}
 library("petersenlab")
+library("psych")
+library("tidyverse")
 ```
+
+### Load Data {#sec-baseRatesLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = "./data/nfl_depthCharts.RData")
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/player_stats_seasonal.RData")
+```
+
+We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` objects in @sec-calculatePlayerAge.
 
 ## Overview {#sec-baseRatesOverview}
 
@@ -551,9 +571,251 @@ We could subdivide even further to identify, for instance, the "base rate" of fa
 
 ## Base Rate of Rookie Performance {#sec-baseRateRookiePerformance}
 
+We examine the base rates of rookie performance compared to performance of non-rookies.
+Rookies who play tend to be better players who were drafted in early rounds of the National Football League (NFL) draft.
+Thus, to more fairly compare rookies and non-rookies, we examine only players who were drafted in the first two rounds of the NFL Draft.
+
+```{r}
+rookiesDraftedEarly <- player_stats_seasonal %>% 
+  filter(years_of_experience == 0) %>% 
+  filter(draftround %in% c(1,2)) %>% 
+  arrange(player_id, season) %>% 
+  group_by(player_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup() %>% 
+  arrange(player_display_name)
+
+nonRookiesDraftedEarly <- player_stats_seasonal %>% 
+  filter(years_of_experience > 0) %>% 
+  filter(draftround %in% c(1,2)) %>% 
+  arrange(player_display_name)
+```
+
+[EXAMINE FOR ROOKIES WHO WERE DRAFTED IN FIRST TWO ROUNDS OF NFL DRAFT]
+
+[ALSO, FOR A SECONDARY ANALYSIS, SUBSET TO PLAYERS WHO PLAYED A FULL SEASON]
+
 ### Quarterbacks {#sec-baseRateRookiePerformanceQBs}
 
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "QB") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "QB") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+rookiesDraftedEarly %>% 
+  filter(position == "QB") %>%
+  select(fantasyPoints) %>% 
+  hist()
+```
+
+Among Quarterbacks who played a full season:
+
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "QB") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "QB") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+```
+
 ### Running Backs {#sec-baseRateRookiePerformanceRBs}
+
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+nonRookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  select(rushing_tds) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+rookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  select(fantasyPoints) %>% 
+  hist()
+
+rookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  select(rushing_tds) %>% 
+  psych::describe()
+```
+
+Among Running Backs who played a full season:
+
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+nonRookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  filter(games >= 16) %>% 
+  select(rushing_tds) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+rookiesDraftedEarly %>% 
+  filter(position == "RB") %>%
+  filter(games >= 16) %>% 
+  select(rushing_tds) %>% 
+  psych::describe()
+```
+
+### Wide Receivers {#sec-baseRateRookiePerformanceWRs}
+
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+nonRookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  select(receiving_tds) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+rookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  select(fantasyPoints) %>% 
+  hist()
+
+rookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  select(receiving_tds) %>% 
+  psych::describe()
+```
+
+Among Wide Receivers who played a full season:
+
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+nonRookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  filter(games >= 16) %>% 
+  select(receiving_tds) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+rookiesDraftedEarly %>% 
+  filter(position == "WR") %>%
+  filter(games >= 16) %>% 
+  select(receiving_tds) %>% 
+  psych::describe()
+```
+
+### Tight Ends {#sec-baseRateRookiePerformanceTEs}
+
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+nonRookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  select(receiving_tds) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+rookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  select(fantasyPoints) %>% 
+  hist()
+
+rookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  select(receiving_tds) %>% 
+  psych::describe()
+```
+
+Among Tight Ends who played a full season:
+
+```{r}
+nonRookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+nonRookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  filter(games >= 16) %>% 
+  select(receiving_tds) %>% 
+  psych::describe()
+```
+
+```{r}
+rookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  filter(games >= 16) %>% 
+  select(fantasyPoints) %>% 
+  psych::describe()
+
+rookiesDraftedEarly %>% 
+  filter(position == "TE") %>%
+  filter(games >= 16) %>% 
+  select(receiving_tds) %>% 
+  psych::describe()
+```
 
 ## How to Account for Base Rates {#sec-accountForBaseRates}
 
