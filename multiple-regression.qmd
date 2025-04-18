@@ -16,6 +16,7 @@ library("mice")
 library("miceadds")
 library("interactions")
 library("brms")
+library("robustbase")
 library("tidyverse")
 library("knitr")
 ```
@@ -1446,7 +1447,7 @@ numImputations <- 5
 
 dataToImpute <- player_stats_seasonal %>% 
   filter(position %in% c("WR")) %>% 
-  select(player_id, where(is.numeric)) %>% 
+  select(player_id, position, where(is.numeric)) %>% 
   select(
     player_id:games, carries:wopr, fantasy_points, fantasy_points_ppr,
     rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,
@@ -1575,7 +1576,7 @@ fimlRegression_syntax <- '
 
 fimlRegression_fit <- lavaan::sem(
   fimlRegression_syntax,
-  data = player_stats_seasonal,
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
   missing = "ML",
   fixed.x = FALSE
 )
@@ -1598,10 +1599,11 @@ Below, we demonstrate how to account for non-independence of observations using 
 
 ```{r}
 player_stats_seasonal_subset <- player_stats_seasonal %>% 
-  filter(!is.na(player_id))
+  filter(!is.na(player_id)) %>% 
+  filter(position %in% c("WR"))
 
 rms::robcov(rms::ols(
-  fantasyPoints_transformed ~ age + height + weight + target_share_log,
+  fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
   data = player_stats_seasonal_subset,
   x = TRUE,
   y = TRUE),
@@ -1611,6 +1613,20 @@ rms::robcov(rms::ols(
 ## Impact of Outliers {#sec-multipleRegressionOutliers}
 
 [As with correlation](#sec-correlationOutliers), multiple regression can be strongly impacted by outliers.
+
+### Robust Regression {#sec-multipleRegressionRobustRegression}
+
+To address outliers, there are various approaches to robust regression.
+One approach is to use an MM-type estimator, such as is used in the `lmrob()` and `glmrob()` functions of the `robustbase` package [@R-robustbase; @Todorov2009_packages].
+
+```{r}
+robustRegression <- lmrob(
+  fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
+  data = player_stats_seasonal %>% filter(position %in% c("WR"))
+)
+
+summary(robustRegression)
+```
 
 ## Moderated Multiple Regression {#sec-moderatedMultipleRegression}
 
