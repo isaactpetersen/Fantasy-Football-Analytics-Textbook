@@ -12,6 +12,27 @@ library("tidyverse")
 library("pROC")
 library("magrittr")
 library("viridis")
+library("viridisLite")
+library("msir")
+```
+
+### Load Data {#sec-predictionAccuracyLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projections_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projections_seasonal.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/player_stats_seasonal.RData")
+load(file = "./data/players_projections_weekly.RData")
+load(file = "./data/players_projections_seasonal.RData")
 ```
 
 ## Overview {#sec-predictionAccuracyOverview}
@@ -1797,6 +1818,829 @@ Theory and empiricism can—and should—inform each other.
 Test bias refers to systematic error (in measurement, prediction, etc.) as a function of group membership that leads the same score to have different meaning for different groups.
 For instance, if the Wonderlic Contemporary Cognitive Ability Test is a strong predictor of performance for Quarterbacks but not for Running Backs, the test is biased.
 Test bias, including how to identify and address it, is described in [@PetersenPrinciplesPsychAssessment](https://isaactpetersen.github.io/Principles-Psychological-Assessment/bias.html).
+
+## Accuracy of Fantasy Projections {#sec-accuracyProjections}
+
+### Seasonal Projections {#sec-accuracyProjectionsSeasonal}
+
+To evaluate the accuracy of projections, we must first merge projections with actual performance.
+
+```{r}
+player_stats_seasonal_subset <- player_stats_seasonal %>% 
+  filter(!is.na(player_id))
+
+nfl_playerIDs_subset <- nfl_playerIDs %>% 
+  filter(!is.na(gsis_id)) %>% 
+  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
+  select(-all_of(c("team", "position", "height", "weight", "age")))
+
+players_projectedPoints_seasonal_combined$season <- as.integer(players_projectedPoints_seasonal_combined$season)
+
+player_stats_seasonal_subset_IDs <- left_join(
+  player_stats_seasonal_subset,
+  nfl_playerIDs_subset,
+  by = c("player_id" = "gsis_id")
+) %>% 
+  filter(!is.na(mfl_id))
+
+projectionsWithActuals_seasonal <- full_join(
+  player_stats_seasonal_subset_IDs,
+  players_projectedPoints_seasonal_combined,
+  by = c("mfl_id" = "id", "season"),
+  suffix = c("", "_proj"),
+)
+
+projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal %>% 
+  unite(
+    "player_id_season",
+    player_id,
+    season,
+    remove = FALSE
+  )
+
+playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal %>% 
+  filter(raw_points > 100 | fantasyPoints > 100) %>% 
+  select(player_id_season) %>% 
+  pull()
+
+projectionsWithActuals_seasonal_qb <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "QB")
+
+projectionsWithActuals_seasonal_rb <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "RB")
+
+projectionsWithActuals_seasonal_wr <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "WR")
+
+projectionsWithActuals_seasonal_te <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "TE")
+
+projectionsWithActuals_seasonal_k <- projectionsWithActuals_seasonal %>% 
+  filter(position == "K")
+
+projectionsWithActuals_seasonal_dl <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "DL")
+
+projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "LB")
+
+projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "DB")
+```
+
+```{r}
+player_stats_seasonal_subset_IDs %>% 
+  filter(!is.na(gsis_id)) %>% 
+  group_by(gsis_id) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+#### Overall {#sec-accuracyProjectionsSeasonalOverall}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal$raw_points,
+  actual = projectionsWithActuals_seasonal$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalOverall
+#| fig-cap: "Calibration Plot for Seasonal Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal$raw_points,
+  y = projectionsWithActuals_seasonal$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal$raw_points,
+  projectionsWithActuals_seasonal$fantasyPoints), na.rm = TRUE) + 50
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Quarterbacks {#sec-accuracyProjectionsSeasonalQB}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_qb$raw_points,
+  actual = projectionsWithActuals_seasonal_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalQBs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_qb$raw_points,
+  y = projectionsWithActuals_seasonal_qb$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_qb$raw_points,
+  projectionsWithActuals_seasonal_qb$fantasyPoints), na.rm = TRUE) + 50
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_qb,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Quarterbacks"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_qb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_qb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Running Backs {#sec-accuracyProjectionsSeasonalRB}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_rb$raw_points,
+  actual = projectionsWithActuals_seasonal_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalRBs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_rb$raw_points,
+  y = projectionsWithActuals_seasonal_rb$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_rb$raw_points,
+  projectionsWithActuals_seasonal_rb$fantasyPoints), na.rm = TRUE) + 0
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_rb,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Running Backs"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_rb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_rb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Wide Receivers {#sec-accuracyProjectionsSeasonalWR}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_wr$raw_points,
+  actual = projectionsWithActuals_seasonal_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalWRs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_wr$raw_points,
+  y = projectionsWithActuals_seasonal_wr$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_wr$raw_points,
+  projectionsWithActuals_seasonal_wr$fantasyPoints), na.rm = TRUE) + 40
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_wr,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Wide Receivers"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_wr$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_wr$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Tight Ends {#sec-accuracyProjectionsSeasonalTE}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_te$raw_points,
+  actual = projectionsWithActuals_seasonal_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalTEs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_te$raw_points,
+  y = projectionsWithActuals_seasonal_te$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_te$raw_points,
+  projectionsWithActuals_seasonal_te$fantasyPoints), na.rm = TRUE) + 0
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_te,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Tight Ends"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_te$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_te$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Kickers {#sec-accuracyProjectionsSeasonalK}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_k$raw_points,
+  actual = projectionsWithActuals_seasonal_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalKs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_k$raw_points,
+  y = projectionsWithActuals_seasonal_k$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_k$raw_points,
+  projectionsWithActuals_seasonal_k$fantasyPoints), na.rm = TRUE) + 100
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_k,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Kickers"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_k$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_k$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Defensive Linemen {#sec-accuracyProjectionsSeasonalDL}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_dl$raw_points,
+  actual = projectionsWithActuals_seasonal_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalDLs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_dl$raw_points,
+  y = projectionsWithActuals_seasonal_dl$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_dl$raw_points,
+  projectionsWithActuals_seasonal_dl$fantasyPoints), na.rm = TRUE) + 0
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_dl,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Defensive Linemen"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_dl$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_dl$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Linebackers {#sec-accuracyProjectionsSeasonalDL}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_lb$raw_points,
+  actual = projectionsWithActuals_seasonal_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalLBs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_lb$raw_points,
+  y = projectionsWithActuals_seasonal_lb$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_lb$raw_points,
+  projectionsWithActuals_seasonal_lb$fantasyPoints), na.rm = TRUE) + 0
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_lb,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Linebackers"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_lb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_lb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+#### Defensive Backs {#sec-accuracyProjectionsSeasonalDB}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_db$raw_points,
+  actual = projectionsWithActuals_seasonal_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotSeasonalDBs
+#| fig-cap: "Calibration Plot for Seasonal Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Seasonal Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 8
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_seasonal_db$raw_points,
+  y = projectionsWithActuals_seasonal_db$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMax <- max(c(
+  projectionsWithActuals_seasonal_db$raw_points,
+  projectionsWithActuals_seasonal_db$fantasyPoints), na.rm = TRUE) + 0
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_seasonal_db,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(0, plotRangeMax),
+    expand = FALSE) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "loess",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of LOESS model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Seasonal Projections of Defensive Backs"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_db$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_db$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+### Weekly Projections {#sec-accuracyProjectionsWeekly}
+
+To evaluate the accuracy of projections, we must first merge projections with actual performance.
+
+```{r}
+
+```
 
 ## Ways to Improve Prediction Accuracy {#sec-waysToImprovePredictionAccuracy}
 
