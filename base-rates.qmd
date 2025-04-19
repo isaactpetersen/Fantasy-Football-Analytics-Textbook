@@ -16,7 +16,6 @@ library("tidyverse")
 #| eval: false
 #| include: false
 
-load(file = "./data/nfl_depthCharts.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
 ```
@@ -583,17 +582,52 @@ rookiesDraftedEarly <- player_stats_seasonal %>%
   group_by(player_id) %>% 
   slice_head(n = 1) %>% 
   ungroup() %>% 
+  mutate(
+    rookie = 0,
+    rookieLabel = "Rookie"
+  ) %>% 
   arrange(player_display_name)
 
 nonRookiesDraftedEarly <- player_stats_seasonal %>% 
   filter(years_of_experience > 0) %>% 
   filter(draftround %in% c(1,2)) %>% 
+  mutate(
+    rookie = 1,
+    rookieLabel = "Non-rookie"
+  ) %>% 
   arrange(player_display_name)
+
+playersDraftedEarly <- bind_rows(
+  rookiesDraftedEarly,
+  nonRookiesDraftedEarly
+) %>% 
+  mutate(rookieLabel = factor(rookieLabel, levels = c("Rookie","Non-rookie")))
 ```
 
-[EXAMINE FOR ROOKIES WHO WERE DRAFTED IN FIRST TWO ROUNDS OF NFL DRAFT]
+```{r}
+#| label: fig-densityPlotRookieVsNonRookieByPosition
+#| fig-cap: "Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft."
+#| fig-alt: "Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft."
 
-[ALSO, FOR A SECONDARY ANALYSIS, SUBSET TO PLAYERS WHO PLAYED A FULL SEASON]
+ggplot2::ggplot(
+  data = playersDraftedEarly %>% filter(position %in% c("QB","RB","WR","TE")),
+  aes(
+    x = fantasyPoints)) + 
+  geom_density(
+    aes(
+      fill = rookieLabel),
+    alpha = 0.5) +
+  facet_wrap( ~ position) +
+  labs(
+    x = "Fantasy Points",
+    y = "Density",
+    title = "Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position"
+  ) +
+  theme_bw() + 
+  theme(
+    axis.title.y = element_text(angle = 0, vjust = 0.5), # horizontal y-axis title
+    legend.title = element_blank()) # remove legend title
+```
 
 ### Quarterbacks {#sec-baseRateRookiePerformanceQBs}
 
