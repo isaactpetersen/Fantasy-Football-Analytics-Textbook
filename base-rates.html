@@ -169,15 +169,15 @@ window.Quarto = {
 </script>
 <meta property="og:title" content="16&nbsp; Base Rates – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/base-rates_files/figure-html/fig-histogramRookieQBs-1.png">
+<meta property="og:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/base-rates_files/figure-html/fig-densityPlotRookieVsNonRookieByPosition-1.png">
 <meta property="og:site_name" content="Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
-<meta property="og:image:alt" content="Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft.">
+<meta property="og:image:alt" content="Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft.">
 <meta property="og:image:height" content="960">
 <meta property="og:image:width" content="1344">
 <meta name="twitter:title" content="16&nbsp; Base Rates – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta name="twitter:description" content="">
-<meta name="twitter:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/base-rates_files/figure-html/fig-histogramRookieQBs-1.png">
-<meta name="twitter:image:alt" content="Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft.">
+<meta name="twitter:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/base-rates_files/figure-html/fig-densityPlotRookieVsNonRookieByPosition-1.png">
+<meta name="twitter:image:alt" content="Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft.">
 <meta name="twitter:image-height" content="960">
 <meta name="twitter:image-width" content="1344">
 <meta name="twitter:card" content="summary_large_image">
@@ -974,23 +974,65 @@ P(\text{not } C_i) &amp;= 1 - P(C_i) \\
 <span id="cb33-5"><a href="#cb33-5"></a>  <span class="fu">group_by</span>(player_id) <span class="sc">%&gt;%</span> </span>
 <span id="cb33-6"><a href="#cb33-6"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb33-7"><a href="#cb33-7"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb33-8"><a href="#cb33-8"></a>  <span class="fu">arrange</span>(player_display_name)</span>
-<span id="cb33-9"><a href="#cb33-9"></a></span>
-<span id="cb33-10"><a href="#cb33-10"></a>nonRookiesDraftedEarly <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb33-11"><a href="#cb33-11"></a>  <span class="fu">filter</span>(years_of_experience <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb33-12"><a href="#cb33-12"></a>  <span class="fu">filter</span>(draftround <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb33-13"><a href="#cb33-13"></a>  <span class="fu">arrange</span>(player_display_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb33-8"><a href="#cb33-8"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb33-9"><a href="#cb33-9"></a>    <span class="at">rookie =</span> <span class="dv">0</span>,</span>
+<span id="cb33-10"><a href="#cb33-10"></a>    <span class="at">rookieLabel =</span> <span class="st">"Rookie"</span></span>
+<span id="cb33-11"><a href="#cb33-11"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-12"><a href="#cb33-12"></a>  <span class="fu">arrange</span>(player_display_name)</span>
+<span id="cb33-13"><a href="#cb33-13"></a></span>
+<span id="cb33-14"><a href="#cb33-14"></a>nonRookiesDraftedEarly <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb33-15"><a href="#cb33-15"></a>  <span class="fu">filter</span>(years_of_experience <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-16"><a href="#cb33-16"></a>  <span class="fu">filter</span>(draftround <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-17"><a href="#cb33-17"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb33-18"><a href="#cb33-18"></a>    <span class="at">rookie =</span> <span class="dv">1</span>,</span>
+<span id="cb33-19"><a href="#cb33-19"></a>    <span class="at">rookieLabel =</span> <span class="st">"Non-rookie"</span></span>
+<span id="cb33-20"><a href="#cb33-20"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-21"><a href="#cb33-21"></a>  <span class="fu">arrange</span>(player_display_name)</span>
+<span id="cb33-22"><a href="#cb33-22"></a></span>
+<span id="cb33-23"><a href="#cb33-23"></a>playersDraftedEarly <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb33-24"><a href="#cb33-24"></a>  rookiesDraftedEarly,</span>
+<span id="cb33-25"><a href="#cb33-25"></a>  nonRookiesDraftedEarly</span>
+<span id="cb33-26"><a href="#cb33-26"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-27"><a href="#cb33-27"></a>  <span class="fu">mutate</span>(<span class="at">rookieLabel =</span> <span class="fu">factor</span>(rookieLabel, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Rookie"</span>,<span class="st">"Non-rookie"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>[EXAMINE FOR ROOKIES WHO WERE DRAFTED IN FIRST TWO ROUNDS OF NFL DRAFT]</p>
-<p>[ALSO, FOR A SECONDARY ANALYSIS, SUBSET TO PLAYERS WHO PLAYED A FULL SEASON]</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb34-2"><a href="#cb34-2"></a>  <span class="at">data =</span> playersDraftedEarly <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)),</span>
+<span id="cb34-3"><a href="#cb34-3"></a>  <span class="fu">aes</span>(</span>
+<span id="cb34-4"><a href="#cb34-4"></a>    <span class="at">x =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb34-5"><a href="#cb34-5"></a>  <span class="fu">geom_density</span>(</span>
+<span id="cb34-6"><a href="#cb34-6"></a>    <span class="fu">aes</span>(</span>
+<span id="cb34-7"><a href="#cb34-7"></a>      <span class="at">fill =</span> rookieLabel),</span>
+<span id="cb34-8"><a href="#cb34-8"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb34-9"><a href="#cb34-9"></a>  <span class="fu">facet_wrap</span>( <span class="sc">~</span> position) <span class="sc">+</span></span>
+<span id="cb34-10"><a href="#cb34-10"></a>  <span class="fu">labs</span>(</span>
+<span id="cb34-11"><a href="#cb34-11"></a>    <span class="at">x =</span> <span class="st">"Fantasy Points"</span>,</span>
+<span id="cb34-12"><a href="#cb34-12"></a>    <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb34-13"><a href="#cb34-13"></a>    <span class="at">title =</span> <span class="st">"Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position"</span></span>
+<span id="cb34-14"><a href="#cb34-14"></a>  ) <span class="sc">+</span></span>
+<span id="cb34-15"><a href="#cb34-15"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb34-16"><a href="#cb34-16"></a>  <span class="fu">theme</span>(</span>
+<span id="cb34-17"><a href="#cb34-17"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>), <span class="co"># horizontal y-axis title</span></span>
+<span id="cb34-18"><a href="#cb34-18"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>()) <span class="co"># remove legend title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-densityPlotRookieVsNonRookieByPosition" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-densityPlotRookieVsNonRookieByPosition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="base-rates_files/figure-html/fig-densityPlotRookieVsNonRookieByPosition-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;16.1: Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-densityPlotRookieVsNonRookieByPosition-1.png" class="img-fluid figure-img" alt="Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-densityPlotRookieVsNonRookieByPosition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.1: Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft.
+</figcaption></figure>
+</div>
+</div>
+</div>
 <section id="sec-baseRateRookiePerformanceQBs" class="level3" data-number="16.7.1"><h3 data-number="16.7.1" class="anchored" data-anchor-id="sec-baseRateRookiePerformanceQBs">
 <span class="header-section-number">16.7.1</span> Quarterbacks</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb34-2"><a href="#cb34-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb34-3"><a href="#cb34-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb34-4"><a href="#cb34-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb35-2"><a href="#cb35-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-4"><a href="#cb35-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1000,10 +1042,10 @@ P(\text{not } C_i) &amp;= 1 - P(C_i) \\
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb35-2"><a href="#cb35-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb35-3"><a href="#cb35-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb35-4"><a href="#cb35-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb36-2"><a href="#cb36-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb36-3"><a href="#cb36-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-4"><a href="#cb36-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1013,28 +1055,28 @@ P(\text{not } C_i) &amp;= 1 - P(C_i) \\
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb36-2"><a href="#cb36-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb36-3"><a href="#cb36-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb36-4"><a href="#cb36-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb37-2"><a href="#cb37-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb37-4"><a href="#cb37-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-histogramRookieQBs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramRookieQBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="base-rates_files/figure-html/fig-histogramRookieQBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieQBs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
+<a href="base-rates_files/figure-html/fig-histogramRookieQBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieQBs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramRookieQBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft.
+Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>Among Quarterbacks who played a full season:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb37-2"><a href="#cb37-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb37-3"><a href="#cb37-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb37-4"><a href="#cb37-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb37-5"><a href="#cb37-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb38-2"><a href="#cb38-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-4"><a href="#cb38-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-5"><a href="#cb38-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1044,11 +1086,11 @@ Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb38-2"><a href="#cb38-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb38-3"><a href="#cb38-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb38-4"><a href="#cb38-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb38-5"><a href="#cb38-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb39-2"><a href="#cb39-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb39-3"><a href="#cb39-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb39-4"><a href="#cb39-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb39-5"><a href="#cb39-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1060,10 +1102,10 @@ Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were
 </section><section id="sec-baseRateRookiePerformanceRBs" class="level3" data-number="16.7.2"><h3 data-number="16.7.2" class="anchored" data-anchor-id="sec-baseRateRookiePerformanceRBs">
 <span class="header-section-number">16.7.2</span> Running Backs</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb39-2"><a href="#cb39-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb39-3"><a href="#cb39-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb39-4"><a href="#cb39-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb40-2"><a href="#cb40-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-3"><a href="#cb40-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-4"><a href="#cb40-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1071,10 +1113,10 @@ Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb40-2"><a href="#cb40-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb40-3"><a href="#cb40-3"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb40-4"><a href="#cb40-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb41-2"><a href="#cb41-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb41-3"><a href="#cb41-3"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb41-4"><a href="#cb41-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1084,10 +1126,10 @@ Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb41-2"><a href="#cb41-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb41-3"><a href="#cb41-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb41-4"><a href="#cb41-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb42-2"><a href="#cb42-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-3"><a href="#cb42-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb42-4"><a href="#cb42-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1095,10 +1137,10 @@ Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb42-2"><a href="#cb42-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-3"><a href="#cb42-3"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb42-4"><a href="#cb42-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb43-2"><a href="#cb43-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb43-3"><a href="#cb43-3"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-4"><a href="#cb43-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1108,28 +1150,28 @@ Figure&nbsp;16.1: Histogram of Fantasy Points Among Rookie Quarterbacks Who Were
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb43-2"><a href="#cb43-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb43-3"><a href="#cb43-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb43-4"><a href="#cb43-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb44-2"><a href="#cb44-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb44-3"><a href="#cb44-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb44-4"><a href="#cb44-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-histogramRookieRBs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramRookieRBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="base-rates_files/figure-html/fig-histogramRookieRBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieRBs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
+<a href="base-rates_files/figure-html/fig-histogramRookieRBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieRBs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramRookieRBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft.
+Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>Among Running Backs who played a full season:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb44-2"><a href="#cb44-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb44-3"><a href="#cb44-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb44-4"><a href="#cb44-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb44-5"><a href="#cb44-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb45-2"><a href="#cb45-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb45-3"><a href="#cb45-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb45-4"><a href="#cb45-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb45-5"><a href="#cb45-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1137,11 +1179,11 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb45-2"><a href="#cb45-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb45-3"><a href="#cb45-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb45-4"><a href="#cb45-4"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb45-5"><a href="#cb45-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb46-2"><a href="#cb46-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb46-3"><a href="#cb46-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb46-4"><a href="#cb46-4"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb46-5"><a href="#cb46-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1151,11 +1193,11 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb46-2"><a href="#cb46-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb46-3"><a href="#cb46-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb46-4"><a href="#cb46-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb46-5"><a href="#cb46-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb47-2"><a href="#cb47-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb47-3"><a href="#cb47-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-4"><a href="#cb47-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-5"><a href="#cb47-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1163,11 +1205,11 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb47-2"><a href="#cb47-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb47-3"><a href="#cb47-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb47-4"><a href="#cb47-4"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb47-5"><a href="#cb47-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-2"><a href="#cb48-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb48-3"><a href="#cb48-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-4"><a href="#cb48-4"></a>  <span class="fu">select</span>(rushing_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-5"><a href="#cb48-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1179,10 +1221,10 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
 </section><section id="sec-baseRateRookiePerformanceWRs" class="level3" data-number="16.7.3"><h3 data-number="16.7.3" class="anchored" data-anchor-id="sec-baseRateRookiePerformanceWRs">
 <span class="header-section-number">16.7.3</span> Wide Receivers</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb48-2"><a href="#cb48-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb48-3"><a href="#cb48-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb48-4"><a href="#cb48-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb49-2"><a href="#cb49-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb49-3"><a href="#cb49-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb49-4"><a href="#cb49-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1190,10 +1232,10 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb49-2"><a href="#cb49-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb49-3"><a href="#cb49-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb49-4"><a href="#cb49-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb50-2"><a href="#cb50-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb50-3"><a href="#cb50-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb50-4"><a href="#cb50-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1203,10 +1245,10 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb50-2"><a href="#cb50-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb50-3"><a href="#cb50-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb50-4"><a href="#cb50-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb51-2"><a href="#cb51-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb51-3"><a href="#cb51-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb51-4"><a href="#cb51-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1214,10 +1256,10 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb51-2"><a href="#cb51-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb51-3"><a href="#cb51-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb51-4"><a href="#cb51-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb52-2"><a href="#cb52-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb52-3"><a href="#cb52-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb52-4"><a href="#cb52-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1227,28 +1269,28 @@ Figure&nbsp;16.2: Histogram of Fantasy Points Among Rookie Running Backs Who Wer
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb52-2"><a href="#cb52-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb52-3"><a href="#cb52-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb52-4"><a href="#cb52-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb53-2"><a href="#cb53-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb53-3"><a href="#cb53-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb53-4"><a href="#cb53-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-histogramRookieWRs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramRookieWRs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="base-rates_files/figure-html/fig-histogramRookieWRs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieWRs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
+<a href="base-rates_files/figure-html/fig-histogramRookieWRs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieWRs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramRookieWRs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft.
+Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>Among Wide Receivers who played a full season:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb53-2"><a href="#cb53-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb53-3"><a href="#cb53-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb53-4"><a href="#cb53-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb53-5"><a href="#cb53-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb54-2"><a href="#cb54-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-3"><a href="#cb54-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-4"><a href="#cb54-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-5"><a href="#cb54-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1256,11 +1298,11 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb54-2"><a href="#cb54-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb54-3"><a href="#cb54-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb54-4"><a href="#cb54-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb54-5"><a href="#cb54-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb55-2"><a href="#cb55-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-3"><a href="#cb55-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-4"><a href="#cb55-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-5"><a href="#cb55-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1270,11 +1312,11 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb55-2"><a href="#cb55-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb55-3"><a href="#cb55-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb55-4"><a href="#cb55-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb55-5"><a href="#cb55-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb56-2"><a href="#cb56-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb56-3"><a href="#cb56-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-4"><a href="#cb56-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-5"><a href="#cb56-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1282,11 +1324,11 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb56-2"><a href="#cb56-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb56-3"><a href="#cb56-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb56-4"><a href="#cb56-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb56-5"><a href="#cb56-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb57-2"><a href="#cb57-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb57-3"><a href="#cb57-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb57-4"><a href="#cb57-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb57-5"><a href="#cb57-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1298,10 +1340,10 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
 </section><section id="sec-baseRateRookiePerformanceTEs" class="level3" data-number="16.7.4"><h3 data-number="16.7.4" class="anchored" data-anchor-id="sec-baseRateRookiePerformanceTEs">
 <span class="header-section-number">16.7.4</span> Tight Ends</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb57-2"><a href="#cb57-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb57-3"><a href="#cb57-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb57-4"><a href="#cb57-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb58-2"><a href="#cb58-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb58-3"><a href="#cb58-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb58-4"><a href="#cb58-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1309,10 +1351,10 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb58-2"><a href="#cb58-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb58-3"><a href="#cb58-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb58-4"><a href="#cb58-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb59-2"><a href="#cb59-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb59-3"><a href="#cb59-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb59-4"><a href="#cb59-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1322,10 +1364,10 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb59-2"><a href="#cb59-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb59-3"><a href="#cb59-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb59-4"><a href="#cb59-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb60-2"><a href="#cb60-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-3"><a href="#cb60-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb60-4"><a href="#cb60-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1333,10 +1375,10 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb60-2"><a href="#cb60-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-3"><a href="#cb60-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb60-4"><a href="#cb60-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb61-2"><a href="#cb61-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb61-3"><a href="#cb61-3"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb61-4"><a href="#cb61-4"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1346,28 +1388,28 @@ Figure&nbsp;16.3: Histogram of Fantasy Points Among Rookie Wide Receivers Who We
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb61-2"><a href="#cb61-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb61-3"><a href="#cb61-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb61-4"><a href="#cb61-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb62-2"><a href="#cb62-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb62-3"><a href="#cb62-3"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb62-4"><a href="#cb62-4"></a>  <span class="fu">hist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-histogramRookieTEs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramRookieTEs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="base-rates_files/figure-html/fig-histogramRookieTEs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieTEs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
+<a href="base-rates_files/figure-html/fig-histogramRookieTEs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;16.5: Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft."><img src="base-rates_files/figure-html/fig-histogramRookieTEs-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramRookieTEs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft.
+Figure&nbsp;16.5: Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>Among Tight Ends who played a full season:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb62-2"><a href="#cb62-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb62-3"><a href="#cb62-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb62-4"><a href="#cb62-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb62-5"><a href="#cb62-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb63-2"><a href="#cb63-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb63-3"><a href="#cb63-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb63-4"><a href="#cb63-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb63-5"><a href="#cb63-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1375,11 +1417,11 @@ Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Tight Ends Who Were D
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb63-2"><a href="#cb63-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb63-3"><a href="#cb63-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb63-4"><a href="#cb63-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb63-5"><a href="#cb63-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a>nonRookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb64-2"><a href="#cb64-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb64-3"><a href="#cb64-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb64-4"><a href="#cb64-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb64-5"><a href="#cb64-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1389,11 +1431,11 @@ Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Tight Ends Who Were D
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb64-2"><a href="#cb64-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb64-3"><a href="#cb64-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb64-4"><a href="#cb64-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
-<span id="cb64-5"><a href="#cb64-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb65-2"><a href="#cb65-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb65-3"><a href="#cb65-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb65-4"><a href="#cb65-4"></a>  <span class="fu">select</span>(fantasyPoints) <span class="sc">%&gt;%</span> </span>
+<span id="cb65-5"><a href="#cb65-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1401,11 +1443,11 @@ Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Tight Ends Who Were D
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
-<span id="cb65-2"><a href="#cb65-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb65-3"><a href="#cb65-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb65-4"><a href="#cb65-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
-<span id="cb65-5"><a href="#cb65-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1"></a>rookiesDraftedEarly <span class="sc">%&gt;%</span> </span>
+<span id="cb66-2"><a href="#cb66-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb66-3"><a href="#cb66-3"></a>  <span class="fu">filter</span>(games <span class="sc">&gt;=</span> <span class="dv">16</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb66-4"><a href="#cb66-4"></a>  <span class="fu">select</span>(receiving_tds) <span class="sc">%&gt;%</span> </span>
+<span id="cb66-5"><a href="#cb66-5"></a>  psych<span class="sc">::</span><span class="fu">describe</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -1462,40 +1504,40 @@ Figure&nbsp;16.4: Histogram of Fantasy Points Among Rookie Tight Ends Who Were D
 \tag{16.23}\]</span></span></p>
 </section></section><section id="sec-probabilityNomogram" class="level4" data-number="16.8.2.2"><h4 data-number="16.8.2.2" class="anchored" data-anchor-id="sec-probabilityNomogram">
 <span class="header-section-number">16.8.2.2</span> Probability Nomogram</h4>
-<p>Using <a href="#sec-bayesTheorem">Bayes’ theorem</a> (described in <a href="#sec-bayesTheorem" class="quarto-xref"><span>Section 16.3.3</span></a>), solving for posttest odds (based on pretest odds and the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a>, as in <a href="#eq-bayes5" class="quarto-xref">Equation&nbsp;<span>16.21</span></a>), and converting odds to probabilities, we can use a Fagan probability nomogram to determine the posttest probability following a test result. The calculation of posttest probability is described in INSERT. A <em>probability nomogram</em> (aka Fagan nomogram) is a way of visually applying <a href="#sec-bayesTheorem">Bayes’ theorem</a> to determine the posttest probability of having a condition based on the <a href="#sec-baseRate">pretest (or prior) probability</a> and <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a>, as depicted in <a href="#fig-probabilityNomogram" class="quarto-xref">Figure&nbsp;<span>16.5</span></a>. To use a probability nomogram, connect the dots from the starting probability (left line) with the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a> (middle line) to see the updated probability. The updated (posttest) probability is where the connecting line crosses the third, right line.</p>
+<p>Using <a href="#sec-bayesTheorem">Bayes’ theorem</a> (described in <a href="#sec-bayesTheorem" class="quarto-xref"><span>Section 16.3.3</span></a>), solving for posttest odds (based on pretest odds and the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a>, as in <a href="#eq-bayes5" class="quarto-xref">Equation&nbsp;<span>16.21</span></a>), and converting odds to probabilities, we can use a Fagan probability nomogram to determine the posttest probability following a test result. The calculation of posttest probability is described in INSERT. A <em>probability nomogram</em> (aka Fagan nomogram) is a way of visually applying <a href="#sec-bayesTheorem">Bayes’ theorem</a> to determine the posttest probability of having a condition based on the <a href="#sec-baseRate">pretest (or prior) probability</a> and <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a>, as depicted in <a href="#fig-probabilityNomogram" class="quarto-xref">Figure&nbsp;<span>16.6</span></a>. To use a probability nomogram, connect the dots from the starting probability (left line) with the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a> (middle line) to see the updated probability. The updated (posttest) probability is where the connecting line crosses the third, right line.</p>
 <div id="fig-probabilityNomogram" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Probability Nomogram. (Figure retrieved from https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png)">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-probabilityNomogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/probabilityNomogram.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;16.5: Probability Nomogram. (Figure retrieved from https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png)."><img src="images/probabilityNomogram.png" class="img-fluid figure-img" style="width:50.0%" alt="Probability Nomogram. (Figure retrieved from https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png)"></a>
+<a href="images/probabilityNomogram.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;16.6: Probability Nomogram. (Figure retrieved from https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png)."><img src="images/probabilityNomogram.png" class="img-fluid figure-img" style="width:50.0%" alt="Probability Nomogram. (Figure retrieved from https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png)"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-probabilityNomogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.5: Probability Nomogram. (Figure retrieved from <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png">https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png</a>).
+Figure&nbsp;16.6: Probability Nomogram. (Figure retrieved from <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png">https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Fagan_nomogram.svg/945px-Fagan_nomogram.svg.png</a>).
 </figcaption></figure>
 </div>
-<p>For instance, if the starting probability is 0.5% and the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a> is 10 (e.g., <a href="evaluating-prediction-accuracy.html#sec-sensitivity">sensitivity</a> = .90, <a href="evaluating-prediction-accuracy.html#sec-specificity">specificity</a> = .91: <span class="math inline">\(\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10\)</span>) from a positive test (i.e., <a href="#sec-positiveLikelihoodRatio">positive likelihood ratio</a>), the updated probability is less than 5%, as depicted in <a href="#fig-probabilityNomogramLine" class="quarto-xref">Figure&nbsp;<span>16.6</span></a>.</p>
+<p>For instance, if the starting probability is 0.5% and the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a> is 10 (e.g., <a href="evaluating-prediction-accuracy.html#sec-sensitivity">sensitivity</a> = .90, <a href="evaluating-prediction-accuracy.html#sec-specificity">specificity</a> = .91: <span class="math inline">\(\text{likelihood ratio} = \frac{\text{sensitivity}}{1 - \text{specificity}} = \frac{.9}{1-.91} = 10\)</span>) from a positive test (i.e., <a href="#sec-positiveLikelihoodRatio">positive likelihood ratio</a>), the updated probability is less than 5%, as depicted in <a href="#fig-probabilityNomogramLine" class="quarto-xref">Figure&nbsp;<span>16.7</span></a>.</p>
 <p>An interactive probability nomogram is available from <span class="citation" data-cites="Altarejos2025">Altarejos &amp; Hayward (<a href="references.html#ref-Altarejos2025" role="doc-biblioref">2025</a>)</span> at the following link: <a href="https://jamaevidence.mhmedical.com/data/calculators/LR_nomogram.html" class="uri">https://jamaevidence.mhmedical.com/data/calculators/LR_nomogram.html</a> (archived at <a href="https://perma.cc/Z3SW-QMJ3" class="uri">https://perma.cc/Z3SW-QMJ3</a>).</p>
 <p>The <a href="https://github.com/DevPsyLab/petersenlab"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2025a</a>)</span> contains the <code>posttestProbability()</code> function that estimates the posttest probability of an event, given the <a href="#sec-baseRate">pretest probability</a> and the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a>, or given the <a href="#sec-baseRate">pretest probability</a> and the <a href="evaluating-prediction-accuracy.html#sec-sensitivity">sensitivity</a> (SN) and <a href="evaluating-prediction-accuracy.html#sec-specificity">specificity</a> (SP) of the test.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
-<span id="cb66-2"><a href="#cb66-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
-<span id="cb66-3"><a href="#cb66-3"></a>  <span class="at">likelihoodRatio =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
+<span id="cb67-2"><a href="#cb67-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb67-3"><a href="#cb67-3"></a>  <span class="at">likelihoodRatio =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.04784689</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
-<span id="cb68-2"><a href="#cb68-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
-<span id="cb68-3"><a href="#cb68-3"></a>  <span class="at">SN =</span> .<span class="dv">90</span>,</span>
-<span id="cb68-4"><a href="#cb68-4"></a>  <span class="at">SP =</span> .<span class="dv">91</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
+<span id="cb69-2"><a href="#cb69-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb69-3"><a href="#cb69-3"></a>  <span class="at">SN =</span> .<span class="dv">90</span>,</span>
+<span id="cb69-4"><a href="#cb69-4"></a>  <span class="at">SP =</span> .<span class="dv">91</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.04784689</code></pre>
 </div>
 </div>
 <p>The function can also estimate the posttest probability of an event given the number of <a href="evaluating-prediction-accuracy.html#sec-truePositive">true positives</a> (TP), <a href="evaluating-prediction-accuracy.html#sec-trueNegative">true negatives</a> (TN), <a href="evaluating-prediction-accuracy.html#sec-falsePositive">false positives</a> (FP), and <a href="evaluating-prediction-accuracy.html#sec-falseNegative">false negatives</a> (FN):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
-<span id="cb70-2"><a href="#cb70-2"></a>  <span class="at">TP =</span> <span class="dv">450</span>,</span>
-<span id="cb70-3"><a href="#cb70-3"></a>  <span class="at">TN =</span> <span class="dv">90545</span>,</span>
-<span id="cb70-4"><a href="#cb70-4"></a>  <span class="at">FP =</span> <span class="dv">8955</span>,</span>
-<span id="cb70-5"><a href="#cb70-5"></a>  <span class="at">FN =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
+<span id="cb71-2"><a href="#cb71-2"></a>  <span class="at">TP =</span> <span class="dv">450</span>,</span>
+<span id="cb71-3"><a href="#cb71-3"></a>  <span class="at">TN =</span> <span class="dv">90545</span>,</span>
+<span id="cb71-4"><a href="#cb71-4"></a>  <span class="at">FP =</span> <span class="dv">8955</span>,</span>
+<span id="cb71-5"><a href="#cb71-5"></a>  <span class="at">FN =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.04784689</code></pre>
 </div>
@@ -1503,141 +1545,141 @@ Figure&nbsp;16.5: Probability Nomogram. (Figure retrieved from <a href="https://
 <p>We discuss <a href="evaluating-prediction-accuracy.html#sec-truePositive">true positives</a> (TP), <a href="evaluating-prediction-accuracy.html#sec-trueNegative">true negatives</a> (TN), <a href="evaluating-prediction-accuracy.html#sec-falsePositive">false positives</a> (FP), <a href="evaluating-prediction-accuracy.html#sec-falseNegative">false negatives</a> (FN), <a href="evaluating-prediction-accuracy.html#sec-sensitivity">sensitivity</a> (SN), and <a href="evaluating-prediction-accuracy.html#sec-specificity">specificity</a> (SP) in <a href="evaluating-prediction-accuracy.html#sec-thresholdDependentAccuracy" class="quarto-xref"><span>Section 17.6</span></a> (<a href="evaluating-prediction-accuracy.html#sec-decisionOutcomes" class="quarto-xref"><span>Section 17.6.1</span></a> and <a href="evaluating-prediction-accuracy.html#sec-sensitivitySpecificityPPVnpv" class="quarto-xref"><span>Section 17.6.6</span></a>).</p>
 <p>If the starting probability is 0.5% and the <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a> is 0.11 from a negative test (i.e., <a href="#sec-negativeLikelihoodRatio">negative likelihood ratio</a>), the updated probability is nearly indistinguishable from zero (0.05%).</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
-<span id="cb72-2"><a href="#cb72-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
-<span id="cb72-3"><a href="#cb72-3"></a>  <span class="at">likelihoodRatio =</span> <span class="fl">0.11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1"></a>petersenlab<span class="sc">::</span><span class="fu">posttestProbability</span>(</span>
+<span id="cb73-2"><a href="#cb73-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb73-3"><a href="#cb73-3"></a>  <span class="at">likelihoodRatio =</span> <span class="fl">0.11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.0005524584</code></pre>
 </div>
 </div>
 <div id="fig-probabilityNomogramLine" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Probability Nomogram. (Figure retrieved from https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg). Also provided in: @Petersen2024a and @PetersenPrinciplesPsychAssessment.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-probabilityNomogramLine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/probabilityNomogramLine.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;16.6: Probability Nomogram Example. (Figure adapted from https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg. Also provided in: @Petersen2024a and @PetersenPrinciplesPsychAssessment.)"><img src="images/probabilityNomogramLine.png" class="img-fluid figure-img" style="width:50.0%" alt="Probability Nomogram. (Figure retrieved from https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg). Also provided in: @Petersen2024a and @PetersenPrinciplesPsychAssessment."></a>
+<a href="images/probabilityNomogramLine.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;16.7: Probability Nomogram Example. (Figure adapted from https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg. Also provided in: @Petersen2024a and @PetersenPrinciplesPsychAssessment.)"><img src="images/probabilityNomogramLine.png" class="img-fluid figure-img" style="width:50.0%" alt="Probability Nomogram. (Figure retrieved from https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg). Also provided in: @Petersen2024a and @PetersenPrinciplesPsychAssessment."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-probabilityNomogramLine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.6: Probability Nomogram Example. (Figure adapted from <a href="https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg">https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg</a>. Also provided in: <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2025b</a>)</span>.)
+Figure&nbsp;16.7: Probability Nomogram Example. (Figure adapted from <a href="https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg">https://commons.wikimedia.org/wiki/File:Fagan_nomogram.svg</a>. Also provided in: <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2025b</a>)</span>.)
 </figcaption></figure>
 </div>
 <p>A probability nomogram calculator is available from <span class="citation" data-cites="Schwartz2006">Schwartz (<a href="references.html#ref-Schwartz2006" role="doc-biblioref">2006</a>)</span> at the following link: <a href="http://araw.mede.uic.edu/cgi-bin/testcalc.pl">http://araw.mede.uic.edu/cgi-bin/testcalc.pl</a> (archived at <a href="https://perma.cc/X8TF-7YBX" class="uri">https://perma.cc/X8TF-7YBX</a>). The <a href="https://github.com/DevPsyLab/petersenlab"><code>petersenlab</code></a> package <span class="citation" data-cites="R-petersenlab">(<a href="references.html#ref-R-petersenlab" role="doc-biblioref">Petersen, 2025a</a>)</span> contains the <code>nomogrammer()</code> function that creates a nomogram plot using the <a href="#sec-positiveLikelihoodRatio">positive</a> and <a href="#sec-negativeLikelihoodRatio">negative</a> <a href="#sec-diagnosticLikelihoodRatio">likelihood ratio</a> or using the <a href="evaluating-prediction-accuracy.html#sec-sensitivity">sensitivity</a> (SN) and <a href="evaluating-prediction-accuracy.html#sec-specificity">specificity</a> (SP) of the test, as adapted from <span class="citation" data-cites="Chekroud2017">Chekroud (<a href="references.html#ref-Chekroud2017" role="doc-biblioref">2017</a>)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb74-2"><a href="#cb74-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
-<span id="cb74-3"><a href="#cb74-3"></a>  <span class="at">SN =</span> <span class="fl">0.90</span>,</span>
-<span id="cb74-4"><a href="#cb74-4"></a>  <span class="at">SP =</span> <span class="fl">0.91</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb75-2"><a href="#cb75-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb75-3"><a href="#cb75-3"></a>  <span class="at">SN =</span> <span class="fl">0.90</span>,</span>
+<span id="cb75-4"><a href="#cb75-4"></a>  <span class="at">SP =</span> <span class="fl">0.91</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-37-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="base-rates_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-37-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="base-rates_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The blue line indicates the <a href="#posttestProbability">posterior probability</a> of the condition given a positive test. The pink line indicates the <a href="#posttestProbability">posterior probability</a> of the condition given a negative test.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb75-2"><a href="#cb75-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
-<span id="cb75-3"><a href="#cb75-3"></a>  <span class="at">PLR =</span> <span class="dv">10</span>,</span>
-<span id="cb75-4"><a href="#cb75-4"></a>  <span class="at">NLR =</span> <span class="fl">0.11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb76-2"><a href="#cb76-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">005</span>,</span>
+<span id="cb76-3"><a href="#cb76-3"></a>  <span class="at">PLR =</span> <span class="dv">10</span>,</span>
+<span id="cb76-4"><a href="#cb76-4"></a>  <span class="at">NLR =</span> <span class="fl">0.11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-38-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="base-rates_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-38-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="base-rates_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The function can also create a nomogram plot using the <a href="evaluating-prediction-accuracy.html#sec-truePositive">true positives</a> (TP), <a href="evaluating-prediction-accuracy.html#sec-trueNegative">true negatives</a> (TN), <a href="evaluating-prediction-accuracy.html#sec-falsePositive">false positives</a> (FP), and <a href="evaluating-prediction-accuracy.html#sec-falseNegative">false negatives</a> (FN):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb76-2"><a href="#cb76-2"></a>  <span class="at">TP =</span> <span class="dv">450</span>,</span>
-<span id="cb76-3"><a href="#cb76-3"></a>  <span class="at">TN =</span> <span class="dv">90545</span>,</span>
-<span id="cb76-4"><a href="#cb76-4"></a>  <span class="at">FP =</span> <span class="dv">8955</span>,</span>
-<span id="cb76-5"><a href="#cb76-5"></a>  <span class="at">FN =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb77-2"><a href="#cb77-2"></a>  <span class="at">TP =</span> <span class="dv">450</span>,</span>
+<span id="cb77-3"><a href="#cb77-3"></a>  <span class="at">TN =</span> <span class="dv">90545</span>,</span>
+<span id="cb77-4"><a href="#cb77-4"></a>  <span class="at">FP =</span> <span class="dv">8955</span>,</span>
+<span id="cb77-5"><a href="#cb77-5"></a>  <span class="at">FN =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-39-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="base-rates_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-39-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img src="base-rates_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The function can also create a nomogram plot using the <a href="evaluating-prediction-accuracy.html#sec-sensitivity">sensitivity</a> (SN) and <a href="evaluating-prediction-accuracy.html#sec-selectionRatio">selection rate</a> of the test. Here is a nomogram plot from the <a href="#sec-baseRatesOverview">HIV example</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb77-2"><a href="#cb77-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">003</span>,</span>
-<span id="cb77-3"><a href="#cb77-3"></a>  <span class="at">SN =</span> .<span class="dv">95</span>,</span>
-<span id="cb77-4"><a href="#cb77-4"></a>  <span class="at">selectionRate =</span> .<span class="dv">01</span></span>
-<span id="cb77-5"><a href="#cb77-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb78-2"><a href="#cb78-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">003</span>,</span>
+<span id="cb78-3"><a href="#cb78-3"></a>  <span class="at">SN =</span> .<span class="dv">95</span>,</span>
+<span id="cb78-4"><a href="#cb78-4"></a>  <span class="at">selectionRate =</span> .<span class="dv">01</span></span>
+<span id="cb78-5"><a href="#cb78-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-40-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img src="base-rates_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-40-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11"><img src="base-rates_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Here is a nomogram plot from the <a href="#sec-cabExample">cab example</a> <span class="citation" data-cites="Kahneman2011">(<a href="references.html#ref-Kahneman2011" role="doc-biblioref">Kahneman, 2011</a>)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb78-2"><a href="#cb78-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">15</span>,</span>
-<span id="cb78-3"><a href="#cb78-3"></a>  <span class="at">SN =</span> .<span class="dv">80</span>,</span>
-<span id="cb78-4"><a href="#cb78-4"></a>  <span class="at">SP =</span> .<span class="dv">80</span></span>
-<span id="cb78-5"><a href="#cb78-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb79-2"><a href="#cb79-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">15</span>,</span>
+<span id="cb79-3"><a href="#cb79-3"></a>  <span class="at">SN =</span> .<span class="dv">80</span>,</span>
+<span id="cb79-4"><a href="#cb79-4"></a>  <span class="at">SP =</span> .<span class="dv">80</span></span>
+<span id="cb79-5"><a href="#cb79-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-41-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11"><img src="base-rates_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-41-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12"><img src="base-rates_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The function can also create a nomogram plot using the <a href="evaluating-prediction-accuracy.html#sec-sensitivity">sensitivity</a> (SN) and <a href="evaluating-prediction-accuracy.html#sec-falsePositiveRate">false positive rate</a> of the test. Here is a nomogram plot from <a href="#sec-nateSilverExample1">Example 1</a> from <span class="citation" data-cites="Silver2012">Silver (<a href="references.html#ref-Silver2012" role="doc-biblioref">2012</a>)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb79-2"><a href="#cb79-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">04</span>,</span>
-<span id="cb79-3"><a href="#cb79-3"></a>  <span class="at">SN =</span> .<span class="dv">50</span>,</span>
-<span id="cb79-4"><a href="#cb79-4"></a>  <span class="at">FPR =</span> .<span class="dv">05</span></span>
-<span id="cb79-5"><a href="#cb79-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb80-2"><a href="#cb80-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">04</span>,</span>
+<span id="cb80-3"><a href="#cb80-3"></a>  <span class="at">SN =</span> .<span class="dv">50</span>,</span>
+<span id="cb80-4"><a href="#cb80-4"></a>  <span class="at">FPR =</span> .<span class="dv">05</span></span>
+<span id="cb80-5"><a href="#cb80-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-42-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12"><img src="base-rates_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-42-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13"><img src="base-rates_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Here is a nomogram plot from <a href="#sec-nateSilverExample2">Example 2</a> from <span class="citation" data-cites="Silver2012">Silver (<a href="references.html#ref-Silver2012" role="doc-biblioref">2012</a>)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb80-2"><a href="#cb80-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">014</span>,</span>
-<span id="cb80-3"><a href="#cb80-3"></a>  <span class="at">SN =</span> .<span class="dv">75</span>,</span>
-<span id="cb80-4"><a href="#cb80-4"></a>  <span class="at">FPR =</span> .<span class="dv">10</span></span>
-<span id="cb80-5"><a href="#cb80-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb81"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb81-2"><a href="#cb81-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">014</span>,</span>
+<span id="cb81-3"><a href="#cb81-3"></a>  <span class="at">SN =</span> .<span class="dv">75</span>,</span>
+<span id="cb81-4"><a href="#cb81-4"></a>  <span class="at">FPR =</span> .<span class="dv">10</span></span>
+<span id="cb81-5"><a href="#cb81-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-43-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13"><img src="base-rates_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-43-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14"><img src="base-rates_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Here is a nomogram plot from <a href="#sec-nateSilverExample3A">Example 3A</a> from <span class="citation" data-cites="Silver2012">Silver (<a href="references.html#ref-Silver2012" role="doc-biblioref">2012</a>)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb81"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb81-2"><a href="#cb81-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">00005</span>,</span>
-<span id="cb81-3"><a href="#cb81-3"></a>  <span class="at">SN =</span> <span class="dv">1</span>,</span>
-<span id="cb81-4"><a href="#cb81-4"></a>  <span class="at">FPR =</span> .<span class="dv">00008</span></span>
-<span id="cb81-5"><a href="#cb81-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb82"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb82-2"><a href="#cb82-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">00005</span>,</span>
+<span id="cb82-3"><a href="#cb82-3"></a>  <span class="at">SN =</span> <span class="dv">1</span>,</span>
+<span id="cb82-4"><a href="#cb82-4"></a>  <span class="at">FPR =</span> .<span class="dv">00008</span></span>
+<span id="cb82-5"><a href="#cb82-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-44-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14"><img src="base-rates_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-44-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15"><img src="base-rates_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Here is a nomogram plot from <a href="#sec-nateSilverExample3B">Example 3B</a> from <span class="citation" data-cites="Silver2012">Silver (<a href="references.html#ref-Silver2012" role="doc-biblioref">2012</a>)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb82"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
-<span id="cb82-2"><a href="#cb82-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">3846272</span>,</span>
-<span id="cb82-3"><a href="#cb82-3"></a>  <span class="at">SN =</span> <span class="dv">1</span>,</span>
-<span id="cb82-4"><a href="#cb82-4"></a>  <span class="at">FPR =</span> .<span class="dv">00008</span></span>
-<span id="cb82-5"><a href="#cb82-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb83"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1"></a>petersenlab<span class="sc">::</span><span class="fu">nomogrammer</span>(</span>
+<span id="cb83-2"><a href="#cb83-2"></a>  <span class="at">pretestProb =</span> .<span class="dv">3846272</span>,</span>
+<span id="cb83-3"><a href="#cb83-3"></a>  <span class="at">SN =</span> <span class="dv">1</span>,</span>
+<span id="cb83-4"><a href="#cb83-4"></a>  <span class="at">FPR =</span> .<span class="dv">00008</span></span>
+<span id="cb83-5"><a href="#cb83-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div>
-<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-45-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15"><img src="base-rates_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="672"></a></p>
+<figure class="figure"><p><a href="base-rates_files/figure-html/unnamed-chunk-45-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16"><img src="base-rates_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -1655,7 +1697,7 @@ Figure&nbsp;16.6: Probability Nomogram Example. (Figure adapted from <a href="ht
 </section><section id="sec-baseRatesSessionInfo" class="level2" data-number="16.10"><h2 data-number="16.10" class="anchored" data-anchor-id="sec-baseRatesSessionInfo">
 <span class="header-section-number">16.10</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb83"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.0 (2025-04-11)
 Platform: x86_64-pc-linux-gnu
