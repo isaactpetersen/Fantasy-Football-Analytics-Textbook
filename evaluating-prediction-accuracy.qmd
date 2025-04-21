@@ -1821,6 +1821,96 @@ Test bias refers to systematic error (in measurement, prediction, etc.) as a fun
 For instance, if the Wonderlic Contemporary Cognitive Ability Test is a strong predictor of performance for Quarterbacks but not for Running Backs, the test is biased.
 Test bias, including how to identify and address it, is described in [@PetersenPrinciplesPsychAssessment](https://isaactpetersen.github.io/Principles-Psychological-Assessment/bias.html).
 
+## Example of Predicting a Categorical outcome {#sec-predictionCategoricalExample}
+
+Let's consider an example of predicting a categorical outcome.
+For this example, let's predict whether or not a Running Back rushes for 200 yards in a game.
+To predict that, we will use the number of rushing yards the player had in the previous game.
+
+```{r}
+player_stats_weekly_example <- player_stats_weekly %>% 
+  filter(position == "RB") %>% 
+  arrange(player_id, season, week) %>% 
+  group_by(player_id, season) %>% 
+  mutate(rushing_yards_priorGame = lag(rushing_yards)) %>% 
+  ungroup()
+```
+
+```{r}
+player_stats_weekly_example %>% 
+  select(player_id, season, week, rushing_yards, rushing_yards_priorGame) %>% 
+  head()
+```
+
+Here are our accuracy indices at a cutoff of 100.
+That is, we predict that each player who rushed more than 100 yards in a given game will rush for 200 yards in their next game.
+
+```{r}
+petersenlab::accuracyAtCutoff(
+  predicted = player_stats_weekly_example$rushing_yards_priorGame,
+  actual = player_stats_weekly_example$rush_200_yds,
+  cutoff = 100
+)
+```
+
+Now, let's lower the cutoff to 50 and see how that impacts our predictive accuracy.
+
+```{r}
+petersenlab::accuracyAtCutoff(
+  predicted = player_stats_weekly_example$rushing_yards_priorGame,
+  actual = player_stats_weekly_example$rush_200_yds,
+  cutoff = 50
+)
+```
+
+Now, let's raise the cutoff to 150 and see how that impacts our predictive accuracy.
+
+```{r}
+petersenlab::accuracyAtCutoff(
+  predicted = player_stats_weekly_example$rushing_yards_priorGame,
+  actual = player_stats_weekly_example$rush_200_yds,
+  cutoff = 150
+)
+```
+
+We can also examine the accuracy at each possible cutoff.
+
+```{r}
+petersenlab::accuracyAtEachCutoff(
+  predicted = player_stats_weekly_example$rushing_yards_priorGame,
+  actual = player_stats_weekly_example$rush_200_yds
+)
+```
+
+We can also create a receiver operating characteristic (ROC) curve, as in @fig-rocCurveExample.
+
+```{r}
+rocCurve <- pROC::roc(
+  data = player_stats_weekly_example,
+  response = rush_200_yds,
+  predictor = rushing_yards_priorGame,
+  smooth = FALSE)
+```
+
+Here is the area under the ROC curve (AUC):
+
+```{r}
+rocCurve$auc
+```
+
+```{r}
+#| label: fig-rocCurveExample
+#| fig-cap: "Example Receiver Operating Characteristic (ROC) Curve."
+#| fig-alt: "Example Receiver Operating Characteristic (ROC) Curve."
+#| fig-width: 8
+#| fig-height: 6
+
+plot(
+  rocCurve,
+  legacy.axes = TRUE,
+  print.auc = TRUE)
+```
+
 ## Accuracy of Fantasy Projections {#sec-accuracyProjections}
 
 ### Seasonal Projections {#sec-accuracyProjectionsSeasonal}
