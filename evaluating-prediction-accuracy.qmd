@@ -2651,7 +2651,823 @@ petersenlab::accuracyOverall(
 To evaluate the accuracy of projections, we must first merge projections with actual performance.
 
 ```{r}
+player_stats_weekly_subset <- player_stats_weekly %>% 
+  filter(!is.na(player_id))
 
+nfl_playerIDs_subset <- nfl_playerIDs %>% 
+  filter(!is.na(gsis_id)) %>% 
+  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
+  select(-all_of(c("team", "position", "height", "weight", "age")))
+
+players_projectedPoints_weekly_combined$season <- as.integer(players_projectedPoints_weekly_combined$season)
+
+player_stats_weekly_subset_IDs <- left_join(
+  player_stats_weekly_subset,
+  nfl_playerIDs_subset,
+  by = c("player_id" = "gsis_id")
+) %>% 
+  filter(!is.na(mfl_id))
+
+projectionsWithActuals_weekly <- full_join(
+  player_stats_weekly_subset_IDs,
+  players_projectedPoints_weekly_combined,
+  by = c("mfl_id" = "id", "season", "week"),
+  suffix = c("", "_proj"),
+)
+
+projectionsWithActuals_weekly <- projectionsWithActuals_weekly %>% 
+  unite(
+    "player_id_season_week",
+    player_id,
+    season,
+    week,
+    remove = FALSE
+  )
+
+playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly %>% 
+  filter(raw_points > 6 | fantasyPoints > 6) %>% 
+  select(player_id_season_week) %>% 
+  pull()
+
+projectionsWithActuals_weekly_qb <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "QB")
+
+projectionsWithActuals_weekly_rb <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "RB")
+
+projectionsWithActuals_weekly_wr <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "WR")
+
+projectionsWithActuals_weekly_te <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "TE")
+
+projectionsWithActuals_weekly_k <- projectionsWithActuals_weekly %>% 
+  filter(position == "K")
+
+projectionsWithActuals_weekly_dl <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "DL")
+
+projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "LB")
+
+projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "DB")
+```
+
+#### Overall {#sec-accuracyProjectionsWeeklyOverall}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly$raw_points,
+  actual = projectionsWithActuals_weekly$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyOverall
+#| fig-cap: "Calibration Plot for Weekly Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly$raw_points,
+  y = projectionsWithActuals_weekly$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Quarterbacks {#sec-accuracyProjectionsWeeklyQB}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_qb$raw_points,
+  actual = projectionsWithActuals_weekly_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyQBs
+#| fig-cap: "Calibration Plot for Weekly Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_qb$raw_points,
+  y = projectionsWithActuals_weekly_qb$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_qb,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Quarterbacks"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_qb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_qb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Running Backs {#sec-accuracyProjectionsWeeklyRB}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_rb$raw_points,
+  actual = projectionsWithActuals_weekly_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyRBs
+#| fig-cap: "Calibration Plot for Weekly Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_rb$raw_points,
+  y = projectionsWithActuals_weekly_rb$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_rb,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Running Backs"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_rb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_rb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Wide Receivers {#sec-accuracyProjectionsWeeklyWR}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_wr$raw_points,
+  actual = projectionsWithActuals_weekly_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyWRs
+#| fig-cap: "Calibration Plot for Weekly Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_wr$raw_points,
+  y = projectionsWithActuals_weekly_wr$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_wr,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Wide Receivers"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_wr$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_wr$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Tight Ends {#sec-accuracyProjectionsWeeklyTE}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_te$raw_points,
+  actual = projectionsWithActuals_weekly_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyTEs
+#| fig-cap: "Calibration Plot for Weekly Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_te$raw_points,
+  y = projectionsWithActuals_weekly_te$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_te,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Tight Ends"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_te$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_te$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Kickers {#sec-accuracyProjectionsWeeklyK}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_k$raw_points,
+  actual = projectionsWithActuals_weekly_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyKs
+#| fig-cap: "Calibration Plot for Weekly Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_k$raw_points,
+  y = projectionsWithActuals_weekly_k$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_k,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Kickers"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_k$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_k$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Defensive Linemen {#sec-accuracyProjectionsWeeklyDL}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_dl$raw_points,
+  actual = projectionsWithActuals_weekly_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyDLs
+#| fig-cap: "Calibration Plot for Weekly Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_dl$raw_points,
+  y = projectionsWithActuals_weekly_dl$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_dl,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Defensive Linemen"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_dl$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_dl$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Linebackers {#sec-accuracyProjectionsWeeklyLB}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_lb$raw_points,
+  actual = projectionsWithActuals_weekly_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyLBs
+#| fig-cap: "Calibration Plot for Weekly Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_lb$raw_points,
+  y = projectionsWithActuals_weekly_lb$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_lb,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Linebackers"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_lb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_lb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+#### Defensive Backs {#sec-accuracyProjectionsWeeklyDB}
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_db$raw_points,
+  actual = projectionsWithActuals_weekly_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-calibrationPlotWeeklyDBs
+#| fig-cap: "Calibration Plot for Weekly Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-alt: "Calibration Plot for Weekly Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."
+#| fig-width: 8
+#| fig-height: 6
+
+#95 prediction interval based on LOESS model
+calibrationLoessModel <- msir::loess.sd(
+  x = projectionsWithActuals_weekly_db$raw_points,
+  y = projectionsWithActuals_weekly_db$fantasyPoints,
+  nsigma = qnorm(.975),
+  na.action = "na.exclude")
+
+calibrationLoessPredictionInterval <- data.frame(
+  x = calibrationLoessModel$x,
+  y = calibrationLoessModel$y,
+  lower = calibrationLoessModel$lower,
+  upper = calibrationLoessModel$upper)
+
+plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
+
+plotRangeMax <- max(calibrationLoessModel$upper, na.rm = TRUE)
+
+ggplot2::ggplot(
+  data = projectionsWithActuals_weekly_db,
+  aes(
+    x = raw_points,
+    y = fantasyPoints)) + 
+  coord_cartesian(
+    xlim = c(0, plotRangeMax),
+    ylim = c(plotRangeMin, plotRangeMax),
+    expand = FALSE) +
+  scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = lower),
+    color = "red",
+    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+  geom_line(
+    data = calibrationLoessPredictionInterval,
+    aes(
+      x = x,
+      y = upper),
+    color = "red",
+    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+  geom_smooth(
+    method = "gam",
+    color = viridisLite::viridis(3)[3],
+    fill = viridisLite::viridis(3)[1],
+    alpha = 0.7) + #95% confidence interval of GAM model
+  geom_abline(
+    slope = 1,
+    intercept = 0) +
+  labs(
+    x = "Projected Fantasy Points",
+    y = "Actual Fantasy Points",
+    title = "Calibration Plot for Weekly Projections of Defensive Backs"
+  ) +
+  theme_classic() + 
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_db$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_db$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
 ```
 
 ## Ways to Improve Prediction Accuracy {#sec-waysToImprovePredictionAccuracy}
