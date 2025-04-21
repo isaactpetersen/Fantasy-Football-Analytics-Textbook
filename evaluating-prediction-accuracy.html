@@ -572,7 +572,20 @@ window.Quarto = {
   <li><a href="#sec-accuracyProjectionsSeasonalDB" id="toc-sec-accuracyProjectionsSeasonalDB" class="nav-link" data-scroll-target="#sec-accuracyProjectionsSeasonalDB"><span class="header-section-number">17.11.1.9</span> Defensive Backs</a></li>
   </ul>
 </li>
-  <li><a href="#sec-accuracyProjectionsWeekly" id="toc-sec-accuracyProjectionsWeekly" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeekly"><span class="header-section-number">17.11.2</span> Weekly Projections</a></li>
+  <li>
+<a href="#sec-accuracyProjectionsWeekly" id="toc-sec-accuracyProjectionsWeekly" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeekly"><span class="header-section-number">17.11.2</span> Weekly Projections</a>
+  <ul>
+<li><a href="#sec-accuracyProjectionsWeeklyOverall" id="toc-sec-accuracyProjectionsWeeklyOverall" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyOverall"><span class="header-section-number">17.11.2.1</span> Overall</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyQB" id="toc-sec-accuracyProjectionsWeeklyQB" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyQB"><span class="header-section-number">17.11.2.2</span> Quarterbacks</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyRB" id="toc-sec-accuracyProjectionsWeeklyRB" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyRB"><span class="header-section-number">17.11.2.3</span> Running Backs</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyWR" id="toc-sec-accuracyProjectionsWeeklyWR" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyWR"><span class="header-section-number">17.11.2.4</span> Wide Receivers</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyTE" id="toc-sec-accuracyProjectionsWeeklyTE" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyTE"><span class="header-section-number">17.11.2.5</span> Tight Ends</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyK" id="toc-sec-accuracyProjectionsWeeklyK" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyK"><span class="header-section-number">17.11.2.6</span> Kickers</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyDL" id="toc-sec-accuracyProjectionsWeeklyDL" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyDL"><span class="header-section-number">17.11.2.7</span> Defensive Linemen</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyLB" id="toc-sec-accuracyProjectionsWeeklyLB" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyLB"><span class="header-section-number">17.11.2.8</span> Linebackers</a></li>
+  <li><a href="#sec-accuracyProjectionsWeeklyDB" id="toc-sec-accuracyProjectionsWeeklyDB" class="nav-link" data-scroll-target="#sec-accuracyProjectionsWeeklyDB"><span class="header-section-number">17.11.2.9</span> Defensive Backs</a></li>
+  </ul>
+</li>
   </ul>
 </li>
   <li><a href="#sec-waysToImprovePredictionAccuracy" id="toc-sec-waysToImprovePredictionAccuracy" class="nav-link" data-scroll-target="#sec-waysToImprovePredictionAccuracy"><span class="header-section-number">17.12</span> Ways to Improve Prediction Accuracy</a></li>
@@ -2808,7 +2821,956 @@ Figure&nbsp;17.16: Calibration Plot for Seasonal Projections of Defensive Backs.
 </section></section><section id="sec-accuracyProjectionsWeekly" class="level3" data-number="17.11.2"><h3 data-number="17.11.2" class="anchored" data-anchor-id="sec-accuracyProjectionsWeekly">
 <span class="header-section-number">17.11.2</span> Weekly Projections</h3>
 <p>To evaluate the accuracy of projections, we must first merge projections with actual performance.</p>
-</section></section><section id="sec-waysToImprovePredictionAccuracy" class="level2" data-number="17.12"><h2 data-number="17.12" class="anchored" data-anchor-id="sec-waysToImprovePredictionAccuracy">
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>player_stats_weekly_subset <span class="ot">&lt;-</span> player_stats_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-2"><a href="#cb48-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id))</span>
+<span id="cb48-3"><a href="#cb48-3"></a></span>
+<span id="cb48-4"><a href="#cb48-4"></a>nfl_playerIDs_subset <span class="ot">&lt;-</span> nfl_playerIDs <span class="sc">%&gt;%</span> </span>
+<span id="cb48-5"><a href="#cb48-5"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(gsis_id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-6"><a href="#cb48-6"></a>  <span class="fu">distinct</span>(gsis_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="co"># keep only rows that do not have duplicate values of gsis_id</span></span>
+<span id="cb48-7"><a href="#cb48-7"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"team"</span>, <span class="st">"position"</span>, <span class="st">"height"</span>, <span class="st">"weight"</span>, <span class="st">"age"</span>)))</span>
+<span id="cb48-8"><a href="#cb48-8"></a></span>
+<span id="cb48-9"><a href="#cb48-9"></a>players_projectedPoints_weekly_combined<span class="sc">$</span>season <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(players_projectedPoints_weekly_combined<span class="sc">$</span>season)</span>
+<span id="cb48-10"><a href="#cb48-10"></a></span>
+<span id="cb48-11"><a href="#cb48-11"></a>player_stats_weekly_subset_IDs <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb48-12"><a href="#cb48-12"></a>  player_stats_weekly_subset,</span>
+<span id="cb48-13"><a href="#cb48-13"></a>  nfl_playerIDs_subset,</span>
+<span id="cb48-14"><a href="#cb48-14"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb48-15"><a href="#cb48-15"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-16"><a href="#cb48-16"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(mfl_id))</span>
+<span id="cb48-17"><a href="#cb48-17"></a></span>
+<span id="cb48-18"><a href="#cb48-18"></a>projectionsWithActuals_weekly <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
+<span id="cb48-19"><a href="#cb48-19"></a>  player_stats_weekly_subset_IDs,</span>
+<span id="cb48-20"><a href="#cb48-20"></a>  players_projectedPoints_weekly_combined,</span>
+<span id="cb48-21"><a href="#cb48-21"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"mfl_id"</span> <span class="ot">=</span> <span class="st">"id"</span>, <span class="st">"season"</span>, <span class="st">"week"</span>),</span>
+<span id="cb48-22"><a href="#cb48-22"></a>  <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">"_proj"</span>),</span>
+<span id="cb48-23"><a href="#cb48-23"></a>)</span>
+<span id="cb48-24"><a href="#cb48-24"></a></span>
+<span id="cb48-25"><a href="#cb48-25"></a>projectionsWithActuals_weekly <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-26"><a href="#cb48-26"></a>  <span class="fu">unite</span>(</span>
+<span id="cb48-27"><a href="#cb48-27"></a>    <span class="st">"player_id_season_week"</span>,</span>
+<span id="cb48-28"><a href="#cb48-28"></a>    player_id,</span>
+<span id="cb48-29"><a href="#cb48-29"></a>    season,</span>
+<span id="cb48-30"><a href="#cb48-30"></a>    week,</span>
+<span id="cb48-31"><a href="#cb48-31"></a>    <span class="at">remove =</span> <span class="cn">FALSE</span></span>
+<span id="cb48-32"><a href="#cb48-32"></a>  )</span>
+<span id="cb48-33"><a href="#cb48-33"></a></span>
+<span id="cb48-34"><a href="#cb48-34"></a>playersWithHighProjectedOrActualPoints_weekly <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-35"><a href="#cb48-35"></a>  <span class="fu">filter</span>(raw_points <span class="sc">&gt;</span> <span class="dv">6</span> <span class="sc">|</span> fantasyPoints <span class="sc">&gt;</span> <span class="dv">6</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-36"><a href="#cb48-36"></a>  <span class="fu">select</span>(player_id_season_week) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-37"><a href="#cb48-37"></a>  <span class="fu">pull</span>()</span>
+<span id="cb48-38"><a href="#cb48-38"></a></span>
+<span id="cb48-39"><a href="#cb48-39"></a>projectionsWithActuals_weekly_qb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-40"><a href="#cb48-40"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"QB"</span>)</span>
+<span id="cb48-41"><a href="#cb48-41"></a></span>
+<span id="cb48-42"><a href="#cb48-42"></a>projectionsWithActuals_weekly_rb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-43"><a href="#cb48-43"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"RB"</span>)</span>
+<span id="cb48-44"><a href="#cb48-44"></a></span>
+<span id="cb48-45"><a href="#cb48-45"></a>projectionsWithActuals_weekly_wr <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-46"><a href="#cb48-46"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"WR"</span>)</span>
+<span id="cb48-47"><a href="#cb48-47"></a></span>
+<span id="cb48-48"><a href="#cb48-48"></a>projectionsWithActuals_weekly_te <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-49"><a href="#cb48-49"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"TE"</span>)</span>
+<span id="cb48-50"><a href="#cb48-50"></a></span>
+<span id="cb48-51"><a href="#cb48-51"></a>projectionsWithActuals_weekly_k <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-52"><a href="#cb48-52"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"K"</span>)</span>
+<span id="cb48-53"><a href="#cb48-53"></a></span>
+<span id="cb48-54"><a href="#cb48-54"></a>projectionsWithActuals_weekly_dl <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-55"><a href="#cb48-55"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DL"</span>)</span>
+<span id="cb48-56"><a href="#cb48-56"></a></span>
+<span id="cb48-57"><a href="#cb48-57"></a>projectionsWithActuals_weekly_lb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-58"><a href="#cb48-58"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"LB"</span>)</span>
+<span id="cb48-59"><a href="#cb48-59"></a></span>
+<span id="cb48-60"><a href="#cb48-60"></a>projectionsWithActuals_weekly_db <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb48-61"><a href="#cb48-61"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DB"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="sec-accuracyProjectionsWeeklyOverall" class="level4" data-number="17.11.2.1"><h4 data-number="17.11.2.1" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyOverall">
+<span class="header-section-number">17.11.2.1</span> Overall</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb49-2"><a href="#cb49-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly<span class="sc">$</span>raw_points,</span>
+<span id="cb49-3"><a href="#cb49-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb49-4"><a href="#cb49-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb49-5"><a href="#cb49-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.3275288","2":"3.912351","3":"2.665","4":"31.31103","5":"5.595626","6":"-65.94999","7":"116.5017","8":"34.06454","9":"0.6914187","10":"0.7139849","11":"0.4263885","12":"0.4263765","13":"0.4263159"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb50-2"><a href="#cb50-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb50-3"><a href="#cb50-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly<span class="sc">$</span>raw_points,</span>
+<span id="cb50-4"><a href="#cb50-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb50-5"><a href="#cb50-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb50-6"><a href="#cb50-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb50-7"><a href="#cb50-7"></a></span>
+<span id="cb50-8"><a href="#cb50-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb50-9"><a href="#cb50-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb50-10"><a href="#cb50-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb50-11"><a href="#cb50-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb50-12"><a href="#cb50-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb50-13"><a href="#cb50-13"></a></span>
+<span id="cb50-14"><a href="#cb50-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb50-15"><a href="#cb50-15"></a></span>
+<span id="cb50-16"><a href="#cb50-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb50-17"><a href="#cb50-17"></a></span>
+<span id="cb50-18"><a href="#cb50-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb50-19"><a href="#cb50-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly,</span>
+<span id="cb50-20"><a href="#cb50-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb50-21"><a href="#cb50-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb50-22"><a href="#cb50-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb50-23"><a href="#cb50-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb50-24"><a href="#cb50-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb50-25"><a href="#cb50-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb50-26"><a href="#cb50-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb50-27"><a href="#cb50-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb50-28"><a href="#cb50-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb50-29"><a href="#cb50-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb50-30"><a href="#cb50-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb50-31"><a href="#cb50-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb50-32"><a href="#cb50-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb50-33"><a href="#cb50-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb50-34"><a href="#cb50-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb50-35"><a href="#cb50-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb50-36"><a href="#cb50-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb50-37"><a href="#cb50-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb50-38"><a href="#cb50-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb50-39"><a href="#cb50-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb50-40"><a href="#cb50-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb50-41"><a href="#cb50-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb50-42"><a href="#cb50-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb50-43"><a href="#cb50-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb50-44"><a href="#cb50-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb50-45"><a href="#cb50-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb50-46"><a href="#cb50-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb50-47"><a href="#cb50-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb50-48"><a href="#cb50-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb50-49"><a href="#cb50-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb50-50"><a href="#cb50-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb50-51"><a href="#cb50-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb50-52"><a href="#cb50-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb50-53"><a href="#cb50-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb50-54"><a href="#cb50-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections"</span></span>
+<span id="cb50-55"><a href="#cb50-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb50-56"><a href="#cb50-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb50-57"><a href="#cb50-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyOverall" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyOverall-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyOverall-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" title="Figure&nbsp;17.17: Calibration Plot for Weekly Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyOverall-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyOverall-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.17: Calibration Plot for Weekly Projections. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb51-2"><a href="#cb51-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb51-3"><a href="#cb51-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb51-4"><a href="#cb51-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb51-5"><a href="#cb51-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.7625618","2":"5.087343","3":"4.0095","4":"44.95449","5":"6.704811","6":"-67.13091","7":"116.5326","8":"29.90223","9":"0.8526251","10":"0.737807","11":"0.2495093","12":"0.2494859","13":"0.2493821"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyQB" class="level4" data-number="17.11.2.2"><h4 data-number="17.11.2.2" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyQB">
+<span class="header-section-number">17.11.2.2</span> Quarterbacks</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb52-2"><a href="#cb52-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_qb<span class="sc">$</span>raw_points,</span>
+<span id="cb52-3"><a href="#cb52-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_qb<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb52-4"><a href="#cb52-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb52-5"><a href="#cb52-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-1.490122","2":"6.100064","3":"5.118","4":"62.60005","5":"7.912019","6":"-162.722","7":"231.9485","8":"25.11286","9":"0.8757131","10":"0.6497807","11":"0.2255957","12":"0.2253877","13":"0.2241487"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb53-2"><a href="#cb53-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb53-3"><a href="#cb53-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_qb<span class="sc">$</span>raw_points,</span>
+<span id="cb53-4"><a href="#cb53-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_qb<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb53-5"><a href="#cb53-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb53-6"><a href="#cb53-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb53-7"><a href="#cb53-7"></a></span>
+<span id="cb53-8"><a href="#cb53-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb53-9"><a href="#cb53-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb53-10"><a href="#cb53-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb53-11"><a href="#cb53-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb53-12"><a href="#cb53-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb53-13"><a href="#cb53-13"></a></span>
+<span id="cb53-14"><a href="#cb53-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb53-15"><a href="#cb53-15"></a></span>
+<span id="cb53-16"><a href="#cb53-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb53-17"><a href="#cb53-17"></a></span>
+<span id="cb53-18"><a href="#cb53-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb53-19"><a href="#cb53-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_qb,</span>
+<span id="cb53-20"><a href="#cb53-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb53-21"><a href="#cb53-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb53-22"><a href="#cb53-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb53-23"><a href="#cb53-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb53-24"><a href="#cb53-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb53-25"><a href="#cb53-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb53-26"><a href="#cb53-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb53-27"><a href="#cb53-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb53-28"><a href="#cb53-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb53-29"><a href="#cb53-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb53-30"><a href="#cb53-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb53-31"><a href="#cb53-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb53-32"><a href="#cb53-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb53-33"><a href="#cb53-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb53-34"><a href="#cb53-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb53-35"><a href="#cb53-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb53-36"><a href="#cb53-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb53-37"><a href="#cb53-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb53-38"><a href="#cb53-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb53-39"><a href="#cb53-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb53-40"><a href="#cb53-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb53-41"><a href="#cb53-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb53-42"><a href="#cb53-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb53-43"><a href="#cb53-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb53-44"><a href="#cb53-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb53-45"><a href="#cb53-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb53-46"><a href="#cb53-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb53-47"><a href="#cb53-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb53-48"><a href="#cb53-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb53-49"><a href="#cb53-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb53-50"><a href="#cb53-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb53-51"><a href="#cb53-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb53-52"><a href="#cb53-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb53-53"><a href="#cb53-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb53-54"><a href="#cb53-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Quarterbacks"</span></span>
+<span id="cb53-55"><a href="#cb53-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb53-56"><a href="#cb53-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb53-57"><a href="#cb53-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyQBs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyQBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyQBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18" title="Figure&nbsp;17.18: Calibration Plot for Weekly Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyQBs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyQBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.18: Calibration Plot for Weekly Projections of Quarterbacks. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb54-2"><a href="#cb54-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_qb<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb54-3"><a href="#cb54-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_qb<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb54-4"><a href="#cb54-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb54-5"><a href="#cb54-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-1.735099","2":"6.119498","3":"5.15","4":"60.06067","5":"7.749882","6":"-295.8733","7":"372.8413","8":"24.14593","9":"0.8724445","10":"0.6110116","11":"0.2568073","12":"0.2563065","13":"0.2549991"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyRB" class="level4" data-number="17.11.2.3"><h4 data-number="17.11.2.3" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyRB">
+<span class="header-section-number">17.11.2.3</span> Running Backs</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb55-2"><a href="#cb55-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_rb<span class="sc">$</span>raw_points,</span>
+<span id="cb55-3"><a href="#cb55-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_rb<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb55-4"><a href="#cb55-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb55-5"><a href="#cb55-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-1.012671","2":"4.510756","3":"3.136","4":"40.18293","5":"6.339","6":"-46.07555","7":"141.0095","8":"35.38121","9":"0.6721609","10":"0.7253814","11":"0.4293422","12":"0.4292779","13":"0.4290543"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb56-2"><a href="#cb56-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb56-3"><a href="#cb56-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_rb<span class="sc">$</span>raw_points,</span>
+<span id="cb56-4"><a href="#cb56-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_rb<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb56-5"><a href="#cb56-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb56-6"><a href="#cb56-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb56-7"><a href="#cb56-7"></a></span>
+<span id="cb56-8"><a href="#cb56-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb56-9"><a href="#cb56-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb56-10"><a href="#cb56-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb56-11"><a href="#cb56-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb56-12"><a href="#cb56-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb56-13"><a href="#cb56-13"></a></span>
+<span id="cb56-14"><a href="#cb56-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb56-15"><a href="#cb56-15"></a></span>
+<span id="cb56-16"><a href="#cb56-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb56-17"><a href="#cb56-17"></a></span>
+<span id="cb56-18"><a href="#cb56-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb56-19"><a href="#cb56-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_rb,</span>
+<span id="cb56-20"><a href="#cb56-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb56-21"><a href="#cb56-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb56-22"><a href="#cb56-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb56-23"><a href="#cb56-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb56-24"><a href="#cb56-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb56-25"><a href="#cb56-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb56-26"><a href="#cb56-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb56-27"><a href="#cb56-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb56-28"><a href="#cb56-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb56-29"><a href="#cb56-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb56-30"><a href="#cb56-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb56-31"><a href="#cb56-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb56-32"><a href="#cb56-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb56-33"><a href="#cb56-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb56-34"><a href="#cb56-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb56-35"><a href="#cb56-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb56-36"><a href="#cb56-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb56-37"><a href="#cb56-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb56-38"><a href="#cb56-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb56-39"><a href="#cb56-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb56-40"><a href="#cb56-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb56-41"><a href="#cb56-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb56-42"><a href="#cb56-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb56-43"><a href="#cb56-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb56-44"><a href="#cb56-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb56-45"><a href="#cb56-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb56-46"><a href="#cb56-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb56-47"><a href="#cb56-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb56-48"><a href="#cb56-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb56-49"><a href="#cb56-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb56-50"><a href="#cb56-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb56-51"><a href="#cb56-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb56-52"><a href="#cb56-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb56-53"><a href="#cb56-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb56-54"><a href="#cb56-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Running Backs"</span></span>
+<span id="cb56-55"><a href="#cb56-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb56-56"><a href="#cb56-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb56-57"><a href="#cb56-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyRBs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyRBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyRBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" title="Figure&nbsp;17.19: Calibration Plot for Weekly Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyRBs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyRBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.19: Calibration Plot for Weekly Projections of Running Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb57-2"><a href="#cb57-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_rb<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb57-3"><a href="#cb57-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_rb<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb57-4"><a href="#cb57-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb57-5"><a href="#cb57-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-1.067567","2":"4.393528","3":"3.13","4":"37.87919","5":"6.154607","6":"-74.17964","7":"164.0996","8":"38.28412","9":"0.6940578","10":"0.7705084","11":"0.3916977","12":"0.3914824","13":"0.3906703"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyWR" class="level4" data-number="17.11.2.4"><h4 data-number="17.11.2.4" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyWR">
+<span class="header-section-number">17.11.2.4</span> Wide Receivers</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb58-2"><a href="#cb58-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_wr<span class="sc">$</span>raw_points,</span>
+<span id="cb58-3"><a href="#cb58-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_wr<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb58-4"><a href="#cb58-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb58-5"><a href="#cb58-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.6145695","2":"4.863468","3":"3.52","4":"44.82737","5":"6.695325","6":"-48.72367","7":"92.79598","8":"37.56612","9":"0.761245","10":"0.8073974","11":"0.3139983","12":"0.3139455","13":"0.3137592"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb59-2"><a href="#cb59-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb59-3"><a href="#cb59-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_wr<span class="sc">$</span>raw_points,</span>
+<span id="cb59-4"><a href="#cb59-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_wr<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb59-5"><a href="#cb59-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb59-6"><a href="#cb59-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb59-7"><a href="#cb59-7"></a></span>
+<span id="cb59-8"><a href="#cb59-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb59-9"><a href="#cb59-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb59-10"><a href="#cb59-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb59-11"><a href="#cb59-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb59-12"><a href="#cb59-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb59-13"><a href="#cb59-13"></a></span>
+<span id="cb59-14"><a href="#cb59-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb59-15"><a href="#cb59-15"></a></span>
+<span id="cb59-16"><a href="#cb59-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb59-17"><a href="#cb59-17"></a></span>
+<span id="cb59-18"><a href="#cb59-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb59-19"><a href="#cb59-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_wr,</span>
+<span id="cb59-20"><a href="#cb59-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb59-21"><a href="#cb59-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb59-22"><a href="#cb59-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb59-23"><a href="#cb59-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb59-24"><a href="#cb59-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb59-25"><a href="#cb59-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb59-26"><a href="#cb59-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb59-27"><a href="#cb59-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb59-28"><a href="#cb59-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb59-29"><a href="#cb59-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb59-30"><a href="#cb59-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb59-31"><a href="#cb59-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb59-32"><a href="#cb59-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb59-33"><a href="#cb59-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb59-34"><a href="#cb59-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb59-35"><a href="#cb59-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb59-36"><a href="#cb59-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb59-37"><a href="#cb59-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb59-38"><a href="#cb59-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb59-39"><a href="#cb59-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb59-40"><a href="#cb59-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb59-41"><a href="#cb59-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb59-42"><a href="#cb59-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb59-43"><a href="#cb59-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb59-44"><a href="#cb59-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb59-45"><a href="#cb59-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb59-46"><a href="#cb59-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb59-47"><a href="#cb59-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb59-48"><a href="#cb59-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb59-49"><a href="#cb59-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb59-50"><a href="#cb59-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb59-51"><a href="#cb59-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb59-52"><a href="#cb59-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb59-53"><a href="#cb59-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb59-54"><a href="#cb59-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Wide Receivers"</span></span>
+<span id="cb59-55"><a href="#cb59-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb59-56"><a href="#cb59-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb59-57"><a href="#cb59-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyWRs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyWRs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyWRs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" title="Figure&nbsp;17.20: Calibration Plot for Weekly Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyWRs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyWRs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.20: Calibration Plot for Weekly Projections of Wide Receivers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb60-2"><a href="#cb60-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_wr<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb60-3"><a href="#cb60-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_wr<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb60-4"><a href="#cb60-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb60-5"><a href="#cb60-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.5685825","2":"4.895409","3":"3.6","4":"44.76558","5":"6.690708","6":"-47.93592","7":"91.34172","8":"37.01251","9":"0.7507455","10":"0.8095711","11":"0.3268653","12":"0.3267271","13":"0.3262338"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyTE" class="level4" data-number="17.11.2.5"><h4 data-number="17.11.2.5" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyTE">
+<span class="header-section-number">17.11.2.5</span> Tight Ends</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb61-2"><a href="#cb61-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_te<span class="sc">$</span>raw_points,</span>
+<span id="cb61-3"><a href="#cb61-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_te<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb61-4"><a href="#cb61-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb61-5"><a href="#cb61-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.9114808","2":"3.848615","3":"2.7","4":"29.15345","5":"5.399394","6":"-31.67173","7":"86.28214","8":"38.49151","9":"0.8074221","10":"0.7833681","11":"0.2521233","12":"0.2520031","13":"0.2515935"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb62-2"><a href="#cb62-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb62-3"><a href="#cb62-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_te<span class="sc">$</span>raw_points,</span>
+<span id="cb62-4"><a href="#cb62-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_te<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb62-5"><a href="#cb62-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb62-6"><a href="#cb62-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb62-7"><a href="#cb62-7"></a></span>
+<span id="cb62-8"><a href="#cb62-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb62-9"><a href="#cb62-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb62-10"><a href="#cb62-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb62-11"><a href="#cb62-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb62-12"><a href="#cb62-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb62-13"><a href="#cb62-13"></a></span>
+<span id="cb62-14"><a href="#cb62-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb62-15"><a href="#cb62-15"></a></span>
+<span id="cb62-16"><a href="#cb62-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb62-17"><a href="#cb62-17"></a></span>
+<span id="cb62-18"><a href="#cb62-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb62-19"><a href="#cb62-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_te,</span>
+<span id="cb62-20"><a href="#cb62-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb62-21"><a href="#cb62-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb62-22"><a href="#cb62-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb62-23"><a href="#cb62-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb62-24"><a href="#cb62-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb62-25"><a href="#cb62-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb62-26"><a href="#cb62-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb62-27"><a href="#cb62-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb62-28"><a href="#cb62-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb62-29"><a href="#cb62-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb62-30"><a href="#cb62-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb62-31"><a href="#cb62-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb62-32"><a href="#cb62-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb62-33"><a href="#cb62-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb62-34"><a href="#cb62-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb62-35"><a href="#cb62-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb62-36"><a href="#cb62-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb62-37"><a href="#cb62-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb62-38"><a href="#cb62-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb62-39"><a href="#cb62-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb62-40"><a href="#cb62-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb62-41"><a href="#cb62-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb62-42"><a href="#cb62-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb62-43"><a href="#cb62-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb62-44"><a href="#cb62-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb62-45"><a href="#cb62-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb62-46"><a href="#cb62-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb62-47"><a href="#cb62-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb62-48"><a href="#cb62-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb62-49"><a href="#cb62-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb62-50"><a href="#cb62-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb62-51"><a href="#cb62-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb62-52"><a href="#cb62-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb62-53"><a href="#cb62-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb62-54"><a href="#cb62-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Tight Ends"</span></span>
+<span id="cb62-55"><a href="#cb62-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb62-56"><a href="#cb62-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb62-57"><a href="#cb62-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyTEs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyTEs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyTEs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-21" title="Figure&nbsp;17.21: Calibration Plot for Weekly Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyTEs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyTEs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.21: Calibration Plot for Weekly Projections of Tight Ends. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb63-2"><a href="#cb63-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_te<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb63-3"><a href="#cb63-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_te<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb63-4"><a href="#cb63-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb63-5"><a href="#cb63-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.9312347","2":"3.755108","3":"2.8","4":"25.81456","5":"5.080803","6":"-23.50391","7":"76.68085","8":"38.9749","9":"0.8123619","10":"0.7777806","11":"0.2665533","12":"0.2662546","13":"0.2652193"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyK" class="level4" data-number="17.11.2.6"><h4 data-number="17.11.2.6" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyK">
+<span class="header-section-number">17.11.2.6</span> Kickers</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb64-2"><a href="#cb64-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_k<span class="sc">$</span>raw_points,</span>
+<span id="cb64-3"><a href="#cb64-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_k<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb64-4"><a href="#cb64-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb64-5"><a href="#cb64-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error in lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...): 0 (non-NA) cases</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb66-2"><a href="#cb66-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb66-3"><a href="#cb66-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_k<span class="sc">$</span>raw_points,</span>
+<span id="cb66-4"><a href="#cb66-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_k<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb66-5"><a href="#cb66-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb66-6"><a href="#cb66-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error in simpleLoess(y, x, w, span, degree = degree, parametric = parametric, : invalid 'x'</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb68-2"><a href="#cb68-2"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb68-3"><a href="#cb68-3"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb68-4"><a href="#cb68-4"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb68-5"><a href="#cb68-5"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb68-6"><a href="#cb68-6"></a></span>
+<span id="cb68-7"><a href="#cb68-7"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb68-8"><a href="#cb68-8"></a></span>
+<span id="cb68-9"><a href="#cb68-9"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb68-10"><a href="#cb68-10"></a></span>
+<span id="cb68-11"><a href="#cb68-11"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb68-12"><a href="#cb68-12"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_k,</span>
+<span id="cb68-13"><a href="#cb68-13"></a>  <span class="fu">aes</span>(</span>
+<span id="cb68-14"><a href="#cb68-14"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb68-15"><a href="#cb68-15"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb68-16"><a href="#cb68-16"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb68-17"><a href="#cb68-17"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb68-18"><a href="#cb68-18"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb68-19"><a href="#cb68-19"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb68-20"><a href="#cb68-20"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb68-21"><a href="#cb68-21"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb68-22"><a href="#cb68-22"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb68-23"><a href="#cb68-23"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb68-24"><a href="#cb68-24"></a>    <span class="fu">aes</span>(</span>
+<span id="cb68-25"><a href="#cb68-25"></a>      <span class="at">x =</span> x,</span>
+<span id="cb68-26"><a href="#cb68-26"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb68-27"><a href="#cb68-27"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb68-28"><a href="#cb68-28"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb68-29"><a href="#cb68-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb68-30"><a href="#cb68-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb68-31"><a href="#cb68-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb68-32"><a href="#cb68-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb68-33"><a href="#cb68-33"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb68-34"><a href="#cb68-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb68-35"><a href="#cb68-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb68-36"><a href="#cb68-36"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb68-37"><a href="#cb68-37"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb68-38"><a href="#cb68-38"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb68-39"><a href="#cb68-39"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb68-40"><a href="#cb68-40"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb68-41"><a href="#cb68-41"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb68-42"><a href="#cb68-42"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb68-43"><a href="#cb68-43"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb68-44"><a href="#cb68-44"></a>  <span class="fu">labs</span>(</span>
+<span id="cb68-45"><a href="#cb68-45"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb68-46"><a href="#cb68-46"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb68-47"><a href="#cb68-47"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Kickers"</span></span>
+<span id="cb68-48"><a href="#cb68-48"></a>  ) <span class="sc">+</span></span>
+<span id="cb68-49"><a href="#cb68-49"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb68-50"><a href="#cb68-50"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyKs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyKs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyKs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-22" title="Figure&nbsp;17.22: Calibration Plot for Weekly Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyKs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyKs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.22: Calibration Plot for Weekly Projections of Kickers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb69-2"><a href="#cb69-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_k<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb69-3"><a href="#cb69-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_k<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb69-4"><a href="#cb69-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb69-5"><a href="#cb69-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error in lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...): 0 (non-NA) cases</code></pre>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyDL" class="level4" data-number="17.11.2.7"><h4 data-number="17.11.2.7" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyDL">
+<span class="header-section-number">17.11.2.7</span> Defensive Linemen</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb71-2"><a href="#cb71-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_dl<span class="sc">$</span>raw_points,</span>
+<span id="cb71-3"><a href="#cb71-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_dl<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb71-4"><a href="#cb71-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb71-5"><a href="#cb71-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.2187459","2":"1.770336","3":"1.35","4":"5.594632","5":"2.365297","6":"-78.38077","7":"109.9375","8":"34.75281","9":"0.9996895","10":"0.6127758","11":"0.08962696","12":"0.08941143","13":"0.08861103"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb72-2"><a href="#cb72-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb72-3"><a href="#cb72-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_dl<span class="sc">$</span>raw_points,</span>
+<span id="cb72-4"><a href="#cb72-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_dl<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb72-5"><a href="#cb72-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb72-6"><a href="#cb72-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb72-7"><a href="#cb72-7"></a></span>
+<span id="cb72-8"><a href="#cb72-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb72-9"><a href="#cb72-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb72-10"><a href="#cb72-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb72-11"><a href="#cb72-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb72-12"><a href="#cb72-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb72-13"><a href="#cb72-13"></a></span>
+<span id="cb72-14"><a href="#cb72-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb72-15"><a href="#cb72-15"></a></span>
+<span id="cb72-16"><a href="#cb72-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb72-17"><a href="#cb72-17"></a></span>
+<span id="cb72-18"><a href="#cb72-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb72-19"><a href="#cb72-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_dl,</span>
+<span id="cb72-20"><a href="#cb72-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb72-21"><a href="#cb72-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb72-22"><a href="#cb72-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb72-23"><a href="#cb72-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb72-24"><a href="#cb72-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb72-25"><a href="#cb72-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb72-26"><a href="#cb72-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb72-27"><a href="#cb72-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb72-28"><a href="#cb72-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb72-29"><a href="#cb72-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb72-30"><a href="#cb72-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb72-31"><a href="#cb72-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb72-32"><a href="#cb72-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb72-33"><a href="#cb72-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb72-34"><a href="#cb72-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb72-35"><a href="#cb72-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb72-36"><a href="#cb72-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb72-37"><a href="#cb72-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb72-38"><a href="#cb72-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb72-39"><a href="#cb72-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb72-40"><a href="#cb72-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb72-41"><a href="#cb72-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb72-42"><a href="#cb72-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb72-43"><a href="#cb72-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb72-44"><a href="#cb72-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb72-45"><a href="#cb72-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb72-46"><a href="#cb72-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb72-47"><a href="#cb72-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb72-48"><a href="#cb72-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb72-49"><a href="#cb72-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb72-50"><a href="#cb72-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb72-51"><a href="#cb72-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb72-52"><a href="#cb72-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb72-53"><a href="#cb72-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb72-54"><a href="#cb72-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Defensive Linemen"</span></span>
+<span id="cb72-55"><a href="#cb72-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb72-56"><a href="#cb72-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb72-57"><a href="#cb72-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyDLs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyDLs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyDLs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-23" title="Figure&nbsp;17.23: Calibration Plot for Weekly Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyDLs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyDLs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.23: Calibration Plot for Weekly Projections of Defensive Linemen. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb73-2"><a href="#cb73-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_dl<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb73-3"><a href="#cb73-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_dl<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb73-4"><a href="#cb73-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb73-5"><a href="#cb73-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.2473207","2":"1.801486","3":"1.4","4":"5.801267","5":"2.408582","6":"-83.316","7":"114.2704","8":"34.87747","9":"1.001848","10":"0.6213075","11":"0.08878927","12":"0.08826589","13":"0.08624551"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyLB" class="level4" data-number="17.11.2.8"><h4 data-number="17.11.2.8" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyLB">
+<span class="header-section-number">17.11.2.8</span> Linebackers</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb74-2"><a href="#cb74-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_lb<span class="sc">$</span>raw_points,</span>
+<span id="cb74-3"><a href="#cb74-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_lb<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb74-4"><a href="#cb74-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb74-5"><a href="#cb74-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"1.056654","2":"2.629955","3":"2.0675","4":"11.58904","5":"3.404268","6":"-75.18164","7":"100.6471","8":"30.45877","9":"1.016729","10":"0.607335","11":"0.2458521","12":"0.2456984","13":"0.2452447"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb75-2"><a href="#cb75-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb75-3"><a href="#cb75-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_lb<span class="sc">$</span>raw_points,</span>
+<span id="cb75-4"><a href="#cb75-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_lb<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb75-5"><a href="#cb75-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb75-6"><a href="#cb75-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb75-7"><a href="#cb75-7"></a></span>
+<span id="cb75-8"><a href="#cb75-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb75-9"><a href="#cb75-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb75-10"><a href="#cb75-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb75-11"><a href="#cb75-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb75-12"><a href="#cb75-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb75-13"><a href="#cb75-13"></a></span>
+<span id="cb75-14"><a href="#cb75-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb75-15"><a href="#cb75-15"></a></span>
+<span id="cb75-16"><a href="#cb75-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb75-17"><a href="#cb75-17"></a></span>
+<span id="cb75-18"><a href="#cb75-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb75-19"><a href="#cb75-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_lb,</span>
+<span id="cb75-20"><a href="#cb75-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb75-21"><a href="#cb75-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb75-22"><a href="#cb75-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb75-23"><a href="#cb75-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb75-24"><a href="#cb75-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb75-25"><a href="#cb75-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb75-26"><a href="#cb75-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb75-27"><a href="#cb75-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb75-28"><a href="#cb75-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb75-29"><a href="#cb75-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb75-30"><a href="#cb75-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb75-31"><a href="#cb75-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb75-32"><a href="#cb75-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb75-33"><a href="#cb75-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb75-34"><a href="#cb75-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb75-35"><a href="#cb75-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb75-36"><a href="#cb75-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb75-37"><a href="#cb75-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb75-38"><a href="#cb75-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb75-39"><a href="#cb75-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb75-40"><a href="#cb75-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb75-41"><a href="#cb75-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb75-42"><a href="#cb75-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb75-43"><a href="#cb75-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb75-44"><a href="#cb75-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb75-45"><a href="#cb75-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb75-46"><a href="#cb75-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb75-47"><a href="#cb75-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb75-48"><a href="#cb75-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb75-49"><a href="#cb75-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb75-50"><a href="#cb75-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb75-51"><a href="#cb75-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb75-52"><a href="#cb75-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb75-53"><a href="#cb75-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb75-54"><a href="#cb75-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Linebackers"</span></span>
+<span id="cb75-55"><a href="#cb75-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb75-56"><a href="#cb75-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb75-57"><a href="#cb75-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyLBs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyLBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyLBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-24" title="Figure&nbsp;17.24: Calibration Plot for Weekly Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyLBs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyLBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.24: Calibration Plot for Weekly Projections of Linebackers. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb76-2"><a href="#cb76-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_lb<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb76-3"><a href="#cb76-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_lb<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb76-4"><a href="#cb76-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb76-5"><a href="#cb76-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"1.134223","2":"2.616817","3":"2.1","4":"11.33794","5":"3.367186","6":"-81.62563","7":"105.1072","8":"30.6806","9":"1.035228","10":"0.6133686","11":"0.237698","12":"0.2373272","13":"0.2362607"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section><section id="sec-accuracyProjectionsWeeklyDB" class="level4" data-number="17.11.2.9"><h4 data-number="17.11.2.9" class="anchored" data-anchor-id="sec-accuracyProjectionsWeeklyDB">
+<span class="header-section-number">17.11.2.9</span> Defensive Backs</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb77-2"><a href="#cb77-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_db<span class="sc">$</span>raw_points,</span>
+<span id="cb77-3"><a href="#cb77-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_db<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb77-4"><a href="#cb77-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb77-5"><a href="#cb77-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.9118926","2":"2.47371","3":"2.135","4":"9.60374","5":"3.09899","6":"-81.16081","7":"103.1055","8":"28.83631","9":"1.105039","10":"0.5996387","11":"0.09794624","12":"0.09781723","13":"0.09743002"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1"></a><span class="co">#95 prediction interval based on LOESS model</span></span>
+<span id="cb78-2"><a href="#cb78-2"></a>calibrationLoessModel <span class="ot">&lt;-</span> msir<span class="sc">::</span><span class="fu">loess.sd</span>(</span>
+<span id="cb78-3"><a href="#cb78-3"></a>  <span class="at">x =</span> projectionsWithActuals_weekly_db<span class="sc">$</span>raw_points,</span>
+<span id="cb78-4"><a href="#cb78-4"></a>  <span class="at">y =</span> projectionsWithActuals_weekly_db<span class="sc">$</span>fantasyPoints,</span>
+<span id="cb78-5"><a href="#cb78-5"></a>  <span class="at">nsigma =</span> <span class="fu">qnorm</span>(.<span class="dv">975</span>),</span>
+<span id="cb78-6"><a href="#cb78-6"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span>)</span>
+<span id="cb78-7"><a href="#cb78-7"></a></span>
+<span id="cb78-8"><a href="#cb78-8"></a>calibrationLoessPredictionInterval <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb78-9"><a href="#cb78-9"></a>  <span class="at">x =</span> calibrationLoessModel<span class="sc">$</span>x,</span>
+<span id="cb78-10"><a href="#cb78-10"></a>  <span class="at">y =</span> calibrationLoessModel<span class="sc">$</span>y,</span>
+<span id="cb78-11"><a href="#cb78-11"></a>  <span class="at">lower =</span> calibrationLoessModel<span class="sc">$</span>lower,</span>
+<span id="cb78-12"><a href="#cb78-12"></a>  <span class="at">upper =</span> calibrationLoessModel<span class="sc">$</span>upper)</span>
+<span id="cb78-13"><a href="#cb78-13"></a></span>
+<span id="cb78-14"><a href="#cb78-14"></a>plotRangeMin <span class="ot">&lt;-</span> <span class="fu">min</span>(calibrationLoessModel<span class="sc">$</span>lower, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb78-15"><a href="#cb78-15"></a></span>
+<span id="cb78-16"><a href="#cb78-16"></a>plotRangeMax <span class="ot">&lt;-</span> <span class="fu">max</span>(calibrationLoessModel<span class="sc">$</span>upper, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb78-17"><a href="#cb78-17"></a></span>
+<span id="cb78-18"><a href="#cb78-18"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb78-19"><a href="#cb78-19"></a>  <span class="at">data =</span> projectionsWithActuals_weekly_db,</span>
+<span id="cb78-20"><a href="#cb78-20"></a>  <span class="fu">aes</span>(</span>
+<span id="cb78-21"><a href="#cb78-21"></a>    <span class="at">x =</span> raw_points,</span>
+<span id="cb78-22"><a href="#cb78-22"></a>    <span class="at">y =</span> fantasyPoints)) <span class="sc">+</span> </span>
+<span id="cb78-23"><a href="#cb78-23"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb78-24"><a href="#cb78-24"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, plotRangeMax),</span>
+<span id="cb78-25"><a href="#cb78-25"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(plotRangeMin, plotRangeMax),</span>
+<span id="cb78-26"><a href="#cb78-26"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb78-27"><a href="#cb78-27"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb78-28"><a href="#cb78-28"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, plotRangeMax, <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb78-29"><a href="#cb78-29"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb78-30"><a href="#cb78-30"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb78-31"><a href="#cb78-31"></a>    <span class="fu">aes</span>(</span>
+<span id="cb78-32"><a href="#cb78-32"></a>      <span class="at">x =</span> x,</span>
+<span id="cb78-33"><a href="#cb78-33"></a>      <span class="at">y =</span> lower),</span>
+<span id="cb78-34"><a href="#cb78-34"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb78-35"><a href="#cb78-35"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Lower estimate of 95% prediction interval of linear model</span></span>
+<span id="cb78-36"><a href="#cb78-36"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb78-37"><a href="#cb78-37"></a>    <span class="at">data =</span> calibrationLoessPredictionInterval,</span>
+<span id="cb78-38"><a href="#cb78-38"></a>    <span class="fu">aes</span>(</span>
+<span id="cb78-39"><a href="#cb78-39"></a>      <span class="at">x =</span> x,</span>
+<span id="cb78-40"><a href="#cb78-40"></a>      <span class="at">y =</span> upper),</span>
+<span id="cb78-41"><a href="#cb78-41"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb78-42"><a href="#cb78-42"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
+<span id="cb78-43"><a href="#cb78-43"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb78-44"><a href="#cb78-44"></a>    <span class="at">method =</span> <span class="st">"gam"</span>,</span>
+<span id="cb78-45"><a href="#cb78-45"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
+<span id="cb78-46"><a href="#cb78-46"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb78-47"><a href="#cb78-47"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of GAM model</span></span>
+<span id="cb78-48"><a href="#cb78-48"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb78-49"><a href="#cb78-49"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb78-50"><a href="#cb78-50"></a>    <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb78-51"><a href="#cb78-51"></a>  <span class="fu">labs</span>(</span>
+<span id="cb78-52"><a href="#cb78-52"></a>    <span class="at">x =</span> <span class="st">"Projected Fantasy Points"</span>,</span>
+<span id="cb78-53"><a href="#cb78-53"></a>    <span class="at">y =</span> <span class="st">"Actual Fantasy Points"</span>,</span>
+<span id="cb78-54"><a href="#cb78-54"></a>    <span class="at">title =</span> <span class="st">"Calibration Plot for Weekly Projections of Defensive Backs"</span></span>
+<span id="cb78-55"><a href="#cb78-55"></a>  ) <span class="sc">+</span></span>
+<span id="cb78-56"><a href="#cb78-56"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb78-57"><a href="#cb78-57"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-calibrationPlotWeeklyDBs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Calibration Plot for Weekly Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-calibrationPlotWeeklyDBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyDBs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-25" title="Figure&nbsp;17.25: Calibration Plot for Weekly Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points."><img src="evaluating-prediction-accuracy_files/figure-html/fig-calibrationPlotWeeklyDBs-1.png" class="img-fluid figure-img" alt="Calibration Plot for Weekly Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points." width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibrationPlotWeeklyDBs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.25: Calibration Plot for Weekly Projections of Defensive Backs. The yellow line is the best-fit line based on LOESS. The purple band is the 95% confidence interval of actual fantasy points. The dashed red lines are the 95% prediction interval of actual fantasy points.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1"></a>petersenlab<span class="sc">::</span><span class="fu">accuracyOverall</span>(</span>
+<span id="cb79-2"><a href="#cb79-2"></a>  <span class="at">predicted =</span> projectionsWithActuals_weekly_db<span class="sc">$</span>raw_points[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb79-3"><a href="#cb79-3"></a>  <span class="at">actual =</span> projectionsWithActuals_weekly_db<span class="sc">$</span>fantasyPoints[<span class="fu">which</span>(projectionsWithActuals_weekly<span class="sc">$</span>player_id_season_week <span class="sc">%in%</span> playersWithHighProjectedOrActualPoints_weekly)],</span>
+<span id="cb79-4"><a href="#cb79-4"></a>  <span class="at">dropUndefined =</span> <span class="cn">TRUE</span></span>
+<span id="cb79-5"><a href="#cb79-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ME"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["MAE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["MdAE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["MSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["RMSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["MPE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["MAPE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sMAPE"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["MASE"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["RMSLE"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rsquared"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["rsquaredAdj"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["rsquaredPredictive"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.8914397","2":"2.421523","3":"2.1","4":"9.210631","5":"3.034902","6":"-82.86711","7":"104.9674","8":"29.11699","9":"1.107603","10":"0.6040005","11":"0.08494508","12":"0.08461426","13":"0.08358792"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section></section></section><section id="sec-waysToImprovePredictionAccuracy" class="level2" data-number="17.12"><h2 data-number="17.12" class="anchored" data-anchor-id="sec-waysToImprovePredictionAccuracy">
 <span class="header-section-number">17.12</span> Ways to Improve Prediction Accuracy</h2>
 <p>On the whole, experts’ predictions are inaccurate. Experts’ predictions from many different domains tend to be inaccurate, including political scientists <span class="citation" data-cites="Tetlock2017">(<a href="references.html#ref-Tetlock2017" role="doc-biblioref">Tetlock, 2017</a>)</span>, physicians <span class="citation" data-cites="Koehler2002">(<a href="references.html#ref-Koehler2002" role="doc-biblioref">Koehler et al., 2002</a>)</span>, clinical psychologists <span class="citation" data-cites="Oskamp1965">(<a href="references.html#ref-Oskamp1965" role="doc-biblioref">Oskamp, 1965</a>)</span>, stock market traders and corporate financial officers <span class="citation" data-cites="Skala2008">(<a href="references.html#ref-Skala2008" role="doc-biblioref">Skala, 2008</a>)</span>, seismologists’ predictions of earthquakes <span class="citation" data-cites="Hough2016">(<a href="references.html#ref-Hough2016" role="doc-biblioref">Hough, 2016</a>)</span>, economists’ predictions about the economy <span class="citation" data-cites="Makridakis2009">(<a href="references.html#ref-Makridakis2009" role="doc-biblioref">Makridakis et al., 2009</a>)</span>, lawyers <span class="citation" data-cites="Koehler2002">(<a href="references.html#ref-Koehler2002" role="doc-biblioref">Koehler et al., 2002</a>)</span>, and business managers <span class="citation" data-cites="Russo1992">(<a href="references.html#ref-Russo1992" role="doc-biblioref">Russo &amp; Schoemaker, 1992</a>)</span>. Thus, I would not put much confidence in the predictions by fantasy football fundits. The most common pattern of experts’ predictions is that they show overextremity, that is, their predictions have probability judgments that tend to be too extreme, as described in Section <a href="#sec-calibration" class="quarto-xref"><span>Section 17.3.2</span></a>. Overextremity of experts’ predictions reflects the <a href="cognitive-bias.html#sec-cognitiveBiasesOverconfidence">overprecision</a> type of <a href="cognitive-bias.html#sec-cognitiveBiasesOverconfidence">overconfidence bias</a>. The degree of confidence of a person’s predictions is often not a good indicator of the accuracy of their predictions [and confidence and prediction accuracy are sometimes inversely associated; <span class="citation" data-cites="Silver2012">Silver (<a href="references.html#ref-Silver2012" role="doc-biblioref">2012</a>)</span>]. <a href="cognitive-bias.html#sec-heuristics">Heuristics</a> such as the <a href="cognitive-bias.html#sec-heuristicsAnchoringAdjustment">anchoring and adjustment heuristic</a>, <a href="cognitive-bias.html#sec-cognitiveBiases">cognitive biases</a> such as <a href="cognitive-bias.html#sec-cognitiveBiasesConfirmation">confirmation bias</a> <span class="citation" data-cites="Hoch1985 Koriat1980">(<a href="references.html#ref-Hoch1985" role="doc-biblioref">Hoch, 1985</a>; <a href="references.html#ref-Koriat1980" role="doc-biblioref">Koriat et al., 1980</a>)</span>, <a href="cognitive-bias.html#sec-fallacies">fallacies</a> such as the <a href="cognitive-bias.html#sec-fallaciesBaseRate">base rate fallacy</a> <span class="citation" data-cites="Eddy1982 Koehler2002">(<a href="references.html#ref-Eddy1982" role="doc-biblioref">Eddy, 1982</a>; <a href="references.html#ref-Koehler2002" role="doc-biblioref">Koehler et al., 2002</a>)</span> could contribute to overconfidence of predictions. <a href="#sec-calibration">Poorly calibrated</a> predictions are especially likely when the <a href="base-rates.html#sec-baseRate">base rate</a> is very low (e.g., suicide) or when the <a href="base-rates.html#sec-baseRate">base rate</a> is very high <span class="citation" data-cites="Koehler2002">(<a href="references.html#ref-Koehler2002" role="doc-biblioref">Koehler et al., 2002</a>)</span>.</p>
 <p>Nevertheless, there are some domains that have shown greater predictive accuracy, from which we may learn what practices may lead to greater accuracy. For instance, experts have shown stronger predictive accuracy in weather forecasting <span class="citation" data-cites="Murphy1984">(<a href="references.html#ref-Murphy1984" role="doc-biblioref">Murphy &amp; Winkler, 1984</a>)</span>, horse race betting <span class="citation" data-cites="Johnson2001">(<a href="references.html#ref-Johnson2001" role="doc-biblioref">Johnson &amp; Bruce, 2001</a>)</span>, and playing the card game of bridge <span class="citation" data-cites="Keren1987">(<a href="references.html#ref-Keren1987" role="doc-biblioref">Keren, 1987</a>)</span>, but see <span class="citation" data-cites="Koehler2002">Koehler et al. (<a href="references.html#ref-Koehler2002" role="doc-biblioref">2002</a>)</span> for exceptions.</p>
@@ -2834,7 +3796,7 @@ Figure&nbsp;17.16: Calibration Plot for Seasonal Projections of Defensive Backs.
 </section><section id="sec-predictionAccuracySessionInfo" class="level2" data-number="17.14"><h2 data-number="17.14" class="anchored" data-anchor-id="sec-predictionAccuracySessionInfo">
 <span class="header-section-number">17.14</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.0 (2025-04-11)
 Platform: x86_64-pc-linux-gnu
