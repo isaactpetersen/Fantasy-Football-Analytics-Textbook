@@ -37,6 +37,144 @@ load(file = "./data/players_projections_seasonal.RData")
 load(file = "./data/nfl_playerIDs.RData")
 ```
 
+### Prepare Data {#sec-predictionAccuracyPrepareData}
+
+#### Seasonal Projections {#sec-predictionAccuracyPrepareDataSeasonal}
+
+To evaluate the accuracy of projections, we must first merge projections with actual performance.
+Below, we merge seasonal projections with actual performance.
+
+```{r}
+player_stats_seasonal_subset <- player_stats_seasonal %>% 
+  filter(!is.na(player_id))
+
+nfl_playerIDs_subset <- nfl_playerIDs %>% 
+  filter(!is.na(gsis_id)) %>% 
+  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
+  select(-all_of(c("team", "position", "height", "weight", "age")))
+
+players_projectedPoints_seasonal_combined$season <- as.integer(players_projectedPoints_seasonal_combined$season)
+
+player_stats_seasonal_subset_IDs <- left_join(
+  player_stats_seasonal_subset,
+  nfl_playerIDs_subset,
+  by = c("player_id" = "gsis_id")
+) %>% 
+  filter(!is.na(mfl_id))
+
+projectionsWithActuals_seasonal <- full_join(
+  player_stats_seasonal_subset_IDs,
+  players_projectedPoints_seasonal_combined,
+  by = c("mfl_id" = "id", "season"),
+  suffix = c("", "_proj"),
+)
+
+projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal %>% 
+  unite(
+    "player_id_season",
+    player_id,
+    season,
+    remove = FALSE
+  )
+
+playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal %>% 
+  filter(raw_points > 100 | fantasyPoints > 100) %>% 
+  select(player_id_season) %>% 
+  pull()
+
+projectionsWithActuals_seasonal_qb <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "QB")
+
+projectionsWithActuals_seasonal_rb <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "RB")
+
+projectionsWithActuals_seasonal_wr <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "WR")
+
+projectionsWithActuals_seasonal_te <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "TE")
+
+projectionsWithActuals_seasonal_k <- projectionsWithActuals_seasonal %>% 
+  filter(position == "K")
+
+projectionsWithActuals_seasonal_dl <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "DL")
+
+projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "LB")
+
+projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal %>% 
+  filter(position_group == "DB")
+```
+
+### Weekly Projections {#sec-predictionAccuracyPrepareDataWeekly}
+
+Below, we merge weekly projections with actual performance.
+
+```{r}
+player_stats_weekly_subset <- player_stats_weekly %>% 
+  filter(!is.na(player_id))
+
+nfl_playerIDs_subset <- nfl_playerIDs %>% 
+  filter(!is.na(gsis_id)) %>% 
+  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
+  select(-all_of(c("team", "position", "height", "weight", "age")))
+
+players_projectedPoints_weekly_combined$season <- as.integer(players_projectedPoints_weekly_combined$season)
+
+player_stats_weekly_subset_IDs <- left_join(
+  player_stats_weekly_subset,
+  nfl_playerIDs_subset,
+  by = c("player_id" = "gsis_id")
+) %>% 
+  filter(!is.na(mfl_id))
+
+projectionsWithActuals_weekly <- full_join(
+  player_stats_weekly_subset_IDs,
+  players_projectedPoints_weekly_combined,
+  by = c("mfl_id" = "id", "season", "week"),
+  suffix = c("", "_proj"),
+)
+
+projectionsWithActuals_weekly <- projectionsWithActuals_weekly %>% 
+  unite(
+    "player_id_season_week",
+    player_id,
+    season,
+    week,
+    remove = FALSE
+  )
+
+playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly %>% 
+  filter(raw_points > 6 | fantasyPoints > 6) %>% 
+  select(player_id_season_week) %>% 
+  pull()
+
+projectionsWithActuals_weekly_qb <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "QB")
+
+projectionsWithActuals_weekly_rb <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "RB")
+
+projectionsWithActuals_weekly_wr <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "WR")
+
+projectionsWithActuals_weekly_te <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "TE")
+
+projectionsWithActuals_weekly_k <- projectionsWithActuals_weekly %>% 
+  filter(position == "K")
+
+projectionsWithActuals_weekly_dl <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "DL")
+
+projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "LB")
+
+projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "DB")
+```
+
 ## Overview {#sec-predictionAccuracyOverview}
 
 Predictions can come in different types.
@@ -1915,71 +2053,6 @@ plot(
 
 ### Seasonal Projections {#sec-accuracyProjectionsSeasonal}
 
-To evaluate the accuracy of projections, we must first merge projections with actual performance.
-
-```{r}
-player_stats_seasonal_subset <- player_stats_seasonal %>% 
-  filter(!is.na(player_id))
-
-nfl_playerIDs_subset <- nfl_playerIDs %>% 
-  filter(!is.na(gsis_id)) %>% 
-  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
-  select(-all_of(c("team", "position", "height", "weight", "age")))
-
-players_projectedPoints_seasonal_combined$season <- as.integer(players_projectedPoints_seasonal_combined$season)
-
-player_stats_seasonal_subset_IDs <- left_join(
-  player_stats_seasonal_subset,
-  nfl_playerIDs_subset,
-  by = c("player_id" = "gsis_id")
-) %>% 
-  filter(!is.na(mfl_id))
-
-projectionsWithActuals_seasonal <- full_join(
-  player_stats_seasonal_subset_IDs,
-  players_projectedPoints_seasonal_combined,
-  by = c("mfl_id" = "id", "season"),
-  suffix = c("", "_proj"),
-)
-
-projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal %>% 
-  unite(
-    "player_id_season",
-    player_id,
-    season,
-    remove = FALSE
-  )
-
-playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal %>% 
-  filter(raw_points > 100 | fantasyPoints > 100) %>% 
-  select(player_id_season) %>% 
-  pull()
-
-projectionsWithActuals_seasonal_qb <- projectionsWithActuals_seasonal %>% 
-  filter(position_group == "QB")
-
-projectionsWithActuals_seasonal_rb <- projectionsWithActuals_seasonal %>% 
-  filter(position_group == "RB")
-
-projectionsWithActuals_seasonal_wr <- projectionsWithActuals_seasonal %>% 
-  filter(position_group == "WR")
-
-projectionsWithActuals_seasonal_te <- projectionsWithActuals_seasonal %>% 
-  filter(position_group == "TE")
-
-projectionsWithActuals_seasonal_k <- projectionsWithActuals_seasonal %>% 
-  filter(position == "K")
-
-projectionsWithActuals_seasonal_dl <- projectionsWithActuals_seasonal %>% 
-  filter(position_group == "DL")
-
-projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal %>% 
-  filter(position_group == "LB")
-
-projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal %>% 
-  filter(position_group == "DB")
-```
-
 #### Overall {#sec-accuracyProjectionsSeasonalOverall}
 
 ```{r}
@@ -2737,72 +2810,6 @@ petersenlab::accuracyOverall(
 ```
 
 ### Weekly Projections {#sec-accuracyProjectionsWeekly}
-
-To evaluate the accuracy of projections, we must first merge projections with actual performance.
-
-```{r}
-player_stats_weekly_subset <- player_stats_weekly %>% 
-  filter(!is.na(player_id))
-
-nfl_playerIDs_subset <- nfl_playerIDs %>% 
-  filter(!is.na(gsis_id)) %>% 
-  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
-  select(-all_of(c("team", "position", "height", "weight", "age")))
-
-players_projectedPoints_weekly_combined$season <- as.integer(players_projectedPoints_weekly_combined$season)
-
-player_stats_weekly_subset_IDs <- left_join(
-  player_stats_weekly_subset,
-  nfl_playerIDs_subset,
-  by = c("player_id" = "gsis_id")
-) %>% 
-  filter(!is.na(mfl_id))
-
-projectionsWithActuals_weekly <- full_join(
-  player_stats_weekly_subset_IDs,
-  players_projectedPoints_weekly_combined,
-  by = c("mfl_id" = "id", "season", "week"),
-  suffix = c("", "_proj"),
-)
-
-projectionsWithActuals_weekly <- projectionsWithActuals_weekly %>% 
-  unite(
-    "player_id_season_week",
-    player_id,
-    season,
-    week,
-    remove = FALSE
-  )
-
-playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly %>% 
-  filter(raw_points > 6 | fantasyPoints > 6) %>% 
-  select(player_id_season_week) %>% 
-  pull()
-
-projectionsWithActuals_weekly_qb <- projectionsWithActuals_weekly %>% 
-  filter(position_group == "QB")
-
-projectionsWithActuals_weekly_rb <- projectionsWithActuals_weekly %>% 
-  filter(position_group == "RB")
-
-projectionsWithActuals_weekly_wr <- projectionsWithActuals_weekly %>% 
-  filter(position_group == "WR")
-
-projectionsWithActuals_weekly_te <- projectionsWithActuals_weekly %>% 
-  filter(position_group == "TE")
-
-projectionsWithActuals_weekly_k <- projectionsWithActuals_weekly %>% 
-  filter(position == "K")
-
-projectionsWithActuals_weekly_dl <- projectionsWithActuals_weekly %>% 
-  filter(position_group == "DL")
-
-projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly %>% 
-  filter(position_group == "LB")
-
-projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly %>% 
-  filter(position_group == "DB")
-```
 
 #### Overall {#sec-accuracyProjectionsWeeklyOverall}
 
