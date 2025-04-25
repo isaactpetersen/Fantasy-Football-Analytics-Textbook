@@ -10,6 +10,7 @@ library("plotly")
 library("gghighlight")
 library("ggridges")
 library("ggExtra")
+library("patchwork")
 library("tidyverse")
 ```
 
@@ -797,18 +798,109 @@ ggplotly(plot_ypcByPlayerAge)
 
 :::
 
-### Marginal Density/Histogram {#sec-scatterplotMarginalDensigram}
+### Scatterplot with Rug Plot {#sec-scatterplotRugPlot}
 
-We can also add a marginal density/histogram, as in @fig-scatterplot12 using the `ggExtra` package [@R-ggExtra]:
+We can also add a rug plot, as in @fig-scatterplot12.
 
 ```{r}
 #| label: fig-scatterplot12
+#| fig-cap: "Scatterplot With Rug Plot."
+#| fig-alt: "Scatterplot With Rug Plot."
+
+ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age,
+    y = rushing_yards)) +
+  geom_point() +
+  geom_smooth() +
+  geom_rug(
+    col = "#800000",
+    alpha = 0.2) +
+  coord_cartesian(
+    xlim = c(20,40),
+    ylim = c(0,NA)) +
+  scale_x_continuous(
+    breaks = seq(from = 20, to = 40, by = 5)
+  ) +
+  scale_y_continuous(
+    breaks = seq(from = 0, to = 2500, by = 250)
+  ) +
+  labs(
+    x = "Running Back's Age (years)",
+    y = "Rushing Yards (Season)",
+    title = "NFL Rushing Yards (Season) by Player Age",
+    subtitle = "(Among Running Backs)"
+  ) +
+  theme_classic()
+```
+
+### Marginal Density/Histogram {#sec-scatterplotMarginalDensigram}
+
+We can also add a marginal density/histogram, as in @fig-scatterplot13 using the `ggExtra` package [@R-ggExtra]:
+
+```{r}
+#| label: fig-scatterplot13
 #| fig-cap: "Scatterplot With Marginal Density/Histogram."
 #| fig-alt: "Scatterplot With Marginal Density/Histogram."
 
 ggExtra::ggMarginal(
   plot_ypcByPlayerAge,
   type = "densigram")
+```
+
+Or we can create the plots manually, as in @fig-scatterplot14 using the `patchwork` package [@R-patchwork]:
+
+```{r}
+#| label: fig-scatterplot14
+#| fig-cap: "Scatterplot With Marginal Density/Histogram."
+#| fig-alt: "Scatterplot With Marginal Density/Histogram."
+
+dens1 <- ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = age)) +
+  coord_cartesian(
+    xlim = c(20,40),
+    expand = FALSE) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  theme_void()
+
+dens2 <- ggplot2::ggplot(
+  data = rb_seasonal,
+  aes(
+    x = rushing_yards)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  theme_void() +
+  coord_flip(
+    ylim = c(0, NA),
+    expand = FALSE)
+
+dens1 + patchwork::plot_spacer() + plot_ypcByPlayerAge + dens2 + 
+  patchwork::plot_layout(
+    ncol = 2, 
+    nrow = 2, 
+    widths = c(4, 1),
+    heights = c(1, 4)
+  )
 ```
 
 ## Line Chart {#sec-lineChart}
