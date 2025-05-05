@@ -13,6 +13,7 @@ library("magrittr")
 library("viridis")
 library("viridisLite")
 library("msir")
+library("caret")
 library("tidyverse")
 ```
 
@@ -1769,19 +1770,61 @@ Larger values indicate greater accuracy.
 
 $R^2$ is commonly estimated in [multiple regression](#sec-multipleRegression), in which multiple predictors are allowed to predict one outcome.
 
+An issue with $R^2$ is that it can be artificially inflated by adding more predictors to the model, even if those predictors do not improve the model fit.
+$R^2$ never decreases when adding predictors to a model, even if the predictors do not provide any predictive power.
+Thus, to account for the number of predictors in the model, we can use [adjusted $R^2$](#sec-adjustedRsquared).
+
 ###### Adjusted $R^2$ ($R^2_{adj}$) {#sec-adjustedRsquared}
 
 Adjusted $R^2$ ($R^2_{adj}$) is described in @sec-multipleRegressionAdjustedRsquared.
 Adjusted $R^2$ is similar to the [coefficient of determination](#sec-coefficientOfDetermination), but it accounts for the number of predictors included in the regression model to penalize [overfitting](#sec-overfitting).
+Specifically, adjusted $R^2$ penalizes the number of predictors in the model.
 Adjusted $R^2$ reflects the proportion of variance in the outcome (dependent) variable that is explained by the model predictions over and above what would be expected to be accounted for by chance, given the number of predictors in the model.
+Thus, adjusted $R^2$ will increase only if the new predictor improves the model (i.e., explains additional variance in the outcome variable) more than would be expected by chance.
 Larger values indicate greater accuracy.
 The formula for adjusted $R^2$ is in @eq-adjustedRSquared.
 
 ###### Predictive $R^2$ {#sec-predictiveRsquared}
 
-Predictive $R^2$ is described by @Hopper2014 here: <https://tomhopper.me/2014/05/16/can-we-do-better-than-r-squared/> (archived at <https://perma.cc/BK8J-HFUK>).
+Predictive $R^2$ is described by @Hopper2014 and @Tuzen2025: <https://tomhopper.me/2014/05/16/can-we-do-better-than-r-squared/> (archived at <https://perma.cc/BK8J-HFUK>) and <https://mfatihtuzen.netlify.app/posts/2025-04-30_rsquared/> (archived at <https://perma.cc/EPP8-VG23>).
 Predictive $R^2$ penalizes [overfitting](#sec-overfitting), unlike traditional $R^2$.
 Larger values indicate greater accuracy.
+The formula for predictive $R^2$ is in in @eq-predictiveRSquared:
+
+$$
+\begin{aligned}
+  R^2_{pred} &= 1 - \frac{\text{PRESS}}{\text{SS}_\text{total}}
+\end{aligned}
+$$ {#eq-predictiveRSquared}
+
+where PRESS is the predictive residual sum of squares, and $\text{SS}_\text{total}$ is the total sum of squares.
+
+It is preferable to examine predictive $R^2$ using new data that the model was not trained on—i.e., cross-validation, either in an independent sample (i.e., external cross-validation) or in a hold-out sample (i.e., internal cross-validation on test data).\index{predictive $R^2$}\index{cross-validation}
+
+For example, here is an example of estimating predictive $R^2$ 10-fold cross-validation using the `caret` package [@R-caret].\index{predictive $R^2$}\index{cross-validation}
+
+```{r}
+#| eval: false
+
+set.seed(52242)
+
+# Set up 10-fold cross-validation
+train_control <- caret::trainControl(
+  method = "cv",
+  number = 10)
+
+# Fit the model with cross-validation
+model_cv <- caret::train(
+  outcomeVariable ~ predictorVariable1 + predictorVariable2,
+  data = mydata,
+  method = "lm",
+  na.action = na.exclude,
+  trControl = train_control,
+  metric = "Rsquared")
+
+# View R-squared across the folds
+model_cv$results$Rsquared
+```
 
 ### Discrimination {#sec-discriminationIndices}
 
