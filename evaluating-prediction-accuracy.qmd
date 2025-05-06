@@ -1826,6 +1826,35 @@ model_cv <- caret::train(
 model_cv$results$Rsquared
 ```
 
+Here is an example of estimating predictive $R^2$ with a training and testing data set using the `caret` package [@R-caret].
+
+```{r}
+#| eval: false
+
+set.seed(52242)
+
+inTrain <- caret::createDataPartition(
+  y = as.factor(mydata$outcomeVariable),
+  p = .75, # the proportion of data for the training data set
+  list = FALSE
+)
+
+training <- mydata[ inTrain,]
+testing  <- mydata[-inTrain,]
+
+training_model <- lm(
+  outcomeVariable ~ predictorVariable1 + predictorVariable2,
+  data = training)
+
+testing_predictions <- predict(
+  training_model,
+  newdata = testing)
+
+petersenlab::accuracyOverall(
+  predicted = testing_predictions,
+  actual = testing$outcomeVariable)$rsquared
+```
+
 ### Discrimination {#sec-discriminationIndices}
 
 When dealing with a categorical outcome, discrimination is the ability to separate events from non-events.
