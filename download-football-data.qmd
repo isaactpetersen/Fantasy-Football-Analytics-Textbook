@@ -7,6 +7,7 @@ library("ffanalytics") # to install: install.packages("remotes"); remotes::insta
 library("petersenlab") # to install: install.packages("remotes"); remotes::install_github("DevPsyLab/petersenlab")
 library("nflreadr")
 library("nflfastR")
+library("nflseedR")
 library("nfl4th")
 library("nflplotR")
 library("progressr")
@@ -557,10 +558,12 @@ load(file = "./data/nfl_schedules.RData")
 
 @SharpeStandings provides a Data Dictionary for standings data at the following link: <https://github.com/nflverse/nfldata/blob/master/DATASETS.md#standings>
 
+We can determine NFL standings based on the `nfl_schedules` object using the `nflseedR` [@R-nflseedR] package.
+
 ```{r}
 #| eval: false
 
-nfl_standings_raw <- read_csv("http://www.habitatring.com/standings.csv")
+nfl_standings_raw <- nflseedR::nfl_standings(nfl_schedules) #read_csv("http://www.habitatring.com/standings.csv"); archived at: https://perma.cc/5QLN-VK7V
 ```
 
 ```{r}
@@ -582,7 +585,7 @@ The `nfl_standings` object is in `season`-`team` form.
 That is, each row should be uniquely identified by the combination of `season` and `team`.
 
 ```{r}
-nfl_standings <- nfl_standings_raw
+nfl_standings <- data.frame(nfl_standings_raw)
 ```
 
 Let's check for duplicate `season`-`team` instances:
