@@ -651,7 +651,30 @@ player_stats_seasonal %>%
 
 ### Covariance {#sec-correlationExamplesCovariance}
 
-The following syntax shows the variance-covariance of a set of variables, where the covariance of a variable with itself is the variable's variance.
+The covariance is an unstandardized index of the association between two variables.
+The formula for (sample) covariance is in @eq-covariance and is the numerator to the formula for [correlation](#sec-correlationExamplesPearson).
+
+$$
+\text{Cov}(x, y) = \frac{1}{n - 1} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})
+$$ {#eq-covariance}
+
+For instance, we can calculate the covariance between two variables manually (we subset to just those rows that have data on both $x$ and $y$ to ensure we compute the means using the same values that are included in the estimate of the covariance):
+
+```{r}
+complete_cases <- player_stats_seasonal[complete.cases(player_stats_seasonal$height, player_stats_seasonal$fantasyPoints),]
+
+n <- nrow(complete_cases)
+x <- complete_cases$height
+y <- complete_cases$fantasyPoints
+x_mean <- mean(complete_cases$height)
+y_mean <- mean(complete_cases$fantasyPoints)
+
+cov_manual <- sum((x - x_mean) * (y - y_mean)) / (n - 1)
+cov_manual
+```
+
+The following syntax shows the variance-covariance matrix of a set of variables, where the covariance of a variable with itself is the variable's variance.
+The variances are the values on the diagonal; the covariances are the values on the off-diagonal.
 
 ```{r}
 cov(
@@ -716,20 +739,16 @@ This is an example of [Simpson's paradox](#sec-simpsonsParadox), where the sign 
 There is a *negative* covariance between height and fantasy points when examining Quarterbacks, Running Backs, Wide Receivers, and Tight Ends altogether, but there is a *positive* covariance between height and fantasy points when examining the association between each position separately.
 That is, if you were to examine all positions together, you might assume that being taller might be disadvantageous to scoring fantasy fantasy points; however, once we examine the association within a given position, it emerges that height appears to be somewhat advantageous, if anything, for scoring fantasy points.
 
-The covariance is an unstandardized index of the association between two variables.
-However, it can be helpful to use a standardized index to examine the [effect size](#sec-practicalSignificance)—i.e., the strength of the association.
+The covariance is unstandardized—its metric depends on the metrics of the two variables examined in the association.
+However, it can be helpful to use a standardized index of the association between the variables.
+A standardized index means that the index is on a common metric and does not depend on the metrics of the two variables.
+This is valuable because it allows fairly comparing the strength of associations between sets of variables with different metrics, which is meaningful for estimating the [effect size](#sec-practicalSignificance)—i.e., the strength of the association.
 The [Pearson correlation coefficient](#sec-correlationExamplesPearson), $r$, is an example of a standardized index of the covariance between two variables.
-We can convert a covariance to a [correlation](#sec-correlationExamplesPearson) by standardizing it; i.e., by dividing by the multiplication of the standard deviation of $x$ and the standard deviation of $y$, as in @eq-covToCor:
+We can convert a covariance to a [correlation](#sec-correlationExamplesPearson) by standardizing it; i.e., by dividing by the multiplication of the standard deviation of $x$ and the standard deviation of $y$, as in @eq-pearsonCorrelation.
 
-$$
-r_{xy} = \frac{\text{Cov}(x, y)}{\sigma_x \cdot \sigma_y}
-$$ {#eq-covToCor}
-
-For instance, for the covariance between height and fantasy points, we can convert it to a [correlation](#sec-correlationExamplesPearson) (we subset to just those rows that have data on both $x$ and $y$ to ensure we compute the standard deviations using the same values that are included in the estimate of the covariance):
+For instance, for the covariance between height and fantasy points, we can convert it to a [correlation](#sec-correlationExamplesPearson):
 
 ```{r}
-complete_cases <- player_stats_seasonal[complete.cases(player_stats_seasonal$height, player_stats_seasonal$fantasyPoints),]
-
 cov_value <- cov(
   complete_cases$height,
   complete_cases$fantasyPoints,
@@ -749,6 +768,9 @@ cor(
 
 ### Pearson Correlation {#sec-correlationExamplesPearson}
 
+Correlation is a standardized index of the association between two variables.
+Pearson correlation is the most common type of corrrelation.
+The formula for Pearson correlation is in @eq-pearsonCorrelation.
 Pearson correlation assumes that the variables are [interval](#sec-interval) or [ratio](#sec-interval) level of measurement.
 If the data are [ordinal](#sec-ordinal), [Spearman correlation](#sec-correlationExamplesSpearman) is more appropriate. 
 
