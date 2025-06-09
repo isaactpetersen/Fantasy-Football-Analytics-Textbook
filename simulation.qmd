@@ -1,17 +1,25 @@
-# Simulation: the Monte Carlo Method {#sec-simulation}
+# Simulation: Bootstrapping and the Monte Carlo Method {#sec-simulation}
 
 ## Getting Started {#sec-simulationGettingStarted}
 
 ### Load Packages {#sec-simulationLoadPackages}
 
 ```{r}
+library("ffanalytics")
+library("data.table")
+library("future")
+library("future.apply")
 library("tidyverse")
 ```
 
 ### Load Data {#sec-simulationLoadData}
 
 ```{r}
-load(file = "./data/players_projectedPoints_seasonal.RData")
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projectedPoints_seasonal.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_playerIDs.RData", fsep = ""))
 ```
 
 ## Overview {#sec-simulationOverview}
@@ -37,7 +45,135 @@ For instance, if we know the population distribution for the likely outcomes for
 ### Bootstrapping {#sec-simulationProjectedPointsBootstrapping}
 
 ```{r}
+all_proj <- bind_rows(players_projectedPoints_seasonal)
+```
+
+```{r}
+vars_by_pos <- list(
+  QB = c(
+    "games",
+    "pass_att", "pass_comp", "pass_yds", "pass_tds", "pass_int",
+    "rush_att", "rush_yds", "rush_tds",
+    "fumbles_lost"#,
+    #"sacks",
+    #"pass_09_tds", "pass_1019_tds", "pass_2029_tds", "pass_3039_tds", "pass_4049_tds", "pass_50_tds",  
+    #"pass_250_yds", "pass_300_yds", "pass_350_yds", "pass_40_yds", "pass_400_yds",
+    #"rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds"
+    ),
+  RB = c(
+    "games",
+    "rush_att", "rush_yds", "rush_tds",
+    "rec_tgt", "rec", "rec_yds", "rec_tds",
+    "fumbles_lost",
+    "return_yds", "return_tds"#,
+    #"rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    #"rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
+    #"rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds",
+  ),
+  WR = c(
+    "games",
+    "pass_att", "pass_comp", "pass_yds", "pass_tds", "pass_int",
+    "rush_att", "rush_yds", "rush_tds",
+    "rec_tgt", "rec", "rec_yds", "rec_tds",
+    "fumbles_lost",
+    "return_yds", "return_tds"#,
+    #"rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    #"rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
+    #"rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds",
+  ),
+  TE = c(
+    "games",
+    "pass_att", "pass_comp", "pass_yds", "pass_tds", "pass_int",
+    "rush_att", "rush_yds", "rush_tds",
+    "rec_tgt", "rec", "rec_yds", "rec_tds",
+    "fumbles_lost",
+    "return_yds", "return_tds"#,
+    #"rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    #"rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
+    #"rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds",
+  )
+)
+```
+
+```{r}
+bootstrapSimulation <- function(projectedStats, vars_by_pos, n_iter = 10000, seed = NULL) {
+  dt <- data.table::as.data.table(all_proj)
+  all_ids <- unique(dt$id)
+
+  if (!is.null(seed)) set.seed(seed)
+
+  future::plan(multisession)
+
+  results <- future.apply::future_lapply(
+    all_ids,
+    function(player_id) {
+      player_data <- dt[id == player_id]
+      player_pos <- unique(player_data$pos)
+
+      if (length(player_pos) != 1 || !player_pos %in% names(vars_by_pos)) return(NULL)
+
+      stat_vars <- vars_by_pos[[player_pos]]
+      out <- data.table::data.table(iteration = 1:n_iter, id = player_id, pos = player_pos)
+
+      for (var in stat_vars) {
+        if (var %in% names(player_data)) {
+          non_na_values <- player_data[[var]][!is.na(player_data[[var]])]
+
+          if (length(non_na_values) > 0) {
+            out[[var]] <- sample(non_na_values, n_iter, replace = TRUE)
+          } else {
+            out[[var]] <- NA_real_
+          }
+        } else {
+          out[[var]] <- NA_real_
+        }
+      }
+
+      return(out)
+    },
+    future.seed = TRUE
+  )
+
+  data.table::rbindlist(results, use.names = TRUE, fill = TRUE)
+}
+
+bootstappedStats <- bootstrapSimulation(
+  projectedStats = all_proj,
+  vars_by_pos = vars_by_pos,
+  n_iter = 10000,
+  seed = 52242)
+
+bootstappedStats$data_src <- bootstappedStats$iteration
+
+bootstappedStatsByPosition <- split(
+  bootstappedStats,
+  by = "pos",
+  keep.by = TRUE)
+
+bootstappedStatsByPosition <- lapply(
+  bootstappedStatsByPosition,
+  as_tibble)
+
+attr(bootstappedStatsByPosition, "season") <- 2024
+attr(bootstappedStatsByPosition, "week") <- 0
+
+bootstrappedFantasyPoints <- ffanalytics:::source_points(
+  data_result = bootstappedStatsByPosition,
+  scoring_rules = ffanalytics::scoring)
+
+bootstrappedFantasyPoints$iteration <- bootstrappedFantasyPoints$data_src
+bootstrappedFantasyPoints$data_src <- NULL
+
+bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
+  left_join(
+    nfl_playerIDs[,c("mfl_id","name","merge_name","team")],
+    by = c("id" = "mfl_id")
+  )
+```
+
+```{r}
 #| eval: false
+#| include: false
 
 # https://github.com/FantasyFootballAnalytics/ffanalytics/blob/08cab3cbe6eb645b853bb814e671e186b78a0837/R/calc_projections.R#L218-L253
 
@@ -54,12 +190,119 @@ l = ffanalytics:::scrape_espn(season = 2024, week = 0)
 attr(data_result, "season") <- 2024
 attr(data_result, "week") <- 0
 
-df = ffanalytics:::source_points(l, scoring_rules = ffanalytics::scoring)
+df <- ffanalytics:::source_points(data_result = l, scoring_rules = ffanalytics::scoring)
+```
+
+```{r}
+bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>% 
+  group_by(id) %>% 
+  summarise(
+    mean = mean(raw_points, na.rm = TRUE),
+    SD = sd(raw_points, na.rm = TRUE),
+    min = min(raw_points, na.rm = TRUE),
+    max = max(raw_points, na.rm = TRUE),
+    range = max(raw_points, na.rm = TRUE) - min(raw_points, na.rm = TRUE),
+    IQR = IQR(raw_points, na.rm = TRUE),
+    MAD = mad(raw_points, na.rm = TRUE),
+    CV = SD/mean,
+    median = median(raw_points, na.rm = TRUE),
+    pseudomedian = DescTools::HodgesLehmann(raw_points, na.rm = TRUE),
+    mode = petersenlab::Mode(raw_points, multipleModes = "mean"),
+    skewness = psych::skew(raw_points, na.rm = TRUE),
+    kurtosis = psych::kurtosi(raw_points, na.rm = TRUE)
+  )
+
+bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>% 
+  left_join(
+    nfl_playerIDs[,c("mfl_id","name","merge_name","team","position")],
+    by = c("id" = "mfl_id")
+  ) %>% 
+  select(name, team, position, mean:kurtosis, everything())
+
+bootstrappedFantasyPoints_summary
+```
+
+```{r}
+#| eval: false
+
+bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(CV) %>% head
+bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(-CV) %>% head
+```
+
+```{r}
+#| label: fig-bootstrapping1
+#| fig-cap: "Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping."
+#| fig-alt: "Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping."
+
+ggplot2::ggplot(
+  data = bootstrappedFantasyPoints %>%
+    filter(pos == "QB" & name == "Patrick Mahomes"),
+  mapping = aes(
+    x = raw_points)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  geom_density(
+    color = "#000000",
+    fill = "#F85700",
+    alpha = 0.6 # add transparency
+  ) +
+  geom_rug() +
+  #coord_cartesian(
+  #  xlim = c(0,400)) +
+  labs(
+    x = "Fantasy Points",
+    y = "Density",
+    title = "Distribution of Projected Fantasy Points for Patrick Mahomes"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+```
+
+```{r}
+#| label: fig-bootstrapping1
+#| fig-cap: "Distribution of Projected Fantasy Points for Two Players from Bootstrapping. There is relatively narrow uncertainty around projected fantasy points for Dak Prescott, whereas there is relatively wide uncertainty around the projected fantasy points for Drake Maye."
+#| fig-alt: "Distribution of Projected Fantasy Points for Two Players from Bootstrapping. There is relatively narrow uncertainty around projected fantasy points for Dak Prescott, whereas there is relatively wide uncertainty around the projected fantasy points for Drake Maye."
+
+ggplot2::ggplot(
+  data = bootstrappedFantasyPoints %>%
+    filter(pos == "QB" & (name %in% c("Dak Prescott", "Drake Maye"))),
+  mapping = aes(
+    x = raw_points,
+    group = name,
+    #color = name,
+    fill = name)
+) +
+  geom_histogram(
+    aes(y = after_stat(density))
+  ) +
+  geom_density(
+    alpha = 0.6 # add transparency
+  ) +
+  coord_cartesian(
+    xlim = c(0,NA),
+    expand = FALSE) +
+  #geom_rug() +
+  labs(
+    x = "Fantasy Points",
+    y = "Density",
+    fill = "",
+    color = "",
+    title = "Distribution of Projected Fantasy Points"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 ### Monte Carlo Simulation {#sec-simulationProjectedPointsMonteCarlo}
 
 ```{r}
+#| eval: false
+#| include: false
+
 calculate_fantasyPoints <- function(df, scoring_rules){
   #fantasyPoints <-
   
