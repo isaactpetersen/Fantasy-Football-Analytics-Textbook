@@ -159,6 +159,7 @@ Indices to describe the *spread* (variability) of a variable's data include:
 - minimum and maximum
 - interquartile range (IQR)
 - median absolute deviation
+- coefficient of variation
 
 The (sample) variance of $x$ (written as: $s^2$) is calculated as in @eq-variance:
 
@@ -196,6 +197,14 @@ $$ {#eq-medianAbsoluteDeviation}
 
 where $\tilde{x}$ is the median of $x$.
 Compared to the standard deviation, the median absolute deviation is more robust to outliers.
+
+The coefficient of variation (CV) accounts for the fact that variables with larger means also tend to have larger standard deviations; it is calculated as the standard deviation divided by the mean, as in @eq-coefficientOfVariation:
+
+$$
+\text{CV} = \frac{SD(x)}{\bar{x}}
+$$ {#eq-coefficientOfVariation}
+
+where $SD(x)$ is the standard deviation of $x$.
 
 Below is R code to estimate each:
 
@@ -236,6 +245,12 @@ IQR(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 
 ```{r}
 mad(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+```
+
+- coefficient of variation:
+
+```{r}
+sd(player_stats_seasonal$fantasyPoints, na.rm = TRUE) / mean(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
 ### Shape {#sec-descriptiveStatisticsShape}
@@ -289,6 +304,7 @@ player_stats_seasonal %>%
         range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
         IQR = ~ IQR(., na.rm = TRUE),
         MAD = ~ mad(., na.rm = TRUE),
+        CV = ~ sd(., na.rm = TRUE) / mean(., na.rm = TRUE),
         median = ~ median(., na.rm = TRUE),
         pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
         mode = ~ petersenlab::Mode(., multipleModes = "mean"),
