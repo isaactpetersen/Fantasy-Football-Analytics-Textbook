@@ -59,21 +59,21 @@ vars_by_pos <- list(
     "games",
     "pass_att", "pass_comp", "pass_yds", "pass_tds", "pass_int",
     "rush_att", "rush_yds", "rush_tds",
-    "fumbles_lost"#,
-    #"sacks",
-    #"pass_09_tds", "pass_1019_tds", "pass_2029_tds", "pass_3039_tds", "pass_4049_tds", "pass_50_tds",  
-    #"pass_250_yds", "pass_300_yds", "pass_350_yds", "pass_40_yds", "pass_400_yds",
-    #"rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds"
+    "fumbles_lost",
+    "sacks",
+    "pass_09_tds", "pass_1019_tds", "pass_2029_tds", "pass_3039_tds", "pass_4049_tds", "pass_50_tds",  
+    "pass_250_yds", "pass_300_yds", "pass_350_yds", "pass_40_yds", "pass_400_yds",
+    "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds"
     ),
   RB = c(
     "games",
     "rush_att", "rush_yds", "rush_tds",
     "rec_tgt", "rec", "rec_yds", "rec_tds",
     "fumbles_lost",
-    "return_yds", "return_tds"#,
-    #"rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
-    #"rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
-    #"rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds",
+    "return_yds", "return_tds",
+    "rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    "rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
+    "rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds"
   ),
   WR = c(
     "games",
@@ -81,10 +81,10 @@ vars_by_pos <- list(
     "rush_att", "rush_yds", "rush_tds",
     "rec_tgt", "rec", "rec_yds", "rec_tds",
     "fumbles_lost",
-    "return_yds", "return_tds"#,
-    #"rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
-    #"rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
-    #"rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds",
+    "return_yds", "return_tds",
+    "rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    "rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
+    "rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds"
   ),
   TE = c(
     "games",
@@ -92,62 +92,72 @@ vars_by_pos <- list(
     "rush_att", "rush_yds", "rush_tds",
     "rec_tgt", "rec", "rec_yds", "rec_tds",
     "fumbles_lost",
-    "return_yds", "return_tds"#,
-    #"rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
-    #"rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
-    #"rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds",
-  )
+    "return_yds", "return_tds",
+    "rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    "rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds", "rush_40_yds",
+    "rec_rz_tgt", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds", "rec_40_yds"
+  ),
+  K = c(
+    "fg_50", "fg_50_att", "fg_49", "fg_49_att", "fg_39", "fg_att_39", "fg", "fg_att", "xp", "xp_att"
+  ),
+  DST = c(
+    "dst_fum_recvr", "dst_sacks", "dst_fumbles", "dst_tackles", "dst_td", "dst_yds_against", "dst_pts_against"
+  ) ### ADD IDP VARS
 )
 ```
 
 ```{r}
 bootstrapSimulation <- function(projectedStats, vars_by_pos, n_iter = 10000, seed = NULL) {
-  dt <- data.table::as.data.table(projectedStats)
+  dt <- data.table::as.data.table(projectedStats) # using data.table for speed
   all_ids <- unique(dt$id)
   
   if (!is.null(seed)) set.seed(seed)
   
-  future::plan(future::multisession)
+  future::plan(future::multisession) # parallelize tasks across multiple background R sessions using multiple cores to speed up simulation
   
   results <- future.apply::future_lapply(
-    all_ids,
+    all_ids, # apply the function below to each player using a parallelized loop
     function(player_id) {
       player_data <- dt[id == player_id]
       player_pos <- unique(player_data$pos)
       
       if (length(player_pos) != 1 || !player_pos %in% names(vars_by_pos)) return(NULL)
       
-      stat_vars <- vars_by_pos[[player_pos]]
+      stat_vars <- vars_by_pos[[player_pos]] # pulls the relevant stat variables to simulate for this player's position
       out <- data.table(iteration = seq_len(n_iter), id = player_id, pos = player_pos)
       
-      for (var in stat_vars) {
+      for (var in stat_vars) { # Loop over each stat variable that should be simulated for the player's position
         if (var %in% names(player_data)) {
-          non_na_values <- player_data[[var]][!is.na(player_data[[var]])]
+          non_na_values <- player_data[[var]][!is.na(player_data[[var]])] # pulls non-missing values of the stat for the player (from all projection sources)
           
           if (length(non_na_values) > 0) {
-            out[[var]] <- sample(non_na_values, n_iter, replace = TRUE)
+            out[[var]] <- sample(non_na_values, n_iter, replace = TRUE) # If there are valid values, sample with replacement to simulate n_iter values
           } else {
-            out[[var]] <- NA_real_
+            out[[var]] <- NA_real_ # specifies a numeric missing value (if all values were missing)
           }
         } else {
-          out[[var]] <- NA_real_
+          out[[var]] <- NA_real_ # specifies a numeric missing value (if the stat variable doesn't exist)
         }
       }
       
       return(out)
     },
-    future.seed = TRUE
+    future.seed = TRUE # ensures that each parallel process gets a reproducible random seed
   )
   
-  data.table::rbindlist(results, use.names = TRUE, fill = TRUE)
+  data.table::rbindlist(results, use.names = TRUE, fill = TRUE) # combines all the individual player results into one large data table, aligning columns by name; fill = TRUE ensures that missing columns are filled with NA where necessary
 }
+```
 
+```{r}
 bootstappedStats <- bootstrapSimulation(
   projectedStats = all_proj,
   vars_by_pos = vars_by_pos,
   n_iter = 10000,
   seed = 52242)
+```
 
+```{r}
 bootstappedStats$data_src <- bootstappedStats$iteration
 
 bootstappedStatsByPosition <- split(
@@ -174,6 +184,10 @@ bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>%
     nfl_playerIDs[,c("mfl_id","name","merge_name","team")],
     by = c("id" = "mfl_id")
   )
+
+bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
+  rename(projectedPoints = raw_points) %>% 
+  arrange(-projectedPoints)
 ```
 
 ```{r}
@@ -202,19 +216,19 @@ df <- ffanalytics:::source_points(data_result = l, scoring_rules = ffanalytics::
 bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>% 
   group_by(id) %>% 
   summarise(
-    mean = mean(raw_points, na.rm = TRUE),
-    SD = sd(raw_points, na.rm = TRUE),
-    min = min(raw_points, na.rm = TRUE),
-    max = max(raw_points, na.rm = TRUE),
-    range = max(raw_points, na.rm = TRUE) - min(raw_points, na.rm = TRUE),
-    IQR = IQR(raw_points, na.rm = TRUE),
-    MAD = mad(raw_points, na.rm = TRUE),
+    mean = mean(projectedPoints, na.rm = TRUE),
+    SD = sd(projectedPoints, na.rm = TRUE),
+    min = min(projectedPoints, na.rm = TRUE),
+    max = max(projectedPoints, na.rm = TRUE),
+    range = max(projectedPoints, na.rm = TRUE) - min(projectedPoints, na.rm = TRUE),
+    IQR = IQR(projectedPoints, na.rm = TRUE),
+    MAD = mad(projectedPoints, na.rm = TRUE),
     CV = SD/mean,
-    median = median(raw_points, na.rm = TRUE),
-    pseudomedian = DescTools::HodgesLehmann(raw_points, na.rm = TRUE),
-    mode = petersenlab::Mode(raw_points, multipleModes = "mean"),
-    skewness = psych::skew(raw_points, na.rm = TRUE),
-    kurtosis = psych::kurtosi(raw_points, na.rm = TRUE)
+    median = median(projectedPoints, na.rm = TRUE),
+    pseudomedian = DescTools::HodgesLehmann(projectedPoints, na.rm = TRUE),
+    mode = petersenlab::Mode(projectedPoints, multipleModes = "mean"),
+    skewness = psych::skew(projectedPoints, na.rm = TRUE),
+    kurtosis = psych::kurtosi(projectedPoints, na.rm = TRUE)
   )
 
 bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>% 
@@ -222,13 +236,51 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>%
     nfl_playerIDs[,c("mfl_id","name","merge_name","team","position")],
     by = c("id" = "mfl_id")
   ) %>% 
-  select(name, team, position, mean:kurtosis, everything())
-
-bootstrappedFantasyPoints_summary
+  select(name, team, position, mean:kurtosis, everything()) %>% 
+  arrange(-mean)
 ```
 
 ```{r}
+bootstrappedFantasyPoints_summary %>% 
+  filter(position == "QB") %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
+
+bootstrappedFantasyPoints_summary %>% 
+  filter(position == "RB") %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
+
+bootstrappedFantasyPoints_summary %>% 
+  filter(position == "WR") %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
+
+bootstrappedFantasyPoints_summary %>% 
+  filter(position == "TE") %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
+
+bootstrappedFantasyPoints_summary %>% 
+  filter(position == "PK") %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
+```
+
+
+```{r}
 #| eval: false
+#| include: false
 
 bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(CV) %>% head
 bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(-CV) %>% head
