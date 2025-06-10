@@ -50,7 +50,7 @@ For instance, if we know the population distribution for the likely outcomes for
 ### Bootstrapping {#sec-simulationProjectedPointsBootstrapping}
 
 ```{r}
-all_proj <- bind_rows(players_projectedPoints_seasonal)
+all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
 ```
 
 ```{r}
@@ -102,28 +102,28 @@ vars_by_pos <- list(
 
 ```{r}
 bootstrapSimulation <- function(projectedStats, vars_by_pos, n_iter = 10000, seed = NULL) {
-  dt <- data.table::as.data.table(all_proj)
+  dt <- data.table::as.data.table(projectedStats)
   all_ids <- unique(dt$id)
-
+  
   if (!is.null(seed)) set.seed(seed)
-
-  future::plan(multisession)
-
+  
+  future::plan(future::multisession)
+  
   results <- future.apply::future_lapply(
     all_ids,
     function(player_id) {
       player_data <- dt[id == player_id]
       player_pos <- unique(player_data$pos)
-
+      
       if (length(player_pos) != 1 || !player_pos %in% names(vars_by_pos)) return(NULL)
-
+      
       stat_vars <- vars_by_pos[[player_pos]]
-      out <- data.table::data.table(iteration = 1:n_iter, id = player_id, pos = player_pos)
-
+      out <- data.table(iteration = seq_len(n_iter), id = player_id, pos = player_pos)
+      
       for (var in stat_vars) {
         if (var %in% names(player_data)) {
           non_na_values <- player_data[[var]][!is.na(player_data[[var]])]
-
+          
           if (length(non_na_values) > 0) {
             out[[var]] <- sample(non_na_values, n_iter, replace = TRUE)
           } else {
@@ -133,12 +133,12 @@ bootstrapSimulation <- function(projectedStats, vars_by_pos, n_iter = 10000, see
           out[[var]] <- NA_real_
         }
       }
-
+      
       return(out)
     },
     future.seed = TRUE
   )
-
+  
   data.table::rbindlist(results, use.names = TRUE, fill = TRUE)
 }
 
