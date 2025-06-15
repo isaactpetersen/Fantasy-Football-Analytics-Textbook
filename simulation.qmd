@@ -9,6 +9,7 @@ library("ffanalytics")
 library("data.table")
 library("future")
 library("future.apply")
+library("progressr")
 library("tidyverse")
 ```
 
@@ -107,54 +108,81 @@ vars_by_pos <- list(
 ```
 
 ```{r}
-bootstrapSimulation <- function(projectedStats, vars_by_pos, n_iter = 10000, seed = NULL) {
-  dt <- data.table::as.data.table(projectedStats) # using data.table for speed
+bootstrapSimulation <- function(
+    projectedStats,
+    vars_by_pos,
+    n_iter = 10000,
+    seed = NULL,
+    progress = TRUE) {
+  
+  dt <- data.table::as.data.table(projectedStats) # use data.table for speed
   all_ids <- unique(dt$id)
   
   if (!is.null(seed)) set.seed(seed)
   
   future::plan(future::multisession) # parallelize tasks across multiple background R sessions using multiple cores to speed up simulation
   
-  results <- future.apply::future_lapply(
-    all_ids, # apply the function below to each player using a parallelized loop
-    function(player_id) {
-      player_data <- dt[id == player_id]
-      player_pos <- unique(player_data$pos)
-      
-      if (length(player_pos) != 1 || !player_pos %in% names(vars_by_pos)) return(NULL)
-      
-      stat_vars <- vars_by_pos[[player_pos]] # pulls the relevant stat variables to simulate for this player's position
-      out <- data.table(iteration = seq_len(n_iter), id = player_id, pos = player_pos)
-      
-      for (var in stat_vars) { # Loop over each stat variable that should be simulated for the player's position
-        if (var %in% names(player_data)) {
-          non_na_values <- player_data[[var]][!is.na(player_data[[var]])] # pulls non-missing values of the stat for the player (from all projection sources)
-          
-          if (length(non_na_values) > 0) {
-            out[[var]] <- sample(non_na_values, n_iter, replace = TRUE) # If there are valid values, sample with replacement to simulate n_iter values
+  if (progress) progressr::handlers("txtprogressbar") # specify progress-bar style
+  
+  results <- progressr::with_progress({ # wrap in with_progress for progress bar
+    p <- if (progress) progressr::progressor(along = all_ids) else NULL # create progressor for progress bar
+    
+    future.apply::future_lapply(
+      all_ids, # apply the function below to each player using a parallelized loop
+      function(player_id) {
+        if (!is.null(p)) p() # advance progress bar
+        
+        player_data <- dt[id == player_id]
+        player_pos  <- unique(player_data$pos)
+        
+        if (length(player_pos) != 1 || !player_pos %in% names(vars_by_pos)) return(NULL)
+        
+        stat_vars <- vars_by_pos[[player_pos]] # pull the relevant stat variables to simulate for this player's position
+        out <- data.table(iteration = seq_len(n_iter), id = player_id, pos = player_pos)
+        
+        for (var in stat_vars) { # loop over each stat variable that should be simulated for the player's position
+          if (var %in% names(player_data)) {
+            non_na_values <- player_data[[var]][!is.na(player_data[[var]])] # pull non-missing values of the stat for the player (from all projection sources)
+            
+            if (length(non_na_values) > 0) {
+              out[[var]] <- sample(non_na_values, n_iter, replace = TRUE) # if there are valid values, sample with replacement to simulate n_iter values
+            } else {
+              out[[var]] <- NA_real_ # specify a numeric missing value (if all values were missing)
+            }
           } else {
-            out[[var]] <- NA_real_ # specifies a numeric missing value (if all values were missing)
+            out[[var]] <- NA_real_ # specify a numeric missing value (if the stat variable doesn't exist)
           }
-        } else {
-          out[[var]] <- NA_real_ # specifies a numeric missing value (if the stat variable doesn't exist)
         }
-      }
-      
-      return(out)
-    },
-    future.seed = TRUE # ensures that each parallel process gets a reproducible random seed
-  )
+        
+        return(out)
+      },
+      future.seed = TRUE # ensures that each parallel process gets a reproducible random seed
+    )
+  })
   
   data.table::rbindlist(results, use.names = TRUE, fill = TRUE) # combines all the individual player results into one large data table, aligning columns by name; fill = TRUE ensures that missing columns are filled with NA where necessary
 }
 ```
 
 ```{r}
+#| eval: false
+
 bootstappedStats <- bootstrapSimulation(
   projectedStats = all_proj,
   vars_by_pos = vars_by_pos,
   n_iter = 10000,
   seed = 52242)
+```
+
+```{r}
+#| include: false
+
+bootstappedStats <- bootstrapSimulation(
+  projectedStats = all_proj,
+  vars_by_pos = vars_by_pos,
+  n_iter = 10000,
+  seed = 52242,
+  progress = FALSE)
 ```
 
 ```{r}
@@ -218,6 +246,8 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>%
   summarise(
     mean = mean(projectedPoints, na.rm = TRUE),
     SD = sd(projectedPoints, na.rm = TRUE),
+    floor = quantile(projectedPoints, .10), # 10th quantile
+    ceiling = quantile(projectedPoints, .90), # 90th quantile
     min = min(projectedPoints, na.rm = TRUE),
     max = max(projectedPoints, na.rm = TRUE),
     range = max(projectedPoints, na.rm = TRUE) - min(projectedPoints, na.rm = TRUE),
