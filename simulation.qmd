@@ -55,6 +55,77 @@ all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
 ```
 
 ```{r}
+#| label: code-to-specify-vars-to-bootstrap-by-position
+#| eval: false
+
+vars_by_pos <- list(
+  QB = c(
+    "games",
+    "pass_att", "pass_comp", "pass_inc", "pass_yds", "pass_tds", "pass_int",
+    "rush_att", "rush_yds", "rush_tds",
+    "fumbles_lost", "fumbles_total", "two_pts",
+    "sacks",
+    "pass_09_tds", "pass_1019_tds", "pass_2029_tds", "pass_3039_tds", "pass_4049_tds", "pass_50_tds",
+    "pass_40_yds", "pass_250_yds", "pass_300_yds", "pass_350_yds", "pass_400_yds",
+    "rush_40_yds", "rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds"
+    ),
+  RB = c(
+    "games",
+    "rush_att", "rush_yds", "rush_tds",
+    "rec_tgt", "rec", "rec_yds", "rec_tds", "rec_rz_tgt",
+    "fumbles_lost", "fumbles_total", "two_pts",
+    "return_yds", "return_tds",
+    "rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    "rush_40_yds", "rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds",
+    "rec_40_yds", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds"
+  ),
+  WR = c(
+    "games",
+    "pass_att", "pass_comp", "pass_inc", "pass_yds", "pass_tds", "pass_int",
+    "rush_att", "rush_yds", "rush_tds",
+    "rec_tgt", "rec", "rec_yds", "rec_tds", "rec_rz_tgt",
+    "fumbles_lost", "fumbles_total", "two_pts",
+    "return_yds", "return_tds",
+    "rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    "rush_40_yds", "rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds",
+    "rec_40_yds", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds"
+  ),
+  TE = c(
+    "games",
+    "pass_att", "pass_comp", "pass_inc", "pass_yds", "pass_tds", "pass_int",
+    "rush_att", "rush_yds", "rush_tds",
+    "rec_tgt", "rec", "rec_yds", "rec_tds", "rec_rz_tgt",
+    "fumbles_lost", "fumbles_total", "two_pts",
+    "return_yds", "return_tds",
+    "rush_09_tds", "rush_1019_tds", "rush_2029_tds", "rush_3039_tds", "rush_4049_tds", "rush_50_tds",
+    "rush_40_yds", "rush_50_yds", "rush_100_yds", "rush_150_yds", "rush_200_yds",
+    "rec_40_yds", "rec_50_yds", "rec_100_yds", "rec_150_yds", "rec_200_yds"
+  ),
+  K = c(
+    "fg_0019", "fg_2029", "fg_3039", "fg_4049", "fg_50", "fg_50_att",
+    "fg_39", "fg_att_39", "fg_49", "fg_49_att",
+    "fg", "fg_att", "fg_miss", "xp", "xp_att"
+  ),
+  D = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  DL = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  LB = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  DB = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  DST = c(
+    "dst_fum_recvr", "dst_fum_rec", "dst_int", "dst_safety", "dst_sacks", "dst_td", "dst_blk",
+    "dst_fumbles", "dst_tackles", "dst_yds_against", "dst_pts_against", "dst_pts_allowed", "dst_ret_yds"
+  )
+)
+```
+
+```{r}
 #| label: vars-to-bootstrap-by-position
 
 vars_by_pos <- list(
@@ -104,23 +175,23 @@ vars_by_pos <- list(
     "fg_0019", "fg_2029", "fg_3039", "fg_4049", "fg_50", "fg_50_att",
     "fg_39", "fg_att_39", "fg_49", "fg_49_att",
     "fg", "fg_att", "fg_miss", "xp", "xp_att"
-  )#,
-  #D = c(
-  #  "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
-  #),
-  #DL = c(
-  #  "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
-  #),
-  #LB = c(
-  #  "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
-  #),
-  #DB = c(
-  #  "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
-  #),
-  #DST = c(
-  #  "dst_fum_recvr", "dst_fum_rec", "dst_int", "dst_safety", "dst_sacks", "dst_td", "dst_blk",
-  #  "dst_fumbles", "dst_tackles", "dst_yds_against", "dst_pts_against", "dst_pts_allowed", "dst_ret_yds"
-  #)
+  ),
+  D = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  DL = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  LB = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  DB = c(
+    "idp_solo", "idp_asst", "idp_sack", "idp_int", "idp_fum_force", "idp_fum_rec", "idp_pd", "idp_td", "idp_safety"
+  ),
+  DST = c(
+    "dst_fum_recvr", "dst_fum_rec", "dst_int", "dst_safety", "dst_sacks", "dst_td", "dst_blk",
+    "dst_fumbles", "dst_tackles", "dst_yds_against", "dst_pts_against", "dst_pts_allowed", "dst_ret_yds"
+  )
 )
 ```
 
@@ -207,7 +278,15 @@ bootstappedStats <- bootstrapSimulation(
 ```
 
 ```{r}
-#| label: score-bootstrap-simulation
+#| label: free-up-memory1
+#| include: false
+
+rm(all_proj)
+gc()
+```
+
+```{r}
+#| label: put-simulated-data-in-format-for-scoring
 
 bootstappedStats$data_src <- bootstappedStats$iteration
 
@@ -222,23 +301,47 @@ bootstappedStatsByPosition <- lapply(
 
 attr(bootstappedStatsByPosition, "season") <- 2024
 attr(bootstappedStatsByPosition, "week") <- 0
+```
+
+```{r}
+#| label: free-up-memory2
+#| include: false
+
+rm(bootstappedStats)
+gc()
+```
+
+```{r}
+#| label: score-bootstrap-simulation
 
 bootstrappedFantasyPoints <- ffanalytics:::source_points(
   data_result = bootstappedStatsByPosition,
   scoring_rules = ffanalytics::scoring)
+```
+
+```{r}
+#| label: free-up-memory3
+#| include: false
+
+rm(bootstappedStatsByPosition)
+gc()
+```
+
+```{r}
+#| label: postprocessing-bootstrap-simulation
 
 bootstrappedFantasyPoints$iteration <- bootstrappedFantasyPoints$data_src
 bootstrappedFantasyPoints$data_src <- NULL
 
 bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
-  left_join(
-    nfl_playerIDs[,c("mfl_id","name","merge_name","team")],
-    by = c("id" = "mfl_id")
-  )
+  rename(projectedPoints = raw_points)
+```
 
-bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
-  rename(projectedPoints = raw_points) %>% 
-  arrange(-projectedPoints)
+```{r}
+#| label: free-up-memory4
+#| include: false
+
+gc()
 ```
 
 ```{r}
@@ -286,6 +389,18 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>%
     skewness = psych::skew(projectedPoints, na.rm = TRUE),
     kurtosis = psych::kurtosi(projectedPoints, na.rm = TRUE)
   )
+```
+
+```{r}
+#| label: free-up-memory5
+#| include: false
+
+rm(bootstrappedFantasyPoints)
+gc()
+```
+
+```{r}
+#| label: merge-player-info
 
 bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>% 
   left_join(
@@ -297,7 +412,14 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>%
 ```
 
 ```{r}
-#| label: display-bootstrap-simulation-summaries
+#| label: free-up-memory6
+#| include: false
+
+gc()
+```
+
+```{r}
+#| label: display-bootstrap-simulation-summaries-qb
 
 bootstrappedFantasyPoints_summary %>% 
   filter(position == "QB") %>% 
@@ -305,6 +427,10 @@ bootstrappedFantasyPoints_summary %>%
     across(
       where(is.numeric),
       \(x) round(x, digits = 2)))
+```
+
+```{r}
+#| label: display-bootstrap-simulation-summaries-rb
 
 bootstrappedFantasyPoints_summary %>% 
   filter(position == "RB") %>% 
@@ -312,6 +438,10 @@ bootstrappedFantasyPoints_summary %>%
     across(
       where(is.numeric),
       \(x) round(x, digits = 2)))
+```
+
+```{r}
+#| label: display-bootstrap-simulation-summaries-wr
 
 bootstrappedFantasyPoints_summary %>% 
   filter(position == "WR") %>% 
@@ -319,6 +449,10 @@ bootstrappedFantasyPoints_summary %>%
     across(
       where(is.numeric),
       \(x) round(x, digits = 2)))
+```
+
+```{r}
+#| label: display-bootstrap-simulation-summaries-te
 
 bootstrappedFantasyPoints_summary %>% 
   filter(position == "TE") %>% 
@@ -326,6 +460,10 @@ bootstrappedFantasyPoints_summary %>%
     across(
       where(is.numeric),
       \(x) round(x, digits = 2)))
+```
+
+```{r}
+#| label: display-bootstrap-simulation-summaries-k
 
 bootstrappedFantasyPoints_summary %>% 
   filter(position == "PK") %>% 
@@ -333,27 +471,39 @@ bootstrappedFantasyPoints_summary %>%
     across(
       where(is.numeric),
       \(x) round(x, digits = 2)))
+```
 
-#bootstrappedFantasyPoints_summary %>% 
-#  filter(position %in% c("DL","DT","DE")) %>% 
-#  mutate(
-#    across(
-#      where(is.numeric),
-#      \(x) round(x, digits = 2)))
-#
-#bootstrappedFantasyPoints_summary %>% 
-#  filter(position %in% c("LB","MLB","OLB")) %>% 
-#  mutate(
-#    across(
-#      where(is.numeric),
-#      \(x) round(x, digits = 2)))
-#
-#bootstrappedFantasyPoints_summary %>% 
-#  filter(position %in% c("DB","S","CB")) %>% 
-#  mutate(
-#    across(
-#      where(is.numeric),
-#      \(x) round(x, digits = 2)))
+```{r}
+#| label: display-bootstrap-simulation-summaries-dl
+
+bootstrappedFantasyPoints_summary %>% 
+  filter(position %in% c("DL","DT","DE")) %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
+```
+
+```{r}
+#| label: display-bootstrap-simulation-summaries-lb
+
+bootstrappedFantasyPoints_summary %>% 
+  filter(position %in% c("LB","MLB","OLB")) %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
+```
+
+```{r}
+#| label: display-bootstrap-simulation-summaries-db
+
+bootstrappedFantasyPoints_summary %>% 
+  filter(position %in% c("DB","S","CB")) %>% 
+  mutate(
+    across(
+      where(is.numeric),
+      \(x) round(x, digits = 2)))
 ```
 
 ```{r}
