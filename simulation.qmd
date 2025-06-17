@@ -55,6 +55,8 @@ all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
 ```
 
 ```{r}
+#| label: vars-to-bootstrap-by-position
+
 vars_by_pos <- list(
   QB = c(
     "games",
@@ -123,6 +125,8 @@ vars_by_pos <- list(
 ```
 
 ```{r}
+#| label: function-for-bootstrap-simulation
+
 bootstrapSimulation <- function(
     projectedStats,
     vars_by_pos,
@@ -180,6 +184,7 @@ bootstrapSimulation <- function(
 ```
 
 ```{r}
+#| label: code-to-run-bootstrap-simulation
 #| eval: false
 
 bootstappedStats <- bootstrapSimulation(
@@ -190,6 +195,7 @@ bootstappedStats <- bootstrapSimulation(
 ```
 
 ```{r}
+#| label: run-bootstrap-simulation
 #| include: false
 
 bootstappedStats <- bootstrapSimulation(
@@ -201,6 +207,8 @@ bootstappedStats <- bootstrapSimulation(
 ```
 
 ```{r}
+#| label: score-bootstrap-simulation
+
 bootstappedStats$data_src <- bootstappedStats$iteration
 
 bootstappedStatsByPosition <- split(
@@ -234,6 +242,7 @@ bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>%
 ```
 
 ```{r}
+#| label: compute-fantasy-points-example
 #| eval: false
 #| include: false
 
@@ -256,6 +265,8 @@ df <- ffanalytics:::source_points(data_result = l, scoring_rules = ffanalytics::
 ```
 
 ```{r}
+#| label: summarize-bootstrap-simulation-scores
+
 bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>% 
   group_by(id) %>% 
   summarise(
@@ -286,6 +297,8 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>%
 ```
 
 ```{r}
+#| label: display-bootstrap-simulation-summaries
+
 bootstrappedFantasyPoints_summary %>% 
   filter(position == "QB") %>% 
   mutate(
@@ -321,30 +334,30 @@ bootstrappedFantasyPoints_summary %>%
       where(is.numeric),
       \(x) round(x, digits = 2)))
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position %in% c("DL","DT","DE")) %>% 
-  mutate(
-    across(
-      where(is.numeric),
-      \(x) round(x, digits = 2)))
-
-bootstrappedFantasyPoints_summary %>% 
-  filter(position %in% c("LB","MLB","OLB")) %>% 
-  mutate(
-    across(
-      where(is.numeric),
-      \(x) round(x, digits = 2)))
-
-bootstrappedFantasyPoints_summary %>% 
-  filter(position %in% c("DB","S","CB")) %>% 
-  mutate(
-    across(
-      where(is.numeric),
-      \(x) round(x, digits = 2)))
+#bootstrappedFantasyPoints_summary %>% 
+#  filter(position %in% c("DL","DT","DE")) %>% 
+#  mutate(
+#    across(
+#      where(is.numeric),
+#      \(x) round(x, digits = 2)))
+#
+#bootstrappedFantasyPoints_summary %>% 
+#  filter(position %in% c("LB","MLB","OLB")) %>% 
+#  mutate(
+#    across(
+#      where(is.numeric),
+#      \(x) round(x, digits = 2)))
+#
+#bootstrappedFantasyPoints_summary %>% 
+#  filter(position %in% c("DB","S","CB")) %>% 
+#  mutate(
+#    across(
+#      where(is.numeric),
+#      \(x) round(x, digits = 2)))
 ```
 
-
 ```{r}
+#| label: identify-players-with-lo-or-hi-cv
 #| eval: false
 #| include: false
 
