@@ -289,21 +289,14 @@ gc()
 ```
 
 ```{r}
-#| label: put-simulated-data-in-format-for-scoring
+#| label: put-simulated-data-in-format-for-scoring1
 
-bootstappedStats$data_src <- bootstappedStats$iteration
+data.table::setnames(bootstappedStats, "iteration", "data_src") # data.table equivalent to: bootstappedStats$data_src <- bootstappedStats$iteration
 
 bootstappedStatsByPosition <- split(
   bootstappedStats,
   by = "pos",
   keep.by = TRUE)
-
-bootstappedStatsByPosition <- lapply(
-  bootstappedStatsByPosition,
-  as_tibble)
-
-attr(bootstappedStatsByPosition, "season") <- 2024
-attr(bootstappedStatsByPosition, "week") <- 0
 ```
 
 ```{r}
@@ -311,6 +304,24 @@ attr(bootstappedStatsByPosition, "week") <- 0
 #| include: false
 
 rm(bootstappedStats)
+gc()
+```
+
+```{r}
+#| label: put-simulated-data-in-format-for-scoring1
+
+bootstappedStatsByPosition <- lapply(
+  bootstappedStatsByPosition,
+  setDF)
+
+attr(bootstappedStatsByPosition, "season") <- 2024
+attr(bootstappedStatsByPosition, "week") <- 0
+```
+
+```{r}
+#| label: free-up-memory3
+#| include: false
+
 gc()
 ```
 
@@ -323,7 +334,7 @@ bootstrappedFantasyPoints <- ffanalytics:::source_points(
 ```
 
 ```{r}
-#| label: free-up-memory3
+#| label: free-up-memory4
 #| include: false
 
 rm(bootstappedStatsByPosition)
@@ -341,7 +352,7 @@ bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>%
 ```
 
 ```{r}
-#| label: free-up-memory4
+#| label: free-up-memory5
 #| include: false
 
 gc()
@@ -395,7 +406,7 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>%
 ```
 
 ```{r}
-#| label: free-up-memory5
+#| label: free-up-memory6
 #| include: false
 
 rm(bootstrappedFantasyPoints)
@@ -415,7 +426,7 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>%
 ```
 
 ```{r}
-#| label: free-up-memory6
+#| label: free-up-memory7
 #| include: false
 
 gc()
