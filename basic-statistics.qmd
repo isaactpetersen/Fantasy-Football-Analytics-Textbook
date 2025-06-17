@@ -40,18 +40,18 @@ There are various indices of each.
 
 Indices to describe the *center* (central tendency) of a variable's data include:
 
-- mean (aka "average")
+- mean (aka "average") (i.e., $M$ or $\mu$)
 - median
 - Hodges-Lehmann statistic (aka pseudomedian)
 - mode
 - weighted mean
 - weighted median
 
-The mean of $x$ (written as: $\bar{x}$) is calculated as in @eq-IQR:
+The mean of $x$ (written as: $\bar{x}$ or $\mu_x$) is calculated as in @eq-mean:
 
 $$
 \bar{x} = \frac{\sum x_i}{n} = \frac{x_1 + x_2 + ... + x_n}{n}
-$$ {#eq-IQR}
+$$ {#eq-mean}
 
 ```{r}
 #| code-fold: true
@@ -153,8 +153,8 @@ petersenlab::wthdquantile(
 
 Indices to describe the *spread* (variability) of a variable's data include:
 
-- standard deviation
-- variance
+- standard deviation ($s$ or $\sigma$)
+- variance ($s^2$ or $\sigma^2$)
 - range
 - minimum and maximum
 - interquartile range (IQR)
@@ -168,12 +168,15 @@ s^2 = \frac{\sum (x_i - \bar{x})^2}{n-1}
 $$ {#eq-variance}
 
 where $x_i$ is each data point, $\bar{x}$ is the mean of $x$, and $n$ is the number of data points.
+The population variance divides by $n$ rather than $n-1$ and is written as $\sigma^2$.
 
 The (sample) standard deviation of $x$ (written as: $s$) is calculated as in @eq-sd:
 
 $$
 s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n-1}}
 $$ {#eq-sd}
+
+The population standard deviation divides by $n$ rather than $n-1$ and is written as $\sigma$.
 
 The range is calculated of $x$ is calculated as in @eq-range:
 
@@ -198,13 +201,7 @@ $$ {#eq-medianAbsoluteDeviation}
 where $\tilde{x}$ is the median of $x$.
 Compared to the standard deviation, the median absolute deviation is more robust to outliers.
 
-The coefficient of variation (CV) accounts for the fact that variables with larger means also tend to have larger standard deviations; it is calculated as the standard deviation divided by the mean, as in @eq-coefficientOfVariation:
-
-$$
-\text{CV} = \frac{SD(x)}{\bar{x}}
-$$ {#eq-coefficientOfVariation}
-
-where $SD(x)$ is the standard deviation of $x$.
+The coefficient of variation (CV) accounts for the fact that variables with larger means also tend to have larger standard deviations; it is calculated as the standard deviation divided by the mean, as in @eq-coefficientOfVariation.
 
 Below is R code to estimate each:
 
@@ -357,10 +354,10 @@ Thus, *z* scores are considered a form of a *standardized* score.
 *z* scores are calculated using @eq-zScore:
 
 $$
-z = \frac{x - \bar{x}}{\sigma}
+z = \frac{x - \bar{x}}{s_x}
 $$ {#eq-zScore}
 
-where $x$ is the observed score, $\bar{x}$ is the mean observed score, and $\sigma$ is the standard deviation of the observed scores.
+where $x$ is the observed score, $\bar{x}$ is the mean observed score, and $s_x$ is the standard deviation of the observed scores.
 
 You can easily convert a variable to a *z* score using the `scale()` function:
 
@@ -1197,14 +1194,14 @@ $$
     &= \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}
 {\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2} \sqrt{\sum_{i=1}^{n} (y_i - \bar{y})^2}} 
   && \quad \text{$n-1$ cancels out in numerator and denominator (typical formula for Pearson correlation)} \\
-    &= \frac{\frac{1}{n - 1} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sigma_x \cdot \sigma_y} 
+    &= \frac{\frac{1}{n - 1} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{s_x \cdot s_y} 
   && \quad \text{adding back $n-1$, replacing denominator from line 1 with standard deviation symbols} \\
-    &= \frac{\text{Cov}(x, y)}{\sigma_x \cdot \sigma_y} 
+    &= \frac{\text{Cov}(x, y)}{s_x \cdot s_y} 
   && \quad \text{replacing numerator with covariance notation}
 \end{aligned}
 $$ {#eq-pearsonCorrelation}
 
-where $x$ is the [predictor variable](#sec-correlationalStudy), $y$ is the [outcome variable](#sec-correlationalStudy), and $\text{Cov}(x, y)$ is the covariance between $x$ and $y$.
+where $x$ is the [predictor variable](#sec-correlationalStudy), $y$ is the [outcome variable](#sec-correlationalStudy), $\text{Cov}(x, y)$ is the covariance between $x$ and $y$, $s_x$ is the standard deviation of $x$, and $s_y$ is the standard deviation of $y$.
 
 ### (Multiple) Regression {#sec-regression}
 
