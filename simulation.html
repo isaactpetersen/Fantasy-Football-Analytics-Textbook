@@ -99,7 +99,10 @@ div.csl-indent {
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-8ac9d5e6d36f16f1e0b45640c161c334.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-dark-0dbed38bc34a4b1f0e99ff1ea4c61999.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-8ac9d5e6d36f16f1e0b45640c161c334.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-8ac9d5e6d36f16f1e0b45640c161c334.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -145,10 +148,18 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
 <meta property="og:title" content="23&nbsp; Simulation: Bootstrapping and the Monte Carlo Method – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta property="og:description" content="">
+<meta property="og:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/simulation_files/figure-html/fig-bootstrapping1-1.png">
 <meta property="og:site_name" content="Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
+<meta property="og:image:alt" content="Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping.">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
 <meta name="twitter:title" content="23&nbsp; Simulation: Bootstrapping and the Monte Carlo Method – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta name="twitter:description" content="">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/simulation_files/figure-html/fig-bootstrapping1-1.png">
+<meta name="twitter:image:alt" content="Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping.">
+<meta name="twitter:image-height" content="960">
+<meta name="twitter:image-width" content="1344">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
@@ -818,7 +829,13 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span id="cb10-2"><a href="#cb10-2"></a>bootstrappedFantasyPoints<span class="sc">$</span>data_src <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb10-3"><a href="#cb10-3"></a></span>
 <span id="cb10-4"><a href="#cb10-4"></a>bootstrappedFantasyPoints <span class="ot">&lt;-</span> bootstrappedFantasyPoints <span class="sc">%&gt;%</span> </span>
-<span id="cb10-5"><a href="#cb10-5"></a>  <span class="fu">rename</span>(<span class="at">projectedPoints =</span> raw_points)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-5"><a href="#cb10-5"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb10-6"><a href="#cb10-6"></a>    nfl_playerIDs[,<span class="fu">c</span>(<span class="st">"mfl_id"</span>,<span class="st">"name"</span>,<span class="st">"merge_name"</span>,<span class="st">"team"</span>)],</span>
+<span id="cb10-7"><a href="#cb10-7"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"id"</span> <span class="ot">=</span> <span class="st">"mfl_id"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8"></a>  )</span>
+<span id="cb10-9"><a href="#cb10-9"></a></span>
+<span id="cb10-10"><a href="#cb10-10"></a>bootstrappedFantasyPoints <span class="ot">&lt;-</span> bootstrappedFantasyPoints <span class="sc">%&gt;%</span> </span>
+<span id="cb10-11"><a href="#cb10-11"></a>  <span class="fu">rename</span>(<span class="at">projectedPoints =</span> raw_points)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -855,7 +872,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb13-2"><a href="#cb13-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb13-4"><a href="#cb13-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb13-5"><a href="#cb13-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -870,7 +887,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb14-3"><a href="#cb14-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb14-4"><a href="#cb14-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb14-5"><a href="#cb14-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -885,7 +902,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb15-2"><a href="#cb15-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb15-3"><a href="#cb15-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb15-4"><a href="#cb15-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb15-5"><a href="#cb15-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -900,7 +917,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb16-2"><a href="#cb16-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-2"><a href="#cb16-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb16-3"><a href="#cb16-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb16-4"><a href="#cb16-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb16-5"><a href="#cb16-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -915,7 +932,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb17-2"><a href="#cb17-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"PK"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"PK"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb17-3"><a href="#cb17-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb17-4"><a href="#cb17-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb17-5"><a href="#cb17-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -930,7 +947,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb18-2"><a href="#cb18-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DL"</span>,<span class="st">"DT"</span>,<span class="st">"DE"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-2"><a href="#cb18-2"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DL"</span>,<span class="st">"DT"</span>,<span class="st">"DE"</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb18-3"><a href="#cb18-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb18-4"><a href="#cb18-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb18-5"><a href="#cb18-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -945,7 +962,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb19-2"><a href="#cb19-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"LB"</span>,<span class="st">"MLB"</span>,<span class="st">"OLB"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-2"><a href="#cb19-2"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"LB"</span>,<span class="st">"MLB"</span>,<span class="st">"OLB"</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb19-3"><a href="#cb19-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb19-4"><a href="#cb19-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb19-5"><a href="#cb19-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -960,7 +977,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>bootstrappedFantasyPoints_summary <span class="sc">%&gt;%</span> </span>
-<span id="cb20-2"><a href="#cb20-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DB"</span>,<span class="st">"S"</span>,<span class="st">"CB"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DB"</span>,<span class="st">"S"</span>,<span class="st">"CB"</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb20-3"><a href="#cb20-3"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb20-4"><a href="#cb20-4"></a>    <span class="fu">across</span>(</span>
 <span id="cb20-5"><a href="#cb20-5"></a>      <span class="fu">where</span>(is.numeric),</span>
@@ -973,11 +990,11 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 </div>
 </div>
-<p>An example distribution of projected fantasy points is in <span class="quarto-unresolved-ref">?fig-bootstrapping1</span>.</p>
+<p>An example distribution of projected fantasy points is in <a href="#fig-bootstrapping1" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
 <span id="cb21-2"><a href="#cb21-2"></a>  <span class="at">data =</span> bootstrappedFantasyPoints <span class="sc">%&gt;%</span></span>
-<span id="cb21-3"><a href="#cb21-3"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(pos <span class="sc">==</span> <span class="st">"QB"</span> <span class="sc">&amp;</span> name <span class="sc">==</span> <span class="st">"Patrick Mahomes"</span>),</span>
+<span id="cb21-3"><a href="#cb21-3"></a>    <span class="fu">filter</span>(pos <span class="sc">==</span> <span class="st">"QB"</span> <span class="sc">&amp;</span> name <span class="sc">==</span> <span class="st">"Patrick Mahomes"</span>),</span>
 <span id="cb21-4"><a href="#cb21-4"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
 <span id="cb21-5"><a href="#cb21-5"></a>    <span class="at">x =</span> projectedPoints)</span>
 <span id="cb21-6"><a href="#cb21-6"></a>) <span class="sc">+</span></span>
@@ -1001,56 +1018,63 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span id="cb21-24"><a href="#cb21-24"></a>  ) <span class="sc">+</span></span>
 <span id="cb21-25"><a href="#cb21-25"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
 <span id="cb21-26"><a href="#cb21-26"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in `dplyr::filter()`:
-ℹ In argument: `pos == "QB" &amp; name == "Patrick Mahomes"`.
-Caused by error:
-! object 'name' not found</code></pre>
+</details><div class="cell-output-display">
+<div id="fig-bootstrapping1" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-bootstrapping1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="simulation_files/figure-html/fig-bootstrapping1-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;23.1: Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping."><img src="simulation_files/figure-html/fig-bootstrapping1-1.png" class="img-fluid figure-img" alt="Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bootstrapping1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.1: Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping.
+</figcaption></figure>
 </div>
 </div>
-<p>Projections of two players—one with relatively narrow uncertainty and one with relatively wide uncertainty—are depicted in <span class="quarto-unresolved-ref">?fig-bootstrapping2</span>.</p>
+</div>
+<p>Projections of two players—one with relatively narrow uncertainty and one with relatively wide uncertainty—are depicted in <a href="#fig-bootstrapping2" class="quarto-xref">Figure&nbsp;<span>23.2</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
-<span id="cb23-2"><a href="#cb23-2"></a>  <span class="at">data =</span> bootstrappedFantasyPoints <span class="sc">%&gt;%</span></span>
-<span id="cb23-3"><a href="#cb23-3"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(pos <span class="sc">==</span> <span class="st">"QB"</span> <span class="sc">&amp;</span> (name <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Dak Prescott"</span>, <span class="st">"Drake Maye"</span>))),</span>
-<span id="cb23-4"><a href="#cb23-4"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
-<span id="cb23-5"><a href="#cb23-5"></a>    <span class="at">x =</span> projectedPoints,</span>
-<span id="cb23-6"><a href="#cb23-6"></a>    <span class="at">group =</span> name,</span>
-<span id="cb23-7"><a href="#cb23-7"></a>    <span class="co">#color = name,</span></span>
-<span id="cb23-8"><a href="#cb23-8"></a>    <span class="at">fill =</span> name)</span>
-<span id="cb23-9"><a href="#cb23-9"></a>) <span class="sc">+</span></span>
-<span id="cb23-10"><a href="#cb23-10"></a>  <span class="fu">geom_histogram</span>(</span>
-<span id="cb23-11"><a href="#cb23-11"></a>    <span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density))</span>
-<span id="cb23-12"><a href="#cb23-12"></a>  ) <span class="sc">+</span></span>
-<span id="cb23-13"><a href="#cb23-13"></a>  <span class="fu">geom_density</span>(</span>
-<span id="cb23-14"><a href="#cb23-14"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span> <span class="co"># add transparency</span></span>
-<span id="cb23-15"><a href="#cb23-15"></a>  ) <span class="sc">+</span></span>
-<span id="cb23-16"><a href="#cb23-16"></a>  <span class="fu">coord_cartesian</span>(</span>
-<span id="cb23-17"><a href="#cb23-17"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="cn">NA</span>),</span>
-<span id="cb23-18"><a href="#cb23-18"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb23-19"><a href="#cb23-19"></a>  <span class="co">#geom_rug() +</span></span>
-<span id="cb23-20"><a href="#cb23-20"></a>  <span class="fu">labs</span>(</span>
-<span id="cb23-21"><a href="#cb23-21"></a>    <span class="at">x =</span> <span class="st">"Fantasy Points"</span>,</span>
-<span id="cb23-22"><a href="#cb23-22"></a>    <span class="at">y =</span> <span class="st">"Density"</span>,</span>
-<span id="cb23-23"><a href="#cb23-23"></a>    <span class="at">fill =</span> <span class="st">""</span>,</span>
-<span id="cb23-24"><a href="#cb23-24"></a>    <span class="at">color =</span> <span class="st">""</span>,</span>
-<span id="cb23-25"><a href="#cb23-25"></a>    <span class="at">title =</span> <span class="st">"Distribution of Projected Fantasy Points"</span></span>
-<span id="cb23-26"><a href="#cb23-26"></a>  ) <span class="sc">+</span></span>
-<span id="cb23-27"><a href="#cb23-27"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb23-28"><a href="#cb23-28"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in `dplyr::filter()`:
-ℹ In argument: `pos == "QB" &amp; (name %in% c("Dak Prescott", "Drake
-  Maye"))`.
-Caused by error:
-! object 'name' not found</code></pre>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb22-2"><a href="#cb22-2"></a>  <span class="at">data =</span> bootstrappedFantasyPoints <span class="sc">%&gt;%</span></span>
+<span id="cb22-3"><a href="#cb22-3"></a>    <span class="fu">filter</span>(pos <span class="sc">==</span> <span class="st">"QB"</span> <span class="sc">&amp;</span> (name <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Dak Prescott"</span>, <span class="st">"Drake Maye"</span>))),</span>
+<span id="cb22-4"><a href="#cb22-4"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb22-5"><a href="#cb22-5"></a>    <span class="at">x =</span> projectedPoints,</span>
+<span id="cb22-6"><a href="#cb22-6"></a>    <span class="at">group =</span> name,</span>
+<span id="cb22-7"><a href="#cb22-7"></a>    <span class="co">#color = name,</span></span>
+<span id="cb22-8"><a href="#cb22-8"></a>    <span class="at">fill =</span> name)</span>
+<span id="cb22-9"><a href="#cb22-9"></a>) <span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb22-11"><a href="#cb22-11"></a>    <span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density))</span>
+<span id="cb22-12"><a href="#cb22-12"></a>  ) <span class="sc">+</span></span>
+<span id="cb22-13"><a href="#cb22-13"></a>  <span class="fu">geom_density</span>(</span>
+<span id="cb22-14"><a href="#cb22-14"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span> <span class="co"># add transparency</span></span>
+<span id="cb22-15"><a href="#cb22-15"></a>  ) <span class="sc">+</span></span>
+<span id="cb22-16"><a href="#cb22-16"></a>  <span class="fu">coord_cartesian</span>(</span>
+<span id="cb22-17"><a href="#cb22-17"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="cn">NA</span>),</span>
+<span id="cb22-18"><a href="#cb22-18"></a>    <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb22-19"><a href="#cb22-19"></a>  <span class="co">#geom_rug() +</span></span>
+<span id="cb22-20"><a href="#cb22-20"></a>  <span class="fu">labs</span>(</span>
+<span id="cb22-21"><a href="#cb22-21"></a>    <span class="at">x =</span> <span class="st">"Fantasy Points"</span>,</span>
+<span id="cb22-22"><a href="#cb22-22"></a>    <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb22-23"><a href="#cb22-23"></a>    <span class="at">fill =</span> <span class="st">""</span>,</span>
+<span id="cb22-24"><a href="#cb22-24"></a>    <span class="at">color =</span> <span class="st">""</span>,</span>
+<span id="cb22-25"><a href="#cb22-25"></a>    <span class="at">title =</span> <span class="st">"Distribution of Projected Fantasy Points"</span></span>
+<span id="cb22-26"><a href="#cb22-26"></a>  ) <span class="sc">+</span></span>
+<span id="cb22-27"><a href="#cb22-27"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb22-28"><a href="#cb22-28"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>)) <span class="co"># horizontal y-axis title</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-bootstrapping2" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Distribution of Projected Fantasy Points for Two Players from Bootstrapping. There is relatively narrow uncertainty around projected fantasy points for Dak Prescott, whereas there is relatively wide uncertainty around the projected fantasy points for Drake Maye.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-bootstrapping2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="simulation_files/figure-html/fig-bootstrapping2-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;23.2: Distribution of Projected Fantasy Points for Two Players from Bootstrapping. There is relatively narrow uncertainty around projected fantasy points for Dak Prescott, whereas there is relatively wide uncertainty around the projected fantasy points for Drake Maye."><img src="simulation_files/figure-html/fig-bootstrapping2-1.png" class="img-fluid figure-img" alt="Distribution of Projected Fantasy Points for Two Players from Bootstrapping. There is relatively narrow uncertainty around projected fantasy points for Dak Prescott, whereas there is relatively wide uncertainty around the projected fantasy points for Drake Maye." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bootstrapping2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.2: Distribution of Projected Fantasy Points for Two Players from Bootstrapping. There is relatively narrow uncertainty around projected fantasy points for Dak Prescott, whereas there is relatively wide uncertainty around the projected fantasy points for Drake Maye.
+</figcaption></figure>
+</div>
 </div>
 </div>
 </section><section id="sec-simulationProjectedPointsMonteCarlo" class="level3" data-number="23.3.2"><h3 data-number="23.3.2" class="anchored" data-anchor-id="sec-simulationProjectedPointsMonteCarlo">
 <span class="header-section-number">23.3.2</span> Monte Carlo Simulation</h3>
 <p>You can generate a template for Monte Carlo simulations in the <code>SimDesign</code> <span class="citation" data-cites="R-SimDesign Chalmers2020">(<a href="references.html#ref-R-SimDesign" role="doc-biblioref">Chalmers, 2025</a>; <a href="references.html#ref-Chalmers2020" role="doc-biblioref">Chalmers &amp; Adkins, 2020</a>)</span> package using the following code:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>SimDesign<span class="sc">::</span><span class="fu">SimFunctions</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>SimDesign<span class="sc">::</span><span class="fu">SimFunctions</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code><a href="http://philchalmers.github.io/SimDesign/">#-------------------------------------------------------------------
 
@@ -1088,7 +1112,7 @@ res</a></code></pre>
 </section><section id="sec-simulationSessionInfo" class="level2" data-number="23.5"><h2 data-number="23.5" class="anchored" data-anchor-id="sec-simulationSessionInfo">
 <span class="header-section-number">23.5</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
@@ -1125,36 +1149,36 @@ loaded via a namespace (and not attached):
  [10] magrittr_2.0.3     e1071_1.7-16       compiler_4.5.1    
  [13] reshape2_1.4.4     vctrs_0.6.5        quadprog_1.5-8    
  [16] rvest_1.0.4        pkgconfig_2.0.3    fastmap_1.2.0     
- [19] backports_1.5.0    pbivnorm_0.6.0     promises_1.3.3    
- [22] rmarkdown_2.29     sessioninfo_1.2.3  tzdb_0.5.0        
- [25] haven_2.5.5        ps_1.9.1           xfun_0.52         
- [28] jsonlite_2.0.0     later_1.4.2        rrapply_1.2.7     
- [31] psych_2.5.3        parallel_4.5.1     lavaan_0.6-19     
- [34] cluster_2.1.8.1    DescTools_0.99.60  R6_2.6.1          
- [37] stringi_1.8.7      RColorBrewer_1.1-3 parallelly_1.45.0 
- [40] boot_1.3-31        rpart_4.1.24       brio_1.1.5        
- [43] cellranger_1.1.0   Rcpp_1.0.14        knitr_1.50        
- [46] audio_0.1-11       base64enc_0.1-3    R.utils_2.13.0    
- [49] Matrix_1.7-3       nnet_7.3-20        timechange_0.3.0  
- [52] tidyselect_1.2.1   rstudioapi_0.17.1  yaml_2.3.10       
- [55] codetools_0.2-20   websocket_1.4.4    processx_3.8.6    
- [58] listenv_0.9.1      plyr_1.8.9         lattice_0.22-7    
- [61] withr_3.0.2        evaluate_1.0.4     foreign_0.8-90    
- [64] proxy_0.4-27       xml2_1.3.8         pillar_1.10.2     
- [67] stats4_4.5.1       checkmate_2.3.2    generics_0.1.4    
- [70] chromote_0.5.1     mix_1.0-13         hms_1.1.3         
- [73] petersenlab_1.1.5  scales_1.4.0       rootSolve_1.8.2.4 
- [76] xtable_1.8-4       globals_0.18.0     class_7.3-23      
- [79] glue_1.8.0         Hmisc_5.2-3        lmom_3.2          
- [82] tools_4.5.1        beepr_2.0          Exact_3.3         
- [85] fs_1.6.6           mvtnorm_1.3-3      grid_4.5.1        
- [88] mitools_2.4        colorspace_2.1-1   nlme_3.1-168      
- [91] htmlTable_2.4.3    Formula_1.2-5      cli_3.6.5         
- [94] rappdirs_0.3.3     expm_1.0-0         viridisLite_0.4.2 
- [97] gtable_0.3.6       R.methodsS3_1.8.2  digest_0.6.37     
-[100] htmlwidgets_1.6.4  farver_2.1.2       htmltools_0.5.8.1 
-[103] R.oo_1.27.1        lifecycle_1.0.4    httr_1.4.7        
-[106] MASS_7.3-65       </code></pre>
+ [19] backports_1.5.0    labeling_0.4.3     pbivnorm_0.6.0    
+ [22] promises_1.3.3     rmarkdown_2.29     sessioninfo_1.2.3 
+ [25] tzdb_0.5.0         haven_2.5.5        ps_1.9.1          
+ [28] xfun_0.52          jsonlite_2.0.0     later_1.4.2       
+ [31] rrapply_1.2.7      psych_2.5.3        parallel_4.5.1    
+ [34] lavaan_0.6-19      cluster_2.1.8.1    DescTools_0.99.60 
+ [37] R6_2.6.1           stringi_1.8.7      RColorBrewer_1.1-3
+ [40] parallelly_1.45.0  boot_1.3-31        rpart_4.1.24      
+ [43] brio_1.1.5         cellranger_1.1.0   Rcpp_1.0.14       
+ [46] knitr_1.50         audio_0.1-11       base64enc_0.1-3   
+ [49] R.utils_2.13.0     Matrix_1.7-3       nnet_7.3-20       
+ [52] timechange_0.3.0   tidyselect_1.2.1   rstudioapi_0.17.1 
+ [55] yaml_2.3.10        codetools_0.2-20   websocket_1.4.4   
+ [58] processx_3.8.6     listenv_0.9.1      plyr_1.8.9        
+ [61] lattice_0.22-7     withr_3.0.2        evaluate_1.0.4    
+ [64] foreign_0.8-90     proxy_0.4-27       xml2_1.3.8        
+ [67] pillar_1.10.2      stats4_4.5.1       checkmate_2.3.2   
+ [70] generics_0.1.4     chromote_0.5.1     mix_1.0-13        
+ [73] hms_1.1.3          petersenlab_1.1.5  scales_1.4.0      
+ [76] rootSolve_1.8.2.4  xtable_1.8-4       globals_0.18.0    
+ [79] class_7.3-23       glue_1.8.0         Hmisc_5.2-3       
+ [82] lmom_3.2           tools_4.5.1        beepr_2.0         
+ [85] Exact_3.3          fs_1.6.6           mvtnorm_1.3-3     
+ [88] grid_4.5.1         mitools_2.4        colorspace_2.1-1  
+ [91] nlme_3.1-168       htmlTable_2.4.3    Formula_1.2-5     
+ [94] cli_3.6.5          rappdirs_0.3.3     expm_1.0-0        
+ [97] viridisLite_0.4.2  gtable_0.3.6       R.methodsS3_1.8.2 
+[100] digest_0.6.37      htmlwidgets_1.6.4  farver_2.1.2      
+[103] htmltools_0.5.8.1  R.oo_1.27.1        lifecycle_1.0.4   
+[106] httr_1.4.7         MASS_7.3-65       </code></pre>
 </div>
 </div>
 
@@ -1668,7 +1692,38 @@ The online version of this book will remain open access. If you want to know whe
 <p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
 </div>
   </div>
-</footer>
+</footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 </body></html>
