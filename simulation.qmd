@@ -280,6 +280,12 @@ bootstrappedFantasyPoints$iteration <- bootstrappedFantasyPoints$data_src
 bootstrappedFantasyPoints$data_src <- NULL
 
 bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
+  left_join(
+    nfl_playerIDs[,c("mfl_id","name","merge_name","team")],
+    by = c("id" = "mfl_id")
+  )
+
+bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
   rename(projectedPoints = raw_points)
 ```
 
@@ -367,7 +373,7 @@ gc()
 #| label: display-bootstrap-simulation-summaries-qb
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position == "QB") %>% 
+  filter(position == "QB") %>% 
   mutate(
     across(
       where(is.numeric),
@@ -378,7 +384,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-rb
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position == "RB") %>% 
+  filter(position == "RB") %>% 
   mutate(
     across(
       where(is.numeric),
@@ -389,7 +395,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-wr
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position == "WR") %>% 
+  filter(position == "WR") %>% 
   mutate(
     across(
       where(is.numeric),
@@ -400,7 +406,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-te
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position == "TE") %>% 
+  filter(position == "TE") %>% 
   mutate(
     across(
       where(is.numeric),
@@ -411,7 +417,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-k
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position == "PK") %>% 
+  filter(position == "PK") %>% 
   mutate(
     across(
       where(is.numeric),
@@ -422,7 +428,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-dl
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position %in% c("DL","DT","DE")) %>% 
+  filter(position %in% c("DL","DT","DE")) %>% 
   mutate(
     across(
       where(is.numeric),
@@ -433,7 +439,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-lb
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position %in% c("LB","MLB","OLB")) %>% 
+  filter(position %in% c("LB","MLB","OLB")) %>% 
   mutate(
     across(
       where(is.numeric),
@@ -444,7 +450,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-db
 
 bootstrappedFantasyPoints_summary %>% 
-  dplyr::filter(position %in% c("DB","S","CB")) %>% 
+  filter(position %in% c("DB","S","CB")) %>% 
   mutate(
     across(
       where(is.numeric),
@@ -456,8 +462,8 @@ bootstrappedFantasyPoints_summary %>%
 #| eval: false
 #| include: false
 
-bootstrappedFantasyPoints_summary %>% dplyr::filter(mean > 100 & position == "QB") %>% arrange(CV) %>% head
-bootstrappedFantasyPoints_summary %>% dplyr::filter(mean > 100 & position == "QB") %>% arrange(-CV) %>% head
+bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(CV) %>% head
+bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(-CV) %>% head
 ```
 
 An example distribution of projected fantasy points is in @fig-bootstrapping1.
@@ -469,7 +475,7 @@ An example distribution of projected fantasy points is in @fig-bootstrapping1.
 
 ggplot2::ggplot(
   data = bootstrappedFantasyPoints %>%
-    dplyr::filter(pos == "QB" & name == "Patrick Mahomes"),
+    filter(pos == "QB" & name == "Patrick Mahomes"),
   mapping = aes(
     x = projectedPoints)
 ) +
@@ -504,7 +510,7 @@ Projections of two players—one with relatively narrow uncertainty and one with
 
 ggplot2::ggplot(
   data = bootstrappedFantasyPoints %>%
-    dplyr::filter(pos == "QB" & (name %in% c("Dak Prescott", "Drake Maye"))),
+    filter(pos == "QB" & (name %in% c("Dak Prescott", "Drake Maye"))),
   mapping = aes(
     x = projectedPoints,
     group = name,
