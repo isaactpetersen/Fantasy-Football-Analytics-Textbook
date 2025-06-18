@@ -53,6 +53,8 @@ The distribution provides a probability density function, which indicates the pr
 
 ### Bootstrapping {#sec-simulationProjectedPointsBootstrapping}
 
+#### Prepare Data {#sec-simulationProjectedPointsBootstrappingPrepareData}
+
 ```{r}
 all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
 ```
@@ -127,6 +129,8 @@ vars_by_pos <- list(
 )
 ```
 
+#### Bootstrapping Function {#sec-simulationProjectedPointsBootstrappingFunction}
+
 For performing the bootstrapping, we leverage the `data.table` [@R-data.table], `future` [@R-future], and `future.apply` [@R-future.apply] packages for speed (by using parallel processing) and memory efficiency.
 We use the `progressr` [@R-progressr] package to create a progress bar.
 
@@ -189,6 +193,8 @@ bootstrapSimulation <- function(
 }
 ```
 
+#### Run the Bootsrapping Simulation {#sec-simulationProjectedPointsBootstrappingRun}
+
 ```{r}
 #| label: code-to-run-bootstrap-simulation
 #| eval: false
@@ -219,6 +225,8 @@ bootstappedStats <- bootstrapSimulation(
 rm(all_proj)
 gc()
 ```
+
+#### Score Fantasy Points from the Simulation {#sec-simulationProjectedPointsBootstrappingScore}
 
 ```{r}
 #| label: put-simulated-data-in-format-for-scoring1
@@ -319,6 +327,8 @@ attr(data_result, "week") <- 0
 df <- ffanalytics:::source_points(data_result = l, scoring_rules = ffanalytics::scoring)
 ```
 
+#### Summarize Players' Distribution of Projected Fantasy Points {#sec-simulationProjectedPointsBootstrappingSummarize}
+
 ```{r}
 #| label: summarize-bootstrap-simulation-scores
 
@@ -327,7 +337,8 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>%
   summarise(
     mean = mean(projectedPoints, na.rm = TRUE),
     SD = sd(projectedPoints, na.rm = TRUE),
-    ceiling = quantile(projectedPoints, .90), # 90th quantile
+    q10 = quantile(projectedPoints, .10), # 10th quantile
+    q90 = quantile(projectedPoints, .90), # 90th quantile
     min = min(projectedPoints, na.rm = TRUE),
     max = max(projectedPoints, na.rm = TRUE),
     range = max(projectedPoints, na.rm = TRUE) - min(projectedPoints, na.rm = TRUE),
@@ -348,6 +359,8 @@ bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>%
 
 gc()
 ```
+
+#### View Players' Distribution of Projected Fantasy Points {#sec-simulationProjectedPointsBootstrappingView}
 
 ```{r}
 #| label: merge-player-info
@@ -546,6 +559,8 @@ gc()
 ```
 
 ### Monte Carlo Simulation {#sec-simulationProjectedPointsMonteCarlo}
+
+#### `SimDesign` Package {#sec-simulationProjectedPointsMonteCarloSimDesign}
 
 You can generate a template for Monte Carlo simulations in the `SimDesign` [@R-SimDesign; @Chalmers2020] package using the following code:
 
