@@ -431,7 +431,7 @@ bootstrappedFantasyPoints_summary %>%
 #| label: display-bootstrap-simulation-summaries-k
 
 bootstrappedFantasyPoints_summary %>% 
-  filter(position == "PK") %>% 
+  filter(position == c("K","PK")) %>% 
   mutate(
     across(
       where(is.numeric),
@@ -609,57 +609,298 @@ res <- SimDesign::runSimulation(
 res
 ```
 
+#### Prepare Data {#sec-simulationProjectedPointsMonteCarloPrepareData}
+
+```{r}
+#| include: false
+
+all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
+```
+
+```{r}
+all_proj <- all_proj %>% 
+  rename(projectedPoints = raw_points)
+```
+
+#### Optimal Distribution for Each Player {#sec-simulationProjectedPointsMonteCarloOptimalDistribution}
+
+```{r}
+# Function to identify the "best" distribution (Normal vs Skew‑Normal) for every player (tries both families and picks by AIC; uses empirical distribution if fewer than 2 unique scores)
+fit_best <- function(x) {
+  # Basic checks
+  if (length(unique(x)) < 2 || all(is.na(x))) { # Use empirical distribution if there are fewer than 2 unique scores
+    return(list(type = "empirical", empirical = x))
+  }
+
+  # Try Normal Distribution
+  fit_norm <- tryCatch(
+    fitdistrplus::fitdist(x, distr = "norm"),
+    error = function(e) NULL
+  )
+
+  # Try Skew-Normal Distribution
+  fit_skew <- tryCatch(
+    sn::selm(x ~ 1),
+    error = function(e) NULL
+  )
+
+  # Handle bad fits: sd = NA, etc.
+  if (!is.null(fit_norm) && any(is.na(fit_norm$estimate))) {
+    fit_norm <- NULL
+  }
+
+  if (!is.null(fit_skew)) {
+    pars <- tryCatch(sn::coef(fit_skew, param.type = "dp"), error = function(e) NULL)
+    if (is.null(pars) || any(is.na(pars))) {
+      fit_skew <- NULL
+    }
+  }
+
+  # Choose best available
+  if (!is.null(fit_norm) && !is.null(fit_skew)) {
+    aic_norm <- AIC(fit_norm)
+    aic_skew <- AIC(fit_skew)
+    if (aic_skew + 2 < aic_norm) { # skew-normal is more complex (has more parameters) than normal distribution, so only select a skew-normal distribution if it fits substantially better than a normal distribution
+      pars <- sn::coef(fit_skew, param.type = "dp")
+      return(list(
+        type  = "skewnorm",
+        xi    = pars["dp.location"],
+        omega = pars["dp.scale"],
+        alpha = pars["dp.shape"]))
+    } else {
+      return(list(
+        type = "norm",
+        mean = fit_norm$estimate["mean"],
+        sd   = fit_norm$estimate["sd"]))
+    }
+  } else if (!is.null(fit_norm)) {
+    return(list(
+      type = "norm",
+      mean = fit_norm$estimate["mean"],
+      sd   = fit_norm$estimate["sd"]))
+  } else {
+    return(list(type = "empirical", empirical = x))
+  }
+}
+```
+
+```{r}
+proj_dists_tbl <- all_proj |>
+  filter(!is.na(id) & id != "") |>
+  group_by(id) |>
+  summarise(
+    dist_info = list(fit_best(projectedPoints)),
+    n_proj = n(), # record of how many sources they have
+    .groups = "drop"
+  )
+
+proj_dists <- proj_dists_tbl |>
+  filter(!is.na(id) & id != "") |>
+  distinct(id, .keep_all = TRUE) |>
+  (\(x) setNames(x$dist_info, x$id))()
+```
+
+```{r}
+proj_dists_tbl |>
+  dplyr::mutate(
+    dist_type = purrr::map_chr(dist_info, ~ .x$type)
+  ) |>
+  dplyr::count(dist_type)
+```
+
+#### `SimDesign` Step 1: Design Grid {#sec-simulationProjectedPointsMonteCarloDesign}
+
+Now we build the `SimDesign` design grid based on the number of projections that each player had.
+
+```{r}
+Design <- proj_dists_tbl |>
+  transmute(
+    id,
+    n_sources = n_proj # how many projections the player had
+  )
+```
+
+```{r}
+#| eval: false
+
+missing_ids <- setdiff(Design$id, names(proj_dists))
+length(missing_ids) # should be 0
+
+any(is.na(proj_dists_tbl$id)) # should be FALSE
+any(is.na(Design$id))         # should be FALSE
+any(is.na(names(proj_dists))) # should be FALSE
+```
+
+#### `SimDesign` Step 2: Generate {#sec-simulationProjectedPointsMonteCarloGenerate}
+
+```{r}
+Generate <- function(condition, fixed_objects = NULL) {
+
+  dist_info <- fixed_objects$proj_dists[[as.character(condition$id)]]
+  n_sources <- condition$n_sources
+
+  sim_points <- switch(
+    dist_info$type,
+    empirical = sample(
+      dist_info$empirical,
+      n_sources,
+      replace = TRUE),
+    
+    norm = rnorm(
+      n_sources,
+      mean = dist_info$mean,
+      sd = dist_info$sd),
+    
+    skewnorm = sn::rsn(
+      n_sources,
+      xi = dist_info$xi,
+      omega = dist_info$omega,
+      alpha = dist_info$alpha),
+    
+    stop("Unknown distribution type: ", dist_info$type)
+  )
+
+  data.frame(
+    id = condition$id,
+    sim_points = sim_points)
+}
+```
+
+#### `SimDesign` Step 3: Analyze {#sec-simulationProjectedPointsMonteCarloAnalyze}
+
+```{r}
+Analyse <- function(condition, dat, fixed_objects = NULL) {
+  tibble::tibble(
+    id        = condition$id,
+    mean_pts  = mean(dat$sim_points, na.rm = TRUE),
+    sd_pts    = sd(dat$sim_points, na.rm = TRUE),
+    q10       = quantile(dat$sim_points, 0.10, na.rm = TRUE),
+    q90       = quantile(dat$sim_points, 0.90, na.rm = TRUE),
+    p100      = mean(dat$sim_points >= 100, na.rm = TRUE),
+    p150      = mean(dat$sim_points >= 150, na.rm = TRUE),
+    p200      = mean(dat$sim_points >= 200, na.rm = TRUE),
+    p250      = mean(dat$sim_points >= 250, na.rm = TRUE),
+    p300      = mean(dat$sim_points >= 300, na.rm = TRUE),
+    p350      = mean(dat$sim_points >= 300, na.rm = TRUE)
+  )
+}
+```
+
+#### `SimDesign` Step 4: Summarize {#sec-simulationProjectedPointsMonteCarloSummarize}
+
+```{r}
+Summarise <- function(condition, results, fixed_objects = NULL) {
+  dplyr::summarise(
+    results,
+    across(
+      where(is.numeric),
+      list(
+        mean = ~mean(.x, na.rm = TRUE),
+        sd   = ~sd(.x,  na.rm = TRUE)),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  )
+}
+```
+
+#### `SimDesign` Step 5: Run the Simulation {#sec-simulationProjectedPointsMonteCarloRun}
+
+Now, we can run the model.
+
+::: {#nte-monteCarloSimulation .callout-note title="Monte Carlo Simulation"}
+Note: the following code that runs the simulation takes a while.
+If you just want to save time and load the results object instead of running the simulation, you can load the results object of the simulation (which has already been run) using this code:
+
+```{r}
+load(url("https://osf.io/download/ues7n/"))
+```
+:::
+
+```{r}
+#| eval: false
+
+monteCarloSim_results <- SimDesign::runSimulation(
+  design = Design,
+  replications = 1000,
+  generate = Generate,
+  analyse = Analyse,
+  summarise = Summarise,
+  fixed_objects = list(proj_dists = proj_dists),
+  seed = genSeeds(Design, iseed = 52242), # for reproducibility
+  parallel = TRUE # for faster (parallel) processing
+)
+```
+
+#### Simulation Results {#sec-simulationProjectedPointsMonteCarloResults}
+
+```{r}
+monteCarloSim_results <- monteCarloSim_results %>% 
+  left_join(
+    nfl_playerIDs[,c("mfl_id","name","merge_name","position","team")],
+    by = c("id" = "mfl_id")
+  ) %>% 
+  select(name, team, position, everything()) %>% 
+  arrange(-mean_pts_mean)
+```
+
 ```{r}
 #| eval: false
 #| include: false
 
-calculate_fantasyPoints <- function(df, scoring_rules){
-  #fantasyPoints <-
-  
-  #return(fantasyPoints)
-}
+save(
+  monteCarloSim_results,
+  file = "./data/monteCarloSim_results.RData")
+```
 
-monte_carlo_simulation <- function(position_df, num_simulations = 10000){
-  player_ids <- unique(position_df$id)
-  
-  results <- lapply(player_ids, function(player_id){ # use curly brackets when there are multiple expressions
-    player_data <- position_df %>% filter(id == player_id)
-    
-    # Run the simulation for this player
-    simulations <- replicate(
-      num_simulations, {
-        sampled_data <- player_data %>%
-          summarise(across(
-            c(pass_yds, pass_tds, rush_yds, rush_tds, rec_yds, rec_tds), # add more statistical categories
-            ~ if (all(is.na(.))) NA else sample(.[!is.na(.)], 1, replace = TRUE)))
-        
-        sampled_data # return last expression
-        },
-      simplify = FALSE)
-    
-    simulation_df <- dplyr::bind_rows(simulations)
-    #simulation_df$fantasyPoints <- calculate_fantasyPoints(simulation_df) # write function to calculate fantasy points
-    
-    ci <- simulation_df %>%
-      summarise(across(where(is.numeric), list(
-        lower = \(x) quantile(x, 0.025, na.rm = TRUE),
-        upper = \(x) quantile(x, 0.975, na.rm = TRUE))))
-    
-    ci <- ci %>% 
-      mutate(id = player_id)
-    
-    return(ci)
-    })
-    
-    # Combine results for all players
-    final_ci <- bind_rows(results)
-    
-    return(final_ci)
-}
+```{r}
+#| include: false
 
-monte_carlo_simulation(players_projectedPoints_seasonal$QB, num_simulations = 10)
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/monteCarloSim_results.RData", fsep = ""))
+```
 
-QB_ci <- monte_carlo_simulation(players_projectedPoints_seasonal$QB)
+```{r}
+monteCarloSim_results
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position == "QB")
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position == "RB")
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position == "WR")
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position == "TE")
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position %in% c("K","PK"))
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position %in% c("DL","DT","DE"))
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position %in% c("LB","MLB","OLB"))
+```
+
+```{r}
+monteCarloSim_results %>% 
+  filter(position %in% c("DB","S","CB"))
 ```
 
 ## Conclusion {#sec-simulationConclusion}
