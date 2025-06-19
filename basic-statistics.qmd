@@ -157,6 +157,7 @@ Indices to describe the *spread* (variability) of a variable's data include:
 - variance ($s^2$ or $\sigma^2$)
 - range
 - minimum and maximum (or some other quantiles)
+- weighted quantiles
 - interquartile range (IQR)
 - median absolute deviation
 - coefficient of variation
@@ -203,6 +204,10 @@ Compared to the standard deviation, the median absolute deviation is more robust
 
 The coefficient of variation (CV) accounts for the fact that variables with larger means also tend to have larger standard deviations; it is calculated as the standard deviation divided by the mean, as in @eq-coefficientOfVariation.
 
+If you want to give some values more weight to others, you can calculate weighted quantiles, while assigning a weight to each value.
+The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] contains various functions for computing weighted quantiles based on @Akinshin2023.
+Because some projections are outliers, we use a trimmed version of the weighted Harrell-Davis quantile estimator for greater robustness.
+
 Below is R code to estimate each:
 
 - standard deviation:
@@ -235,8 +240,19 @@ max(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 - quantiles (in this case, the 10th and 90th quantiles):
 
 ```{r}
-quantile(player_stats_seasonal$fantasyPoints, 0.10, na.rm = TRUE)
-quantile(player_stats_seasonal$fantasyPoints, 0.90, na.rm = TRUE)
+quantile(player_stats_seasonal$fantasyPoints, c(0.10, 0.90), na.rm = TRUE)
+```
+
+- weighted quantiles (in this case, the 10th and 90th quantiles):
+
+```{r}
+petersenlab::wthdquantile(
+  player_stats_seasonal$fantasyPoints,
+  w = sample( # randomly generate weights (could specify them manually)
+    x = 1:3,
+    size = length(player_stats_seasonal$fantasyPoints),
+    replace = TRUE),
+  probs = c(0.10, 0.90))
 ```
 
 - interquartile range (IQR):
@@ -305,8 +321,8 @@ player_stats_seasonal %>%
         SD = ~ sd(., na.rm = TRUE),
         min = ~ min(., na.rm = TRUE),
         max = ~ max(., na.rm = TRUE),
-        q10 = quantile(., .10, na.rm = TRUE), # 10th quantile
-        q90 = quantile(., .90, na.rm = TRUE), # 90th quantile
+        q10 = ~ quantile(., .10, na.rm = TRUE), # 10th quantile
+        q90 = ~ quantile(., .90, na.rm = TRUE), # 90th quantile
         range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
         IQR = ~ IQR(., na.rm = TRUE),
         MAD = ~ mad(., na.rm = TRUE),
