@@ -7,7 +7,25 @@
 ```{r}
 library("quantmod")
 library("fPortfolio")
+library("NMOF")
 library("tidyverse")
+```
+
+### Load Data {#sec-modernPortfolioTheoryLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projectedPoints_seasonal.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_playerIDs.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/players_projectedPoints_seasonal.RData")
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/nfl_playerIDs.RData")
 ```
 
 ## Overview {#sec-modernPortfolioTheoryOverview}
@@ -97,7 +115,7 @@ The efficient frontier is a visual depiction of the maximum expected returns for
 The efficient frontier is helpful for identifying the optimal portfolio—the optimal combination and weighting of assets—for a given risk level.
 Anything below the efficient frontier is considered inefficient (i.e., lower-than-maximum returns for a given level of risk).
 
-In the example below, we use historical returns (since YEAR) as the expected future returns.
+In the example below, we use historical returns (since 2012) as the expected future returns.
 However, using historical returns as the expected future returns is risky because, as described in the common disclaimer, "Past performance does not guarantee future results."
 If you select a relatively short period of historical returns, you may be selecting a period when the stock performed particularly well.
 When evaluating historical returns it is preferable to evaluate long time horizons and to evaluate how the stock performed during period of both boom (i.e., "bull markets") and bust (i.e., "bear markets", such as in a recession).
@@ -136,6 +154,15 @@ returns <- na.omit(
     type = "discrete"))
 
 returns_ts <- timeSeries::as.timeSeries(returns)
+```
+
+```{r}
+#| eval: false
+
+minYear <- format(as.Date(row.names(returns_ts)), "%Y") %>% 
+  na.omit %>% 
+  as.integer %>% 
+  min()
 ```
 
 ### Create Portfolio {#sec-createPortfolio}
@@ -269,9 +296,257 @@ That is, you could buy low and, for players who outperform expectations, sell hi
 
 ### Based on Variability Across Projection Sources {#sec-efficientFrontierFantasyProjectionsUncertainty}
 
+```{r}
+all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
+
+all_proj <- all_proj %>% 
+  rename(projectedPoints = raw_points)
+```
+
+```{r}
+all_proj_summary <- all_proj %>% 
+  group_by(id) %>% 
+  summarise(
+    mean = mean(projectedPoints, na.rm = TRUE),
+    sd = sd(projectedPoints, na.rm = TRUE),
+    var = var(projectedPoints, na.rm = TRUE)
+  )
+
+all_proj_summary <- all_proj_summary %>% 
+  left_join(
+    nfl_playerIDs[,c("mfl_id","name","merge_name","position","team")],
+    by = c("id" = "mfl_id")
+  ) %>% 
+  select(name, team, position, everything()) %>% 
+  arrange(-mean)
+```
+
+::: {.content-visible when-format="html:js"}
+
+```{r}
+#| label: fig-projectedPointsMeanVsSD
+#| fig-cap: "Mean of Projected Fantasy Points For Each Player as a Function of the Standard Deviation of the Projected Fantasy Points Across Sources."
+#| fig-alt: "Mean of Projected Fantasy Points For Each Player as a Function of the Standard Deviation of the Projected Fantasy Points Across Sources."
+
+plot_projectedPointsMeanVsSD <- ggplot2::ggplot(
+  data = all_proj_summary,
+  aes(
+    x = sd,
+    y = mean)) +
+  geom_point(
+    aes(
+      text = name, # add player name for mouse over tooltip
+      label = position)) + # add season for mouse over tooltip
+  #geom_smooth() +
+  coord_cartesian(
+    xlim = c(0,NA),
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Standard Deviation of Player's Projected Fantasy Points (Season) Across Sources",
+    y = "Mean of Player's Projected Fantasy Points (Season) Across Sources",
+    title = "Mean vs Standard Deviation of Players' Projected Fantasy Points"
+  ) +
+  theme_classic()
+
+plotly::ggplotly(plot_projectedPointsMeanVsSD)
+```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{r}
+#| label: fig-projectedPointsMeanVsSD
+#| fig-cap: "Mean of Projected Fantasy Points For Each Player as a Function of the Standard Deviation of the Projected Fantasy Points Across Sources."
+#| fig-alt: "Mean of Projected Fantasy Points For Each Player as a Function of the Standard Deviation of the Projected Fantasy Points Across Sources."
+
+ggplot2::ggplot(
+  data = all_proj_summary,
+  aes(
+    x = sd,
+    y = mean)) +
+  geom_point(
+    aes(
+      text = name, # add player name for mouse over tooltip
+      label = position)) + # add season for mouse over tooltip
+  #geom_smooth() +
+  coord_cartesian(
+    xlim = c(0,NA),
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Standard Deviation of Player's Projected Fantasy Points (Season) Across Sources",
+    y = "Mean of Player's Projected Fantasy Points (Season) Across Sources",
+    title = "Mean vs Standard Deviation of Players' Projected Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+:::
+
+```{r}
+all_proj_summary_noNA <- all_proj_summary %>% 
+  filter(!is.na(id) & !is.na(mean) & !is.na(var))
+
+all_proj_summary_noNA_removeZeroVar <- all_proj_summary_noNA %>% 
+  filter(var > 0)
+```
+
+```{r}
+const_cor <- function(rho, numAssets) {
+  C <- array(rho, dim = c(numAssets, numAssets))
+  diag(C) <- 1
+  C
+}
+
+varCovMatrix <- diag(all_proj_summary_noNA_removeZeroVar$sd) %*% const_cor(0, nrow(all_proj_summary_noNA_removeZeroVar)) %*% diag(all_proj_summary_noNA_removeZeroVar$sd) # create a variance-covariance matrix assuming assets/players are uncorrelated
+
+efficientFrontierData <- NMOF::mvFrontier(
+  all_proj_summary_noNA_removeZeroVar$mean,
+  varCovMatrix,
+  wmin = 0,
+  wmax = 1,
+  n = 50)
+```
+
+```{r}
+#| label: fig-efficientFrontierAcrossProjections
+#| fig-cap: "Efficient Frontier of Projected Fantasy Points Across Sources."
+#| fig-alt: "Efficient Frontier of Projected Fantasy Points Across Sources."
+
+plot(
+  efficientFrontierData$volatility,
+  efficientFrontierData$return,
+  pch = 19,
+  cex = 0.5,
+  type = "o",
+  xlab = "Variance in Projected Fantasy Points Across Sources",
+  ylab = "Projected Fantasy Points")
+```
+
 ### Based on Historical Game-to-Game Variability {#sec-efficientFrontierFantasyProjectionsGameToGameVariability}
 
 <https://eng.wealthfront.com/2012/01/17/moneyball-using-modern-portfolio-theory-to-win-your-fantasy-sports-league> [@Hitchings2012; archived at <https://perma.cc/JQ6G-KSRT>]
+
+```{r}
+player_stats_weekly_recent <- player_stats_weekly %>% 
+  filter(season == max(season))
+
+player_stats_weekly_recent_summary <- player_stats_weekly_recent %>% 
+  group_by(player_id) %>% 
+  summarise(
+    mean = mean(fantasyPoints, na.rm = TRUE),
+    sd = sd(fantasyPoints, na.rm = TRUE),
+    var = var(fantasyPoints, na.rm = TRUE)
+  )
+
+player_stats_weekly_recent_summary <- player_stats_weekly_recent_summary %>% 
+  left_join(
+    nfl_playerIDs[,c("gsis_id","name","merge_name","position","team")],
+    by = c("player_id" = "gsis_id")
+  ) %>% 
+  select(name, team, position, everything()) %>% 
+  arrange(-mean)
+```
+
+::: {.content-visible when-format="html:js"}
+
+```{r}
+#| label: fig-fantasyPointsMeanVsSD
+#| fig-cap: "Mean of Weekly Fantasy Points For Each Player as a Function of the Week-to-Week Standard Deviation of their Fantasy Points."
+#| fig-alt: "Mean of Weekly Fantasy Points For Each Player as a Function of the Week-to-Week Standard Deviation of their Fantasy Points."
+
+plot_fantasyPointsMeanVsSD <- ggplot2::ggplot(
+  data = player_stats_weekly_recent_summary,
+  aes(
+    x = sd,
+    y = mean)) +
+  geom_point(
+    aes(
+      text = name, # add player name for mouse over tooltip
+      label = position)) + # add season for mouse over tooltip
+  #geom_smooth() +
+  coord_cartesian(
+    xlim = c(0,NA),
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Standard Deviation of Player's Fantasy Points From Week-to-Week",
+    y = "Mean of Player's Fantasy Points Across Weeks",
+    title = "Mean vs Standard Deviation of Players' Fantasy Points"
+  ) +
+  theme_classic()
+
+plotly::ggplotly(plot_fantasyPointsMeanVsSD)
+```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{r}
+#| label: fig-fantasyPointsMeanVsSD
+#| fig-cap: "Mean of Weekly Fantasy Points For Each Player as a Function of the Week-to-Week Standard Deviation of their Fantasy Points."
+#| fig-alt: "Mean of Weekly Fantasy Points For Each Player as a Function of the Week-to-Week Standard Deviation of their Fantasy Points."
+
+ggplot2::ggplot(
+  data = player_stats_weekly_recent_summary,
+  aes(
+    x = sd,
+    y = mean)) +
+  geom_point(
+    aes(
+      text = name, # add player name for mouse over tooltip
+      label = position)) + # add season for mouse over tooltip
+  #geom_smooth() +
+  coord_cartesian(
+    xlim = c(0,NA),
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Standard Deviation of Player's Fantasy Points From Week-to-Week",
+    y = "Mean of Player's Fantasy Points Across Weeks",
+    title = "Mean vs Standard Deviation of Players' Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+:::
+
+```{r}
+player_stats_weekly_recent_summary_noNA <- player_stats_weekly_recent_summary %>% 
+  filter(!is.na(player_id) & !is.na(mean) & !is.na(var))
+
+player_stats_weekly_recent_summary_noNA_removeZeroVar <- player_stats_weekly_recent_summary_noNA %>% 
+  filter(var > 0)
+```
+
+```{r}
+varCovMatrix2 <- diag(player_stats_weekly_recent_summary_noNA_removeZeroVar$sd) %*% const_cor(0, nrow(player_stats_weekly_recent_summary_noNA_removeZeroVar)) %*% diag(player_stats_weekly_recent_summary_noNA_removeZeroVar$sd) # create a variance-covariance matrix assuming assets/players are uncorrelated
+
+efficientFrontierData2 <- NMOF::mvFrontier(
+  player_stats_weekly_recent_summary_noNA_removeZeroVar$mean,
+  varCovMatrix2,
+  wmin = 0,
+  wmax = 1,
+  n = 50)
+```
+
+```{r}
+#| label: fig-efficientFrontierAcrossWeeks
+#| fig-cap: "Efficient Frontier of Fantasy Points Across Weeks."
+#| fig-alt: "Efficient Frontier of Fantasy Points Across Weeks."
+
+plot(
+  efficientFrontierData2$volatility,
+  efficientFrontierData2$return,
+  pch = 19,
+  cex = 0.5,
+  type = "o",
+  xlab = "Variance in Fantasy Points Across Weeks",
+  ylab = "Weekly Fantasy Points")
+```
 
 ## Conclusion {#sec-modernPortfolioTheoryConclusion}
 
