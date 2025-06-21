@@ -321,6 +321,18 @@ all_proj_summary <- all_proj_summary %>%
   arrange(-mean)
 ```
 
+As shown below, the correlation between mean and standard deviation of projected points is positive.
+That is, greater expected returns (i.e., mean of projected fantasy points) are associated with greater risk or volatility (i.e., standard deviation of projected fantasy points).
+Thus, to obtain a lineup that scores greater fantasy points, it may be necessary to take on greater risk.
+Moreover, you would not want take take on more risk for the same number of expected fantasy points; in addition, you would not want to score fewer fantasy points for the same amount of risk [@Hitchings2012].
+
+```{r}
+cor.test(
+  ~ mean + sd,
+  data = all_proj_summary
+)
+```
+
 ::: {.content-visible when-format="html:js"}
 
 ```{r}
@@ -386,6 +398,167 @@ ggplot2::ggplot(
 :::
 
 ```{r}
+#| eval: false
+#| include: false
+
+all_proj_summary %>% 
+  filter(position == "QB" & mean > 300) %>% 
+  arrange(-sd)
+
+all_proj_summary %>% 
+  filter(position == "QB" & mean > 150) %>% 
+  arrange(sd)
+
+all_proj_summary %>% 
+  filter(position == "RB" & mean > 200) %>% 
+  arrange(-sd)
+
+all_proj_summary %>% 
+  filter(position == "RB" & mean > 100) %>% 
+  arrange(sd)
+
+all_proj_summary %>% 
+  filter(position == "WR" & mean > 200) %>% 
+  arrange(-sd)
+
+all_proj_summary %>% 
+  filter(position == "WR" & mean > 100) %>% 
+  arrange(sd)
+```
+
+```{r}
+hiLo_permutations <- expand.grid(
+  rep(list(c("Hi", "Lo")), 3),
+  stringsAsFactors = FALSE
+)
+
+qbRbWr_projections <- data.frame(
+  condition = c("Hi", "Lo"),
+  qb_name = c("Josh Allen", "Matthew Stafford"),
+  rb_name = c("Saquon Barkley", "Joe Mixon"),
+  wr_name = c("Ja'Marr Chase", "Courtland Sutton")
+)
+
+qbRbWr_projections$qb_mean <- c(
+  all_proj_summary$mean[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[1])],
+  all_proj_summary$mean[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[2])])
+
+qbRbWr_projections$qb_sd <- c(
+  all_proj_summary$sd[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[1])],
+  all_proj_summary$sd[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[2])])
+
+qbRbWr_projections$rb_mean <- c(
+  all_proj_summary$mean[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[1])],
+  all_proj_summary$mean[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[2])])
+
+qbRbWr_projections$rb_sd <- c(
+  all_proj_summary$sd[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[1])],
+  all_proj_summary$sd[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[2])])
+
+qbRbWr_projections$wr_mean <- c(
+  all_proj_summary$mean[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[1])],
+  all_proj_summary$mean[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[2])])
+
+qbRbWr_projections$wr_sd <- c(
+  all_proj_summary$sd[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[1])],
+  all_proj_summary$sd[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[2])])
+
+qbRbWr_projections$qb_lastName <- sapply(strsplit(qbRbWr_projections$qb_name, " "), function(x) tail(x, 1))
+qbRbWr_projections$rb_lastName <- sapply(strsplit(qbRbWr_projections$rb_name, " "), function(x) tail(x, 1))
+qbRbWr_projections$wr_lastName <- sapply(strsplit(qbRbWr_projections$wr_name, " "), function(x) tail(x, 1))
+
+team_projections <- data.frame(
+  team = apply(hiLo_permutations, 1, paste0, collapse = ""),
+  team_name = NA,
+  team_mean = NA,
+  team_sd = NA,
+  qb = hiLo_permutations$Var1,
+  rb = hiLo_permutations$Var2,
+  wr = hiLo_permutations$Var3,
+  qb_name = NA,
+  qb_lastName = NA,
+  qb_mean = NA,
+  qb_sd = NA,
+  rb_name = NA,
+  rb_lastName = NA,
+  rb_mean = NA,
+  rb_sd = NA,
+  wr_name = NA,
+  wr_lastName = NA,
+  wr_mean = NA,
+  wr_sd = NA
+)
+
+team_projections$qb_name[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_name[which(qbRbWr_projections$condition == "Hi")]
+team_projections$qb_name[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_name[which(qbRbWr_projections$condition == "Lo")]
+team_projections$qb_lastName[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_lastName[which(qbRbWr_projections$condition == "Hi")]
+team_projections$qb_lastName[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_lastName[which(qbRbWr_projections$condition == "Lo")]
+team_projections$qb_mean[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_mean[which(qbRbWr_projections$condition == "Hi")]
+team_projections$qb_mean[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_mean[which(qbRbWr_projections$condition == "Lo")]
+team_projections$qb_sd[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_sd[which(qbRbWr_projections$condition == "Hi")]
+team_projections$qb_sd[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_sd[which(qbRbWr_projections$condition == "Lo")]
+
+team_projections$rb_name[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_name[which(qbRbWr_projections$condition == "Hi")]
+team_projections$rb_name[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_name[which(qbRbWr_projections$condition == "Lo")]
+team_projections$rb_lastName[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_lastName[which(qbRbWr_projections$condition == "Hi")]
+team_projections$rb_lastName[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_lastName[which(qbRbWr_projections$condition == "Lo")]
+team_projections$rb_mean[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_mean[which(qbRbWr_projections$condition == "Hi")]
+team_projections$rb_mean[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_mean[which(qbRbWr_projections$condition == "Lo")]
+team_projections$rb_sd[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_sd[which(qbRbWr_projections$condition == "Hi")]
+team_projections$rb_sd[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_sd[which(qbRbWr_projections$condition == "Lo")]
+
+team_projections$wr_name[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_name[which(qbRbWr_projections$condition == "Hi")]
+team_projections$wr_name[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_name[which(qbRbWr_projections$condition == "Lo")]
+team_projections$wr_lastName[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_lastName[which(qbRbWr_projections$condition == "Hi")]
+team_projections$wr_lastName[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_lastName[which(qbRbWr_projections$condition == "Lo")]
+team_projections$wr_mean[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_mean[which(qbRbWr_projections$condition == "Hi")]
+team_projections$wr_mean[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_mean[which(qbRbWr_projections$condition == "Lo")]
+team_projections$wr_sd[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_sd[which(qbRbWr_projections$condition == "Hi")]
+team_projections$wr_sd[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_sd[which(qbRbWr_projections$condition == "Lo")]
+
+team_projections$team_name <- apply(
+  team_projections[, c("qb_lastName", "rb_lastName", "wr_lastName")],
+  1,
+  paste,
+  collapse = "/"
+)
+
+team_projections$team_mean <- rowSums(team_projections[,c("qb_mean","rb_mean","wr_mean")])
+team_projections$team_sd <- rowSums(team_projections[,c("qb_sd","rb_sd","wr_sd")])
+```
+
+In @fig-teamPortfolio1, we depict the combined mean of projected fantasy points for a Quarterback/Running Back/Wide Receiver combination as a function of the standard deviation of their projected fantasy points across sources.
+
+```{r}
+#| label: fig-teamPortfolio1
+#| fig-cap: "Mean of Projected Fantasy Points For a Quarterback/Running Back/Wide Receiver Combination as a Function of the Standard Deviation of the Projected Fantasy Points Across Sources."
+#| fig-alt: "Mean of Projected Fantasy Points For a Quarterback/Running Back/Wide Receiver Combination as a Function of the Standard Deviation of the Projected Fantasy Points Across Sources."
+
+ggplot2::ggplot(
+  data = team_projections,
+  aes(
+    x = team_sd,
+    y = team_mean,
+    label = team_name)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = team_name)) +
+  #geom_text(
+  #  hjust = 0,
+  #  vjust = 0) +
+  #geom_smooth() +
+  coord_cartesian(
+    xlim = c(NA,NA),
+    ylim = c(NA,NA),
+    expand = TRUE) +
+  labs(
+    x = "Standard Deviation of Players' Projected Fantasy Points (Season) Across Sources",
+    y = "Mean of Players' Projected Fantasy Points (Season) Across Sources",
+    title = "Mean vs Standard Deviation of Players' Projected Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+```{r}
 all_proj_summary_noNA <- all_proj_summary %>% 
   filter(!is.na(id) & !is.na(mean) & !is.na(var))
 
@@ -410,6 +583,11 @@ efficientFrontierData <- NMOF::mvFrontier(
   n = 50)
 ```
 
+When you evaluate all possible combinations of players, you can obtain the expected returns and standard deviations for each player combination.
+Based on that, you can determine the maximum number of fantasy points (i.e., the best possible team) at each level of risk.
+The best expected returns at each level of risk is known as the efficient frontier.
+The efficient frontier of projected fantasy points across sources is in @fig-efficientFrontierAcrossProjections.
+
 ```{r}
 #| label: fig-efficientFrontierAcrossProjections
 #| fig-cap: "Efficient Frontier of Projected Fantasy Points Across Sources."
@@ -422,7 +600,8 @@ plot(
   cex = 0.5,
   type = "o",
   xlab = "Standard Deviation of Projected Fantasy Points Across Sources",
-  ylab = "Projected Fantasy Points")
+  ylab = "Projected Fantasy Points",
+  main = "Efficient Frontier of Projected Fantasy Points Across Sources")
 ```
 
 The formula for the variance (and standard deviation) of the sum of two variables is in @eq-varianceSumTwoVars:
@@ -476,6 +655,13 @@ player_stats_weekly_recent_summary <- player_stats_weekly_recent_summary %>%
   ) %>% 
   select(name, team, position, everything()) %>% 
   arrange(-mean)
+```
+
+```{r}
+cor.test(
+  ~ mean + sd,
+  data = player_stats_weekly_recent_summary
+)
 ```
 
 Here is the code to generate the variance-covariance matrix of players' performance (it is very large because there are many players):
@@ -562,6 +748,163 @@ ggplot2::ggplot(
 :::
 
 ```{r}
+#| eval: false
+#| include: false
+
+player_stats_weekly_recent_summary %>% 
+  filter(position == "QB" & mean > 20) %>% 
+  arrange(-sd)
+
+player_stats_weekly_recent_summary %>% 
+  filter(position == "QB" & mean > 10) %>% 
+  arrange(sd)
+
+player_stats_weekly_recent_summary %>% 
+  filter(position == "RB" & mean > 17) %>% 
+  arrange(-sd)
+
+player_stats_weekly_recent_summary %>% 
+  filter(position == "RB" & mean > 10) %>% 
+  arrange(sd)
+
+player_stats_weekly_recent_summary %>% 
+  filter(position == "WR" & mean > 17) %>% 
+  arrange(-sd)
+
+player_stats_weekly_recent_summary %>% 
+  filter(position == "WR" & mean > 10) %>% 
+  arrange(sd)
+```
+
+```{r}
+qbRbWr_projections2 <- data.frame(
+  condition = c("Hi", "Lo"),
+  qb_name = c("Josh Allen", "Patrick Mahomes"),
+  rb_name = c("Saquon Barkley", "David Montgomery"),
+  wr_name = c("Ja'Marr Chase", "Stefon Diggs")
+)
+
+qbRbWr_projections2$qb_mean <- c(
+  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[1])],
+  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[2])])
+
+qbRbWr_projections2$qb_sd <- c(
+  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[1])],
+  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[2])])
+
+qbRbWr_projections2$rb_mean <- c(
+  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[1])],
+  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[2])])
+
+qbRbWr_projections2$rb_sd <- c(
+  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[1])],
+  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[2])])
+
+qbRbWr_projections2$wr_mean <- c(
+  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[1])],
+  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[2])])
+
+qbRbWr_projections2$wr_sd <- c(
+  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[1])],
+  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[2])])
+
+qbRbWr_projections2$qb_lastName <- sapply(strsplit(qbRbWr_projections2$qb_name, " "), function(x) tail(x, 1))
+qbRbWr_projections2$rb_lastName <- sapply(strsplit(qbRbWr_projections2$rb_name, " "), function(x) tail(x, 1))
+qbRbWr_projections2$wr_lastName <- sapply(strsplit(qbRbWr_projections2$wr_name, " "), function(x) tail(x, 1))
+
+team_projections2 <- data.frame(
+  team = apply(hiLo_permutations, 1, paste0, collapse = ""),
+  team_name = NA,
+  team_mean = NA,
+  team_sd = NA,
+  qb = hiLo_permutations$Var1,
+  rb = hiLo_permutations$Var2,
+  wr = hiLo_permutations$Var3,
+  qb_name = NA,
+  qb_lastName = NA,
+  qb_mean = NA,
+  qb_sd = NA,
+  rb_name = NA,
+  rb_lastName = NA,
+  rb_mean = NA,
+  rb_sd = NA,
+  wr_name = NA,
+  wr_lastName = NA,
+  wr_mean = NA,
+  wr_sd = NA
+)
+
+team_projections2$qb_name[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_name[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$qb_name[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_name[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$qb_lastName[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_lastName[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$qb_lastName[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_lastName[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$qb_mean[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_mean[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$qb_mean[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_mean[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$qb_sd[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_sd[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$qb_sd[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_sd[which(qbRbWr_projections2$condition == "Lo")]
+
+team_projections2$rb_name[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_name[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$rb_name[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_name[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$rb_lastName[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_lastName[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$rb_lastName[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_lastName[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$rb_mean[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_mean[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$rb_mean[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_mean[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$rb_sd[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_sd[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$rb_sd[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_sd[which(qbRbWr_projections2$condition == "Lo")]
+
+team_projections2$wr_name[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_name[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$wr_name[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_name[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$wr_lastName[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_lastName[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$wr_lastName[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_lastName[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$wr_mean[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_mean[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$wr_mean[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_mean[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$wr_sd[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_sd[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$wr_sd[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_sd[which(qbRbWr_projections2$condition == "Lo")]
+
+team_projections2$team_name <- apply(
+  team_projections2[, c("qb_lastName", "rb_lastName", "wr_lastName")],
+  1,
+  paste,
+  collapse = "/"
+)
+
+team_projections2$team_mean <- rowSums(team_projections2[,c("qb_mean","rb_mean","wr_mean")])
+team_projections2$team_sd <- rowSums(team_projections2[,c("qb_sd","rb_sd","wr_sd")])
+```
+
+In @fig-teamPortfolio2, we depict the combined mean of projected fantasy points for a Quarterback/Running Back/Wide Receiver combination as a function of the standard deviation of their projected fantasy points across sources.
+
+```{r}
+#| label: fig-teamPortfolio2
+#| fig-cap: "Mean of Weekly Fantasy Points For a Quarterback/Running Back/Wide Receiver Combination as a Function of the Week-to-Week Standard Deviation of their Fantasy Points."
+#| fig-alt: "Mean of Weekly Fantasy Points For a Quarterback/Running Back/Wide Receiver Combination as a Function of the Week-to-Week Standard Deviation of their Fantasy Points."
+
+ggplot2::ggplot(
+  data = team_projections2,
+  aes(
+    x = team_sd,
+    y = team_mean,
+    label = team_name)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = team_name)) +
+  #geom_text(
+  #  hjust = 0,
+  #  vjust = 0) +
+  #geom_smooth() +
+  coord_cartesian(
+    xlim = c(NA,NA),
+    ylim = c(NA,NA),
+    expand = TRUE) +
+  labs(
+    x = "Standard Deviation of Players' Projected Fantasy Points (Season) Across Sources",
+    y = "Mean of Players' Projected Fantasy Points (Season) Across Sources",
+    title = "Mean vs Standard Deviation of Players' Projected Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+
+```{r}
 player_stats_weekly_recent_summary_noNA <- player_stats_weekly_recent_summary %>% 
   filter(!is.na(player_id) & !is.na(mean) & !is.na(var))
 
@@ -580,6 +923,8 @@ efficientFrontierData2 <- NMOF::mvFrontier(
   n = 50)
 ```
 
+The efficient frontier of fantasy points across weeks is in @fig-efficientFrontierAcrossWeeks.
+
 ```{r}
 #| label: fig-efficientFrontierAcrossWeeks
 #| fig-cap: "Efficient Frontier of Fantasy Points Across Weeks."
@@ -592,7 +937,8 @@ plot(
   cex = 0.5,
   type = "o",
   xlab = "Standard Deviation of Fantasy Points Across Weeks",
-  ylab = "Weekly Fantasy Points")
+  ylab = "Weekly Fantasy Points",
+  main = "Efficient Frontier of Fantasy Points Across Weeks")
 ```
 
 ## Conclusion {#sec-modernPortfolioTheoryConclusion}
