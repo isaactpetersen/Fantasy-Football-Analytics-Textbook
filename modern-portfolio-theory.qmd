@@ -397,6 +397,34 @@ ggplot2::ggplot(
 
 :::
 
+The formula for the variance (and standard deviation) of the sum of two variables is in @eq-varianceSumTwoVars:
+
+$$
+\begin{aligned}
+  \text{Var}(x + y) &= \text{Var}(x) + \text{Var}(y) + 2\text{Cov}(x, y)\\
+  s^2_{(x + y)} &= s^2_x + s^2_y +  2\text{Cov}(x, y)\\
+  \text{Std Dev}(x + y) &= \sqrt{\text{Var}(x) + \text{Var}(y) + 2\text{Cov}(x, y)}\\
+  s_{(x + y)} &= \sqrt{s^2_x + s^2_y + 2\text{Cov}(x, y)}\\
+\end{aligned}
+$$ {#eq-varianceSumTwoVars}
+
+If we assume that players' performance is uncorrelated with one another, the covariance between the players is zero, so the formula simplifies to @eq-varianceSumTwoVarsNoCov:
+
+$$
+\begin{aligned}
+  \text{Var}(x + y) &= \text{Var}(x) + \text{Var}(y)\\
+  s^2_{(x + y)} &= s^2_x + s^2_y\\
+  \text{Std Dev}(x + y) &= \sqrt{\text{Var}(x) + \text{Var}(y)}\\
+  s_{(x + y)} &= \sqrt{s^2_x + s^2_y}\\
+\end{aligned}
+$$ {#eq-varianceSumTwoVarsNoCov}
+
+That is, if players' performance is independent of each other, the variance of two players' points is merely the sum of their variances; their standard deviation is then the square root of that.
+In reality, players' performance is not truly independent—particularly for players on the same team or, for a given game, for players on opposing teams.
+However, for players not playing in the same game, it is a reasonable assumption to make and it greatly simplifies the math.
+If you wanted to, you could account for players' covariance by using @eq-varianceSumTwoVars.
+An example variance-covariance matrix of players' performance is in @sec-efficientFrontierFantasyProjectionsGameToGameVariability.
+
 ```{r}
 #| eval: false
 #| include: false
@@ -603,34 +631,6 @@ plot(
   ylab = "Projected Fantasy Points",
   main = "Efficient Frontier of Projected Fantasy Points Across Sources")
 ```
-
-The formula for the variance (and standard deviation) of the sum of two variables is in @eq-varianceSumTwoVars:
-
-$$
-\begin{aligned}
-  \text{Var}(x + y) &= \text{Var}(x) + \text{Var}(y) + 2\text{Cov}(x, y)\\
-  s^2_{(x + y)} &= s^2_x + s^2_y +  2\text{Cov}(x, y)\\
-  \text{Std Dev}(x + y) &= \sqrt{\text{Var}(x) + \text{Var}(y) + 2\text{Cov}(x, y)}\\
-  s_{(x + y)} &= \sqrt{s^2_x + s^2_y + 2\text{Cov}(x, y)}\\
-\end{aligned}
-$$ {#eq-varianceSumTwoVars}
-
-If we assume that players' performance is uncorrelated with one another, the covariance between the players is zero, so the formula simplifies to @eq-varianceSumTwoVarsNoCov:
-
-$$
-\begin{aligned}
-  \text{Var}(x + y) &= \text{Var}(x) + \text{Var}(y)\\
-  s^2_{(x + y)} &= s^2_x + s^2_y\\
-  \text{Std Dev}(x + y) &= \sqrt{\text{Var}(x) + \text{Var}(y)}\\
-  s_{(x + y)} &= \sqrt{s^2_x + s^2_y}\\
-\end{aligned}
-$$ {#eq-varianceSumTwoVarsNoCov}
-
-That is, if players' performance is independent of each other, the variance of two players' points is merely the sum of their variances; their standard deviation is then the square root of that.
-In reality, players' performance is not truly independent—particularly for players on the same team or, for a given game, for players on opposing teams.
-However, for players not playing in the same game, it is a reasonable assumption to make and it greatly simplifies the math.
-If you wanted to, you could account for players' covariance by using @eq-varianceSumTwoVars.
-An example variance-covariance matrix of players' performance is in @sec-efficientFrontierFantasyProjectionsGameToGameVariability.
 
 ### Based on Historical Game-to-Game Variability {#sec-efficientFrontierFantasyProjectionsGameToGameVariability}
 
@@ -902,7 +902,6 @@ ggplot2::ggplot(
   ) +
   theme_classic()
 ```
-
 
 ```{r}
 player_stats_weekly_recent_summary_noNA <- player_stats_weekly_recent_summary %>% 
