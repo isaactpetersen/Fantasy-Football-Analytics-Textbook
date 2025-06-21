@@ -1216,26 +1216,26 @@ res</a></code></pre>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>proj_dists_tbl <span class="ot">&lt;-</span> all_proj <span class="sc">|&gt;</span></span>
-<span id="cb27-2"><a href="#cb27-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(id) <span class="sc">&amp;</span> id <span class="sc">!=</span> <span class="st">""</span>) <span class="sc">|&gt;</span></span>
-<span id="cb27-3"><a href="#cb27-3"></a>  <span class="fu">group_by</span>(id) <span class="sc">|&gt;</span></span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>proj_dists_tbl <span class="ot">&lt;-</span> all_proj <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(id) <span class="sc">&amp;</span> id <span class="sc">!=</span> <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb27-3"><a href="#cb27-3"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
 <span id="cb27-4"><a href="#cb27-4"></a>  <span class="fu">summarise</span>(</span>
 <span id="cb27-5"><a href="#cb27-5"></a>    <span class="at">dist_info =</span> <span class="fu">list</span>(<span class="fu">fit_best</span>(projectedPoints)),</span>
 <span id="cb27-6"><a href="#cb27-6"></a>    <span class="at">n_proj =</span> <span class="fu">n</span>(), <span class="co"># record of how many sources they have</span></span>
 <span id="cb27-7"><a href="#cb27-7"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
 <span id="cb27-8"><a href="#cb27-8"></a>  )</span>
 <span id="cb27-9"><a href="#cb27-9"></a></span>
-<span id="cb27-10"><a href="#cb27-10"></a>proj_dists <span class="ot">&lt;-</span> proj_dists_tbl <span class="sc">|&gt;</span></span>
-<span id="cb27-11"><a href="#cb27-11"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(id) <span class="sc">&amp;</span> id <span class="sc">!=</span> <span class="st">""</span>) <span class="sc">|&gt;</span></span>
-<span id="cb27-12"><a href="#cb27-12"></a>  <span class="fu">distinct</span>(id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb27-10"><a href="#cb27-10"></a>proj_dists <span class="ot">&lt;-</span> proj_dists_tbl <span class="sc">%&gt;%</span></span>
+<span id="cb27-11"><a href="#cb27-11"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(id) <span class="sc">&amp;</span> id <span class="sc">!=</span> <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb27-12"><a href="#cb27-12"></a>  <span class="fu">distinct</span>(id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb27-13"><a href="#cb27-13"></a>  (\(x) <span class="fu">setNames</span>(x<span class="sc">$</span>dist_info, x<span class="sc">$</span>id))()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>proj_dists_tbl <span class="sc">|&gt;</span></span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>proj_dists_tbl <span class="sc">%&gt;%</span></span>
 <span id="cb28-2"><a href="#cb28-2"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
 <span id="cb28-3"><a href="#cb28-3"></a>    <span class="at">dist_type =</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(dist_info, <span class="sc">~</span> .x<span class="sc">$</span>type)</span>
-<span id="cb28-4"><a href="#cb28-4"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb28-5"><a href="#cb28-5"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(dist_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
@@ -1249,11 +1249,12 @@ res</a></code></pre>
 <span class="header-section-number">23.3.2.4</span> <code>SimDesign</code> Step 1: Design Grid</h4>
 <p>Now we build the <code>SimDesign</code> design grid based on the number of projections that each player had.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a>Design <span class="ot">&lt;-</span> proj_dists_tbl <span class="sc">|&gt;</span></span>
-<span id="cb29-2"><a href="#cb29-2"></a>  <span class="fu">transmute</span>(</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a>Design <span class="ot">&lt;-</span> proj_dists_tbl <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
 <span id="cb29-3"><a href="#cb29-3"></a>    id,</span>
-<span id="cb29-4"><a href="#cb29-4"></a>    <span class="at">n_sources =</span> n_proj <span class="co"># how many projections the player had</span></span>
-<span id="cb29-5"><a href="#cb29-5"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-4"><a href="#cb29-4"></a>    <span class="at">n_sources =</span> n_proj,</span>
+<span id="cb29-5"><a href="#cb29-5"></a>    <span class="at">.keep =</span> <span class="st">"none"</span></span>
+<span id="cb29-6"><a href="#cb29-6"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
