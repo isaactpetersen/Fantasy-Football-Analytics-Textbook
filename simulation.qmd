@@ -685,26 +685,26 @@ fit_best <- function(x) {
 ```
 
 ```{r}
-proj_dists_tbl <- all_proj |>
-  filter(!is.na(id) & id != "") |>
-  group_by(id) |>
+proj_dists_tbl <- all_proj %>%
+  filter(!is.na(id) & id != "") %>%
+  group_by(id) %>%
   summarise(
     dist_info = list(fit_best(projectedPoints)),
     n_proj = n(), # record of how many sources they have
     .groups = "drop"
   )
 
-proj_dists <- proj_dists_tbl |>
-  filter(!is.na(id) & id != "") |>
-  distinct(id, .keep_all = TRUE) |>
+proj_dists <- proj_dists_tbl %>%
+  filter(!is.na(id) & id != "") %>%
+  distinct(id, .keep_all = TRUE) %>%
   (\(x) setNames(x$dist_info, x$id))()
 ```
 
 ```{r}
-proj_dists_tbl |>
+proj_dists_tbl %>%
   dplyr::mutate(
     dist_type = purrr::map_chr(dist_info, ~ .x$type)
-  ) |>
+  ) %>%
   dplyr::count(dist_type)
 ```
 
@@ -713,10 +713,11 @@ proj_dists_tbl |>
 Now we build the `SimDesign` design grid based on the number of projections that each player had.
 
 ```{r}
-Design <- proj_dists_tbl |>
-  transmute(
+Design <- proj_dists_tbl %>%
+  dplyr::mutate(
     id,
-    n_sources = n_proj # how many projections the player had
+    n_sources = n_proj,
+    .keep = "none"
   )
 ```
 
