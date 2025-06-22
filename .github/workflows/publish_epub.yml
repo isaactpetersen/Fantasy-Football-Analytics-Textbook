@@ -68,8 +68,15 @@ jobs:
       #    render: false # renders in previous step, so don't render again
       #  env:
       #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List files in workspace
+        if: always()
+        run: |
+          ls -lh
+          find . -type f
         
       - name: Archive production artifacts
+        if: always() # ensures it runs even if previous steps fail
         uses: actions/upload-artifact@v4 # update
         with:
           name: _book
@@ -77,3 +84,6 @@ jobs:
             _book/
             *.tex
             *.md
+            *.log
+            *.bbl
+            *.blg
