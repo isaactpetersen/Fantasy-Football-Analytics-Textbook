@@ -33,7 +33,7 @@ load(file = "./data/nfl_depthCharts.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_pbp.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_4thdown.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
-load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
+#load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
 load(file = "./data/nfl_espnQBR_seasonal.RData")
@@ -69,7 +69,7 @@ load(file = "./data/nfl_depthCharts.RData")
 load(file = "./data/nfl_pbp.RData")
 load(file = "./data/nfl_4thdown.RData")
 load(file = "./data/nfl_participation.RData")
-load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
+#load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
 load(file = "./data/nfl_injuries.RData")
 load(file = "./data/nfl_snapCounts.RData")
 load(file = "./data/nfl_espnQBR_seasonal.RData")
@@ -198,7 +198,7 @@ varNames <- c(
   names(nfl_pbp),
   names(nfl_4thdown),
   names(nfl_participation),
-  names(nfl_actualFantasyPoints_player_weekly),
+  #names(nfl_actualFantasyPoints_player_weekly),
   names(nfl_injuries),
   names(nfl_snapCounts),
   names(nfl_espnQBR_seasonal),
@@ -249,11 +249,12 @@ nfl_playerIDs$pfr_id
 # Prepare data for merging
 #-todo: calculate years_of_experience
 ## Use common name for the same (gsis_id) ID variable
-nfl_actualFantasyPoints_player_weekly <- nfl_actualFantasyPoints_player_weekly %>% 
-  rename(gsis_id = player_id)
 
-nfl_actualFantasyPoints_player_seasonal <- nfl_actualFantasyPoints_player_seasonal %>% 
-  rename(gsis_id = player_id)
+#nfl_actualFantasyPoints_player_weekly <- nfl_actualFantasyPoints_player_weekly %>% 
+#  rename(gsis_id = player_id)
+#
+#nfl_actualFantasyPoints_player_seasonal <- nfl_actualFantasyPoints_player_seasonal %>% 
+#  rename(gsis_id = player_id)
 
 player_stats_seasonal_offense <- player_stats_seasonal %>% 
   filter(position_group %in% c("QB","RB","WR","TE")) %>% 
@@ -286,7 +287,7 @@ nfl_rosters <- nfl_rosters %>%
   mutate(
     draft_number = as.integer(draft_number))
 
-nfl_rosters_weekly <- nfl_rosters %>% 
+nfl_rosters_weekly <- nfl_rosters_weekly %>% 
   mutate(
     draft_number = as.integer(draft_number))
 
@@ -297,7 +298,8 @@ nfl_depthCharts <- nfl_depthCharts %>%
 nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
   mutate(
     season = as.integer(season),
-    receptions = as.integer(receptions))
+    receptions = as.integer(receptions)) %>% 
+  distinct(gsis_id, season, week, .keep_all = TRUE) # drop duplicated rows
 
 ## Rename variables
 #-todo: rename variables in expected fantasy points so they don't get coalesced with actual points
@@ -395,7 +397,8 @@ seasonalAndWeeklyData <- powerjoin::power_full_join(
   by = c("gsis_id","season"),
   conflict = coalesce_xy
 ) %>% 
-  filter(!is.na(week))
+  filter(!is.na(week)) %>% 
+  select(gsis_id, season, week, full_name, position, team, everything())
 
 # Duplicate cases
 seasonalData %>% 
@@ -513,22 +516,22 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
 
 CURRENTLY (WILL CHANGE):
 
-- seasonalData: 1999-2023
-- seasonalData_lag: 1999-2022 (predicting fantasy points in 2023)
-- newData_seasonal: 2023 (to be used for predicting fantasy points in 2024)
+- seasonalData: 1999-2024: i.e. all data currently available
+- seasonalData_lag: 1999-2023 (predicting fantasy points in 2024)
+- newData_seasonal: 2024 (to be used for predicting fantasy points in 2025)
 
 to create:
 
 - seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
-- seasonalData_lag_train: 1999-2022 (predicting fantasy points in 2023), most players
-- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), some retired players
-- (eventually, newData_seasonal, which is derived from the imputed version of seasonalData_lag_all, and then keeps only data from 2023, thus predicting fantasy points in 2024, and removing the fantasy_points_lag variable)
+- seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most players
+- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some of the) retired players; 2023 rather than 2024 because don't have fantasy points for retired players in most recent year
+- (eventually, newData_seasonal, which is derived from the imputed version of seasonalData_lag_all, and then keeps only data from 2024, thus predicting fantasy points in 2025, and removing the fantasy_points_lag variable)
 
 To impute:
 
 - seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
-- seasonalData_lag_train: 1999-2022 (predicting fantasy points in 2023), most players
-- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), some retired players
+- seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most players
+- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some of the) retired players
 
 IMPUTATION AND MODEL PROCESS:
 
@@ -538,13 +541,13 @@ IMPUTATION:
 - all data (training and test data), used for generating next year predictions
 
 MODEL:
-- training data (imputed version of seasonalData_lag_all): all seasons (except 2023 predicting 2024), most players
+- training data (imputed version of seasonalData_lag_all): all seasons (except 2024 predicting 2025), most players
 
 EVALUATE MODEL PREDICTIONS:
-- test data (imputed version of seasonalData_lag_test): all seasons (except 2023 predicting 2024), some retired players
+- test data (imputed version of seasonalData_lag_test): all seasons (except 2024 predicting 2025), some retired players
 
 GENERATE MODEL PREDICTIONS
-- next year data (newData_seasonal): 2023 (predicting 2024)
+- next year data (newData_seasonal): 2024 (predicting 2025)
 
 ```{r}
 seasonalData_lag_qb_all <- seasonalData_lag_subsetQB
