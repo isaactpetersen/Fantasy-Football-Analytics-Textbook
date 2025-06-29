@@ -514,40 +514,47 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
 
 ### Split into Test and Training Data {#sec-splitTestTraining}
 
-CURRENTLY (WILL CHANGE):
+```{r}
+#| eval: false
+#| include: false
 
-- seasonalData: 1999-2024: i.e. all data currently available
-- seasonalData_lag: 1999-2023 (predicting fantasy points in 2024)
-- newData_seasonal: 2024 (to be used for predicting fantasy points in 2025)
+# Notes to self
 
-to create:
+# CURRENTLY (WILL CHANGE):
+# 
+# - seasonalData: 1999-2024: i.e. all data currently available
+# - seasonalData_lag: 1999-2023 (predicting fantasy points in 2024)
+# - newData_seasonal: 2024 (to be used for predicting fantasy points in 2025)
 
-- seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
-- seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most players
-- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some of the) retired players; 2023 rather than 2024 because don't have fantasy points for retired players in most recent year
-- (eventually, newData_seasonal, which is derived from the imputed version of seasonalData_lag_all, and then keeps only data from 2024, thus predicting fantasy points in 2025, and removing the fantasy_points_lag variable)
+# to create:
+# 
+# - seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
+# - seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most #players
+# - seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some #of the) retired players; 2023 rather than 2024 because don't have fantasy #points for retired players in most recent year
+# - (eventually, newData_seasonal, which is derived from the imputed version of #seasonalData_lag_all, and then keeps only data from 2024, thus predicting #fantasy points in 2025, and removing the fantasy_points_lag variable)
 
-To impute:
+# To impute:
+# 
+# - seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
+# - seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most #players
+# - seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some #of the) retired players
 
-- seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
-- seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most players
-- seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some of the) retired players
-
-IMPUTATION AND MODEL PROCESS:
-
-IMPUTATION:
-- training data
-- test data
-- all data (training and test data), used for generating next year predictions
-
-MODEL:
-- training data (imputed version of seasonalData_lag_all): all seasons (except 2024 predicting 2025), most players
-
-EVALUATE MODEL PREDICTIONS:
-- test data (imputed version of seasonalData_lag_test): all seasons (except 2024 predicting 2025), some retired players
-
-GENERATE MODEL PREDICTIONS
-- next year data (newData_seasonal): 2024 (predicting 2025)
+# IMPUTATION AND MODEL PROCESS:
+# 
+# IMPUTATION:
+# - training data
+# - test data
+# - all data (training and test data), used for generating next year #predictions
+# 
+# MODEL:
+# - training data (imputed version of seasonalData_lag_all): all seasons #(except 2024 predicting 2025), most players
+# 
+# EVALUATE MODEL PREDICTIONS:
+# - test data (imputed version of seasonalData_lag_test): all seasons (except #2024 predicting 2025), some retired players
+# 
+# GENERATE MODEL PREDICTIONS
+# - next year data (newData_seasonal): 2024 (predicting 2025)
+```
 
 ```{r}
 seasonalData_lag_qb_all <- seasonalData_lag_subsetQB
@@ -600,11 +607,16 @@ seasonalData_lag_te_test <- seasonalData_lag_te_all %>%
 
 ### Impute the Missing Data {#sec-missingDataImputation}
 
-NOTES:
+```{r}
+#| eval: false
+#| include: false
 
-- CONSIDER USING RETIRED PLAYERS AS THE HOLDOUT SAMPLE
-- CONSIDER WIDENING THE DATA TO AVOID MULTILEVEL IMPUTATION
-- CONSIDER IMPUTING THE TRAINING AND TEST DATA SEPARATELY BY POSITION
+# Notes to self
+
+# - CONSIDER USING RETIRED PLAYERS AS THE HOLDOUT SAMPLE
+# - CONSIDER WIDENING THE DATA TO AVOID MULTILEVEL IMPUTATION
+# - CONSIDER IMPUTING THE TRAINING AND TEST DATA SEPARATELY BY POSITION
+```
 
 Here is a vignette demonstrating how to impute missing data using `missForest()`: <https://rpubs.com/lmorgan95/MissForest> (archived at: <https://perma.cc/6GB4-2E22>).
 Below, we impute the training data (and all data) separately by position.
@@ -666,7 +678,9 @@ data_test_qb <- seasonalData_lag_qb_test_imp
 data_test_qb_matrix <- data_test_qb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
+```
 
+```{r}
 # RBs
 seasonalData_lag_rb_all_imp <- missRanger::missRanger(
   seasonalData_lag_rb_all,
@@ -715,7 +729,9 @@ data_test_rb <- seasonalData_lag_rb_test_imp
 data_test_rb_matrix <- data_test_rb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
+```
 
+```{r}
 # WRs
 seasonalData_lag_wr_all_imp <- missRanger::missRanger(
   seasonalData_lag_wr_all,
@@ -764,7 +780,9 @@ data_test_wr <- seasonalData_lag_wr_test_imp
 data_test_wr_matrix <- data_test_wr %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
+```
 
+```{r}
 # TEs
 seasonalData_lag_te_all_imp <- missRanger::missRanger(
   seasonalData_lag_te_all,
