@@ -302,7 +302,6 @@ nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>%
   distinct(gsis_id, season, week, .keep_all = TRUE) # drop duplicated rows
 
 ## Rename variables
-#-todo: rename variables in expected fantasy points so they don't get coalesced with actual points
 nfl_draftPicks <- nfl_draftPicks %>%
   rename(
     games_career = games,
@@ -322,6 +321,10 @@ nfl_draftPicks <- nfl_draftPicks %>%
     def_sacks_career = def_sacks
   )
 
+## Subset variables
+nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
+  select(gsis_id:position, contains("_exp"), contains("_diff"), contains("_team")) #drop "raw stats" variables (e.g., rec_yards_gained) so they don't get coalesced with actual stats
+
 # Check duplicate ids
 player_stats_seasonal_offense %>% 
   group_by(gsis_id, season) %>% 
@@ -333,6 +336,46 @@ nfl_advancedStatsPFR_seasonal %>%
   filter(n() > 1, !is.na(gsis_id)) %>% 
   select(gsis_id, pfr_id, season, team, everything()) %>% 
   head()
+```
+
+Identify objects with shared variable names:
+
+```{r}
+dplyr::intersect(
+  names(nfl_players),
+  names(nfl_draftPicks))
+
+length(na.omit(nfl_players$position)) # use by default (more cases)
+length(na.omit(nfl_draftPicks$position))
+
+dplyr::intersect(
+  names(player_stats_seasonal_offense),
+  names(nfl_advancedStatsPFR_seasonal))
+
+length(na.omit(player_stats_seasonal_offense$season)) # use by default (more cases)
+length(na.omit(nfl_advancedStatsPFR_seasonal$season))
+
+length(na.omit(player_stats_seasonal_offense$team)) # use by default (more cases)
+length(na.omit(nfl_advancedStatsPFR_seasonal$team))
+
+length(na.omit(player_stats_seasonal_offense$age)) # use by default (more cases)
+length(na.omit(nfl_advancedStatsPFR_seasonal$age))
+
+dplyr::intersect(
+  names(nfl_rosters_weekly),
+  names(nfl_expectedFantasyPoints_weekly))
+
+length(na.omit(nfl_rosters_weekly$season)) # use by default (more cases)
+length(na.omit(nfl_expectedFantasyPoints_weekly$season))
+
+length(na.omit(nfl_rosters_weekly$week)) # use by default (more cases)
+length(na.omit(nfl_expectedFantasyPoints_weekly$week))
+
+length(na.omit(nfl_rosters_weekly$position)) # use by default (more cases)
+length(na.omit(nfl_expectedFantasyPoints_weekly$position))
+
+length(na.omit(nfl_rosters_weekly$full_name)) # use by default (more cases)
+length(na.omit(nfl_expectedFantasyPoints_weekly$full_name))
 ```
 
 ### Merge Data {#sec-machineLearningMergeData}
@@ -368,38 +411,58 @@ playerMerged <- playerListToMerge %>%
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id"),
-    conflict = coalesce_xy)
+    conflict = coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 
 playerSeasonMerged <- playerSeasonListToMerge %>% 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season"),
-    conflict = coalesce_xy)
+    conflict = coalesce_xy) # where the objects have the same variable name (e.g., team), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 
 playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>% 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season","week"),
-    conflict = coalesce_xy)
+    conflict = coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
+```
 
+Identify objects with shared variable names:
+
+```{r}
+dplyr::intersect(
+  names(playerSeasonMerged),
+  names(playerMerged))
+```
+
+```{r}
 seasonalData <- powerjoin::power_full_join(
   playerSeasonMerged,
-  playerMerged %>% select(-age, -years_of_experience, -team, -team_abbr, -team_seq, -current_team_id),
+  playerMerged %>% select(-age, -years_of_experience, -team, -team_abbr, -team_seq, -current_team_id), # drop variables from id objects that change from year to year (and thus are not necessarily accurate for a given season)
   by = "gsis_id",
-  conflict = coalesce_xy
+  conflict = coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 ) %>% 
   filter(!is.na(season)) %>% 
   select(gsis_id, season, player_display_name, position, team, games, everything())
+```
 
+```{r}
+dplyr::intersect(
+  names(playerSeasonWeekMerged),
+  names(seasonalData))
+```
+
+```{r}
 seasonalAndWeeklyData <- powerjoin::power_full_join(
   playerSeasonWeekMerged,
   seasonalData,
   by = c("gsis_id","season"),
-  conflict = coalesce_xy
+  conflict = coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 ) %>% 
   filter(!is.na(week)) %>% 
   select(gsis_id, season, week, full_name, position, team, everything())
+```
 
+```{r}
 # Duplicate cases
 seasonalData %>% 
   group_by(gsis_id, season) %>% 
@@ -453,7 +516,7 @@ seasonalData_lag <- seasonalData %>%
   ungroup()
 
 seasonalData_lag %>% 
-  select(gsis_id, player_display_name, season, fantasyPoints, fantasyPoints_lag)
+  select(gsis_id, player_display_name, season, fantasyPoints, fantasyPoints_lag) # verify that lagging worked as expected
 ```
 
 ### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
@@ -518,7 +581,8 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
 #| eval: false
 #| include: false
 
-# Notes to self
+# Notes to self:
+# - Using only retired players as the holdout sample, so that we can include all current/active players in the training model
 
 # CURRENTLY (WILL CHANGE):
 # 
@@ -529,28 +593,28 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
 # to create:
 # 
 # - seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
-# - seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most #players
-# - seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some #of the) retired players; 2023 rather than 2024 because don't have fantasy #points for retired players in most recent year
-# - (eventually, newData_seasonal, which is derived from the imputed version of #seasonalData_lag_all, and then keeps only data from 2024, thus predicting #fantasy points in 2025, and removing the fantasy_points_lag variable)
+# - seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most players
+# - seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some of the) retired players; 2023 rather than 2024 because don't have fantasy points for retired players in most recent year
+# - (eventually, newData_seasonal, which is derived from the imputed version of seasonalData_lag_all, and then keeps only data from 2024, thus predicting fantasy points in 2025, and removing the fantasy_points_lag variable)
 
 # To impute:
 # 
 # - seasonalData_lag_all: 1999-2023 (predicting fantasy points in 2024)
-# - seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most #players
-# - seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some #of the) retired players
+# - seasonalData_lag_train: 1999-2023 (predicting fantasy points in 2024), most players
+# - seasonalData_lag_test: 1999-2022 (predicting fantasy points in 2023), (some of the) retired players
 
 # IMPUTATION AND MODEL PROCESS:
 # 
 # IMPUTATION:
 # - training data
 # - test data
-# - all data (training and test data), used for generating next year #predictions
+# - all data (training and test data), used for generating next year predictions
 # 
 # MODEL:
-# - training data (imputed version of seasonalData_lag_all): all seasons #(except 2024 predicting 2025), most players
+# - training data (imputed version of seasonalData_lag_all): all seasons (except 2024 predicting 2025), most players
 # 
 # EVALUATE MODEL PREDICTIONS:
-# - test data (imputed version of seasonalData_lag_test): all seasons (except #2024 predicting 2025), some retired players
+# - test data (imputed version of seasonalData_lag_test): all seasons (except 2024 predicting 2025), (some of the) retired players
 # 
 # GENERATE MODEL PREDICTIONS
 # - next year data (newData_seasonal): 2024 (predicting 2025)
@@ -562,7 +626,7 @@ seasonalData_lag_rb_all <- seasonalData_lag_subsetRB
 seasonalData_lag_wr_all <- seasonalData_lag_subsetWR
 seasonalData_lag_te_all <- seasonalData_lag_subsetTE
 
-set.seed(52242)
+set.seed(52242) # for reproducibility (to keep the same train/holdout players)
 
 activeQBs <- unique(seasonalData_lag_qb_all$gsis_id[which(seasonalData_lag_qb_all$season == max(seasonalData_lag_qb_all$season, na.rm = TRUE))])
 retiredQBs <- unique(seasonalData_lag_qb_all$gsis_id[which(seasonalData_lag_qb_all$gsis_id %ni% activeQBs)])
@@ -573,6 +637,8 @@ activeRBs <- unique(seasonalData_lag_rb_all$gsis_id[which(seasonalData_lag_rb_al
 retiredRBs <- unique(seasonalData_lag_rb_all$gsis_id[which(seasonalData_lag_rb_all$gsis_id %ni% activeRBs)])
 numRBs <- length(unique(seasonalData_lag_rb_all$gsis_id))
 rbHoldoutIDs <- sample(retiredRBs, size = ceiling(.2 * numRBs)) # holdout 20% of players
+
+set.seed(52242) # for reproducibility (to keep the same train/holdout players); added here to prevent a downstream error with predict.missRanger() due to missingness; this suggests that an error can arise from including a player in the holdout sample who has missingness in particular variables; would be good to identify which player(s) in the holdout sample evoke that error to identify the kinds of missingness that yield the error
 
 activeWRs <- unique(seasonalData_lag_wr_all$gsis_id[which(seasonalData_lag_wr_all$season == max(seasonalData_lag_wr_all$season, na.rm = TRUE))])
 retiredWRs <- unique(seasonalData_lag_wr_all$gsis_id[which(seasonalData_lag_wr_all$gsis_id %ni% activeWRs)])
@@ -613,7 +679,6 @@ seasonalData_lag_te_test <- seasonalData_lag_te_all %>%
 
 # Notes to self
 
-# - CONSIDER USING RETIRED PLAYERS AS THE HOLDOUT SAMPLE
 # - CONSIDER WIDENING THE DATA TO AVOID MULTILEVEL IMPUTATION
 # - CONSIDER IMPUTING THE TRAINING AND TEST DATA SEPARATELY BY POSITION
 ```
@@ -944,25 +1009,25 @@ newData_seasonalRB$fantasyPoints_lag <- newData_seasonalRB_imp$ximp$fantasyPoint
 newData_seasonalWR$fantasyPoints_lag <- newData_seasonalWR_imp$ximp$fantasyPoints_lag
 newData_seasonalTE$fantasyPoints_lag <- newData_seasonalTE_imp$ximp$fantasyPoints_lag
 
-newData_seasonalQB <- left_join(
+newData_seasonalQB <- dplyr::left_join(
   newData_seasonalQB,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
-newData_seasonalRB <- left_join(
+newData_seasonalRB <- dplyr::left_join(
   newData_seasonalRB,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
-newData_seasonalWR <- left_join(
+newData_seasonalWR <- dplyr::left_join(
   newData_seasonalWR,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
-newData_seasonalTE <- left_join(
+newData_seasonalTE <- dplyr::left_join(
   newData_seasonalTE,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
@@ -1044,28 +1109,33 @@ pred_vars_qb_categorical <- "gsis_id" # to specify categorical predictors
 
 ```{r}
 model_likelihood <- "gaussian" # gamma
-nrounds <- 1000
+nrounds <- 2000
 ```
 
 #### Identify Optimal Tuning Parameters {#sec-treeBoostingOptimalTuningParameters}
+
+For identifying the optimal tuning parameters for boosting, we partition the training data into inner training data and validation data.
+We randomly split the training data into 80% inner training data and 20% held-out validation data.
+We then use the [mean absolute error](#sec-meanAbsoluteError) as our index of prediction accuracy on the held-out validation data.
 
 ```{r}
 # Partition training data into inner training data and validation data
 ntrain_qb <- dim(data_train_qb_matrix)[1]
 
 set.seed(52242)
-valid_tune_idx_qb <- sample.int(ntrain_qb, as.integer(0.2*ntrain_qb))
+valid_tune_idx_qb <- sample.int(ntrain_qb, as.integer(0.2*ntrain_qb)) # 
 
 folds_qb <- list(valid_tune_idx_qb)
 
 # Specify parameter grid, gp_model, and gpb.Dataset
 param_grid_qb <- list(
-  "learning_rate" = c(1,0.1,0.01),
-  "max_depth" = c(1,2,3,5,10),
-  "min_data_in_leaf" = c(10,100,1000),
-  "lambda_l2" = c(0,1,10))
+  "learning_rate" = c(0.2, 0.1, 0.05, 0.01),
+  "max_depth" = c(3, 5, 7),
+  "min_data_in_leaf" = c(10, 50, 100),
+  "lambda_l2" = c(0, 1, 5))
 
-other_params_qb <- list(num_leaves = 2^10)
+other_params_qb <- list(
+  num_leaves = 2^6) # 2^n, where n is smaller than the largest max_depth
 
 gp_model_qb <- gpboost::GPModel(
   group_data = data_train_qb_matrix[,"gsis_id"],
@@ -1089,12 +1159,18 @@ opt_params_qb <- gpboost::gpb.grid.search.tune.parameters(
   data = gp_data_qb,
   gp_model = gp_model_qb,
   nrounds = nrounds,
-  early_stopping_rounds = 10,
+  early_stopping_rounds = 50,
   verbose_eval = 1,
-  metric = "mse")
+  metric = "mae")
 
 opt_params_qb
 ```
+
+A learning rate of 1 is very high for boosting.
+Even if a learning rate of 1 did well in tuning, I use a lower learning rate (0.2) to avoid overfitting.
+I also added some light regularization (`lambda_l2`) for better generalization.
+I also set the maximum tree depth (`max_depth`) at 7 to capture up to 3-way interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^5 (32).
+I set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 50.
 
 #### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
 
@@ -1113,14 +1189,14 @@ gp_data_qb <- gpboost::gpb.Dataset(
   label = data_train_qb_matrix[,"fantasyPoints_lag"])
 
 params_qb <- list(
-  learning_rate = 1,
-  max_depth = 10,
-  num_leaves = 2^10,
-  min_data_in_leaf = 10,
-  lambda_l2 = 0,
+  learning_rate = 0.2, # 0.1,
+  max_depth = 7, #3,
+  min_data_in_leaf = 10, #50
+  lambda_l2 = 0, # 1,
+  num_leaves = 2^6, #2^5,
   num_threads = num_cores)
 
-nrounds_qb <- 7000 # identify optimal number of trees through iteration and cross-validation
+nrounds_qb <- 2000 # identify optimal number of trees through iteration and cross-validation
 
 #gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead")) # to speed up model estimation
 ```
