@@ -565,6 +565,13 @@ seasonalData <- seasonalData %>%
 gc()
 ```
 
+```{r}
+#| label: create-new-data-machine-learning
+
+newData_seasonal <- seasonalData %>% 
+  filter(season == max(season, na.rm = TRUE))
+```
+
 ### Lag Fantasy Points {#sec-lagFantasyPoints}
 
 ```{r}
@@ -1139,7 +1146,7 @@ set.seed(52242)
 
 randomForest_qb <- caret::train(
   fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_subsetQB_imp$ximp,
+  data = seasonalData_lag_qb_train_imp$data,
   method = "rf",
   trControl = trainControl(
     method = "cv",
@@ -1147,7 +1154,7 @@ randomForest_qb <- caret::train(
 
 randomForest_rb <- caret::train(
   fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_subsetRB_imp$ximp,
+  data = seasonalData_lag_rb_train_imp$data,
   method = "rf",
   trControl = trainControl(
     method = "cv",
@@ -1155,7 +1162,7 @@ randomForest_rb <- caret::train(
 
 randomForest_wr <- caret::train(
   fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_subsetWR_imp$ximp,
+  data = seasonalData_lag_wr_train_imp$data,
   method = "rf",
   trControl = trainControl(
     method = "cv",
@@ -1163,7 +1170,7 @@ randomForest_wr <- caret::train(
 
 randomForest_te <- caret::train(
   fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_subsetTE_imp$ximp,
+  data = seasonalData_lag_te_train_imp$data,
   method = "rf",
   trControl = trainControl(
     method = "cv",
@@ -1176,68 +1183,68 @@ print(randomForest_rb)
 print(randomForest_wr)
 print(randomForest_te)
 
-newData_seasonalQB_imp$ximp$fantasyPoints_lag <- predict(
+newData_qb$fantasyPoints_lag <- predict(
   randomForest_qb,
-  newdata = newData_seasonalQB_imp$ximp
+  newdata = newData_qb
 )
 
-newData_seasonalRB_imp$ximp$fantasyPoints_lag <- predict(
+newData_rb$fantasyPoints_lag <- predict(
   randomForest_rb,
-  newdata = newData_seasonalRB_imp$ximp
+  newdata = newData_rb
 )
 
-newData_seasonalWR_imp$ximp$fantasyPoints_lag <- predict(
+newData_wr$fantasyPoints_lag <- predict(
   randomForest_wr,
-  newdata = newData_seasonalWR_imp$ximp
+  newdata = newData_wr
 )
 
-newData_seasonalTE_imp$ximp$fantasyPoints_lag <- predict(
+newData_te$fantasyPoints_lag <- predict(
   randomForest_te,
-  newdata = newData_seasonalTE_imp$ximp
+  newdata = newData_te
 )
 
-newData_seasonalQB$fantasyPoints_lag <- newData_seasonalQB_imp$ximp$fantasyPoints_lag
-newData_seasonalRB$fantasyPoints_lag <- newData_seasonalRB_imp$ximp$fantasyPoints_lag
-newData_seasonalWR$fantasyPoints_lag <- newData_seasonalWR_imp$ximp$fantasyPoints_lag
-newData_seasonalTE$fantasyPoints_lag <- newData_seasonalTE_imp$ximp$fantasyPoints_lag
+newData_qb$fantasyPoints_lag <- newData_qb$fantasyPoints_lag
+newData_rb$fantasyPoints_lag <- newData_rb$fantasyPoints_lag
+newData_wr$fantasyPoints_lag <- newData_wr$fantasyPoints_lag
+newData_te$fantasyPoints_lag <- newData_te$fantasyPoints_lag
 
-newData_seasonalQB <- dplyr::left_join(
-  newData_seasonalQB,
+newData_qb <- dplyr::left_join(
+  newData_qb,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
-newData_seasonalRB <- dplyr::left_join(
-  newData_seasonalRB,
+newData_rb <- dplyr::left_join(
+  newData_rb,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
-newData_seasonalWR <- dplyr::left_join(
-  newData_seasonalWR,
+newData_wr <- dplyr::left_join(
+  newData_wr,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
-newData_seasonalTE <- dplyr::left_join(
-  newData_seasonalTE,
+newData_te <- dplyr::left_join(
+  newData_te,
   newData_seasonal %>% select(gsis_id, player_display_name, team),
   by = "gsis_id"
 )
 
-newData_seasonalQB %>%
+newData_qb %>%
   arrange(-fantasyPoints_lag) %>% 
   select(gsis_id, player_display_name, fantasyPoints_lag)
 
-newData_seasonalRB %>%
+newData_rb %>%
   arrange(-fantasyPoints_lag) %>% 
   select(gsis_id, player_display_name, fantasyPoints_lag)
 
-newData_seasonalWR %>%
+newData_wr %>%
   arrange(-fantasyPoints_lag) %>% 
   select(gsis_id, player_display_name, fantasyPoints_lag)
 
-newData_seasonalTE %>%
+newData_te %>%
   arrange(-fantasyPoints_lag) %>% 
   select(gsis_id, player_display_name, fantasyPoints_lag)
 ```
@@ -1461,11 +1468,17 @@ pred_test_qb <- predict(
   pred_latent = FALSE)
 
 y_pred_test_qb <- pred_test_qb[["response_mean"]] # if outcome is mean-centered, add mean(data_train_qb_matrix[,"fantasyPoints_lag"])
-cbind(y_pred_test_qb, data_test_qb_matrix[,"fantasyPoints_lag"])
+
+predictedVsActual <- data.frame(
+  predictedPoints = y_pred_test_qb,
+  actualPoints = data_test_qb_matrix[,"fantasyPoints_lag"]
+)
+
+predictedVsActual
 
 petersenlab::accuracyOverall(
-  predicted = y_pred_test_qb,
-  actual = data_test_qb_matrix[,"fantasyPoints_lag"],
+  predicted = predictedVsActual$predictedPoints,
+  actual = predictedVsActual$actualPoints,
   dropUndefined = TRUE
 )
 ```
