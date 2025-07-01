@@ -92,6 +92,13 @@ load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
 ```
 
+```{r}
+#| label: free-up-memory1-ml
+#| include: false
+
+gc()
+```
+
 ### Specify Options {#machineLearningSpecifyOptions}
 
 ```{r}
@@ -246,6 +253,8 @@ nfl_playerIDs$pfr_id
 ### Prepare Data for Merging {#sec-machineLearningPrepareDataForMerging}
 
 ```{r}
+#| label: prepare-data-merging-machine-learning
+
 # Prepare data for merging
 #-todo: calculate years_of_experience
 ## Use common name for the same (gsis_id) ID variable
@@ -338,6 +347,13 @@ nfl_advancedStatsPFR_seasonal %>%
   head()
 ```
 
+```{r}
+#| label: free-up-memory2-ml
+#| include: false
+
+gc()
+```
+
 Identify objects with shared variable names:
 
 ```{r}
@@ -383,6 +399,8 @@ length(na.omit(nfl_expectedFantasyPoints_weekly$full_name))
 To merge data, we use the `powerjoin` package [@R-powerjoin]:
 
 ```{r}
+#| label: merge-data1-machine-learning
+
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 #-todo: remove redundant variables
 playerListToMerge <- list(
@@ -426,6 +444,13 @@ playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>%
     conflict = coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 ```
 
+```{r}
+#| label: free-up-memory3-ml
+#| include: false
+
+gc()
+```
+
 Identify objects with shared variable names:
 
 ```{r}
@@ -435,6 +460,8 @@ dplyr::intersect(
 ```
 
 ```{r}
+#| label: merge-data2-machine-learning
+
 seasonalData <- powerjoin::power_full_join(
   playerSeasonMerged,
   playerMerged %>% select(-age, -years_of_experience, -team, -team_abbr, -team_seq, -current_team_id), # drop variables from id objects that change from year to year (and thus are not necessarily accurate for a given season)
@@ -446,12 +473,21 @@ seasonalData <- powerjoin::power_full_join(
 ```
 
 ```{r}
+#| label: free-up-memory4-ml
+#| include: false
+
+gc()
+```
+
+```{r}
 dplyr::intersect(
   names(playerSeasonWeekMerged),
   names(seasonalData))
 ```
 
 ```{r}
+#| label: merge-data3-machine-learning
+
 seasonalAndWeeklyData <- powerjoin::power_full_join(
   playerSeasonWeekMerged,
   seasonalData,
@@ -460,6 +496,13 @@ seasonalAndWeeklyData <- powerjoin::power_full_join(
 ) %>% 
   filter(!is.na(week)) %>% 
   select(gsis_id, season, week, full_name, position, team, everything())
+```
+
+```{r}
+#| label: free-up-memory5-ml
+#| include: false
+
+gc()
 ```
 
 ```{r}
@@ -478,6 +521,8 @@ seasonalAndWeeklyData %>%
 ### Additional Processing {#sec-mlAdditionalProcessing}
 
 ```{r}
+#| label: additional-processing-machine-learning
+
 # Convert character and logical variables to factors
 seasonalData <- seasonalData %>% 
   mutate(
@@ -492,9 +537,18 @@ seasonalData <- seasonalData %>%
   )
 ```
 
+```{r}
+#| label: free-up-memory6-ml
+#| include: false
+
+gc()
+```
+
 ### Fill in Missing Data for Static Variables {#sec-fillMissingData}
 
 ```{r}
+#| label: fill-in-missing-data-machine-learning
+
 seasonalData <- seasonalData %>% 
   arrange(gsis_id, season) %>% 
   group_by(gsis_id) %>% 
@@ -504,9 +558,18 @@ seasonalData <- seasonalData %>%
   ungroup()
 ```
 
+```{r}
+#| label: free-up-memory7-ml
+#| include: false
+
+gc()
+```
+
 ### Lag Fantasy Points {#sec-lagFantasyPoints}
 
 ```{r}
+#| label: lag-fantasy-points-machine-learning
+
 seasonalData_lag <- seasonalData %>% 
   arrange(gsis_id, season) %>% 
   group_by(gsis_id) %>% 
@@ -519,9 +582,18 @@ seasonalData_lag %>%
   select(gsis_id, player_display_name, season, fantasyPoints, fantasyPoints_lag) # verify that lagging worked as expected
 ```
 
+```{r}
+#| label: free-up-memory8-ml
+#| include: false
+
+gc()
+```
+
 ### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
 
 ```{r}
+#| label: subset-data-machine-learning
+
 seasonalData_lag %>% select_if(~class(.) == "Date")
 seasonalData_lag %>% select_if(is.character)
 seasonalData_lag %>% select_if(is.factor)
@@ -539,9 +611,18 @@ seasonalData_lag_subset <- seasonalData_lag %>%
   dplyr::select(-any_of(dropVars))
 ```
 
+```{r}
+#| label: free-up-memory9-ml
+#| include: false
+
+gc()
+```
+
 ### Separate by Position {#sec-separateByPosition}
 
 ```{r}
+#| label: separate-by-position-machine-learning
+
 seasonalData_lag_subsetQB <- seasonalData_lag_subset %>% 
   filter(position == "QB") %>% 
   select(
@@ -573,6 +654,13 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
     height, weight, rookie_year, draft_number,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
+```
+
+```{r}
+#| label: free-up-memory10-ml
+#| include: false
+
+gc()
 ```
 
 ### Split into Test and Training Data {#sec-splitTestTraining}
@@ -621,6 +709,8 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
 ```
 
 ```{r}
+#| label: split-test-training-machine-learning
+
 seasonalData_lag_qb_all <- seasonalData_lag_subsetQB
 seasonalData_lag_rb_all <- seasonalData_lag_subsetRB
 seasonalData_lag_wr_all <- seasonalData_lag_subsetWR
@@ -671,6 +761,61 @@ seasonalData_lag_te_test <- seasonalData_lag_te_all %>%
   filter(gsis_id %in% teHoldoutIDs)
 ```
 
+```{r}
+#| label: free-up-memory11-ml
+#| include: false
+
+rm(nfl_players)
+rm(nfl_teams)
+rm(nfl_rosters)
+rm(nfl_rosters_weekly)
+rm(nfl_schedules)
+rm(nfl_combine)
+rm(nfl_draftPicks)
+rm(nfl_depthCharts)
+rm(nfl_pbp)
+rm(nfl_4thdown)
+rm(nfl_participation)
+rm(nfl_actualFantasyPoints_weekly)
+rm(nfl_injuries)
+rm(nfl_snapCounts)
+rm(nfl_espnQBR_seasonal)
+rm(nfl_espnQBR_weekly)
+rm(nfl_nextGenStats_weekly)
+rm(nfl_advancedStatsPFR_seasonal)
+rm(nfl_advancedStatsPFR_weekly)
+rm(nfl_playerContracts)
+rm(nfl_ftnCharting)
+rm(nfl_playerIDs)
+rm(nfl_rankings_draft)
+rm(nfl_rankings_weekly)
+rm(nfl_expectedFantasyPoints_weekly)
+rm(nfl_expectedFantasyPoints_pbp)
+rm(nfl_actualStats_career)
+rm(nfl_actualStats_career_player)
+rm(nfl_actualStats_career_player_inclPost)
+rm(nfl_actualStats_seasonal)
+rm(nfl_actualStats_seasonal_player)
+rm(nfl_actualStats_seasonal_player_inclPost)
+rm(nfl_actualStats_seasonal_team)
+rm(nfl_actualStats_seasonal_team_inclPost)
+rm(player_stats_weekly)
+rm(player_stats_weekly_offense)
+rm(player_stats_seasonal)
+rm(player_stats_seasonal_offense)
+
+rm(playerListToMerge)
+rm(playerMerged)
+rm(playerSeasonListToMerge)
+rm(playerSeasonMerged)
+rm(playerSeasonWeekListToMerge)
+rm(playerSeasonWeekMerged)
+rm(playerSeasonWeekPositionListToMerge)
+rm(seasonalAndWeeklyData)
+
+gc()
+```
+
 ### Impute the Missing Data {#sec-missingDataImputation}
 
 ```{r}
@@ -695,6 +840,8 @@ Note: the following code takes a while to run.
 :::
 
 ```{r}
+#| label: impute-qb-machine-learning
+
 # QBs
 seasonalData_lag_qb_all_imp <- missRanger::missRanger(
   seasonalData_lag_qb_all,
@@ -746,6 +893,15 @@ data_test_qb_matrix <- data_test_qb %>%
 ```
 
 ```{r}
+#| label: free-up-memory12-ml
+#| include: false
+
+gc()
+```
+
+```{r}
+#| label: impute-rb-machine-learning
+
 # RBs
 seasonalData_lag_rb_all_imp <- missRanger::missRanger(
   seasonalData_lag_rb_all,
@@ -797,6 +953,15 @@ data_test_rb_matrix <- data_test_rb %>%
 ```
 
 ```{r}
+#| label: free-up-memory13-ml
+#| include: false
+
+gc()
+```
+
+```{r}
+#| label: impute-wr-machine-learning
+
 # WRs
 seasonalData_lag_wr_all_imp <- missRanger::missRanger(
   seasonalData_lag_wr_all,
@@ -848,6 +1013,15 @@ data_test_wr_matrix <- data_test_wr %>%
 ```
 
 ```{r}
+#| label: free-up-memory14-ml
+#| include: false
+
+gc()
+```
+
+```{r}
+#| label: impute-te-machine-learning
+
 # TEs
 seasonalData_lag_te_all_imp <- missRanger::missRanger(
   seasonalData_lag_te_all,
@@ -898,9 +1072,17 @@ data_test_te_matrix <- data_test_te %>%
   as.matrix()
 ```
 
+```{r}
+#| label: free-up-memory15-ml
+#| include: false
+
+gc()
+```
+
 ## Identify Cores for Parallel Processing {#sec-coresParallel}
 
 ```{r}
+#| label: parallel-cores-machine-learning
 #| include: false
 
 num_cores <- parallel::detectCores()
@@ -940,6 +1122,8 @@ We use the `caret` package [@R-caret].
 We use the `parallel` [@R-parallel] and `doParallel` [@R-doParallel] packages for parallel (faster) processing.
 
 ```{r}
+#| label: cross-sectional-machine-learning
+
 cl <- parallel::makeCluster(num_cores)
 doParallel::registerDoParallel(cl)
 
@@ -1097,6 +1281,8 @@ If using a gamma distribution, it requires positive-only values:
 #### Specify Predictor Variables {#sec-treeBoostingSpecifyPredictors}
 
 ```{r}
+#| label: specify-predictors-machine-learning
+
 pred_vars_qb <- data_train_qb_matrix %>% 
   as_tibble() %>% 
   select(-fantasyPoints_lag, -ageCentered20, ageCentered20Quadratic) %>% # -gsis_id
@@ -1108,6 +1294,8 @@ pred_vars_qb_categorical <- "gsis_id" # to specify categorical predictors
 #### Specify General Model Options {#sec-treeBoostingSpecifyGeneralModelOptions}
 
 ```{r}
+#| label: specify-general-model-options-machine-learning
+
 model_likelihood <- "gaussian" # gamma
 nrounds <- 2000
 ```
@@ -1119,6 +1307,8 @@ We randomly split the training data into 80% inner training data and 20% held-ou
 We then use the [mean absolute error](#sec-meanAbsoluteError) as our index of prediction accuracy on the held-out validation data.
 
 ```{r}
+#| label: tuning-parameters-machine-learning
+
 # Partition training data into inner training data and validation data
 ntrain_qb <- dim(data_train_qb_matrix)[1]
 
@@ -1166,6 +1356,13 @@ opt_params_qb <- gpboost::gpb.grid.search.tune.parameters(
 opt_params_qb
 ```
 
+```{r}
+#| label: free-up-memory16-ml
+#| include: false
+
+gc()
+```
+
 A learning rate of 1 is very high for boosting.
 Even if a learning rate of 1 did well in tuning, I use a lower learning rate (0.2) to avoid overfitting.
 I also added some light regularization (`lambda_l2`) for better generalization.
@@ -1175,6 +1372,8 @@ I set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 50.
 #### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
 
 ```{r}
+#| label: model-parameters-machine-learning
+
 gp_model_qb <- gpboost::GPModel(
   group_data = data_train_qb_matrix[,"gsis_id"],
   likelihood = model_likelihood,
@@ -1204,6 +1403,8 @@ nrounds_qb <- 2000 # identify optimal number of trees through iteration and cros
 #### Fit Model {#sec-treeBoostingFitModel}
 
 ```{r}
+#| label: fit-model-machine-learning
+
 gp_model_fit_qb <- gpboost::gpb.train(
   data = gp_data_qb,
   gp_model = gp_model_qb,
@@ -1213,9 +1414,18 @@ gp_model_fit_qb <- gpboost::gpb.train(
 summary(gp_model_qb) # Estimated random effects model
 ```
 
+```{r}
+#| label: free-up-memory17-ml
+#| include: false
+
+gc()
+```
+
 #### Evaluate Accuracy of Model on Test Data {#sec-treeBoostingModelAccuracy}
 
 ```{r}
+#| label: evaluate-model-machine-learning
+
 # Test Model on Test Data
 pred_test_qb <- predict(
   gp_model_fit_qb,
@@ -1240,6 +1450,8 @@ petersenlab::accuracyOverall(
 #### Generate Predictions for Next Season {#sec-treeBoostingModelPredictions}
 
 ```{r}
+#| label: next-season-predictions-machine-learning
+
 # Generate model predictions for next season
 pred_nextYear_qb <- predict(
   gp_model_fit_qb,
