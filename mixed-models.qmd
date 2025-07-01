@@ -20,6 +20,8 @@ library("fitdistrplus")
 library("performance")
 library("parallel")
 library("parallelly")
+library("broom.mixed")
+library("tidybayes")
 library("plotly")
 library("viridis")
 library("tidyverse")
@@ -1776,6 +1778,40 @@ logLik(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 
 #### Diagnostic Plots {#sec-fantasyPointsByAgeExperienceModelsDiagnosticPlots}
 
+##### Regression Coefficients {#sec-fantasyPointsByAgeExperienceModelsRegressionCoefficients}
+
+To visualize the regression coefficients, we can use the `tidy()` function of the `broom.mixed` package, as in @fig-individualFantasyPointsRandomLinearFixedQuadraticSlopesInteractionCoefficients.
+
+```{r}
+#| label: fig-individualFantasyPointsRandomLinearFixedQuadraticSlopesInteractionCoefficients
+#| fig-cap: "Regression Coefficients with 95% Confidence Interval from a Mixed Model With Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes in Interaction With Position. Overlaid with the Model-Implied Trajectory by Position."
+#| fig-alt: "Regression Coefficients with 95% Confidence Interval from a Mixed Model With Random Intercepts, Random Linear Slopes, and Fixed Quadratic Slopes in Interaction With Position. Overlaid with the Model-Implied Trajectory by Position."
+#| code-fold: true
+
+pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience_tidy <- broom.mixed::tidy(
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
+  effects = "fixed",
+  conf.int = TRUE)
+
+ggplot(
+  pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience_tidy,
+  aes(
+    x = term,
+    y = estimate)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      ymin = conf.low,
+      ymax = conf.high),
+    width = 0.2) +
+  coord_flip() + # flip axes for readability
+  labs(
+    title = "Regression Coefficients with 95% CI",
+    y = "Coefficient Estimate",
+    x = "") +
+  theme_minimal()
+```
+
 ##### Plot of Residuals {#sec-fantasyPointsByAgeExperienceModelsResidualPlot}
 
 ```{r}
@@ -2213,6 +2249,66 @@ plot(bayesianMixedModelFit, ask = FALSE)
 
 pp_check(bayesianMixedModelFit) + 
   ggplot2::xlim(0, 600)
+```
+
+#### Plot of Regression Coefficients {#sec-fantasyPointsByAgeExperienceModelsBayesianRegressionCoefficients}
+
+To visualize the regression coefficients, we can use the `tidy()` function of the `broom.mixed` package, as in @fig-bayesianRegressionCoefficients.
+
+```{r}
+#| label: fig-bayesianRegressionCoefficients
+#| fig-cap: "Regression Coefficients with 95% Credible Interval from Bayesian Mixed Model."
+#| fig-alt: "Regression Coefficients with 95% Credible Interval from Bayesian Mixed Model."
+
+bayesianMixedModelFit_tidy <- broom.mixed::tidy(
+  bayesianMixedModelFit,
+  effects = "fixed",
+  conf.int = TRUE)
+
+ggplot(
+  bayesianMixedModelFit_tidy,
+  aes(
+    x = term,
+    y = estimate)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      ymin = conf.low,
+      ymax = conf.high),
+    width = 0.2) +
+  coord_flip() + # flip axes for readability
+  labs(
+    title = "Posterior Distributions and 95% Credible Intervals",
+    x = "Predictor",
+    y = "Posterior Estimate") +
+  theme_minimal()
+```
+
+To visualize the distribution of regression coefficients, we can use the `tidybayes` package, as in @fig-bayesianRegressionCoefficientsDistributions.
+
+```{r}
+#| label: fig-bayesianRegressionCoefficientsDistributions
+#| fig-cap: "Distributions of Regression Coefficients with 66% (Thin Line) and 95% (Thin Line) Credible Intervals from Bayesian Mixed Model."
+#| fig-alt: "Distributions of Regression Coefficients with 66% (Thin Line) and 95% (Thin Line) Credible Intervals from Bayesian Mixed Model."
+
+bayesianMixedModelFit %>%
+  tidybayes::tidy_draws() %>%
+  select(starts_with("b_")) %>%
+  pivot_longer(
+    everything(),
+    names_to = "term",
+    values_to = "estimate") %>%
+  mutate(term = sub("^b_", "", term)) %>%
+  ggplot(
+    aes(
+      x = estimate,
+      y = term)) +
+  stat_halfeye() + # by default, .width shows the 66% (thick line) and 95% (thin line) credible intervals
+  labs(
+    title = "Posterior Distributions of Regression Coefficients with 66% and 95% Credible Intervals",
+    x = "Predictor",
+    y = "Posterior Estimate") +
+  theme_minimal()
 ```
 
 ### Plots of Model-Implied Fantasy Points by Position and Age {#sec-fantasyPointsByAgePlots}
