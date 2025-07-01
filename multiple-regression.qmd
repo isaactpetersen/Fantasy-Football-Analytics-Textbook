@@ -17,6 +17,8 @@ library("miceadds")
 library("interactions")
 library("brms")
 library("robustbase")
+library("QuantPsyc")
+library("broom")
 library("tidyverse")
 library("knitr")
 ```
@@ -1015,7 +1017,13 @@ $$
 \end{aligned}
 $$ {#eq-linearRegressionModelSubstitute}
 
-If we want to obtain standardized regression coefficients, we can standardize the [outcome variable](#sec-correlationalStudy) and each [predictor variable](#sec-correlationalStudy) using the `scale()` function:
+If we want to obtain standardized regression coefficients, we can use the `lm.beta()` function of the `QuantPsyc` package.
+
+```{r}
+QuantPsyc::lm.beta(linearRegressionModel)
+```
+
+Or, we can standardize the [outcome variable](#sec-correlationalStudy) and each [predictor variable](#sec-correlationalStudy) using the `scale()` function:
 
 ```{r}
 linearRegressionModelStandardized <- lm(
@@ -1055,7 +1063,90 @@ Here are the model results:
 summary(quadraticTermsRegressionModel)
 ```
 
-Only the quadratic term for target share shows a significant association.
+Only the quadratic term for target share (not height or weight) shows a significant association.
+
+Here are the standardized coefficients:
+
+```{r}
+QuantPsyc::lm.beta(quadraticTermsRegressionModel)
+```
+
+```{r}
+quadraticTermsRegressionModelStandardized <- lm(
+  scale(fantasyPoints) ~ scale(age) + scale(I(age^2)) + scale(height) + scale(I(height^2)) + scale(weight) + scale(I(weight^2)) + scale(target_share) + scale(I(target_share^2)),
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  na.action = "na.exclude"
+)
+
+summary(quadraticTermsRegressionModelStandardized)
+```
+
+### Visualizing Regression Results {#sec-multipleRegressionVisualizingResults}
+
+#### Regression Coefficients {#sec-multipleRegressionVisualizingRegressionCoefficients}
+
+To visualize the regression coefficients, we can use the `tidy()` function of the `broom` package.
+
+```{r}
+quadraticTermsRegressionModel_tidy <- tidy(
+  quadraticTermsRegressionModel,
+  conf.int = TRUE)
+
+quadraticTermsRegressionModelStandardized_tidy <- tidy(
+  quadraticTermsRegressionModelStandardized,
+  conf.int = TRUE)
+```
+
+```{r}
+#| label: fig-regressionCoefficients
+#| fig-cap: "Regression Coefficients with 95% Confidence Interval."
+#| fig-alt: "Regression Coefficients with 95% Confidence Interval."
+
+ggplot(
+  quadraticTermsRegressionModel_tidy,
+  aes(
+    x = term,
+    y = estimate)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      ymin = conf.low,
+      ymax = conf.high),
+    width = 0.2) +
+  coord_flip() + # flip axes for readability
+  labs(
+    title = "Regression Coefficients with 95% CI",
+    x = "Predictor",
+    y = "Coefficient Estimate") +
+  theme_minimal()
+```
+
+```{r}
+#| label: fig-regressionCoefficientsStandardized
+#| fig-cap: "Standardized Regression Coefficients with 95% Confidence Interval."
+#| fig-alt: "Standardized Regression Coefficients with 95% Confidence Interval."
+
+ggplot(
+  quadraticTermsRegressionModelStandardized_tidy,
+  aes(
+    x = term,
+    y = estimate)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      ymin = conf.low,
+      ymax = conf.high),
+    width = 0.2) +
+  coord_flip() + # flip axes for readability
+  labs(
+    title = "Regression Coefficients with 95% CI",
+    x = "Predictor",
+    y = "Standardized Coefficient Estimate") +
+  theme_minimal()
+```
+
+#### Model-Implied Association {#sec-multipleRegressionVisualizingModelImpliedAssociation}
+
 If we wanted to visualize the shape of the model-implied association between target share and fantasy points, we could generate the model-implied predictions using the data range that we want to visualize.
 
 ```{r}
