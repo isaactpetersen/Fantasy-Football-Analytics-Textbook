@@ -5,9 +5,9 @@
 ### Load Packages {#sec-mixedModelsLoadPackages}
 
 ```{r}
-library("petersenlab")
 library("lme4")
 library("lmerTest")
+library("effectsize")
 library("MuMIn")
 library("emmeans")
 library("sjstats")
@@ -710,6 +710,7 @@ pointsPerSeason_nullModel <- lm(
 )
 
 summary(pointsPerSeason_nullModel)
+print(effectsize::standardize_parameters(pointsPerSeason_nullModel, method = "refit"), digits = 2)
 
 summary(pointsPerSeason_nullModel)$r.squared
 AIC(pointsPerSeason_nullModel)
@@ -756,6 +757,8 @@ pointsPerSeason_linearRegression <- lm(
 )
 
 summary(pointsPerSeason_linearRegression)
+print(effectsize::standardize_parameters(pointsPerSeason_linearRegression, method = "refit"), digits = 2)
+
 summary(pointsPerSeason_linearRegression)$r.squared
 AIC(pointsPerSeason_linearRegression)
 MuMIn::AICc(pointsPerSeason_linearRegression)
@@ -803,6 +806,8 @@ pointsPerSeason_quadraticRegression <- lm(
 )
 
 summary(pointsPerSeason_quadraticRegression)
+print(effectsize::standardize_parameters(pointsPerSeason_linearRegression, method = "refit"), digits = 2)
+
 summary(pointsPerSeason_quadraticRegression)$r.squared
 AIC(pointsPerSeason_quadraticRegression)
 MuMIn::AICc(pointsPerSeason_quadraticRegression)
@@ -900,6 +905,8 @@ pointsPerSeason_randomIntercepts <- lmerTest::lmer(
 )
 
 summary(pointsPerSeason_randomIntercepts)
+print(effectsize::standardize_parameters(pointsPerSeason_randomIntercepts, method = "refit"), digits = 2)
+
 MuMIn::r.squaredGLMM(pointsPerSeason_randomIntercepts)
 performance::icc(pointsPerSeason_randomIntercepts)
 AIC(pointsPerSeason_randomIntercepts)
@@ -1000,7 +1007,7 @@ plotly::ggplotly(
 
 #### Random Intercepts Model with Position as Fixed-Effect Predictor {#sec-fantasyPointsByAgeExperienceModelsPosition}
 
-To obtain standardized regression coefficients, we use the `lm.beta.lmer()` function of the [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab].
+To obtain standardized regression coefficients, we use the `standardize_parameters()` function of the `effectsize` package [@R-effectsize; @BenShachar2020_packages].
 We use the `emmeans` package [@R-emmeans] to determine the model-implied number of points per season by position.
 
 ```{r}
@@ -1012,7 +1019,7 @@ pointsPerSeason_position <- lmerTest::lmer(
 )
 
 summary(pointsPerSeason_position)
-petersenlab::lm.beta.lmer(pointsPerSeason_position)
+print(effectsize::standardize_parameters(pointsPerSeason_position, method = "refit"), digits = 2)
 
 MuMIn::r.squaredGLMM(pointsPerSeason_position)
 emmeans::emmeans(pointsPerSeason_position, "positionFactor")
@@ -1129,7 +1136,7 @@ pointsPerSeason_positionAgeFixedLinearSlopes <- lmerTest::lmer(
 )
 
 summary(pointsPerSeason_positionAgeFixedLinearSlopes)
-petersenlab::lm.beta.lmer(pointsPerSeason_positionAgeFixedLinearSlopes)
+print(effectsize::standardize_parameters(pointsPerSeason_positionAgeFixedLinearSlopes, method = "refit"), digits = 2)
 
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeFixedLinearSlopes)
 emmeans::emmeans(pointsPerSeason_positionAgeFixedLinearSlopes, "positionFactor")
@@ -1239,7 +1246,7 @@ pointsPerSeason_positionAgeRandomLinearSlopes <- lmerTest::lmer(
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearSlopes)
-petersenlab::lm.beta.lmer(pointsPerSeason_positionAgeFixedLinearSlopes)
+print(effectsize::standardize_parameters(pointsPerSeason_positionAgeRandomLinearSlopes, method = "refit"), digits = 2)
 
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearSlopes)
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearSlopes, "positionFactor")
@@ -1355,7 +1362,7 @@ pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes <- lmerTest::lmer(
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
-petersenlab::lm.beta.lmer(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
+print(effectsize::standardize_parameters(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, method = "refit"), digits = 2)
 
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes)
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes, "positionFactor")
@@ -1482,7 +1489,7 @@ pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction <- lmerTe
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
-petersenlab::lm.beta.lmer(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
+print(effectsize::standardize_parameters(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction, method = "refit"), digits = 2)
 
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction)
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteraction, "positionFactor")
@@ -1597,7 +1604,7 @@ pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience
 )
 
 summary(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
-petersenlab::lm.beta.lmer(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+print(effectsize::standardize_parameters(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, method = "refit"), digits = 2)
 
 MuMIn::r.squaredGLMM(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 emmeans::emmeans(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "positionFactor")
