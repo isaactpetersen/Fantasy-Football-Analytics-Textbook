@@ -786,7 +786,7 @@ rm(nfl_advancedStatsPFR_seasonal)
 rm(nfl_advancedStatsPFR_weekly)
 rm(nfl_playerContracts)
 rm(nfl_ftnCharting)
-rm(nfl_playerIDs)
+#rm(nfl_playerIDs)
 rm(nfl_rankings_draft)
 rm(nfl_rankings_weekly)
 rm(nfl_expectedFantasyPoints_weekly)
@@ -853,18 +853,19 @@ seasonalData_lag_qb_all_imp <- missRanger::missRanger(
 seasonalData_lag_qb_all_imp
 
 data_all_qb <- seasonalData_lag_qb_all_imp$data
+data_all_qb$fantasyPointsMC_lag <- scale(data_all_qb$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_all_qb_matrix <- data_all_qb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
 newData_qb <- data_all_qb %>% 
   filter(season == max(season, na.rm = TRUE)) %>% 
-  select(-fantasyPoints_lag)
+  select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_qb_matrix <- data_all_qb_matrix[
   data_all_qb_matrix[, "season"] == max(data_all_qb_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
   , # all columns
   drop = FALSE]
 
-dropCol_qb <- which(colnames(newData_qb_matrix) == "fantasyPoints_lag")
+dropCol_qb <- which(colnames(newData_qb_matrix) %in% c("fantasyPoints_lag","fantasyPointsMC_lag"))
 newData_qb_matrix <- newData_qb_matrix[, -dropCol_qb, drop = FALSE]
 
 seasonalData_lag_qb_train_imp <- missRanger::missRanger(
@@ -877,6 +878,7 @@ seasonalData_lag_qb_train_imp <- missRanger::missRanger(
 seasonalData_lag_qb_train_imp
 
 data_train_qb <- seasonalData_lag_qb_train_imp$data
+data_train_qb$fantasyPointsMC_lag <- scale(data_train_qb$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_train_qb_matrix <- data_train_qb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
@@ -913,18 +915,19 @@ seasonalData_lag_rb_all_imp <- missRanger::missRanger(
 seasonalData_lag_rb_all_imp
 
 data_all_rb <- seasonalData_lag_rb_all_imp$data
+data_all_rb$fantasyPointsMC_lag <- scale(data_all_rb$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_all_rb_matrix <- data_all_rb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
 newData_rb <- data_all_rb %>% 
   filter(season == max(season, na.rm = TRUE)) %>% 
-  select(-fantasyPoints_lag)
+  select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_rb_matrix <- data_all_rb_matrix[
   data_all_rb_matrix[, "season"] == max(data_all_rb_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
   , # all columns
   drop = FALSE]
 
-dropCol_rb <- which(colnames(newData_rb_matrix) == "fantasyPoints_lag")
+dropCol_rb <- which(colnames(newData_rb_matrix) %in% c("fantasyPoints_lag","fantasyPointsMC_lag"))
 newData_rb_matrix <- newData_rb_matrix[, -dropCol_rb, drop = FALSE]
 
 seasonalData_lag_rb_train_imp <- missRanger::missRanger(
@@ -937,6 +940,7 @@ seasonalData_lag_rb_train_imp <- missRanger::missRanger(
 seasonalData_lag_rb_train_imp
 
 data_train_rb <- seasonalData_lag_rb_train_imp$data
+data_train_rb$fantasyPointsMC_lag <- scale(data_train_rb$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_train_rb_matrix <- data_train_rb %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
@@ -973,18 +977,19 @@ seasonalData_lag_wr_all_imp <- missRanger::missRanger(
 seasonalData_lag_wr_all_imp
 
 data_all_wr <- seasonalData_lag_wr_all_imp$data
+data_all_wr$fantasyPointsMC_lag <- scale(data_all_wr$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_all_wr_matrix <- data_all_wr %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
 newData_wr <- data_all_wr %>% 
   filter(season == max(season, na.rm = TRUE)) %>% 
-  select(-fantasyPoints_lag)
+  select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_wr_matrix <- data_all_wr_matrix[
   data_all_wr_matrix[, "season"] == max(data_all_wr_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
   , # all columns
   drop = FALSE]
 
-dropCol_wr <- which(colnames(newData_wr_matrix) == "fantasyPoints_lag")
+dropCol_wr <- which(colnames(newData_wr_matrix) %in% c("fantasyPoints_lag","fantasyPointsMC_lag"))
 newData_wr_matrix <- newData_wr_matrix[, -dropCol_wr, drop = FALSE]
 
 seasonalData_lag_wr_train_imp <- missRanger::missRanger(
@@ -997,6 +1002,7 @@ seasonalData_lag_wr_train_imp <- missRanger::missRanger(
 seasonalData_lag_wr_train_imp
 
 data_train_wr <- seasonalData_lag_wr_train_imp$data
+data_train_wr$fantasyPointsMC_lag <- scale(data_train_wr$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_train_wr_matrix <- data_train_wr %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
@@ -1033,18 +1039,19 @@ seasonalData_lag_te_all_imp <- missRanger::missRanger(
 seasonalData_lag_te_all_imp
 
 data_all_te <- seasonalData_lag_te_all_imp$data
+data_all_te$fantasyPointsMC_lag <- scale(data_all_te$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_all_te_matrix <- data_all_te %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
 newData_te <- data_all_te %>% 
   filter(season == max(season, na.rm = TRUE)) %>% 
-  select(-fantasyPoints_lag)
+  select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_te_matrix <- data_all_te_matrix[
   data_all_te_matrix[, "season"] == max(data_all_te_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
   , # all columns
   drop = FALSE]
 
-dropCol_te <- which(colnames(newData_te_matrix) == "fantasyPoints_lag")
+dropCol_te <- which(colnames(newData_te_matrix) %in% c("fantasyPoints_lag","fantasyPointsMC_lag"))
 newData_te_matrix <- newData_te_matrix[, -dropCol_te, drop = FALSE]
 
 seasonalData_lag_te_train_imp <- missRanger::missRanger(
@@ -1057,6 +1064,7 @@ seasonalData_lag_te_train_imp <- missRanger::missRanger(
 seasonalData_lag_te_train_imp
 
 data_train_te <- seasonalData_lag_te_train_imp$data
+data_train_te$fantasyPointsMC_lag <- scale(data_train_te$fantasyPoints_lag, scale = FALSE) # mean-centered
 data_train_te_matrix <- data_train_te %>%
   mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
   as.matrix()
@@ -1275,7 +1283,7 @@ Adapted from here:
 If using a gamma distribution, it requires positive-only values:
 
 ```{r}
-#data_train_qb_matrix[,"fantasyPoints_lag"][data_train_qb_matrix[,"fantasyPoints_lag"] <= 0] <- 0.01
+data_train_qb_matrix[,"fantasyPoints_lag"][data_train_qb_matrix[,"fantasyPoints_lag"] <= 0] <- 0.01
 ```
 
 #### Specify Predictor Variables {#sec-treeBoostingSpecifyPredictors}
@@ -1285,7 +1293,7 @@ If using a gamma distribution, it requires positive-only values:
 
 pred_vars_qb <- data_train_qb_matrix %>% 
   as_tibble() %>% 
-  select(-fantasyPoints_lag, -ageCentered20, ageCentered20Quadratic) %>% # -gsis_id
+  select(-fantasyPoints_lag, -fantasyPointsMC_lag, -ageCentered20, ageCentered20Quadratic) %>% # -gsis_id
   names()
 
 pred_vars_qb_categorical <- "gsis_id" # to specify categorical predictors
@@ -1296,8 +1304,8 @@ pred_vars_qb_categorical <- "gsis_id" # to specify categorical predictors
 ```{r}
 #| label: specify-general-model-options-machine-learning
 
-model_likelihood <- "gaussian" # gamma
-nrounds <- 2000
+model_likelihood <- "gamma" # gaussian
+nrounds <- 2000 # maximum number of boosting iterations (i.e., number of trees built sequentially); more rounds = potentially better learning, but also greater risk of overfitting
 ```
 
 #### Identify Optimal Tuning Parameters {#sec-treeBoostingOptimalTuningParameters}
@@ -1319,13 +1327,13 @@ folds_qb <- list(valid_tune_idx_qb)
 
 # Specify parameter grid, gp_model, and gpb.Dataset
 param_grid_qb <- list(
-  "learning_rate" = c(0.2, 0.1, 0.05, 0.01),
-  "max_depth" = c(3, 5, 7),
-  "min_data_in_leaf" = c(10, 50, 100),
-  "lambda_l2" = c(0, 1, 5))
+  "learning_rate" = c(0.2, 0.1, 0.05, 0.01), # the step size used when updating predictions after each boosting round (high values make big updates, which can speed up learning but risk overshooting; low values are usually more accurate but require more rounds)
+  "max_depth" = c(3, 5, 7), # maximum depth (levels) of each decision tree; deeper trees capture more complex patterns and interactions but risk overfitting; shallower trees tend to generalize better
+  "min_data_in_leaf" = c(10, 50, 100), # minimum number of training examples in a leaf node; higher values = more regularization (simpler trees)
+  "lambda_l2" = c(0, 1, 5)) # L2 regularization penalty for large weights in tree splits; adds a "cost" for complexity; helps prevent overfitting by shrinking the contribution of each tree
 
 other_params_qb <- list(
-  num_leaves = 2^6) # 2^n, where n is smaller than the largest max_depth
+  num_leaves = 2^6) # maximum number of leaves per tree; controls the maximum complexity of each tree (along with max_depth); more leaves = more expressive models, but can overfit if min_data_in_leaf is too small; num_leaves must be consistent with max_depth, because deeper trees naturally support more leaves; max is: 2^n, where n is the largest max_depth
 
 gp_model_qb <- gpboost::GPModel(
   group_data = data_train_qb_matrix[,"gsis_id"],
@@ -1338,7 +1346,7 @@ gp_model_qb <- gpboost::GPModel(
 gp_data_qb <- gpboost::gpb.Dataset(
   data = data_train_qb_matrix[,pred_vars_qb],
   categorical_feature = pred_vars_qb_categorical,
-  label = data_train_qb_matrix[,"fantasyPoints_lag"])
+  label = data_train_qb_matrix[,"fantasyPoints_lag"]) #use mean-centered variable and add mean back afterward
 
 # Find optimal tuning parameters
 opt_params_qb <- gpboost::gpb.grid.search.tune.parameters(
@@ -1349,7 +1357,7 @@ opt_params_qb <- gpboost::gpb.grid.search.tune.parameters(
   data = gp_data_qb,
   gp_model = gp_model_qb,
   nrounds = nrounds,
-  early_stopping_rounds = 50,
+  early_stopping_rounds = 50, # stops training early if the model hasn’t improved on the validation set in 50 rounds; prevents overfitting and saves time
   verbose_eval = 1,
   metric = "mae")
 
@@ -1364,10 +1372,10 @@ gc()
 ```
 
 A learning rate of 1 is very high for boosting.
-Even if a learning rate of 1 did well in tuning, I use a lower learning rate (0.2) to avoid overfitting.
+Even if a learning rate of 1 did well in tuning, I use a lower learning rate (0.1) to avoid overfitting.
 I also added some light regularization (`lambda_l2`) for better generalization.
-I also set the maximum tree depth (`max_depth`) at 7 to capture up to 3-way interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^5 (32).
-I set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 50.
+I also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^5 (32).
+I set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 10.
 
 #### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
 
@@ -1388,14 +1396,14 @@ gp_data_qb <- gpboost::gpb.Dataset(
   label = data_train_qb_matrix[,"fantasyPoints_lag"])
 
 params_qb <- list(
-  learning_rate = 0.2, # 0.1,
-  max_depth = 7, #3,
-  min_data_in_leaf = 10, #50
-  lambda_l2 = 0, # 1,
-  num_leaves = 2^6, #2^5,
+  learning_rate = 0.1,
+  max_depth = 5,
+  min_data_in_leaf = 10,
+  lambda_l2 = 1,
+  num_leaves = 2^5,
   num_threads = num_cores)
 
-nrounds_qb <- 2000 # identify optimal number of trees through iteration and cross-validation
+nrounds_qb <- 123 # identify optimal number of trees through iteration and cross-validation
 
 #gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead")) # to speed up model estimation
 ```
@@ -1410,8 +1418,6 @@ gp_model_fit_qb <- gpboost::gpb.train(
   gp_model = gp_model_qb,
   nrounds = nrounds_qb,
   params = params_qb) # verbose = 0
-
-summary(gp_model_qb) # Estimated random effects model
 ```
 
 ```{r}
@@ -1419,6 +1425,23 @@ summary(gp_model_qb) # Estimated random effects model
 #| include: false
 
 gc()
+```
+
+#### Model Results {#sec-treeBoostingModelResults}
+
+```{r}
+summary(gp_model_qb) # estimated random effects model
+
+gp_model_qb_importance <- gpboost::gpb.importance(gp_model_fit_qb)
+gp_model_qb_importance
+```
+
+```{r}
+#| label: fig-featureImportanceTreeBoosting
+#| fig-cap: "Importance of Features (Predictors) in Tree Boosting Machine Learning Model."
+#| fig-alt: "Importance of Features (Predictors) in Tree Boosting Machine Learning Model."
+
+gpboost::gpb.plot.importance(gp_model_qb_importance)
 ```
 
 #### Evaluate Accuracy of Model on Test Data {#sec-treeBoostingModelAccuracy}
@@ -1437,7 +1460,7 @@ pred_test_qb <- predict(
   predict_var = FALSE,
   pred_latent = FALSE)
 
-y_pred_test_qb <- pred_test_qb[["response_mean"]]
+y_pred_test_qb <- pred_test_qb[["response_mean"]] # if outcome is mean-centered, add mean(data_train_qb_matrix[,"fantasyPoints_lag"])
 cbind(y_pred_test_qb, data_test_qb_matrix[,"fantasyPoints_lag"])
 
 petersenlab::accuracyOverall(
