@@ -13,6 +13,7 @@ library("powerjoin")
 library("tidymodels")
 library("LongituRF")
 library("gpboost")
+library("effectsize")
 library("tidyverse")
 ```
 
@@ -1174,6 +1175,10 @@ final_model %>%
   workflows::extract_fit_parsnip() %>% 
   broom::tidy()
 
+final_model %>%
+  workflows::extract_fit_parsnip() %>% 
+  effectsize::standardize_parameters()
+
 # Predict on Test Data
 df <- data_test_qb %>%
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
@@ -1277,6 +1282,10 @@ final_model <- workflows::fit(
 final_model %>% 
   workflows::extract_fit_parsnip() %>% 
   broom::tidy()
+
+final_model %>%
+  workflows::extract_fit_parsnip() %>% 
+  effectsize::standardize_parameters()
 
 # Predict on Test Data
 df <- data_test_qb %>%
@@ -1479,7 +1488,7 @@ rec <- recipes::recipe(
 
 # Define Model
 ridge_spec <- 
-  parnsnip::linear_reg(
+  parsnip::linear_reg(
     penalty = tune::tune(),
     mixture = 0) %>%
   parsnip::set_engine("glmnet")
