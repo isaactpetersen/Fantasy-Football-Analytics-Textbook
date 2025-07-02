@@ -1883,11 +1883,11 @@ Below, we fit longitudinal random forest models using the `MERF()` function of t
 
 ```{r}
 smerf <- LongituRF::MERF(
-  X = data_train_qb_matrix %>% as_tibble() %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
-  Y = data_train_qb_matrix[,c("fantasyPoints_lag")] %>% as.matrix(),
-  Z = data_train_qb_matrix[,c("pacr")] %>% as.matrix(),
-  id = data_train_qb_matrix[,c("gsis_id")] %>% as.matrix(),
-  time = data_train_qb_matrix[,c("ageCentered20")] %>% as.matrix(),
+  X = data_train_qb %>% dplyr::select(season:att_br.rush) %>% as.matrix(), # predictors of the fixed effects
+  Y = data_train_qb[,c("fantasyPoints_lag")] %>% as.matrix(), # outcome variable
+  Z = data_train_qb %>% dplyr::mutate(constant = 1) %>% dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) %>% as.matrix(), # predictors of the random effects
+  id = data_train_qb[,c("gsis_id")] %>% as.matrix(), # player ID (for nesting)
+  time = data_train_qb[,c("ageCentered20")] %>% as.matrix(), # time variable
   ntree = 500,
   sto = "BM")
 
@@ -1899,8 +1899,8 @@ smerf$OOB # OOB error at each iteration
 # Predict on Test Data
 predict(
   smerf,
-  X = data_test_qb %>% as_tibble() %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
-  Z = data_test_qb[,c("pacr")] %>% as.matrix(),
+  X = data_test_qb %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
+  Z = data_train_qb %>% dplyr::mutate(constant = 1) %>% dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) %>% as.matrix(),
   id = data_test_qb[,c("gsis_id")] %>% as.matrix(),
   time = data_test_qb[,c("ageCentered20")] %>% as.matrix())
 ```
