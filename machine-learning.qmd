@@ -7,12 +7,11 @@
 ```{r}
 library("petersenlab")
 library("parallel")
-library("doParallel")
+library("future")
 library("missRanger")
 library("powerjoin")
 library("tidymodels")
 library("LongituRF")
-#library("caret")
 library("gpboost")
 library("tidyverse")
 ```
@@ -1111,7 +1110,7 @@ num_true_cores <- parallel::detectCores(logical = FALSE)
 ```{r}
 #| eval: false
 
-num_cores <- detectCores() - 1
+num_cores <- parallel::detectCores() - 1
 num_true_cores <- parallel::detectCores(logical = FALSE) - 1
 ```
 
@@ -1119,139 +1118,763 @@ num_true_cores <- parallel::detectCores(logical = FALSE) - 1
 num_cores
 ```
 
+We use the `future` [@R-future] package for parallel (faster) processing.
+
+```{r}
+future::plan(future::multisession, workers = num_cores)
+```
+
 ## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
 
 ### Regression with One Predictor {#sec-regressionOnePredictor}
 
+```{r}
+# Set seed for reproducibility
+set.seed(52242)
+
+# Set up cross-validation
+folds <- rsample::group_vfold_cv(
+  data_train_qb,
+  group = gsis_id,
+  v = 10) # 10-fold cross-validation
+
+# Define Recipe (Formula)
+rec <- recipes::recipe(
+  fantasyPoints_lag ~ ageCentered20,
+  data = data_train_qb)
+
+# Define Model
+lm_spec <- parsnip::linear_reg() %>%
+  parsnip::set_engine("lm") %>%
+  parsnip::set_mode("regression")
+
+# Workflow
+lm_wf <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(lm_spec)
+
+# Fit Model with Cross-Validation
+cv_results <- tune::fit_resamples(
+  lm_wf,
+  resamples = folds,
+  metrics = metric_set(rmse, mae, rsq),
+  control = control_resamples(save_pred = TRUE)
+)
+
+# View Cross-Validation metrics
+tune::collect_metrics(cv_results)
+
+# Fit Final Model on Training Data
+final_model <- workflows::fit(
+  lm_wf,
+  data = data_train_qb)
+
+# View Coefficients
+final_model %>% 
+  workflows::extract_fit_parsnip() %>% 
+  broom::tidy()
+
+# Predict on Test Data
+predict(final_model, data_test_qb)
+
+df <- data_test_qb %>%
+  mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
+
+# Evaluate Accuracy of Predictions
+petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-regressionOnePredictor
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Regression Model with One Predictor (Player Age)."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Regression Model with One Predictor (Player Age)."
+
+# Calculate combined range for axes
+axis_limits <- range(c(df$pred, df$fantasyPoints_lag), na.rm = TRUE)
+
+ggplot(
+  df,
+  aes(
+    x = pred,
+    y = fantasyPoints_lag)) +
+  geom_point(
+    size = 2,
+    alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    color = "blue",
+    linetype = "dashed") +
+  coord_equal(
+    xlim = axis_limits,
+    ylim = axis_limits) +
+  labs(
+    title = "Predicted vs Actual Fantasy Points (Test Data)",
+    x = "Predicted Fantasy Points",
+    y = "Actual Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+```{r}
+newData_qb %>%
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+  left_join(
+    .,
+    nfl_playerIDs %>% select(gsis_id, name),
+    by = "gsis_id"
+  ) %>% 
+  select(name, fantasyPoints_lag) %>% 
+  arrange(-fantasyPoints_lag)
+```
+
 ### Regression with Multiple Predictors {#sec-regressionMultiplePredictors}
+
+```{r}
+# Set seed for reproducibility
+set.seed(52242)
+
+# Set up cross-validation
+folds <- rsample::group_vfold_cv(
+  data_train_qb,
+  group = gsis_id,
+  v = 10) # 10-fold cross-validation
+
+# Define Recipe (Formula)
+rec <- recipes::recipe(
+  fantasyPoints_lag ~ .,
+  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+
+# Define Model
+lm_spec <- parsnip::linear_reg() %>%
+  parsnip::set_engine("lm") %>%
+  parsnip::set_mode("regression")
+
+# Workflow
+lm_wf <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(lm_spec)
+
+# Fit Model with Cross-Validation
+cv_results <- tune::fit_resamples(
+  lm_wf,
+  resamples = folds,
+  metrics = metric_set(rmse, mae, rsq),
+  control = control_resamples(save_pred = TRUE)
+)
+
+# View Cross-Validation metrics
+tune::collect_metrics(cv_results)
+
+# Fit Final Model on Training Data
+final_model <- workflows::fit(
+  lm_wf,
+  data = data_train_qb)
+
+# View Coefficients
+final_model %>% 
+  workflows::extract_fit_parsnip() %>% 
+  broom::tidy()
+
+# Predict on Test Data
+predict(final_model, data_test_qb)
+
+df <- data_test_qb %>%
+  mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
+
+# Evaluate Accuracy of Predictions
+petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-regressionMultiplePredictors
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Regression Model with Multiple Predictors."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Regression Model with Multiple Predictors."
+
+# Calculate combined range for axes
+axis_limits <- range(c(df$pred, df$fantasyPoints_lag), na.rm = TRUE)
+
+ggplot(
+  df,
+  aes(
+    x = pred,
+    y = fantasyPoints_lag)) +
+  geom_point(
+    size = 2,
+    alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    color = "blue",
+    linetype = "dashed") +
+  coord_equal(
+    xlim = axis_limits,
+    ylim = axis_limits) +
+  labs(
+    title = "Predicted vs Actual Fantasy Points (Test Data)",
+    x = "Predicted Fantasy Points",
+    y = "Actual Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+```{r}
+newData_qb %>%
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+  left_join(
+    .,
+    nfl_playerIDs %>% select(gsis_id, name),
+    by = "gsis_id"
+  ) %>% 
+  select(name, fantasyPoints_lag) %>% 
+  arrange(-fantasyPoints_lag)
+```
 
 ## Fitting the Machine Learning Models {#sec-fittingModels-machineLearning}
 
 ### Least Absolute Shrinkage and Selection Option (LASSO) {#sec-lasso}
 
+```{r}
+# Set seed for reproducibility
+set.seed(52242)
+
+# Set up cross-validation
+folds <- rsample::group_vfold_cv(
+  data_train_qb,
+  group = gsis_id,
+  v = 10) # 10-fold cross-validation
+
+# Define Recipe (Formula)
+rec <- recipes::recipe(
+  fantasyPoints_lag ~ .,
+  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+
+# Define Model
+lasso_spec <- 
+  parsnip::linear_reg(
+    penalty = tune(),
+    mixture = 1) %>%
+  set_engine("glmnet")
+
+# Workflow
+lasso_wf <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(lasso_spec)
+
+# Define grid of penalties to try (log scale is typical)
+penalty_grid <- dials::grid_regular(
+  dials::penalty(range = c(-4, -1)),
+  levels = 20)
+
+# Tune the Penalty Parameter
+cv_results <- tune::tune_grid(
+  lasso_wf,
+  resamples = folds,
+  grid = penalty_grid,
+  metrics = metric_set(rmse, mae, rsq),
+  control = control_grid(save_pred = TRUE)
+)
+
+# View Cross-Validation metrics
+tune::collect_metrics(cv_results)
+
+# Identify best penalty
+select_best(cv_results, metric = "rmse")
+select_best(cv_results, metric = "mae")
+select_best(cv_results, metric = "rsq")
+
+best_penalty <- select_best(cv_results, metric = "mae")
+
+# Finalize Workflow with Best Penalty
+final_wf <- finalize_workflow(
+  lasso_wf,
+  best_penalty)
+
+# Fit Final Model on Training Data
+final_model <- workflows::fit(
+  final_wf,
+  data = data_train_qb)
+
+# View Coefficients
+final_model %>% 
+  workflows::extract_fit_parsnip() %>% 
+  broom::tidy()
+
+# Predict on Test Data
+predict(final_model, data_test_qb)
+
+df <- data_test_qb %>%
+  mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
+
+# Evaluate Accuracy of Predictions
+petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-lassoModel
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Least Absolute Shrinkage and Selection Option (LASSO) Model."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Least Absolute Shrinkage and Selection Option (LASSO) Model."
+
+# Calculate combined range for axes
+axis_limits <- range(c(df$pred, df$fantasyPoints_lag), na.rm = TRUE)
+
+ggplot(
+  df,
+  aes(
+    x = pred,
+    y = fantasyPoints_lag)) +
+  geom_point(
+    size = 2,
+    alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    color = "blue",
+    linetype = "dashed") +
+  coord_equal(
+    xlim = axis_limits,
+    ylim = axis_limits) +
+  labs(
+    title = "Predicted vs Actual Fantasy Points (Test Data)",
+    x = "Predicted Fantasy Points",
+    y = "Actual Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+```{r}
+newData_qb %>%
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+  left_join(
+    .,
+    nfl_playerIDs %>% select(gsis_id, name),
+    by = "gsis_id"
+  ) %>% 
+  select(name, fantasyPoints_lag) %>% 
+  arrange(-fantasyPoints_lag)
+```
+
 ### Ridge Regression {#sec-ridgeRegression}
 
+```{r}
+# Set seed for reproducibility
+set.seed(52242)
+
+# Set up cross-validation
+folds <- rsample::group_vfold_cv(
+  data_train_qb,
+  group = gsis_id,
+  v = 10) # 10-fold cross-validation
+
+# Define Recipe (Formula)
+rec <- recipes::recipe(
+  fantasyPoints_lag ~ .,
+  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+
+# Define Model
+ridge_spec <- 
+  linear_reg(
+    penalty = tune(),
+    mixture = 0) %>%
+  set_engine("glmnet")
+
+# Workflow
+ridge_wf <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(ridge_spec)
+
+# Define grid of penalties to try (log scale is typical)
+penalty_grid <- dials::grid_regular(
+  dials::penalty(range = c(-4, -1)),
+  levels = 20)
+
+# Tune the Penalty Parameter
+cv_results <- tune::tune_grid(
+  ridge_wf,
+  resamples = folds,
+  grid = penalty_grid,
+  metrics = metric_set(rmse, mae, rsq),
+  control = control_grid(save_pred = TRUE)
+)
+
+# View Cross-Validation metrics
+tune::collect_metrics(cv_results)
+
+# Identify best penalty
+select_best(cv_results, metric = "rmse")
+select_best(cv_results, metric = "mae")
+select_best(cv_results, metric = "rsq")
+
+best_penalty <- select_best(cv_results, metric = "mae")
+
+# Finalize Workflow with Best Penalty
+final_wf <- finalize_workflow(
+  ridge_wf,
+  best_penalty)
+
+# Fit Final Model on Training Data
+final_model <- workflows::fit(
+  final_wf,
+  data = data_train_qb)
+
+# View Coefficients
+final_model %>% 
+  workflows::extract_fit_parsnip() %>% 
+  broom::tidy()
+
+# Predict on Test Data
+predict(final_model, data_test_qb)
+
+df <- data_test_qb %>%
+  mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
+
+# Evaluate Accuracy of Predictions
+petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-ridgeRegressionModel
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Ridge Regression Model."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Ridge Regression Model."
+
+# Calculate combined range for axes
+axis_limits <- range(c(df$pred, df$fantasyPoints_lag), na.rm = TRUE)
+
+ggplot(
+  df,
+  aes(
+    x = pred,
+    y = fantasyPoints_lag)) +
+  geom_point(
+    size = 2,
+    alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    color = "blue",
+    linetype = "dashed") +
+  coord_equal(
+    xlim = axis_limits,
+    ylim = axis_limits) +
+  labs(
+    title = "Predicted vs Actual Fantasy Points (Test Data)",
+    x = "Predicted Fantasy Points",
+    y = "Actual Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+```{r}
+newData_qb %>%
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+  left_join(
+    .,
+    nfl_playerIDs %>% select(gsis_id, name),
+    by = "gsis_id"
+  ) %>% 
+  select(name, fantasyPoints_lag) %>% 
+  arrange(-fantasyPoints_lag)
+```
+
 ### Elastic Net {#sec-elasticNet}
+
+```{r}
+# Set seed for reproducibility
+set.seed(52242)
+
+# Set up cross-validation
+folds <- rsample::group_vfold_cv(
+  data_train_qb,
+  group = gsis_id,
+  v = 10) # 10-fold cross-validation
+
+# Define Recipe (Formula)
+rec <- recipes::recipe(
+  fantasyPoints_lag ~ .,
+  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+
+# Define Model
+enet_spec <- 
+  linear_reg(
+    penalty = tune(),
+    mixture = tune()) %>%
+  set_engine("glmnet")
+
+# Workflow
+enet_wf <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(enet_spec)
+
+# Define a regular grid for both penalty and mixture
+grid_enet <- dials::grid_regular(
+  dials::penalty(range = c(-4, -1)),
+  dials::mixture(range = c(0, 1)),
+  levels = c(20, 5) # 20 penalty values × 5 mixture values
+)
+
+# Tune the Grid
+cv_results <- tune::tune_grid(
+  enet_wf,
+  resamples = folds,
+  grid = grid_enet,
+  metrics = metric_set(rmse, mae, rsq),
+  control = control_grid(save_pred = TRUE)
+)
+
+# View Cross-Validation metrics
+tune::collect_metrics(cv_results)
+
+# Identify best penalty
+select_best(cv_results, metric = "rmse")
+select_best(cv_results, metric = "mae")
+select_best(cv_results, metric = "rsq")
+
+best_penalty <- select_best(cv_results, metric = "mae")
+
+# Finalize Workflow with Best Penalty
+final_wf <- finalize_workflow(
+  enet_wf,
+  best_penalty)
+
+# Fit Final Model on Training Data
+final_model <- workflows::fit(
+  final_wf,
+  data = data_train_qb)
+
+# View Coefficients
+final_model %>% 
+  workflows::extract_fit_parsnip() %>% 
+  broom::tidy()
+
+# Predict on Test Data
+predict(final_model, data_test_qb)
+
+df <- data_test_qb %>%
+  mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
+
+# Evaluate Accuracy of Predictions
+petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| label: fig-elasticNetModel
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Elastic Net Model."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Elastic Net Model."
+
+# Calculate combined range for axes
+axis_limits <- range(c(df$pred, df$fantasyPoints_lag), na.rm = TRUE)
+
+ggplot(
+  df,
+  aes(
+    x = pred,
+    y = fantasyPoints_lag)) +
+  geom_point(
+    size = 2,
+    alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    color = "blue",
+    linetype = "dashed") +
+  coord_equal(
+    xlim = axis_limits,
+    ylim = axis_limits) +
+  labs(
+    title = "Predicted vs Actual Fantasy Points (Test Data)",
+    x = "Predicted Fantasy Points",
+    y = "Actual Fantasy Points"
+  ) +
+  theme_classic()
+```
+
+```{r}
+newData_qb %>%
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+  left_join(
+    .,
+    nfl_playerIDs %>% select(gsis_id, name),
+    by = "gsis_id"
+  ) %>% 
+  select(name, fantasyPoints_lag) %>% 
+  arrange(-fantasyPoints_lag)
+```
 
 ### Random Forest Machine Learning {#sec-randomForest}
 
 #### Cross-Sectional Data {#sec-randomForestCrossSectionalData}
 
-We use the `caret` package [@R-caret].
-We use the `doParallel` [@R-doParallel] package for parallel (faster) processing.
-
 ```{r}
-#| label: cross-sectional-machine-learning
-#| eval: false
-
-cl <- parallel::makeCluster(num_cores)
-doParallel::registerDoParallel(cl)
-
+# Set seed for reproducibility
 set.seed(52242)
 
-randomForest_qb <- caret::train(
-  fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_qb_train_imp$data,
-  method = "rf",
-  trControl = trainControl(
-    method = "cv",
-    number = 10)) # 10-fold cross-validation
+# Set up cross-validation
+folds <- rsample::group_vfold_cv(
+  data_train_qb,
+  group = gsis_id,
+  v = 10) # 10-fold cross-validation
 
-randomForest_rb <- caret::train(
-  fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_rb_train_imp$data,
-  method = "rf",
-  trControl = trainControl(
-    method = "cv",
-    number = 10)) # 10-fold cross-validation
+# Define Recipe (Formula)
+rec <- recipes::recipe(
+  fantasyPoints_lag ~ .,
+  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
 
-randomForest_wr <- caret::train(
-  fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_wr_train_imp$data,
-  method = "rf",
-  trControl = trainControl(
-    method = "cv",
-    number = 10)) # 10-fold cross-validation
+# Define Model
+rf_spec <- 
+  parsnip::rand_forest(
+    mtry = tune::tune(),
+    min_n = tune::tune(),
+    trees = 500) %>%
+  parsnip::set_mode("regression") %>%
+  parsnip::set_engine("ranger", importance = "impurity")
 
-randomForest_te <- caret::train(
-  fantasyPoints_lag ~ ., # use all predictors
-  data = seasonalData_lag_te_train_imp$data,
-  method = "rf",
-  trControl = trainControl(
-    method = "cv",
-    number = 10)) # 10-fold cross-validation
+# Workflow
+rf_wf <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(rf_spec)
 
-stopCluster(cl)
+# Create Grid
+n_predictors <- recipes::prep(rec) %>%
+  recipes::juice() %>%
+  dplyr::select(-fantasyPoints_lag) %>%
+  ncol()
 
-print(randomForest_qb)
-print(randomForest_rb)
-print(randomForest_wr)
-print(randomForest_te)
+# Dynamically define ranges based on data
+rf_params <- hardhat::extract_parameter_set_dials(rf_spec) %>%
+  dials:::update.parameters(
+    mtry = dials::mtry(range = c(1L, n_predictors)),
+    min_n = dials::min_n(range = c(2L, 10L))
+  )
 
-newData_qb$fantasyPoints_lag <- predict(
-  randomForest_qb,
-  newdata = newData_qb
+rf_grid <- dials::grid_random(rf_params, size = 15) #dials::grid_regular(rf_params, levels = 5)
+
+# Tune the Grid
+cv_results <- tune::tune_grid(
+  rf_wf,
+  resamples = folds,
+  grid = rf_grid,
+  metrics = metric_set(rmse, mae, rsq),
+  control = control_grid(save_pred = TRUE)
 )
 
-newData_rb$fantasyPoints_lag <- predict(
-  randomForest_rb,
-  newdata = newData_rb
+# View Cross-Validation metrics
+tune::collect_metrics(cv_results)
+
+# Identify best penalty
+select_best(cv_results, metric = "rmse")
+select_best(cv_results, metric = "mae")
+select_best(cv_results, metric = "rsq")
+
+best_penalty <- select_best(cv_results, metric = "mae")
+
+# Finalize Workflow with Best Penalty
+final_wf <- finalize_workflow(
+  rf_wf,
+  best_penalty)
+
+# Fit Final Model on Training Data
+final_model <- workflows::fit(
+  final_wf,
+  data = data_train_qb)
+
+# View Feature Importance
+rf_fit <- final_model %>% 
+  workflows::extract_fit_parsnip()
+
+rf_fit
+
+ranger_obj <- rf_fit$fit
+
+ranger_obj$variable.importance
+
+# Predict on Test Data
+predict(final_model, data_test_qb)
+
+df <- data_test_qb %>%
+  mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
+
+# Evaluate Accuracy of Predictions
+petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
 )
+```
 
-newData_wr$fantasyPoints_lag <- predict(
-  randomForest_wr,
-  newdata = newData_wr
-)
+```{r}
+#| label: fig-randomForestModel
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Random Forest Model."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Random Forest Model."
 
-newData_te$fantasyPoints_lag <- predict(
-  randomForest_te,
-  newdata = newData_te
-)
+# Calculate combined range for axes
+axis_limits <- range(c(df$pred, df$fantasyPoints_lag), na.rm = TRUE)
 
-newData_qb$fantasyPoints_lag <- newData_qb$fantasyPoints_lag
-newData_rb$fantasyPoints_lag <- newData_rb$fantasyPoints_lag
-newData_wr$fantasyPoints_lag <- newData_wr$fantasyPoints_lag
-newData_te$fantasyPoints_lag <- newData_te$fantasyPoints_lag
+ggplot(
+  df,
+  aes(
+    x = pred,
+    y = fantasyPoints_lag)) +
+  geom_point(
+    size = 2,
+    alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    color = "blue",
+    linetype = "dashed") +
+  coord_equal(
+    xlim = axis_limits,
+    ylim = axis_limits) +
+  labs(
+    title = "Predicted vs Actual Fantasy Points (Test Data)",
+    x = "Predicted Fantasy Points",
+    y = "Actual Fantasy Points"
+  ) +
+  theme_classic()
+```
 
-newData_qb <- dplyr::left_join(
-  newData_qb,
-  newData_seasonal %>% select(gsis_id, player_display_name, team),
-  by = "gsis_id"
-)
-
-newData_rb <- dplyr::left_join(
-  newData_rb,
-  newData_seasonal %>% select(gsis_id, player_display_name, team),
-  by = "gsis_id"
-)
-
-newData_wr <- dplyr::left_join(
-  newData_wr,
-  newData_seasonal %>% select(gsis_id, player_display_name, team),
-  by = "gsis_id"
-)
-
-newData_te <- dplyr::left_join(
-  newData_te,
-  newData_seasonal %>% select(gsis_id, player_display_name, team),
-  by = "gsis_id"
-)
-
+```{r}
 newData_qb %>%
-  arrange(-fantasyPoints_lag) %>% 
-  select(gsis_id, player_display_name, fantasyPoints_lag)
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+  left_join(
+    .,
+    nfl_playerIDs %>% select(gsis_id, name),
+    by = "gsis_id"
+  ) %>% 
+  select(name, fantasyPoints_lag) %>% 
+  arrange(-fantasyPoints_lag)
+```
 
-newData_rb %>%
-  arrange(-fantasyPoints_lag) %>% 
-  select(gsis_id, player_display_name, fantasyPoints_lag)
+Now we can stop the parallel backend:
 
-newData_wr %>%
-  arrange(-fantasyPoints_lag) %>% 
-  select(gsis_id, player_display_name, fantasyPoints_lag)
+```{r}
+future::plan(future::sequential)
+```
 
-newData_te %>%
-  arrange(-fantasyPoints_lag) %>% 
-  select(gsis_id, player_display_name, fantasyPoints_lag)
+```{r}
+#| include: false
+
+gc()
 ```
 
 #### Longitudinal Data {#sec-randomForestLongitudinalData}
