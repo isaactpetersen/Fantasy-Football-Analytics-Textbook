@@ -10,7 +10,9 @@ library("parallel")
 library("doParallel")
 library("missRanger")
 library("powerjoin")
-library("caret")
+library("tidymodels")
+library("LongituRF")
+#library("caret")
 library("gpboost")
 library("tidyverse")
 ```
@@ -1140,6 +1142,7 @@ We use the `doParallel` [@R-doParallel] package for parallel (faster) processing
 
 ```{r}
 #| label: cross-sectional-machine-learning
+#| eval: false
 
 cl <- parallel::makeCluster(num_cores)
 doParallel::registerDoParallel(cl)
@@ -1253,27 +1256,31 @@ newData_te %>%
 
 #### Longitudinal Data {#sec-randomForestLongitudinalData}
 
-[@Hu2023]
+Approaches to estimating random forest models with longitudinal data are described by @@Hu2023.
+Below, we fit longitudinal random forest models using the `MERF()` function of the `LongituRF` package [@R-LongituRF].
 
 ```{r}
-#| eval: false
-
-library("LongituRF")
-
 smerf <- LongituRF::MERF(
-  X = seasonalData_subsetQB_imp$ximp[,c("passing_epa")] %>% as.matrix(),
-  Y = seasonalData_subsetQB$fantasyPoints_lag,
-  Z = seasonalData_subsetQB_imp$ximp[,c("pacr")] %>% as.matrix(),
-  id = seasonalData_subsetQB$gsis_id,
-  time = seasonalData_subsetQB_imp$ximp[,c("ageCentered20")] %>% as.matrix(),
+  X = data_train_qb_matrix %>% as_tibble() %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
+  Y = data_train_qb_matrix[,c("fantasyPoints_lag")] %>% as.matrix(),
+  Z = data_train_qb_matrix[,c("pacr")] %>% as.matrix(),
+  id = data_train_qb_matrix[,c("gsis_id")] %>% as.matrix(),
+  time = data_train_qb_matrix[,c("ageCentered20")] %>% as.matrix(),
   ntree = 500,
   sto = "BM")
 
 smerf$forest # the fitted random forest (obtained at the last iteration)
 smerf$random_effects # the predicted random effects for each player
 smerf$omega # the predicted stochastic processes
-plot(smerf$Vraisemblance) # evolution of the log-likelihood
 smerf$OOB # OOB error at each iteration
+```
+
+```{r}
+#| label: fig-randomForestLongitudinalLogLikelihood
+#| fig-cap: "Evolution of the Log-Likelihood."
+#| fig-alt: "Evolution of the Log-Likelihood."
+
+plot(smerf$Vraisemblance)
 ```
 
 ### *k*-Fold Cross-Validation {#sec-kfoldCV}
