@@ -1119,10 +1119,45 @@ num_true_cores <- parallel::detectCores(logical = FALSE) - 1
 num_cores
 ```
 
-We use the `future` [@R-future] package for parallel (faster) processing.
+We use the `future` package [@R-future] for parallel (faster) processing.
 
 ```{r}
 future::plan(future::multisession, workers = num_cores)
+```
+
+## Set up the Cross-Validation Folds {#sec-folds}
+
+### *k*-Fold Cross-Validation {#sec-kFoldCrossValidation}
+
+*k*-fold cross-validation partitions the data into *k* folds (subsets).
+In each of the *k* iterations, the model is trained on $k - 1$ folds and is evaluated on the remaining fold.
+For example, in a 10-fold cross-validation (i.e., $k = 10$), as used below, the model is trained 10 times, each time leaving out a different 10% of the data for validation.
+*k*-fold cross-validation is widely used because it tends to yield stable estimates of model performance, by balancing bias and variance.
+It is also computationally efficient, requiring only *k* model fits to evaluate model performance.
+
+```{r}
+set.seed(52242) # for reproducibility
+
+folds_kFold <- rsample::group_vfold_cv(
+  data_train_qb,
+  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
+  v = 10) # 10-fold cross-validation
+```
+
+### Leave-One-Out (LOO) Cross-Validation {#sec-looCrossValidation}
+
+Leave-one-out (LOO) cross-validation partitions the data into *n* folds, where *n* is the sample size.
+In each of the *n* iterations, the model is trained on $n - 1$ observations and is evaluated on the one left out.
+For example, in a LOO cross-validation with 100 players, the model is trained 100 times, each time leaving out a different player for validation.
+LOO cross-validation is especially useful when the dataset is small—too small to form reliable training sets in [*k*-fold cross-validation](#sec-kFoldCrossValidation) (e.g., with $k = 5$ or $k = 10$, which divide the sample into 5 or 10 folds, respectively).
+However, LOO tends to be less computationally efficient because it requires more model fits than [*k*-fold cross-validation](#sec-kFoldCrossValidation).
+LOO tends to have low bias, producing performance estimates closer to those obtained when fitting the model to the full dataset, because each model is trained on nearly all the data.
+However, LOO also tends to have high variance in its error estimates, because each validation fold contains only a single observation, making those estimates more sensitive to individual data points.
+
+```{r}
+set.seed(52242) # for reproducibility
+
+folds_loo <- rsample::loo_cv(data_train_qb)
 ```
 
 ## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
@@ -1134,10 +1169,7 @@ future::plan(future::multisession, workers = num_cores)
 set.seed(52242)
 
 # Set up Cross-Validation
-folds <- rsample::group_vfold_cv(
-  data_train_qb,
-  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
-  v = 10) # 10-fold cross-validation
+folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
@@ -1242,10 +1274,7 @@ newData_qb %>%
 set.seed(52242)
 
 # Set up Cross-Validation
-folds <- rsample::group_vfold_cv(
-  data_train_qb,
-  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
-  v = 10) # 10-fold cross-validation
+folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
@@ -1352,10 +1381,7 @@ newData_qb %>%
 set.seed(52242)
 
 # Set up Cross-Validation
-folds <- rsample::group_vfold_cv(
-  data_train_qb,
-  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
-  v = 10) # 10-fold cross-validation
+folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
@@ -1476,10 +1502,7 @@ newData_qb %>%
 set.seed(52242)
 
 # Set up Cross-Validation
-folds <- rsample::group_vfold_cv(
-  data_train_qb,
-  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
-  v = 10) # 10-fold cross-validation
+folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
@@ -1600,10 +1623,7 @@ newData_qb %>%
 set.seed(52242)
 
 # Set up Cross-Validation
-folds <- rsample::group_vfold_cv(
-  data_train_qb,
-  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
-  v = 10) # 10-fold cross-validation
+folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
@@ -1728,10 +1748,7 @@ newData_qb %>%
 set.seed(52242)
 
 # Set up Cross-Validation
-folds <- rsample::group_vfold_cv(
-  data_train_qb,
-  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
-  v = 10) # 10-fold cross-validation
+folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
@@ -1912,10 +1929,6 @@ predict(
 
 plot(smerf$Vraisemblance)
 ```
-
-### *k*-Fold Cross-Validation {#sec-kfoldCV}
-
-### Leave-One-Out (LOO) Cross-Validation {#sec-looCV}
 
 ### Combining Tree-Boosting with Mixed Models {#sec-treeBoosting}
 
