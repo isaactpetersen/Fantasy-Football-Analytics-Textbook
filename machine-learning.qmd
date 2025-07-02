@@ -1132,10 +1132,10 @@ future::plan(future::multisession, workers = num_cores)
 # Set seed for reproducibility
 set.seed(52242)
 
-# Set up cross-validation
+# Set up Cross-Validation
 folds <- rsample::group_vfold_cv(
   data_train_qb,
-  group = gsis_id,
+  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
   v = 10) # 10-fold cross-validation
 
 # Define Recipe (Formula)
@@ -1157,8 +1157,8 @@ lm_wf <- workflows::workflow() %>%
 cv_results <- tune::fit_resamples(
   lm_wf,
   resamples = folds,
-  metrics = metric_set(rmse, mae, rsq),
-  control = control_resamples(save_pred = TRUE)
+  metrics = yardstick::metric_set(rmse, mae, rsq),
+  control = tune::control_resamples(save_pred = TRUE)
 )
 
 # View Cross-Validation metrics
@@ -1175,8 +1175,6 @@ final_model %>%
   broom::tidy()
 
 # Predict on Test Data
-predict(final_model, data_test_qb)
-
 df <- data_test_qb %>%
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
@@ -1238,15 +1236,15 @@ newData_qb %>%
 # Set seed for reproducibility
 set.seed(52242)
 
-# Set up cross-validation
+# Set up Cross-Validation
 folds <- rsample::group_vfold_cv(
   data_train_qb,
-  group = gsis_id,
+  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
   v = 10) # 10-fold cross-validation
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
-  fantasyPoints_lag ~ .,
+  fantasyPoints_lag ~ ., # use all predictors
   data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
@@ -1263,8 +1261,8 @@ lm_wf <- workflows::workflow() %>%
 cv_results <- tune::fit_resamples(
   lm_wf,
   resamples = folds,
-  metrics = metric_set(rmse, mae, rsq),
-  control = control_resamples(save_pred = TRUE)
+  metrics = yardstick::metric_set(rmse, mae, rsq),
+  control = tune::control_resamples(save_pred = TRUE)
 )
 
 # View Cross-Validation metrics
@@ -1281,8 +1279,6 @@ final_model %>%
   broom::tidy()
 
 # Predict on Test Data
-predict(final_model, data_test_qb)
-
 df <- data_test_qb %>%
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
@@ -1346,23 +1342,23 @@ newData_qb %>%
 # Set seed for reproducibility
 set.seed(52242)
 
-# Set up cross-validation
+# Set up Cross-Validation
 folds <- rsample::group_vfold_cv(
   data_train_qb,
-  group = gsis_id,
+  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
   v = 10) # 10-fold cross-validation
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
-  fantasyPoints_lag ~ .,
+  fantasyPoints_lag ~ ., # use all predictors
   data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
 lasso_spec <- 
   parsnip::linear_reg(
-    penalty = tune(),
+    penalty = tune::tune(),
     mixture = 1) %>%
-  set_engine("glmnet")
+  parsnip::set_engine("glmnet")
 
 # Workflow
 lasso_wf <- workflows::workflow() %>%
@@ -1379,22 +1375,22 @@ cv_results <- tune::tune_grid(
   lasso_wf,
   resamples = folds,
   grid = penalty_grid,
-  metrics = metric_set(rmse, mae, rsq),
-  control = control_grid(save_pred = TRUE)
+  metrics = yardstick::metric_set(rmse, mae, rsq),
+  control = tune::control_grid(save_pred = TRUE)
 )
 
 # View Cross-Validation metrics
 tune::collect_metrics(cv_results)
 
 # Identify best penalty
-select_best(cv_results, metric = "rmse")
-select_best(cv_results, metric = "mae")
-select_best(cv_results, metric = "rsq")
+tune::select_best(cv_results, metric = "rmse")
+tune::select_best(cv_results, metric = "mae")
+tune::select_best(cv_results, metric = "rsq")
 
-best_penalty <- select_best(cv_results, metric = "mae")
+best_penalty <- tune::select_best(cv_results, metric = "mae")
 
 # Finalize Workflow with Best Penalty
-final_wf <- finalize_workflow(
+final_wf <- tune::finalize_workflow(
   lasso_wf,
   best_penalty)
 
@@ -1409,8 +1405,6 @@ final_model %>%
   broom::tidy()
 
 # Predict on Test Data
-predict(final_model, data_test_qb)
-
 df <- data_test_qb %>%
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
@@ -1472,23 +1466,23 @@ newData_qb %>%
 # Set seed for reproducibility
 set.seed(52242)
 
-# Set up cross-validation
+# Set up Cross-Validation
 folds <- rsample::group_vfold_cv(
   data_train_qb,
-  group = gsis_id,
+  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
   v = 10) # 10-fold cross-validation
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
-  fantasyPoints_lag ~ .,
+  fantasyPoints_lag ~ ., # use all predictors
   data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
 ridge_spec <- 
-  linear_reg(
-    penalty = tune(),
+  parnsnip::linear_reg(
+    penalty = tune::tune(),
     mixture = 0) %>%
-  set_engine("glmnet")
+  parsnip::set_engine("glmnet")
 
 # Workflow
 ridge_wf <- workflows::workflow() %>%
@@ -1505,22 +1499,22 @@ cv_results <- tune::tune_grid(
   ridge_wf,
   resamples = folds,
   grid = penalty_grid,
-  metrics = metric_set(rmse, mae, rsq),
-  control = control_grid(save_pred = TRUE)
+  metrics = yardstick::metric_set(rmse, mae, rsq),
+  control = tune::control_grid(save_pred = TRUE)
 )
 
 # View Cross-Validation metrics
 tune::collect_metrics(cv_results)
 
 # Identify best penalty
-select_best(cv_results, metric = "rmse")
-select_best(cv_results, metric = "mae")
-select_best(cv_results, metric = "rsq")
+tune::select_best(cv_results, metric = "rmse")
+tune::select_best(cv_results, metric = "mae")
+tune::select_best(cv_results, metric = "rsq")
 
-best_penalty <- select_best(cv_results, metric = "mae")
+best_penalty <- tune::select_best(cv_results, metric = "mae")
 
 # Finalize Workflow with Best Penalty
-final_wf <- finalize_workflow(
+final_wf <- tune::finalize_workflow(
   ridge_wf,
   best_penalty)
 
@@ -1535,8 +1529,6 @@ final_model %>%
   broom::tidy()
 
 # Predict on Test Data
-predict(final_model, data_test_qb)
-
 df <- data_test_qb %>%
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
@@ -1598,23 +1590,23 @@ newData_qb %>%
 # Set seed for reproducibility
 set.seed(52242)
 
-# Set up cross-validation
+# Set up Cross-Validation
 folds <- rsample::group_vfold_cv(
   data_train_qb,
-  group = gsis_id,
+  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
   v = 10) # 10-fold cross-validation
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
-  fantasyPoints_lag ~ .,
+  fantasyPoints_lag ~ ., # use all predictors
   data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
 enet_spec <- 
-  linear_reg(
-    penalty = tune(),
-    mixture = tune()) %>%
-  set_engine("glmnet")
+  parsnip::linear_reg(
+    penalty = tune::tune(),
+    mixture = tune::tune()) %>%
+  parsnip::set_engine("glmnet")
 
 # Workflow
 enet_wf <- workflows::workflow() %>%
@@ -1633,22 +1625,22 @@ cv_results <- tune::tune_grid(
   enet_wf,
   resamples = folds,
   grid = grid_enet,
-  metrics = metric_set(rmse, mae, rsq),
-  control = control_grid(save_pred = TRUE)
+  metrics = yardstick::metric_set(rmse, mae, rsq),
+  control = tune::control_grid(save_pred = TRUE)
 )
 
 # View Cross-Validation metrics
 tune::collect_metrics(cv_results)
 
 # Identify best penalty
-select_best(cv_results, metric = "rmse")
-select_best(cv_results, metric = "mae")
-select_best(cv_results, metric = "rsq")
+tune::select_best(cv_results, metric = "rmse")
+tune::select_best(cv_results, metric = "mae")
+tune::select_best(cv_results, metric = "rsq")
 
-best_penalty <- select_best(cv_results, metric = "mae")
+best_penalty <- tune::select_best(cv_results, metric = "mae")
 
 # Finalize Workflow with Best Penalty
-final_wf <- finalize_workflow(
+final_wf <- tune::finalize_workflow(
   enet_wf,
   best_penalty)
 
@@ -1663,8 +1655,6 @@ final_model %>%
   broom::tidy()
 
 # Predict on Test Data
-predict(final_model, data_test_qb)
-
 df <- data_test_qb %>%
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
@@ -1728,15 +1718,15 @@ newData_qb %>%
 # Set seed for reproducibility
 set.seed(52242)
 
-# Set up cross-validation
+# Set up Cross-Validation
 folds <- rsample::group_vfold_cv(
   data_train_qb,
-  group = gsis_id,
+  group = gsis_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
   v = 10) # 10-fold cross-validation
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
-  fantasyPoints_lag ~ .,
+  fantasyPoints_lag ~ ., # use all predictors
   data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
@@ -1746,7 +1736,9 @@ rf_spec <-
     min_n = tune::tune(),
     trees = 500) %>%
   parsnip::set_mode("regression") %>%
-  parsnip::set_engine("ranger", importance = "impurity")
+  parsnip::set_engine(
+    "ranger",
+    importance = "impurity")
 
 # Workflow
 rf_wf <- workflows::workflow() %>%
@@ -1773,22 +1765,22 @@ cv_results <- tune::tune_grid(
   rf_wf,
   resamples = folds,
   grid = rf_grid,
-  metrics = metric_set(rmse, mae, rsq),
-  control = control_grid(save_pred = TRUE)
+  metrics = yardstick::metric_set(rmse, mae, rsq),
+  control = tune::control_grid(save_pred = TRUE)
 )
 
 # View Cross-Validation metrics
 tune::collect_metrics(cv_results)
 
 # Identify best penalty
-select_best(cv_results, metric = "rmse")
-select_best(cv_results, metric = "mae")
-select_best(cv_results, metric = "rsq")
+tune::select_best(cv_results, metric = "rmse")
+tune::select_best(cv_results, metric = "mae")
+tune::select_best(cv_results, metric = "rsq")
 
-best_penalty <- select_best(cv_results, metric = "mae")
+best_penalty <- tune::select_best(cv_results, metric = "mae")
 
 # Finalize Workflow with Best Penalty
-final_wf <- finalize_workflow(
+final_wf <- tune::finalize_workflow(
   rf_wf,
   best_penalty)
 
@@ -1808,8 +1800,6 @@ ranger_obj <- rf_fit$fit
 ranger_obj$variable.importance
 
 # Predict on Test Data
-predict(final_model, data_test_qb)
-
 df <- data_test_qb %>%
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
@@ -1893,9 +1883,17 @@ smerf <- LongituRF::MERF(
   sto = "BM")
 
 smerf$forest # the fitted random forest (obtained at the last iteration)
-smerf$random_effects # the predicted random effects for each player
-smerf$omega # the predicted stochastic processes
+smerf$random_effects %>% data.frame() # the predicted random effects for each player
+smerf$omega %>% data.frame() # the predicted stochastic processes
 smerf$OOB # OOB error at each iteration
+
+# Predict on Test Data
+predict(
+  smerf,
+  X = data_test_qb %>% as_tibble() %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
+  Z = data_test_qb[,c("pacr")] %>% as.matrix(),
+  id = data_test_qb[,c("gsis_id")] %>% as.matrix(),
+  time = data_test_qb[,c("ageCentered20")] %>% as.matrix())
 ```
 
 ```{r}
