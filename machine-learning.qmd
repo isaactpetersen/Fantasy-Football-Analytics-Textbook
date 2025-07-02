@@ -143,51 +143,60 @@ This chapter discusses several key ones:
 
 - supervised learning
     - continuous outcome (i.e., regression)
-      - linear regression
-      - lasso regression
-      - ridge regression
-      - elastic net regression
+      - [linear regression](#sec-fittingModels-regression)
+      - [lasso regression](#sec-lasso)
+      - [ridge regression](#sec-ridgeRegression)
+      - [elastic net regression](#sec-elasticNet)
+      - [random forest](#sec-randomForest)
     - categorical outcome (i.e., classification)
-      - logistic regression
+      - [logistic regression](#sec-multipleRegressionTypes)
       - support vector machine
-      - random forest
-      - extreme gradient boosting
+      - [random forest](#sec-randomForest)
+      - boosting
+        - [tree boosting](#sec-treeBoosting)
 - unsupervised learning
-    - clustering
-    - principal component analysis
+    - [cluster analysis](#sec-clusterAnalysis)
+    - [principal component analysis](#sec-pca)
+    - [factor analysis](#sec-factorAnalysis)
 - semi-supervised learning
 - reinforcement learning
     - deep learning
 - ensemble
 
-*Ensemble* machine learning methods combine multiple machine learning approaches with the goal that combining multiple approaches might lead to more accurate predictions that any one method might be able to achieve on its own.
+*Ensemble* machine learning methods combine multiple machine learning approaches with the goal that combining multiple approaches might lead to more accurate predictions than any one method might be able to achieve on its own.
 
 ### Supervised Learning {#sec-machineLearningTypesSupervised}
 
-[DEFINE SUPERVISED LEARNING]
+Supervised learning involves learning from data where the correct classification or outcome is known.
+For instance, predicting how many points a player will score is a supervised learning task, because there is a ground truth—the actual number of points scored—that can be used to train and evaluate the model.
 
-Unlike linear and logistic regression, various machine learning techniques can handle multicollinearity, including LASSO regression, ridge regression, and elastic net regression.
-Least absolute shrinkage and selection operator (LASSO) regression helps perform selection of which predictor variables to keep in the model by shrinking some coefficients to zero.
-Ridge regression shrinks the coefficients of predictor variables toward zero, but not to zero, so it does not perform selection of which predictor variables to retain; this allows it to allow nonzero coefficients for multiple correlated predictor variables in the context of multicollinearity.
-Elastic net involves a combination of LASSO and ridge regression; it performs selection of which predictor variables to keep by shrinking the coefficients of some predictor variables to zero, and it shrinks the coefficients of some predictor variables toward zero, to address multicollinearity.
+Unlike linear and logistic regression, various machine learning techniques can handle multicollinearity, including lasso regression, ridge regression, and elastic net regression.
+Least absolute shrinkage and selection operator (lasso) regression performs selection of which predictor variables to keep in the model by shrinking some coefficients to zero, effectively removing them from the model.
+Ridge regression shrinks the coefficients of predictor variables toward zero, but not to zero, so it does not perform selection of which predictor variables to retain; this allows it to yield stable estimates for multiple correlated predictor variables in the context of multicollinearity.
+Elastic net involves a combination of lasso and ridge regression; it performs selection of which predictor variables to keep by shrinking the coefficients of some predictor variables to zero (like lasso, for variable selection), and it shrinks the coefficients of some predictor variables toward zero (like ridge, for handling multicollinearity among correlated predictors).
 
-Unless interactions or nonlinear terms are specified, linear, logistic, LASSO, ridge, and elastic net regresstion do not account for interactions among the predictor variables or for nonlinear associations between the predictor variables and the outcome variable.
-By contrast, random forests and extreme gradient boosting do account for interactions among the predictor variables and for nonlinear associations between the predictor variables and the outcome variable.
+Unless interactions or nonlinear terms are specified, linear, logistic, lasso, ridge, and elastic net regression assume additive and linear associations between the predictors and outcome.
+That is, they do not automatically account for interactions among the predictor variables or for nonlinear associations between the predictor variables and the outcome variable (unless interaction terms or nonlinear transformations are explicitly included).
+By contrast, random forests and tree boosting methods automatically account for interactions and nonlinear associations between predictors and the outcome variable.
+These models recursively partition the data in ways that capture complex patterns without the need to manually specify interaction or polynomial terms.
 
 ### Unsupervised Learning {#sec-machineLearningTypesUnsupervised}
 
-[DEFINE UNSUPERVISED LEARNING]
+Unsupervised learning involves learning from data without known classifications.
+Unsupervised learning is used to discover hidden patterns, groupings, or structures in the data.
+For instance, if we want to identify different subtypes of Wide Receivers based on their playing style or performance metrics, or uncover underlying dimensions in a large dataset, we would use an unsupervised learning approach.
 
 We describe [cluster analysis](#sec-clusterAnalysis) in @sec-clusterAnalysis.
 We describe [principal component analysis](#sec-pca) in @sec-pca.
 
 ### Semi-supervised Learning {#sec-machineLearningTypesSemisupervised}
 
-[DEFINE SEMI-SUPERVISED LEARNING]
+Semi-supervised learning combines supervised learning and unsupervised learning by training the model on some data for which the classification is known and some data for which the classification is not known.
 
 ### Reinforcement Learning {#sec-machineLearningTypesReinforcement}
 
-[DEFINE REINFORCEMENT LEARNING]
+Reinforcement learning involves an agent learning to make decisions by interacting with the environment.
+Through trial and error, the agent receives feedback in the form of rewards or penalties and learns a strategy that maximizes the cumulative reward over time.
 
 ## Data Processing {#sec-machineLearningDataProcessing}
 
@@ -839,6 +848,8 @@ gc()
 # - CONSIDER IMPUTING THE TRAINING AND TEST DATA SEPARATELY BY POSITION
 ```
 
+Many of the machine learning approaches described in this chapter require no missing observations in order for a case to be included in the analysis.
+In this section, we demonstrate one approach to imputing missing data.
 Here is a vignette demonstrating how to impute missing data using `missForest()`: <https://rpubs.com/lmorgan95/MissForest> (archived at: <https://perma.cc/6GB4-2E22>).
 Below, we impute the training data (and all data) separately by position.
 We then use the imputed training data to make out-of-sample predictions to fill in the missing data for the testing data.
@@ -1160,7 +1171,9 @@ set.seed(52242) # for reproducibility
 folds_loo <- rsample::loo_cv(data_train_qb)
 ```
 
-## Fitting the Traditional Regression Models {#sec-fittingModels-regression}
+## Fitting the Traditional Linear Regression Models {#sec-fittingModels-regression}
+
+We describe linear regression in @sec-multipleRegression.
 
 ### Regression with One Predictor {#sec-regressionOnePredictor}
 
@@ -1252,7 +1265,8 @@ ggplot(
     x = "Predicted Fantasy Points",
     y = "Actual Fantasy Points"
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 ```{r}
@@ -1357,7 +1371,8 @@ ggplot(
     x = "Predicted Fantasy Points",
     y = "Actual Fantasy Points"
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 ```{r}
@@ -1374,7 +1389,7 @@ newData_qb %>%
 
 ## Fitting the Machine Learning Models {#sec-fittingModels-machineLearning}
 
-### Least Absolute Shrinkage and Selection Option (LASSO) {#sec-lasso}
+### Least Absolute Shrinkage and Selection Option (Lasso) {#sec-lasso}
 
 ```{r}
 # Set seed for reproducibility
@@ -1453,8 +1468,8 @@ petersenlab::accuracyOverall(
 
 ```{r}
 #| label: fig-lassoModel
-#| fig-cap: "Predicted Versus Actual Fantasy Points for Least Absolute Shrinkage and Selection Option (LASSO) Model."
-#| fig-alt: "Predicted Versus Actual Fantasy Points for Least Absolute Shrinkage and Selection Option (LASSO) Model."
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Least Absolute Shrinkage and Selection Option (Lasso) Model."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Least Absolute Shrinkage and Selection Option (Lasso) Model."
 
 # Calculate combined range for axes
 axis_limits <- range(c(df$pred, df$fantasyPoints_lag), na.rm = TRUE)
@@ -1480,7 +1495,8 @@ ggplot(
     x = "Predicted Fantasy Points",
     y = "Actual Fantasy Points"
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 ```{r}
@@ -1601,7 +1617,8 @@ ggplot(
     x = "Predicted Fantasy Points",
     y = "Actual Fantasy Points"
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 ```{r}
@@ -1724,7 +1741,8 @@ ggplot(
     x = "Predicted Fantasy Points",
     y = "Actual Fantasy Points"
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 ```{r}
@@ -1866,7 +1884,8 @@ ggplot(
     x = "Predicted Fantasy Points",
     y = "Actual Fantasy Points"
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 ```{r}
