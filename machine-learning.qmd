@@ -200,6 +200,8 @@ Through trial and error, the agent receives feedback in the form of rewards or p
 
 ## Data Processing {#sec-machineLearningDataProcessing}
 
+Several data processing steps are necessary to get the data in the form necessary for machine learning.
+
 ```{r}
 #| eval: false
 #| include: false
@@ -262,6 +264,10 @@ nfl_playerIDs$pfr_id
 ```
 
 ### Prepare Data for Merging {#sec-machineLearningPrepareDataForMerging}
+
+First, we apply several steps.
+We subset to the positions and variables of interest.
+We also rename columns and change variable types to make sure they match the column names and types across objects, which will be important later when we merge the data.
 
 ```{r}
 #| label: prepare-data-merging-machine-learning
@@ -365,7 +371,7 @@ nfl_advancedStatsPFR_seasonal %>%
 gc()
 ```
 
-Identify objects with shared variable names:
+Below, we identify shared variable names across objects to be merged to make sure we account for them in merging:
 
 ```{r}
 dplyr::intersect(
@@ -407,7 +413,11 @@ length(na.omit(nfl_expectedFantasyPoints_weekly$full_name))
 
 ### Merge Data {#sec-machineLearningMergeData}
 
-To merge data, we use the `powerjoin` package [@R-powerjoin]:
+To perform machine learning, we need all of the [predictor variables](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) in the same data file.
+Thus, we must merge data files.
+To merge data, we use the `powerjoin` package [@R-powerjoin], which allows coalescing variables with the same name from two different objects.
+We specify `coalesce_xy`, which means that—for variables that have the same name across both objects—it keeps the value from object 1 (if present); if not, it keeps the value from object 2.
+We first merge variables from objects that have the same structure—player data (i.e., `id` form), seasonal data (i.e., `id`-`season` form), or weekly data (i.e., `id`-`season`-`week` form).
 
 ```{r}
 #| label: merge-data1-machine-learning
@@ -462,13 +472,15 @@ playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>%
 gc()
 ```
 
-Identify objects with shared variable names:
+To prepare for merging player data with seasonal data, we identify shared variable names across the objects:
 
 ```{r}
 dplyr::intersect(
   names(playerSeasonMerged),
   names(playerMerged))
 ```
+
+Then we merge the player data with the seasonal data:
 
 ```{r}
 #| label: merge-data2-machine-learning
@@ -490,11 +502,15 @@ seasonalData <- powerjoin::power_full_join(
 gc()
 ```
 
+To prepare for merging player and seasonal data with weekly data, we identify shared variable names across the objects:
+
 ```{r}
 dplyr::intersect(
   names(playerSeasonWeekMerged),
   names(seasonalData))
 ```
+
+Then we merge the player and seasonal data with the weekly data:
 
 ```{r}
 #| label: merge-data3-machine-learning
@@ -531,6 +547,8 @@ seasonalAndWeeklyData %>%
 
 ### Additional Processing {#sec-mlAdditionalProcessing}
 
+For purposes of machine learning, we set all character and logical columns to factors.
+
 ```{r}
 #| label: additional-processing-machine-learning
 
@@ -557,6 +575,8 @@ gc()
 
 ### Fill in Missing Data for Static Variables {#sec-fillMissingData}
 
+For variables that are not expected to change, such as a player's name and position, we fill in missing values by using a player's value on those variables from other rows in the data.
+
 ```{r}
 #| label: fill-in-missing-data-machine-learning
 
@@ -578,6 +598,8 @@ gc()
 
 ### Create New Data Object for Merging with Later Predictions {#sec-newDataObject}
 
+We create a new data object that contains the latest seasonal data, for merging with later predictions.
+
 ```{r}
 #| label: create-new-data-machine-learning
 
@@ -586,6 +608,12 @@ newData_seasonal <- seasonalData %>%
 ```
 
 ### Lag Fantasy Points {#sec-lagFantasyPoints}
+
+To develop a machine learning model that uses a player's performance metrics in a given season for predicting the player's fantasy points in the subsequent season, we need to include the player's fantasy points from the subsequent season in the same row as the previous season's performance metrics.
+Thus, we need to create a lagged variable for fantasy points.
+That way, 2024 fantasy points are in the same row as 2023 performance metrics, 2023 fantasy points are in the same row as 2023 performance metrics, and so on.
+We call this the lagged fantasy points variable (`fantasyPoints_lag`).
+We also retain the original same-year fantasy points variable (`fantasyPoints`) so it can be used as predictor of their subsequent-year fantasy points.
 
 ```{r}
 #| label: lag-fantasy-points-machine-learning
@@ -610,6 +638,9 @@ gc()
 ```
 
 ### Subset to Predictor Variables and Outcome Variable {#sec-subsetToPredictorsAndOutcome}
+
+Then, we drop variables that we do not want to include in the model as our [predictor](#sec-correlationalStudy) or [outcome](#sec-correlationalStudy) variable.
+Thus, all of the variables in the object are our [predictor](#sec-correlationalStudy) and [outcome](#sec-correlationalStudy) variables.
 
 ```{r}
 #| label: subset-data-machine-learning
@@ -639,6 +670,8 @@ gc()
 ```
 
 ### Separate by Position {#sec-separateByPosition}
+
+Then, we separate the objects by position, so we can develop different machine learning models for each position.
 
 ```{r}
 #| label: separate-by-position-machine-learning
@@ -684,6 +717,38 @@ gc()
 ```
 
 ### Split into Test and Training Data {#sec-splitTestTraining}
+
+Because machine learning can leverage many predictors, it is at high risk of [overfitting](#sec-overfitting)—explaining error variance that would not generalize to new data, such as data for new players or future seasons.
+Thus, it is important to develop and tune the machine learning model so as not to [overfit](sec-overfitting) the model.
+In machine learning, it is common to use [cross-validation](#sec-crossValidation) where we train the model on a subset of the observations, and we evaluate how well the model generalizes to unseen (e.g., "hold-out") observations.
+Then, we select the model parameters by how well the model generalizes to the hold-out data, so we are selecting  a model that maximizes accuracy and generalizability (i.e., parsimony).
+
+For internal [cross-validation](#sec-crossValidation), it is common to divide the data into three subsets:
+
+1. training data
+1. validation data
+1. test data
+
+The training set is used to fit the model.
+It is usually the largest portion of the data.
+We fit various models to the training set based on which parameters we want to evaluate (e.g., how many trees to use in a tree-boosting model).
+
+The models fit with the training set are then evaluated using the unseen observations in the validation set.
+The validation set is used to tune the model parameters and prevent [overfitting](#sec-overfitting).
+We select the model parameters that yield the greatest accuracy in the validation set.
+In [*k*-fold cross-validation](#sec-kFoldCrossValidation), the validation set rotates across folds, thus replacing the need for a separate validation set.
+
+The test set is used after model training and tuning to evaluate the model's generalizability to unseen data.
+
+Below, we split the data into test and training data.
+Our ultimate goal is to predict next year's fantasy points.
+However, to do that effectively, we must first develop a model for which we can evaluate its accuracy against historical fantasy points (because we do not yet know players will score in the future).
+We want to include all current/active players in our training data, so that our predictions of their future performance can be accounted for by including their prior data in the model.
+Thus, we use retired players as our hold-out (test) data.
+We split our data into 80% training data and 20% testing data.
+The 20% testing data thus includes all retired players, but not all retired players are in the testing data.
+
+Then, for the analysis, we can either a) use rotating folds (as the case for [*k*-fold](#sec-kFoldCrossValidation) and [leave-one-out [LOO]](#sec-looCrossValidation) cross-validation) for which a separate validation set (from the training set) is not needed, as we do in @sec-folds, or we can b) subdivide the training set into an inner training set and validation set, as we do in @sec-treeBoostingOptimalTuningParameters.
 
 ```{r}
 #| eval: false
@@ -1177,6 +1242,9 @@ We describe linear regression in @sec-multipleRegression.
 
 ### Regression with One Predictor {#sec-regressionOnePredictor}
 
+Below, we fit a linear regression model with one predictor and evaluate it with cross-validation.
+We also evaluate its accuracy on the hold-out (test) data.
+
 ```{r}
 # Set seed for reproducibility
 set.seed(52242)
@@ -1236,6 +1304,8 @@ petersenlab::accuracyOverall(
 )
 ```
 
+@fig-regressionOnePredictor depicts the predicted versus actual fantasy points for the model on the test data.
+
 ```{r}
 #| label: fig-regressionOnePredictor
 #| fig-cap: "Predicted Versus Actual Fantasy Points for Regression Model with One Predictor (Player Age)."
@@ -1269,6 +1339,8 @@ ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
+Below are the model predictions for next year's fantasy points:
+
 ```{r}
 newData_qb %>%
   mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
@@ -1282,6 +1354,9 @@ newData_qb %>%
 ```
 
 ### Regression with Multiple Predictors {#sec-regressionMultiplePredictors}
+
+Below, we fit a linear regression model with multiple predictors and evaluate it with cross-validation.
+We also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -1342,6 +1417,8 @@ petersenlab::accuracyOverall(
 )
 ```
 
+@fig-regressionMultiplePredictors depicts the predicted versus actual fantasy points for the model on the test data.
+
 ```{r}
 #| label: fig-regressionMultiplePredictors
 #| fig-cap: "Predicted Versus Actual Fantasy Points for Regression Model with Multiple Predictors."
@@ -1375,6 +1452,8 @@ ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
+Below are the model predictions for next year's fantasy points:
+
 ```{r}
 newData_qb %>%
   mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
@@ -1390,6 +1469,10 @@ newData_qb %>%
 ## Fitting the Machine Learning Models {#sec-fittingModels-machineLearning}
 
 ### Least Absolute Shrinkage and Selection Option (Lasso) {#sec-lasso}
+
+Below, we fit a lasso model.
+We evaluate it and tune its penalty parameter with cross-validation.
+We also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -1466,6 +1549,8 @@ petersenlab::accuracyOverall(
 )
 ```
 
+@fig-lassoModel depicts the predicted versus actual fantasy points for the model on the test data.
+
 ```{r}
 #| label: fig-lassoModel
 #| fig-cap: "Predicted Versus Actual Fantasy Points for Least Absolute Shrinkage and Selection Option (Lasso) Model."
@@ -1499,6 +1584,8 @@ ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
+Below are the model predictions for next year's fantasy points:
+
 ```{r}
 newData_qb %>%
   mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
@@ -1512,6 +1599,10 @@ newData_qb %>%
 ```
 
 ### Ridge Regression {#sec-ridgeRegression}
+
+Below, we fit a ridge regression model.
+We evaluate it and tune its penalty parameter with cross-validation.
+We also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -1588,6 +1679,8 @@ petersenlab::accuracyOverall(
 )
 ```
 
+@fig-ridgeRegressionModel depicts the predicted versus actual fantasy points for the model on the test data.
+
 ```{r}
 #| label: fig-ridgeRegressionModel
 #| fig-cap: "Predicted Versus Actual Fantasy Points for Ridge Regression Model."
@@ -1621,6 +1714,8 @@ ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
+Below are the model predictions for next year's fantasy points:
+
 ```{r}
 newData_qb %>%
   mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
@@ -1634,6 +1729,10 @@ newData_qb %>%
 ```
 
 ### Elastic Net {#sec-elasticNet}
+
+Below, we fit an elastic net model.
+We evaluate it and tune its penalty and mixture parameters with cross-validation.
+We also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -1712,6 +1811,8 @@ petersenlab::accuracyOverall(
 )
 ```
 
+@fig-elasticNetModel depicts the predicted versus actual fantasy points for the model on the test data.
+
 ```{r}
 #| label: fig-elasticNetModel
 #| fig-cap: "Predicted Versus Actual Fantasy Points for Elastic Net Model."
@@ -1744,6 +1845,8 @@ ggplot(
   theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
+
+Below are the model predictions for next year's fantasy points:
 
 ```{r}
 newData_qb %>%
@@ -1855,6 +1958,8 @@ petersenlab::accuracyOverall(
 )
 ```
 
+@fig-randomForestModel depicts the predicted versus actual fantasy points for the model on the test data.
+
 ```{r}
 #| label: fig-randomForestModel
 #| fig-cap: "Predicted Versus Actual Fantasy Points for Random Forest Model."
@@ -1887,6 +1992,8 @@ ggplot(
   theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
+
+Below are the model predictions for next year's fantasy points:
 
 ```{r}
 newData_qb %>%
@@ -1999,7 +2106,7 @@ We then use the [mean absolute error](#sec-meanAbsoluteError) as our index of pr
 ntrain_qb <- dim(data_train_qb_matrix)[1]
 
 set.seed(52242)
-valid_tune_idx_qb <- sample.int(ntrain_qb, as.integer(0.2*ntrain_qb)) # 
+valid_tune_idx_qb <- sample.int(ntrain_qb, as.integer(0.2*ntrain_qb)) # validation set
 
 folds_qb <- list(valid_tune_idx_qb)
 
