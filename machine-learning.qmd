@@ -144,7 +144,7 @@ This chapter discusses several key ones:
 - supervised learning
     - continuous outcome (i.e., regression)
       - [linear regression](#sec-fittingModels-regression)
-      - [lasso regression](#sec-lasso)
+      - [least absolute shrinkage and selection option (LASSO) regression](#sec-lasso)
       - [ridge regression](#sec-ridgeRegression)
       - [elastic net regression](#sec-elasticNet)
       - [random forest](#sec-randomForest)
@@ -170,12 +170,12 @@ This chapter discusses several key ones:
 Supervised learning involves learning from data where the correct classification or outcome is known.
 For instance, predicting how many points a player will score is a supervised learning task, because there is a ground truth—the actual number of points scored—that can be used to train and evaluate the model.
 
-Unlike linear and logistic regression, various machine learning techniques can handle multicollinearity, including lasso regression, ridge regression, and elastic net regression.
-Least absolute shrinkage and selection operator (lasso) regression performs selection of which predictor variables to keep in the model by shrinking some coefficients to zero, effectively removing them from the model.
-Ridge regression shrinks the coefficients of predictor variables toward zero, but not to zero, so it does not perform selection of which predictor variables to retain; this allows it to yield stable estimates for multiple correlated predictor variables in the context of multicollinearity.
-Elastic net involves a combination of lasso and ridge regression; it performs selection of which predictor variables to keep by shrinking the coefficients of some predictor variables to zero (like lasso, for variable selection), and it shrinks the coefficients of some predictor variables toward zero (like ridge, for handling multicollinearity among correlated predictors).
+Unlike linear and logistic regression, various machine learning techniques can handle [multicollinearity](#sec-multipleRegressionMulticollinearity), including [LASSO regression](#sec-lasso), [ridge regression](#sec-ridgeRegression), and [elastic net regression](#sec-elasticNet).
+[Least absolute shrinkage and selection option (LASSO) regression](#sec-lasso) performs selection of which predictor variables to keep in the model by shrinking some coefficients to zero, effectively removing them from the model.
+[Ridge regression](#sec-ridgeRegression) shrinks the coefficients of predictor variables toward zero, but not to zero, so it does not perform selection of which predictor variables to retain; this allows it to yield stable estimates for multiple correlated predictor variables in the context of [multicollinearity](#sec-multipleRegressionMulticollinearity).
+[Elastic net](#sec-elasticNet) involves a combination of [LASSO](#sec-lasso) and [ridge](#sec-ridgeRegression) regression; it performs selection of which predictor variables to keep by shrinking the coefficients of some predictor variables to zero (like [LASSO](#sec-lasso), for variable selection), and it shrinks the coefficients of some predictor variables toward zero (like [ridge](#sec-ridgeRegression), for handling [multicollinearity](#sec-multipleRegressionMulticollinearity) among correlated predictors).
 
-Unless interactions or nonlinear terms are specified, linear, logistic, lasso, ridge, and elastic net regression assume additive and linear associations between the predictors and outcome.
+Unless interactions or nonlinear terms are specified, linear, logistic, [LASSO](#sec-lasso), [ridge](#sec-ridgeRegression), and [elastic net](#sec-elasticNet) regression assume additive and linear associations between the predictors and outcome.
 That is, they do not automatically account for interactions among the predictor variables or for nonlinear associations between the predictor variables and the outcome variable (unless interaction terms or nonlinear transformations are explicitly included).
 By contrast, random forests and tree boosting methods automatically account for interactions and nonlinear associations between predictors and the outcome variable.
 These models recursively partition the data in ways that capture complex patterns without the need to manually specify interaction or polynomial terms.
@@ -1468,11 +1468,17 @@ newData_qb %>%
 
 ## Fitting the Machine Learning Models {#sec-fittingModels-machineLearning}
 
-### Least Absolute Shrinkage and Selection Option (Lasso) {#sec-lasso}
+### Least Absolute Shrinkage and Selection Option (LASSO) {#sec-lasso}
 
-Below, we fit a lasso model.
+Below, we fit a LASSO model.
 We evaluate it and tune its penalty parameter with cross-validation.
-We also evaluate its accuracy on the hold-out (test) data.
+The penalty parameter in a LASSO model controls the strength of regularization applied to the model coefficients.
+Smaller penalty values result in less regularization, allowing the model to retain more predictors with larger (nonzero) coefficients.
+This typically reduces bias but increases variance of the model's predictions, as the model may [overfit](#sec-overfitting) to the training data by including irrelevant or weak predictors.
+Larger penalty values apply stronger regularization, shrinking more coefficients exactly to zero.
+This encourages a sparser model that may increase bias (by excluding useful predictors) but reduces variance and improves generalizability by simplifying the model and reducing [overfitting](#sec-overfitting).
+
+After tuning the model, we evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -1602,7 +1608,13 @@ newData_qb %>%
 
 Below, we fit a ridge regression model.
 We evaluate it and tune its penalty parameter with cross-validation.
-We also evaluate its accuracy on the hold-out (test) data.
+The penalty parameter in a ridge regression model controls the amount of regularization applied to the model's coefficients.
+Smaller penalty values allow coefficients to remain large, resulting in a model that closely fits the training data.
+This may reduce bias but increases the risk of [overfitting](#sec-overfitting), especially in the presence of [multicollinearity](#sec-multipleRegressionMulticollinearity) or many weak predictors.
+Larger penalty values shrink coefficients toward zero (though not exactly to zero), which reduces model complexity.
+This typically increases bias slightly but reduces variance of the model's predictions, making the model more stable and better suited for generalization to new data.
+
+After tuning the model, we also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -1732,7 +1744,20 @@ newData_qb %>%
 
 Below, we fit an elastic net model.
 We evaluate it and tune its penalty and mixture parameters with cross-validation.
-We also evaluate its accuracy on the hold-out (test) data.
+
+The penalty parameter controls the overall strength of regularization applied to the model’s coefficients.
+Smaller penalty values allow coefficients to remain large, which can reduce bias but increase variance of the model's predictions and can increase the risk of [overfitting](#sec-overfitting).
+Larger penalty values shrink coefficients more aggressively, leading to simpler models with potentially higher bias but lower variance of predictions.
+This regularization helps prevent [overfitting](#sec-overfitting), especially when the model includes many predictors or [multicollinearity](#sec-multipleRegressionMulticollinearity).
+
+The mixture parameter controls the balance between [LASSO](#sec-lasso) and [ridge](#sec-ridgeRegression) regularization.
+It ranges from 0 to 1:
+A value of 0 applies pure [ridge regression](#sec-ridgeRegression), which shrinks all coefficients but keeps them in the model.
+A value of 1 applies pure [LASSO](#sec-lasso), which can shrink some coefficients exactly to zero, effectively performing variable selection.
+Values between 0 and 1 apply a combination: [ridge](#sec-ridgeRegression)-like smoothing and [LASSO](#sec-lasso)-like sparsity.
+Smaller mixture values favor shrinkage without variable elimination, whereas larger values favor sparser solutions by excluding weak predictors.
+
+After tuning the model, we also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -1863,6 +1888,22 @@ newData_qb %>%
 ### Random Forest Machine Learning {#sec-randomForest}
 
 #### Cross-Sectional Data {#sec-randomForestCrossSectionalData}
+
+Below, we fit a random forest model.
+We evaluate it and tune two parameters with cross-validation.
+The first parameter is `mtry`, which controls the number of predictors randomly sampled at each split in a decision tree.
+Smaller `mtry` values increase tree diversity by forcing trees to consider different subsets of predictors.
+This typically reduces the variance of the overall model's predictions (because the final prediction is averaged over more diverse trees) but may increase bias if strong predictors are frequently excluded.
+Larger `mtry` allow more predictors to be considered at each split, making trees more similar to each other.
+This can reduce bias but often increases variance of the model's predictions, because the trees are more correlated and less effective at error cancellation when averaged.
+
+The second parameter is `min_n`, which controls the minimum number of observations that must be present in a node for a split to be attempted.
+Smaller `min_n` values allow trees to grow deeper and capture more fine-grained patterns in the training data.
+This typically reduces bias but increases variance of the overall model's predictions, because deeper trees are more likely to [overfit](#sec-overfitting) to noise in the training data.
+Larger `min_n` values restrict the depth of the trees by requiring more data to justify a split.
+This can reduce variance by producing simpler, more generalizable trees—but may increase bias if the trees are unable to capture important structure in the data.
+
+After tuning the model, we evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
 # Set seed for reproducibility
@@ -2020,6 +2061,10 @@ gc()
 ```
 
 #### Longitudinal Data {#sec-randomForestLongitudinalData}
+
+The above approaches to machine learning assume that the observations are independent across rows.
+However, in our case, this assumption does not hold because the data are longitudinal—each player has multiple seasons, and each row corresponds to a unique player–season combination.
+In the approaches below, using a random forest model (this section) and a [tree-boosting model](#sec-treeBoosting) (in @sec-treeBoosting), we address this by explicitly accounting for the nesting of longitudinal observations within players.
 
 Approaches to estimating random forest models with longitudinal data are described by @Hu2023.
 Below, we fit longitudinal random forest models using the `MERF()` function of the `LongituRF` package [@R-LongituRF].
