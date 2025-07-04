@@ -1,3 +1,26 @@
+
+```{r setup}
+#| include: false
+
+# Enable automatic chunk timing logging to GitHub Actions
+knitr::opts_chunk$set(time = TRUE)  # Apply to ALL chunks globally
+
+# Null coalescing operator
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
+# Define timing hook
+knitr::knit_hooks$set(time = function(before, options) {
+  if (before) {
+    options$start_time <- Sys.time()
+  } else {
+    elapsed <- difftime(Sys.time(), options$start_time, units = "secs")
+    msg <- sprintf("::notice title=Chunk Time::Chunk `%s` ran in %.2f seconds.", 
+                   options$label %||% "<unnamed>", as.numeric(elapsed))
+    message(msg)  # Send to GitHub Actions log
+  }
+})
+```
+
 # Preface {#sec-preface .unnumbered .unlisted}
 
 ```{r}
