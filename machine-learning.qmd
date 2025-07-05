@@ -15,6 +15,7 @@ library("LongituRF")
 library("gpboost")
 library("effectsize")
 library("tidyverse")
+library("knitr")
 ```
 
 ### Load Data {#sec-machineLearningLoadData}
@@ -1254,7 +1255,7 @@ folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
-  fantasyPoints_lag ~ ageCentered20,
+  fantasyPoints_lag ~ fantasyPoints,
   data = data_train_qb)
 
 # Define Model
@@ -1302,6 +1303,16 @@ petersenlab::accuracyOverall(
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+rsquare_onePredictor <- petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)$rsquared %>% round(., digits = 2)
 ```
 
 @fig-regressionOnePredictor depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1415,6 +1426,16 @@ petersenlab::accuracyOverall(
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+rsquare_multiplePredictors <- petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)$rsquared %>% round(., digits = 2)
 ```
 
 @fig-regressionMultiplePredictors depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1555,6 +1576,16 @@ petersenlab::accuracyOverall(
 )
 ```
 
+```{r}
+#| include: false
+
+rsquare_lasso <- petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)$rsquared %>% round(., digits = 2)
+```
+
 @fig-lassoModel depicts the predicted versus actual fantasy points for the model on the test data.
 
 ```{r}
@@ -1689,6 +1720,16 @@ petersenlab::accuracyOverall(
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+rsquare_ridge <- petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)$rsquared %>% round(., digits = 2)
 ```
 
 @fig-ridgeRegressionModel depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1836,6 +1877,16 @@ petersenlab::accuracyOverall(
 )
 ```
 
+```{r}
+#| include: false
+
+rsquare_elasticNet <- petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)$rsquared %>% round(., digits = 2)
+```
+
 @fig-elasticNetModel depicts the predicted versus actual fantasy points for the model on the test data.
 
 ```{r}
@@ -1887,7 +1938,7 @@ newData_qb %>%
 
 ### Random Forest Machine Learning {#sec-randomForest}
 
-#### Cross-Sectional Data {#sec-randomForestCrossSectionalData}
+#### Assuming Independent Observations {#sec-randomForestIndependent}
 
 Below, we fit a random forest model.
 We evaluate it and tune two parameters with cross-validation.
@@ -1999,6 +2050,16 @@ petersenlab::accuracyOverall(
 )
 ```
 
+```{r}
+#| include: false
+
+rsquare_randomForest <- petersenlab::accuracyOverall(
+  predicted = df$pred,
+  actual = df$fantasyPoints_lag,
+  dropUndefined = TRUE
+)$rsquared %>% round(., digits = 2)
+```
+
 @fig-randomForestModel depicts the predicted versus actual fantasy points for the model on the test data.
 
 ```{r}
@@ -2060,7 +2121,7 @@ future::plan(future::sequential)
 gc()
 ```
 
-#### Longitudinal Data {#sec-randomForestLongitudinalData}
+#### Accounting for Longitudinal Data {#sec-randomForestLongitudinalData}
 
 The above approaches to machine learning assume that the observations are independent across rows.
 However, in our case, this assumption does not hold because the data are longitudinal—each player has multiple seasons, and each row corresponds to a unique player–season combination.
@@ -2083,14 +2144,6 @@ smerf$forest # the fitted random forest (obtained at the last iteration)
 smerf$random_effects %>% data.frame() # the predicted random effects for each player
 smerf$omega %>% data.frame() # the predicted stochastic processes
 smerf$OOB # OOB error at each iteration
-
-# Predict on Test Data
-predict(
-  smerf,
-  X = data_test_qb %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
-  Z = data_train_qb %>% dplyr::mutate(constant = 1) %>% dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) %>% as.matrix(),
-  id = data_test_qb[,c("gsis_id")] %>% as.matrix(),
-  time = data_test_qb[,c("ageCentered20")] %>% as.matrix())
 ```
 
 ```{r}
@@ -2099,6 +2152,20 @@ predict(
 #| fig-alt: "Evolution of the Log-Likelihood."
 
 plot(smerf$Vraisemblance)
+```
+
+The following code generates an error, for some reason.
+This issue has been posted on the GitHub repository: <https://github.com/sistm/LongituRF/issues/5>.
+Hopefully the package maintainer will help address the issue.
+
+```{r}
+# Predict on Test Data
+predict(
+  smerf,
+  X = data_test_qb %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
+  Z = data_train_qb %>% dplyr::mutate(constant = 1) %>% dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) %>% as.matrix(),
+  id = data_test_qb[,c("gsis_id")] %>% as.matrix(),
+  time = data_test_qb[,c("ageCentered20")] %>% as.matrix())
 ```
 
 ### Combining Tree-Boosting with Mixed Models {#sec-treeBoosting}
@@ -2306,6 +2373,16 @@ petersenlab::accuracyOverall(
 )
 ```
 
+```{r}
+#| include: false
+
+rsquare_treeBoosting <- petersenlab::accuracyOverall(
+  predicted = predictedVsActual$predictedPoints,
+  actual = predictedVsActual$actualPoints,
+  dropUndefined = TRUE
+)$rsquared %>% round(., digits = 2)
+```
+
 #### Generate Predictions for Next Season {#sec-treeBoostingModelPredictions}
 
 ```{r}
@@ -2334,6 +2411,44 @@ newData_qb <- left_join(
 newData_qb %>% 
   arrange(-fantasyPoints_lag) %>% 
   select(name, fantasyPoints_lag, fantasyPoints)
+```
+
+## Summarizing the Machine Learning Models {#sec-summarizingModels-machineLearning}
+
+```{r}
+#| include: false
+
+machineLearningTable <- data.frame(
+  model = c(
+    "Regression with One Predictor",
+    "Regressions with Multiple Predictors",
+    "LASSO",
+    "Ridge Regression",
+    "Elastic Net",
+    "Random Forest",
+    "Tree-Boosting"
+  ), 
+  rsquared = c(
+    rsquare_onePredictor,
+    rsquare_multiplePredictors,
+    rsquare_lasso,
+    rsquare_ridge,
+    rsquare_elasticNet,
+    rsquare_randomForest,
+    rsquare_treeBoosting
+  )
+)
+```
+
+```{r}
+#| label: tbl-machineLearningModelSummary
+#| tbl-cap: "Summary of Machine Learning Models."
+#| echo: false
+
+knitr::kable(
+  machineLearningTable,
+  col.names = c("Model","$R^2$"),
+  booktabs = TRUE)
 ```
 
 ## Conclusion {#sec-machineLearningConclusion}
