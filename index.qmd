@@ -2,18 +2,24 @@
 ```{r}
 #| label: setup
 #| include: false
+#| message: !expr NA
 
-# Enable automatic chunk timing logging to GitHub Actions
-knitr::opts_chunk$set(time = TRUE) # Apply to ALL chunks globally
+# Preface
+
+# Globally apply message = NA (https://github.com/quarto-dev/quarto-cli/discussions/7443)
+knitr::opts_chunk$set(
+  time = TRUE,
+  message = NA # show messages in console but not book
+)
 
 # Null coalescing operator
 `%||%` <- function(a, b) if (!is.null(a)) a else b
 
-# Setup output file
+# Prepare log file
 log_file <- "chunk-times.txt"
 if (file.exists(log_file)) file.remove(log_file)
 
-# Define hook
+# Timing hook
 knitr::knit_hooks$set(time = function(before, options) {
   if (before) {
     options$start_time <- Sys.time()
@@ -21,11 +27,11 @@ knitr::knit_hooks$set(time = function(before, options) {
     elapsed <- difftime(Sys.time(), options$start_time, units = "secs")
     label <- options$label %||% "<unnamed>"
     msg <- sprintf("Chunk `%s` ran in %.2f seconds.", label, as.numeric(elapsed))
-
-    # Log to GitHub Actions via stdout (so it's not suppressed)
-    cat(sprintf("::notice title=Chunk Time::%s\n", msg))
-
-    # Also log to file
+    
+    # Log to GitHub Actions console
+    message(sprintf("::notice title=Chunk Time::%s", msg))
+    
+    # Also save to file
     cat(msg, file = log_file, append = TRUE, sep = "\n")
   }
 })
