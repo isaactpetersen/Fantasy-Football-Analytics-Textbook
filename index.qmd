@@ -3,35 +3,40 @@
 #| label: setup
 #| include: false
 
-# Preface
-
-# Globally apply message = NA (https://github.com/quarto-dev/quarto-cli/discussions/7443)
+# Global knitr options
 knitr::opts_chunk$set(
   time = TRUE,
-  message = NA # show messages in console but not book
+  message = NA # Show in console, not in rendered output
 )
 
 # Null coalescing operator
 `%||%` <- function(a, b) if (!is.null(a)) a else b
 
-# Prepare log file
+# Log file setup
 log_file <- "chunk-times.txt"
 if (file.exists(log_file)) file.remove(log_file)
 
+# Environment to track start times
+.chunk_times_env <- new.env()
+
 # Timing hook
 knitr::knit_hooks$set(time = function(before, options) {
+  label <- options$label %||% "<unnamed>"
+  
   if (before) {
-    options$start_time <- Sys.time()
+    .chunk_times_env[[label]] <- Sys.time()
   } else {
-    elapsed <- difftime(Sys.time(), options$start_time, units = "secs")
-    label <- options$label %||% "<unnamed>"
-    msg <- sprintf("Chunk `%s` ran in %.2f seconds.", label, as.numeric(elapsed))
-    
-    # Log to GitHub Actions console
-    message(sprintf("::notice title=Chunk Time::%s", msg))
-    
-    # Also save to file
-    cat(msg, file = log_file, append = TRUE, sep = "\n")
+    start_time <- .chunk_times_env[[label]]
+    if (!is.null(start_time)) {
+      elapsed <- difftime(Sys.time(), start_time, units = "secs")
+      msg <- sprintf("Chunk `%s` ran in %.2f seconds.", label, as.numeric(elapsed))
+      
+      # Send message to GitHub Actions log
+      message(sprintf("::notice title=Chunk Time::%s", msg))
+      
+      # Also save to file
+      cat(msg, file = log_file, append = TRUE, sep = "\n")
+    }
   }
 })
 ```
