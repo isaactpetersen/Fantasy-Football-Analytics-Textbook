@@ -118,14 +118,14 @@ Machine learning can be useful for leveraging big data and lots of predictor var
 However, many machine learning techniques are black boxes—it is often unclear how or why certain predictions are made, which can make it difficult to interpret the model's decisions and understand the underlying relationships between variables.
 Machine learning tends to be a data-driven, atheoretical technique.
 This can result in overfitting.
-Thus, when estimating machine learning models, it is common to keep a hold-out sample for use in cross-validation to evaluate the extent of shrinkage of model coefficients.
+Thus, when estimating machine learning models, it is common to keep a hold-out sample for use in [cross-validation](#sec-crossValidation) to evaluate the extent of shrinkage of model coefficients.
 The data that the model is trained on is known as the "training data".
 The data that the model was not trained on but is then is independently tested on—i.e., the hold-out sample—is the "test data".
 Shrinkage occurs when predictor variables explain some random error variance in the original model.
 When the model is applied to an independent sample (i.e., the test data), the predictive model will likely not perform quite as well, and the regressions coefficients will tend to get smaller (i.e., shrink).
 
-If the test data were collected as part of the same processes as the original data and were merely held out for purposes of analysis, this is called internal cross-validation.
-If the test data were collected separately from the original data used to train the model, this is called external cross-validation.
+If the test data were collected as part of the same processes as the original data and were merely held out for purposes of analysis, this is called internal [cross-validation](#sec-crossValidation).
+If the test data were collected separately from the original data used to train the model, this is called external [cross-validation](#sec-crossValidation).
 
 Most machine learning methods were developed with cross-sectional data in mind.
 That is, they assume that each person has only one observation on the outcome variable.
@@ -919,7 +919,7 @@ In this section, we demonstrate one approach to imputing missing data.
 Here is a vignette demonstrating how to impute missing data using `missForest()`: <https://rpubs.com/lmorgan95/MissForest> (archived at: <https://perma.cc/6GB4-2E22>).
 Below, we impute the training data (and all data) separately by position.
 We then use the imputed training data to make out-of-sample predictions to fill in the missing data for the testing data.
-We do not want to impute the training and testing data together so that we can keep them separate for the purposes of cross-validation.
+We do not want to impute the training and testing data together so that we can keep them separate for the purposes of [cross-validation](#sec-crossValidation).
 However, we impute all data (training and test data together) for purposes of making out-of-sample predictions from the machine learning models to predict players' performance next season (when actuals are not yet available for evaluating their accuracy).
 To impute data, we use the `missRanger` package [@R-missRanger].
 
@@ -1204,6 +1204,12 @@ future::plan(future::multisession, workers = num_cores)
 
 ## Set up the Cross-Validation Folds {#sec-folds}
 
+In the examples below, we predict the future fantasy points of Quarterbacks.
+However, the examples could be applied to any of the positions.
+There are various approaches to [cross-validation](#sec-crossValidation).
+In the examples below, we use [*k*-fold cross-validation](#sec-kFoldCrossValidation).
+However, we also provide the code to apply [leave-one-out (LOO) cross-validation](#sec-looCrossValidation).
+
 ### *k*-Fold Cross-Validation {#sec-kFoldCrossValidation}
 
 *k*-fold cross-validation partitions the data into *k* folds (subsets).
@@ -1243,7 +1249,7 @@ We describe linear regression in @sec-multipleRegression.
 
 ### Regression with One Predictor {#sec-regressionOnePredictor}
 
-Below, we fit a linear regression model with one predictor and evaluate it with cross-validation.
+Below, we fit a linear regression model with one predictor and evaluate it with [cross-validation](#sec-crossValidation).
 We also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
@@ -1308,11 +1314,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
-rsquare_onePredictor <- petersenlab::accuracyOverall(
+accuracyIndices_onePredictor <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
-)$rsquared %>% round(., digits = 2)
+)
+
+rsquare_onePredictor <- round(accuracyIndices_onePredictor$rsquared, digits = 2)
+me_onePredictor <- round(accuracyIndices_onePredictor$ME, digits = 2)
+mae_onePredictor <- round(accuracyIndices_onePredictor$MAE, digits = 2)
 ```
 
 @fig-regressionOnePredictor depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1366,7 +1376,7 @@ newData_qb %>%
 
 ### Regression with Multiple Predictors {#sec-regressionMultiplePredictors}
 
-Below, we fit a linear regression model with multiple predictors and evaluate it with cross-validation.
+Below, we fit a linear regression model with multiple predictors and evaluate it with [cross-validation](#sec-crossValidation).
 We also evaluate its accuracy on the hold-out (test) data.
 
 ```{r}
@@ -1431,11 +1441,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
-rsquare_multiplePredictors <- petersenlab::accuracyOverall(
+accuracyIndices_multiplePredictors <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
-)$rsquared %>% round(., digits = 2)
+)
+
+rsquare_multiplePredictors <- round(accuracyIndices_multiplePredictors$rsquared, digits = 2)
+me_multiplePredictors <- round(accuracyIndices_multiplePredictors$ME, digits = 2)
+mae_multiplePredictors <- round(accuracyIndices_multiplePredictors$MAE, digits = 2)
 ```
 
 @fig-regressionMultiplePredictors depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1492,7 +1506,7 @@ newData_qb %>%
 ### Least Absolute Shrinkage and Selection Option (LASSO) {#sec-lasso}
 
 Below, we fit a LASSO model.
-We evaluate it and tune its penalty parameter with cross-validation.
+We evaluate it and tune its penalty parameter with [cross-validation](#sec-crossValidation).
 The penalty parameter in a LASSO model controls the strength of regularization applied to the model coefficients.
 Smaller penalty values result in less regularization, allowing the model to retain more predictors with larger (nonzero) coefficients.
 This typically reduces bias but increases variance of the model's predictions, as the model may [overfit](#sec-overfitting) to the training data by including irrelevant or weak predictors.
@@ -1581,11 +1595,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
-rsquare_lasso <- petersenlab::accuracyOverall(
+accuracyIndices_lasso <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
-)$rsquared %>% round(., digits = 2)
+)
+
+rsquare_lasso <- round(accuracyIndices_lasso$rsquared, digits = 2)
+me_lasso <- round(accuracyIndices_lasso$ME, digits = 2)
+mae_lasso <- round(accuracyIndices_lasso$MAE, digits = 2)
 ```
 
 @fig-lassoModel depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1640,7 +1658,7 @@ newData_qb %>%
 ### Ridge Regression {#sec-ridgeRegression}
 
 Below, we fit a ridge regression model.
-We evaluate it and tune its penalty parameter with cross-validation.
+We evaluate it and tune its penalty parameter with [cross-validation](#sec-crossValidation).
 The penalty parameter in a ridge regression model controls the amount of regularization applied to the model's coefficients.
 Smaller penalty values allow coefficients to remain large, resulting in a model that closely fits the training data.
 This may reduce bias but increases the risk of [overfitting](#sec-overfitting), especially in the presence of [multicollinearity](#sec-multipleRegressionMulticollinearity) or many weak predictors.
@@ -1729,11 +1747,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
-rsquare_ridge <- petersenlab::accuracyOverall(
+accuracyIndices_ridge <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
-)$rsquared %>% round(., digits = 2)
+)
+
+rsquare_ridge <- round(accuracyIndices_ridge$rsquared, digits = 2)
+me_ridge <- round(accuracyIndices_ridge$ME, digits = 2)
+mae_ridge <- round(accuracyIndices_ridge$MAE, digits = 2)
 ```
 
 @fig-ridgeRegressionModel depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1788,7 +1810,7 @@ newData_qb %>%
 ### Elastic Net {#sec-elasticNet}
 
 Below, we fit an elastic net model.
-We evaluate it and tune its penalty and mixture parameters with cross-validation.
+We evaluate it and tune its penalty and mixture parameters with [cross-validation](#sec-crossValidation).
 
 The penalty parameter controls the overall strength of regularization applied to the model’s coefficients.
 Smaller penalty values allow coefficients to remain large, which can reduce bias but increase variance of the model's predictions and can increase the risk of [overfitting](#sec-overfitting).
@@ -1886,11 +1908,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
-rsquare_elasticNet <- petersenlab::accuracyOverall(
+accuracyIndices_elasticNet <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
-)$rsquared %>% round(., digits = 2)
+)
+
+rsquare_elasticNet <- round(accuracyIndices_elasticNet$rsquared, digits = 2)
+me_elasticNet <- round(accuracyIndices_elasticNet$ME, digits = 2)
+mae_elasticNet <- round(accuracyIndices_elasticNet$MAE, digits = 2)
 ```
 
 @fig-elasticNetModel depicts the predicted versus actual fantasy points for the model on the test data.
@@ -1947,7 +1973,7 @@ newData_qb %>%
 #### Assuming Independent Observations {#sec-randomForestIndependent}
 
 Below, we fit a random forest model.
-We evaluate it and tune two parameters with cross-validation.
+We evaluate it and tune two parameters with [cross-validation](#sec-crossValidation).
 The first parameter is `mtry`, which controls the number of predictors randomly sampled at each split in a decision tree.
 Smaller `mtry` values increase tree diversity by forcing trees to consider different subsets of predictors.
 This typically reduces the variance of the overall model's predictions (because the final prediction is averaged over more diverse trees) but may increase bias if strong predictors are frequently excluded.
@@ -2061,11 +2087,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
-rsquare_randomForest <- petersenlab::accuracyOverall(
+accuracyIndices_randomForest <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
   dropUndefined = TRUE
-)$rsquared %>% round(., digits = 2)
+)
+
+rsquare_randomForest <- round(accuracyIndices_randomForest$rsquared, digits = 2)
+me_randomForest <- round(accuracyIndices_randomForest$ME, digits = 2)
+mae_randomForest <- round(accuracyIndices_randomForest$MAE, digits = 2)
 ```
 
 @fig-randomForestModel depicts the predicted versus actual fantasy points for the model on the test data.
@@ -2384,11 +2414,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
-rsquare_treeBoosting <- petersenlab::accuracyOverall(
+accuracyIndices_treeBoosting <- petersenlab::accuracyOverall(
   predicted = predictedVsActual$predictedPoints,
   actual = predictedVsActual$actualPoints,
   dropUndefined = TRUE
-)$rsquared %>% round(., digits = 2)
+)
+
+rsquare_treeBoosting <- round(accuracyIndices_treeBoosting$rsquared, digits = 2)
+me_treeBoosting <- round(accuracyIndices_treeBoosting$ME, digits = 2)
+mae_treeBoosting <- round(accuracyIndices_treeBoosting$MAE, digits = 2)
 ```
 
 #### Generate Predictions for Next Season {#sec-treeBoostingModelPredictions}
@@ -2444,10 +2478,36 @@ machineLearningTable <- data.frame(
     rsquare_elasticNet,
     rsquare_randomForest,
     rsquare_treeBoosting
+  ),
+  me = c(
+    me_onePredictor,
+    me_multiplePredictors,
+    me_lasso,
+    me_ridge,
+    me_elasticNet,
+    me_randomForest,
+    me_treeBoosting
+  ),
+  mae = c(
+    mae_onePredictor,
+    mae_multiplePredictors,
+    mae_lasso,
+    mae_ridge,
+    mae_elasticNet,
+    mae_randomForest,
+    mae_treeBoosting
   )
+)
+
+rsquare_maximum <- max(
+  c(rsquare_onePredictor, rsquare_multiplePredictors,
+    rsquare_lasso, rsquare_ridge, rsquare_elasticNet,
+    rsquare_randomForest, rsquare_treeBoosting),
+  na.rm = TRUE
 )
 ```
 
+We examined multiple machine learning models to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
 A summary of the accuracy of the machine learning models is in @tbl-machineLearningModelSummary.
 
 ```{r}
@@ -2457,9 +2517,24 @@ A summary of the accuracy of the machine learning models is in @tbl-machineLearn
 
 knitr::kable(
   machineLearningTable,
-  col.names = c("Model","$R^2$"),
+  col.names = c("Model","$R^2$","Mean Error","Mean Absolute Error"),
   booktabs = TRUE)
 ```
+
+The most accurate model had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using [regression with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
+The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
+This suggests that the other predictors examined did not have [incremental validity](#sec-incrementalValidity)—they did not show utility above and beyond a player's fantasy points in predicting their future fantasy points.
+If anything, considering the additional predictor variables showed *decremental* validity—the inclusion of the additional variables worsened prediction, possibly by weakening the predictive association of the previous season's fantasy points and misattributing its predictive effect to other, related predictors in the model.
+
+Among the machine learning models, the [random forest model](#sec-randomForest) was most accurate.
+However, it was still less accurate than a [simple regression model with one predictor](#sec-regressionOnePredictor).
+This is consistent with the common finding that simple models (and parsimony) are often preferable.
+As an example, @Youngstrom2018 found that simple models did just as well and in some cases better than [LASSO models](#sec-lasso) in classifying bipolar disorder.
+
+The most accurate of models all explained less than half of the variance in players' future fantasy points.
+Thus, there remains considerable variance to be explained.
+The considerable unexplained variance suggests that we are missing key variables that are important predictors of future fantasy performance.
+It is also consistent with the conclusion from many other domains in psychology that human behavior is challenging to predict [@PetersenPrinciplesPsychAssessment].
 
 ## Conclusion {#sec-machineLearningConclusion}
 
