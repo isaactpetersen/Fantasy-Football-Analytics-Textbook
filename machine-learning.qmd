@@ -2307,10 +2307,10 @@ gc()
 ```
 
 A learning rate of 1 is very high for boosting.
-Even if a learning rate of 1 did well in tuning, I use a lower learning rate (0.1) to avoid overfitting.
-I also added some light regularization (`lambda_l2`) for better generalization.
-I also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^5 (32).
-I set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 10.
+Even if a learning rate of 1 did well in tuning, we use a lower learning rate (0.1) to avoid overfitting.
+We also added some light regularization (`lambda_l2`) for better generalization.
+We also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^5 (32).
+We set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 10.
 
 #### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
 
@@ -2505,6 +2505,13 @@ rsquare_maximum <- max(
     rsquare_randomForest, rsquare_treeBoosting),
   na.rm = TRUE
 )
+
+mae_minimum <- min(
+  c(mae_onePredictor, mae_multiplePredictors,
+    mae_lasso, mae_ridge, mae_elasticNet,
+    mae_randomForest, mae_treeBoosting),
+  na.rm = TRUE
+)
 ```
 
 We examined multiple machine learning models to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
@@ -2521,15 +2528,19 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
-The most accurate model had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using [regression with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
-The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
+The most accurate model, in terms of $R^2$, had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using [regression with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
+The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate (in terms of $R^2$) than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
 This suggests that the other predictors examined did not have [incremental validity](#sec-incrementalValidity)—they did not show utility above and beyond a player's fantasy points in predicting their future fantasy points.
 If anything, considering the additional predictor variables showed *decremental* validity—the inclusion of the additional variables worsened prediction, possibly by weakening the predictive association of the previous season's fantasy points and misattributing its predictive effect to other, related predictors in the model.
 
-Among the machine learning models, the [random forest model](#sec-randomForest) was most accurate.
+Among the machine learning models, the [random forest model](#sec-randomForest) was most accurate according to $R^2$.
 However, it was still less accurate than a [simple regression model with one predictor](#sec-regressionOnePredictor).
 This is consistent with the common finding that simple models (and parsimony) are often preferable.
 As an example, @Youngstrom2018 found that simple models did just as well and in some cases better than [LASSO models](#sec-lasso) in classifying bipolar disorder.
+
+The most accurate model in terms of [mean absolute error](#sec-meanAbsoluteError) was the [tree-boosting model](#sec-treeBoosting), which had a [mean absolute error](#sec-meanAbsoluteError) of `{r} mae_minimum`.
+However, even in the most accurate model, the predicted values were over `{r} petersenlab::apa(mae_minimum, decimals = 0)` points away from the actual values, suggesting that the model-predicted values were not particularly accurate.
+In sum, the [regression model with one predictor](#sec-regressionOnePredictor) was the most accurate in terms of differentiating between players ($R^2$), whereas the [tree-boosting model](#sec-treeBoosting) was the most accurate in terms of how close the predicted values were to the actual values.
 
 The most accurate of models all explained less than half of the variance in players' future fantasy points.
 Thus, there remains considerable variance to be explained.
