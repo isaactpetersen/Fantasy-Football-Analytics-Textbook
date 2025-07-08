@@ -5,7 +5,54 @@
 ### Load Packages {#sec-factorAnalysisLoadPackages}
 
 ```{r}
+library("psych")
+library("nFactors")
+library("lavaan")
+library("lavaangui")
+library("tidyverse")
+```
 
+### Load Data {#sec-factorAnalysisLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_nextGenStats_weekly.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/nfl_nextGenStats_weekly.RData")
+```
+
+### Prepare Data {#sec-factorAnalysisPrepareData}
+
+#### Merge Data {#sec-factorAnalysisPrepareDataMerge}
+
+```{r}
+dataMerged <- full_join(
+  player_stats_weekly,
+  nfl_nextGenStats_weekly %>% select(-any_of(c("player_display_name","completions","attempts","receptions","targets"))),
+  by = c("player_id" = "player_gsis_id","season","season_type","week"),
+)
+```
+
+#### Specify Variables {#sec-pcaPrepareDataSpecifyVars}
+
+```{r}
+faVars <- c(
+  "completions","attempts","passing_yards","passing_tds","passing_interceptions",
+  "sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
+  "passing_air_yards","passing_yards_after_catch","passing_first_downs",
+  "passing_epa","passing_cpoe","passing_2pt_conversions","pacr","pass_40_yds",
+  "pass_inc","pass_comp_pct","fumbles","two_pts",
+  "avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
+  "avg_air_yards_differential","aggressiveness","max_completed_air_distance",
+  "avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
+  "expected_completion_percentage","completion_percentage_above_expectation",
+  "avg_air_distance","max_air_distance")
 ```
 
 ## Overview of Factor Analysis {#sec-factorAnalysisOverview}
@@ -209,6 +256,86 @@ My recommendation would always be to use an orthogonal rotation if you have reas
 However, you should always try an oblique rotation, too, to see how strongly the factors are correlated.\index{factor analysis}\index{rotation}\index{oblique rotation}
 Examples of oblique rotations include oblimin and promax.\index{factor analysis}\index{rotation}\index{oblique rotation}
 
+### Example {#sec-efaExample}
+
+We generated the scree plot in @fig-efaScreePlot1 using the `fa.parallel()` function of the `psych` package [@R-psych].
+
+```{r}
+#| label: fig-efaScreePlot1
+#| fig-cap: "Scree Plot."
+#| fig-alt: "Scree Plot."
+
+psych::fa.parallel(
+  x = dataMerged[faVars],
+  fm = "minres", # errors out when using "ml"
+  fa = "fa"
+)
+```
+
+We generated the scree plot in @fig-efaScreePlot2 using the `nScree()` and `plotnScree()` functions of the `nFactors` package [@R-nFactors].
+
+```{r}
+#| label: fig-efaScreePlot2
+#| fig-cap: "Scree Plot."
+#| fig-alt: "Scree Plot."
+
+screeDataEFA <- nFactors::nScree(
+  x = cor(
+    dataMerged[faVars],
+    use = "pairwise.complete.obs"),
+  model = "factors")
+
+nFactors::plotnScree(screeDataEFA)
+```
+
+We generated the very simple structure (VSS) plots in Figures [-@fig-efaVSSPlot1] and [-@fig-efaVSSPlot2] using the `vss()` and `nfactors()` functions of the `psych` package [@R-psych].
+
+```{r}
+#| label: fig-efaVSSPlot1
+#| fig-cap: "Very Simple Structure Plot."
+#| fig-alt: "Very Simple Structure Plot."
+
+psych::vss(
+  dataMerged[faVars],
+  rotate = "oblimin",
+  fm = "minres") # errors out when using "mle"
+```
+
+```{r}
+#| label: fig-efaVSSPlot2
+#| fig-cap: "Very Simple Structure Plot."
+#| fig-alt: "Very Simple Structure Plot."
+
+psych::nfactors(
+  dataMerged[faVars],
+  rotate = "oblimin",
+  fm = "minres") # errors out when using "ml"
+```
+
+We fit EFA models using the `efa()` function of the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
+
+```{r}
+#| eval: false
+
+efaOblique_fit <- lavaan::efa(
+  data = dataMerged,
+  ov.names = faVars,
+  nfactors = 1:9,
+  rotation = "geomin",
+  missing = "ML",
+  estimator = "MLR",
+  meanstructure = TRUE
+)
+```
+
+A path diagram of the EFA model was created using the `plot_lavaan()` function of the `lavaangui` package [@R-lavaangui; @Karch2025_packages].
+
+```{r}
+#| eval: false
+
+lavaangui::plot_lavaan(efaOblique_fit)
+```
+
 ## Confirmatory Factor Analysis {#sec-cfa}
 
 Confirmatory factor analysis (CFA) is used to (dis)confirm a priori hypotheses about the factor structure of the model.\index{factor analysis!confirmatory}
@@ -218,6 +345,84 @@ The researcher specifies the number, meaning, associations, and pattern of free 
 A key advantage of CFA is the ability to directly compare alternative models (i.e., factor structures), which is valuable for theory testing [@Strauss2009].\index{factor analysis!confirmatory}
 For instance, you could use [CFA](#cfa) to test whether the variance in several measures' scores is best explained with one factor or two factors.\index{factor analysis!confirmatory}
 In CFA, cross-loadings are not estimated unless the researcher specifies them.\index{cross-loading}\index{factor analysis!confirmatory}
+
+### Example {#sec-cfaExample}
+
+We fit CFA models using the `cfa()` function of the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
+
+```{r}
+cfaModel1_syntax <- '
+ #Factor loadings
+ F1 =~ completions + attempts + passing_yards + passing_tds + passing_interceptions + sacks_suffered + sack_yards_lost + sack_fumbles + sack_fumbles_lost + passing_air_yards + passing_yards_after_catch + passing_first_downs + pass_inc + fumbles
+ F2 =~ passing_air_yards + pacr + avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + avg_air_yards_to_sticks + expected_completion_percentage + avg_air_distance + max_air_distance
+ F3 =~ passing_tds + passing_epa + passing_cpoe + pass_40_yds + pass_comp_pct + avg_air_yards_differential + max_completed_air_distance + avg_time_to_throw + avg_completed_air_yards + avg_intended_air_yards + passer_rating + completion_percentage_above_expectation
+'
+```
+
+```{r}
+#| eval: false
+
+cfaModel1_fit <- lavaan::cfa(
+  cfaModel1_syntax,
+  data = dataMerged,
+  missing = "ML",
+  estimator = "MLR",
+  std.lv = TRUE)
+```
+
+```{r}
+#| eval: false
+
+summary(
+  cfaModel1_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
+```{r}
+#| eval: false
+
+lavaan::fitMeasures(
+  cfaModel1_fit,
+  fit.measures = c(
+    "chisq", "df", "pvalue",
+    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq.scaling.factor",
+    "baseline.chisq","baseline.df","baseline.pvalue",
+    "rmsea", "cfi", "tli", "srmr",
+    "rmsea.robust", "cfi.robust", "tli.robust"))
+```
+
+```{r}
+#| eval: false
+
+lavaan::residuals(
+  cfaModel1_fit,
+  type = "cor")
+```
+
+```{r}
+#| eval: false
+
+lavaan::modificationindices(
+  cfaModel1_fit,
+  sort. = TRUE)
+```
+
+```{r}
+#| eval: false
+
+lavaan::lavPredict(cfaModel1_fit)
+```
+
+A path diagram of the CFA model was created using the `plot_lavaan()` function of the `lavaangui` package [@R-lavaangui; @Karch2025_packages].
+
+```{r}
+#| eval: false
+
+lavaangui::plot_lavaan(cfaModel1_fit)
+```
 
 ## Determining the Number of Factors to Retain {#sec-factorAnalysisNumFactors}
 
