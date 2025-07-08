@@ -1,0 +1,34 @@
+```{r}
+#| label: setup-timing
+#| include: false
+
+# Set knitr options globally for all chunks
+knitr::opts_chunk$set(time_it = TRUE)
+
+# Get chapter-specific log file name
+current_file <- knitr::current_input()
+log_file <- sprintf("chunk-times-%s.txt", tools::file_path_sans_ext(basename(current_file)))
+
+# Clear previous log
+if (file.exists(log_file)) file.remove(log_file)
+
+# Create timing hook
+knitr::knit_hooks$set(time_it = local({
+  now <- NULL
+  function(before, options) {
+    label <- if (!is.null(options$label)) options$label else "<unnamed>"
+    if (before) {
+      now <<- Sys.time()
+    } else {
+      elapsed <- difftime(Sys.time(), now, units = "secs")
+      msg <- sprintf("This chunk (`%s`) ran in %.2f seconds.", label, as.numeric(elapsed))
+      
+      # Print to GitHub Actions log
+      message(msg)
+      
+      # Save to chapter-specific log file
+      cat(msg, file = log_file, append = TRUE, sep = "\n")
+    }
+  }
+}))
+```
