@@ -594,6 +594,14 @@ window.Quarto = {
 <a href="#sec-factorAnalysisGettingStarted" id="toc-sec-factorAnalysisGettingStarted" class="nav-link active" data-scroll-target="#sec-factorAnalysisGettingStarted"><span class="header-section-number">23.1</span> Getting Started</a>
   <ul>
 <li><a href="#sec-factorAnalysisLoadPackages" id="toc-sec-factorAnalysisLoadPackages" class="nav-link" data-scroll-target="#sec-factorAnalysisLoadPackages"><span class="header-section-number">23.1.1</span> Load Packages</a></li>
+  <li><a href="#sec-factorAnalysisLoadData" id="toc-sec-factorAnalysisLoadData" class="nav-link" data-scroll-target="#sec-factorAnalysisLoadData"><span class="header-section-number">23.1.2</span> Load Data</a></li>
+  <li>
+<a href="#sec-factorAnalysisPrepareData" id="toc-sec-factorAnalysisPrepareData" class="nav-link" data-scroll-target="#sec-factorAnalysisPrepareData"><span class="header-section-number">23.1.3</span> Prepare Data</a>
+  <ul>
+<li><a href="#sec-factorAnalysisPrepareDataMerge" id="toc-sec-factorAnalysisPrepareDataMerge" class="nav-link" data-scroll-target="#sec-factorAnalysisPrepareDataMerge"><span class="header-section-number">23.1.3.1</span> Merge Data</a></li>
+  <li><a href="#sec-pcaPrepareDataSpecifyVars" id="toc-sec-pcaPrepareDataSpecifyVars" class="nav-link" data-scroll-target="#sec-pcaPrepareDataSpecifyVars"><span class="header-section-number">23.1.3.2</span> Specify Variables</a></li>
+  </ul>
+</li>
   </ul>
 </li>
   <li><a href="#sec-factorAnalysisOverview" id="toc-sec-factorAnalysisOverview" class="nav-link" data-scroll-target="#sec-factorAnalysisOverview"><span class="header-section-number">23.2</span> Overview of Factor Analysis</a></li>
@@ -601,9 +609,15 @@ window.Quarto = {
 <a href="#sec-efa" id="toc-sec-efa" class="nav-link" data-scroll-target="#sec-efa"><span class="header-section-number">23.3</span> Exploratory Factor Analysis</a>
   <ul>
 <li><a href="#sec-factorAnalysisRotation" id="toc-sec-factorAnalysisRotation" class="nav-link" data-scroll-target="#sec-factorAnalysisRotation"><span class="header-section-number">23.3.1</span> Factor Rotation</a></li>
+  <li><a href="#sec-efaExample" id="toc-sec-efaExample" class="nav-link" data-scroll-target="#sec-efaExample"><span class="header-section-number">23.3.2</span> Example</a></li>
   </ul>
 </li>
-  <li><a href="#sec-cfa" id="toc-sec-cfa" class="nav-link" data-scroll-target="#sec-cfa"><span class="header-section-number">23.4</span> Confirmatory Factor Analysis</a></li>
+  <li>
+<a href="#sec-cfa" id="toc-sec-cfa" class="nav-link" data-scroll-target="#sec-cfa"><span class="header-section-number">23.4</span> Confirmatory Factor Analysis</a>
+  <ul>
+<li><a href="#sec-cfaExample" id="toc-sec-cfaExample" class="nav-link" data-scroll-target="#sec-cfaExample"><span class="header-section-number">23.4.1</span> Example</a></li>
+  </ul>
+</li>
   <li><a href="#sec-factorAnalysisNumFactors" id="toc-sec-factorAnalysisNumFactors" class="nav-link" data-scroll-target="#sec-factorAnalysisNumFactors"><span class="header-section-number">23.5</span> Determining the Number of Factors to Retain</a></li>
   <li><a href="#sec-interpretingAndUsingLatentFactors" id="toc-sec-interpretingAndUsingLatentFactors" class="nav-link" data-scroll-target="#sec-interpretingAndUsingLatentFactors"><span class="header-section-number">23.6</span> Interpreting and Using Latent Factors</a></li>
   <li><a href="#sec-factorAnalysisConclusion" id="toc-sec-factorAnalysisConclusion" class="nav-link" data-scroll-target="#sec-factorAnalysisConclusion"><span class="header-section-number">23.7</span> Conclusion</a></li>
@@ -658,7 +672,50 @@ window.Quarto = {
 <span class="header-section-number">23.1</span> Getting Started</h2>
 <section id="sec-factorAnalysisLoadPackages" class="level3" data-number="23.1.1"><h3 data-number="23.1.1" class="anchored" data-anchor-id="sec-factorAnalysisLoadPackages">
 <span class="header-section-number">23.1.1</span> Load Packages</h3>
-</section></section><section id="sec-factorAnalysisOverview" class="level2" data-number="23.2"><h2 data-number="23.2" class="anchored" data-anchor-id="sec-factorAnalysisOverview">
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"psych"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"nFactors"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"lavaan"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"lavaangui"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-factorAnalysisLoadData" class="level3" data-number="23.1.2"><h3 data-number="23.1.2" class="anchored" data-anchor-id="sec-factorAnalysisLoadData">
+<span class="header-section-number">23.1.2</span> Load Data</h3>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/player_stats_weekly.RData"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/nfl_nextGenStats_weekly.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-factorAnalysisPrepareData" class="level3" data-number="23.1.3"><h3 data-number="23.1.3" class="anchored" data-anchor-id="sec-factorAnalysisPrepareData">
+<span class="header-section-number">23.1.3</span> Prepare Data</h3>
+<section id="sec-factorAnalysisPrepareDataMerge" class="level4" data-number="23.1.3.1"><h4 data-number="23.1.3.1" class="anchored" data-anchor-id="sec-factorAnalysisPrepareDataMerge">
+<span class="header-section-number">23.1.3.1</span> Merge Data</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>dataMerged <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
+<span id="cb3-2"><a href="#cb3-2"></a>  player_stats_weekly,</span>
+<span id="cb3-3"><a href="#cb3-3"></a>  nfl_nextGenStats_weekly <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"player_display_name"</span>,<span class="st">"completions"</span>,<span class="st">"attempts"</span>,<span class="st">"receptions"</span>,<span class="st">"targets"</span>))),</span>
+<span id="cb3-4"><a href="#cb3-4"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"player_gsis_id"</span>,<span class="st">"season"</span>,<span class="st">"season_type"</span>,<span class="st">"week"</span>),</span>
+<span id="cb3-5"><a href="#cb3-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-pcaPrepareDataSpecifyVars" class="level4" data-number="23.1.3.2"><h4 data-number="23.1.3.2" class="anchored" data-anchor-id="sec-pcaPrepareDataSpecifyVars">
+<span class="header-section-number">23.1.3.2</span> Specify Variables</h4>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>faVars <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="st">"completions"</span>,<span class="st">"attempts"</span>,<span class="st">"passing_yards"</span>,<span class="st">"passing_tds"</span>,<span class="st">"passing_interceptions"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="st">"sacks_suffered"</span>,<span class="st">"sack_yards_lost"</span>,<span class="st">"sack_fumbles"</span>,<span class="st">"sack_fumbles_lost"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="st">"passing_air_yards"</span>,<span class="st">"passing_yards_after_catch"</span>,<span class="st">"passing_first_downs"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="st">"passing_epa"</span>,<span class="st">"passing_cpoe"</span>,<span class="st">"passing_2pt_conversions"</span>,<span class="st">"pacr"</span>,<span class="st">"pass_40_yds"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="st">"pass_inc"</span>,<span class="st">"pass_comp_pct"</span>,<span class="st">"fumbles"</span>,<span class="st">"two_pts"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="st">"avg_time_to_throw"</span>,<span class="st">"avg_completed_air_yards"</span>,<span class="st">"avg_intended_air_yards"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8"></a>  <span class="st">"avg_air_yards_differential"</span>,<span class="st">"aggressiveness"</span>,<span class="st">"max_completed_air_distance"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="st">"avg_air_yards_to_sticks"</span>,<span class="st">"passer_rating"</span>, <span class="co">#,"completion_percentage"</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="st">"expected_completion_percentage"</span>,<span class="st">"completion_percentage_above_expectation"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11"></a>  <span class="st">"avg_air_distance"</span>,<span class="st">"max_air_distance"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section></section><section id="sec-factorAnalysisOverview" class="level2" data-number="23.2"><h2 data-number="23.2" class="anchored" data-anchor-id="sec-factorAnalysisOverview">
 <span class="header-section-number">23.2</span> Overview of Factor Analysis</h2>
 <p>Factor analysis involves the estimation of latent variables. Latent variables are ways of studying and operationalizing theoretical constructs that cannot be directly observed or quantified. Factor analysis is a class of latent variable models that is designated to identify the structure of a measure or set of measures, and ideally, a construct or set of constructs. It aims to identify the optimal latent structure for a group of variables. The goal of factor analysis is to identify simple, parsimonious factors that underlie the “junk” (i.e., scores filled with measurement error) that we observe.</p>
 <p>Factor analysis encompasses two general types: <a href="#sec-cfa">confirmatory factor analysis</a> and <a href="#sec-efa">exploratory factor analysis</a>. <a href="#sec-efa"><em>Exploratory factor analysis</em></a> (EFA) is a latent variable modeling approach that is used when the researcher has no a priori hypotheses about how a set of variables is structured. <a href="#sec-efa">EFA</a> seeks to identify the empirically optimal-fitting model in ways that balance accuracy (i.e., variance accounted for) and parsimony (i.e., simplicity). <a href="#sec-cfa"><em>Confirmatory factor analysis</em></a> (CFA) is a latent variable modeling approach that is used when a researcher wants to evaluate how well a hypothesized model fits, and the model can be examined in comparison to alternative models. Using a <a href="#sec-cfa">CFA</a> approach, the researcher can pit models representing two theoretical frameworks against each other to see which better accounts for the observed data.</p>
@@ -790,10 +847,253 @@ Figure&nbsp;23.11: Example of a Factor Rotation of Neuroticism and Extraversion.
 </div>
 <p>Simple structure is achieved when each variable loads highly onto as few factors as possible (i.e., each item has only one significant or primary loading). Oftentimes this is not the case, so we choose our rotation method in order to decide if the factors can be correlated (an oblique rotation) or if the factors will be uncorrelated (an orthogonal rotation). If the factors are not correlated with each other, use an orthogonal rotation. The correlation between an item and a factor is a factor loading, which is simply a way to ask how much a variable is correlated with the underlying factor. However, its interpretation is more complicated if there are correlated factors!</p>
 <p>An orthogonal rotation (e.g., varimax) can help with simplicity of interpretation because it seeks to yield simple structure without cross-loadings. Cross-loadings are instances where a variable loads onto multiple factors. My recommendation would always be to use an orthogonal rotation if you have reason to believe that finding simple structure in your data is possible; otherwise, the factors are extremely difficult to interpret—what exactly does a cross-loading even mean? However, you should always try an oblique rotation, too, to see how strongly the factors are correlated. Examples of oblique rotations include oblimin and promax.</p>
+</section><section id="sec-efaExample" class="level3" data-number="23.3.2"><h3 data-number="23.3.2" class="anchored" data-anchor-id="sec-efaExample">
+<span class="header-section-number">23.3.2</span> Example</h3>
+<p>We generated the scree plot in <a href="#fig-efaScreePlot1" class="quarto-xref">Figure&nbsp;<span>23.12</span></a> using the <code>fa.parallel()</code> function of the <code>psych</code> package <span class="citation" data-cites="R-psych">(<a href="references.html#ref-R-psych" role="doc-biblioref">Revelle, 2025</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>psych<span class="sc">::</span><span class="fu">fa.parallel</span>(</span>
+<span id="cb5-2"><a href="#cb5-2"></a>  <span class="at">x =</span> dataMerged[faVars],</span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>, <span class="co"># errors out when using "ml"</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>  <span class="at">fa =</span> <span class="st">"fa"</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Parallel analysis suggests that the number of factors =  12  and the number of components =  NA </code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-efaScreePlot1" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Scree Plot.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-efaScreePlot1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="factor-analysis_files/figure-html/fig-efaScreePlot1-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;23.12: Scree Plot."><img src="factor-analysis_files/figure-html/fig-efaScreePlot1-1.png" class="img-fluid figure-img" alt="Scree Plot." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-efaScreePlot1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.12: Scree Plot.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>We generated the scree plot in <span class="quarto-unresolved-ref">?fig-efaScreePlot2</span> using the <code>nScree()</code> and <code>plotnScree()</code> functions of the <code>nFactors</code> package <span class="citation" data-cites="R-nFactors">(<a href="references.html#ref-R-nFactors" role="doc-biblioref">Raiche &amp; Magis, 2025</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>screeDataEFA <span class="ot">&lt;-</span> nFactors<span class="sc">::</span><span class="fu">nScree</span>(</span>
+<span id="cb7-2"><a href="#cb7-2"></a>  <span class="at">x =</span> <span class="fu">cor</span>(</span>
+<span id="cb7-3"><a href="#cb7-3"></a>    dataMerged[faVars],</span>
+<span id="cb7-4"><a href="#cb7-4"></a>    <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5"></a>  <span class="at">model =</span> <span class="st">"factors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error in eigen(stats::cov2cor(corFA(x, method = "ginv"))): infinite or missing values in 'x'</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>nFactors<span class="sc">::</span><span class="fu">plotnScree</span>(screeDataEFA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error: object 'screeDataEFA' not found</code></pre>
+</div>
+</div>
+<p>We generated the very simple structure (VSS) plots in Figures <a href="#fig-efaVSSPlot1" class="quarto-xref"><span>23.13</span></a> and <a href="#fig-efaVSSPlot2" class="quarto-xref"><span>23.14</span></a> using the <code>vss()</code> and <code>nfactors()</code> functions of the <code>psych</code> package <span class="citation" data-cites="R-psych">(<a href="references.html#ref-R-psych" role="doc-biblioref">Revelle, 2025</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>psych<span class="sc">::</span><span class="fu">vss</span>(</span>
+<span id="cb11-2"><a href="#cb11-2"></a>  dataMerged[faVars],</span>
+<span id="cb11-3"><a href="#cb11-3"></a>  <span class="at">rotate =</span> <span class="st">"oblimin"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>) <span class="co"># errors out when using "mle"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Very Simple Structure
+Call: psych::vss(x = dataMerged[faVars], rotate = "oblimin", fm = "minres")
+VSS complexity 1 achieves a maximimum of 0.75  with  3  factors
+VSS complexity 2 achieves a maximimum of 0.87  with  3  factors
+
+The Velicer MAP achieves a minimum of </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Inf  with    factors 
+BIC achieves a minimum of  -17115864  with  7  factors
+Sample Size adjusted BIC achieves a minimum of  -17114853  with  7  factors
+
+Statistics by number of factors 
+  vss1 vss2 map dof   chisq prob sqresid  fit RMSEA      BIC    SABIC complex
+1 0.55 0.00 NaN 495     NaN  NaN      78 0.55    NA       NA       NA     1.0
+2 0.69 0.75 NaN 463 7.2e+07    0      43 0.75  0.59  7.2e+07  7.2e+07     1.1
+3 0.75 0.87 NaN 432     NaN  NaN      18 0.90    NA       NA       NA     1.3
+4 0.68 0.84 NaN 402 6.0e+07    0      20 0.89  0.58  6.0e+07  6.0e+07     1.5
+5 0.67 0.82 NaN 373 6.6e+07    0      21 0.88  0.64  6.6e+07  6.6e+07     1.5
+6 0.68 0.81 NaN 345 6.7e+07    0      21 0.88  0.66  6.7e+07  6.7e+07     1.5
+7 0.66 0.78 NaN 318 0.0e+00    1      25 0.86  0.00 -1.7e+07 -1.7e+07     1.5
+8 0.61 0.75 NaN 292     NaN  NaN      28 0.84    NA       NA       NA     1.7
+   eChisq  SRMR eCRMS    eBIC
+1 2.5e+07 0.231 0.239 2.5e+07
+2 1.3e+07 0.168 0.180 1.3e+07
+3 3.8e+06 0.090 0.100 3.8e+06
+4 3.0e+06 0.080 0.092 3.0e+06
+5 2.4e+06 0.072 0.086 2.4e+06
+6 2.1e+06 0.067 0.083 2.1e+06
+7 1.7e+06 0.061 0.078 1.7e+06
+8 1.4e+06 0.056 0.075 1.4e+06</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-efaVSSPlot1" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Very Simple Structure Plot.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-efaVSSPlot1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="factor-analysis_files/figure-html/fig-efaVSSPlot1-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;23.13: Very Simple Structure Plot."><img src="factor-analysis_files/figure-html/fig-efaVSSPlot1-1.png" class="img-fluid figure-img" alt="Very Simple Structure Plot." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-efaVSSPlot1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.13: Very Simple Structure Plot.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>psych<span class="sc">::</span><span class="fu">nfactors</span>(</span>
+<span id="cb14-2"><a href="#cb14-2"></a>  dataMerged[faVars],</span>
+<span id="cb14-3"><a href="#cb14-3"></a>  <span class="at">rotate =</span> <span class="st">"oblimin"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>) <span class="co"># errors out when using "ml"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+Number of factors
+Call: vss(x = x, n = n, rotate = rotate, diagonal = diagonal, fm = fm, 
+    n.obs = n.obs, plot = FALSE, title = title, use = use, cor = cor)
+VSS complexity 1 achieves a maximimum of 0.75  with  3  factors
+VSS complexity 2 achieves a maximimum of 0.87  with  3  factors
+The Velicer MAP achieves a minimum of </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Inf  with    factors 
+Empirical BIC achieves a minimum of  580587.4  with  20  factors
+Sample Size adjusted BIC achieves a minimum of  -17114853  with  7  factors
+
+Statistics by number of factors 
+   vss1 vss2 map dof   chisq prob sqresid  fit RMSEA      BIC    SABIC complex
+1  0.55 0.00 NaN 495     NaN  NaN      78 0.55    NA       NA       NA     1.0
+2  0.69 0.75 NaN 463 7.2e+07    0      43 0.75  0.59  7.2e+07  7.2e+07     1.1
+3  0.75 0.87 NaN 432     NaN  NaN      18 0.90    NA       NA       NA     1.3
+4  0.68 0.84 NaN 402 6.0e+07    0      20 0.89  0.58  6.0e+07  6.0e+07     1.5
+5  0.67 0.82 NaN 373 6.6e+07    0      21 0.88  0.64  6.6e+07  6.6e+07     1.5
+6  0.68 0.81 NaN 345 6.7e+07    0      21 0.88  0.66  6.7e+07  6.7e+07     1.5
+7  0.66 0.78 NaN 318 0.0e+00    1      25 0.86  0.00 -1.7e+07 -1.7e+07     1.5
+8  0.61 0.75 NaN 292     NaN  NaN      28 0.84    NA       NA       NA     1.7
+9  0.61 0.74 NaN 267     NaN  NaN      28 0.84    NA       NA       NA     1.6
+10 0.63 0.72 NaN 243 0.0e+00    1      30 0.83  0.00 -6.8e+06 -6.8e+06     1.4
+11 0.54 0.69 NaN 220     NaN  NaN      35 0.80    NA       NA       NA     1.6
+12 0.30 0.44 NaN 198 5.7e+07    0      55 0.68  0.81  5.7e+07  5.7e+07     2.2
+13 0.28 0.38 NaN 177 5.4e+07    0      60 0.66  0.84  5.4e+07  5.4e+07     2.2
+14 0.28 0.38 NaN 157 5.6e+07    0      60 0.65  0.90  5.6e+07  5.6e+07     2.0
+15 0.25 0.38 NaN 138 5.7e+07    0      67 0.62  0.97  5.7e+07  5.7e+07     2.3
+16 0.22 0.34 NaN 120 5.7e+07    0      70 0.59  1.04  5.7e+07  5.7e+07     2.3
+17 0.23 0.34 NaN 103 5.8e+07    0      73 0.58  1.13  5.8e+07  5.8e+07     2.2
+18 0.23 0.33 NaN  87 5.8e+07    0      74 0.57  1.23  5.8e+07  5.8e+07     2.1
+19 0.22 0.33 NaN  72 5.8e+07    0      75 0.57  1.36  5.8e+07  5.8e+07     2.2
+20 0.23 0.33 NaN  58 5.8e+07    0      77 0.56  1.51  5.8e+07  5.8e+07     2.0
+    eChisq  SRMR eCRMS    eBIC
+1  2.5e+07 0.231 0.239 2.5e+07
+2  1.3e+07 0.168 0.180 1.3e+07
+3  3.8e+06 0.090 0.100 3.8e+06
+4  3.0e+06 0.080 0.092 3.0e+06
+5  2.4e+06 0.072 0.086 2.4e+06
+6  2.1e+06 0.067 0.083 2.1e+06
+7  1.7e+06 0.061 0.078 1.7e+06
+8  1.4e+06 0.056 0.075 1.4e+06
+9  1.2e+06 0.051 0.072 1.2e+06
+10 1.1e+06 0.048 0.070 1.0e+06
+11 8.8e+05 0.044 0.067 8.8e+05
+12 7.7e+05 0.041 0.066 7.6e+05
+13 7.0e+05 0.039 0.067 7.0e+05
+14 6.6e+05 0.038 0.069 6.6e+05
+15 6.2e+05 0.037 0.071 6.2e+05
+16 6.1e+05 0.036 0.076 6.1e+05
+17 5.9e+05 0.036 0.081 5.9e+05
+18 5.9e+05 0.036 0.087 5.9e+05
+19 5.8e+05 0.035 0.096 5.8e+05
+20 5.8e+05 0.035 0.107 5.8e+05</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-efaVSSPlot2" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Very Simple Structure Plot.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-efaVSSPlot2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="factor-analysis_files/figure-html/fig-efaVSSPlot2-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;23.14: Very Simple Structure Plot."><img src="factor-analysis_files/figure-html/fig-efaVSSPlot2-1.png" class="img-fluid figure-img" alt="Very Simple Structure Plot." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-efaVSSPlot2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.14: Very Simple Structure Plot.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>We fit EFA models using the <code>efa()</code> function of the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>efaOblique_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">efa</span>(</span>
+<span id="cb17-2"><a href="#cb17-2"></a>  <span class="at">data =</span> dataMerged,</span>
+<span id="cb17-3"><a href="#cb17-3"></a>  <span class="at">ov.names =</span> faVars,</span>
+<span id="cb17-4"><a href="#cb17-4"></a>  <span class="at">nfactors =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>,</span>
+<span id="cb17-5"><a href="#cb17-5"></a>  <span class="at">rotation =</span> <span class="st">"geomin"</span>,</span>
+<span id="cb17-6"><a href="#cb17-6"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7"></a>  <span class="at">estimator =</span> <span class="st">"MLR"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8"></a>  <span class="at">meanstructure =</span> <span class="cn">TRUE</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>A path diagram of the EFA model was created using the <code>plot_lavaan()</code> function of the <code>lavaangui</code> package <span class="citation" data-cites="R-lavaangui Karch2025_packages">(<a href="references.html#ref-R-lavaangui" role="doc-biblioref">Karch, 2025b</a>; <a href="references.html#ref-Karch2025_packages" role="doc-biblioref">Karch, 2025a</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>lavaangui<span class="sc">::</span><span class="fu">plot_lavaan</span>(efaOblique_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section></section><section id="sec-cfa" class="level2" data-number="23.4"><h2 data-number="23.4" class="anchored" data-anchor-id="sec-cfa">
 <span class="header-section-number">23.4</span> Confirmatory Factor Analysis</h2>
 <p>Confirmatory factor analysis (CFA) is used to (dis)confirm a priori hypotheses about the factor structure of the model. CFA is a test of the hypothesis. In CFA, you specify the model and ask how well this model represents the data. The researcher specifies the number, meaning, associations, and pattern of free parameters in the factor loading matrix <span class="citation" data-cites="Bollen2002">(<a href="references.html#ref-Bollen2002" role="doc-biblioref">Bollen, 2002</a>)</span>. A key advantage of CFA is the ability to directly compare alternative models (i.e., factor structures), which is valuable for theory testing <span class="citation" data-cites="Strauss2009">(<a href="references.html#ref-Strauss2009" role="doc-biblioref">Strauss &amp; Smith, 2009</a>)</span>. For instance, you could use <a href="#cfa">CFA</a> to test whether the variance in several measures’ scores is best explained with one factor or two factors. In CFA, cross-loadings are not estimated unless the researcher specifies them.</p>
-</section><section id="sec-factorAnalysisNumFactors" class="level2" data-number="23.5"><h2 data-number="23.5" class="anchored" data-anchor-id="sec-factorAnalysisNumFactors">
+<section id="sec-cfaExample" class="level3" data-number="23.4.1"><h3 data-number="23.4.1" class="anchored" data-anchor-id="sec-cfaExample">
+<span class="header-section-number">23.4.1</span> Example</h3>
+<p>We fit CFA models using the <code>cfa()</code> function of the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>cfaModel1_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="st"> #Factor loadings</span></span>
+<span id="cb19-3"><a href="#cb19-3"></a><span class="st"> F1 =~ completions + attempts + passing_yards + passing_tds + passing_interceptions + sacks_suffered + sack_yards_lost + sack_fumbles + sack_fumbles_lost + passing_air_yards + passing_yards_after_catch + passing_first_downs + pass_inc + fumbles</span></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="st"> F2 =~ passing_air_yards + pacr + avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + avg_air_yards_to_sticks + expected_completion_percentage + avg_air_distance + max_air_distance</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="st"> F3 =~ passing_tds + passing_epa + passing_cpoe + pass_40_yds + pass_comp_pct + avg_air_yards_differential + max_completed_air_distance + avg_time_to_throw + avg_completed_air_yards + avg_intended_air_yards + passer_rating + completion_percentage_above_expectation</span></span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>cfaModel1_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">cfa</span>(</span>
+<span id="cb20-2"><a href="#cb20-2"></a>  cfaModel1_syntax,</span>
+<span id="cb20-3"><a href="#cb20-3"></a>  <span class="at">data =</span> dataMerged,</span>
+<span id="cb20-4"><a href="#cb20-4"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5"></a>  <span class="at">estimator =</span> <span class="st">"MLR"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6"></a>  <span class="at">std.lv =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">summary</span>(</span>
+<span id="cb21-2"><a href="#cb21-2"></a>  cfaModel1_fit,</span>
+<span id="cb21-3"><a href="#cb21-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-4"><a href="#cb21-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-5"><a href="#cb21-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>lavaan<span class="sc">::</span><span class="fu">fitMeasures</span>(</span>
+<span id="cb22-2"><a href="#cb22-2"></a>  cfaModel1_fit,</span>
+<span id="cb22-3"><a href="#cb22-3"></a>  <span class="at">fit.measures =</span> <span class="fu">c</span>(</span>
+<span id="cb22-4"><a href="#cb22-4"></a>    <span class="st">"chisq"</span>, <span class="st">"df"</span>, <span class="st">"pvalue"</span>,</span>
+<span id="cb22-5"><a href="#cb22-5"></a>    <span class="st">"chisq.scaled"</span>, <span class="st">"df.scaled"</span>, <span class="st">"pvalue.scaled"</span>,</span>
+<span id="cb22-6"><a href="#cb22-6"></a>    <span class="st">"chisq.scaling.factor"</span>,</span>
+<span id="cb22-7"><a href="#cb22-7"></a>    <span class="st">"baseline.chisq"</span>,<span class="st">"baseline.df"</span>,<span class="st">"baseline.pvalue"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8"></a>    <span class="st">"rmsea"</span>, <span class="st">"cfi"</span>, <span class="st">"tli"</span>, <span class="st">"srmr"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9"></a>    <span class="st">"rmsea.robust"</span>, <span class="st">"cfi.robust"</span>, <span class="st">"tli.robust"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>lavaan<span class="sc">::</span><span class="fu">residuals</span>(</span>
+<span id="cb23-2"><a href="#cb23-2"></a>  cfaModel1_fit,</span>
+<span id="cb23-3"><a href="#cb23-3"></a>  <span class="at">type =</span> <span class="st">"cor"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>lavaan<span class="sc">::</span><span class="fu">modificationindices</span>(</span>
+<span id="cb24-2"><a href="#cb24-2"></a>  cfaModel1_fit,</span>
+<span id="cb24-3"><a href="#cb24-3"></a>  <span class="at">sort. =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>lavaan<span class="sc">::</span><span class="fu">lavPredict</span>(cfaModel1_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>A path diagram of the CFA model was created using the <code>plot_lavaan()</code> function of the <code>lavaangui</code> package <span class="citation" data-cites="R-lavaangui Karch2025_packages">(<a href="references.html#ref-R-lavaangui" role="doc-biblioref">Karch, 2025b</a>; <a href="references.html#ref-Karch2025_packages" role="doc-biblioref">Karch, 2025a</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>lavaangui<span class="sc">::</span><span class="fu">plot_lavaan</span>(cfaModel1_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="sec-factorAnalysisNumFactors" class="level2" data-number="23.5"><h2 data-number="23.5" class="anchored" data-anchor-id="sec-factorAnalysisNumFactors">
 <span class="header-section-number">23.5</span> Determining the Number of Factors to Retain</h2>
 <p>A goal of factor analysis and <a href="pca.html">principal component analysis</a> is simplification or parsimony, while still explaining as much variance as possible. The hope is that you can have fewer factors that explain the associations between the variables than the number of observed variables. But how do you decide on the number of factors?</p>
 <p>There are a number of criteria that one can use to help determine how many factors/components to keep:</p>
@@ -817,18 +1117,18 @@ Figure&nbsp;23.11: Example of a Factor Rotation of Neuroticism and Extraversion.
 <li>Tucker Lewis Index (TLI): larger is better</li>
 </ul>
 <p>There is not necessarily a “correct” criterion to use in determining how many factors to keep, so it is generally recommended that researchers use multiple criteria in combination with theory and interpretability.</p>
-<p>A scree plot provides lots of information. A scree plot has the factor number on the x-axis and the eigenvalue on the y-axis. The eigenvalue is the variance accounted for by a factor; when using a varimax (orthogonal) rotation, an eigenvalue (or factor variance) is calculated as the sum of squared standardized factor (or component) loadings on that factor. An example of a scree plot is in <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.12</span></a>.</p>
+<p>A scree plot provides lots of information. A scree plot has the factor number on the x-axis and the eigenvalue on the y-axis. The eigenvalue is the variance accounted for by a factor; when using a varimax (orthogonal) rotation, an eigenvalue (or factor variance) is calculated as the sum of squared standardized factor (or component) loadings on that factor. An example of a scree plot is in <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.15</span></a>.</p>
 <div id="fig-screePlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of a Scree Plot.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-screePlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/screePlot.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;23.12: Example of a Scree Plot."><img src="images/screePlot.png" class="img-fluid figure-img" alt="Example of a Scree Plot."></a>
+<a href="images/screePlot.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;23.15: Example of a Scree Plot."><img src="images/screePlot.png" class="img-fluid figure-img" alt="Example of a Scree Plot."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-screePlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;23.12: Example of a Scree Plot.
+Figure&nbsp;23.15: Example of a Scree Plot.
 </figcaption></figure>
 </div>
 <p>The total variance is equal to the number of variables you have, so one eigenvalue is approximately one variable’s worth of variance. The first factor accounts for the most variance, the second factor accounts for the second-most variance, and so on. The more factors you add, the less variance is explained by the additional factor.</p>
-<p>One criterion for how many factors to keep is the Kaiser-Guttman criterion. According to the Kaiser-Guttman criterion, you should keep any factors whose eigenvalue is greater than 1. That is, for the sake of simplicity, parsimony, and data reduction, you should take any factors that explain more than a single variable would explain. According to the Kaiser-Guttman criterion, we would keep three factors from <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.12</span></a> that have eigenvalues greater than 1. The default in SPSS is to retain factors with eigenvalues greater than 1. However, keeping factors whose eigenvalue is greater than 1 is not the most correct rule. If you let SPSS do this, you may get many factors with eigenvalues around 1 (e.g., factors with an eigenvalue ~ 1.0001) that are not adding so much that it is worth the added complexity. The Kaiser-Guttman criterion usually results in keeping too many factors. Factors with small eigenvalues around 1 could reflect error shared across variables. For instance, factors with small eigenvalues could reflect method variance (i.e., method factor), such as a self-report factor that turns up as a factor in factor analysis, but that may be useless to you as a conceptual factor of a construct of interest.</p>
-<p>Another criterion is Cattell’s scree test, which involves selecting the number of factors from looking at the scree plot. “Scree” refers to the rubble of stones at the bottom of a mountain. According to Cattell’s scree test, you should keep the factors before the last steep drop in eigenvalues—i.e., the factors before the rubble, where the slope approaches zero. The beginning of the scree (or rubble), where the slope approaches zero, is called the “elbow” of a scree plot. Using Cattell’s scree test, you retain the number of factors that explain the most variance prior to the explained variance drop-off, because, ultimately, you want to include only as many factors in which you gain substantially more by the inclusion of these factors. That is, you would keep the number of factors at the elbow of the scree plot minus one. If the last steep drop occurs from Factor 4 to Factor 5 and the elbow is at Factor 5, we would keep four factors. In <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.12</span></a>, the last steep drop in eigenvalues occurs from Factor 3 to Factor 4; the elbow of the scree plot occurs at Factor 4. We would keep the number of factors at the elbow minus one. Thus, using Cattell’s scree test, we would keep three factors based on <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.12</span></a>.</p>
+<p>One criterion for how many factors to keep is the Kaiser-Guttman criterion. According to the Kaiser-Guttman criterion, you should keep any factors whose eigenvalue is greater than 1. That is, for the sake of simplicity, parsimony, and data reduction, you should take any factors that explain more than a single variable would explain. According to the Kaiser-Guttman criterion, we would keep three factors from <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.15</span></a> that have eigenvalues greater than 1. The default in SPSS is to retain factors with eigenvalues greater than 1. However, keeping factors whose eigenvalue is greater than 1 is not the most correct rule. If you let SPSS do this, you may get many factors with eigenvalues around 1 (e.g., factors with an eigenvalue ~ 1.0001) that are not adding so much that it is worth the added complexity. The Kaiser-Guttman criterion usually results in keeping too many factors. Factors with small eigenvalues around 1 could reflect error shared across variables. For instance, factors with small eigenvalues could reflect method variance (i.e., method factor), such as a self-report factor that turns up as a factor in factor analysis, but that may be useless to you as a conceptual factor of a construct of interest.</p>
+<p>Another criterion is Cattell’s scree test, which involves selecting the number of factors from looking at the scree plot. “Scree” refers to the rubble of stones at the bottom of a mountain. According to Cattell’s scree test, you should keep the factors before the last steep drop in eigenvalues—i.e., the factors before the rubble, where the slope approaches zero. The beginning of the scree (or rubble), where the slope approaches zero, is called the “elbow” of a scree plot. Using Cattell’s scree test, you retain the number of factors that explain the most variance prior to the explained variance drop-off, because, ultimately, you want to include only as many factors in which you gain substantially more by the inclusion of these factors. That is, you would keep the number of factors at the elbow of the scree plot minus one. If the last steep drop occurs from Factor 4 to Factor 5 and the elbow is at Factor 5, we would keep four factors. In <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.15</span></a>, the last steep drop in eigenvalues occurs from Factor 3 to Factor 4; the elbow of the scree plot occurs at Factor 4. We would keep the number of factors at the elbow minus one. Thus, using Cattell’s scree test, we would keep three factors based on <a href="#fig-screePlot" class="quarto-xref">Figure&nbsp;<span>23.15</span></a>.</p>
 <p>There are more sophisticated ways of using a scree plot, but they usually end up at a similar decision. Examples of more sophisticated tests include parallel analysis and very simple structure (VSS) plots. In a parallel analysis, you examine where the eigenvalues from observed data and random data converge, so you do not retain a factor that explains less variance than would be expected by random chance.</p>
 <p>In general, my recommendation is to use Cattell’s scree test, and then test the factor solutions with plus or minus one factor. You should never accept factors with eigenvalues less than zero (or components from <a href="pca.html">principal component analysis</a> with eigenvalues less than one), because they are likely to be largely composed of error. If you are using maximum likelihood factor analysis, you can compare the fit of various models with model fit criteria to see which model fits best for its parsimony. A model will always fit better when you add additional parameters or factors, so you examine if there is <em>significant</em> improvement in model fit when adding the additional factor—that is, we keep adding complexity until additional complexity does not buy us much. Always try a factor solution that is one less and one more than suggested by Cattell’s scree test to buffer your final solution because the purpose of factor analysis is to explain things and to have interpretability. Even if all rules or indicators suggest to keep X number of factors, maybe <span class="math inline">\(\pm\)</span> one factor helps clarify things. Even though factor analysis is empirical, theory and interpretatability should also inform decisions.</p>
 </section><section id="sec-interpretingAndUsingLatentFactors" class="level2" data-number="23.6"><h2 data-number="23.6" class="anchored" data-anchor-id="sec-interpretingAndUsingLatentFactors">
@@ -839,7 +1139,7 @@ Figure&nbsp;23.12: Example of a Scree Plot.
 </section><section id="sec-factorAnalysisSessionInfo" class="level2" data-number="23.8"><h2 data-number="23.8" class="anchored" data-anchor-id="sec-factorAnalysisSessionInfo">
 <span class="header-section-number">23.8</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
@@ -861,11 +1161,30 @@ tzcode source: system (glibc)
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
+other attached packages:
+ [1] lubridate_1.9.4  forcats_1.0.0    stringr_1.5.1    dplyr_1.1.4     
+ [5] purrr_1.0.4      readr_2.1.5      tidyr_1.3.1      tibble_3.3.0    
+ [9] ggplot2_3.5.2    tidyverse_2.0.0  lavaangui_0.2.4  lavaan_0.6-19   
+[13] nFactors_2.4.1.2 psych_2.5.6     
+
 loaded via a namespace (and not attached):
- [1] htmlwidgets_1.6.4 compiler_4.5.1    fastmap_1.2.0     cli_3.6.5        
- [5] tools_4.5.1       htmltools_0.5.8.1 rmarkdown_2.29    knitr_1.50       
- [9] jsonlite_2.0.0    xfun_0.52         digest_0.6.37     rlang_1.1.6      
-[13] evaluate_1.0.4   </code></pre>
+ [1] GPArotation_2025.3-1 generics_0.1.4       stringi_1.8.7       
+ [4] lattice_0.22-7       hms_1.1.3            digest_0.6.37       
+ [7] magrittr_2.0.3       timechange_0.3.0     evaluate_1.0.4      
+[10] grid_4.5.1           RColorBrewer_1.1-3   fastmap_1.2.0       
+[13] jsonlite_2.0.0       promises_1.3.3       scales_1.4.0        
+[16] pbivnorm_0.6.0       mnormt_2.1.1         cli_3.6.5           
+[19] shiny_1.11.1         rlang_1.1.6          withr_3.0.2         
+[22] yaml_2.3.10          tools_4.5.1          parallel_4.5.1      
+[25] tzdb_0.5.0           httpuv_1.6.16        vctrs_0.6.5         
+[28] R6_2.6.1             mime_0.13            stats4_4.5.1        
+[31] lifecycle_1.0.4      htmlwidgets_1.6.4    MASS_7.3-65         
+[34] pkgconfig_2.0.3      pillar_1.11.0        later_1.4.2         
+[37] gtable_0.3.6         glue_1.8.0           Rcpp_1.1.0          
+[40] xfun_0.52            tidyselect_1.2.1     knitr_1.50          
+[43] farver_2.1.2         xtable_1.8-4         htmltools_0.5.8.1   
+[46] nlme_3.1-168         igraph_2.1.4         rmarkdown_2.29      
+[49] compiler_4.5.1       quadprog_1.5-8      </code></pre>
 </div>
 </div>
 
@@ -876,6 +1195,24 @@ Bollen, K. A. (2002). Latent variables in psychology and the social sciences. <e
 </div>
 <div id="ref-Corston2000" class="csl-entry" role="listitem">
 Corston, R., &amp; Colman, A. M. (2000). <em>A crash course in SPSS for <span>Windows</span></em>. Wiley-Blackwell.
+</div>
+<div id="ref-Karch2025_packages" class="csl-entry" role="listitem">
+Karch, J. D. (2025a). <span class="nocase">lavaangui</span>: A web-based graphical interface for specifying <span class="nocase">lavaan</span> models by drawing path diagrams. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, 1–12. <a href="https://doi.org/10.1080/10705511.2024.2420678">https://doi.org/10.1080/10705511.2024.2420678</a>
+</div>
+<div id="ref-R-lavaangui" class="csl-entry" role="listitem">
+Karch, J. D. (2025b). <em><span class="nocase">lavaangui</span>: Graphical user interface with integrated diagrammer for <span class="nocase">lavaan</span></em>. <a href="https://doi.org/10.32614/CRAN.package.lavaangui">https://doi.org/10.32614/CRAN.package.lavaangui</a>
+</div>
+<div id="ref-R-nFactors" class="csl-entry" role="listitem">
+Raiche, G., &amp; Magis, D. (2025). <em><span class="nocase">nFactors</span>: Parallel analysis and other non graphical solutions to the <span>Cattell</span> scree test</em>. <a href="https://doi.org/10.32614/CRAN.package.nFactors">https://doi.org/10.32614/CRAN.package.nFactors</a>
+</div>
+<div id="ref-R-psych" class="csl-entry" role="listitem">
+Revelle, W. (2025). <em><span class="nocase">psych</span>: Procedures for psychological, psychometric, and personality research</em>. <a href="https://doi.org/10.32614/CRAN.package.psych">https://doi.org/10.32614/CRAN.package.psych</a>
+</div>
+<div id="ref-Rosseel2012_packages" class="csl-entry" role="listitem">
+Rosseel, Y. (2012). <span class="nocase">lavaan</span>: An <span>R</span> package for structural equation modeling. <em>Journal of Statistical Software</em>, <em>48</em>(2), 1–36. <a href="https://doi.org/10.18637/jss.v048.i02">https://doi.org/10.18637/jss.v048.i02</a>
+</div>
+<div id="ref-R-lavaan" class="csl-entry" role="listitem">
+Rosseel, Y., Jorgensen, T. D., &amp; De Wilde, L. (2024). <em><span class="nocase">lavaan</span>: Latent variable analysis</em>. <a href="https://doi.org/10.32614/CRAN.package.lavaan">https://doi.org/10.32614/CRAN.package.lavaan</a>
 </div>
 <div id="ref-Strauss2009" class="csl-entry" role="listitem">
 Strauss, M. E., &amp; Smith, G. T. (2009). Construct validity: Advances in theory and methodology. <em>Annual Review of Clinical Psychology</em>, <em>5</em>(1), 1–25. <a href="https://doi.org/10.1146/annurev.clinpsy.032408.153639">https://doi.org/10.1146/annurev.clinpsy.032408.153639</a>
