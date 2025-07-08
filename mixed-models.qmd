@@ -1918,8 +1918,22 @@ performance::check_model(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSl
 ##### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
 
 ```{r}
-num_cores <- detectCores()
-num_cores
+#| label: parallel-cores-mixed-models
+#| include: false
+
+num_cores <- parallelly::availableCores()
+num_true_cores <- parallelly::availableCores(logical = FALSE)
+```
+
+```{r}
+#| eval: false
+
+num_cores <- parallelly::availableCores() - 1
+num_true_cores <- parallelly::availableCores(logical = FALSE) - 1
+```
+
+```{r}
+#| label: gam-mixed-models
 
 pointsPerSeason_gam <- bam( # using bam() instead of gam() for faster estimation due to large size of data
   fantasyPoints ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
@@ -2022,6 +2036,8 @@ logLik(pointsPerSeason_gam)
 ##### Players Who Were (at Least Once) at the Top of the End-of-Season Depth Chart {#sec-fantasyPointsByAgeExperienceModelsAgeDepth}
 
 ```{r}
+#| label: players-top-depth-chart-mixed-models
+
 pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience <- lmerTest::lmer(
   fantasyPoints ~ positionFactor + ageCentered20 + ageCentered20Quadratic + positionFactor:ageCentered20 + positionFactor:ageCentered20Quadratic + years_of_experience + (1 + ageCentered20 | player_idFactor),
   data = player_stats_seasonal_offense_subset,
@@ -2038,6 +2054,10 @@ emmeans::emmeans(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlope
 emmeans::emmeans(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience, "years_of_experience")
 performance::icc(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 AIC(pointsPerSeasonDepth_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
+```
+
+```{r}
+#| label: gam-players-top-depth-chart-mixed-models
 
 pointsPerSeasonDepth_gam <- bam( # using bam() instead of gam() for faster estimation due to large size of data
   fantasyPoints ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
