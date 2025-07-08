@@ -600,6 +600,7 @@ window.Quarto = {
   <ul>
 <li><a href="#sec-factorAnalysisPrepareDataMerge" id="toc-sec-factorAnalysisPrepareDataMerge" class="nav-link" data-scroll-target="#sec-factorAnalysisPrepareDataMerge"><span class="header-section-number">23.1.3.1</span> Merge Data</a></li>
   <li><a href="#sec-pcaPrepareDataSpecifyVars" id="toc-sec-pcaPrepareDataSpecifyVars" class="nav-link" data-scroll-target="#sec-pcaPrepareDataSpecifyVars"><span class="header-section-number">23.1.3.2</span> Specify Variables</a></li>
+  <li><a href="#sec-pcaPrepareDataStandardize" id="toc-sec-pcaPrepareDataStandardize" class="nav-link" data-scroll-target="#sec-pcaPrepareDataStandardize"><span class="header-section-number">23.1.3.3</span> Standardize Variables</a></li>
   </ul>
 </li>
   </ul>
@@ -713,6 +714,14 @@ window.Quarto = {
 <span id="cb4-9"><a href="#cb4-9"></a>  <span class="st">"avg_air_yards_to_sticks"</span>,<span class="st">"passer_rating"</span>, <span class="co">#,"completion_percentage"</span></span>
 <span id="cb4-10"><a href="#cb4-10"></a>  <span class="st">"expected_completion_percentage"</span>,<span class="st">"completion_percentage_above_expectation"</span>,</span>
 <span id="cb4-11"><a href="#cb4-11"></a>  <span class="st">"avg_air_distance"</span>,<span class="st">"max_air_distance"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="sec-pcaPrepareDataStandardize" class="level4" data-number="23.1.3.3"><h4 data-number="23.1.3.3" class="anchored" data-anchor-id="sec-pcaPrepareDataStandardize">
+<span class="header-section-number">23.1.3.3</span> Standardize Variables</h4>
+<p>Although standardizing variables is not strictly necessary in factor analysis, it can be helpful to prevent some variables from having considerably larger variances than others.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>dataForFA <span class="ot">&lt;-</span> dataMerged</span>
+<span id="cb5-2"><a href="#cb5-2"></a>dataForFA[faVars] <span class="ot">&lt;-</span> <span class="fu">scale</span>(dataForFA[faVars])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section></section><section id="sec-factorAnalysisOverview" class="level2" data-number="23.2"><h2 data-number="23.2" class="anchored" data-anchor-id="sec-factorAnalysisOverview">
@@ -851,11 +860,11 @@ Figure&nbsp;23.11: Example of a Factor Rotation of Neuroticism and Extraversion.
 <span class="header-section-number">23.3.2</span> Example</h3>
 <p>We generated the scree plot in <a href="#fig-efaScreePlot1" class="quarto-xref">Figure&nbsp;<span>23.12</span></a> using the <code>fa.parallel()</code> function of the <code>psych</code> package <span class="citation" data-cites="R-psych">(<a href="references.html#ref-R-psych" role="doc-biblioref">Revelle, 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>psych<span class="sc">::</span><span class="fu">fa.parallel</span>(</span>
-<span id="cb5-2"><a href="#cb5-2"></a>  <span class="at">x =</span> dataMerged[faVars],</span>
-<span id="cb5-3"><a href="#cb5-3"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>, <span class="co"># errors out when using "ml"</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a>  <span class="at">fa =</span> <span class="st">"fa"</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>psych<span class="sc">::</span><span class="fu">fa.parallel</span>(</span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="at">x =</span> dataForFA[faVars],</span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>, <span class="co"># errors out when using "ml"</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a>  <span class="at">fa =</span> <span class="st">"fa"</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Parallel analysis suggests that the number of factors =  12  and the number of components =  NA </code></pre>
 </div>
@@ -872,29 +881,29 @@ Figure&nbsp;23.12: Scree Plot: With Comparisons to Simulated and Resampled Data.
 </div>
 <p>We generated the scree plot in <span class="quarto-unresolved-ref">?fig-efaScreePlot2</span> using the <code>nScree()</code> and <code>plotnScree()</code> functions of the <code>nFactors</code> package <span class="citation" data-cites="R-nFactors">(<a href="references.html#ref-R-nFactors" role="doc-biblioref">Raiche &amp; Magis, 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>screeDataEFA <span class="ot">&lt;-</span> nFactors<span class="sc">::</span><span class="fu">nScree</span>(</span>
-<span id="cb7-2"><a href="#cb7-2"></a>  <span class="at">x =</span> <span class="fu">cor</span>(</span>
-<span id="cb7-3"><a href="#cb7-3"></a>    dataMerged[faVars],</span>
-<span id="cb7-4"><a href="#cb7-4"></a>    <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>),</span>
-<span id="cb7-5"><a href="#cb7-5"></a>  <span class="at">model =</span> <span class="st">"factors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>screeDataEFA <span class="ot">&lt;-</span> nFactors<span class="sc">::</span><span class="fu">nScree</span>(</span>
+<span id="cb8-2"><a href="#cb8-2"></a>  <span class="at">x =</span> <span class="fu">cor</span>(</span>
+<span id="cb8-3"><a href="#cb8-3"></a>    dataForFA[faVars],</span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>),</span>
+<span id="cb8-5"><a href="#cb8-5"></a>  <span class="at">model =</span> <span class="st">"factors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-error">
 <pre><code>Error in eigen(stats::cov2cor(corFA(x, method = "ginv"))): infinite or missing values in 'x'</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>nFactors<span class="sc">::</span><span class="fu">plotnScree</span>(screeDataEFA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>nFactors<span class="sc">::</span><span class="fu">plotnScree</span>(screeDataEFA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-error">
 <pre><code>Error: object 'screeDataEFA' not found</code></pre>
 </div>
 </div>
 <p>We generated the very simple structure (VSS) plots in Figures <a href="#fig-efaVSSPlot1" class="quarto-xref"><span>23.13</span></a> and <a href="#fig-efaVSSPlot2" class="quarto-xref"><span>23.14</span></a> using the <code>vss()</code> and <code>nfactors()</code> functions of the <code>psych</code> package <span class="citation" data-cites="R-psych">(<a href="references.html#ref-R-psych" role="doc-biblioref">Revelle, 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>psych<span class="sc">::</span><span class="fu">vss</span>(</span>
-<span id="cb11-2"><a href="#cb11-2"></a>  dataMerged[faVars],</span>
-<span id="cb11-3"><a href="#cb11-3"></a>  <span class="at">rotate =</span> <span class="st">"oblimin"</span>,</span>
-<span id="cb11-4"><a href="#cb11-4"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>) <span class="co"># errors out when using "mle"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>psych<span class="sc">::</span><span class="fu">vss</span>(</span>
+<span id="cb12-2"><a href="#cb12-2"></a>  dataForFA[faVars],</span>
+<span id="cb12-3"><a href="#cb12-3"></a>  <span class="at">rotate =</span> <span class="st">"oblimin"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>) <span class="co"># errors out when using "mle"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Very Simple Structure
-Call: psych::vss(x = dataMerged[faVars], rotate = "oblimin", fm = "minres")
+Call: psych::vss(x = dataForFA[faVars], rotate = "oblimin", fm = "minres")
 VSS complexity 1 achieves a maximimum of 0.75  with  3  factors
 VSS complexity 2 achieves a maximimum of 0.87  with  3  factors
 
@@ -902,8 +911,8 @@ The Velicer MAP achieves a minimum of </code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Inf  with    factors 
-BIC achieves a minimum of  -17115864  with  7  factors
-Sample Size adjusted BIC achieves a minimum of  -17114853  with  7  factors
+BIC achieves a minimum of  -17115871  with  7  factors
+Sample Size adjusted BIC achieves a minimum of  -17114860  with  7  factors
 
 Statistics by number of factors 
   vss1 vss2 map dof   chisq prob sqresid  fit RMSEA      BIC    SABIC complex
@@ -937,10 +946,10 @@ Figure&nbsp;23.13: Very Simple Structure Plot.
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>psych<span class="sc">::</span><span class="fu">nfactors</span>(</span>
-<span id="cb14-2"><a href="#cb14-2"></a>  dataMerged[faVars],</span>
-<span id="cb14-3"><a href="#cb14-3"></a>  <span class="at">rotate =</span> <span class="st">"oblimin"</span>,</span>
-<span id="cb14-4"><a href="#cb14-4"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>) <span class="co"># errors out when using "ml"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>psych<span class="sc">::</span><span class="fu">nfactors</span>(</span>
+<span id="cb15-2"><a href="#cb15-2"></a>  dataForFA[faVars],</span>
+<span id="cb15-3"><a href="#cb15-3"></a>  <span class="at">rotate =</span> <span class="st">"oblimin"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4"></a>  <span class="at">fm =</span> <span class="st">"minres"</span>) <span class="co"># errors out when using "ml"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Number of factors
@@ -953,7 +962,7 @@ The Velicer MAP achieves a minimum of </code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Inf  with    factors 
 Empirical BIC achieves a minimum of  580587.4  with  20  factors
-Sample Size adjusted BIC achieves a minimum of  -17114853  with  7  factors
+Sample Size adjusted BIC achieves a minimum of  -17114860  with  7  factors
 
 Statistics by number of factors 
    vss1 vss2 map dof   chisq prob sqresid  fit RMSEA      BIC    SABIC complex
@@ -1012,20 +1021,21 @@ Figure&nbsp;23.14: Model Indices by Number of Factors.
 </div>
 <p>We fit EFA models using the <code>efa()</code> function of the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>efaOblique_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">efa</span>(</span>
-<span id="cb17-2"><a href="#cb17-2"></a>  <span class="at">data =</span> dataMerged,</span>
-<span id="cb17-3"><a href="#cb17-3"></a>  <span class="at">ov.names =</span> faVars,</span>
-<span id="cb17-4"><a href="#cb17-4"></a>  <span class="at">nfactors =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>,</span>
-<span id="cb17-5"><a href="#cb17-5"></a>  <span class="at">rotation =</span> <span class="st">"geomin"</span>,</span>
-<span id="cb17-6"><a href="#cb17-6"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb17-7"><a href="#cb17-7"></a>  <span class="at">estimator =</span> <span class="st">"MLR"</span>,</span>
-<span id="cb17-8"><a href="#cb17-8"></a>  <span class="at">meanstructure =</span> <span class="cn">TRUE</span></span>
-<span id="cb17-9"><a href="#cb17-9"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>efaOblique_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">efa</span>(</span>
+<span id="cb18-2"><a href="#cb18-2"></a>  <span class="at">data =</span> dataForFA,</span>
+<span id="cb18-3"><a href="#cb18-3"></a>  <span class="at">ov.names =</span> faVars,</span>
+<span id="cb18-4"><a href="#cb18-4"></a>  <span class="at">nfactors =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>,</span>
+<span id="cb18-5"><a href="#cb18-5"></a>  <span class="at">rotation =</span> <span class="st">"geomin"</span>,</span>
+<span id="cb18-6"><a href="#cb18-6"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb18-7"><a href="#cb18-7"></a>  <span class="at">estimator =</span> <span class="st">"MLR"</span>,</span>
+<span id="cb18-8"><a href="#cb18-8"></a>  <span class="at">cluster =</span> <span class="st">"player_id"</span>,</span>
+<span id="cb18-9"><a href="#cb18-9"></a>  <span class="at">meanstructure =</span> <span class="cn">TRUE</span></span>
+<span id="cb18-10"><a href="#cb18-10"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>A path diagram of the EFA model was created using the <code>plot_lavaan()</code> function of the <code>lavaangui</code> package <span class="citation" data-cites="R-lavaangui Karch2025_packages">(<a href="references.html#ref-R-lavaangui" role="doc-biblioref">Karch, 2025b</a>; <a href="references.html#ref-Karch2025_packages" role="doc-biblioref">Karch, 2025a</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>lavaangui<span class="sc">::</span><span class="fu">plot_lavaan</span>(efaOblique_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>lavaangui<span class="sc">::</span><span class="fu">plot_lavaan</span>(efaOblique_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-cfa" class="level2" data-number="23.4"><h2 data-number="23.4" class="anchored" data-anchor-id="sec-cfa">
@@ -1035,62 +1045,64 @@ Figure&nbsp;23.14: Model Indices by Number of Factors.
 <span class="header-section-number">23.4.1</span> Example</h3>
 <p>We fit CFA models using the <code>cfa()</code> function of the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>cfaModel1_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb19-2"><a href="#cb19-2"></a><span class="st"> #Factor loadings</span></span>
-<span id="cb19-3"><a href="#cb19-3"></a><span class="st"> F1 =~ completions + attempts + passing_yards + passing_tds + passing_interceptions + sacks_suffered + sack_yards_lost + sack_fumbles + sack_fumbles_lost + passing_air_yards + passing_yards_after_catch + passing_first_downs + pass_inc + fumbles</span></span>
-<span id="cb19-4"><a href="#cb19-4"></a><span class="st"> F2 =~ passing_air_yards + pacr + avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + avg_air_yards_to_sticks + expected_completion_percentage + avg_air_distance + max_air_distance</span></span>
-<span id="cb19-5"><a href="#cb19-5"></a><span class="st"> F3 =~ passing_tds + passing_epa + passing_cpoe + pass_40_yds + pass_comp_pct + avg_air_yards_differential + max_completed_air_distance + avg_time_to_throw + avg_completed_air_yards + avg_intended_air_yards + passer_rating + completion_percentage_above_expectation</span></span>
-<span id="cb19-6"><a href="#cb19-6"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>cfaModel1_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="st"> #Factor loadings</span></span>
+<span id="cb20-3"><a href="#cb20-3"></a><span class="st"> F1 =~ completions + attempts + passing_yards + passing_tds + passing_interceptions + sacks_suffered + sack_yards_lost + sack_fumbles + sack_fumbles_lost + passing_air_yards + passing_yards_after_catch + passing_first_downs + pass_inc + fumbles</span></span>
+<span id="cb20-4"><a href="#cb20-4"></a><span class="st"> F2 =~ passing_air_yards + pacr + avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + avg_air_yards_to_sticks + expected_completion_percentage + avg_air_distance + max_air_distance</span></span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="st"> F3 =~ passing_tds + passing_epa + passing_cpoe + pass_40_yds + pass_comp_pct + avg_air_yards_differential + max_completed_air_distance + avg_time_to_throw + avg_completed_air_yards + avg_intended_air_yards + passer_rating + completion_percentage_above_expectation</span></span>
+<span id="cb20-6"><a href="#cb20-6"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>cfaModel1_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">cfa</span>(</span>
-<span id="cb20-2"><a href="#cb20-2"></a>  cfaModel1_syntax,</span>
-<span id="cb20-3"><a href="#cb20-3"></a>  <span class="at">data =</span> dataMerged,</span>
-<span id="cb20-4"><a href="#cb20-4"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb20-5"><a href="#cb20-5"></a>  <span class="at">estimator =</span> <span class="st">"MLR"</span>,</span>
-<span id="cb20-6"><a href="#cb20-6"></a>  <span class="at">std.lv =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>cfaModel1_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">cfa</span>(</span>
+<span id="cb21-2"><a href="#cb21-2"></a>  cfaModel1_syntax,</span>
+<span id="cb21-3"><a href="#cb21-3"></a>  <span class="at">data =</span> dataForFA,</span>
+<span id="cb21-4"><a href="#cb21-4"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb21-5"><a href="#cb21-5"></a>  <span class="at">estimator =</span> <span class="st">"MLR"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6"></a>  <span class="at">std.lv =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-7"><a href="#cb21-7"></a>  <span class="at">cluster =</span> <span class="st">"player_id"</span>,</span>
+<span id="cb21-8"><a href="#cb21-8"></a>  <span class="at">em.iter.max =</span> <span class="dv">2000000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">summary</span>(</span>
-<span id="cb21-2"><a href="#cb21-2"></a>  cfaModel1_fit,</span>
-<span id="cb21-3"><a href="#cb21-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb21-4"><a href="#cb21-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb21-5"><a href="#cb21-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>lavaan<span class="sc">::</span><span class="fu">fitMeasures</span>(</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="fu">summary</span>(</span>
 <span id="cb22-2"><a href="#cb22-2"></a>  cfaModel1_fit,</span>
-<span id="cb22-3"><a href="#cb22-3"></a>  <span class="at">fit.measures =</span> <span class="fu">c</span>(</span>
-<span id="cb22-4"><a href="#cb22-4"></a>    <span class="st">"chisq"</span>, <span class="st">"df"</span>, <span class="st">"pvalue"</span>,</span>
-<span id="cb22-5"><a href="#cb22-5"></a>    <span class="st">"chisq.scaled"</span>, <span class="st">"df.scaled"</span>, <span class="st">"pvalue.scaled"</span>,</span>
-<span id="cb22-6"><a href="#cb22-6"></a>    <span class="st">"chisq.scaling.factor"</span>,</span>
-<span id="cb22-7"><a href="#cb22-7"></a>    <span class="st">"baseline.chisq"</span>,<span class="st">"baseline.df"</span>,<span class="st">"baseline.pvalue"</span>,</span>
-<span id="cb22-8"><a href="#cb22-8"></a>    <span class="st">"rmsea"</span>, <span class="st">"cfi"</span>, <span class="st">"tli"</span>, <span class="st">"srmr"</span>,</span>
-<span id="cb22-9"><a href="#cb22-9"></a>    <span class="st">"rmsea.robust"</span>, <span class="st">"cfi.robust"</span>, <span class="st">"tli.robust"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-3"><a href="#cb22-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-4"><a href="#cb22-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-5"><a href="#cb22-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>lavaan<span class="sc">::</span><span class="fu">residuals</span>(</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>lavaan<span class="sc">::</span><span class="fu">fitMeasures</span>(</span>
 <span id="cb23-2"><a href="#cb23-2"></a>  cfaModel1_fit,</span>
-<span id="cb23-3"><a href="#cb23-3"></a>  <span class="at">type =</span> <span class="st">"cor"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-3"><a href="#cb23-3"></a>  <span class="at">fit.measures =</span> <span class="fu">c</span>(</span>
+<span id="cb23-4"><a href="#cb23-4"></a>    <span class="st">"chisq"</span>, <span class="st">"df"</span>, <span class="st">"pvalue"</span>,</span>
+<span id="cb23-5"><a href="#cb23-5"></a>    <span class="st">"chisq.scaled"</span>, <span class="st">"df.scaled"</span>, <span class="st">"pvalue.scaled"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6"></a>    <span class="st">"chisq.scaling.factor"</span>,</span>
+<span id="cb23-7"><a href="#cb23-7"></a>    <span class="st">"baseline.chisq"</span>,<span class="st">"baseline.df"</span>,<span class="st">"baseline.pvalue"</span>,</span>
+<span id="cb23-8"><a href="#cb23-8"></a>    <span class="st">"rmsea"</span>, <span class="st">"cfi"</span>, <span class="st">"tli"</span>, <span class="st">"srmr"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9"></a>    <span class="st">"rmsea.robust"</span>, <span class="st">"cfi.robust"</span>, <span class="st">"tli.robust"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>lavaan<span class="sc">::</span><span class="fu">modificationindices</span>(</span>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>lavaan<span class="sc">::</span><span class="fu">residuals</span>(</span>
 <span id="cb24-2"><a href="#cb24-2"></a>  cfaModel1_fit,</span>
-<span id="cb24-3"><a href="#cb24-3"></a>  <span class="at">sort. =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-3"><a href="#cb24-3"></a>  <span class="at">type =</span> <span class="st">"cor"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>lavaan<span class="sc">::</span><span class="fu">lavPredict</span>(cfaModel1_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>lavaan<span class="sc">::</span><span class="fu">modificationindices</span>(</span>
+<span id="cb25-2"><a href="#cb25-2"></a>  cfaModel1_fit,</span>
+<span id="cb25-3"><a href="#cb25-3"></a>  <span class="at">sort. =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>lavaan<span class="sc">::</span><span class="fu">lavPredict</span>(cfaModel1_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>A path diagram of the CFA model was created using the <code>plot_lavaan()</code> function of the <code>lavaangui</code> package <span class="citation" data-cites="R-lavaangui Karch2025_packages">(<a href="references.html#ref-R-lavaangui" role="doc-biblioref">Karch, 2025b</a>; <a href="references.html#ref-Karch2025_packages" role="doc-biblioref">Karch, 2025a</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>lavaangui<span class="sc">::</span><span class="fu">plot_lavaan</span>(cfaModel1_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>lavaangui<span class="sc">::</span><span class="fu">plot_lavaan</span>(cfaModel1_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-factorAnalysisNumFactors" class="level2" data-number="23.5"><h2 data-number="23.5" class="anchored" data-anchor-id="sec-factorAnalysisNumFactors">
@@ -1139,7 +1151,7 @@ Figure&nbsp;23.15: Example of a Scree Plot.
 </section><section id="sec-factorAnalysisSessionInfo" class="level2" data-number="23.8"><h2 data-number="23.8" class="anchored" data-anchor-id="sec-factorAnalysisSessionInfo">
 <span class="header-section-number">23.8</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
