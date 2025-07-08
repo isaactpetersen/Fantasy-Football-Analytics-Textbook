@@ -55,6 +55,15 @@ faVars <- c(
   "avg_air_distance","max_air_distance")
 ```
 
+#### Standardize Variables {#sec-pcaPrepareDataStandardize}
+
+Although standardizing variables is not strictly necessary in factor analysis, it can be helpful to prevent some variables from having considerably larger variances than others.
+
+```{r}
+dataForFA <- dataMerged
+dataForFA[faVars] <- scale(dataForFA[faVars])
+```
+
 ## Overview of Factor Analysis {#sec-factorAnalysisOverview}
 
 Factor analysis involves the estimation of latent variables.
@@ -266,7 +275,7 @@ We generated the scree plot in @fig-efaScreePlot1 using the `fa.parallel()` func
 #| fig-alt: "Scree Plot: With Comparisons to Simulated and Resampled Data."
 
 psych::fa.parallel(
-  x = dataMerged[faVars],
+  x = dataForFA[faVars],
   fm = "minres", # errors out when using "ml"
   fa = "fa"
 )
@@ -281,7 +290,7 @@ We generated the scree plot in @fig-efaScreePlot2 using the `nScree()` and `plot
 
 screeDataEFA <- nFactors::nScree(
   x = cor(
-    dataMerged[faVars],
+    dataForFA[faVars],
     use = "pairwise.complete.obs"),
   model = "factors")
 
@@ -296,7 +305,7 @@ We generated the very simple structure (VSS) plots in Figures [-@fig-efaVSSPlot1
 #| fig-alt: "Very Simple Structure Plot."
 
 psych::vss(
-  dataMerged[faVars],
+  dataForFA[faVars],
   rotate = "oblimin",
   fm = "minres") # errors out when using "mle"
 ```
@@ -307,7 +316,7 @@ psych::vss(
 #| fig-alt: "Model Indices by Number of Factors."
 
 psych::nfactors(
-  dataMerged[faVars],
+  dataForFA[faVars],
   rotate = "oblimin",
   fm = "minres") # errors out when using "ml"
 ```
@@ -318,12 +327,13 @@ We fit EFA models using the `efa()` function of the `lavaan` package [@Rosseel20
 #| eval: false
 
 efaOblique_fit <- lavaan::efa(
-  data = dataMerged,
+  data = dataForFA,
   ov.names = faVars,
   nfactors = 1:9,
   rotation = "geomin",
   missing = "ML",
   estimator = "MLR",
+  cluster = "player_id",
   meanstructure = TRUE
 )
 ```
@@ -364,10 +374,12 @@ cfaModel1_syntax <- '
 
 cfaModel1_fit <- lavaan::cfa(
   cfaModel1_syntax,
-  data = dataMerged,
+  data = dataForFA,
   missing = "ML",
   estimator = "MLR",
-  std.lv = TRUE)
+  std.lv = TRUE,
+  cluster = "player_id",
+  em.iter.max = 2000000)
 ```
 
 ```{r}
