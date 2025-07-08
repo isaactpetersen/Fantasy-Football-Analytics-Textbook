@@ -5,7 +5,59 @@
 ### Load Packages {#sec-pcaLoadPackages}
 
 ```{r}
+library("psych")
+library("nFactors")
+library("tidyverse")
+```
 
+### Load Data {#sec-pcaLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_nextGenStats_weekly.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/nfl_nextGenStats_weekly.RData")
+```
+
+### Prepare Data {#sec-pcaPrepareData}
+
+#### Merge Data {#sec-pcaPrepareDataMerge}
+
+```{r}
+dataMerged <- full_join(
+  player_stats_weekly,
+  nfl_nextGenStats_weekly %>% select(-any_of(c("player_display_name","completions","attempts","receptions","targets"))),
+  by = c("player_id" = "player_gsis_id","season","season_type","week"),
+)
+```
+
+#### Specify Variables {#sec-pcaPrepareDataSpecifyVars}
+
+```{r}
+pcaVars <- c(
+  "completions","attempts","passing_yards","passing_tds","passing_interceptions",
+  "sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
+  "passing_air_yards","passing_yards_after_catch","passing_first_downs",
+  "passing_epa","passing_cpoe","passing_2pt_conversions","pacr","pass_40_yds",
+  "pass_inc","pass_comp_pct","fumbles","two_pts",
+  "avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
+  "avg_air_yards_differential","aggressiveness","max_completed_air_distance",
+  "avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
+  "expected_completion_percentage","completion_percentage_above_expectation",
+  "avg_air_distance","max_air_distance")
+```
+
+#### Standardize Variables {#sec-pcaPrepareDataStandardize}
+
+```{r}
+dataForPCA <- dataMerged
+dataForPCA[pcaVars] <- scale(dataForPCA[pcaVars])
 ```
 
 ## Overview of Principal Component Analysis {#sec-pcaOverview}
@@ -93,6 +145,171 @@ However, if you are interested in the factor structure, use [factor analysis](#s
 [Factor analysis](#sec-factorAnalysis) better handles error than PCA—[factor analysis](#sec-factorAnalysis) assumes that what is in the variable is the combination of common construct variance and error.\index{principal component analysis}\index{factor analysis}
 By contrast, PCA assumes that the measures have no measurement error.\index{principal component analysis}\index{measurement error}
 [Factor analysis](#sec-factorAnalysis) is useful for the identification of latent constructs—i.e., underlying dimensions or factors that explain (cause) observed scores.\index{factor analysis}
+
+## Example of Principal Component Analysis {#sec-pcaExample}
+
+```{r}
+#| label: fig-pcaScreePlot1
+#| fig-cap: "Scree Plot."
+#| fig-alt: "Scree Plot."
+
+psych::fa.parallel(
+  x = dataForPCA[pcaVars],
+  fa = "pc"
+)
+```
+
+```{r}
+#| label: fig-pcaScreePlot2
+#| fig-cap: "Scree Plot."
+#| fig-alt: "Scree Plot."
+
+screeDataPCA <- nFactors::nScree(
+  x = cor(
+    dataForPCA[pcaVars],
+    use = "pairwise.complete.obs"),
+  model = "components")
+
+nFactors::plotnScree(screeDataPCA)
+```
+
+```{r}
+psych::vss(
+  dataForPCA[pcaVars],
+  rotate = "oblimin",
+  fm = "pc")
+```
+
+```{r}
+pca1ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 1,
+  rotate = "oblimin")
+
+pca2ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 2,
+  rotate = "oblimin")
+
+pca3ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 3,
+  rotate = "oblimin")
+
+pca4ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 4,
+  rotate = "oblimin")
+
+pca5ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 5,
+  rotate = "oblimin")
+
+pca6ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 6,
+  rotate = "oblimin")
+
+pca7ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 7,
+  rotate = "oblimin")
+
+pca8ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 8,
+  rotate = "oblimin")
+
+pca9ComponentOblique <- psych::principal(
+  dataForPCA[pcaVars],
+  nfactors = 9,
+  rotate = "oblimin")
+```
+
+```{r}
+pca1ComponentOblique
+pca2ComponentOblique
+pca3ComponentOblique
+pca4ComponentOblique
+pca5ComponentOblique
+pca6ComponentOblique
+pca7ComponentOblique
+pca8ComponentOblique
+pca9ComponentOblique
+```
+
+Here are the variables that had a standardized component loading of 0.4 or greater on each component:
+
+```{r}
+component1vars <- c(
+  "completions","attempts","passing_yards","passing_tds","passing_interceptions",
+  "sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
+  "passing_air_yards","passing_yards_after_catch","passing_first_downs",
+  #"passing_epa","passing_cpoe","passing_2pt_conversions","pacr","pass_40_yds",
+  "pass_inc","fumbles")#,"two_pts","pass_comp_pct",
+  #"avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
+  #"avg_air_yards_differential","aggressiveness","max_completed_air_distance",
+  #"avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
+  #"expected_completion_percentage","completion_percentage_above_expectation",
+  #"avg_air_distance","max_air_distance")
+
+component2vars <- c(
+  #"completions","attempts","passing_yards","passing_tds","passing_interceptions",
+  #"sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
+  "passing_air_yards",#"passing_yards_after_catch","passing_first_downs",
+  "pacr",#"passing_epa","passing_cpoe","passing_2pt_conversions","pass_40_yds",
+  #"pass_inc","pass_comp_pct","fumbles","two_pts",
+  "avg_completed_air_yards","avg_intended_air_yards",#"avg_time_to_throw",
+  "aggressiveness","max_completed_air_distance",#"avg_air_yards_differential",
+  "avg_air_yards_to_sticks",#"passer_rating", #,"completion_percentage"
+  "expected_completion_percentage",#"completion_percentage_above_expectation",
+  "avg_air_distance","max_air_distance")
+
+component3vars <- c(
+  "passing_tds",#"completions","attempts","passing_yards","passing_interceptions",
+  #"sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
+  #"passing_air_yards","passing_yards_after_catch","passing_first_downs",
+  "passing_epa","passing_cpoe","pass_40_yds",#"passing_2pt_conversions","pacr",
+  "pass_comp_pct",#"fumbles","two_pts","pass_inc",
+  "avg_air_yards_differential","max_completed_air_distance",
+  "avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
+  #"aggressiveness",
+  "passer_rating",#"avg_air_yards_to_sticks", #,"completion_percentage"
+  "completion_percentage_above_expectation")#,"expected_completion_percentage",
+  #"avg_air_distance","max_air_distance")
+```
+
+
+```{r}
+pca3ComponentOblique$scores %>% 
+  na.omit() %>% 
+  head()
+```
+
+```{r}
+pca3ComponentOblique$scores[which.max(pca3ComponentOblique$scores[,1]),]
+dataMerged[which.max(pca3ComponentOblique$scores[,1]), c("player_display_name", "season", "week", component1vars)]
+
+pca3ComponentOblique$scores[which.min(pca3ComponentOblique$scores[,1]),]
+dataMerged[which.min(pca3ComponentOblique$scores[,1]), c("player_display_name", "season", "week", component1vars)]
+```
+
+```{r}
+pca3ComponentOblique$scores[which.max(pca3ComponentOblique$scores[,2]),]
+dataMerged[which.max(pca3ComponentOblique$scores[,2]), c("player_display_name", "season", "week", component2vars)]
+
+pca3ComponentOblique$scores[which.min(pca3ComponentOblique$scores[,2]),]
+dataMerged[which.min(pca3ComponentOblique$scores[,2]), c("player_display_name", "season", "week", component2vars)]
+```
+
+```{r}
+pca3ComponentOblique$scores[which.max(pca3ComponentOblique$scores[,3]),]
+dataMerged[which.max(pca3ComponentOblique$scores[,3]), c("player_display_name", "season", "week", component3vars)]
+
+pca3ComponentOblique$scores[which.min(pca3ComponentOblique$scores[,3]),]
+dataMerged[which.min(pca3ComponentOblique$scores[,3]), c("player_display_name", "season", "week", component3vars)]
+```
 
 ## Conclusion {#sec-pcaConclusion}
 
