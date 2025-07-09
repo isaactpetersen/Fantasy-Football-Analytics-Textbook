@@ -57,12 +57,19 @@ faVars <- c(
   "avg_air_distance","max_air_distance")
 ```
 
+#### Subset Data {#sec-pcaPrepareDataSubset}
+
+```{r}
+dataMerged_subset <- dataMerged %>% 
+  filter(!is.na(player_id))
+```
+
 #### Standardize Variables {#sec-pcaPrepareDataStandardize}
 
 Although standardizing variables is not strictly necessary in factor analysis, it can be helpful to prevent some variables from having considerably larger variances than others.
 
 ```{r}
-dataForFA <- dataMerged
+dataForFA <- dataMerged_subset
 dataForFA[faVars] <- scale(dataForFA[faVars])
 ```
 
@@ -381,7 +388,7 @@ cfaModel1_fit <- lavaan::cfa(
   estimator = "MLR",
   std.lv = TRUE,
   cluster = "player_id",
-  em.iter.max = 2000000)
+  em.h1.iter.max = 2000000)
 ```
 
 ```{r}
