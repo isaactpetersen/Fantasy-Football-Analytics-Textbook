@@ -22,6 +22,7 @@ library("robustbase")
 library("ordinal")
 library("MASS")
 library("broom")
+library("effectsize")
 library("tidyverse")
 library("knitr")
 ```
@@ -181,12 +182,14 @@ linearRegression <- lm(
 )
 
 summary(linearRegression)
+
 print(effectsize::standardize_parameters(linearRegression, method = "refit"), digits = 2)
 ```
 
 ### Logistic Regression {#sec-multipleRegressionLogistic}
 
 We fit a logistic regression model using the `glm()` function and specifying `family = binomial()`.
+To calculate the model $R^2$, we use the `r2()` function of the `performance` package [@R-performance; @Ludecke2021_packages].
 
 ```{r}
 #| label: logistic-regression
@@ -208,6 +211,7 @@ logisticRegression <- glm(
 )
 
 summary(logisticRegression)
+performance::r2(logisticRegression)
 print(effectsize::standardize_parameters(logisticRegression, method = "refit"), digits = 2)
 ```
 
@@ -229,6 +233,7 @@ ordinalRegression <- ordinal::clm(
 )
 
 summary(ordinalRegression)
+performance::r2(ordinalRegression)
 print(effectsize::standardize_parameters(ordinalRegression, method = "refit"), digits = 2)
 ```
 
@@ -247,6 +252,7 @@ poissonRegression <- glm(
 )
 
 summary(poissonRegression)
+performance::r2(poissonRegression)
 print(effectsize::standardize_parameters(poissonRegression, method = "refit"), digits = 2)
 ```
 
@@ -265,6 +271,7 @@ negativeBinomialRegression <- MASS::glm.nb(
 )
 
 summary(negativeBinomialRegression)
+performance::r2(negativeBinomialRegression)
 print(effectsize::standardize_parameters(negativeBinomialRegression, method = "refit"), digits = 2)
 ```
 
@@ -291,6 +298,7 @@ betaRegression <- brms::brm(
 #| label: beta-regression-summmary
 
 summary(betaRegression)
+performance::r2(betaRegression)
 ```
 
 ## Assumptions of Multiple Regression {#sec-assumptionsRegression}
@@ -1225,6 +1233,15 @@ summary(quadraticTermsRegressionModelStandardized)
 print(effectsize::standardize_parameters(quadraticTermsRegressionModel, method = "refit"), digits = 2)
 ```
 
+### Dominance Analysis {#sec-multipleRegressionDominanceAnalysis}
+
+We can perform a dominance analysis to evaluate the relative importance of the predictors in the regression model.
+To perform the dominance analysis, we use the `dominance_analysis()` function of the `parameters` package [@R-parameters; @Luedecke2020_packages], which leverages the `domir` package [@R-domir].
+
+```{r}
+parameters::dominance_analysis(linearRegressionModel)
+```
+
 ### Visualizing Regression Results {#sec-multipleRegressionVisualizingResults}
 
 #### Regression Coefficients {#sec-multipleRegressionVisualizingRegressionCoefficients}
@@ -1841,7 +1858,7 @@ Y <- varsToImpute
 Now, let's specify the imputation method—we use the two-level predictive mean matching (`2l.pmm`) method from the `miceadds` package [@R-miceadds] to account for the nonindependent data (owing to multiple seasons per player):
 
 ```{r}
-meth <- make.method(dataToImpute)
+meth <- mice::make.method(dataToImpute)
 meth[1:length(meth)] <- ""
 meth[Y] <- "2l.pmm" # specify the imputation method here; this can differ by outcome variable
 ```
@@ -1862,7 +1879,7 @@ The values are:
 - include cluster mean of predictor in addition to fixed effect and random effect of predictor: `4`
 
 ```{r}
-pred <- make.predictorMatrix(dataToImpute)
+pred <- mice::make.predictorMatrix(dataToImpute)
 pred[1:nrow(pred), 1:ncol(pred)] <- 0
 pred[Y, "player_id_integer"] <- (-2) # cluster variable
 pred[Y, predictors] <- 1 # fixed effect predictors
@@ -1913,7 +1930,7 @@ Thus, it may be necessary to select a different imputation method for more accur
 Now, let's do some post-processing:
 
 ```{r}
-imp_long <- complete(
+imp_long <- mice::complete(
   imp,
   action = "long",
   include = TRUE)
@@ -1924,7 +1941,7 @@ imp_long$fantasyPoints_transformed <- predict(
   yjTransformed,
   newdata = imp_long["fantasyPoints"])$fantasyPoints
 
-imp_mids <- as.mids(imp_long)
+imp_mids <- mice::as.mids(imp_long)
 ```
 
 Now let's estimate multiple regression with the multiply imputed data:
@@ -1936,7 +1953,7 @@ imp_regression <- with(
     fantasyPoints_transformed ~ age + height + weight + target_share_log)
   )
 
-summary(pool(imp_regression))
+summary(mice::pool(imp_regression))
 ```
 
 ### Full Information Maximum Likelihood {#sec-multipleRegressionFIML}
@@ -1978,12 +1995,15 @@ player_stats_seasonal_subset <- player_stats_seasonal %>%
   filter(!is.na(player_id)) %>% 
   filter(position %in% c("WR"))
 
-rms::robcov(rms::ols(
+regressionWithClusterVariable <- rms::robcov(rms::ols(
   fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
   data = player_stats_seasonal_subset,
   x = TRUE,
   y = TRUE),
   cluster = player_stats_seasonal_subset$player_id) #account for nested data within player
+
+regressionWithClusterVariable
+performance::r2(regressionWithClusterVariable)
 ```
 
 ## Impact of Outliers {#sec-multipleRegressionOutliers}
@@ -1996,7 +2016,7 @@ To address outliers, there are various approaches to robust regression.
 One approach is to use an MM-type estimator, such as is used in the `lmrob()` and `glmrob()` functions of the `robustbase` package [@R-robustbase; @Todorov2009_packages].
 
 ```{r}
-robustRegression <- lmrob(
+robustRegression <- robustbase::lmrob(
   fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
   data = player_stats_seasonal %>% filter(position %in% c("WR"))
 )
@@ -2160,7 +2180,7 @@ summary(
   rsquare = TRUE)
 ```
 
-We can also estimate a model with multiple hypothesized [mediator](#sec-mediations):
+We can also estimate a model with multiple hypothesized [mediators](#sec-mediations):
 
 ```{r}
 multipleMediatorModel <- '
@@ -2220,6 +2240,7 @@ bayesianMultipleRegressionModel <- brm(
 
 ```{r}
 summary(bayesianMultipleRegressionModel)
+performance::r2(bayesianMultipleRegressionModel)
 ```
 
 ## Conclusion {#sec-multipleRegressionConclusion}
