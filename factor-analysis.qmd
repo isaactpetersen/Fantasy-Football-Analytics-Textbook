@@ -20,36 +20,77 @@ library("tidyverse")
 #| eval: false
 #| include: false
 
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_nextGenStats_weekly.RData", fsep = ""))
 ```
 
 ```{r}
+load(file = "./data/player_stats_seasonal.RData")
 load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/nfl_nextGenStats_weekly.RData")
 ```
 
 ### Prepare Data {#sec-factorAnalysisPrepareData}
 
+#### Season-Averages {#sec-factorAnalysisPrepareDataSeasonAvg}
+
+```{r}
+player_stats_seasonal_avgPerGame <- player_stats_seasonal %>% 
+  mutate(
+    completionsPerGame = completions / games,
+    attemptsPerGame = attempts / games,
+    passing_yardsPerGame = passing_yards / games,
+    passing_tdsPerGame = passing_tds / games,
+    passing_interceptionsPerGame = passing_interceptions / games,
+    sacks_sufferedPerGame = sacks_suffered / games,
+    sack_yards_lostPerGame = sack_yards_lost / games,
+    sack_fumblesPerGame = sack_fumbles / games,
+    sack_fumbles_lostPerGame = sack_fumbles_lost / games,
+    passing_air_yardsPerGame = passing_air_yards / games,
+    passing_yards_after_catchPerGame = passing_yards_after_catch / games,
+    passing_first_downsPerGame = passing_first_downs / games,
+    #passing_epaPerGame = passing_epa / games,
+    #passing_cpoePerGame = passing_cpoe / games,
+    passing_2pt_conversionsPerGame = passing_2pt_conversions / games,
+    #pacrPerGame = pacr / games
+    pass_40_ydsPerGame = pass_40_yds / games,
+    pass_incPerGame = pass_inc / games,
+    #pass_comp_pctPerGame = pass_comp_pct / games,
+    fumblesPerGame = fumbles / games
+  )
+
+nfl_nextGenStats_seasonal <- nfl_nextGenStats_weekly %>% 
+  filter(season_type == "REG") %>% 
+  select(-any_of(c("week","season_type","player_display_name","player_position","team_abbr","player_first_name","player_last_name","player_jersey_number","player_short_name"))) %>% 
+  group_by(player_gsis_id, season) %>% 
+  summarise(
+    across(everything(),
+      ~ mean(.x, na.rm = TRUE)),
+    .groups = "drop")
+```
+
 #### Merge Data {#sec-factorAnalysisPrepareDataMerge}
 
 ```{r}
 dataMerged <- full_join(
-  player_stats_weekly,
-  nfl_nextGenStats_weekly %>% select(-any_of(c("player_display_name","completions","attempts","receptions","targets"))),
-  by = c("player_id" = "player_gsis_id","season","season_type","week"),
+  player_stats_seasonal_avgPerGame,
+  nfl_nextGenStats_seasonal %>% select(-any_of(c("player_display_name","completions","attempts","receptions","targets"))),
+  by = c("player_id" = "player_gsis_id","season"),
 )
 ```
 
 #### Specify Variables {#sec-pcaPrepareDataSpecifyVars}
 
 ```{r}
-faVars <- c(
-  "completions","attempts","passing_yards","passing_tds","passing_interceptions",
-  "sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
-  "passing_air_yards","passing_yards_after_catch","passing_first_downs",
-  "passing_epa","passing_cpoe","passing_2pt_conversions","pacr","pass_40_yds",
-  "pass_inc","pass_comp_pct","fumbles","two_pts",
+#| eval: false
+
+c(
+  "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame","passing_interceptionsPerGame",
+  "sacks_sufferedPerGame","sack_yards_lostPerGame","sack_fumblesPerGame","sack_fumbles_lostPerGame",
+  "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame",
+  "passing_epa","passing_cpoe","passing_2pt_conversionsPerGame","pacr","pass_40_ydsPerGame",
+  "pass_incPerGame","pass_comp_pct","fumblesPerGame", #"two_pts",
   "avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
   "avg_air_yards_differential","aggressiveness","max_completed_air_distance",
   "avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
@@ -57,20 +98,54 @@ faVars <- c(
   "avg_air_distance","max_air_distance")
 ```
 
+```{r}
+#efaVars <- c(
+#  "completionsPerGame","passing_yardsPerGame","passing_tdsPerGame",
+#  "avg_completed_air_yards","avg_intended_air_yards","avg_air_distance",
+#  "passing_cpoe","pass_comp_pct","passer_rating","completion_percentage_above_expectation")
+
+#efaVars <- c(
+# "passing_yardsPerGame","passing_tdsPerGame",
+# "avg_completed_air_yards","avg_air_distance",
+# "pass_comp_pct","passer_rating")
+#
+#cfaVars <- c(
+# "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame",
+# "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame",
+# "avg_completed_air_yards","avg_intended_air_yards","aggressiveness","max_completed_air_distance",
+# "avg_air_distance","max_air_distance","avg_air_yards_to_sticks","passing_cpoe","pass_comp_pct",
+# "passer_rating","completion_percentage_above_expectation"
+#)
+
+#faVars <- unique(c(cfaVars, efaVars))
+
+efaVars <- c(
+ "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame",
+ "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame",
+ "avg_completed_air_yards","avg_intended_air_yards","aggressiveness","max_completed_air_distance",
+ "avg_air_distance","max_air_distance","avg_air_yards_to_sticks","passing_cpoe","pass_comp_pct",
+ "passer_rating","completion_percentage_above_expectation"
+)
+```
+
 #### Subset Data {#sec-pcaPrepareDataSubset}
 
 ```{r}
 dataMerged_subset <- dataMerged %>% 
-  filter(!is.na(player_id))
+  filter(!is.na(player_id)) %>% 
+  filter(position == "QB")
 ```
 
 #### Standardize Variables {#sec-pcaPrepareDataStandardize}
 
-Although standardizing variables is not strictly necessary in factor analysis, it can be helpful to prevent some variables from having considerably larger variances than others.
+Standardizing variables is not strictly necessary in factor analysis; however, standardization can be helpful to prevent some variables from having considerably larger variances than others.
 
 ```{r}
 dataForFA <- dataMerged_subset
-dataForFA[faVars] <- scale(dataForFA[faVars])
+dataForFA_standardized <- dataForFA
+
+dataForFA_standardized[faVars] <- scale(dataForFA_standardized[faVars])
+#dataForFA[faVars] <- scale(dataForFA[faVars])
 ```
 
 ## Overview of Factor Analysis {#sec-factorAnalysisOverview}
@@ -276,6 +351,41 @@ Examples of oblique rotations include oblimin and promax.\index{factor analysis}
 
 ### Example {#sec-efaExample}
 
+```{r}
+#| eval: false
+#| include: false
+
+cor_mat <- cor(dataForFA[faVars], use = "pairwise.complete.obs")
+
+cor_tidy <- cor_mat %>%
+  as.data.frame() %>%
+  rownames_to_column("var1") %>%
+  pivot_longer(-var1, names_to = "var2", values_to = "correlation") %>%
+  filter(var1 != var2) %>% # remove self-correlations
+  mutate(pair = pmap_chr(list(var1, var2), ~ paste(sort(c(...)), collapse = "___"))) %>% 
+  distinct(pair, .keep_all = TRUE) # remove duplicate pairs (symmetry)
+
+high_corrs <- cor_tidy %>%
+  filter(abs(correlation) > 0.85) %>%
+  arrange(desc(abs(correlation)))
+
+high_corrs
+
+cov_mat <- cov(dataForFA[, faVars], use = "pairwise.complete.obs")
+eigen_cov_mat <- eigen(cov_mat)
+print(eigen_cov_mat$values)
+
+# Index of smallest (most problematic) eigenvalue
+idx <- which.min(eigen_cov_mat$values)
+
+# Extract the associated eigenvector
+problem_vector <- eigen_cov_mat$vectors[, idx]
+names(problem_vector) <- faVars
+
+# Sort by absolute magnitude to identify most influential variables
+sort(abs(problem_vector), decreasing = TRUE)
+```
+
 We generated the scree plot in @fig-efaScreePlot1 using the `fa.parallel()` function of the `psych` package [@R-psych].
 
 ```{r}
@@ -297,10 +407,17 @@ We generated the scree plot in @fig-efaScreePlot2 using the `nScree()` and `plot
 #| fig-cap: "Scree Plot with Parallel Analysis."
 #| fig-alt: "Scree Plot with Parallel Analysis."
 
+#screeDataEFA <- nFactors::nScree(
+#  x = cor( # throws error with correlation matrix, so use covariance instead (below)
+#    dataForFA[faVars],
+#    use = "pairwise.complete.obs"),
+#  model = "factors")
+
 screeDataEFA <- nFactors::nScree(
-  x = cor(
+  x = cov(
     dataForFA[faVars],
     use = "pairwise.complete.obs"),
+  cor = FALSE,
   model = "factors")
 
 nFactors::plotnScree(screeDataEFA)
@@ -333,26 +450,219 @@ psych::nfactors(
 We fit EFA models using the `efa()` function of the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
 
 ```{r}
-#| eval: false
+#| label: efa
 
-efaOblique_fit <- lavaan::efa(
+efa_fit <- lavaan::efa(
   data = dataForFA,
-  ov.names = faVars,
-  nfactors = 1:9,
+  ov.names = efaVars,
+  nfactors = 1:7,
   rotation = "geomin",
   missing = "ML",
   estimator = "MLR",
-  cluster = "player_id",
-  meanstructure = TRUE
-)
+  bounds = "standard",
+  meanstructure = TRUE,
+  em.h1.iter.max = 2000000)
 ```
 
-A path diagram of the EFA model was created using the `plot_lavaan()` function of the `lavaangui` package [@R-lavaangui; @Karch2025_packages].
+```{r}
+#| label: efa-summary
+
+summary(efa_fit)
+```
+
+A path diagram of the EFA model was created using the `lavaanPlot()` function of the `lavaanPlot` package [@R-lavaanPlot].
+
+```{r}
+lavaanPlot::lavaanPlot(
+  efa_fit$nf3,
+  coefs = TRUE,
+  stand = TRUE)
+```
+
+Here is the syntax for estimating a three-factor EFA using exploratory structural equation modeling (ESEM).
+Estimating the model in a ESEM framework allows us to make modifications to the model, such as adding correlated residuals, and adding predictors or outcomes of the latent factors. 
+
+```{r}
+#| label: efa-3factor-syntax
+
+efa3factor_syntax <- '
+ # EFA Factor Loadings
+ efa("efa1")*f1 + 
+ efa("efa1")*f2 + 
+ efa("efa1")*f3 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
+ passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame + 
+ avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + 
+ avg_air_distance + max_air_distance + avg_air_yards_to_sticks + passing_cpoe + pass_comp_pct + 
+ passer_rating + completion_percentage_above_expectation
+'
+```
+
+To fit the ESEM model, we use the `sem()` function of the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
+
+```{r}
+#| label: efa-3factor-fit
+
+efa3factor_fit <- sem(
+  efa3factor_syntax,
+  data = dataForFA,
+  information = "observed",
+  missing = "ML",
+  estimator = "MLR",
+  rotation = "geomin",
+  bounds = "standard",
+  meanstructure = TRUE,
+  em.h1.iter.max = 2000000)
+```
+
+```{r}
+summary(
+  efa3factor_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
+```{r}
+lavaan::fitMeasures(
+  efa3factor_fit,
+  fit.measures = c(
+    "chisq", "df", "pvalue",
+    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq.scaling.factor",
+    "baseline.chisq","baseline.df","baseline.pvalue",
+    "rmsea", "cfi", "tli", "srmr",
+    "rmsea.robust", "cfi.robust", "tli.robust"))
+```
+
+```{r}
+lavaan::residuals(
+  efa3factor_fit,
+  type = "cor")
+```
+
+```{r}
+lavaan::modificationindices(
+  efa3factor_fit,
+  sort. = TRUE)
+```
+
+```{r}
+lavaan::lavPredict(efa3factor_fit)
+```
+
+```{r}
+lavaanPlot::lavaanPlot(
+  efa3factor_fit,
+  coefs = TRUE,
+  stand = TRUE)
+```
+
+To make the plot interactive for editing, you can use the `plot_lavaan()` function of the `lavaangui` package [@R-lavaangui; @Karch2025_packages]:
 
 ```{r}
 #| eval: false
 
-lavaangui::plot_lavaan(efaOblique_fit)
+lavaangui::plot_lavaan(efa3factor_fit)
+```
+
+Here is a modification of the 3-factor model with correlated residuals:
+
+```{r}
+#| label: efa-3factorModified-syntax
+
+efa3factorModified_syntax <- '
+ # EFA Factor Loadings
+ efa("efa1")*f1 + 
+ efa("efa1")*f2 + 
+ efa("efa1")*f3 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
+ passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame + 
+ avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + 
+ avg_air_distance + max_air_distance + avg_air_yards_to_sticks + passing_cpoe + pass_comp_pct + 
+ passer_rating + completion_percentage_above_expectation
+ 
+ # Correlated Residuals
+ completionsPerGame ~~ attemptsPerGame
+ passing_yardsPerGame ~~ passing_yards_after_catchPerGame
+ attemptsPerGame ~~ passing_yardsPerGame
+ attemptsPerGame ~~ passing_air_yardsPerGame
+ passing_air_yardsPerGame ~~ passing_yards_after_catchPerGame
+ passing_yards_after_catchPerGame ~~ avg_completed_air_yards
+ passing_tdsPerGame ~~ passer_rating
+ completionsPerGame ~~ passing_air_yardsPerGame
+ max_completed_air_distance ~~ max_air_distance
+ aggressiveness ~~ completion_percentage_above_expectation
+'
+```
+
+```{r}
+#| label: efa-3factorModified-fit
+
+efa3factorModified_fit <- sem(
+  efa3factorModified_syntax,
+  data = dataForFA,
+  information = "observed",
+  missing = "ML",
+  estimator = "MLR",
+  rotation = "geomin",
+  bounds = "standard",
+  meanstructure = TRUE,
+  em.h1.iter.max = 2000000)
+```
+
+```{r}
+summary(
+  efa3factorModified_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
+```{r}
+lavaan::fitMeasures(
+  efa3factorModified_fit,
+  fit.measures = c(
+    "chisq", "df", "pvalue",
+    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq.scaling.factor",
+    "baseline.chisq","baseline.df","baseline.pvalue",
+    "rmsea", "cfi", "tli", "srmr",
+    "rmsea.robust", "cfi.robust", "tli.robust"))
+```
+
+```{r}
+lavaan::residuals(
+  efa3factorModified_fit,
+  type = "cor")
+```
+
+```{r}
+lavaan::modificationindices(
+  efa3factorModified_fit,
+  sort. = TRUE)
+```
+
+```{r}
+lavaan::lavPredict(efa3factorModified_fit)
+```
+
+```{r}
+lavaanPlot::lavaanPlot(
+  efa3factorModified_fit,
+  coefs = TRUE,
+  stand = TRUE)
+```
+
+```{r}
+#| eval: false
+
+lavaangui::plot_lavaan(efa3factorModified_fit)
+```
+
+```{r}
+anova(
+  efa3factorModified_fit,
+  efa3factor_fit
+)
 ```
 
 ## Confirmatory Factor Analysis {#sec-cfa}
@@ -367,45 +677,153 @@ In CFA, cross-loadings are not estimated unless the researcher specifies them.\i
 
 ### Example {#sec-cfaExample}
 
+```{r}
+#| eval: false
+#| include: false
+
+psych::principal(
+  dataForFA_standardized[faVars],
+  nfactors = 3,
+  rotate = "oblimin")
+
+'
+ #Factor loadings
+ F1 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + passing_interceptionsPerGame + passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame
+ F2 =~ pacr + avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + avg_air_yards_to_sticks + expected_completion_percentage + avg_air_distance + max_air_distance
+ F3 =~ passing_epa + passing_cpoe + pass_comp_pct + passer_rating + completion_percentage_above_expectation
+'
+
+factor1_syntax <- '
+ # Factor loadings
+ F1 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame
+ 
+ # Correlated residuals
+ passing_air_yardsPerGame ~~ passing_yards_after_catchPerGame
+ completionsPerGame ~~ attemptsPerGame
+ attemptsPerGame ~~ passing_yards_after_catchPerGame
+ passing_yards_after_catchPerGame ~~ passing_first_downsPerGame
+ completionsPerGame ~~ passing_first_downsPerGame
+ attemptsPerGame ~~ passing_tdsPerGame
+ completionsPerGame ~~ passing_tdsPerGame
+ passing_tdsPerGame ~~ passing_air_yardsPerGame
+'
+
+factor1_fit <- lavaan::cfa(
+  factor1_syntax,
+  data = dataForFA,
+  missing = "ML",
+  estimator = "MLR",
+  bounds = "standard",
+  std.lv = TRUE,
+  cluster = "player_id", # account for nested data within the same player (i.e., longitudinal data)
+  em.h1.iter.max = 2000000)
+
+summary(
+  factor1_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+
+lavaan::modificationindices(
+  factor1_fit,
+  sort. = TRUE)
+
+factor2_syntax <- '
+ # Factor loadings
+ F2 =~ avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + avg_air_distance + max_air_distance + avg_air_yards_to_sticks #expected_completion_percentage + pacr
+ 
+ # Correlated residuals
+ max_completed_air_distance ~~ max_air_distance
+ avg_completed_air_yards ~~ max_completed_air_distance
+ avg_completed_air_yards ~~ avg_air_distance
+ avg_completed_air_yards ~~ max_air_distance
+ avg_intended_air_yards ~~ max_completed_air_distance
+'
+
+factor2_fit <- lavaan::cfa(
+  factor2_syntax,
+  data = dataForFA,
+  missing = "ML",
+  estimator = "MLR",
+  bounds = "standard",
+  std.lv = TRUE,
+  cluster = "player_id", # account for nested data within the same player (i.e., longitudinal data)
+  em.h1.iter.max = 2000000)
+
+summary(
+  factor2_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+
+lavaan::modificationindices(
+  factor2_fit,
+  sort. = TRUE)
+
+factor3_syntax <- '
+ #Factor loadings
+ F3 =~ passing_cpoe + pass_comp_pct + passer_rating + completion_percentage_above_expectation
+'
+
+factor3_fit <- lavaan::cfa(
+  factor3_syntax,
+  data = dataForFA,
+  missing = "ML",
+  estimator = "MLR",
+  bounds = "standard",
+  std.lv = TRUE,
+  cluster = "player_id", # account for nested data within the same player (i.e., longitudinal data)
+  em.h1.iter.max = 2000000)
+
+summary(
+  factor3_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+
+lavaan::modificationindices(
+  factor3_fit,
+  sort. = TRUE)
+```
+
 We fit CFA models using the `cfa()` function of the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
 
 ```{r}
-cfaModel1_syntax <- '
+cfa1factor_syntax <- '
  #Factor loadings
- F1 =~ completions + attempts + passing_yards + passing_tds + passing_interceptions + sacks_suffered + sack_yards_lost + sack_fumbles + sack_fumbles_lost + passing_air_yards + passing_yards_after_catch + passing_first_downs + pass_inc + fumbles
- F2 =~ passing_air_yards + pacr + avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + avg_air_yards_to_sticks + expected_completion_percentage + avg_air_distance + max_air_distance
- F3 =~ passing_tds + passing_epa + passing_cpoe + pass_40_yds + pass_comp_pct + avg_air_yards_differential + max_completed_air_distance + avg_time_to_throw + avg_completed_air_yards + avg_intended_air_yards + passer_rating + completion_percentage_above_expectation
+ F1 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
+ passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame + 
+ avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + 
+ avg_air_distance + max_air_distance + avg_air_yards_to_sticks + passing_cpoe + pass_comp_pct + 
+ passer_rating + completion_percentage_above_expectation
 '
 ```
 
 ```{r}
-#| eval: false
+#| label: cfa-1factor-fit
 
-cfaModel1_fit <- lavaan::cfa(
-  cfaModel1_syntax,
+cfa1factor_fit <- lavaan::cfa(
+  cfa1factor_syntax,
   data = dataForFA,
   missing = "ML",
   estimator = "MLR",
+  bounds = "standard",
   std.lv = TRUE,
-  cluster = "player_id",
+  cluster = "player_id", # account for nested data within the same player (i.e., longitudinal data)
   em.h1.iter.max = 2000000)
 ```
 
 ```{r}
-#| eval: false
-
 summary(
-  cfaModel1_fit,
+  cfa1factor_fit,
   fit.measures = TRUE,
   standardized = TRUE,
   rsquare = TRUE)
 ```
 
 ```{r}
-#| eval: false
-
 lavaan::fitMeasures(
-  cfaModel1_fit,
+  cfa1factor_fit,
   fit.measures = c(
     "chisq", "df", "pvalue",
     "chisq.scaled", "df.scaled", "pvalue.scaled",
@@ -416,33 +834,310 @@ lavaan::fitMeasures(
 ```
 
 ```{r}
-#| eval: false
-
 lavaan::residuals(
-  cfaModel1_fit,
+  cfa1factor_fit,
   type = "cor")
 ```
 
 ```{r}
-#| eval: false
-
 lavaan::modificationindices(
-  cfaModel1_fit,
+  cfa1factor_fit,
   sort. = TRUE)
 ```
 
 ```{r}
-#| eval: false
-
-lavaan::lavPredict(cfaModel1_fit)
+lavaan::lavPredict(cfa1factor_fit)
 ```
 
-A path diagram of the CFA model was created using the `plot_lavaan()` function of the `lavaangui` package [@R-lavaangui; @Karch2025_packages].
+```{r}
+lavaanPlot::lavaanPlot(
+  cfa1factor_fit,
+  coefs = TRUE,
+  stand = TRUE)
+```
 
 ```{r}
 #| eval: false
 
-lavaangui::plot_lavaan(cfaModel1_fit)
+lavaangui::plot_lavaan(cfa1factor_fit)
+```
+
+```{r}
+cfa2factor_syntax <- '
+ #Factor loadings
+ F1 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
+ passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame
+ 
+ F2 =~ avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + 
+ avg_air_distance + max_air_distance + avg_air_yards_to_sticks + passing_cpoe + pass_comp_pct + 
+ passer_rating + completion_percentage_above_expectation
+'
+```
+
+```{r}
+#| label: cfa-2factor-fit
+
+cfa2factor_fit <- lavaan::cfa(
+  cfa2factor_syntax,
+  data = dataForFA,
+  missing = "ML",
+  estimator = "MLR",
+  bounds = "standard",
+  std.lv = TRUE,
+  cluster = "player_id", # account for nested data within the same player (i.e., longitudinal data)
+  em.h1.iter.max = 2000000)
+```
+
+```{r}
+summary(
+  cfa2factor_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
+```{r}
+lavaan::fitMeasures(
+  cfa2factor_fit,
+  fit.measures = c(
+    "chisq", "df", "pvalue",
+    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq.scaling.factor",
+    "baseline.chisq","baseline.df","baseline.pvalue",
+    "rmsea", "cfi", "tli", "srmr",
+    "rmsea.robust", "cfi.robust", "tli.robust"))
+```
+
+```{r}
+lavaan::residuals(
+  cfa2factor_fit,
+  type = "cor")
+```
+
+```{r}
+lavaan::modificationindices(
+  cfa2factor_fit,
+  sort. = TRUE)
+```
+
+```{r}
+lavaan::lavPredict(cfa2factor_fit)
+```
+
+```{r}
+lavaanPlot::lavaanPlot(
+  cfa2factor_fit,
+  coefs = TRUE,
+  stand = TRUE)
+```
+
+```{r}
+#| eval: false
+
+lavaangui::plot_lavaan(cfa2factor_fit)
+```
+
+```{r}
+anova(
+  cfa2factor_fit,
+  cfa1factor_fit
+)
+```
+
+```{r}
+cfa3factor_syntax <- '
+ #Factor loadings
+ F1 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
+ passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame
+ 
+ F2 =~ avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + 
+ avg_air_distance + max_air_distance + avg_air_yards_to_sticks
+ 
+ F3 =~ passing_cpoe + pass_comp_pct + passer_rating + completion_percentage_above_expectation
+'
+```
+
+```{r}
+#| label: cfa-3factor-fit
+
+cfa3factor_fit <- lavaan::cfa(
+  cfa3factor_syntax,
+  data = dataForFA,
+  missing = "ML",
+  estimator = "MLR",
+  bounds = "standard",
+  std.lv = TRUE,
+  cluster = "player_id", # account for nested data within the same player (i.e., longitudinal data)
+  em.h1.iter.max = 2000000)
+```
+
+```{r}
+summary(
+  cfa3factor_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
+```{r}
+lavaan::fitMeasures(
+  cfa3factor_fit,
+  fit.measures = c(
+    "chisq", "df", "pvalue",
+    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq.scaling.factor",
+    "baseline.chisq","baseline.df","baseline.pvalue",
+    "rmsea", "cfi", "tli", "srmr",
+    "rmsea.robust", "cfi.robust", "tli.robust"))
+```
+
+```{r}
+lavaan::residuals(
+  cfa3factor_fit,
+  type = "cor")
+```
+
+```{r}
+lavaan::modificationindices(
+  cfa3factor_fit,
+  sort. = TRUE)
+```
+
+```{r}
+lavaan::lavPredict(cfa3factor_fit)
+```
+
+```{r}
+lavaanPlot::lavaanPlot(
+  cfa3factor_fit,
+  coefs = TRUE,
+  stand = TRUE)
+```
+
+```{r}
+#| eval: false
+
+lavaangui::plot_lavaan(cfa3factor_fit)
+```
+
+```{r}
+anova(
+  cfa3factor_fit,
+  cfa2factor_fit
+)
+```
+
+```{r}
+cfa3factorModified_syntax <- '
+ # Factor loadings
+ F1 =~ NA*completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
+ passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame
+ 
+ F2 =~ NA*avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + 
+ avg_air_distance + max_air_distance + avg_air_yards_to_sticks
+ 
+ F3 =~ NA*passing_cpoe + pass_comp_pct + passer_rating + completion_percentage_above_expectation
+ 
+ # Cross loadings
+ #F3 =~ attemptsPerGame
+
+ # Correlated residuals
+ passing_air_yardsPerGame ~~ passing_yards_after_catchPerGame
+ completionsPerGame ~~ attemptsPerGame
+ attemptsPerGame ~~ passing_yards_after_catchPerGame
+ passing_yards_after_catchPerGame ~~ passing_first_downsPerGame
+ completionsPerGame ~~ passing_first_downsPerGame
+ attemptsPerGame ~~ passing_tdsPerGame
+ completionsPerGame ~~ passing_tdsPerGame
+ passing_tdsPerGame ~~ passing_air_yardsPerGame
+ 
+ max_completed_air_distance ~~ max_air_distance
+ avg_completed_air_yards ~~ max_completed_air_distance
+ avg_completed_air_yards ~~ avg_air_distance
+ avg_completed_air_yards ~~ max_air_distance
+ avg_intended_air_yards ~~ max_completed_air_distance
+ 
+ completionsPerGame ~~ pass_comp_pct
+ passing_yardsPerGame ~~ avg_completed_air_yards
+ passing_yardsPerGame ~~ max_completed_air_distance
+ passing_tdsPerGame ~~ passer_rating
+ aggressiveness ~~ completion_percentage_above_expectation
+ 
+ # Variances
+ F1 ~~ 1*F1
+ F2 ~~ 1*F2
+ #F3 ~~ 1*F3
+'
+```
+
+```{r}
+#| label: cfa-3factorModified-fit
+
+cfa3factorModified_fit <- lavaan::cfa(
+  cfa3factorModified_syntax,
+  data = dataForFA,
+  missing = "ML",
+  estimator = "MLR",
+  bounds = "standard",
+  #std.lv = TRUE,
+  cluster = "player_id", # account for nested data within the same player (i.e., longitudinal data)
+  em.h1.iter.max = 2000000)
+```
+
+```{r}
+summary(
+  cfa3factorModified_fit,
+  fit.measures = TRUE,
+  standardized = TRUE,
+  rsquare = TRUE)
+```
+
+```{r}
+lavaan::fitMeasures(
+  cfa3factorModified_fit,
+  fit.measures = c(
+    "chisq", "df", "pvalue",
+    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq.scaling.factor",
+    "baseline.chisq","baseline.df","baseline.pvalue",
+    "rmsea", "cfi", "tli", "srmr",
+    "rmsea.robust", "cfi.robust", "tli.robust"))
+```
+
+```{r}
+lavaan::residuals(
+  cfa3factorModified_fit,
+  type = "cor")
+```
+
+```{r}
+lavaan::modificationindices(
+  cfa3factorModified_fit,
+  sort. = TRUE)
+```
+
+```{r}
+lavaan::lavPredict(cfa3factorModified_fit)
+```
+
+```{r}
+lavaanPlot::lavaanPlot(
+  cfa3factorModified_fit,
+  coefs = TRUE,
+  stand = TRUE)
+```
+
+```{r}
+#| eval: false
+
+lavaangui::plot_lavaan(cfa3factorModified_fit)
+```
+
+```{r}
+anova(
+  cfa3factorModified_fit,
+  cfa3factor_fit
+)
 ```
 
 ## Determining the Number of Factors to Retain {#sec-factorAnalysisNumFactors}
