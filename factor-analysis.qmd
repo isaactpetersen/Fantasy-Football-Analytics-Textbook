@@ -88,7 +88,7 @@ nfl_nextGenStats_seasonal <- nfl_nextGenStats_weekly %>%
 
 ```{r}
 dataMerged <- full_join(
-  player_stats_seasonal_avgPerGame,
+  player_stats_seasonal_avgPerGame %>% select(-any_of("week")),
   nfl_nextGenStats_seasonal %>% select(-any_of(c("player_display_name","completions","attempts","receptions","targets"))),
   by = c("player_id" = "player_gsis_id","season"),
 )
@@ -540,7 +540,9 @@ lavaan::modificationindices(
 ```
 
 ```{r}
-lavaan::lavPredict(efa3factor_fit)
+efa3factor_factorScores <- lavaan::lavPredict(efa3factor_fit)
+
+head(efa3factor_factorScores)
 ```
 
 ```{r}
@@ -565,9 +567,9 @@ Here is a modification of the 3-factor model with correlated residuals:
 
 efa3factorModified_syntax <- '
  # EFA Factor Loadings
- efa("efa1")*f1 + 
- efa("efa1")*f2 + 
- efa("efa1")*f3 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
+ efa("efa1")*F1 + 
+ efa("efa1")*F2 + 
+ efa("efa1")*F3 =~ completionsPerGame + attemptsPerGame + passing_yardsPerGame + passing_tdsPerGame + 
  passing_air_yardsPerGame + passing_yards_after_catchPerGame + passing_first_downsPerGame + 
  avg_completed_air_yards + avg_intended_air_yards + aggressiveness + max_completed_air_distance + 
  avg_air_distance + max_air_distance + avg_air_yards_to_sticks + passing_cpoe + pass_comp_pct + 
@@ -635,7 +637,9 @@ lavaan::modificationindices(
 ```
 
 ```{r}
-lavaan::lavPredict(efa3factorModified_fit)
+efa3factorModified_factorScores <- lavaan::lavPredict(efa3factorModified_fit)
+
+head(efa3factorModified_factorScores)
 ```
 
 ```{r}
@@ -656,6 +660,45 @@ anova(
   efa3factorModified_fit,
   efa3factor_fit
 )
+```
+
+Here are the variables that had a standardized loading greater than 0.3 on each of the factors:
+
+```{r}
+factor1vars <- c(
+  "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame",
+  "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame")
+
+factor2vars <- c(
+  "avg_completed_air_yards","avg_intended_air_yards","aggressiveness","max_completed_air_distance",
+  "avg_air_distance","max_air_distance","avg_air_yards_to_sticks")
+
+factor3vars <- c(
+  "passing_cpoe","pass_comp_pct","passer_rating","completion_percentage_above_expectation")
+```
+
+```{r}
+efa3factorModified_factorScores[which.max(efa3factorModified_factorScores[,"F1"]),]
+```
+
+```{r}
+dataForFA[which.max(efa3factorModified_factorScores[,"F1"]), c("player_display_name", "season", factor1vars)]
+```
+
+```{r}
+efa3factorModified_factorScores[which.max(efa3factorModified_factorScores[,"F2"]),]
+```
+
+```{r}
+dataForFA[which.max(efa3factorModified_factorScores[,"F2"]), c("player_display_name", "season", factor2vars)]
+```
+
+```{r}
+efa3factorModified_factorScores[which.max(efa3factorModified_factorScores[,"F3"]),]
+```
+
+```{r}
+dataForFA[which.max(cfa3factorModified_factorScores[,"F3"]), c("player_display_name", "season", factor3vars)]
 ```
 
 ## Confirmatory Factor Analysis {#sec-cfa}
@@ -839,7 +882,9 @@ lavaan::modificationindices(
 ```
 
 ```{r}
-lavaan::lavPredict(cfa1factor_fit)
+cfa1factor_factorScores <- lavaan::lavPredict(cfa1factor_fit)
+
+head(cfa1factor_factorScores)
 ```
 
 ```{r}
@@ -914,7 +959,9 @@ lavaan::modificationindices(
 ```
 
 ```{r}
-lavaan::lavPredict(cfa2factor_fit)
+cfa2factor_factorScores <- lavaan::lavPredict(cfa2factor_fit)
+
+head(cfa2factor_factorScores)
 ```
 
 ```{r}
@@ -997,7 +1044,9 @@ lavaan::modificationindices(
 ```
 
 ```{r}
-lavaan::lavPredict(cfa3factor_fit)
+cfa3factor_factorScores <- lavaan::lavPredict(cfa3factor_fit)
+
+head(cfa3factor_factorScores)
 ```
 
 ```{r}
@@ -1059,7 +1108,6 @@ cfa3factorModified_syntax <- '
  # Variances
  F1 ~~ 1*F1
  F2 ~~ 1*F2
- #F3 ~~ 1*F3
 '
 ```
 
@@ -1110,7 +1158,9 @@ lavaan::modificationindices(
 ```
 
 ```{r}
-lavaan::lavPredict(cfa3factorModified_fit)
+cfa3factorModified_factorScores <- lavaan::lavPredict(cfa3factorModified_fit)
+
+head(cfa3factorModified_factorScores)
 ```
 
 ```{r}
@@ -1131,6 +1181,45 @@ anova(
   cfa3factorModified_fit,
   cfa3factor_fit
 )
+```
+
+Here are the variables that loaded onto each of the factors:
+
+```{r}
+factor1vars <- c(
+  "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame",
+  "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame")
+
+factor2vars <- c(
+  "avg_completed_air_yards","avg_intended_air_yards","aggressiveness","max_completed_air_distance",
+  "avg_air_distance","max_air_distance","avg_air_yards_to_sticks")
+
+factor3vars <- c(
+  "passing_cpoe","pass_comp_pct","passer_rating","completion_percentage_above_expectation")
+```
+
+```{r}
+cfa3factorModified_factorScores[which.max(cfa3factorModified_factorScores[,"F1"]),]
+```
+
+```{r}
+dataForFA[which.max(cfa3factorModified_factorScores[,"F1"]), c("player_display_name", "season", factor1vars)]
+```
+
+```{r}
+cfa3factorModified_factorScores[which.max(cfa3factorModified_factorScores[,"F2"]),]
+```
+
+```{r}
+dataForFA[which.max(cfa3factorModified_factorScores[,"F2"]), c("player_display_name", "season", factor2vars)]
+```
+
+```{r}
+cfa3factorModified_factorScores[which.max(cfa3factorModified_factorScores[,"F3"]),]
+```
+
+```{r}
+dataForFA[which.max(cfa3factorModified_factorScores[,"F3"]), c("player_display_name", "season", factor3vars)]
 ```
 
 ## Determining the Number of Factors to Retain {#sec-factorAnalysisNumFactors}
