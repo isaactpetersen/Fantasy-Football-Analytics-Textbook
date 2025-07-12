@@ -104,23 +104,39 @@ PCA does not have the same assumptions as [factor analysis](#sec-factorAnalysis)
 But if you estimate (6) eigenvectors and only keep (2), the model is a two-component model and whatever left becomes error.\index{principal component analysis}\index{measurement error}\index{eigenvector}
 Therefore, PCA does not have the same assumptions as [factor analysis](#sec-factorAnalysis), but it often ends up in the same place.\index{principal component analysis}\index{factor analysis}
 
-## Ensuring the Variables are on the Same Scale {#sec-pcaStandardize}
+## Decisions in Principal Component Analysis {#sec-pcaDecisions}
 
-Before performing a PCA, it is important to ensure that the variables included in the PCA are on the same scale.
+There are four primary decisions to make in PCA:
+
+1. what variables to include in the model and how to scale them
+1. whether and how to rotate components
+1. how many components to retain
+1. how to interpret and use the components
+
+As in [factor analysis](#sec-factorAnalysis), the answer you get can differ highly depending on the decisions you make.
+We provide guidance on each of these decisions below and in @sec-factorAnalysisDecisions.
+
+### 1. Variables to Include and their Scaling {#sec-variablesToInclude-pca}
+
+As in [factor analysis](#sec-factorAnalysis).
+The first decision when conducting a factor analysis is which variables to include and the scaling of those variables.
+Guidance on which variables to include is in @sec-variablesToInclude-factorAnalysis.
+
+In addition, before performing a PCA, it is important to ensure that the variables included in the PCA are on the same scale.
 PCA seeks to identify components that explain variance in the data, so if the variables are not on the same scale, some variables may contribute considerably more variance than others.
 A common way of ensuring that variables are on the same scale is to standardize them using, for example,  [*z*-scores](#sec-zScores).
 
-## Component Rotation {#sec-pcaRotation}
+### 2. Component Rotation {#sec-pcaRotation}
 
 Similar considerations as in [factor analysis](#sec-factorAnalysis) can be used to determine whether and how to rotate components in PCA.
 The considerations for determining whether and how to rotate factors in [factor analysis](#sec-factorAnalysis) are described in @sec-factorAnalysisRotation.
 
-## Determining the Number of Components to Retain {#sec-pcaNumComponents}
+### 3. Determining the Number of Components to Retain {#sec-pcaNumComponents}
 
 Similar criteria as in [factor analysis](#sec-factorAnalysis) can be used to determine the number of components to retain in PCA.
 The criteria for determining the number of factors to retain in [factor analysis](#sec-factorAnalysis) are described in @sec-factorAnalysisNumFactors.
 
-## Interpreting and Using PCA Components {#sec-interpretingAndUsingComponentsPCA}
+### 4. Interpreting and Using PCA Components {#sec-interpretingAndUsingComponentsPCA}
 
 The next step is interpreting the PCA components.\index{principal component analysis}
 Use theory to interpret and label the components.\index{principal component analysis}
@@ -152,6 +168,12 @@ By contrast, PCA assumes that the measures have no measurement error.\index{prin
 
 We generated the scree plot in @fig-pcaScreePlot1 using the `fa.parallel()` function of the `psych` package [@R-psych].
 
+The number of components to keep would depend on which criteria one uses.
+Based on the rule to keep factors whose eigenvalues are greater than one and based on the parallel test, we would keep nine components.
+However, based on the Cattell scree test (the "elbow" of the screen plot minus one), we would keep three components.
+If using the optimal coordinates, we would keep four components; if using the acceleration factor, we would keep one component.
+Therefore, interpretability of the components would be important for deciding how many components to keep.
+
 ```{r}
 #| label: fig-pcaScreePlot1
 #| fig-cap: "Scree Plot: With Comparisons to Simulated and Resampled Data."
@@ -180,6 +202,7 @@ nFactors::plotnScree(screeDataPCA)
 ```
 
 We generated the very simple structure (VSS) plots in Figures [-@fig-pcaVSSPlot1] and [-@fig-pcaVSSPlot2] using the `vss()` and `nfactors()` functions of the `psych` package [@R-psych].
+The optimal number of components based on VSS criterion is three components.
 
 ```{r}
 #| label: fig-pcaVSSPlot1
@@ -262,6 +285,13 @@ pca8ComponentOblique
 pca9ComponentOblique
 ```
 
+Based on the component solutions, the three-component solution maps onto our three-factor solution from [factor analysis](#sec-factorAnalysis).
+The three-component solution explains more than half of the variance in the variables.
+The fourth component in a four-component solution is not particularly interpretable, explains relatively little variance, and seems to be related to sacks: sacks suffered, sack yards lost, sack fumbles, and sack fumbles lost.
+However, two of the sack-related variables (sacks suffered and sack yards lost) load more strongly onto the first component, suggesting that these sack-related variables are better captured by another component.
+Moreover, sacks might be considered a scoring methodological component rather than a particular concept of interest.
+For these resources we prefer the three-component solution and choose to retain three components.
+
 ```{r}
 dataMergedWithPCA <- cbind(dataMerged, pca3ComponentOblique$scores)
 ```
@@ -318,6 +348,8 @@ Thus, we label component 2 as "Aggressiveness", which reflects throwing longer, 
 The variables that loaded most strongly onto component 3 appear to reflect Quarterback performance: passing touchdowns, passing expected points added, passing completion percentage above expectation, passes completed of 40 yards or more, pass completion percentage, air yards differential (intended air yards $-$ completed air yards; attempting deeper passes than he on average completes), maximum completed air distance, average time to throw, average completed air yards, average intended air yards, and passer rating.
 Quarterbacks who perform better tend to have higher values on those variables.
 Thus, we label component 3 as "Performance".
+
+Below are component scores from the PCA for the first six players:
 
 ```{r}
 pca3ComponentOblique$scores %>% 
