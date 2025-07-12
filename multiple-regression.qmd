@@ -23,6 +23,7 @@ library("ordinal")
 library("MASS")
 library("broom")
 library("effectsize")
+library("tidymodels")
 library("tidyverse")
 library("knitr")
 ```
@@ -429,7 +430,7 @@ A spread-level plot depicts the log of the absolute value of studentized residua
 Homoscedasticity in a spread-level plot is identified as a flat slope; a slope that differs from zero indicates heteroscedasticity.
 
 ```{r}
-#| layout: [[100], [50, 50]]
+#| layout: [[100], [50, 50], [50, 50]]
 #| label: fig-homscedasticityHeteroscedasticity
 #| fig-cap: "Example of Homoscedasticity and Heteroscedasticity in Residual Plots."
 #| fig-alt: "Example of Homoscedasticity and Heteroscedasticity in Residual Plots."
@@ -437,12 +438,14 @@ Homoscedasticity in a spread-level plot is identified as a flat slope; a slope t
 #|   - "Homoscedasticity"
 #|   - "Fan-Shaped Heteroscedasticity"
 #|   - "Bow-Tie-Shaped Heteroscedasticity"
+#|   - "Diamond-Shaped Heteroscedasticity"
+#|   - "Triangle-Shaped Heteroscedasticity"
 #| code-fold: true
 
 set.seed(52242)
+sampleSize <- 1000
 
 # 1. Homoscedasticity
-sampleSize <- 1000
 x1 <- runif(sampleSize, 0, 10)
 y1 <- 3 + 2 * x1 + rnorm(sampleSize, mean = 0, sd = 2)
 fit1 <- lm(y1 ~ x1)
@@ -464,6 +467,55 @@ fit3 <- lm(y3 ~ x3)
 res3 <- resid(fit3)
 fitted3 <- fitted(fit3)
 
+# 4. Diamond-shaped heteroscedasticity
+x4 <- runif(sampleSize, 0, 10)
+sd4 <- -abs(x4 - 5) + 5.5  # inverted bow-tie
+y4 <- 3 + 2 * x4 + rnorm(sampleSize, mean = 0, sd = sd4)
+fit4 <- lm(y4 ~ x4)
+res4 <- resid(fit4)
+fitted4 <- fitted(fit4)
+
+#5. Triangle-shaped heteroscedasticity
+height <- 10
+
+sample_triangle <- function(n, v1, v2, v3) {
+  u <- runif(n)
+  v <- runif(n)
+  is_flip <- u + v > 1
+  u[is_flip] <- 1 - u[is_flip]
+  v[is_flip] <- 1 - v[is_flip]
+  
+  x <- (1 - u - v) * v1[1] + u * v2[1] + v * v3[1]
+  y <- (1 - u - v) * v1[2] + u * v2[2] + v * v3[2]
+  
+  cbind(x, y)
+}
+
+# Triangle vertices
+v1 <- c(0, height)  # top left
+v2 <- c(10, height) # top right
+v3 <- c(5, 0)       # bottom center
+
+# Sample points inside triangle
+tri_points <- sample_triangle(
+  sampleSize,
+  v1,
+  v2,
+  v3)
+
+# Extract x and residuals
+x5 <- tri_points[, 1]
+residuals5 <- tri_points[, 2]
+
+# Generate outcome
+y5 <- 3 + 2 * x5 + residuals5
+
+# Fit model
+fit5 <- lm(y5 ~ x5)
+res5 <- resid(fit5)
+fitted5 <- fitted(fit5)
+
+# Plots
 plot(
   fitted1,
   res1,
@@ -492,6 +544,30 @@ plot(
   fitted3,
   res3,
   main = "Bow-Tie-Shaped Heteroscedasticity",
+  xlab = "Fitted value",
+  ylab = "Residual")
+
+abline(
+  h = 0,
+  lwd = 2,
+  col = "blue")
+
+plot(
+  fitted4,
+  res4,
+  main = "Diamond-Shaped Heteroscedasticity",
+  xlab = "Fitted value",
+  ylab = "Residual")
+
+abline(
+  h = 0,
+  lwd = 2,
+  col = "blue")
+
+plot(
+  fitted5,
+  res5,
+  main = "Triangle-Shaped Heteroscedasticity",
   xlab = "Fitted value",
   ylab = "Residual")
 
