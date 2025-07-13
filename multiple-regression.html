@@ -1181,16 +1181,16 @@ Formula: target_share ~ age + height + weight
 
 Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept    -2.75      0.12    -3.00    -2.51 1.00     4815     3192
-age           0.02      0.00     0.02     0.02 1.00     6851     3269
-height       -0.01      0.00    -0.01    -0.00 1.00     4812     2504
-weight        0.01      0.00     0.00     0.01 1.00     4823     3079
+Intercept    -2.75      0.13    -3.00    -2.51 1.00     4500     3001
+age           0.02      0.00     0.02     0.02 1.00     6082     2618
+height       -0.01      0.00    -0.01    -0.00 1.00     4526     2647
+weight        0.01      0.00     0.00     0.01 1.00     3748     3064
 
 Further Distributional Parameters:
     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-phi    12.23      0.09    12.07    12.40 1.00     2243     2372
-zoi     0.13      0.00     0.13     0.14 1.00     2225     2085
-coi     0.00      0.00     0.00     0.00 1.00     2319     2002
+phi    12.23      0.09    12.05    12.41 1.00     2424     2602
+zoi     0.13      0.00     0.13     0.14 1.00     2016     2030
+coi     0.00      0.00     0.00     0.00 1.00     2338     1862
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3768,7 +3768,7 @@ seed : int(0) </code></pre>
 <span id="cb134-25"><a href="#cb134-25"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_spec)</span>
 <span id="cb134-26"><a href="#cb134-26"></a></span>
 <span id="cb134-27"><a href="#cb134-27"></a><span class="co"># Function for fitting the models on the bootstrap samples</span></span>
-<span id="cb134-28"><a href="#cb134-28"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(split) {</span>
+<span id="cb134-28"><a href="#cb134-28"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(split, ...) {</span>
 <span id="cb134-29"><a href="#cb134-29"></a>  analysis_data <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">analysis</span>(split)</span>
 <span id="cb134-30"><a href="#cb134-30"></a>  fit <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">fit</span>(lm_workflow, <span class="at">data =</span> analysis_data)</span>
 <span id="cb134-31"><a href="#cb134-31"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(fit)</span>
@@ -3778,15 +3778,24 @@ seed : int(0) </code></pre>
 <span id="cb134-35"><a href="#cb134-35"></a>boot_models <span class="ot">&lt;-</span> boots <span class="sc">%&gt;%</span></span>
 <span id="cb134-36"><a href="#cb134-36"></a>  <span class="fu">mutate</span>(<span class="at">coef_info =</span> purrr<span class="sc">::</span><span class="fu">map</span>(splits, fit_lm))</span>
 <span id="cb134-37"><a href="#cb134-37"></a></span>
-<span id="cb134-38"><a href="#cb134-38"></a><span class="co"># Extract bootstrapped coefficients</span></span>
-<span id="cb134-39"><a href="#cb134-39"></a>boot_coefs <span class="ot">&lt;-</span> </span>
-<span id="cb134-40"><a href="#cb134-40"></a>  boot_models <span class="sc">%&gt;%</span> </span>
-<span id="cb134-41"><a href="#cb134-41"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(coef_info)</span>
-<span id="cb134-42"><a href="#cb134-42"></a></span>
-<span id="cb134-43"><a href="#cb134-43"></a><span class="co"># Compute percentile intervals for the regression coefficients</span></span>
-<span id="cb134-44"><a href="#cb134-44"></a>percentile_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_pctl</span>(boot_models, coef_info)</span>
-<span id="cb134-45"><a href="#cb134-45"></a></span>
-<span id="cb134-46"><a href="#cb134-46"></a>percentile_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb134-38"><a href="#cb134-38"></a><span class="co"># Extract bootstrapped coefficient estimates</span></span>
+<span id="cb134-39"><a href="#cb134-39"></a>boot_coefs <span class="ot">&lt;-</span> boot_models <span class="sc">%&gt;%</span></span>
+<span id="cb134-40"><a href="#cb134-40"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(coef_info)</span>
+<span id="cb134-41"><a href="#cb134-41"></a></span>
+<span id="cb134-42"><a href="#cb134-42"></a><span class="co"># Percentile confidence intervals</span></span>
+<span id="cb134-43"><a href="#cb134-43"></a>percentile_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_pctl</span>(</span>
+<span id="cb134-44"><a href="#cb134-44"></a>  <span class="at">.data =</span> boot_models,</span>
+<span id="cb134-45"><a href="#cb134-45"></a>  <span class="at">statistics =</span> coef_info)</span>
+<span id="cb134-46"><a href="#cb134-46"></a></span>
+<span id="cb134-47"><a href="#cb134-47"></a><span class="co"># Bias-corrected and accelerated confidence intervals</span></span>
+<span id="cb134-48"><a href="#cb134-48"></a>bca_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_bca</span>(</span>
+<span id="cb134-49"><a href="#cb134-49"></a>  <span class="at">.data =</span> boot_models,</span>
+<span id="cb134-50"><a href="#cb134-50"></a>  <span class="at">statistics =</span> coef_info,</span>
+<span id="cb134-51"><a href="#cb134-51"></a>  <span class="at">.fn =</span> fit_lm</span>
+<span id="cb134-52"><a href="#cb134-52"></a>)</span>
+<span id="cb134-53"><a href="#cb134-53"></a></span>
+<span id="cb134-54"><a href="#cb134-54"></a><span class="co"># View confidence intervals</span></span>
+<span id="cb134-55"><a href="#cb134-55"></a>percentile_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -3794,35 +3803,43 @@ seed : int(0) </code></pre>
   </script>
 </div>
 </div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb135"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1"></a>bca_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":[".lower"],"name":[2],"type":["dbl"],"align":["right"]},{"label":[".estimate"],"name":[3],"type":["dbl"],"align":["right"]},{"label":[".upper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":[".alpha"],"name":[5],"type":["dbl"],"align":["right"]},{"label":[".method"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"(Intercept)","2":"0.6816791085","3":"2.406487641","4":"4.032547015","5":"0.05","6":"BCa"},{"1":"age","2":"0.0183483367","3":"0.033563100","4":"0.050985370","5":"0.05","6":"BCa"},{"1":"height","2":"-0.0390665178","3":"-0.009677881","4":"0.021060204","5":"0.05","6":"BCa"},{"1":"weight","2":"-0.0007771743","3":"0.003666608","4":"0.007944101","5":"0.05","6":"BCa"},{"1":"target_share","2":"25.7948232046","3":"27.914049300","4":"29.570016286","5":"0.05","6":"BCa"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
 </div>
 <p>The distributions of the regression coefficients across boostraps are depicted in <a href="#fig-bootstrapRegressionCoefficients" class="quarto-xref">Figure&nbsp;<span>11.32</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb135"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1"></a><span class="fu">ggplot</span>(</span>
-<span id="cb135-2"><a href="#cb135-2"></a>  boot_coefs,</span>
-<span id="cb135-3"><a href="#cb135-3"></a>  <span class="fu">aes</span>(estimate)) <span class="sc">+</span></span>
-<span id="cb135-4"><a href="#cb135-4"></a>  <span class="fu">geom_histogram</span>(</span>
-<span id="cb135-5"><a href="#cb135-5"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
-<span id="cb135-6"><a href="#cb135-6"></a>    <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb135-7"><a href="#cb135-7"></a>  <span class="fu">facet_wrap</span>(</span>
-<span id="cb135-8"><a href="#cb135-8"></a>    <span class="sc">~</span> term,</span>
-<span id="cb135-9"><a href="#cb135-9"></a>    <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb135-10"><a href="#cb135-10"></a>  <span class="fu">geom_vline</span>(</span>
-<span id="cb135-11"><a href="#cb135-11"></a>    <span class="fu">aes</span>(</span>
-<span id="cb135-12"><a href="#cb135-12"></a>      <span class="at">xintercept =</span> .lower),</span>
-<span id="cb135-13"><a href="#cb135-13"></a>    <span class="at">data =</span> percentile_intervals,</span>
-<span id="cb135-14"><a href="#cb135-14"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
-<span id="cb135-15"><a href="#cb135-15"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb135-16"><a href="#cb135-16"></a>  <span class="fu">geom_vline</span>(</span>
-<span id="cb135-17"><a href="#cb135-17"></a>    <span class="fu">aes</span>(</span>
-<span id="cb135-18"><a href="#cb135-18"></a>      <span class="at">xintercept =</span> .upper),</span>
-<span id="cb135-19"><a href="#cb135-19"></a>    <span class="at">data =</span> percentile_intervals,</span>
-<span id="cb135-20"><a href="#cb135-20"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
-<span id="cb135-21"><a href="#cb135-21"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb135-22"><a href="#cb135-22"></a>  <span class="fu">labs</span>(</span>
-<span id="cb135-23"><a href="#cb135-23"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Distributions of Coefficients"</span>,</span>
-<span id="cb135-24"><a href="#cb135-24"></a>    <span class="at">x =</span> <span class="st">"Coefficient Estimate"</span>,</span>
-<span id="cb135-25"><a href="#cb135-25"></a>    <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
-<span id="cb135-26"><a href="#cb135-26"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb136-2"><a href="#cb136-2"></a>  boot_coefs,</span>
+<span id="cb136-3"><a href="#cb136-3"></a>  <span class="fu">aes</span>(estimate)) <span class="sc">+</span></span>
+<span id="cb136-4"><a href="#cb136-4"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb136-5"><a href="#cb136-5"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
+<span id="cb136-6"><a href="#cb136-6"></a>    <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb136-7"><a href="#cb136-7"></a>  <span class="fu">facet_wrap</span>(</span>
+<span id="cb136-8"><a href="#cb136-8"></a>    <span class="sc">~</span> term,</span>
+<span id="cb136-9"><a href="#cb136-9"></a>    <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb136-10"><a href="#cb136-10"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb136-11"><a href="#cb136-11"></a>    <span class="fu">aes</span>(</span>
+<span id="cb136-12"><a href="#cb136-12"></a>      <span class="at">xintercept =</span> .lower),</span>
+<span id="cb136-13"><a href="#cb136-13"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb136-14"><a href="#cb136-14"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb136-15"><a href="#cb136-15"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb136-16"><a href="#cb136-16"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb136-17"><a href="#cb136-17"></a>    <span class="fu">aes</span>(</span>
+<span id="cb136-18"><a href="#cb136-18"></a>      <span class="at">xintercept =</span> .upper),</span>
+<span id="cb136-19"><a href="#cb136-19"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb136-20"><a href="#cb136-20"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb136-21"><a href="#cb136-21"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb136-22"><a href="#cb136-22"></a>  <span class="fu">labs</span>(</span>
+<span id="cb136-23"><a href="#cb136-23"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Distributions of Coefficients"</span>,</span>
+<span id="cb136-24"><a href="#cb136-24"></a>    <span class="at">x =</span> <span class="st">"Coefficient Estimate"</span>,</span>
+<span id="cb136-25"><a href="#cb136-25"></a>    <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb136-26"><a href="#cb136-26"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-bootstrapRegressionCoefficients" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Parameter Estimates Across Bootstraps.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-bootstrapRegressionCoefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3843,24 +3860,24 @@ Figure&nbsp;11.32: Histogram of Parameter Estimates Across Bootstraps.
 </ul>
 <p>First, we mean-center the <a href="research-methods.html#sec-correlationalStudy">predictors</a>. In this case, we center the <a href="research-methods.html#sec-correlationalStudy">predictors</a> around the mean of height and weight for Wide Receivers:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb136-2"><a href="#cb136-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb137-2"><a href="#cb137-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we compute the interaction term as the multiplication of the two centered <a href="research-methods.html#sec-correlationalStudy">predictors</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we fit the moderated multiple regression model:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb138-2"><a href="#cb138-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
-<span id="cb138-3"><a href="#cb138-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb138-4"><a href="#cb138-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb138-5"><a href="#cb138-5"></a>)</span>
-<span id="cb138-6"><a href="#cb138-6"></a></span>
-<span id="cb138-7"><a href="#cb138-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb139-2"><a href="#cb139-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
+<span id="cb139-3"><a href="#cb139-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb139-4"><a href="#cb139-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb139-5"><a href="#cb139-5"></a>)</span>
+<span id="cb139-6"><a href="#cb139-6"></a></span>
+<span id="cb139-7"><a href="#cb139-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3888,21 +3905,21 @@ F-statistic: 28.46 on 3 and 5385 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <p>This model is equivalent to the model that includes the interaction term explicitly:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb140-2"><a href="#cb140-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
-<span id="cb140-3"><a href="#cb140-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb140-4"><a href="#cb140-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb140-5"><a href="#cb140-5"></a>)</span>
-<span id="cb140-6"><a href="#cb140-6"></a></span>
-<span id="cb140-7"><a href="#cb140-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb141-2"><a href="#cb141-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
+<span id="cb141-3"><a href="#cb141-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb141-4"><a href="#cb141-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb141-5"><a href="#cb141-5"></a>)</span>
+<span id="cb141-6"><a href="#cb141-6"></a></span>
+<span id="cb141-7"><a href="#cb141-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, we can visualize the interaction to understand it. We create an interaction plot (<a href="#fig-interactionPlot" class="quarto-xref">Figure&nbsp;<span>11.33</span></a>) and Johnson-Neyman plot (<a href="#fig-johnsonNeymanPlot" class="quarto-xref">Figure&nbsp;<span>11.34</span></a>) using the <code>interactions</code> package <span class="citation" data-cites="R-interactions">(<a href="references.html#ref-R-interactions" role="doc-biblioref">Long, 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
-<span id="cb141-2"><a href="#cb141-2"></a>  moderationModel,</span>
-<span id="cb141-3"><a href="#cb141-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb141-4"><a href="#cb141-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
+<span id="cb142-2"><a href="#cb142-2"></a>  moderationModel,</span>
+<span id="cb142-3"><a href="#cb142-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb142-4"><a href="#cb142-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-interactionPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Interaction Plot from Moderated Multiple Regression.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-interactionPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3915,11 +3932,11 @@ Figure&nbsp;11.33: Interaction Plot from Moderated Multiple Regression.
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
-<span id="cb142-2"><a href="#cb142-2"></a>  moderationModel,</span>
-<span id="cb142-3"><a href="#cb142-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb142-4"><a href="#cb142-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb142-5"><a href="#cb142-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
+<span id="cb143-2"><a href="#cb143-2"></a>  moderationModel,</span>
+<span id="cb143-3"><a href="#cb143-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb143-4"><a href="#cb143-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb143-5"><a href="#cb143-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>JOHNSON-NEYMAN INTERVAL
 
@@ -3941,11 +3958,11 @@ Figure&nbsp;11.34: Johnson-Neyman Plot from Moderated Multiple Regression.
 </div>
 <p>Here is a simple slopes analysis:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
-<span id="cb144-2"><a href="#cb144-2"></a>  moderationModel,</span>
-<span id="cb144-3"><a href="#cb144-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb144-4"><a href="#cb144-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb144-5"><a href="#cb144-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
+<span id="cb145-2"><a href="#cb145-2"></a>  moderationModel,</span>
+<span id="cb145-3"><a href="#cb145-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb145-4"><a href="#cb145-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb145-5"><a href="#cb145-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>SIMPLE SLOPES ANALYSIS
 
@@ -3972,31 +3989,13 @@ Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD):
 <span class="header-section-number">11.15</span> Mediation</h2>
 <p>A mediation model takes the following general form in the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb146-2"><a href="#cb146-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb146-3"><a href="#cb146-3"></a><span class="st">  Y ~ direct*X</span></span>
-<span id="cb146-4"><a href="#cb146-4"></a><span class="st">  </span></span>
-<span id="cb146-5"><a href="#cb146-5"></a><span class="st">  # mediator</span></span>
-<span id="cb146-6"><a href="#cb146-6"></a><span class="st">  M ~ a*X</span></span>
-<span id="cb146-7"><a href="#cb146-7"></a><span class="st">  Y ~ b*M</span></span>
-<span id="cb146-8"><a href="#cb146-8"></a><span class="st">  </span></span>
-<span id="cb146-9"><a href="#cb146-9"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb146-10"><a href="#cb146-10"></a><span class="st">  indirect := a*b</span></span>
-<span id="cb146-11"><a href="#cb146-11"></a><span class="st">  </span></span>
-<span id="cb146-12"><a href="#cb146-12"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb146-13"><a href="#cb146-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
-<span id="cb146-14"><a href="#cb146-14"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<p>Let’s substitute in our <a href="research-methods.html#sec-correlationalStudy">predictor</a>, <a href="research-methods.html#sec-correlationalStudy">outcome</a>, and hypothesized <a href="research-methods.html#sec-mediation">mediator</a>. In this case, we predict that receiving touchdowns partially accounts for the association between Wide Receiver’s target share and their fantasy points. This is a silly example because fantasy points are derived, in part, from touchdowns, so of course touchdowns will partially account for almost any effect on Wide Receivers’ fantasy points. This example is merely for demonstrating the process of developing and examining a mediation model.</p>
-<div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb147"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
 <span id="cb147-2"><a href="#cb147-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb147-3"><a href="#cb147-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb147-3"><a href="#cb147-3"></a><span class="st">  Y ~ direct*X</span></span>
 <span id="cb147-4"><a href="#cb147-4"></a><span class="st">  </span></span>
 <span id="cb147-5"><a href="#cb147-5"></a><span class="st">  # mediator</span></span>
-<span id="cb147-6"><a href="#cb147-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
-<span id="cb147-7"><a href="#cb147-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
+<span id="cb147-6"><a href="#cb147-6"></a><span class="st">  M ~ a*X</span></span>
+<span id="cb147-7"><a href="#cb147-7"></a><span class="st">  Y ~ b*M</span></span>
 <span id="cb147-8"><a href="#cb147-8"></a><span class="st">  </span></span>
 <span id="cb147-9"><a href="#cb147-9"></a><span class="st">  # indirect effect = a*b</span></span>
 <span id="cb147-10"><a href="#cb147-10"></a><span class="st">  indirect := a*b</span></span>
@@ -4006,27 +4005,45 @@ Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD):
 <span id="cb147-14"><a href="#cb147-14"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>Let’s substitute in our <a href="research-methods.html#sec-correlationalStudy">predictor</a>, <a href="research-methods.html#sec-correlationalStudy">outcome</a>, and hypothesized <a href="research-methods.html#sec-mediation">mediator</a>. In this case, we predict that receiving touchdowns partially accounts for the association between Wide Receiver’s target share and their fantasy points. This is a silly example because fantasy points are derived, in part, from touchdowns, so of course touchdowns will partially account for almost any effect on Wide Receivers’ fantasy points. This example is merely for demonstrating the process of developing and examining a mediation model.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb148-2"><a href="#cb148-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb148-3"><a href="#cb148-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb148-4"><a href="#cb148-4"></a><span class="st">  </span></span>
+<span id="cb148-5"><a href="#cb148-5"></a><span class="st">  # mediator</span></span>
+<span id="cb148-6"><a href="#cb148-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
+<span id="cb148-7"><a href="#cb148-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
+<span id="cb148-8"><a href="#cb148-8"></a><span class="st">  </span></span>
+<span id="cb148-9"><a href="#cb148-9"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb148-10"><a href="#cb148-10"></a><span class="st">  indirect := a*b</span></span>
+<span id="cb148-11"><a href="#cb148-11"></a><span class="st">  </span></span>
+<span id="cb148-12"><a href="#cb148-12"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb148-13"><a href="#cb148-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
+<span id="cb148-14"><a href="#cb148-14"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <p>To get a robust estimate of the indirect effect, we obtain bootstrapped estimates from 1,000 bootstrap draws. Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, but this example uses only 1,000 bootstrap draws for a shorter runtime.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb148-2"><a href="#cb148-2"></a>  mediationModel,</span>
-<span id="cb148-3"><a href="#cb148-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb148-4"><a href="#cb148-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb148-5"><a href="#cb148-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb148-6"><a href="#cb148-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb148-7"><a href="#cb148-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb148-8"><a href="#cb148-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb148-9"><a href="#cb148-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb148-10"><a href="#cb148-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb149-2"><a href="#cb149-2"></a>  mediationModel,</span>
+<span id="cb149-3"><a href="#cb149-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb149-4"><a href="#cb149-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb149-5"><a href="#cb149-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb149-6"><a href="#cb149-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb149-7"><a href="#cb149-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb149-8"><a href="#cb149-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb149-9"><a href="#cb149-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb149-10"><a href="#cb149-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a><span class="fu">summary</span>(</span>
-<span id="cb149-2"><a href="#cb149-2"></a>  mediationFit,</span>
-<span id="cb149-3"><a href="#cb149-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb149-4"><a href="#cb149-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb149-5"><a href="#cb149-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb150"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1"></a><span class="fu">summary</span>(</span>
+<span id="cb150-2"><a href="#cb150-2"></a>  mediationFit,</span>
+<span id="cb150-3"><a href="#cb150-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb150-4"><a href="#cb150-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb150-5"><a href="#cb150-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 16 iterations
 
@@ -4130,46 +4147,46 @@ Defined Parameters:
 </div>
 <p>We can also estimate a model with multiple hypothesized <a href="#sec-mediations">mediators</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb151-2"><a href="#cb151-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb151-3"><a href="#cb151-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
-<span id="cb151-4"><a href="#cb151-4"></a><span class="st">  </span></span>
-<span id="cb151-5"><a href="#cb151-5"></a><span class="st">  # mediator</span></span>
-<span id="cb151-6"><a href="#cb151-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
-<span id="cb151-7"><a href="#cb151-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
-<span id="cb151-8"><a href="#cb151-8"></a><span class="st">  </span></span>
-<span id="cb151-9"><a href="#cb151-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
-<span id="cb151-10"><a href="#cb151-10"></a><span class="st">  </span></span>
-<span id="cb151-11"><a href="#cb151-11"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb151-12"><a href="#cb151-12"></a><span class="st">  indirect1 := a1*b1</span></span>
-<span id="cb151-13"><a href="#cb151-13"></a><span class="st">  indirect2 := a2*b2</span></span>
-<span id="cb151-14"><a href="#cb151-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
-<span id="cb151-15"><a href="#cb151-15"></a><span class="st">  </span></span>
-<span id="cb151-16"><a href="#cb151-16"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb151-17"><a href="#cb151-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
-<span id="cb151-18"><a href="#cb151-18"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb152-2"><a href="#cb152-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb152-3"><a href="#cb152-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb152-4"><a href="#cb152-4"></a><span class="st">  </span></span>
+<span id="cb152-5"><a href="#cb152-5"></a><span class="st">  # mediator</span></span>
+<span id="cb152-6"><a href="#cb152-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
+<span id="cb152-7"><a href="#cb152-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
+<span id="cb152-8"><a href="#cb152-8"></a><span class="st">  </span></span>
+<span id="cb152-9"><a href="#cb152-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
+<span id="cb152-10"><a href="#cb152-10"></a><span class="st">  </span></span>
+<span id="cb152-11"><a href="#cb152-11"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb152-12"><a href="#cb152-12"></a><span class="st">  indirect1 := a1*b1</span></span>
+<span id="cb152-13"><a href="#cb152-13"></a><span class="st">  indirect2 := a2*b2</span></span>
+<span id="cb152-14"><a href="#cb152-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
+<span id="cb152-15"><a href="#cb152-15"></a><span class="st">  </span></span>
+<span id="cb152-16"><a href="#cb152-16"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb152-17"><a href="#cb152-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
+<span id="cb152-18"><a href="#cb152-18"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb152-2"><a href="#cb152-2"></a>  multipleMediatorModel,</span>
-<span id="cb152-3"><a href="#cb152-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb152-4"><a href="#cb152-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb152-5"><a href="#cb152-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb152-6"><a href="#cb152-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb152-7"><a href="#cb152-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb152-8"><a href="#cb152-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb152-9"><a href="#cb152-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb152-10"><a href="#cb152-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb153-2"><a href="#cb153-2"></a>  multipleMediatorModel,</span>
+<span id="cb153-3"><a href="#cb153-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb153-4"><a href="#cb153-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb153-5"><a href="#cb153-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb153-6"><a href="#cb153-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb153-7"><a href="#cb153-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb153-8"><a href="#cb153-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb153-9"><a href="#cb153-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb153-10"><a href="#cb153-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1"></a><span class="fu">summary</span>(</span>
-<span id="cb153-2"><a href="#cb153-2"></a>  multipleMediatorFit,</span>
-<span id="cb153-3"><a href="#cb153-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb153-4"><a href="#cb153-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb153-5"><a href="#cb153-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a><span class="fu">summary</span>(</span>
+<span id="cb154-2"><a href="#cb154-2"></a>  multipleMediatorFit,</span>
+<span id="cb154-3"><a href="#cb154-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb154-4"><a href="#cb154-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb154-5"><a href="#cb154-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 33 iterations
 
@@ -4286,15 +4303,15 @@ Defined Parameters:
 </section><section id="sec-multipleRegressionBayesian" class="level2" data-number="11.16"><h2 data-number="11.16" class="anchored" data-anchor-id="sec-multipleRegressionBayesian">
 <span class="header-section-number">11.16</span> Bayesian Multiple Regression</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
-<span id="cb155-2"><a href="#cb155-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb155-3"><a href="#cb155-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb155-4"><a href="#cb155-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
-<span id="cb155-5"><a href="#cb155-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
+<span id="cb156-2"><a href="#cb156-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb156-3"><a href="#cb156-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb156-4"><a href="#cb156-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
+<span id="cb156-5"><a href="#cb156-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb157"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> Family: gaussian 
   Links: mu = identity; sigma = identity 
@@ -4305,25 +4322,25 @@ Formula: fantasyPoints_transformed ~ age + height + weight + I(log(target_share 
 
 Regression Coefficients:
                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept              2.36      0.82     0.76     4.04 1.00     3298     2616
-age                    0.03      0.01     0.02     0.05 1.00     3566     2851
-height                -0.01      0.01    -0.04     0.02 1.00     3075     2609
-weight                 0.00      0.00    -0.00     0.01 1.00     3477     3333
-Ilogtarget_shareP1    27.87      0.31    27.29    28.48 1.00     3659     2610
+Intercept              2.38      0.84     0.72     4.01 1.00     3585     3386
+age                    0.03      0.01     0.02     0.05 1.00     4121     2648
+height                -0.01      0.01    -0.04     0.02 1.00     3335     2946
+weight                 0.00      0.00    -0.00     0.01 1.00     3647     3236
+Ilogtarget_shareP1    27.87      0.29    27.30    28.44 1.00     3776     2511
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     1.57      0.02     1.54     1.61 1.00     4174     2831
+sigma     1.57      0.02     1.54     1.61 1.00     4161     2949
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb159"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># Bayesian R2 with Compatibility Interval
 
-  Conditional R2: 0.677 (95% CI [0.668, 0.686])</code></pre>
+  Conditional R2: 0.677 (95% CI [0.668, 0.685])</code></pre>
 </div>
 </div>
 </section><section id="sec-multipleRegressionConclusion" class="level2" data-number="11.17"><h2 data-number="11.17" class="anchored" data-anchor-id="sec-multipleRegressionConclusion">
@@ -4332,7 +4349,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </section><section id="sec-multipleRegressionSessionInfo" class="level2" data-number="11.18"><h2 data-number="11.18" class="anchored" data-anchor-id="sec-multipleRegressionSessionInfo">
 <span class="header-section-number">11.18</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
@@ -4355,21 +4372,21 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] knitr_1.50          lubridate_1.9.4     forcats_1.0.0      
- [4] stringr_1.5.1       readr_2.1.5         tidyverse_2.0.0    
- [7] yardstick_1.3.2     workflowsets_1.1.1  workflows_1.2.0    
-[10] tune_1.3.0          tidyr_1.3.1         tibble_3.3.0       
-[13] rsample_1.3.0       recipes_1.3.1       purrr_1.1.0        
-[16] parsnip_1.3.2       modeldata_1.4.0     infer_1.0.9        
-[19] dplyr_1.1.4         dials_1.4.0         scales_1.4.0       
-[22] tidymodels_1.3.0    effectsize_1.0.1    broom_1.0.8        
-[25] MASS_7.3-65         ordinal_2023.12-4.1 robustbase_0.99-4-1
-[28] brms_2.22.0         Rcpp_1.1.0          interactions_1.2.0 
-[31] miceadds_3.17-44    mice_3.18.0         lavaan_0.6-19      
-[34] performance_0.15.0  lme4_1.1-37         Matrix_1.7-3       
-[37] caret_7.0-1         lattice_0.22-7      ggplot2_3.5.2      
-[40] car_3.1-3           carData_3.0-5       rms_8.0-0          
-[43] Hmisc_5.2-3         petersenlab_1.1.7  
+ [1] future_1.58.0       knitr_1.50          lubridate_1.9.4    
+ [4] forcats_1.0.0       stringr_1.5.1       readr_2.1.5        
+ [7] tidyverse_2.0.0     yardstick_1.3.2     workflowsets_1.1.1 
+[10] workflows_1.2.0     tune_1.3.0          tidyr_1.3.1        
+[13] tibble_3.3.0        rsample_1.3.0       recipes_1.3.1      
+[16] purrr_1.1.0         parsnip_1.3.2       modeldata_1.4.0    
+[19] infer_1.0.9         dplyr_1.1.4         dials_1.4.0        
+[22] scales_1.4.0        tidymodels_1.3.0    effectsize_1.0.1   
+[25] broom_1.0.8         MASS_7.3-65         ordinal_2023.12-4.1
+[28] robustbase_0.99-4-1 brms_2.22.0         Rcpp_1.1.0         
+[31] interactions_1.2.0  miceadds_3.17-44    mice_3.18.0        
+[34] lavaan_0.6-19       performance_0.15.0  lme4_1.1-37        
+[37] Matrix_1.7-3        caret_7.0-1         lattice_0.22-7     
+[40] ggplot2_3.5.2       car_3.1-3           carData_3.0-5      
+[43] rms_8.0-0           Hmisc_5.2-3         petersenlab_1.1.7  
 
 loaded via a namespace (and not attached):
   [1] fs_1.6.6             matrixStats_1.5.0    sparsevctrs_0.3.4   
@@ -4419,10 +4436,10 @@ loaded via a namespace (and not attached):
 [133] ps_1.9.1             reshape2_1.4.4       stats4_4.5.1        
 [136] rstantools_2.4.0     evaluate_1.0.4       mitools_2.4         
 [139] RcppParallel_5.1.10  nloptr_2.2.1         tzdb_0.5.0          
-[142] foreach_1.5.2        MatrixModels_0.5-4   future_1.58.0       
-[145] xtable_1.8-4         e1071_1.7-16         viridisLite_0.4.2   
-[148] class_7.3-23         cluster_2.1.8.1      timechange_0.3.0    
-[151] globals_0.18.0       bridgesampling_1.1-2</code></pre>
+[142] foreach_1.5.2        MatrixModels_0.5-4   xtable_1.8-4        
+[145] e1071_1.7-16         viridisLite_0.4.2    class_7.3-23        
+[148] cluster_2.1.8.1      timechange_0.3.0     globals_0.18.0      
+[151] bridgesampling_1.1-2</code></pre>
 </div>
 </div>
 
