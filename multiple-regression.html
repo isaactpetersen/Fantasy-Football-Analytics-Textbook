@@ -746,8 +746,9 @@ window.Quarto = {
 <span id="cb1-14"><a href="#cb1-14"></a><span class="fu">library</span>(<span class="st">"MASS"</span>)</span>
 <span id="cb1-15"><a href="#cb1-15"></a><span class="fu">library</span>(<span class="st">"broom"</span>)</span>
 <span id="cb1-16"><a href="#cb1-16"></a><span class="fu">library</span>(<span class="st">"effectsize"</span>)</span>
-<span id="cb1-17"><a href="#cb1-17"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
-<span id="cb1-18"><a href="#cb1-18"></a><span class="fu">library</span>(<span class="st">"knitr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-17"><a href="#cb1-17"></a><span class="fu">library</span>(<span class="st">"tidymodels"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19"></a><span class="fu">library</span>(<span class="st">"knitr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="sec-multipleRegressionLoadData" class="level3" data-number="11.1.2"><h3 data-number="11.1.2" class="anchored" data-anchor-id="sec-multipleRegressionLoadData">
@@ -1180,16 +1181,16 @@ Formula: target_share ~ age + height + weight
 
 Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept    -2.76      0.13    -3.00    -2.51 1.00     4813     3205
-age           0.02      0.00     0.02     0.02 1.00     5628     2718
-height       -0.01      0.00    -0.01    -0.00 1.00     4709     2711
-weight        0.01      0.00     0.00     0.01 1.00     4196     3178
+Intercept    -2.75      0.12    -3.00    -2.51 1.00     4815     3192
+age           0.02      0.00     0.02     0.02 1.00     6851     3269
+height       -0.01      0.00    -0.01    -0.00 1.00     4812     2504
+weight        0.01      0.00     0.00     0.01 1.00     4823     3079
 
 Further Distributional Parameters:
     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-phi    12.24      0.09    12.07    12.41 1.00     2362     2316
-zoi     0.13      0.00     0.13     0.14 1.00     2176     1818
-coi     0.00      0.00     0.00     0.00 1.00     2143     1966
+phi    12.23      0.09    12.07    12.40 1.00     2243     2372
+zoi     0.13      0.00     0.13     0.14 1.00     2225     2085
+coi     0.00      0.00     0.00     0.00 1.00     2319     2002
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1199,7 +1200,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># Bayesian R2 with Compatibility Interval
 
-  Conditional R2: 0.011 (95% CI [0.009, 0.012])</code></pre>
+  Conditional R2: 0.011 (95% CI [0.009, 0.013])</code></pre>
 </div>
 </div>
 </section></section><section id="sec-assumptionsRegression" class="level2" data-number="11.5"><h2 data-number="11.5" class="anchored" data-anchor-id="sec-assumptionsRegression">
@@ -1304,11 +1305,11 @@ Figure&nbsp;11.2: Example Associations Depicted With Scatterplots.
 </section><section id="sec-assumptionsRegressionEvaluatingHomoscedasticity" class="level4" data-number="11.5.1.2"><h4 data-number="11.5.1.2" class="anchored" data-anchor-id="sec-assumptionsRegressionEvaluatingHomoscedasticity">
 <span class="header-section-number">11.5.1.2</span> Homoscedasticity</h4>
 <p>To evaluate homoscedasticity, we can evaluate a residual plot (<a href="#fig-residualPlots" class="quarto-xref">Figure&nbsp;<span>11.21</span></a>) and spread-level plot (<a href="#fig-spreadLevelPlot" class="quarto-xref">Figure&nbsp;<span>11.22</span></a>). A residual plot depicts the residuals on the y-axis as a function of the model’s fitted values on the x-axis. Homoscedasticity in a residual plot is identified as a constant spread of residuals versus fitted values—the residuals do not show a fan, cone, or bow-tie shape; a fan, cone, or bow-tie shape indicates heteroscedasticity. In a residual plot, a fan or cone shape indicates increasing or decreasing variance in the residuals as a function of the fitted values; a bow-tie shape indicates that the residuals are smallest in the middle of the fitted values and greatest on the extremes of the fitted values. A spread-level plot depicts the log of the absolute value of studentized residuals on the y-axis as a function of the log of the model’s fitted values on the x-axis. Homoscedasticity in a spread-level plot is identified as a flat slope; a slope that differs from zero indicates heteroscedasticity.</p>
-<div class="cell" data-layout="[[100],[50,50]]">
+<div class="cell" data-layout="[[100],[50,50],[50,50]]">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
-<span id="cb43-2"><a href="#cb43-2"></a></span>
-<span id="cb43-3"><a href="#cb43-3"></a><span class="co"># 1. Homoscedasticity</span></span>
-<span id="cb43-4"><a href="#cb43-4"></a>sampleSize <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb43-2"><a href="#cb43-2"></a>sampleSize <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb43-3"><a href="#cb43-3"></a></span>
+<span id="cb43-4"><a href="#cb43-4"></a><span class="co"># 1. Homoscedasticity</span></span>
 <span id="cb43-5"><a href="#cb43-5"></a>x1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(sampleSize, <span class="dv">0</span>, <span class="dv">10</span>)</span>
 <span id="cb43-6"><a href="#cb43-6"></a>y1 <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(sampleSize, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
 <span id="cb43-7"><a href="#cb43-7"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y1 <span class="sc">~</span> x1)</span>
@@ -1330,41 +1331,114 @@ Figure&nbsp;11.2: Example Associations Depicted With Scatterplots.
 <span id="cb43-23"><a href="#cb43-23"></a>res3 <span class="ot">&lt;-</span> <span class="fu">resid</span>(fit3)</span>
 <span id="cb43-24"><a href="#cb43-24"></a>fitted3 <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit3)</span>
 <span id="cb43-25"><a href="#cb43-25"></a></span>
-<span id="cb43-26"><a href="#cb43-26"></a><span class="fu">plot</span>(</span>
-<span id="cb43-27"><a href="#cb43-27"></a>  fitted1,</span>
-<span id="cb43-28"><a href="#cb43-28"></a>  res1,</span>
-<span id="cb43-29"><a href="#cb43-29"></a>  <span class="at">main =</span> <span class="st">"Homoscedasticity"</span>,</span>
-<span id="cb43-30"><a href="#cb43-30"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
-<span id="cb43-31"><a href="#cb43-31"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
-<span id="cb43-32"><a href="#cb43-32"></a></span>
-<span id="cb43-33"><a href="#cb43-33"></a><span class="fu">abline</span>(</span>
-<span id="cb43-34"><a href="#cb43-34"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
-<span id="cb43-35"><a href="#cb43-35"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb43-36"><a href="#cb43-36"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span>
-<span id="cb43-37"><a href="#cb43-37"></a></span>
-<span id="cb43-38"><a href="#cb43-38"></a><span class="fu">plot</span>(</span>
-<span id="cb43-39"><a href="#cb43-39"></a>  fitted2,</span>
-<span id="cb43-40"><a href="#cb43-40"></a>  res2,</span>
-<span id="cb43-41"><a href="#cb43-41"></a>  <span class="at">main =</span> <span class="st">"Fan-Shaped Heteroscedasticity"</span>,</span>
-<span id="cb43-42"><a href="#cb43-42"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
-<span id="cb43-43"><a href="#cb43-43"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
-<span id="cb43-44"><a href="#cb43-44"></a></span>
-<span id="cb43-45"><a href="#cb43-45"></a><span class="fu">abline</span>(</span>
-<span id="cb43-46"><a href="#cb43-46"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
-<span id="cb43-47"><a href="#cb43-47"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb43-48"><a href="#cb43-48"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb43-26"><a href="#cb43-26"></a><span class="co"># 4. Diamond-shaped heteroscedasticity</span></span>
+<span id="cb43-27"><a href="#cb43-27"></a>x4 <span class="ot">&lt;-</span> <span class="fu">runif</span>(sampleSize, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb43-28"><a href="#cb43-28"></a>sd4 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">abs</span>(x4 <span class="sc">-</span> <span class="dv">5</span>) <span class="sc">+</span> <span class="fl">5.5</span>  <span class="co"># inverted bow-tie</span></span>
+<span id="cb43-29"><a href="#cb43-29"></a>y4 <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x4 <span class="sc">+</span> <span class="fu">rnorm</span>(sampleSize, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sd4)</span>
+<span id="cb43-30"><a href="#cb43-30"></a>fit4 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y4 <span class="sc">~</span> x4)</span>
+<span id="cb43-31"><a href="#cb43-31"></a>res4 <span class="ot">&lt;-</span> <span class="fu">resid</span>(fit4)</span>
+<span id="cb43-32"><a href="#cb43-32"></a>fitted4 <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit4)</span>
+<span id="cb43-33"><a href="#cb43-33"></a></span>
+<span id="cb43-34"><a href="#cb43-34"></a><span class="co">#5. Triangle-shaped heteroscedasticity</span></span>
+<span id="cb43-35"><a href="#cb43-35"></a>height <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb43-36"><a href="#cb43-36"></a></span>
+<span id="cb43-37"><a href="#cb43-37"></a>sample_triangle <span class="ot">&lt;-</span> <span class="cf">function</span>(n, v1, v2, v3) {</span>
+<span id="cb43-38"><a href="#cb43-38"></a>  u <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb43-39"><a href="#cb43-39"></a>  v <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb43-40"><a href="#cb43-40"></a>  is_flip <span class="ot">&lt;-</span> u <span class="sc">+</span> v <span class="sc">&gt;</span> <span class="dv">1</span></span>
+<span id="cb43-41"><a href="#cb43-41"></a>  u[is_flip] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> u[is_flip]</span>
+<span id="cb43-42"><a href="#cb43-42"></a>  v[is_flip] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> v[is_flip]</span>
+<span id="cb43-43"><a href="#cb43-43"></a>  </span>
+<span id="cb43-44"><a href="#cb43-44"></a>  x <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> u <span class="sc">-</span> v) <span class="sc">*</span> v1[<span class="dv">1</span>] <span class="sc">+</span> u <span class="sc">*</span> v2[<span class="dv">1</span>] <span class="sc">+</span> v <span class="sc">*</span> v3[<span class="dv">1</span>]</span>
+<span id="cb43-45"><a href="#cb43-45"></a>  y <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> u <span class="sc">-</span> v) <span class="sc">*</span> v1[<span class="dv">2</span>] <span class="sc">+</span> u <span class="sc">*</span> v2[<span class="dv">2</span>] <span class="sc">+</span> v <span class="sc">*</span> v3[<span class="dv">2</span>]</span>
+<span id="cb43-46"><a href="#cb43-46"></a>  </span>
+<span id="cb43-47"><a href="#cb43-47"></a>  <span class="fu">cbind</span>(x, y)</span>
+<span id="cb43-48"><a href="#cb43-48"></a>}</span>
 <span id="cb43-49"><a href="#cb43-49"></a></span>
-<span id="cb43-50"><a href="#cb43-50"></a><span class="fu">plot</span>(</span>
-<span id="cb43-51"><a href="#cb43-51"></a>  fitted3,</span>
-<span id="cb43-52"><a href="#cb43-52"></a>  res3,</span>
-<span id="cb43-53"><a href="#cb43-53"></a>  <span class="at">main =</span> <span class="st">"Bow-Tie-Shaped Heteroscedasticity"</span>,</span>
-<span id="cb43-54"><a href="#cb43-54"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
-<span id="cb43-55"><a href="#cb43-55"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
-<span id="cb43-56"><a href="#cb43-56"></a></span>
-<span id="cb43-57"><a href="#cb43-57"></a><span class="fu">abline</span>(</span>
-<span id="cb43-58"><a href="#cb43-58"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
-<span id="cb43-59"><a href="#cb43-59"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb43-60"><a href="#cb43-60"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb43-50"><a href="#cb43-50"></a><span class="co"># Triangle vertices</span></span>
+<span id="cb43-51"><a href="#cb43-51"></a>v1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, height)  <span class="co"># top left</span></span>
+<span id="cb43-52"><a href="#cb43-52"></a>v2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, height) <span class="co"># top right</span></span>
+<span id="cb43-53"><a href="#cb43-53"></a>v3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">0</span>)       <span class="co"># bottom center</span></span>
+<span id="cb43-54"><a href="#cb43-54"></a></span>
+<span id="cb43-55"><a href="#cb43-55"></a><span class="co"># Sample points inside triangle</span></span>
+<span id="cb43-56"><a href="#cb43-56"></a>tri_points <span class="ot">&lt;-</span> <span class="fu">sample_triangle</span>(</span>
+<span id="cb43-57"><a href="#cb43-57"></a>  sampleSize,</span>
+<span id="cb43-58"><a href="#cb43-58"></a>  v1,</span>
+<span id="cb43-59"><a href="#cb43-59"></a>  v2,</span>
+<span id="cb43-60"><a href="#cb43-60"></a>  v3)</span>
+<span id="cb43-61"><a href="#cb43-61"></a></span>
+<span id="cb43-62"><a href="#cb43-62"></a><span class="co"># Extract x and residuals</span></span>
+<span id="cb43-63"><a href="#cb43-63"></a>x5 <span class="ot">&lt;-</span> tri_points[, <span class="dv">1</span>]</span>
+<span id="cb43-64"><a href="#cb43-64"></a>residuals5 <span class="ot">&lt;-</span> tri_points[, <span class="dv">2</span>]</span>
+<span id="cb43-65"><a href="#cb43-65"></a></span>
+<span id="cb43-66"><a href="#cb43-66"></a><span class="co"># Generate outcome</span></span>
+<span id="cb43-67"><a href="#cb43-67"></a>y5 <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x5 <span class="sc">+</span> residuals5</span>
+<span id="cb43-68"><a href="#cb43-68"></a></span>
+<span id="cb43-69"><a href="#cb43-69"></a><span class="co"># Fit model</span></span>
+<span id="cb43-70"><a href="#cb43-70"></a>fit5 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y5 <span class="sc">~</span> x5)</span>
+<span id="cb43-71"><a href="#cb43-71"></a>res5 <span class="ot">&lt;-</span> <span class="fu">resid</span>(fit5)</span>
+<span id="cb43-72"><a href="#cb43-72"></a>fitted5 <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit5)</span>
+<span id="cb43-73"><a href="#cb43-73"></a></span>
+<span id="cb43-74"><a href="#cb43-74"></a><span class="co"># Plots</span></span>
+<span id="cb43-75"><a href="#cb43-75"></a><span class="fu">plot</span>(</span>
+<span id="cb43-76"><a href="#cb43-76"></a>  fitted1,</span>
+<span id="cb43-77"><a href="#cb43-77"></a>  res1,</span>
+<span id="cb43-78"><a href="#cb43-78"></a>  <span class="at">main =</span> <span class="st">"Homoscedasticity"</span>,</span>
+<span id="cb43-79"><a href="#cb43-79"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
+<span id="cb43-80"><a href="#cb43-80"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
+<span id="cb43-81"><a href="#cb43-81"></a></span>
+<span id="cb43-82"><a href="#cb43-82"></a><span class="fu">abline</span>(</span>
+<span id="cb43-83"><a href="#cb43-83"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
+<span id="cb43-84"><a href="#cb43-84"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb43-85"><a href="#cb43-85"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb43-86"><a href="#cb43-86"></a></span>
+<span id="cb43-87"><a href="#cb43-87"></a><span class="fu">plot</span>(</span>
+<span id="cb43-88"><a href="#cb43-88"></a>  fitted2,</span>
+<span id="cb43-89"><a href="#cb43-89"></a>  res2,</span>
+<span id="cb43-90"><a href="#cb43-90"></a>  <span class="at">main =</span> <span class="st">"Fan-Shaped Heteroscedasticity"</span>,</span>
+<span id="cb43-91"><a href="#cb43-91"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
+<span id="cb43-92"><a href="#cb43-92"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
+<span id="cb43-93"><a href="#cb43-93"></a></span>
+<span id="cb43-94"><a href="#cb43-94"></a><span class="fu">abline</span>(</span>
+<span id="cb43-95"><a href="#cb43-95"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
+<span id="cb43-96"><a href="#cb43-96"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb43-97"><a href="#cb43-97"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb43-98"><a href="#cb43-98"></a></span>
+<span id="cb43-99"><a href="#cb43-99"></a><span class="fu">plot</span>(</span>
+<span id="cb43-100"><a href="#cb43-100"></a>  fitted3,</span>
+<span id="cb43-101"><a href="#cb43-101"></a>  res3,</span>
+<span id="cb43-102"><a href="#cb43-102"></a>  <span class="at">main =</span> <span class="st">"Bow-Tie-Shaped Heteroscedasticity"</span>,</span>
+<span id="cb43-103"><a href="#cb43-103"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
+<span id="cb43-104"><a href="#cb43-104"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
+<span id="cb43-105"><a href="#cb43-105"></a></span>
+<span id="cb43-106"><a href="#cb43-106"></a><span class="fu">abline</span>(</span>
+<span id="cb43-107"><a href="#cb43-107"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
+<span id="cb43-108"><a href="#cb43-108"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb43-109"><a href="#cb43-109"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb43-110"><a href="#cb43-110"></a></span>
+<span id="cb43-111"><a href="#cb43-111"></a><span class="fu">plot</span>(</span>
+<span id="cb43-112"><a href="#cb43-112"></a>  fitted4,</span>
+<span id="cb43-113"><a href="#cb43-113"></a>  res4,</span>
+<span id="cb43-114"><a href="#cb43-114"></a>  <span class="at">main =</span> <span class="st">"Diamond-Shaped Heteroscedasticity"</span>,</span>
+<span id="cb43-115"><a href="#cb43-115"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
+<span id="cb43-116"><a href="#cb43-116"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
+<span id="cb43-117"><a href="#cb43-117"></a></span>
+<span id="cb43-118"><a href="#cb43-118"></a><span class="fu">abline</span>(</span>
+<span id="cb43-119"><a href="#cb43-119"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
+<span id="cb43-120"><a href="#cb43-120"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb43-121"><a href="#cb43-121"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb43-122"><a href="#cb43-122"></a></span>
+<span id="cb43-123"><a href="#cb43-123"></a><span class="fu">plot</span>(</span>
+<span id="cb43-124"><a href="#cb43-124"></a>  fitted5,</span>
+<span id="cb43-125"><a href="#cb43-125"></a>  res5,</span>
+<span id="cb43-126"><a href="#cb43-126"></a>  <span class="at">main =</span> <span class="st">"Triangle-Shaped Heteroscedasticity"</span>,</span>
+<span id="cb43-127"><a href="#cb43-127"></a>  <span class="at">xlab =</span> <span class="st">"Fitted value"</span>,</span>
+<span id="cb43-128"><a href="#cb43-128"></a>  <span class="at">ylab =</span> <span class="st">"Residual"</span>)</span>
+<span id="cb43-129"><a href="#cb43-129"></a></span>
+<span id="cb43-130"><a href="#cb43-130"></a><span class="fu">abline</span>(</span>
+<span id="cb43-131"><a href="#cb43-131"></a>  <span class="at">h =</span> <span class="dv">0</span>,</span>
+<span id="cb43-132"><a href="#cb43-132"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb43-133"><a href="#cb43-133"></a>  <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div id="fig-homscedasticityHeteroscedasticity" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-homscedasticityHeteroscedasticity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
@@ -1397,6 +1471,28 @@ Figure&nbsp;11.2: Example Associations Depicted With Scatterplots.
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-homscedasticityHeteroscedasticity-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (c) Bow-Tie-Shaped Heteroscedasticity
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-homscedasticityHeteroscedasticity" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-homscedasticityHeteroscedasticity-4" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of Homoscedasticity and Heteroscedasticity in Residual Plots.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-homscedasticityHeteroscedasticity-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="multiple-regression_files/figure-html/fig-homscedasticityHeteroscedasticity-4.png" class="lightbox" data-gallery="fig-homscedasticityHeteroscedasticity" title="Figure&nbsp;11.3&nbsp;(d): Diamond-Shaped Heteroscedasticity"><img src="multiple-regression_files/figure-html/fig-homscedasticityHeteroscedasticity-4.png" class="img-fluid figure-img" data-ref-parent="fig-homscedasticityHeteroscedasticity" alt="Example of Homoscedasticity and Heteroscedasticity in Residual Plots." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-homscedasticityHeteroscedasticity-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(d) Diamond-Shaped Heteroscedasticity
+</figcaption></figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-homscedasticityHeteroscedasticity" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-homscedasticityHeteroscedasticity-5" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of Homoscedasticity and Heteroscedasticity in Residual Plots.">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-homscedasticityHeteroscedasticity-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="multiple-regression_files/figure-html/fig-homscedasticityHeteroscedasticity-5.png" class="lightbox" data-gallery="fig-homscedasticityHeteroscedasticity" title="Figure&nbsp;11.3&nbsp;(e): Triangle-Shaped Heteroscedasticity"><img src="multiple-regression_files/figure-html/fig-homscedasticityHeteroscedasticity-5.png" class="img-fluid figure-img" data-ref-parent="fig-homscedasticityHeteroscedasticity" alt="Example of Homoscedasticity and Heteroscedasticity in Residual Plots." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-homscedasticityHeteroscedasticity-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(e) Triangle-Shaped Heteroscedasticity
 </figcaption></figure>
 </div>
 </div>
@@ -1659,7 +1755,7 @@ Figure&nbsp;11.4: Quantile–Quantile (QQ) Plots of Various Distributions (Right
 <p>As noted in <a href="basic-statistics.html#sec-statisticalTestsPartitionedVariance" class="quarto-xref"><span>Section 9.6.6</span></a>, The coefficient of determination (<span class="math inline">\(R^2\)</span>) reflects the proportion of variance in the <a href="research-methods.html#sec-correlationalStudy">outcome (dependent) variable</a> that is explained by the model predictions, as in <a href="basic-statistics.html#eq-coefficientOfDeterminationPartitionedVariance" class="quarto-xref">Equation&nbsp;<span>9.25</span></a>: <span class="math inline">\(R^2 = \frac{\text{variance explained in }Y}{\text{total variance in }Y}\)</span>. Various formulas for <span class="math inline">\(R^2\)</span> are in <a href="basic-statistics.html#eq-rSquared" class="quarto-xref">Equation&nbsp;<span>9.19</span></a>. Larger <span class="math inline">\(R^2\)</span> values indicate greater accuracy. Multiple regression can be conceptualized with overlapping circles (similar to a venn diagram), where the non-overlapping portions of the circles reflect nonshared variance and the overlapping portions of the circles reflect shared variance, as in <a href="#fig-regression" class="quarto-xref">Figure&nbsp;<span>11.29</span></a>.</p>
 <div id="fig-regression" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Conceptual Depiction of Proportion of Variance Explained ($R^2$) in an Outcome Variable ($Y$) by Multiple Predictors ($X1$ and $X2$) in Multiple Regression. The size of each circle represents the variable's variance. The proportion of variance in $Y$ that is explained by the predictors is depicted by the areas in orange. The dark orange space ($G$) is where multiple predictors explain overlapping variance in the outcome. Overlapping variance that is explained in the outcome ($G$) will not be recovered in the regression coefficients when both predictors are included in the regression model. From @Petersen2024a and @PetersenPrinciplesPsychAssessment.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/multipleRegressionRSquared.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" title="Figure&nbsp;11.5: Conceptual Depiction of Proportion of Variance Explained (R^2) in an Outcome Variable (Y) by Multiple Predictors (X1 and X2) in Multiple Regression. The size of each circle represents the variable’s variance. The proportion of variance in Y that is explained by the predictors is depicted by the areas in orange. The dark orange space (G) is where multiple predictors explain overlapping variance in the outcome. Overlapping variance that is explained in the outcome (G) will not be recovered in the regression coefficients when both predictors are included in the regression model. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."><img src="images/multipleRegressionRSquared.png" class="img-fluid figure-img" style="width:50.0%" alt="Conceptual Depiction of Proportion of Variance Explained ($R^2$) in an Outcome Variable ($Y$) by Multiple Predictors ($X1$ and $X2$) in Multiple Regression. The size of each circle represents the variable's variance. The proportion of variance in $Y$ that is explained by the predictors is depicted by the areas in orange. The dark orange space ($G$) is where multiple predictors explain overlapping variance in the outcome. Overlapping variance that is explained in the outcome ($G$) will not be recovered in the regression coefficients when both predictors are included in the regression model. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."></a>
+<a href="images/multipleRegressionRSquared.png" class="lightbox" data-gallery="quarto-lightbox-gallery-21" title="Figure&nbsp;11.5: Conceptual Depiction of Proportion of Variance Explained (R^2) in an Outcome Variable (Y) by Multiple Predictors (X1 and X2) in Multiple Regression. The size of each circle represents the variable’s variance. The proportion of variance in Y that is explained by the predictors is depicted by the areas in orange. The dark orange space (G) is where multiple predictors explain overlapping variance in the outcome. Overlapping variance that is explained in the outcome (G) will not be recovered in the regression coefficients when both predictors are included in the regression model. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."><img src="images/multipleRegressionRSquared.png" class="img-fluid figure-img" style="width:50.0%" alt="Conceptual Depiction of Proportion of Variance Explained ($R^2$) in an Outcome Variable ($Y$) by Multiple Predictors ($X1$ and $X2$) in Multiple Regression. The size of each circle represents the variable's variance. The proportion of variance in $Y$ that is explained by the predictors is depicted by the areas in orange. The dark orange space ($G$) is where multiple predictors explain overlapping variance in the outcome. Overlapping variance that is explained in the outcome ($G$) will not be recovered in the regression coefficients when both predictors are included in the regression model. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.5: Conceptual Depiction of Proportion of Variance Explained (<span class="math inline">\(R^2\)</span>) in an Outcome Variable (<span class="math inline">\(Y\)</span>) by Multiple Predictors (<span class="math inline">\(X1\)</span> and <span class="math inline">\(X2\)</span>) in Multiple Regression. The size of each circle represents the variable’s variance. The proportion of variance in <span class="math inline">\(Y\)</span> that is explained by the predictors is depicted by the areas in orange. The dark orange space (<span class="math inline">\(G\)</span>) is where multiple predictors explain overlapping variance in the outcome. Overlapping variance that is explained in the outcome (<span class="math inline">\(G\)</span>) will not be recovered in the regression coefficients when both predictors are included in the regression model. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2025</a>)</span>.
@@ -1820,7 +1916,7 @@ R^2_{adj} = 1 - (1 - R^2) \frac{n - 1}{n - p - 1}
 </details><div class="cell-output-display">
 <div id="fig-overfittingModel" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From @Petersen2024a and @PetersenPrinciplesPsychAssessment.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-overfittingModel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-overfittingModel-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" title="Figure&nbsp;11.6: Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."><img src="multiple-regression_files/figure-html/fig-overfittingModel-1.png" class="img-fluid figure-img" alt="Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From @Petersen2024a and @PetersenPrinciplesPsychAssessment." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-overfittingModel-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-22" title="Figure&nbsp;11.6: Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."><img src="multiple-regression_files/figure-html/fig-overfittingModel-1.png" class="img-fluid figure-img" alt="Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From @Petersen2024a and @PetersenPrinciplesPsychAssessment." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-overfittingModel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.6: Over-fitting Model in Red Relative to the True Distribution of the Data in Blue. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2025</a>)</span>.
@@ -2533,7 +2629,7 @@ target_share | FALSE |    FALSE |    FALSE |               </code></pre>
 </details><div class="cell-output-display">
 <div id="fig-regressionCoefficients" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Regression Coefficients with 95% Confidence Interval.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-regressionCoefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-regressionCoefficients-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-30" title="Figure&nbsp;11.9: Regression Coefficients with 95% Confidence Interval."><img src="multiple-regression_files/figure-html/fig-regressionCoefficients-1.png" class="img-fluid figure-img" alt="Regression Coefficients with 95% Confidence Interval." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-regressionCoefficients-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-32" title="Figure&nbsp;11.9: Regression Coefficients with 95% Confidence Interval."><img src="multiple-regression_files/figure-html/fig-regressionCoefficients-1.png" class="img-fluid figure-img" alt="Regression Coefficients with 95% Confidence Interval." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regressionCoefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.9: Regression Coefficients with 95% Confidence Interval.
@@ -2562,7 +2658,7 @@ Figure&nbsp;11.9: Regression Coefficients with 95% Confidence Interval.
 </details><div class="cell-output-display">
 <div id="fig-regressionCoefficientsStandardized" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Standardized Regression Coefficients with 95% Confidence Interval.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-regressionCoefficientsStandardized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-regressionCoefficientsStandardized-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-31" title="Figure&nbsp;11.10: Standardized Regression Coefficients with 95% Confidence Interval."><img src="multiple-regression_files/figure-html/fig-regressionCoefficientsStandardized-1.png" class="img-fluid figure-img" alt="Standardized Regression Coefficients with 95% Confidence Interval." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-regressionCoefficientsStandardized-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-33" title="Figure&nbsp;11.10: Standardized Regression Coefficients with 95% Confidence Interval."><img src="multiple-regression_files/figure-html/fig-regressionCoefficientsStandardized-1.png" class="img-fluid figure-img" alt="Standardized Regression Coefficients with 95% Confidence Interval." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regressionCoefficientsStandardized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.10: Standardized Regression Coefficients with 95% Confidence Interval.
@@ -2615,7 +2711,7 @@ Figure&nbsp;11.10: Standardized Regression Coefficients with 95% Confidence Inte
 </details><div class="cell-output-display">
 <div id="fig-modelImpliedPredictionsQuadraticRegression" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Model-Implied Predictions of A Wide Receiver's Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-modelImpliedPredictionsQuadraticRegression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-modelImpliedPredictionsQuadraticRegression-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-32" title="Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model."><img src="multiple-regression_files/figure-html/fig-modelImpliedPredictionsQuadraticRegression-1.png" class="img-fluid figure-img" alt="Model-Implied Predictions of A Wide Receiver's Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-modelImpliedPredictionsQuadraticRegression-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-34" title="Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model."><img src="multiple-regression_files/figure-html/fig-modelImpliedPredictionsQuadraticRegression-1.png" class="img-fluid figure-img" alt="Model-Implied Predictions of A Wide Receiver's Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-modelImpliedPredictionsQuadraticRegression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Points as a Function of Target Share. The model-implied predictions were estimated based on a multiple regression model.
@@ -2697,7 +2793,7 @@ Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Poin
 </details><div class="cell-output-display">
 <div id="fig-marginalModelPlots" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Marginal Model Plots.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-marginalModelPlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-marginalModelPlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-33" title="Figure&nbsp;11.12: Marginal Model Plots."><img src="multiple-regression_files/figure-html/fig-marginalModelPlots-1.png" class="img-fluid figure-img" alt="Marginal Model Plots." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-marginalModelPlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-35" title="Figure&nbsp;11.12: Marginal Model Plots."><img src="multiple-regression_files/figure-html/fig-marginalModelPlots-1.png" class="img-fluid figure-img" alt="Marginal Model Plots." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-marginalModelPlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.12: Marginal Model Plots.
@@ -2712,7 +2808,7 @@ Figure&nbsp;11.12: Marginal Model Plots.
 </details><div class="cell-output-display">
 <div id="fig-addedVariablePlots" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Added-Variable Plots.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-addedVariablePlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-addedVariablePlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-34" title="Figure&nbsp;11.13: Added-Variable Plots."><img src="multiple-regression_files/figure-html/fig-addedVariablePlots-1.png" class="img-fluid figure-img" alt="Added-Variable Plots." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-addedVariablePlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-36" title="Figure&nbsp;11.13: Added-Variable Plots."><img src="multiple-regression_files/figure-html/fig-addedVariablePlots-1.png" class="img-fluid figure-img" alt="Added-Variable Plots." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-addedVariablePlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.13: Added-Variable Plots.
@@ -2728,7 +2824,7 @@ Figure&nbsp;11.13: Added-Variable Plots.
 </details><div class="cell-output-display">
 <div id="fig-componentPlusResidualPlots" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Component-Plus-Residual Plots.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-componentPlusResidualPlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-componentPlusResidualPlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-35" title="Figure&nbsp;11.14: Component-Plus-Residual Plots."><img src="multiple-regression_files/figure-html/fig-componentPlusResidualPlots-1.png" class="img-fluid figure-img" alt="Component-Plus-Residual Plots." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-componentPlusResidualPlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-37" title="Figure&nbsp;11.14: Component-Plus-Residual Plots."><img src="multiple-regression_files/figure-html/fig-componentPlusResidualPlots-1.png" class="img-fluid figure-img" alt="Component-Plus-Residual Plots." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-componentPlusResidualPlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.14: Component-Plus-Residual Plots.
@@ -2746,7 +2842,7 @@ Figure&nbsp;11.14: Component-Plus-Residual Plots.
 </details><div class="cell-output-display">
 <div id="fig-histogramTargetShare" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Target Share.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramTargetShare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-histogramTargetShare-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-36" title="Figure&nbsp;11.15: Histogram of Target Share."><img src="multiple-regression_files/figure-html/fig-histogramTargetShare-1.png" class="img-fluid figure-img" alt="Histogram of Target Share." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-histogramTargetShare-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-38" title="Figure&nbsp;11.15: Histogram of Target Share."><img src="multiple-regression_files/figure-html/fig-histogramTargetShare-1.png" class="img-fluid figure-img" alt="Histogram of Target Share." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramTargetShare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.15: Histogram of Target Share.
@@ -2762,7 +2858,7 @@ Figure&nbsp;11.15: Histogram of Target Share.
 </details><div class="cell-output-display">
 <div id="fig-histogramTargetSharesTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Target Share, Transformed.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramTargetSharesTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-histogramTargetSharesTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-37" title="Figure&nbsp;11.16: Histogram of Target Share, Transformed."><img src="multiple-regression_files/figure-html/fig-histogramTargetSharesTransformed-1.png" class="img-fluid figure-img" alt="Histogram of Target Share, Transformed." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-histogramTargetSharesTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-39" title="Figure&nbsp;11.16: Histogram of Target Share, Transformed."><img src="multiple-regression_files/figure-html/fig-histogramTargetSharesTransformed-1.png" class="img-fluid figure-img" alt="Histogram of Target Share, Transformed." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramTargetSharesTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.16: Histogram of Target Share, Transformed.
@@ -2818,7 +2914,7 @@ F-statistic:  1955 on 7 and 4429 DF,  p-value: &lt; 2.2e-16</code></pre>
 </details><div class="cell-output-display">
 <div id="fig-marginalModelPlotsLogTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Marginal Model Plots After Log Transformation of Target Share.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-marginalModelPlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-marginalModelPlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-38" title="Figure&nbsp;11.17: Marginal Model Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-marginalModelPlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Marginal Model Plots After Log Transformation of Target Share." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-marginalModelPlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-40" title="Figure&nbsp;11.17: Marginal Model Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-marginalModelPlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Marginal Model Plots After Log Transformation of Target Share." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-marginalModelPlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.17: Marginal Model Plots After Log Transformation of Target Share.
@@ -2833,7 +2929,7 @@ Figure&nbsp;11.17: Marginal Model Plots After Log Transformation of Target Share
 </details><div class="cell-output-display">
 <div id="fig-addedVariablePlotsLogTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Added-Variable Plots After Log Transformation of Target Share.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-addedVariablePlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-addedVariablePlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-39" title="Figure&nbsp;11.18: Added-Variable Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-addedVariablePlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Added-Variable Plots After Log Transformation of Target Share." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-addedVariablePlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-41" title="Figure&nbsp;11.18: Added-Variable Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-addedVariablePlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Added-Variable Plots After Log Transformation of Target Share." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-addedVariablePlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.18: Added-Variable Plots After Log Transformation of Target Share.
@@ -2848,7 +2944,7 @@ Figure&nbsp;11.18: Added-Variable Plots After Log Transformation of Target Share
 </details><div class="cell-output-display">
 <div id="fig-componentPlusResidualPlotsLogTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Component-Plus-Residual Plots After Log Transformation of Target Share.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-componentPlusResidualPlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-componentPlusResidualPlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-40" title="Figure&nbsp;11.19: Component-Plus-Residual Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-componentPlusResidualPlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Component-Plus-Residual Plots After Log Transformation of Target Share." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-componentPlusResidualPlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-42" title="Figure&nbsp;11.19: Component-Plus-Residual Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-componentPlusResidualPlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Component-Plus-Residual Plots After Log Transformation of Target Share." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-componentPlusResidualPlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.19: Component-Plus-Residual Plots After Log Transformation of Target Share.
@@ -2877,7 +2973,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <div class="cell-output-display">
 <div id="fig-residualPlotsLogTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Residual Plots After Log Transformation of Target Share.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-residualPlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-residualPlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-41" title="Figure&nbsp;11.20: Residual Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-residualPlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Residual Plots After Log Transformation of Target Share." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-residualPlotsLogTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-43" title="Figure&nbsp;11.20: Residual Plots After Log Transformation of Target Share."><img src="multiple-regression_files/figure-html/fig-residualPlotsLogTransformed-1.png" class="img-fluid figure-img" alt="Residual Plots After Log Transformation of Target Share." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-residualPlotsLogTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.20: Residual Plots After Log Transformation of Target Share.
@@ -2909,7 +3005,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <div class="cell-output-display">
 <div id="fig-residualPlots" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Residual Plots.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-residualPlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-residualPlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-42" title="Figure&nbsp;11.21: Residual Plots."><img src="multiple-regression_files/figure-html/fig-residualPlots-1.png" class="img-fluid figure-img" alt="Residual Plots." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-residualPlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-44" title="Figure&nbsp;11.21: Residual Plots."><img src="multiple-regression_files/figure-html/fig-residualPlots-1.png" class="img-fluid figure-img" alt="Residual Plots." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-residualPlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.21: Residual Plots.
@@ -2929,7 +3025,7 @@ Suggested power transformation:  0.4647539 </code></pre>
 <div class="cell-output-display">
 <div id="fig-spreadLevelPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Spread-Level Plot.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-spreadLevelPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-spreadLevelPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-43" title="Figure&nbsp;11.22: Spread-Level Plot."><img src="multiple-regression_files/figure-html/fig-spreadLevelPlot-1.png" class="img-fluid figure-img" alt="Spread-Level Plot." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-spreadLevelPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-45" title="Figure&nbsp;11.22: Spread-Level Plot."><img src="multiple-regression_files/figure-html/fig-spreadLevelPlot-1.png" class="img-fluid figure-img" alt="Spread-Level Plot." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-spreadLevelPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.22: Spread-Level Plot.
@@ -2946,7 +3042,7 @@ Figure&nbsp;11.22: Spread-Level Plot.
 </details><div class="cell-output-display">
 <div id="fig-histogramFantasyPoints" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points (Among Wide Receivers).">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramFantasyPoints-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-histogramFantasyPoints-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-44" title="Figure&nbsp;11.23: Histogram of Fantasy Points (Among Wide Receivers)."><img src="multiple-regression_files/figure-html/fig-histogramFantasyPoints-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points (Among Wide Receivers)." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-histogramFantasyPoints-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-46" title="Figure&nbsp;11.23: Histogram of Fantasy Points (Among Wide Receivers)."><img src="multiple-regression_files/figure-html/fig-histogramFantasyPoints-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points (Among Wide Receivers)." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramFantasyPoints-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.23: Histogram of Fantasy Points (Among Wide Receivers).
@@ -2984,7 +3080,7 @@ Lambda estimates for Yeo-Johnson transformation:
 </details><div class="cell-output-display">
 <div id="fig-histogramFantasyPointsTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points (Among Wide Receivers), Transformed.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramFantasyPointsTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-histogramFantasyPointsTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-45" title="Figure&nbsp;11.24: Histogram of Fantasy Points (Among Wide Receivers), Transformed."><img src="multiple-regression_files/figure-html/fig-histogramFantasyPointsTransformed-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points (Among Wide Receivers), Transformed." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-histogramFantasyPointsTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-47" title="Figure&nbsp;11.24: Histogram of Fantasy Points (Among Wide Receivers), Transformed."><img src="multiple-regression_files/figure-html/fig-histogramFantasyPointsTransformed-1.png" class="img-fluid figure-img" alt="Histogram of Fantasy Points (Among Wide Receivers), Transformed." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogramFantasyPointsTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.24: Histogram of Fantasy Points (Among Wide Receivers), Transformed.
@@ -3046,7 +3142,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <div class="cell-output-display">
 <div id="fig-residualPlotsOutcomeTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Residual Plots After Transformation of Fantasy Points.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-residualPlotsOutcomeTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-residualPlotsOutcomeTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-46" title="Figure&nbsp;11.25: Residual Plots After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-residualPlotsOutcomeTransformed-1.png" class="img-fluid figure-img" alt="Residual Plots After Transformation of Fantasy Points." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-residualPlotsOutcomeTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-48" title="Figure&nbsp;11.25: Residual Plots After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-residualPlotsOutcomeTransformed-1.png" class="img-fluid figure-img" alt="Residual Plots After Transformation of Fantasy Points." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-residualPlotsOutcomeTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.25: Residual Plots After Transformation of Fantasy Points.
@@ -3066,7 +3162,7 @@ Suggested power transformation:  1.890813 </code></pre>
 <div class="cell-output-display">
 <div id="fig-spreadLevelPlotOutcomeTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Spread-Level Plot After Transformation of Fantasy Points.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-spreadLevelPlotOutcomeTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-spreadLevelPlotOutcomeTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-47" title="Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-spreadLevelPlotOutcomeTransformed-1.png" class="img-fluid figure-img" alt="Spread-Level Plot After Transformation of Fantasy Points." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-spreadLevelPlotOutcomeTransformed-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-49" title="Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-spreadLevelPlotOutcomeTransformed-1.png" class="img-fluid figure-img" alt="Spread-Level Plot After Transformation of Fantasy Points." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-spreadLevelPlotOutcomeTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points.
@@ -3107,7 +3203,7 @@ Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points.
 <div class="cell-output-display">
 <div id="fig-qqPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Residual Plots After Transformation of Fantasy Points.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-qqPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-qqPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-48" title="Figure&nbsp;11.27: Residual Plots After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-qqPlot-1.png" class="img-fluid figure-img" alt="Residual Plots After Transformation of Fantasy Points." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-qqPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-50" title="Figure&nbsp;11.27: Residual Plots After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-qqPlot-1.png" class="img-fluid figure-img" alt="Residual Plots After Transformation of Fantasy Points." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-qqPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.27: Residual Plots After Transformation of Fantasy Points.
@@ -3121,7 +3217,7 @@ Figure&nbsp;11.27: Residual Plots After Transformation of Fantasy Points.
 </details><div class="cell-output-display">
 <div id="fig-ppPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Residual Plots After Transformation of Fantasy Points.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-ppPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-49" title="Figure&nbsp;11.28: Residual Plots After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-ppPlot-1.png" class="img-fluid figure-img" alt="Residual Plots After Transformation of Fantasy Points." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-ppPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-51" title="Figure&nbsp;11.28: Residual Plots After Transformation of Fantasy Points."><img src="multiple-regression_files/figure-html/fig-ppPlot-1.png" class="img-fluid figure-img" alt="Residual Plots After Transformation of Fantasy Points." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.28: Residual Plots After Transformation of Fantasy Points.
@@ -3135,7 +3231,7 @@ Figure&nbsp;11.28: Residual Plots After Transformation of Fantasy Points.
 <p>Multicollinearity in multiple regression is depicted conceptually in <a href="#fig-regression" class="quarto-xref">Figure&nbsp;<span>11.29</span></a>.</p>
 <div id="fig-regression" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Conceptual Depiction of Multicollinearity in Multiple Regression. From @Petersen2024a and @PetersenPrinciplesPsychAssessment.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/multipleRegressionMulticollinearity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-50" title="Figure&nbsp;11.29: Conceptual Depiction of Multicollinearity in Multiple Regression. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."><img src="images/multipleRegressionMulticollinearity.png" class="img-fluid figure-img" style="width:50.0%" alt="Conceptual Depiction of Multicollinearity in Multiple Regression. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."></a>
+<a href="images/multipleRegressionMulticollinearity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-52" title="Figure&nbsp;11.29: Conceptual Depiction of Multicollinearity in Multiple Regression. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."><img src="images/multipleRegressionMulticollinearity.png" class="img-fluid figure-img" style="width:50.0%" alt="Conceptual Depiction of Multicollinearity in Multiple Regression. From @Petersen2024a and @PetersenPrinciplesPsychAssessment."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.29: Conceptual Depiction of Multicollinearity in Multiple Regression. From <span class="citation" data-cites="Petersen2024a">Petersen (<a href="references.html#ref-Petersen2024a" role="doc-biblioref">2024</a>)</span> and <span class="citation" data-cites="PetersenPrinciplesPsychAssessment">Petersen (<a href="references.html#ref-PetersenPrinciplesPsychAssessment" role="doc-biblioref">2025</a>)</span>.
@@ -3377,7 +3473,7 @@ R-Square:
 </details><div class="cell-output-display">
 <div id="fig-miTracePlots" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Trace plots from multiple imputation.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miTracePlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-miTracePlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-51" title="Figure&nbsp;11.30: Trace plots from multiple imputation."><img src="multiple-regression_files/figure-html/fig-miTracePlots-1.png" class="img-fluid figure-img" alt="Trace plots from multiple imputation." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-miTracePlots-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-53" title="Figure&nbsp;11.30: Trace plots from multiple imputation."><img src="multiple-regression_files/figure-html/fig-miTracePlots-1.png" class="img-fluid figure-img" alt="Trace plots from multiple imputation." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-miTracePlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.30: Trace plots from multiple imputation.
@@ -3391,7 +3487,7 @@ Figure&nbsp;11.30: Trace plots from multiple imputation.
 </details><div class="cell-output-display">
 <div id="fig-miDensityPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Density plot from multiple imputation.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miDensityPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-miDensityPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-52" title="Figure&nbsp;11.31: Density plot from multiple imputation."><img src="multiple-regression_files/figure-html/fig-miDensityPlot-1.png" class="img-fluid figure-img" alt="Density plot from multiple imputation." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-miDensityPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-54" title="Figure&nbsp;11.31: Density plot from multiple imputation."><img src="multiple-regression_files/figure-html/fig-miDensityPlot-1.png" class="img-fluid figure-img" alt="Density plot from multiple imputation." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-miDensityPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.31: Density plot from multiple imputation.
@@ -3642,6 +3738,102 @@ compute.outlier.stats
 seed : int(0) </code></pre>
 </div>
 </div>
+<p>Another approach to handling outliers is to use boostrapping, which involves fitting models to various bootstrap resamples of the data. Bootstrap samples are datasets generated by sampling repeatedly with replacement.</p>
+<p>We set up the bootstrap folds using the <code>bootstraps()</code> function of the <code>rsample</code> package <span class="citation" data-cites="R-sample">(<a href="references.html#ref-R-sample" role="doc-biblioref"><strong>R-sample?</strong></a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
+<span id="cb134-2"><a href="#cb134-2"></a>bootstrapSamples <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb134-3"><a href="#cb134-3"></a></span>
+<span id="cb134-4"><a href="#cb134-4"></a><span class="co"># Create bootstrap resamples (with apparent = TRUE)</span></span>
+<span id="cb134-5"><a href="#cb134-5"></a>boots <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">bootstraps</span>(</span>
+<span id="cb134-6"><a href="#cb134-6"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb134-7"><a href="#cb134-7"></a>  <span class="at">times =</span> bootstrapSamples,</span>
+<span id="cb134-8"><a href="#cb134-8"></a>  <span class="at">apparent =</span> <span class="cn">TRUE</span></span>
+<span id="cb134-9"><a href="#cb134-9"></a>)</span>
+<span id="cb134-10"><a href="#cb134-10"></a></span>
+<span id="cb134-11"><a href="#cb134-11"></a><span class="co"># Define recipe</span></span>
+<span id="cb134-12"><a href="#cb134-12"></a>rec <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(</span>
+<span id="cb134-13"><a href="#cb134-13"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share,</span>
+<span id="cb134-14"><a href="#cb134-14"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
+<span id="cb134-15"><a href="#cb134-15"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb134-16"><a href="#cb134-16"></a>  recipes<span class="sc">::</span><span class="fu">step_log</span>(target_share, <span class="at">offset =</span> <span class="dv">1</span>) <span class="co"># replace I(log(target_share + 1))</span></span>
+<span id="cb134-17"><a href="#cb134-17"></a></span>
+<span id="cb134-18"><a href="#cb134-18"></a><span class="co"># Define model spec and workflow</span></span>
+<span id="cb134-19"><a href="#cb134-19"></a>lm_spec <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb134-20"><a href="#cb134-20"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb134-21"><a href="#cb134-21"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb134-22"><a href="#cb134-22"></a></span>
+<span id="cb134-23"><a href="#cb134-23"></a>lm_workflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb134-24"><a href="#cb134-24"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(rec) <span class="sc">%&gt;%</span></span>
+<span id="cb134-25"><a href="#cb134-25"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_spec)</span>
+<span id="cb134-26"><a href="#cb134-26"></a></span>
+<span id="cb134-27"><a href="#cb134-27"></a><span class="co"># Function for fitting the models on the bootstrap samples</span></span>
+<span id="cb134-28"><a href="#cb134-28"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(split) {</span>
+<span id="cb134-29"><a href="#cb134-29"></a>  analysis_data <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">analysis</span>(split)</span>
+<span id="cb134-30"><a href="#cb134-30"></a>  fit <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">fit</span>(lm_workflow, <span class="at">data =</span> analysis_data)</span>
+<span id="cb134-31"><a href="#cb134-31"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(fit)</span>
+<span id="cb134-32"><a href="#cb134-32"></a>}</span>
+<span id="cb134-33"><a href="#cb134-33"></a></span>
+<span id="cb134-34"><a href="#cb134-34"></a><span class="co"># Fit bootstrap models and save results</span></span>
+<span id="cb134-35"><a href="#cb134-35"></a>boot_models <span class="ot">&lt;-</span> boots <span class="sc">%&gt;%</span></span>
+<span id="cb134-36"><a href="#cb134-36"></a>  <span class="fu">mutate</span>(<span class="at">coef_info =</span> purrr<span class="sc">::</span><span class="fu">map</span>(splits, fit_lm))</span>
+<span id="cb134-37"><a href="#cb134-37"></a></span>
+<span id="cb134-38"><a href="#cb134-38"></a><span class="co"># Extract bootstrapped coefficients</span></span>
+<span id="cb134-39"><a href="#cb134-39"></a>boot_coefs <span class="ot">&lt;-</span> </span>
+<span id="cb134-40"><a href="#cb134-40"></a>  boot_models <span class="sc">%&gt;%</span> </span>
+<span id="cb134-41"><a href="#cb134-41"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(coef_info)</span>
+<span id="cb134-42"><a href="#cb134-42"></a></span>
+<span id="cb134-43"><a href="#cb134-43"></a><span class="co"># Compute percentile intervals for the regression coefficients</span></span>
+<span id="cb134-44"><a href="#cb134-44"></a>percentile_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_pctl</span>(boot_models, coef_info)</span>
+<span id="cb134-45"><a href="#cb134-45"></a></span>
+<span id="cb134-46"><a href="#cb134-46"></a>percentile_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":[".lower"],"name":[2],"type":["dbl"],"align":["right"]},{"label":[".estimate"],"name":[3],"type":["dbl"],"align":["right"]},{"label":[".upper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":[".alpha"],"name":[5],"type":["dbl"],"align":["right"]},{"label":[".method"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"(Intercept)","2":"0.7369273451","3":"2.406487641","4":"4.091332302","5":"0.05","6":"percentile"},{"1":"age","2":"0.0171421145","3":"0.033563100","4":"0.050252799","5":"0.05","6":"percentile"},{"1":"height","2":"-0.0401659258","3":"-0.009677881","4":"0.020670424","5":"0.05","6":"percentile"},{"1":"target_share","2":"26.0293608204","3":"27.914049300","4":"29.775478919","5":"0.05","6":"percentile"},{"1":"weight","2":"-0.0007009008","3":"0.003666608","4":"0.008002306","5":"0.05","6":"percentile"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>The distributions of the regression coefficients across boostraps are depicted in <a href="#fig-bootstrapRegressionCoefficients" class="quarto-xref">Figure&nbsp;<span>11.32</span></a>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb135"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb135-2"><a href="#cb135-2"></a>  boot_coefs,</span>
+<span id="cb135-3"><a href="#cb135-3"></a>  <span class="fu">aes</span>(estimate)) <span class="sc">+</span></span>
+<span id="cb135-4"><a href="#cb135-4"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb135-5"><a href="#cb135-5"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
+<span id="cb135-6"><a href="#cb135-6"></a>    <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb135-7"><a href="#cb135-7"></a>  <span class="fu">facet_wrap</span>(</span>
+<span id="cb135-8"><a href="#cb135-8"></a>    <span class="sc">~</span> term,</span>
+<span id="cb135-9"><a href="#cb135-9"></a>    <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb135-10"><a href="#cb135-10"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb135-11"><a href="#cb135-11"></a>    <span class="fu">aes</span>(</span>
+<span id="cb135-12"><a href="#cb135-12"></a>      <span class="at">xintercept =</span> .lower),</span>
+<span id="cb135-13"><a href="#cb135-13"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb135-14"><a href="#cb135-14"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb135-15"><a href="#cb135-15"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb135-16"><a href="#cb135-16"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb135-17"><a href="#cb135-17"></a>    <span class="fu">aes</span>(</span>
+<span id="cb135-18"><a href="#cb135-18"></a>      <span class="at">xintercept =</span> .upper),</span>
+<span id="cb135-19"><a href="#cb135-19"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb135-20"><a href="#cb135-20"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb135-21"><a href="#cb135-21"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb135-22"><a href="#cb135-22"></a>  <span class="fu">labs</span>(</span>
+<span id="cb135-23"><a href="#cb135-23"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Distributions of Coefficients"</span>,</span>
+<span id="cb135-24"><a href="#cb135-24"></a>    <span class="at">x =</span> <span class="st">"Coefficient Estimate"</span>,</span>
+<span id="cb135-25"><a href="#cb135-25"></a>    <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb135-26"><a href="#cb135-26"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-bootstrapRegressionCoefficients" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Parameter Estimates Across Bootstraps.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-bootstrapRegressionCoefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="multiple-regression_files/figure-html/fig-bootstrapRegressionCoefficients-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-55" title="Figure&nbsp;11.32: Histogram of Parameter Estimates Across Bootstraps."><img src="multiple-regression_files/figure-html/fig-bootstrapRegressionCoefficients-1.png" class="img-fluid figure-img" alt="Histogram of Parameter Estimates Across Bootstraps." width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bootstrapRegressionCoefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.32: Histogram of Parameter Estimates Across Bootstraps.
+</figcaption></figure>
+</div>
+</div>
+</div>
 </section></section><section id="sec-moderatedMultipleRegression" class="level2" data-number="11.14"><h2 data-number="11.14" class="anchored" data-anchor-id="sec-moderatedMultipleRegression">
 <span class="header-section-number">11.14</span> Moderated Multiple Regression</h2>
 <p>When examining moderation in multiple regression, several steps are important:</p>
@@ -3651,24 +3843,24 @@ seed : int(0) </code></pre>
 </ul>
 <p>First, we mean-center the <a href="research-methods.html#sec-correlationalStudy">predictors</a>. In this case, we center the <a href="research-methods.html#sec-correlationalStudy">predictors</a> around the mean of height and weight for Wide Receivers:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb134-2"><a href="#cb134-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb136-2"><a href="#cb136-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we compute the interaction term as the multiplication of the two centered <a href="research-methods.html#sec-correlationalStudy">predictors</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb135"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we fit the moderated multiple regression model:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb136-2"><a href="#cb136-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
-<span id="cb136-3"><a href="#cb136-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb136-4"><a href="#cb136-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb136-5"><a href="#cb136-5"></a>)</span>
-<span id="cb136-6"><a href="#cb136-6"></a></span>
-<span id="cb136-7"><a href="#cb136-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb138-2"><a href="#cb138-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
+<span id="cb138-3"><a href="#cb138-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb138-4"><a href="#cb138-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb138-5"><a href="#cb138-5"></a>)</span>
+<span id="cb138-6"><a href="#cb138-6"></a></span>
+<span id="cb138-7"><a href="#cb138-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3696,38 +3888,38 @@ F-statistic: 28.46 on 3 and 5385 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <p>This model is equivalent to the model that includes the interaction term explicitly:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb138-2"><a href="#cb138-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
-<span id="cb138-3"><a href="#cb138-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb138-4"><a href="#cb138-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb138-5"><a href="#cb138-5"></a>)</span>
-<span id="cb138-6"><a href="#cb138-6"></a></span>
-<span id="cb138-7"><a href="#cb138-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb140-2"><a href="#cb140-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
+<span id="cb140-3"><a href="#cb140-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb140-4"><a href="#cb140-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb140-5"><a href="#cb140-5"></a>)</span>
+<span id="cb140-6"><a href="#cb140-6"></a></span>
+<span id="cb140-7"><a href="#cb140-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Now, we can visualize the interaction to understand it. We create an interaction plot (<a href="#fig-interactionPlot" class="quarto-xref">Figure&nbsp;<span>11.32</span></a>) and Johnson-Neyman plot (<a href="#fig-johnsonNeymanPlot" class="quarto-xref">Figure&nbsp;<span>11.33</span></a>) using the <code>interactions</code> package <span class="citation" data-cites="R-interactions">(<a href="references.html#ref-R-interactions" role="doc-biblioref">Long, 2024</a>)</span>.</p>
+<p>Now, we can visualize the interaction to understand it. We create an interaction plot (<a href="#fig-interactionPlot" class="quarto-xref">Figure&nbsp;<span>11.33</span></a>) and Johnson-Neyman plot (<a href="#fig-johnsonNeymanPlot" class="quarto-xref">Figure&nbsp;<span>11.34</span></a>) using the <code>interactions</code> package <span class="citation" data-cites="R-interactions">(<a href="references.html#ref-R-interactions" role="doc-biblioref">Long, 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
-<span id="cb139-2"><a href="#cb139-2"></a>  moderationModel,</span>
-<span id="cb139-3"><a href="#cb139-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb139-4"><a href="#cb139-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
+<span id="cb141-2"><a href="#cb141-2"></a>  moderationModel,</span>
+<span id="cb141-3"><a href="#cb141-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb141-4"><a href="#cb141-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-interactionPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Interaction Plot from Moderated Multiple Regression.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-interactionPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-interactionPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-53" title="Figure&nbsp;11.32: Interaction Plot from Moderated Multiple Regression."><img src="multiple-regression_files/figure-html/fig-interactionPlot-1.png" class="img-fluid figure-img" alt="Interaction Plot from Moderated Multiple Regression." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-interactionPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-56" title="Figure&nbsp;11.33: Interaction Plot from Moderated Multiple Regression."><img src="multiple-regression_files/figure-html/fig-interactionPlot-1.png" class="img-fluid figure-img" alt="Interaction Plot from Moderated Multiple Regression." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-interactionPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11.32: Interaction Plot from Moderated Multiple Regression.
+Figure&nbsp;11.33: Interaction Plot from Moderated Multiple Regression.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
-<span id="cb140-2"><a href="#cb140-2"></a>  moderationModel,</span>
-<span id="cb140-3"><a href="#cb140-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb140-4"><a href="#cb140-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb140-5"><a href="#cb140-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
+<span id="cb142-2"><a href="#cb142-2"></a>  moderationModel,</span>
+<span id="cb142-3"><a href="#cb142-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb142-4"><a href="#cb142-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb142-5"><a href="#cb142-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>JOHNSON-NEYMAN INTERVAL
 
@@ -3739,21 +3931,21 @@ Note: The range of observed values of weight_centered is [-47.48, 64.52]</code><
 <div class="cell-output-display">
 <div id="fig-johnsonNeymanPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Johnson-Neyman Plot from Moderated Multiple Regression.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-johnsonNeymanPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="multiple-regression_files/figure-html/fig-johnsonNeymanPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-54" title="Figure&nbsp;11.33: Johnson-Neyman Plot from Moderated Multiple Regression."><img src="multiple-regression_files/figure-html/fig-johnsonNeymanPlot-1.png" class="img-fluid figure-img" alt="Johnson-Neyman Plot from Moderated Multiple Regression." width="672"></a>
+<a href="multiple-regression_files/figure-html/fig-johnsonNeymanPlot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-57" title="Figure&nbsp;11.34: Johnson-Neyman Plot from Moderated Multiple Regression."><img src="multiple-regression_files/figure-html/fig-johnsonNeymanPlot-1.png" class="img-fluid figure-img" alt="Johnson-Neyman Plot from Moderated Multiple Regression." width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-johnsonNeymanPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11.33: Johnson-Neyman Plot from Moderated Multiple Regression.
+Figure&nbsp;11.34: Johnson-Neyman Plot from Moderated Multiple Regression.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>Here is a simple slopes analysis:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
-<span id="cb142-2"><a href="#cb142-2"></a>  moderationModel,</span>
-<span id="cb142-3"><a href="#cb142-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb142-4"><a href="#cb142-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb142-5"><a href="#cb142-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
+<span id="cb144-2"><a href="#cb144-2"></a>  moderationModel,</span>
+<span id="cb144-3"><a href="#cb144-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb144-4"><a href="#cb144-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb144-5"><a href="#cb144-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>SIMPLE SLOPES ANALYSIS
 
@@ -3780,61 +3972,61 @@ Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD):
 <span class="header-section-number">11.15</span> Mediation</h2>
 <p>A mediation model takes the following general form in the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb144-2"><a href="#cb144-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb144-3"><a href="#cb144-3"></a><span class="st">  Y ~ direct*X</span></span>
-<span id="cb144-4"><a href="#cb144-4"></a><span class="st">  </span></span>
-<span id="cb144-5"><a href="#cb144-5"></a><span class="st">  # mediator</span></span>
-<span id="cb144-6"><a href="#cb144-6"></a><span class="st">  M ~ a*X</span></span>
-<span id="cb144-7"><a href="#cb144-7"></a><span class="st">  Y ~ b*M</span></span>
-<span id="cb144-8"><a href="#cb144-8"></a><span class="st">  </span></span>
-<span id="cb144-9"><a href="#cb144-9"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb144-10"><a href="#cb144-10"></a><span class="st">  indirect := a*b</span></span>
-<span id="cb144-11"><a href="#cb144-11"></a><span class="st">  </span></span>
-<span id="cb144-12"><a href="#cb144-12"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb144-13"><a href="#cb144-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
-<span id="cb144-14"><a href="#cb144-14"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb146-2"><a href="#cb146-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb146-3"><a href="#cb146-3"></a><span class="st">  Y ~ direct*X</span></span>
+<span id="cb146-4"><a href="#cb146-4"></a><span class="st">  </span></span>
+<span id="cb146-5"><a href="#cb146-5"></a><span class="st">  # mediator</span></span>
+<span id="cb146-6"><a href="#cb146-6"></a><span class="st">  M ~ a*X</span></span>
+<span id="cb146-7"><a href="#cb146-7"></a><span class="st">  Y ~ b*M</span></span>
+<span id="cb146-8"><a href="#cb146-8"></a><span class="st">  </span></span>
+<span id="cb146-9"><a href="#cb146-9"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb146-10"><a href="#cb146-10"></a><span class="st">  indirect := a*b</span></span>
+<span id="cb146-11"><a href="#cb146-11"></a><span class="st">  </span></span>
+<span id="cb146-12"><a href="#cb146-12"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb146-13"><a href="#cb146-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
+<span id="cb146-14"><a href="#cb146-14"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Let’s substitute in our <a href="research-methods.html#sec-correlationalStudy">predictor</a>, <a href="research-methods.html#sec-correlationalStudy">outcome</a>, and hypothesized <a href="research-methods.html#sec-mediation">mediator</a>. In this case, we predict that receiving touchdowns partially accounts for the association between Wide Receiver’s target share and their fantasy points. This is a silly example because fantasy points are derived, in part, from touchdowns, so of course touchdowns will partially account for almost any effect on Wide Receivers’ fantasy points. This example is merely for demonstrating the process of developing and examining a mediation model.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb145-2"><a href="#cb145-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb145-3"><a href="#cb145-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
-<span id="cb145-4"><a href="#cb145-4"></a><span class="st">  </span></span>
-<span id="cb145-5"><a href="#cb145-5"></a><span class="st">  # mediator</span></span>
-<span id="cb145-6"><a href="#cb145-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
-<span id="cb145-7"><a href="#cb145-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
-<span id="cb145-8"><a href="#cb145-8"></a><span class="st">  </span></span>
-<span id="cb145-9"><a href="#cb145-9"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb145-10"><a href="#cb145-10"></a><span class="st">  indirect := a*b</span></span>
-<span id="cb145-11"><a href="#cb145-11"></a><span class="st">  </span></span>
-<span id="cb145-12"><a href="#cb145-12"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb145-13"><a href="#cb145-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
-<span id="cb145-14"><a href="#cb145-14"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb147"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb147-2"><a href="#cb147-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb147-3"><a href="#cb147-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb147-4"><a href="#cb147-4"></a><span class="st">  </span></span>
+<span id="cb147-5"><a href="#cb147-5"></a><span class="st">  # mediator</span></span>
+<span id="cb147-6"><a href="#cb147-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
+<span id="cb147-7"><a href="#cb147-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
+<span id="cb147-8"><a href="#cb147-8"></a><span class="st">  </span></span>
+<span id="cb147-9"><a href="#cb147-9"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb147-10"><a href="#cb147-10"></a><span class="st">  indirect := a*b</span></span>
+<span id="cb147-11"><a href="#cb147-11"></a><span class="st">  </span></span>
+<span id="cb147-12"><a href="#cb147-12"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb147-13"><a href="#cb147-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
+<span id="cb147-14"><a href="#cb147-14"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>To get a robust estimate of the indirect effect, we obtain bootstrapped estimates from 1,000 bootstrap draws. Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, but this example uses only 1,000 bootstrap draws for a shorter runtime.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb146-2"><a href="#cb146-2"></a>  mediationModel,</span>
-<span id="cb146-3"><a href="#cb146-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb146-4"><a href="#cb146-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb146-5"><a href="#cb146-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb146-6"><a href="#cb146-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb146-7"><a href="#cb146-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb146-8"><a href="#cb146-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb146-9"><a href="#cb146-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb146-10"><a href="#cb146-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb148-2"><a href="#cb148-2"></a>  mediationModel,</span>
+<span id="cb148-3"><a href="#cb148-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb148-4"><a href="#cb148-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb148-5"><a href="#cb148-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb148-6"><a href="#cb148-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb148-7"><a href="#cb148-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb148-8"><a href="#cb148-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb148-9"><a href="#cb148-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb148-10"><a href="#cb148-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb147"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1"></a><span class="fu">summary</span>(</span>
-<span id="cb147-2"><a href="#cb147-2"></a>  mediationFit,</span>
-<span id="cb147-3"><a href="#cb147-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb147-4"><a href="#cb147-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb147-5"><a href="#cb147-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a><span class="fu">summary</span>(</span>
+<span id="cb149-2"><a href="#cb149-2"></a>  mediationFit,</span>
+<span id="cb149-3"><a href="#cb149-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb149-4"><a href="#cb149-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb149-5"><a href="#cb149-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 16 iterations
 
@@ -3938,46 +4130,46 @@ Defined Parameters:
 </div>
 <p>We can also estimate a model with multiple hypothesized <a href="#sec-mediations">mediators</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb149-2"><a href="#cb149-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb149-3"><a href="#cb149-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
-<span id="cb149-4"><a href="#cb149-4"></a><span class="st">  </span></span>
-<span id="cb149-5"><a href="#cb149-5"></a><span class="st">  # mediator</span></span>
-<span id="cb149-6"><a href="#cb149-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
-<span id="cb149-7"><a href="#cb149-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
-<span id="cb149-8"><a href="#cb149-8"></a><span class="st">  </span></span>
-<span id="cb149-9"><a href="#cb149-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
-<span id="cb149-10"><a href="#cb149-10"></a><span class="st">  </span></span>
-<span id="cb149-11"><a href="#cb149-11"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb149-12"><a href="#cb149-12"></a><span class="st">  indirect1 := a1*b1</span></span>
-<span id="cb149-13"><a href="#cb149-13"></a><span class="st">  indirect2 := a2*b2</span></span>
-<span id="cb149-14"><a href="#cb149-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
-<span id="cb149-15"><a href="#cb149-15"></a><span class="st">  </span></span>
-<span id="cb149-16"><a href="#cb149-16"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb149-17"><a href="#cb149-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
-<span id="cb149-18"><a href="#cb149-18"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb151-2"><a href="#cb151-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb151-3"><a href="#cb151-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb151-4"><a href="#cb151-4"></a><span class="st">  </span></span>
+<span id="cb151-5"><a href="#cb151-5"></a><span class="st">  # mediator</span></span>
+<span id="cb151-6"><a href="#cb151-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
+<span id="cb151-7"><a href="#cb151-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
+<span id="cb151-8"><a href="#cb151-8"></a><span class="st">  </span></span>
+<span id="cb151-9"><a href="#cb151-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
+<span id="cb151-10"><a href="#cb151-10"></a><span class="st">  </span></span>
+<span id="cb151-11"><a href="#cb151-11"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb151-12"><a href="#cb151-12"></a><span class="st">  indirect1 := a1*b1</span></span>
+<span id="cb151-13"><a href="#cb151-13"></a><span class="st">  indirect2 := a2*b2</span></span>
+<span id="cb151-14"><a href="#cb151-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
+<span id="cb151-15"><a href="#cb151-15"></a><span class="st">  </span></span>
+<span id="cb151-16"><a href="#cb151-16"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb151-17"><a href="#cb151-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
+<span id="cb151-18"><a href="#cb151-18"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb150"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb150-2"><a href="#cb150-2"></a>  multipleMediatorModel,</span>
-<span id="cb150-3"><a href="#cb150-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb150-4"><a href="#cb150-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb150-5"><a href="#cb150-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb150-6"><a href="#cb150-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb150-7"><a href="#cb150-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb150-8"><a href="#cb150-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb150-9"><a href="#cb150-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb150-10"><a href="#cb150-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb152-2"><a href="#cb152-2"></a>  multipleMediatorModel,</span>
+<span id="cb152-3"><a href="#cb152-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb152-4"><a href="#cb152-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb152-5"><a href="#cb152-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb152-6"><a href="#cb152-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb152-7"><a href="#cb152-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb152-8"><a href="#cb152-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb152-9"><a href="#cb152-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb152-10"><a href="#cb152-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a><span class="fu">summary</span>(</span>
-<span id="cb151-2"><a href="#cb151-2"></a>  multipleMediatorFit,</span>
-<span id="cb151-3"><a href="#cb151-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb151-4"><a href="#cb151-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb151-5"><a href="#cb151-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1"></a><span class="fu">summary</span>(</span>
+<span id="cb153-2"><a href="#cb153-2"></a>  multipleMediatorFit,</span>
+<span id="cb153-3"><a href="#cb153-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb153-4"><a href="#cb153-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb153-5"><a href="#cb153-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 33 iterations
 
@@ -4094,15 +4286,15 @@ Defined Parameters:
 </section><section id="sec-multipleRegressionBayesian" class="level2" data-number="11.16"><h2 data-number="11.16" class="anchored" data-anchor-id="sec-multipleRegressionBayesian">
 <span class="header-section-number">11.16</span> Bayesian Multiple Regression</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
-<span id="cb153-2"><a href="#cb153-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb153-3"><a href="#cb153-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb153-4"><a href="#cb153-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
-<span id="cb153-5"><a href="#cb153-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
+<span id="cb155-2"><a href="#cb155-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb155-3"><a href="#cb155-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb155-4"><a href="#cb155-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
+<span id="cb155-5"><a href="#cb155-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> Family: gaussian 
   Links: mu = identity; sigma = identity 
@@ -4113,25 +4305,25 @@ Formula: fantasyPoints_transformed ~ age + height + weight + I(log(target_share 
 
 Regression Coefficients:
                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept              2.37      0.82     0.76     3.95 1.00     3779     3268
-age                    0.03      0.01     0.02     0.05 1.00     4499     2979
-height                -0.01      0.01    -0.04     0.02 1.00     3472     2597
-weight                 0.00      0.00    -0.00     0.01 1.00     3686     3511
-Ilogtarget_shareP1    27.86      0.30    27.26    28.45 1.00     3745     2698
+Intercept              2.36      0.82     0.76     4.04 1.00     3298     2616
+age                    0.03      0.01     0.02     0.05 1.00     3566     2851
+height                -0.01      0.01    -0.04     0.02 1.00     3075     2609
+weight                 0.00      0.00    -0.00     0.01 1.00     3477     3333
+Ilogtarget_shareP1    27.87      0.31    27.29    28.48 1.00     3659     2610
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     1.57      0.02     1.54     1.61 1.00     3590     2406
+sigma     1.57      0.02     1.54     1.61 1.00     4174     2831
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># Bayesian R2 with Compatibility Interval
 
-  Conditional R2: 0.677 (95% CI [0.667, 0.685])</code></pre>
+  Conditional R2: 0.677 (95% CI [0.668, 0.686])</code></pre>
 </div>
 </div>
 </section><section id="sec-multipleRegressionConclusion" class="level2" data-number="11.17"><h2 data-number="11.17" class="anchored" data-anchor-id="sec-multipleRegressionConclusion">
@@ -4140,7 +4332,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </section><section id="sec-multipleRegressionSessionInfo" class="level2" data-number="11.18"><h2 data-number="11.18" class="anchored" data-anchor-id="sec-multipleRegressionSessionInfo">
 <span class="header-section-number">11.18</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
@@ -4164,68 +4356,73 @@ attached base packages:
 
 other attached packages:
  [1] knitr_1.50          lubridate_1.9.4     forcats_1.0.0      
- [4] stringr_1.5.1       dplyr_1.1.4         purrr_1.1.0        
- [7] readr_2.1.5         tidyr_1.3.1         tibble_3.3.0       
-[10] tidyverse_2.0.0     effectsize_1.0.1    broom_1.0.8        
-[13] MASS_7.3-65         ordinal_2023.12-4.1 robustbase_0.99-4-1
-[16] brms_2.22.0         Rcpp_1.1.0          interactions_1.2.0 
-[19] miceadds_3.17-44    mice_3.18.0         lavaan_0.6-19      
-[22] performance_0.15.0  lme4_1.1-37         Matrix_1.7-3       
-[25] caret_7.0-1         lattice_0.22-7      ggplot2_3.5.2      
-[28] car_3.1-3           carData_3.0-5       rms_8.0-0          
-[31] Hmisc_5.2-3         petersenlab_1.1.7  
+ [4] stringr_1.5.1       readr_2.1.5         tidyverse_2.0.0    
+ [7] yardstick_1.3.2     workflowsets_1.1.1  workflows_1.2.0    
+[10] tune_1.3.0          tidyr_1.3.1         tibble_3.3.0       
+[13] rsample_1.3.0       recipes_1.3.1       purrr_1.1.0        
+[16] parsnip_1.3.2       modeldata_1.4.0     infer_1.0.9        
+[19] dplyr_1.1.4         dials_1.4.0         scales_1.4.0       
+[22] tidymodels_1.3.0    effectsize_1.0.1    broom_1.0.8        
+[25] MASS_7.3-65         ordinal_2023.12-4.1 robustbase_0.99-4-1
+[28] brms_2.22.0         Rcpp_1.1.0          interactions_1.2.0 
+[31] miceadds_3.17-44    mice_3.18.0         lavaan_0.6-19      
+[34] performance_0.15.0  lme4_1.1-37         Matrix_1.7-3       
+[37] caret_7.0-1         lattice_0.22-7      ggplot2_3.5.2      
+[40] car_3.1-3           carData_3.0-5       rms_8.0-0          
+[43] Hmisc_5.2-3         petersenlab_1.1.7  
 
 loaded via a namespace (and not attached):
-  [1] domir_1.2.0          splines_4.5.1        polspline_1.1.25    
-  [4] cellranger_1.1.0     datawizard_1.1.0     hardhat_1.4.1       
-  [7] pROC_1.18.5          rpart_4.1.24         lifecycle_1.0.4     
- [10] Rdpack_2.6.4         StanHeaders_2.32.10  processx_3.8.6      
- [13] globals_0.18.0       insight_1.3.1        backports_1.5.0     
- [16] magrittr_2.0.3       rmarkdown_2.29       yaml_2.3.10         
- [19] pkgbuild_1.4.8       gld_2.6.7            DBI_1.2.3           
- [22] minqa_1.2.8          RColorBrewer_1.1-3   multcomp_1.4-28     
- [25] abind_1.4-8          expm_1.0-0           quadprog_1.5-8      
- [28] nnet_7.3-20          TH.data_1.1-3        tensorA_0.36.2.1    
- [31] sandwich_3.1-1       jtools_2.3.0         ipred_0.9-15        
- [34] lava_1.8.1           inline_0.3.21        listenv_0.9.1       
- [37] MatrixModels_0.5-4   bridgesampling_1.1-2 parallelly_1.45.0   
- [40] codetools_0.2-20     tidyselect_1.2.1     shape_1.4.6.1       
- [43] bayesplot_1.13.0     farver_2.1.2         broom.mixed_0.2.9.6 
- [46] matrixStats_1.5.0    stats4_4.5.1         base64enc_0.1-3     
- [49] jsonlite_2.0.0       e1071_1.7-16         mitml_0.4-5         
- [52] Formula_1.2-5        survival_3.8-3       iterators_1.0.14    
- [55] emmeans_1.11.2       foreach_1.5.2        tools_4.5.1         
- [58] DescTools_0.99.60    glue_1.8.0           mnormt_2.1.1        
- [61] prodlim_2025.04.28   gridExtra_2.3        pan_1.9             
- [64] mgcv_1.9-3           xfun_0.52            distributional_0.5.0
- [67] loo_2.8.0            withr_3.0.2          numDeriv_2016.8-1.1 
- [70] fastmap_1.2.0        mitools_2.4          boot_1.3-31         
- [73] SparseM_1.84-2       callr_3.7.6          digest_0.6.37       
- [76] timechange_0.3.0     R6_2.6.1             estimability_1.5.1  
- [79] colorspace_2.1-1     mix_1.0-13           generics_0.1.4      
- [82] data.table_1.17.8    recipes_1.3.1        class_7.3-23        
- [85] httr_1.4.7           htmlwidgets_1.6.4    parameters_0.27.0   
- [88] ModelMetrics_1.2.2.2 pkgconfig_2.0.3      Exact_3.3           
- [91] gtable_0.3.6         timeDate_4041.110    furrr_0.3.1         
- [94] htmltools_0.5.8.1    scales_1.4.0         lmom_3.2            
- [97] posterior_1.6.1      gower_1.0.2          reformulas_0.4.1    
-[100] rstudioapi_0.17.1    tzdb_0.5.0           reshape2_1.4.4      
-[103] curl_6.4.0           coda_0.19-4.1        checkmate_2.3.2     
-[106] nlme_3.1-168         nloptr_2.2.1         proxy_0.4-27        
-[109] zoo_1.8-14           rootSolve_1.8.2.4    parallel_4.5.1      
-[112] foreign_0.8-90       pillar_1.11.0        grid_4.5.1          
-[115] vctrs_0.6.5          jomo_2.7-6           ucminf_1.2.2        
-[118] xtable_1.8-4         cluster_2.1.8.1      htmlTable_2.4.3     
-[121] evaluate_1.0.4       pbivnorm_0.6.0       mvtnorm_1.3-3       
-[124] cli_3.6.5            compiler_4.5.1       rlang_1.1.6         
-[127] rstantools_2.4.0     future.apply_1.20.0  labeling_0.4.3      
-[130] ps_1.9.1             fs_1.6.6             plyr_1.8.9          
-[133] rstan_2.32.7         stringi_1.8.7        psych_2.5.6         
-[136] pander_0.6.6         QuickJSR_1.8.0       viridisLite_0.4.2   
-[139] V8_6.0.4             glmnet_4.1-9         Brobdingnag_1.2-9   
-[142] bayestestR_0.16.1    quantreg_6.1         hms_1.1.3           
-[145] future_1.58.0        haven_2.5.5          rbibutils_2.3       
-[148] RcppParallel_5.1.10  DEoptimR_1.1-3-1     readxl_1.4.5        </code></pre>
+  [1] fs_1.6.6             matrixStats_1.5.0    sparsevctrs_0.3.4   
+  [4] DiceDesign_1.10      httr_1.4.7           RColorBrewer_1.1-3  
+  [7] insight_1.3.1        numDeriv_2016.8-1.1  tools_4.5.1         
+ [10] backports_1.5.0      R6_2.6.1             mgcv_1.9-3          
+ [13] jomo_2.7-6           withr_3.0.2          Brobdingnag_1.2-9   
+ [16] gridExtra_2.3        quantreg_6.1         cli_3.6.5           
+ [19] domir_1.2.0          mix_1.0-13           sandwich_3.1-1      
+ [22] labeling_0.4.3       mvtnorm_1.3-3        polspline_1.1.25    
+ [25] proxy_0.4-27         QuickJSR_1.8.0       pbivnorm_0.6.0      
+ [28] StanHeaders_2.32.10  foreign_0.8-90       parallelly_1.45.0   
+ [31] readxl_1.4.5         rstudioapi_0.17.1    generics_0.1.4      
+ [34] shape_1.4.6.1        distributional_0.5.0 inline_0.3.21       
+ [37] loo_2.8.0            DescTools_0.99.60    abind_1.4-8         
+ [40] lifecycle_1.0.4      multcomp_1.4-28      yaml_2.3.10         
+ [43] grid_4.5.1           mitml_0.4-5          haven_2.5.5         
+ [46] jtools_2.3.0         pillar_1.11.0        boot_1.3-31         
+ [49] gld_2.6.7            estimability_1.5.1   future.apply_1.20.0 
+ [52] codetools_0.2-20     pan_1.9              glue_1.8.0          
+ [55] V8_6.0.4             data.table_1.17.8    vctrs_0.6.5         
+ [58] Rdpack_2.6.4         cellranger_1.1.0     gtable_0.3.6        
+ [61] datawizard_1.1.0     gower_1.0.2          xfun_0.52           
+ [64] rbibutils_2.3        prodlim_2025.04.28   coda_0.19-4.1       
+ [67] reformulas_0.4.1     survival_3.8-3       timeDate_4041.110   
+ [70] iterators_1.0.14     hardhat_1.4.1        lava_1.8.1          
+ [73] TH.data_1.1-3        ipred_0.9-15         nlme_3.1-168        
+ [76] rstan_2.32.7         tensorA_0.36.2.1     rpart_4.1.24        
+ [79] colorspace_2.1-1     DBI_1.2.3            nnet_7.3-20         
+ [82] Exact_3.3            mnormt_2.1.1         tidyselect_1.2.1    
+ [85] processx_3.8.6       emmeans_1.11.2       compiler_4.5.1      
+ [88] curl_6.4.0           glmnet_4.1-9         htmlTable_2.4.3     
+ [91] SparseM_1.84-2       expm_1.0-0           bayestestR_0.16.1   
+ [94] posterior_1.6.1      checkmate_2.3.2      DEoptimR_1.1-3-1    
+ [97] psych_2.5.6          quadprog_1.5-8       callr_3.7.6         
+[100] digest_0.6.37        minqa_1.2.8          rmarkdown_2.29      
+[103] htmltools_0.5.8.1    pkgconfig_2.0.3      base64enc_0.1-3     
+[106] lhs_1.2.0            fastmap_1.2.0        rlang_1.1.6         
+[109] htmlwidgets_1.6.4    farver_2.1.2         zoo_1.8-14          
+[112] jsonlite_2.0.0       broom.mixed_0.2.9.6  ModelMetrics_1.2.2.2
+[115] magrittr_2.0.3       Formula_1.2-5        bayesplot_1.13.0    
+[118] parameters_0.27.0    GPfit_1.0-9          ucminf_1.2.2        
+[121] furrr_0.3.1          stringi_1.8.7        pROC_1.18.5         
+[124] rootSolve_1.8.2.4    plyr_1.8.9           pkgbuild_1.4.8      
+[127] parallel_4.5.1       listenv_0.9.1        lmom_3.2            
+[130] splines_4.5.1        pander_0.6.6         hms_1.1.3           
+[133] ps_1.9.1             reshape2_1.4.4       stats4_4.5.1        
+[136] rstantools_2.4.0     evaluate_1.0.4       mitools_2.4         
+[139] RcppParallel_5.1.10  nloptr_2.2.1         tzdb_0.5.0          
+[142] foreach_1.5.2        MatrixModels_0.5-4   future_1.58.0       
+[145] xtable_1.8-4         e1071_1.7-16         viridisLite_0.4.2   
+[148] class_7.3-23         cluster_2.1.8.1      timechange_0.3.0    
+[151] globals_0.18.0       bridgesampling_1.1-2</code></pre>
 </div>
 </div>
 
