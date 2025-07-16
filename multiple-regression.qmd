@@ -18,6 +18,7 @@ library("mice")
 library("miceadds")
 library("interactions")
 library("brms")
+library("parallelly")
 library("robustbase")
 library("ordinal")
 library("MASS")
@@ -321,6 +322,10 @@ betaRegression <- brms::brm(
   formula = target_share ~ age + height + weight,
   data = newdata %>% filter(position %in% c("WR")),
   family = zero_one_inflated_beta(),
+  cores = 4,
+  threads = threading(parallelly::availableCores()),
+  seed = 52242,
+  silent = 0
 )
 ```
 
