@@ -3,7 +3,7 @@
 # Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test {#sec-mythbusters}
 
 In this chapter, we put a popular fantasy football belief to the test.
-We evaluate whether the widely held belief is true that players perform better during a contract year.
+We evaluate the widely held belief that players perform better during a contract year.
 
 ## Getting Started {#sec-mythbustersGettingStarted}
 
@@ -303,7 +303,13 @@ nfl_contractYearQBRsubset_seasonal <- nfl_contractYearQBR_seasonal %>%
 ```
 
 Then, we analyze the data.
+
+#### Quarterback Rating {#sec-contractYearQB-QBR}
+
 Below is a mixed model that examines whether a player has a higher QBR per game when they are in a contract year compared to when they are not in a contract year.
+The first model includes just contract year as a predictor.
+The second model includes additional covariates, including player age and experience.
+In terms of Quarterback Rating (QBR), findings from the models indicate that Quarterbacks did not perform significantly better in their contract year.
 
 ```{r}
 mixedModel_qbr <- lmerTest::lmer(
@@ -327,6 +333,10 @@ performance::r2(mixedModelAge_qbr)
 emmeans::emmeans(mixedModelAge_qbr, "contractYear")
 ```
 
+#### Points Added {#sec-contractYearQB-PointsAdded}
+
+In terms of points added, Quarterbacks did not perform better in their contract year.
+
 ```{r}
 mixedModel_ptsAdded <- lmerTest::lmer(
   pts_added ~ contractYear + (1 | player_id),
@@ -349,6 +359,11 @@ performance::r2(mixedModelAge_ptsAdded)
 emmeans::emmeans(mixedModelAge_ptsAdded, "contractYear")
 ```
 
+#### Expected Points Added {#sec-contractYearQB-PointsAdded}
+
+In terms of expected points added (EPA) from passing plays, when not controlling for player age and experience, Quarterbacks performed better in their contract year.
+However, when controlling for player age and experience, Quarterbacks did not perform significantly better in their contract year.
+
 ```{r}
 mixedModel_epaPass <- lmerTest::lmer(
   epa_pass ~ contractYear + (1 | player_id),
@@ -370,6 +385,10 @@ summary(mixedModelAge_epaPass)
 performance::r2(mixedModelAge_epaPass)
 emmeans::emmeans(mixedModelAge_epaPass, "contractYear")
 ```
+
+#### Fantasy Points {#sec-contractYearQB-FantasyPoints}
+
+In terms of fantasy points, Quarterbacks performed significantly worse in their contract year, even controlling for player age and experience.
 
 ```{r}
 mixedModel_fantasyPtsPass <- lmerTest::lmer(
@@ -405,6 +424,10 @@ player_statsContractsRB_seasonal <- player_statsContracts_seasonal %>%
     season >= 2011) # keep only seasons since 2011 (when most contract data are available)
 ```
 
+#### Yards Per Carry {#sec-contractYearRB-YPC}
+
+In terms of yards per carry (YPC), Running Backs did not perform significantly better in their contract year.
+
 ```{r}
 mixedModel_ypc <- lmerTest::lmer(
   ypc ~ contractYear + (1 | player_id),
@@ -427,6 +450,10 @@ performance::r2(mixedModelAge_ypc)
 emmeans::emmeans(mixedModelAge_ypc, "contractYear")
 ```
 
+#### Expected Points Added {#sec-contractYearRB-EPA}
+
+In terms of expected points added (EPA) from rushing plays, Running Backs did not perform significantly better in their contract year.
+
 ```{r}
 mixedModel_epaRush <- lmerTest::lmer(
   rushing_epa ~ contractYear + (1 | player_id),
@@ -448,6 +475,10 @@ summary(mixedModelAge_epaRush)
 performance::r2(mixedModelAge_epaRush)
 emmeans::emmeans(mixedModelAge_epaRush, "contractYear")
 ```
+
+#### Fantasy Points {#sec-contractYearRB-FantasyPoints}
+
+In terms of fantasy points, Running Backs performed significantly worse in their contract year, even controlling for player age and experience.
 
 ```{r}
 mixedModel_fantasyPtsRush <- lmerTest::lmer(
@@ -483,6 +514,10 @@ player_statsContractsWRTE_seasonal <- player_statsContracts_seasonal %>%
     season >= 2011) # keep only seasons since 2011 (when most contract data are available)
 ```
 
+#### Receiving Yards {#sec-contractYearWRTE-ReceivingYards}
+
+In terms of receiving yards, Wide Receivers/Tight Ends performed significantly worse in their contract year, even controlling for player age and experience.
+
 ```{r}
 mixedModel_receivingYards <- lmerTest::lmer(
   receiving_yards ~ contractYear + (1 | player_id),
@@ -505,6 +540,10 @@ performance::r2(mixedModelAge_receivingYards)
 emmeans::emmeans(mixedModelAge_receivingYards, "contractYear")
 ```
 
+#### Expected Points Added {#sec-contractYearWRTE-EPA}
+
+In terms of expected points added (EPA) from receiving plays, Wide Receivers/Tight Ends performed significantly worse in their contract year, even controlling for player age and experience.
+
 ```{r}
 mixedModel_epaReceiving <- lmerTest::lmer(
   receiving_epa ~ contractYear + (1 | player_id),
@@ -526,6 +565,10 @@ summary(mixedModelAge_epaReceiving)
 performance::r2(mixedModelAge_epaReceiving)
 emmeans::emmeans(mixedModelAge_epaReceiving, "contractYear")
 ```
+
+#### Fantasy Points {#sec-contractYearWRTE-FantasyPoints}
+
+In terms of fantasy points, Wide Receivers/Tight Ends performed significantly worse in their contract year, even controlling for player age and experience.
 
 ```{r}
 mixedModel_fantasyPtsReceiving <- lmerTest::lmer(
@@ -559,6 +602,10 @@ player_statsContractsQBRBWRTE_seasonal <- player_statsContracts_seasonal %>%
     season >= 2011) # keep only seasons since 2011 (when most contract data are available)
 ```
 
+#### Fantasy Points {#sec-contractYearQBRBWRTE-FantasyPoints}
+
+In terms of fantasy points, Quarterbacks/Running Backs/Wide Receivers/Tight Ends performed significantly worse in their contract year, even controlling for player age and experience.
+
 ```{r}
 mixedModel_fantasyPts <- lmerTest::lmer(
   fantasyPoints ~ contractYear + position_group + (1 | player_id),
@@ -581,13 +628,16 @@ performance::r2(mixedModelAge_fantasyPts)
 emmeans::emmeans(mixedModelAge_fantasyPts, "contractYear")
 ```
 
-
-```{r}
-# Placeholder for model predicting fantasy points
-# Include player position as a covariate
-```
-
 ## Conclusion {#sec-mythbustersConclusion}
+
+There is a widely held belief that NFL players perform better in the last year of the contract because they are motivated to gain another contract.
+There is some evidence in the NBA and MLB that players tend to perform better in their contract year.
+We evaluated this possibility among NFL players who were Quarterbacks, Running Backs, Wide Receivers, or Tight Ends.
+We evaluated a wide range of performance indexes, including Quarterback Rating, yards per carry, points added, expected points added, receiving yards, and fantasy points.
+None of the positions showed significantly better performance in their contract year for any of the performance indexes.
+By contrast, if anything, players tended to perform more poorly during their contract year, as operationalized by fantasy points, receiving yards (WR/TE), and EPA from receiving plays (WR/TE), even when controlling for player and age experience.
+In sum, we did not find evidence in support of the contract year hypothesis and consider this myth debunked.
+However, we are open to this possibility being reexamined in new ways or with additional performance
 
 ::: {.content-visible when-format="html"}
 
