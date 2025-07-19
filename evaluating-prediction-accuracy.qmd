@@ -266,7 +266,7 @@ Thus, scale-dependent accuracy indices cannot be directly compared when using me
 
 When dealing with a categorical outcome, discrimination is the ability to separate events from non-events.
 When dealing with a continuous outcome, discrimination is the strength of the association between the predictor and the outcome.
-Aspects of discrimination at a particular cutoff (e.g., sensitivity, specificity, area under the ROC curve) are described in INSERT.
+Aspects of discrimination at a particular cutoff (e.g., sensitivity, specificity, area under the ROC curve) are described in @sec-thresholdDependentAccuracy.
 
 ### Calibration {#sec-calibration}
 
@@ -959,6 +959,38 @@ Thus, the optimal cutoff depends on how costly each type of error is: false nega
 If false negatives are more costly than false positives, we would set a low cutoff.
 If false positives are more costly than false negatives, we would set a high cutoff.
 
+### Set a Cutoff/Threshold {#sec-setCutoff}
+
+For evaluating sensitivity, specificity, positive predictive value, negative predictive value, and the [receiver operating characteristic (ROC) curve](#sec-roc), we need to make a dichotomous decision/prediction.
+For this example, our goal is to predict which Running Backs or Wide Receivers will score 300 or more fantasy points.
+We will predict a player as scoring 300 or more fantasy points for a given projection source if that projection source projected the player to score 300 or more fantasy points.
+Thus, our cutoff or threshold is 300 or more projected points.
+The same player has multiple rows in the data file—one for each projection source.
+
+```{r}
+projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal %>% 
+  filter(position_group %in% c("RB","WR")) %>% 
+  filter(season == 2024)
+
+projectionsWithActuals_seasonal_subset$prediction <- ifelse(projectionsWithActuals_seasonal_subset$raw_points >= 300, 1, 0)
+projectionsWithActuals_seasonal_subset$truth <- ifelse(projectionsWithActuals_seasonal_subset$fantasyPoints >= 300, 1, 0)
+
+projectionsWithActuals_seasonal_subset$predictionFactor <- factor(
+  projectionsWithActuals_seasonal_subset$prediction,
+  levels = c(1,0),
+  labels = c("Prediction: Will Score 300+ Points", "Prediction: Will Not Score 300+ Points"))
+
+projectionsWithActuals_seasonal_subset$truthFactor <- factor(
+  projectionsWithActuals_seasonal_subset$truth,
+  levels = c(1,0),
+  labels = c("Truth: Scored 300+ Points", "Truth: Did Not Score 300+ Points")
+)
+
+table(projectionsWithActuals_seasonal_subset$predictionFactor)
+
+table(projectionsWithActuals_seasonal_subset$truthFactor)
+```
+
 ### Signal Detection Theory {#sec-sdt}
 
 Signal detection theory (SDT) is a probability-based theory for the detection of a given stimulus (signal) from a stimulus set that includes non-target stimuli (noise).
@@ -999,9 +1031,40 @@ We end at the highest possible cutoff, where the sensitivity is 0 and the specif
 Each point on the ROC curve corresponds to a pair of hit and false alarm rates (sensitivity and specificity) resulting from a specific cutoff value.
 Then, we can draw lines or a curve to connect the points.
 
-INSERT depicts an empirical ROC plot where lines are drawn to connect the hit and false alarm rates.
+@fig-aucExampleEmpirical depicts an empirical ROC plot where lines are drawn to connect the hit and false alarm rates, in predicting Running Backs and Wide Receivers who score 300 or more fantasy points.
 
-INSERT depicts an ROC curve where a smoothed and fitted curve is drawn to connect the hit and false alarm rates.
+```{r}
+#| label: fig-aucExampleEmpirical
+#| fig-cap: "Empirical Receiver Operating Characteristic (ROC) Curve for Predicting Running Backs and Wide Receivers that Score 300 or More Fantasy Points."
+#| fig-alt: "Empirical Receiver Operating Characteristic (ROC) Curve for Predicting Running Backs and Wide Receivers that Score 300 or More Fantasy Points."
+#| fig-width: 8
+#| fig-height: 8
+
+plot(
+  pROC::roc(
+    truth ~ raw_points,
+    projectionsWithActuals_seasonal_subset),
+  legacy.axes = TRUE,
+  print.auc = TRUE)
+```
+
+@fig-aucExample depicts an ROC curve where a smoothed and fitted curve is drawn to connect the hit and false alarm rates, in predicting Running Backs and Wide Receivers who score 300 or more fantasy points.
+
+```{r}
+#| label: fig-aucExample
+#| fig-cap: "Smoothed Receiver Operating Characteristic (ROC) Curve for Predicting Running Backs and Wide Receivers that Score 300 or More Fantasy Points."
+#| fig-alt: "Smoothed Receiver Operating Characteristic (ROC) Curve for Predicting Running Backs and Wide Receivers that Score 300 or More Fantasy Points."
+#| fig-width: 8
+#| fig-height: 8
+
+plot(
+  pROC::roc(
+    truth ~ raw_points,
+    projectionsWithActuals_seasonal_subset,
+    smooth = TRUE),
+  legacy.axes = TRUE,
+  print.auc = TRUE)
+```
 
 ##### Area Under the ROC Curve {#sec-auc}
 
@@ -1153,10 +1216,7 @@ If the predictions and outcomes are dichotomous, the confusion matrix is a 2x2 m
 In such a case, the confusion matrix provides a tabular count of each type of accurate cases ([true positives](#sec-truePositive) and [true negatives](#sec-trueNegative)) versus the number of each type of error ([false positives](#sec-falsePositive) and [false negatives](#sec-falseNegative)), as shown in @fig-confusionMatrix.
 An example of a confusion matrix is in @fig-confusionMatrix1.
 
-To generate a 2x2 confusion matrix, we need to make a dichotomous decision/prediction.
-For this example, our goal is to predict which Running Backs or Wide Receivers will score 300 or more fantasy points.
-We will predict a player as scoring 300 or more fantasy points for a given projection source if that projection source projected the player to score 300 or more fantasy points.
-Thus, the same player has multiple rows in the data file—one for each projection source.
+Here is our 2x2 confusion matrix, predicting which Running Backs or Wide Receivers will score 300 or more fantasy points.
 
 ```{r}
 projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal %>% 
