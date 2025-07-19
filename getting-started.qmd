@@ -295,62 +295,6 @@ seq(
 
 Hopefully, that provides an example for how to learn about a particular function, its arguments, and how to use them.
 
-## Create a Function {#sec-createFunction}
-
-Functions are useful if you want to perform an operation multiple times.
-Use of a function can save you time without needed to retype out all of the code each time.
-For instance, let's say you want to convert temperature between Fahrenheit and Celsius, you could create a function to do that.
-
-```{r}
-convert_temperature <- function(temperature, unit = "F"){
-  if(unit == "F"){ # if the input temperature(s) in Fahrenheit
-    newtemp <- (temperature - 32) / (9/5)
-  } else if(unit == "C"){ # if the input temperature(s) in Celsius
-    newtemp <- (temperature * (9/5)) + 32
-  }
-  
-  return(newtemp)
-}
-```
-
-Now we can use the function to convert temperatures between Fahrenheit and Celsius.
-A temperature of 32°F is equal to 0°C.
-A temperature of 0°C is equal to 89.6°F.
-
-```{r}
-convert_temperature(
-  temperature = 32,
-  unit = "F"
-)
-
-convert_temperature(
-  temperature = 32,
-  unit = "C"
-)
-```
-
-We can also convert the temperature for a vector of values at once:
-
-```{r}
-convert_temperature(
-  temperature = c(0, 10, 20, 30, 40, 50),
-  unit = "F"
-)
-
-convert_temperature(
-  temperature = c(0, 10, 20, 30, 40, 50),
-  unit = "C"
-)
-```
-
-Because the default unit is "F", we do not need to specify the unit if our input temperatures are in Fahrenheit:
-
-```{r}
-convert_temperature(
-  c(0, 10, 20, 30, 40, 50)
-)
-```
-
 ## Create a Vector {#sec-createVector}
 
 A vector is a series of elements that can be numeric or character.
@@ -580,6 +524,41 @@ players$position == "WR" & players$age > 26
 
 ```{r}
 players$position == "WR" | players$age > 23
+```
+
+## If...Else Conditions {#sec-ifelse}
+
+We can use the construction, `if()...else if()...else()` if we want to perform conditional operations.
+The construction, `if()...else if()...else()` can only be used on one value at a time.
+
+```{r}
+player_rank <- 15
+
+if(player_rank <= 10){ # check this condition first
+  tier <- 1
+  print(tier)
+} else if(player_rank <= 20){ # if first condition was not met, check this condition next
+  tier <- 2
+  print(tier)
+} else if(player_rank <= 30){ # if first two conditions were not met, check this condition next
+  tier <- 3
+  print(tier)
+} else{ # if all other conditions were not met, then do this
+  print("Don't draft this player!")
+}
+```
+
+To apply conditional operations to a vector, we can use the `ifelse()` function.
+
+```{r}
+player_rank <- c(1, 10, 20, 40, 100)
+
+tier <- ifelse(
+  player_rank <= 10, # check this condition
+  1, # assign this value if true
+  2) # assign this value if false
+
+tier
 ```
 
 ## Piping {#sec-piping}
@@ -1280,6 +1259,65 @@ for(i in 1:length(players$ID)){
 ```
 
 Loops are fine for basic computations, but other approaches (such as the `apply()` family of functions) can be even faster than loops.
+
+## Create a Function {#sec-createFunction}
+
+Now, let's put together what we have learned to create a useful function.
+Functions are useful if you want to perform an operation multiple times.
+Any operation that you want to perform multiple times, you can create a function to accomplish.
+Use of a function can save you time without needed to retype out all of the code each time.
+For instance, let's say you want to convert temperature between Fahrenheit and Celsius, you could create a function to do that.
+In this case, our function has two arguments: `temperature` (in degrees) and `unit` of the original temperature (`F` for Fahrenheit or `C` for Celsius, where the default unit is Fahrenheit).
+
+```{r}
+convert_temperature <- function(temperature, unit = "F"){
+  if(unit == "F"){ # if the input temperature(s) in Fahrenheit
+    newtemp <- (temperature - 32) / (9/5)
+  } else if(unit == "C"){ # if the input temperature(s) in Celsius
+    newtemp <- (temperature * (9/5)) + 32
+  }
+  
+  return(newtemp)
+}
+```
+
+Now we can use the function to convert temperatures between Fahrenheit and Celsius.
+A temperature of 32°F is equal to 0°C.
+A temperature of 0°C is equal to 89.6°F.
+
+```{r}
+convert_temperature(
+  temperature = 32,
+  unit = "F"
+)
+
+convert_temperature(
+  temperature = 32,
+  unit = "C"
+)
+```
+
+We can also convert the temperature for a vector of values at once:
+
+```{r}
+convert_temperature(
+  temperature = c(0, 10, 20, 30, 40, 50),
+  unit = "F"
+)
+
+convert_temperature(
+  temperature = c(0, 10, 20, 30, 40, 50),
+  unit = "C"
+)
+```
+
+Because the default unit is "F", we do not need to specify the unit if our input temperatures are in Fahrenheit:
+
+```{r}
+convert_temperature(
+  c(0, 10, 20, 30, 40, 50)
+)
+```
 
 # Conclusion {#sec-gettingStartedConclusion}
 
