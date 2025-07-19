@@ -82,6 +82,7 @@ nfl_playerIDs_subset <- nfl_playerIDs %>%
   select(-all_of(c("team", "position", "height", "weight", "age")))
 
 players_projectedPoints_seasonal_combined$season <- as.integer(players_projectedPoints_seasonal_combined$season)
+players_projections_seasonal_average_merged$season <- as.integer(players_projections_seasonal_average_merged$season)
 
 player_stats_seasonal_subset_IDs <- left_join(
   player_stats_seasonal_subset,
@@ -97,6 +98,13 @@ projectionsWithActuals_seasonal <- full_join(
   suffix = c("", "_proj"),
 )
 
+crowdAveragedProjectionsWithActuals_seasonal <- full_join(
+  player_stats_seasonal_subset_IDs,
+  players_projections_seasonal_average_merged %>% filter(avg_type == "average"),
+  by = c("mfl_id" = "id", "season"),
+  suffix = c("", "_proj"),
+)
+
 projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal %>% 
   unite(
     "player_id_season",
@@ -105,6 +113,45 @@ projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal %>%
     remove = FALSE
   )
 
+crowdAveragedProjectionsWithActuals_seasonal <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  unite(
+    "player_id_season",
+    player_id,
+    season,
+    remove = FALSE
+  )
+```
+
+Players in the `projectionsWithActuals_seasonal` object are (supposed to be) uniquely identified by `player_id`-`season`-`data_src`:
+
+```{r}
+projectionsWithActuals_seasonal %>% 
+  filter(!is.na(player_id)) %>% 
+  group_by(player_id, season, data_src) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Players in the `crowdAveragedProjectionsWithActuals_seasonal` object are (supposed to be) uniquely identified by `player_id`-`season`-`avg_type`:
+
+```{r}
+crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(!is.na(player_id)) %>% 
+  group_by(player_id, season, avg_type) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+We save the data object for use in other chapters:
+
+```{r}
+save(
+  projectionsWithActuals_seasonal, crowdAveragedProjectionsWithActuals_seasonal,
+  file = "./data/projectionsWithActuals_seasonal.RData"
+)
+```
+
+```{r}
 playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal %>% 
   filter(raw_points > 100 | fantasyPoints > 100) %>% 
   select(player_id_season) %>% 
@@ -135,16 +182,6 @@ projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal %>%
   filter(position_group == "DB")
 ```
 
-Players are uniquely identified by `player_id`-`season`-`data_src`:
-
-```{r}
-projectionsWithActuals_seasonal %>% 
-  filter(!is.na(player_id)) %>% 
-  group_by(player_id, season, data_src) %>% 
-  filter(n() > 1) %>% 
-  head()
-```
-
 #### Weekly Projections {#sec-predictionAccuracyPrepareDataWeekly}
 
 Below, we merge weekly projections with actual performance.
@@ -159,6 +196,7 @@ nfl_playerIDs_subset <- nfl_playerIDs %>%
   select(-all_of(c("team", "position", "height", "weight", "age")))
 
 players_projectedPoints_weekly_combined$season <- as.integer(players_projectedPoints_weekly_combined$season)
+players_projections_weekly_average_merged$season <- as.integer(players_projections_weekly_average_merged$season)
 
 player_stats_weekly_subset_IDs <- left_join(
   player_stats_weekly_subset,
@@ -174,6 +212,13 @@ projectionsWithActuals_weekly <- full_join(
   suffix = c("", "_proj"),
 )
 
+crowdAveragedProjectionsWithActuals_weekly <- full_join(
+  player_stats_weekly_subset_IDs,
+  players_projections_weekly_average_merged,
+  by = c("mfl_id" = "id", "season", "week"),
+  suffix = c("", "_proj"),
+)
+
 projectionsWithActuals_weekly <- projectionsWithActuals_weekly %>% 
   unite(
     "player_id_season_week",
@@ -183,6 +228,46 @@ projectionsWithActuals_weekly <- projectionsWithActuals_weekly %>%
     remove = FALSE
   )
 
+crowdAveragedProjectionsWithActuals_weekly <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  unite(
+    "player_id_season_week",
+    player_id,
+    season,
+    week,
+    remove = FALSE
+  )
+```
+
+Players in the `projectionsWithActuals_weekly` object are (supposed to be) uniquely identified by `player_id`-`season`-`week`-`data_src`:
+
+```{r}
+projectionsWithActuals_weekly %>% 
+  filter(!is.na(player_id)) %>% 
+  group_by(player_id, season, week, data_src) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Players in the `crowdAveragedProjectionsWithActuals_weekly` object are (supposed to be) uniquely identified by `player_id`-`season`-`week`-`avg_type`:
+
+```{r}
+crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(!is.na(player_id)) %>% 
+  group_by(player_id, season, week, avg_type) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+We save the data object for use in other chapters:
+
+```{r}
+save(
+  projectionsWithActuals_weekly, crowdAveragedProjectionsWithActuals_weekly,
+  file = "./data/projectionsWithActuals_weekly.RData"
+)
+```
+
+```{r}
 playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly %>% 
   filter(raw_points > 6 | fantasyPoints > 6) %>% 
   select(player_id_season_week) %>% 
@@ -211,16 +296,6 @@ projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly %>%
 
 projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly %>% 
   filter(position_group == "DB")
-```
-
-Players are uniquely identified by `player_id`-`season`-`week`-`data_src`:
-
-```{r}
-projectionsWithActuals_weekly %>% 
-  filter(!is.na(player_id)) %>% 
-  group_by(player_id, season, week, data_src) %>% 
-  filter(n() > 1) %>% 
-  head()
 ```
 
 ## Overview {#sec-predictionAccuracyOverview}
@@ -3628,7 +3703,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3746,7 +3821,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Quarterbacks who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Quarterbacks who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3864,7 +3939,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Running Backs who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Running Backs who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3983,7 +4058,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Wide Receivers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Wide Receivers who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -4101,7 +4176,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Tight Ends who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Tight Ends who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -4219,7 +4294,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Kickers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Kickers who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -4337,7 +4412,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Defensive Linemen who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Defensive Linemen who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -4455,7 +4530,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Linebackers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Linebackers who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -4573,7 +4648,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Defensive Backs who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Defensive Backs who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -4830,7 +4905,7 @@ knitr::kable(
 
 ```{r}
 #| label: tbl-weeklyAccuracyByPositionSubset
-#| tbl-cap: "Accuracy of Weekly Projections By Position, Among Players with Greater than 100 Projected or Actual Points."
+#| tbl-cap: "Accuracy of Weekly Projections By Position, Among Players with Greater than 6 Projected or Actual Points."
 #| echo: false
 
 knitr::kable(

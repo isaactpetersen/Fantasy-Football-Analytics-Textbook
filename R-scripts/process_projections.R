@@ -17,6 +17,9 @@ filenames_week <- str_extract(filenames, "week\\d+") %>%
   str_remove("week") %>% 
   as.integer()
 
+filenames_season <- filenames_season[which(!is.na(filenames_week))]
+filenames_week <- filenames_week[which(!is.na(filenames_week))]
+
 objectNames_projectedPoints <- paste("players_projectedPoints_weekly_", filenames_season, "_", "week", filenames_week, sep = "")
 objectNames_projectedPoints_combined <- paste("players_projectedPoints_weekly_combined_", filenames_season, "_", "week", filenames_week, sep = "")
 objectNames_projections <- paste("players_projections_weekly_average_", filenames_season, "_", "week", filenames_week, sep = "")
@@ -145,12 +148,15 @@ filenamesSeasonal <- list.files(
 
 filenamesSeasonal_season <- str_extract(filenamesSeasonal, "\\d{4}")
 
-objectNames_seasonal <- paste("players_projectedPoints_seasonal_", filenamesSeasonal_season, sep = "")
+objectNames_projectedPoints_seasonal <- paste("players_projectedPoints_seasonal_", filenamesSeasonal_season, sep = "")
+objectNames_projections_seasonal <- paste("players_projections_seasonal_average_", filenamesSeasonal_season, sep = "")
 
 for(i in 1:length(filenamesSeasonal_season)){
-  objectName_seasonal_subset <- objectNames_seasonal[i]
+  objectName_projectedPoints_seasonal_subset <- objectNames_projectedPoints_seasonal[i]
+  objectName_projections_seasonal_subset <- objectNames_projections_seasonal[i]
   
   rm(players_projectedPoints_seasonal)
+  rm(players_projections_seasonal_average)
   
   fullFilepath <- filenamesSeasonal[i]
   
@@ -170,22 +176,33 @@ for(i in 1:length(filenamesSeasonal_season)){
   players_projectedPoints_seasonal_combined <- players_projectedPoints_seasonal_combined %>% 
     select(season, everything())
   
+  # Projections
+  players_projections_seasonal_average$season <- filenamesSeasonal_season[i]
+  
   # Assign to object
-  assign(objectName_seasonal_subset, players_projectedPoints_seasonal_combined)
+  assign(objectName_projectedPoints_seasonal_subset, players_projectedPoints_seasonal_combined)
+  assign(objectName_projections_seasonal_subset, players_projections_seasonal_average)
   
   rm(players_projectedPoints_seasonal)
+  rm(players_projections_seasonal_average)
 }
 
 ## Combine Across Seasons ----
 
-objectNames_seasonal_acrossSeasons <- paste("players_projectedPoints_seasonal_", unique(filenamesSeasonal_season), sep = "")
+objectNames_projectedPoints_seasonal_acrossSeasons <- paste("players_projectedPoints_seasonal_", unique(filenamesSeasonal_season), sep = "")
+objectNames_projections_weekly_average_acrossSeasons <- objectNames_projections_seasonal
 
-players_projectedPoints_seasonal_combined <- objectNames_seasonal_acrossSeasons %>%
+players_projectedPoints_seasonal_combined <- objectNames_projectedPoints_seasonal_acrossSeasons %>%
+  map(get) %>%  # retrieve each object by name
+  bind_rows() %>% # bind all data frames by row
+  arrange(season)
+
+players_projections_seasonal_average_merged <- objectNames_projections_weekly_average_acrossSeasons %>%
   map(get) %>%  # retrieve each object by name
   bind_rows() %>% # bind all data frames by row
   arrange(season)
 
 save(
-  players_projectedPoints_seasonal_combined,
+  players_projectedPoints_seasonal_combined, players_projections_seasonal_average_merged,
   file = paste("./data/players_projections_seasonal", ".RData", sep = "")
 )
