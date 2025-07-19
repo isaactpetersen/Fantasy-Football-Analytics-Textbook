@@ -2391,7 +2391,8 @@ Relatedly, crowd-averaged projections tend to be more accurate than individual s
 The association between projected and actual fantasy points tended to flatten at the higher levels of projected points, for some positions, including Running Backs, Kickers, and defensive players.
 A consequence of this pattern, from the perspective of draft strategy, is that it would not make sense to draft players projected to score more than the flattening of the projected–actual curve.
 For instance, drafting a highly routed Wide Receiver may be safer than drafting a highly ranked Running Back, who may be more prone to injury.
-This finding was echoed by @Kartes2025 (archived at <https://perma.cc/R3WS-CAKD>) whose evaluation of the accuracy of projections by position found that:
+This finding is consistent with findings from @Petersen2017 [archived at <https://perma.cc/BG2W-ANUF>], who found that projections were more accurate for Quarterbacks and Wide Receivers than for Running Backs; projections were the least accurate for Kickers, Defensive Backs, and Defense/Special Teams.
+These finding were also extended by @Kartes2025 (archived at <https://perma.cc/R3WS-CAKD>) whose evaluation of the accuracy of projections by position found that:
 
 a. Quarterbacks with preseason ranks of 6–10 showed the greatest systematic underperformance relative to their projections, suggesting that you should either draft an elite Quarterback (ranked 1–5) or wait until later rounds to draft multiple lower-ranked Quarterbacks.
 a. Elite Running Backs (with preseason ranks of 1–5) showed strong underperformance (relative to projections), suggesting that you should draft Running Backs ranked 6 and below.
@@ -2413,6 +2414,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_overall <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal$raw_points,
+  actual = projectionsWithActuals_seasonal$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_overall <- round(accuracyIndices_seasonal_overall$rsquared, digits = 2)
+me_seasonal_overall <- round(accuracyIndices_seasonal_overall$ME, digits = 2)
+mae_seasonal_overall <- round(accuracyIndices_seasonal_overall$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for all players (across all positions) is in @fig-calibrationPlotSeasonalOverall.
@@ -2484,7 +2499,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for players across all positions, but only among those who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -2492,6 +2507,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_overall_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$rsquared, digits = 2)
+me_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$ME, digits = 2)
+mae_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$MAE, digits = 2)
 ```
 
 #### Quarterbacks {#sec-accuracyProjectionsSeasonalQB}
@@ -2504,6 +2533,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_qb$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_qb <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_qb$raw_points,
+  actual = projectionsWithActuals_seasonal_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_qb <- round(accuracyIndices_seasonal_qb$rsquared, digits = 2)
+me_seasonal_qb <- round(accuracyIndices_seasonal_qb$ME, digits = 2)
+mae_seasonal_qb <- round(accuracyIndices_seasonal_qb$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Quarterbacks is in @fig-calibrationPlotSeasonalQBs.
@@ -2574,7 +2617,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Quarterbacks who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Quarterbacks who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -2582,6 +2625,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_qb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_qb_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_qb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_qb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$rsquared, digits = 2)
+me_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$ME, digits = 2)
+mae_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$MAE, digits = 2)
 ```
 
 #### Running Backs {#sec-accuracyProjectionsSeasonalRB}
@@ -2594,6 +2651,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_rb$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_rb <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_rb$raw_points,
+  actual = projectionsWithActuals_seasonal_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_rb <- round(accuracyIndices_seasonal_rb$rsquared, digits = 2)
+me_seasonal_rb <- round(accuracyIndices_seasonal_rb$ME, digits = 2)
+mae_seasonal_rb <- round(accuracyIndices_seasonal_rb$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Running Backs is in @fig-calibrationPlotSeasonalRBs.
@@ -2664,7 +2735,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Running Backs who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Running Backs who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -2672,6 +2743,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_rb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_rb_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_rb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_rb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$rsquared, digits = 2)
+me_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$ME, digits = 2)
+mae_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$MAE, digits = 2)
 ```
 
 #### Wide Receivers {#sec-accuracyProjectionsSeasonalWR}
@@ -2684,6 +2769,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_wr$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_wr <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_wr$raw_points,
+  actual = projectionsWithActuals_seasonal_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_wr <- round(accuracyIndices_seasonal_wr$rsquared, digits = 2)
+me_seasonal_wr <- round(accuracyIndices_seasonal_wr$ME, digits = 2)
+mae_seasonal_wr <- round(accuracyIndices_seasonal_wr$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Wide Receivers is in @fig-calibrationPlotSeasonalWRs.
@@ -2754,7 +2853,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Wide Receivers who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Wide Receivers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -2762,6 +2861,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_wr$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_wr_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_wr$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_wr$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$rsquared, digits = 2)
+me_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$ME, digits = 2)
+mae_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$MAE, digits = 2)
 ```
 
 #### Tight Ends {#sec-accuracyProjectionsSeasonalTE}
@@ -2774,6 +2887,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_te$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_te <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_te$raw_points,
+  actual = projectionsWithActuals_seasonal_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_te <- round(accuracyIndices_seasonal_te$rsquared, digits = 2)
+me_seasonal_te <- round(accuracyIndices_seasonal_te$ME, digits = 2)
+mae_seasonal_te <- round(accuracyIndices_seasonal_te$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Tight Ends is in @fig-calibrationPlotSeasonalTEs.
@@ -2844,7 +2971,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Tight Ends who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Tight Ends who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -2852,6 +2979,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_te$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_te_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_te$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_te$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$rsquared, digits = 2)
+me_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$ME, digits = 2)
+mae_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$MAE, digits = 2)
 ```
 
 #### Kickers {#sec-accuracyProjectionsSeasonalK}
@@ -2864,6 +3005,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_k$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_k <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_k$raw_points,
+  actual = projectionsWithActuals_seasonal_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_k <- round(accuracyIndices_seasonal_k$rsquared, digits = 2)
+me_seasonal_k <- round(accuracyIndices_seasonal_k$ME, digits = 2)
+mae_seasonal_k <- round(accuracyIndices_seasonal_k$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Kickers is in @fig-calibrationPlotSeasonalKs.
@@ -2934,7 +3089,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Kickers who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Kickers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -2942,6 +3097,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_k$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_k_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_k$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_k$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$rsquared, digits = 2)
+me_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$ME, digits = 2)
+mae_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$MAE, digits = 2)
 ```
 
 #### Defensive Linemen {#sec-accuracyProjectionsSeasonalDL}
@@ -2954,6 +3123,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_dl$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_dl <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_dl$raw_points,
+  actual = projectionsWithActuals_seasonal_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_dl <- round(accuracyIndices_seasonal_dl$rsquared, digits = 2)
+me_seasonal_dl <- round(accuracyIndices_seasonal_dl$ME, digits = 2)
+mae_seasonal_dl <- round(accuracyIndices_seasonal_dl$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Defensive Linemen is in @fig-calibrationPlotSeasonalDLs.
@@ -3024,7 +3207,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Defensive Linemen who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Defensive Linemen who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3032,6 +3215,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_dl$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_dl_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_dl$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_dl$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$rsquared, digits = 2)
+me_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$ME, digits = 2)
+mae_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$MAE, digits = 2)
 ```
 
 #### Linebackers {#sec-accuracyProjectionsSeasonalLB}
@@ -3044,6 +3241,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_lb$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_lb <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_lb$raw_points,
+  actual = projectionsWithActuals_seasonal_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_lb <- round(accuracyIndices_seasonal_lb$rsquared, digits = 2)
+me_seasonal_lb <- round(accuracyIndices_seasonal_lb$ME, digits = 2)
+mae_seasonal_lb <- round(accuracyIndices_seasonal_lb$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Linebackers is in @fig-calibrationPlotSeasonalLBs.
@@ -3114,7 +3325,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Linebackers who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Linebackers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3122,6 +3333,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_lb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_lb_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_lb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_lb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$rsquared, digits = 2)
+me_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$ME, digits = 2)
+mae_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$MAE, digits = 2)
 ```
 
 #### Defensive Backs {#sec-accuracyProjectionsSeasonalDB}
@@ -3134,6 +3359,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_db$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_db <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_db$raw_points,
+  actual = projectionsWithActuals_seasonal_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_db <- round(accuracyIndices_seasonal_db$rsquared, digits = 2)
+me_seasonal_db <- round(accuracyIndices_seasonal_db$ME, digits = 2)
+mae_seasonal_db <- round(accuracyIndices_seasonal_db$MAE, digits = 2)
 ```
 
 A calibration plot of the seasonal projections for Defensive backs is in @fig-calibrationPlotSeasonalDBs.
@@ -3204,7 +3443,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the seasonal accuracy indexes for only those Defensive Backs who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the seasonal accuracy indexes for only those Defensive Backs who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3212,6 +3451,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_seasonal_db$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_db_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_seasonal_db$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = projectionsWithActuals_seasonal_db$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$rsquared, digits = 2)
+me_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$ME, digits = 2)
+mae_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$MAE, digits = 2)
 ```
 
 ### Weekly Projections {#sec-accuracyProjectionsWeekly}
@@ -3226,6 +3479,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_overall <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly$raw_points,
+  actual = projectionsWithActuals_weekly$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_overall <- round(accuracyIndices_weekly_overall$rsquared, digits = 2)
+me_weekly_overall <- round(accuracyIndices_weekly_overall$ME, digits = 2)
+mae_weekly_overall <- round(accuracyIndices_weekly_overall$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for all players (across all positions) is in @fig-calibrationPlotWeeklyOverall.
@@ -3296,7 +3563,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for players across all positions, but only among those who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3304,6 +3571,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_overall_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$rsquared, digits = 2)
+me_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$ME, digits = 2)
+mae_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$MAE, digits = 2)
 ```
 
 #### Quarterbacks {#sec-accuracyProjectionsWeeklyQB}
@@ -3316,6 +3597,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_qb$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_qb <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_qb$raw_points,
+  actual = projectionsWithActuals_weekly_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_qb <- round(accuracyIndices_weekly_qb$rsquared, digits = 2)
+me_weekly_qb <- round(accuracyIndices_weekly_qb$ME, digits = 2)
+mae_weekly_qb <- round(accuracyIndices_weekly_qb$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Quarterbacks is in @fig-calibrationPlotWeeklyQBs.
@@ -3386,7 +3681,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Quarterbacks who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Quarterbacks who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3394,6 +3689,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_qb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_qb_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_qb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_qb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$rsquared, digits = 2)
+me_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$ME, digits = 2)
+mae_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$MAE, digits = 2)
 ```
 
 #### Running Backs {#sec-accuracyProjectionsWeeklyRB}
@@ -3406,6 +3715,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_rb$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_rb <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_rb$raw_points,
+  actual = projectionsWithActuals_weekly_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_rb <- round(accuracyIndices_weekly_rb$rsquared, digits = 2)
+me_weekly_rb <- round(accuracyIndices_weekly_rb$ME, digits = 2)
+mae_weekly_rb <- round(accuracyIndices_weekly_rb$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Running Backs is in @fig-calibrationPlotWeeklyRBs.
@@ -3476,7 +3799,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Running Backs who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Running Backs who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3484,6 +3807,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_rb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_rb_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_rb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_rb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$rsquared, digits = 2)
+me_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$ME, digits = 2)
+mae_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$MAE, digits = 2)
 ```
 
 #### Wide Receivers {#sec-accuracyProjectionsWeeklyWR}
@@ -3496,6 +3833,21 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_wr$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_wr <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_wr$raw_points,
+  actual = projectionsWithActuals_weekly_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_wr <- round(accuracyIndices_weekly_wr$rsquared, digits = 2)
+me_weekly_wr <- round(accuracyIndices_weekly_wr$ME, digits = 2)
+mae_weekly_wr <- round(accuracyIndices_weekly_wr$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Wide Receivers is in @fig-calibrationPlotWeeklyWRs.
@@ -3566,7 +3918,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Wide Receivers who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Wide Receivers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3574,6 +3926,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_wr$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_wr_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_wr$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_wr$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$rsquared, digits = 2)
+me_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$ME, digits = 2)
+mae_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$MAE, digits = 2)
 ```
 
 #### Tight Ends {#sec-accuracyProjectionsWeeklyTE}
@@ -3586,6 +3952,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_te$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_te <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_te$raw_points,
+  actual = projectionsWithActuals_weekly_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_te <- round(accuracyIndices_weekly_te$rsquared, digits = 2)
+me_weekly_te <- round(accuracyIndices_weekly_te$ME, digits = 2)
+mae_weekly_te <- round(accuracyIndices_weekly_te$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Tight Ends is in @fig-calibrationPlotWeeklyTEs.
@@ -3656,7 +4036,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Tight Ends who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Tight Ends who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3664,6 +4044,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_te$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_te_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_te$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_te$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$rsquared, digits = 2)
+me_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$ME, digits = 2)
+mae_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$MAE, digits = 2)
 ```
 
 #### Kickers {#sec-accuracyProjectionsWeeklyK}
@@ -3676,6 +4070,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_k$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_k <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_k$raw_points,
+  actual = projectionsWithActuals_weekly_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_k <- round(accuracyIndices_weekly_k$rsquared, digits = 2)
+me_weekly_k <- round(accuracyIndices_weekly_k$ME, digits = 2)
+mae_weekly_k <- round(accuracyIndices_weekly_k$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Kickers is in @fig-calibrationPlotWeeklyKs.
@@ -3746,7 +4154,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Kickers who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Kickers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3754,6 +4162,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_k$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_k_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_k$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_k$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$rsquared, digits = 2)
+me_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$ME, digits = 2)
+mae_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$MAE, digits = 2)
 ```
 
 #### Defensive Linemen {#sec-accuracyProjectionsWeeklyDL}
@@ -3766,6 +4188,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_dl$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_dl <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_dl$raw_points,
+  actual = projectionsWithActuals_weekly_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_dl <- round(accuracyIndices_weekly_dl$rsquared, digits = 2)
+me_weekly_dl <- round(accuracyIndices_weekly_dl$ME, digits = 2)
+mae_weekly_dl <- round(accuracyIndices_weekly_dl$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Defensive Linemen is in @fig-calibrationPlotWeeklyDLs.
@@ -3836,7 +4272,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Defensive Linemen who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Defensive Linemen who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3844,6 +4280,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_dl$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_dl_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_dl$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_dl$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$rsquared, digits = 2)
+me_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$ME, digits = 2)
+mae_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$MAE, digits = 2)
 ```
 
 #### Linebackers {#sec-accuracyProjectionsWeeklyLB}
@@ -3856,6 +4306,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_lb$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_lb <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_lb$raw_points,
+  actual = projectionsWithActuals_weekly_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_lb <- round(accuracyIndices_weekly_lb$rsquared, digits = 2)
+me_weekly_lb <- round(accuracyIndices_weekly_lb$ME, digits = 2)
+mae_weekly_lb <- round(accuracyIndices_weekly_lb$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Linebackers is in @fig-calibrationPlotWeeklyLBs.
@@ -3926,7 +4390,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Linebackers who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Linebackers who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -3934,6 +4398,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_lb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_lb_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_lb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_lb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$rsquared, digits = 2)
+me_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$ME, digits = 2)
+mae_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$MAE, digits = 2)
 ```
 
 #### Defensive Backs {#sec-accuracyProjectionsWeeklyDB}
@@ -3946,6 +4424,20 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_db$fantasyPoints,
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_db <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_db$raw_points,
+  actual = projectionsWithActuals_weekly_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_db <- round(accuracyIndices_weekly_db$rsquared, digits = 2)
+me_weekly_db <- round(accuracyIndices_weekly_db$ME, digits = 2)
+mae_weekly_db <- round(accuracyIndices_weekly_db$MAE, digits = 2)
 ```
 
 A calibration plot of the weekly projections for Linebackers is in @fig-calibrationPlotWeeklyDBs.
@@ -4016,7 +4508,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
-Here are the weekly accuracy indexes for only those Defensive Backs who had high projected or actual points (i.e., the players that are most important to differentiate between):
+Here are the weekly accuracy indexes for only those Defensive Backs who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
@@ -4024,6 +4516,262 @@ petersenlab::accuracyOverall(
   actual = projectionsWithActuals_weekly_db$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
   dropUndefined = TRUE
 )
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_db_subset <- petersenlab::accuracyOverall(
+  predicted = projectionsWithActuals_weekly_db$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = projectionsWithActuals_weekly_db$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$rsquared, digits = 2)
+me_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$ME, digits = 2)
+mae_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$MAE, digits = 2)
+```
+
+### Summarizing the Accuracy By Position {#sec-predictionAccuracyByPosition}
+
+```{r}
+#| include: false
+
+seasonalAccuracy <- data.frame(
+  position = c(
+    "All",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_seasonal_overall,
+    rsquare_seasonal_qb,
+    rsquare_seasonal_rb,
+    rsquare_seasonal_wr,
+    rsquare_seasonal_te,
+    rsquare_seasonal_k,
+    rsquare_seasonal_dl,
+    rsquare_seasonal_lb,
+    rsquare_seasonal_db
+  ),
+  me = c(
+    me_seasonal_overall,
+    me_seasonal_qb,
+    me_seasonal_rb,
+    me_seasonal_wr,
+    me_seasonal_te,
+    me_seasonal_k,
+    me_seasonal_dl,
+    me_seasonal_lb,
+    me_seasonal_db
+  ),
+  mae = c(
+    mae_seasonal_overall,
+    mae_seasonal_qb,
+    mae_seasonal_rb,
+    mae_seasonal_wr,
+    mae_seasonal_te,
+    mae_seasonal_k,
+    mae_seasonal_dl,
+    mae_seasonal_lb,
+    mae_seasonal_db
+  )
+)
+
+seasonalAccuracy_subset <- data.frame(
+  position = c(
+    "All",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_seasonal_overall_subset,
+    rsquare_seasonal_qb_subset,
+    rsquare_seasonal_rb_subset,
+    rsquare_seasonal_wr_subset,
+    rsquare_seasonal_te_subset,
+    rsquare_seasonal_k_subset,
+    rsquare_seasonal_dl_subset,
+    rsquare_seasonal_lb_subset,
+    rsquare_seasonal_db_subset
+  ),
+  me = c(
+    me_seasonal_overall_subset,
+    me_seasonal_qb_subset,
+    me_seasonal_rb_subset,
+    me_seasonal_wr_subset,
+    me_seasonal_te_subset,
+    me_seasonal_k_subset,
+    me_seasonal_dl_subset,
+    me_seasonal_lb_subset,
+    me_seasonal_db_subset
+  ),
+  mae = c(
+    mae_seasonal_overall_subset,
+    mae_seasonal_qb_subset,
+    mae_seasonal_rb_subset,
+    mae_seasonal_wr_subset,
+    mae_seasonal_te_subset,
+    mae_seasonal_k_subset,
+    mae_seasonal_dl_subset,
+    mae_seasonal_lb_subset,
+    mae_seasonal_db_subset
+  )
+)
+
+weeklyAccuracy <- data.frame(
+  position = c(
+    "All",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_weekly_overall,
+    rsquare_weekly_qb,
+    rsquare_weekly_rb,
+    rsquare_weekly_wr,
+    rsquare_weekly_te,
+    rsquare_weekly_k,
+    rsquare_weekly_dl,
+    rsquare_weekly_lb,
+    rsquare_weekly_db
+  ),
+  me = c(
+    me_weekly_overall,
+    me_weekly_qb,
+    me_weekly_rb,
+    me_weekly_wr,
+    me_weekly_te,
+    me_weekly_k,
+    me_weekly_dl,
+    me_weekly_lb,
+    me_weekly_db
+  ),
+  mae = c(
+    mae_weekly_overall,
+    mae_weekly_qb,
+    mae_weekly_rb,
+    mae_weekly_wr,
+    mae_weekly_te,
+    mae_weekly_k,
+    mae_weekly_dl,
+    mae_weekly_lb,
+    mae_weekly_db
+  )
+)
+
+weeklyAccuracy_subset <- data.frame(
+  position = c(
+    "All",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_weekly_overall_subset,
+    rsquare_weekly_qb_subset,
+    rsquare_weekly_rb_subset,
+    rsquare_weekly_wr_subset,
+    rsquare_weekly_te_subset,
+    rsquare_weekly_k_subset,
+    rsquare_weekly_dl_subset,
+    rsquare_weekly_lb_subset,
+    rsquare_weekly_db_subset
+  ),
+  me = c(
+    me_weekly_overall_subset,
+    me_weekly_qb_subset,
+    me_weekly_rb_subset,
+    me_weekly_wr_subset,
+    me_weekly_te_subset,
+    me_weekly_k_subset,
+    me_weekly_dl_subset,
+    me_weekly_lb_subset,
+    me_weekly_db_subset
+  ),
+  mae = c(
+    mae_weekly_overall_subset,
+    mae_weekly_qb_subset,
+    mae_weekly_rb_subset,
+    mae_weekly_wr_subset,
+    mae_weekly_te_subset,
+    mae_weekly_k_subset,
+    mae_weekly_dl_subset,
+    mae_weekly_lb_subset,
+    mae_weekly_db_subset
+  )
+)
+```
+
+We summarize the accuracy of seasonal projections by position in Tables [-@tbl-seasonalAccuracyByPosition] and [-@tbl-seasonalAccuracyByPositionSubset].
+
+```{r}
+#| label: tbl-seasonalAccuracyByPosition
+#| tbl-cap: "Accuracy of Seasonal Projections By Position."
+#| echo: false
+
+knitr::kable(
+  seasonalAccuracy,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
+```
+
+```{r}
+#| label: tbl-seasonalAccuracyByPositionSubset
+#| tbl-cap: "Accuracy of Seasonal Projections By Position, Among Players with Greater than 100 Projected or Actual Points."
+#| echo: false
+
+knitr::kable(
+  seasonalAccuracy_subset,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
+```
+
+We summarize the accuracy of weekly projections by position in Tables [-@tbl-weeeklyAccuracyByPosition] and [-@tbl-weeklyAccuracyByPositionSubset].
+
+```{r}
+#| label: tbl-weeeklyAccuracyByPosition
+#| tbl-cap: "Accuracy of Weekly Projections By Position."
+#| echo: false
+
+knitr::kable(
+  weeklyAccuracy,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
+```
+
+```{r}
+#| label: tbl-weeklyAccuracyByPositionSubset
+#| tbl-cap: "Accuracy of Weekly Projections By Position, Among Players with Greater than 100 Projected or Actual Points."
+#| echo: false
+
+knitr::kable(
+  weeklyAccuracy_subset,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
 ```
 
 ## Ways to Improve Prediction Accuracy {#sec-waysToImprovePredictionAccuracy}
