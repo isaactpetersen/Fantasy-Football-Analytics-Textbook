@@ -135,6 +135,16 @@ projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal %>%
   filter(position_group == "DB")
 ```
 
+Players are uniquely identified by `player_id`-`season`-`data_src`:
+
+```{r}
+projectionsWithActuals_seasonal %>% 
+  filter(!is.na(player_id)) %>% 
+  group_by(player_id, season, data_src) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
 #### Weekly Projections {#sec-predictionAccuracyPrepareDataWeekly}
 
 Below, we merge weekly projections with actual performance.
@@ -201,6 +211,16 @@ projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly %>%
 
 projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly %>% 
   filter(position_group == "DB")
+```
+
+Players are uniquely identified by `player_id`-`season`-`week`-`data_src`:
+
+```{r}
+projectionsWithActuals_weekly %>% 
+  filter(!is.na(player_id)) %>% 
+  group_by(player_id, season, week, data_src) %>% 
+  filter(n() > 1) %>% 
+  head()
 ```
 
 ## Overview {#sec-predictionAccuracyOverview}
@@ -1130,31 +1150,68 @@ There are also test calculators available online:
 
 A confusion matrix (aka 2x2 accuracy table, cross-tabulation table, or contigency table) is a matrix for categorical data that presents the predicted outcome on one dimension and the actual outcome (truth) on the other dimension.
 If the predictions and outcomes are dichotomous, the confusion matrix is a 2x2 matrix with two rows and two columns that represent four possible predicted-actual combinations ([decision outcomes](#sec-decisionOutcomes)).
-In such a case, the confusion matrix provides a tabular count of each type of accurate cases ([true positives](#sec-truePositive) and [true negatives](#sec-trueNegative)) versus the number of each type of error ([false positives](#sec-falsePositive) and [false negatives](#sec-falseNegative)), as shown in INSERT.
-An example of a confusion matrix is in INSERT.
+In such a case, the confusion matrix provides a tabular count of each type of accurate cases ([true positives](#sec-truePositive) and [true negatives](#sec-trueNegative)) versus the number of each type of error ([false positives](#sec-falsePositive) and [false negatives](#sec-falseNegative)), as shown in @fig-confusionMatrix.
+An example of a confusion matrix is in @fig-confusionMatrix1.
+
+To generate a 2x2 confusion matrix, we need to make a dichotomous decision/prediction.
+For this example, our goal is to predict which Running Backs or Wide Receivers will score 300 or more fantasy points.
+We will predict a player as scoring 300 or more fantasy points for a given projection source if that projection source projected the player to score 300 or more fantasy points.
+Thus, the same player has multiple rows in the data file—one for each projection source.
+
+```{r}
+projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal %>% 
+  filter(position_group %in% c("RB","WR")) %>% 
+  filter(season == 2024)
+
+projectionsWithActuals_seasonal_subset$prediction <- ifelse(projectionsWithActuals_seasonal_subset$raw_points >= 300, 1, 0)
+projectionsWithActuals_seasonal_subset$truth <- ifelse(projectionsWithActuals_seasonal_subset$fantasyPoints >= 300, 1, 0)
+
+projectionsWithActuals_seasonal_subset$predictionFactor <- factor(
+  projectionsWithActuals_seasonal_subset$prediction,
+  levels = c(1,0),
+  labels = c("Prediction: Will Score 300+ Points", "Prediction: Will Not Score 300+ Points"))
+
+projectionsWithActuals_seasonal_subset$truthFactor <- factor(
+  projectionsWithActuals_seasonal_subset$truth,
+  levels = c(1,0),
+  labels = c("Truth: Scored 300+ Points", "Truth: Did Not Score 300+ Points")
+)
+
+table(projectionsWithActuals_seasonal_subset$predictionFactor)
+
+table(projectionsWithActuals_seasonal_subset$truthFactor)
+```
 
 ##### Number {#sec-confusionMatrix-number}
 
 ```{r}
-#table(mydata$diagnosisFactor, mydata$diseaseFactor)
+table(
+  projectionsWithActuals_seasonal_subset$predictionFactor,
+  projectionsWithActuals_seasonal_subset$truthFactor)
 ```
 
-##### Number with margins added {#sec-confusionMatrix-numberMargins}
+##### Number With Margins Added {#sec-confusionMatrix-numberMargins}
 
 ```{r}
-#addmargins(table(mydata$diagnosisFactor, mydata$diseaseFactor))
+addmargins(table(
+  projectionsWithActuals_seasonal_subset$predictionFactor,
+  projectionsWithActuals_seasonal_subset$truthFactor))
 ```
 
 ##### Proportions {#sec-confusionMatrix-numberMarginsProportions}
 
 ```{r}
-#prop.table(table(mydata$diagnosisFactor, mydata$diseaseFactor))
+prop.table(table(
+  projectionsWithActuals_seasonal_subset$predictionFactor,
+  projectionsWithActuals_seasonal_subset$truthFactor))
 ```
 
-##### Proportions with margins added {#sec-confusionMatrix-numberMarginsProportionsMargins}
+##### Proportions With Margins Added {#sec-confusionMatrix-numberMarginsProportionsMargins}
 
 ```{r}
-#addmargins(prop.table(table(mydata$diagnosisFactor, mydata$diseaseFactor)))
+addmargins(prop.table(table(
+  projectionsWithActuals_seasonal_subset$predictionFactor,
+  projectionsWithActuals_seasonal_subset$truthFactor)))
 ```
 
 #### True Positives (TP) {#sec-truePositive}
