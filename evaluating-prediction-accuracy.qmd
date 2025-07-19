@@ -2155,7 +2155,7 @@ Spiegelhalter's *z* was calculated using the `rms` package [@R-rms].
 Smaller *z* values (and larger associated *p*-values) reflect greater [calibration accuracy](#calibration).
 A statistically significant Spiegelhalter's *z* (*p* < .05) indicates a significant degree of miscalibration.
 
-#### Calibration for predicting a continuous outcome {#sec-calibrationContinuous}
+#### Calibration for Predicting a Continuous Outcome {#sec-calibrationContinuous}
 
 When predicting a continuous outcome, [calibration](#sec-calibration) of the predicted values in relation to the outcome values can be examined in multiple ways including:
 
@@ -2171,20 +2171,8 @@ The intercept is also called "calibration-in-the-large", whereas "calibration-in
 For predictions to be well [calibrated](#sec-calibration), the intercept should be close to zero and the slope should be close to one.
 If the slope is close to one but the intercept is not close to zero (or the intercept is close to zero but the slope is not close to one), the predictions would not be considered well [calibrated](#sec-calibration).
 The 95% confidence interval of the observed value, across all values of the predicted values, should include the diagonal reference line whose intercept is zero and whose slope is one.
-
-For instance, based on the intercept and slope of the [calibration plot](#sec-calibrationPlot) in Figure INSERT, the predictions are not well calibrated, despite having a slope near one, because the 95% confidence interval of the intercept does not include zero.
-The best-fit line is the yellow line.
-The intercept from the best-fit line is positive, as shown in the regression equation.
-This is a case of underprediction, where the predicted values are consistently less than the observed values.
-The confidence interval of the observed value (i.e., the purple band) is the interval within which we have 95% confidence that the true observed value would lie for a given predicted value, based on the model
-The 95% prediction interval of the observed value (i.e., the dashed red lines) is the interval within which we would expect that 95% of future observations would lie for a given predicted value.
-The black diagonal line indicates the reference line with an intercept of zero and a slope of one.
-The predictions would be significantly [miscalibrated](#sec-calibration) at a given level of the predicted values if the 95% confidence interval of the observed value does not include the reference line at that level of the predicted value.
-In this case, the 95% confidence interval of the observed value does not include the reference line (i.e., the actual observed value) at lower levels of the predicted values, so the predictions are [miscalibrated](#sec-calibration) lower levels of the predicted values.
-
-Gold-standard recommendations include examining the predicted values in relation to the observed values using locally estimated scatterplot smoothing (LOESS) [@Austin2014], such as in Figure INSERT.
+Gold-standard recommendations include examining the predicted values in relation to the observed values using locally estimated scatterplot smoothing (LOESS) [@Austin2014], such as in @fig-calibrationPlotSeasonalOverall.
 We can examine whether the LOESS-based 95% confidence interval of the observed value at every level of the predicted values includes the diagonal reference line (i.e., the actual observed value).
-In this case, the 95% confidence interval of the observed value does not include the reference line at lower levels of the predicted values, so the predictions are [miscalibrated](#sec-calibration) at lower levels of the predicted values.
 
 ## Integrating the Accuracy Indices {#sec-integratingAccuracy}
 
@@ -2430,8 +2418,25 @@ me_seasonal_overall <- round(accuracyIndices_seasonal_overall$ME, digits = 2)
 mae_seasonal_overall <- round(accuracyIndices_seasonal_overall$MAE, digits = 2)
 ```
 
+The intercept and slope of the best-fit line can be estimated using regression, as in below:
+
+```{r}
+summary(lm(
+  fantasyPoints ~ raw_points,
+  data = projectionsWithActuals_seasonal
+))
+```
+
 A calibration plot of the seasonal projections for all players (across all positions) is in @fig-calibrationPlotSeasonalOverall.
+The best-fit LOESS line is the yellow line.
+The intercept from the best-fit line is positive; the slope is less than one.
+The predicted values are less than the observed values at lower levels of projected points, whereas the predicted values are higher than the observed values at higher levels of projected points, consistent with the overextremity form of [miscalibration](#sec-calibration).
+The confidence interval of the observed value (i.e., the purple band) is the interval within which we have 95% confidence that the true observed value would lie for a given predicted value, based on the model.
+The 95% prediction interval of the observed value (i.e., the dashed red lines) is the interval within which we would expect that 95% of future observations would lie for a given predicted value.
 We calculate the 95% prediction interval based on a LOESS model, which allows nonlinear associations, using the `loess.sd()` function of the `msir` package [@R-msir; @Scrucca2011_packages].
+The black diagonal line indicates the reference line with an intercept of zero and a slope of one.
+The predictions would be significantly [miscalibrated](#sec-calibration) at a given level of the predicted values if the 95% confidence interval of the observed value does not include the reference line at that level of the predicted value.
+In this case, based on the intercept and slope of the [calibration plot](#sec-calibrationPlot) in @fig-calibrationPlotSeasonalOverall, the 95% confidence interval of the observed value does not include the reference line (i.e., the actual observed value) at lower or upper levels of the predicted values, so the predictions are [miscalibrated](#sec-calibration) at lower and upper levels of the predicted values.
 
 ```{r}
 #| label: fig-calibrationPlotSeasonalOverall
