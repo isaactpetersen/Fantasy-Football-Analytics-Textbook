@@ -21,8 +21,6 @@ library("tidyverse")
 
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/projectionsWithActuals_seasonal.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/projectionsWithActuals_weekly.RData", fsep = ""))
-#load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projections_seasonal.RData", fsep = ""))
-#load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projections_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 ```
@@ -30,8 +28,6 @@ load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fan
 ```{r}
 load(file = "./data/projectionsWithActuals_seasonal.RData")
 load(file = "./data/projectionsWithActuals_weekly.RData")
-#load(file = "./data/players_projections_seasonal.RData")
-#load(file = "./data/players_projections_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
 load(file = "./data/player_stats_weekly.RData")
 ```
@@ -60,7 +56,7 @@ Error cancellation deals with the idea that, when individuals' judgments bracket
 However, when individuals' judgments do not bracket the truth, the average of the predictions will not cancel out the errors.
 
 Averaging projections from individuals tends to yield predictions that are more accurate than the accuracy of most forecasters in the group [@Mannes2014].
-Indeed, when at least some of of the projections bracket the truth, averaged predictions must be more accurate than the average individual forecaster—in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE)—and averaged predictions are often much more accurate [@Larrick2024].
+Indeed, when at least some of the projections bracket the truth, averaged predictions must be more accurate than the average individual forecaster—in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE)—and averaged predictions are often much more accurate [@Larrick2024].
 When referring to the accuracy of the "average individual forecaster", we are referring to accuracy in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE)—not to the accuracy of the forecaster at the 50th percentile.
 If none of the projections bracket the truth—e.g., all projections overestimate the truth—averaged predictions will be as accurate than the average individual forecaster in terms of [mean absolute error](#sec-meanAbsoluteError) [@Larrick2024].
 In sum, "Averaging the answers of a crowd, therefore, ensures a level of accuracy no worse than the average member of the crowd and, in some cases, a level better than nearly all members" [@Larrick2024, p. 126].
@@ -635,7 +631,7 @@ It requires a large sample of predictions to determine whether a given forecaste
 Thus, it can be challenging to know, in advance, who the most accurate forecasters will be.
 Because average projections are as or more accurate than the average forecaster's prediction, averaging projections across all forecasters is superior to choosing individual forecasters when the forecasters are roughly similar in forecasting ability or when it is hard to distinguish their ability in advance [@Larrick2024].
 
-The relatively modest accuracy of the projections by so-called fantasy "experts'" and of their average of their projections could occur for a number of reasons.
+The relatively modest accuracy of the projections by so-called fantasy "experts" and of their average of their projections could occur for a number of reasons.
 One possibility is that the level of expertise of the "expert" forecasters in terms of being able to provide accurate forecasts is not strong.
 That is, because football performance and injuries are so challenging to predict, individual forecasters' projections may not be particularly close to the truth.
 
@@ -742,7 +738,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5))
 ```
 
-Proportion of players whose bracketing rate was zero:
+Below is the proportion of players whose bracketing rate was zero:
 
 ```{r}
 seasonalIndividualSources %>% 
@@ -750,6 +746,17 @@ seasonalIndividualSources %>%
   mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
   summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
 ```
+
+```{r}
+#| include: false
+
+proportionZeroBracketingRate_seasonal <- seasonalIndividualSources %>% 
+  filter(!is.na(bracketingRate)) %>% 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
+  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
+```
+
+A high proportion (`{r} petersenlab::apa(proportionZeroBracketingRate_seasonal * 100, decimals = 0)`%) of players' forecasts did not bracket the truth.
 
 ### Weekly Projections {#sec-accuracyOfCrowdWeekly}
 
@@ -839,7 +846,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5))
 ```
 
-Proportion of players whose bracketing rate was zero:
+Below is the proportion of players whose bracketing rate was zero:
 
 ```{r}
 weeklyIndividualSources %>% 
@@ -847,6 +854,17 @@ weeklyIndividualSources %>%
   mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
   summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
 ```
+
+```{r}
+#| include: false
+
+proportionZeroBracketingRate_weekly <- weeklyIndividualSources %>% 
+  filter(!is.na(bracketingRate)) %>% 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
+  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
+```
+
+A high proportion (`{r} petersenlab::apa(proportionZeroBracketingRate_weekly * 100, decimals = 0)`%) of players' forecasts did not bracket the truth.
 
 ## How Well Do People Incorporate Advice From Others? {#sec-incoporateAdvice}
 
@@ -947,7 +965,7 @@ Thus, performance in fantasy football is around half and half luck versus skill.
 
 Because fantasy football is not 100% luck, it is not the same as a slot machine.
 However, there are still unpredictable elements (e.g., injuries), and there is considerable luck involved.
-As a result, sports betting and gambling on fantasy football still involve components of [variable ratio reinforcement](#sec-reinforcementIntermittent) that lend them to being potentially highly addictive.
+As a result, sports betting and gambling on fantasy football still involve components of [variable ratio reinforcement](#sec-reinforcementIntermittent) that lend them to being potentially highly addictive despite people's tendency to lose money.
 
 ## Suggestions {#sec-decisionMakingSuggestions}
 
@@ -966,6 +984,14 @@ If you are going to bet, only bet a small portion of your money and never more t
 And do not make multi-leg bets (parlays); people lose on average 25 cents for every dollar wagered on parlays [@Brown2025].
 
 ## Conclusion {#sec-decisionMakingConclusion}
+
+The wisdom of the crowd is the idea that the average of the predictions of many people is often more accurate than the prediction of individual experts.
+When at least some of the projections bracket—i.e., fall on opposite sides of—the truth, averaged predictions are more accurate than the average individual forecaster—in terms of [mean absolute error](#sec-meanAbsoluteError) (MAE).
+Crowd-averaged projections tend to be most accurate when the crowd consists of individuals who hold expertise in the domain such that they will make predictions that fall close to the truth, there is relatively low variability in the expertise of the individual forecasters in terms of their ability to make accurate forecasts, there is cognitive diversity among the forecasters, the projections are made independently—i.e., the forecasters are not aware of others’ forecasts and do not discuss or interact with the other forecasters, the bracketing rate is high, and there are at least 5–10 sources of projections.
+In the case of fantasy football, however, a high proportion of players' forecasts do not bracket the truth, suggesting that the so-called experts are not accurate in predicting players' future fantasy performance.
+Nevertheless, going with the crowd-averaged projections tends to be more accurate than relying on an individual projection source.
+Performance in fantasy football is around half and half luck versus skill.
+Sports betting and gambling on fantasy football involve components of [variable ratio reinforcement](#sec-reinforcementIntermittent) that lend them to being potentially highly addictive.
 
 ::: {.content-visible when-format="html"}
 
