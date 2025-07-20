@@ -180,6 +180,30 @@ projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal %>%
 
 projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal %>% 
   filter(position_group == "DB")
+
+crowdAveragedProjectionsWithActuals_seasonal_qb <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position_group == "QB")
+
+crowdAveragedProjectionsWithActuals_seasonal_rb <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position_group == "RB")
+
+crowdAveragedProjectionsWithActuals_seasonal_wr <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position_group == "WR")
+
+crowdAveragedProjectionsWithActuals_seasonal_te <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position_group == "TE")
+
+crowdAveragedProjectionsWithActuals_seasonal_k <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position == "K")
+
+crowdAveragedProjectionsWithActuals_seasonal_dl <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position_group == "DL")
+
+crowdAveragedProjectionsWithActuals_seasonal_lb <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position_group == "LB")
+
+crowdAveragedProjectionsWithActuals_seasonal_db <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+  filter(position_group == "DB")
 ```
 
 #### Weekly Projections {#sec-predictionAccuracyPrepareDataWeekly}
@@ -295,6 +319,30 @@ projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly %>%
   filter(position_group == "LB")
 
 projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly %>% 
+  filter(position_group == "DB")
+
+crowdAveragedProjectionsWithActuals_weekly_qb <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(position_group == "QB")
+
+crowdAveragedProjectionsWithActuals_weekly_rb <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(position_group == "RB")
+
+crowdAveragedProjectionsWithActuals_weekly_wr <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(position_group == "WR")
+
+crowdAveragedProjectionsWithActuals_weekly_te <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(position_group == "TE")
+
+crowdAveragedProjectionsWithActuals_weekly_k <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(position == "K")
+
+crowdAveragedProjectionsWithActuals_weekly_dl <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(position_group == "DL")
+
+crowdAveragedProjectionsWithActuals_weekly_lb <- crowdAveragedProjectionsWithActuals_weekly %>% 
+  filter(position_group == "LB")
+
+crowdAveragedProjectionsWithActuals_weekly_db <- crowdAveragedProjectionsWithActuals_weekly %>% 
   filter(position_group == "DB")
 ```
 
@@ -2663,6 +2711,54 @@ me_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$ME, 
 mae_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$MAE, digits = 2)
 ```
 
+Here are the seasonal accuracy indexes for crowd-averaged projections of all players (across all positions):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_overall_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_overall_crowd <- round(accuracyIndices_seasonal_overall_crowd$rsquared, digits = 2)
+me_seasonal_overall_crowd <- round(accuracyIndices_seasonal_overall_crowd$ME, digits = 2)
+mae_seasonal_overall_crowd <- round(accuracyIndices_seasonal_overall_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal$points[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_overall_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal$points[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_overall_crowd_subset <- round(accuracyIndices_seasonal_overall_crowd_subset$rsquared, digits = 2)
+me_seasonal_overall_crowd_subset <- round(accuracyIndices_seasonal_overall_crowd_subset$ME, digits = 2)
+mae_seasonal_overall_crowd_subset <- round(accuracyIndices_seasonal_overall_crowd_subset$MAE, digits = 2)
+```
+
 #### Quarterbacks {#sec-accuracyProjectionsSeasonalQB}
 
 Here are the seasonal accuracy indexes for all Quarterbacks:
@@ -2779,6 +2875,54 @@ accuracyIndices_seasonal_qb_subset <- petersenlab::accuracyOverall(
 rsquare_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$rsquared, digits = 2)
 me_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$ME, digits = 2)
 mae_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections for Quarterbacks:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_qb_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_qb_crowd <- round(accuracyIndices_seasonal_qb_crowd$rsquared, digits = 2)
+me_seasonal_qb_crowd <- round(accuracyIndices_seasonal_qb_crowd$ME, digits = 2)
+mae_seasonal_qb_crowd <- round(accuracyIndices_seasonal_qb_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Quarterbacks, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_qb_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_qb_crowd_subset <- round(accuracyIndices_seasonal_qb_crowd_subset$rsquared, digits = 2)
+me_seasonal_qb_crowd_subset <- round(accuracyIndices_seasonal_qb_crowd_subset$ME, digits = 2)
+mae_seasonal_qb_crowd_subset <- round(accuracyIndices_seasonal_qb_crowd_subset$MAE, digits = 2)
 ```
 
 #### Running Backs {#sec-accuracyProjectionsSeasonalRB}
@@ -2899,6 +3043,54 @@ me_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$ME, digits = 2
 mae_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$MAE, digits = 2)
 ```
 
+Here are the seasonal accuracy indexes for crowd-averaged projections for Running Backs:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_rb_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_rb_crowd <- round(accuracyIndices_seasonal_rb_crowd$rsquared, digits = 2)
+me_seasonal_rb_crowd <- round(accuracyIndices_seasonal_rb_crowd$ME, digits = 2)
+mae_seasonal_rb_crowd <- round(accuracyIndices_seasonal_rb_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Running Backs, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_rb_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_rb_crowd_subset <- round(accuracyIndices_seasonal_rb_crowd_subset$rsquared, digits = 2)
+me_seasonal_rb_crowd_subset <- round(accuracyIndices_seasonal_rb_crowd_subset$ME, digits = 2)
+mae_seasonal_rb_crowd_subset <- round(accuracyIndices_seasonal_rb_crowd_subset$MAE, digits = 2)
+```
+
 #### Wide Receivers {#sec-accuracyProjectionsSeasonalWR}
 
 Here are the seasonal accuracy indexes for all Wide Receivers:
@@ -3015,6 +3207,54 @@ accuracyIndices_seasonal_wr_subset <- petersenlab::accuracyOverall(
 rsquare_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$rsquared, digits = 2)
 me_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$ME, digits = 2)
 mae_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections for Wide Receivers:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_wr_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_wr_crowd <- round(accuracyIndices_seasonal_wr_crowd$rsquared, digits = 2)
+me_seasonal_wr_crowd <- round(accuracyIndices_seasonal_wr_crowd$ME, digits = 2)
+mae_seasonal_wr_crowd <- round(accuracyIndices_seasonal_wr_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Wide Receivers, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_wr_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_wr_crowd_subset <- round(accuracyIndices_seasonal_wr_crowd_subset$rsquared, digits = 2)
+me_seasonal_wr_crowd_subset <- round(accuracyIndices_seasonal_wr_crowd_subset$ME, digits = 2)
+mae_seasonal_wr_crowd_subset <- round(accuracyIndices_seasonal_wr_crowd_subset$MAE, digits = 2)
 ```
 
 #### Tight Ends {#sec-accuracyProjectionsSeasonalTE}
@@ -3135,6 +3375,54 @@ me_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$ME, digits = 2
 mae_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$MAE, digits = 2)
 ```
 
+Here are the seasonal accuracy indexes for crowd-averaged projections for Tight Ends:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_te_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_te_crowd <- round(accuracyIndices_seasonal_te_crowd$rsquared, digits = 2)
+me_seasonal_te_crowd <- round(accuracyIndices_seasonal_te_crowd$ME, digits = 2)
+mae_seasonal_te_crowd <- round(accuracyIndices_seasonal_te_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Tight Ends, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_te_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_te_crowd_subset <- round(accuracyIndices_seasonal_te_crowd_subset$rsquared, digits = 2)
+me_seasonal_te_crowd_subset <- round(accuracyIndices_seasonal_te_crowd_subset$ME, digits = 2)
+mae_seasonal_te_crowd_subset <- round(accuracyIndices_seasonal_te_crowd_subset$MAE, digits = 2)
+```
+
 #### Kickers {#sec-accuracyProjectionsSeasonalK}
 
 Here are the seasonal accuracy indexes for all Kickers:
@@ -3251,6 +3539,54 @@ accuracyIndices_seasonal_k_subset <- petersenlab::accuracyOverall(
 rsquare_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$rsquared, digits = 2)
 me_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$ME, digits = 2)
 mae_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections for Kickers:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_k_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_k_crowd <- round(accuracyIndices_seasonal_k_crowd$rsquared, digits = 2)
+me_seasonal_k_crowd <- round(accuracyIndices_seasonal_k_crowd$ME, digits = 2)
+mae_seasonal_k_crowd <- round(accuracyIndices_seasonal_k_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Kickers, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_k_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_k_crowd_subset <- round(accuracyIndices_seasonal_k_crowd_subset$rsquared, digits = 2)
+me_seasonal_k_crowd_subset <- round(accuracyIndices_seasonal_k_crowd_subset$ME, digits = 2)
+mae_seasonal_k_crowd_subset <- round(accuracyIndices_seasonal_k_crowd_subset$MAE, digits = 2)
 ```
 
 #### Defensive Linemen {#sec-accuracyProjectionsSeasonalDL}
@@ -3371,6 +3707,54 @@ me_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$ME, digits = 2
 mae_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$MAE, digits = 2)
 ```
 
+Here are the seasonal accuracy indexes for crowd-averaged projections for Defensive Linemen:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_dl_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_dl_crowd <- round(accuracyIndices_seasonal_dl_crowd$rsquared, digits = 2)
+me_seasonal_dl_crowd <- round(accuracyIndices_seasonal_dl_crowd$ME, digits = 2)
+mae_seasonal_dl_crowd <- round(accuracyIndices_seasonal_dl_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Defensive Linemen, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_dl_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_dl_crowd_subset <- round(accuracyIndices_seasonal_dl_crowd_subset$rsquared, digits = 2)
+me_seasonal_dl_crowd_subset <- round(accuracyIndices_seasonal_dl_crowd_subset$ME, digits = 2)
+mae_seasonal_dl_crowd_subset <- round(accuracyIndices_seasonal_dl_crowd_subset$MAE, digits = 2)
+```
+
 #### Linebackers {#sec-accuracyProjectionsSeasonalLB}
 
 Here are the seasonal accuracy indexes for all Linebackers:
@@ -3489,6 +3873,54 @@ me_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$ME, digits = 2
 mae_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$MAE, digits = 2)
 ```
 
+Here are the seasonal accuracy indexes for crowd-averaged projections for Linebackers:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_lb_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_lb_crowd <- round(accuracyIndices_seasonal_lb_crowd$rsquared, digits = 2)
+me_seasonal_lb_crowd <- round(accuracyIndices_seasonal_lb_crowd$ME, digits = 2)
+mae_seasonal_lb_crowd <- round(accuracyIndices_seasonal_lb_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Linebackers, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_lb_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_lb_crowd_subset <- round(accuracyIndices_seasonal_lb_crowd_subset$rsquared, digits = 2)
+me_seasonal_lb_crowd_subset <- round(accuracyIndices_seasonal_lb_crowd_subset$ME, digits = 2)
+mae_seasonal_lb_crowd_subset <- round(accuracyIndices_seasonal_lb_crowd_subset$MAE, digits = 2)
+```
+
 #### Defensive Backs {#sec-accuracyProjectionsSeasonalDB}
 
 Here are the seasonal accuracy indexes for all Defensive Backs:
@@ -3605,6 +4037,54 @@ accuracyIndices_seasonal_db_subset <- petersenlab::accuracyOverall(
 rsquare_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$rsquared, digits = 2)
 me_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$ME, digits = 2)
 mae_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections for Defensive Backs:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_db_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points,
+  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_db_crowd <- round(accuracyIndices_seasonal_db_crowd$rsquared, digits = 2)
+me_seasonal_db_crowd <- round(accuracyIndices_seasonal_db_crowd$ME, digits = 2)
+mae_seasonal_db_crowd <- round(accuracyIndices_seasonal_db_crowd$MAE, digits = 2)
+```
+
+Here are the seasonal accuracy indexes for crowd-averaged projections of Defensive Backs, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_seasonal_db_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  dropUndefined = TRUE
+)
+
+rsquare_seasonal_db_crowd_subset <- round(accuracyIndices_seasonal_db_crowd_subset$rsquared, digits = 2)
+me_seasonal_db_crowd_subset <- round(accuracyIndices_seasonal_db_crowd_subset$ME, digits = 2)
+mae_seasonal_db_crowd_subset <- round(accuracyIndices_seasonal_db_crowd_subset$MAE, digits = 2)
 ```
 
 ### Weekly Projections {#sec-accuracyProjectionsWeekly}
@@ -3727,6 +4207,54 @@ me_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$ME, digi
 mae_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$MAE, digits = 2)
 ```
 
+Here are the weekly accuracy indexes for crowd-averaged projections of all players (across all positions):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_overall_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_overall_crowd <- round(accuracyIndices_weekly_overall_crowd$rsquared, digits = 2)
+me_weekly_overall_crowd <- round(accuracyIndices_weekly_overall_crowd$ME, digits = 2)
+mae_weekly_overall_crowd <- round(accuracyIndices_weekly_overall_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly$points[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_overall_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly$points[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_overall_crowd_subset <- round(accuracyIndices_weekly_overall_crowd_subset$rsquared, digits = 2)
+me_weekly_overall_crowd_subset <- round(accuracyIndices_weekly_overall_crowd_subset$ME, digits = 2)
+mae_weekly_overall_crowd_subset <- round(accuracyIndices_weekly_overall_crowd_subset$MAE, digits = 2)
+```
+
 #### Quarterbacks {#sec-accuracyProjectionsWeeklyQB}
 
 Here are the weekly accuracy indexes for all Quarterbacks:
@@ -3845,6 +4373,54 @@ me_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$ME, digits = 2)
 mae_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$MAE, digits = 2)
 ```
 
+Here are the weekly accuracy indexes for crowd-averaged projections of Quarterbacks:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_qb_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_qb_crowd <- round(accuracyIndices_weekly_qb_crowd$rsquared, digits = 2)
+me_weekly_qb_crowd <- round(accuracyIndices_weekly_qb_crowd$ME, digits = 2)
+mae_weekly_qb_crowd <- round(accuracyIndices_weekly_qb_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Quarterbacks, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_qb_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_qb_crowd_subset <- round(accuracyIndices_weekly_qb_crowd_subset$rsquared, digits = 2)
+me_weekly_qb_crowd_subset <- round(accuracyIndices_weekly_qb_crowd_subset$ME, digits = 2)
+mae_weekly_qb_crowd_subset <- round(accuracyIndices_weekly_qb_crowd_subset$MAE, digits = 2)
+```
+
 #### Running Backs {#sec-accuracyProjectionsWeeklyRB}
 
 Here are the weekly accuracy indexes for all Running Backs:
@@ -3961,6 +4537,54 @@ accuracyIndices_weekly_rb_subset <- petersenlab::accuracyOverall(
 rsquare_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$rsquared, digits = 2)
 me_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$ME, digits = 2)
 mae_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Running Backs:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_rb_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_rb_crowd <- round(accuracyIndices_weekly_rb_crowd$rsquared, digits = 2)
+me_weekly_rb_crowd <- round(accuracyIndices_weekly_rb_crowd$ME, digits = 2)
+mae_weekly_rb_crowd <- round(accuracyIndices_weekly_rb_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Running Backs, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_rb_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_rb_crowd_subset <- round(accuracyIndices_weekly_rb_crowd_subset$rsquared, digits = 2)
+me_weekly_rb_crowd_subset <- round(accuracyIndices_weekly_rb_crowd_subset$ME, digits = 2)
+mae_weekly_rb_crowd_subset <- round(accuracyIndices_weekly_rb_crowd_subset$MAE, digits = 2)
 ```
 
 #### Wide Receivers {#sec-accuracyProjectionsWeeklyWR}
@@ -4082,6 +4706,54 @@ me_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$ME, digits = 2)
 mae_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$MAE, digits = 2)
 ```
 
+Here are the weekly accuracy indexes for crowd-averaged projections of Wide Receivers:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_wr_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_wr_crowd <- round(accuracyIndices_weekly_wr_crowd$rsquared, digits = 2)
+me_weekly_wr_crowd <- round(accuracyIndices_weekly_wr_crowd$ME, digits = 2)
+mae_weekly_wr_crowd <- round(accuracyIndices_weekly_wr_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Wide Receivers, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_wr_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_wr_crowd_subset <- round(accuracyIndices_weekly_wr_crowd_subset$rsquared, digits = 2)
+me_weekly_wr_crowd_subset <- round(accuracyIndices_weekly_wr_crowd_subset$ME, digits = 2)
+mae_weekly_wr_crowd_subset <- round(accuracyIndices_weekly_wr_crowd_subset$MAE, digits = 2)
+```
+
 #### Tight Ends {#sec-accuracyProjectionsWeeklyTE}
 
 Here are the weekly accuracy indexes for all Tight Ends:
@@ -4198,6 +4870,54 @@ accuracyIndices_weekly_te_subset <- petersenlab::accuracyOverall(
 rsquare_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$rsquared, digits = 2)
 me_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$ME, digits = 2)
 mae_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Tight Ends:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_te_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_te_crowd <- round(accuracyIndices_weekly_te_crowd$rsquared, digits = 2)
+me_weekly_te_crowd <- round(accuracyIndices_weekly_te_crowd$ME, digits = 2)
+mae_weekly_te_crowd <- round(accuracyIndices_weekly_te_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Tight Ends, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_te_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_te_crowd_subset <- round(accuracyIndices_weekly_te_crowd_subset$rsquared, digits = 2)
+me_weekly_te_crowd_subset <- round(accuracyIndices_weekly_te_crowd_subset$ME, digits = 2)
+mae_weekly_te_crowd_subset <- round(accuracyIndices_weekly_te_crowd_subset$MAE, digits = 2)
 ```
 
 #### Kickers {#sec-accuracyProjectionsWeeklyK}
@@ -4318,6 +5038,54 @@ me_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$ME, digits = 2)
 mae_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$MAE, digits = 2)
 ```
 
+Here are the weekly accuracy indexes for crowd-averaged projections of Kickers:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_k_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_k_crowd <- round(accuracyIndices_weekly_k_crowd$rsquared, digits = 2)
+me_weekly_k_crowd <- round(accuracyIndices_weekly_k_crowd$ME, digits = 2)
+mae_weekly_k_crowd <- round(accuracyIndices_weekly_k_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Kickers, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_k_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_k_crowd_subset <- round(accuracyIndices_weekly_k_crowd_subset$rsquared, digits = 2)
+me_weekly_k_crowd_subset <- round(accuracyIndices_weekly_k_crowd_subset$ME, digits = 2)
+mae_weekly_k_crowd_subset <- round(accuracyIndices_weekly_k_crowd_subset$MAE, digits = 2)
+```
+
 #### Defensive Linemen {#sec-accuracyProjectionsWeeklyDL}
 
 Here are the weekly accuracy indexes for all Defensive Linemen:
@@ -4434,6 +5202,54 @@ accuracyIndices_weekly_dl_subset <- petersenlab::accuracyOverall(
 rsquare_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$rsquared, digits = 2)
 me_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$ME, digits = 2)
 mae_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Defensive Linemen:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_dl_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_dl_crowd <- round(accuracyIndices_weekly_dl_crowd$rsquared, digits = 2)
+me_weekly_dl_crowd <- round(accuracyIndices_weekly_dl_crowd$ME, digits = 2)
+mae_weekly_dl_crowd <- round(accuracyIndices_weekly_dl_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Defensive Linemen, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_dl_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_dl_crowd_subset <- round(accuracyIndices_weekly_dl_crowd_subset$rsquared, digits = 2)
+me_weekly_dl_crowd_subset <- round(accuracyIndices_weekly_dl_crowd_subset$ME, digits = 2)
+mae_weekly_dl_crowd_subset <- round(accuracyIndices_weekly_dl_crowd_subset$MAE, digits = 2)
 ```
 
 #### Linebackers {#sec-accuracyProjectionsWeeklyLB}
@@ -4554,6 +5370,54 @@ me_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$ME, digits = 2)
 mae_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$MAE, digits = 2)
 ```
 
+Here are the weekly accuracy indexes for crowd-averaged projections of Linebackers:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_lb_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_lb_crowd <- round(accuracyIndices_weekly_lb_crowd$rsquared, digits = 2)
+me_weekly_lb_crowd <- round(accuracyIndices_weekly_lb_crowd$ME, digits = 2)
+mae_weekly_lb_crowd <- round(accuracyIndices_weekly_lb_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Linebackers, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_lb_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_lb_crowd_subset <- round(accuracyIndices_weekly_lb_crowd_subset$rsquared, digits = 2)
+me_weekly_lb_crowd_subset <- round(accuracyIndices_weekly_lb_crowd_subset$ME, digits = 2)
+mae_weekly_lb_crowd_subset <- round(accuracyIndices_weekly_lb_crowd_subset$MAE, digits = 2)
+```
+
 #### Defensive Backs {#sec-accuracyProjectionsWeeklyDB}
 
 Here are the weekly accuracy indexes for all Defensive Backs:
@@ -4672,6 +5536,54 @@ me_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$ME, digits = 2)
 mae_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$MAE, digits = 2)
 ```
 
+Here are the weekly accuracy indexes for crowd-averaged projections of Defensive Backs:
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_db_crowd <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points,
+  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints,
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_db_crowd <- round(accuracyIndices_weekly_db_crowd$rsquared, digits = 2)
+me_weekly_db_crowd <- round(accuracyIndices_weekly_db_crowd$ME, digits = 2)
+mae_weekly_db_crowd <- round(accuracyIndices_weekly_db_crowd$MAE, digits = 2)
+```
+
+Here are the weekly accuracy indexes for crowd-averaged projections of Defensive Backs, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
+
+```{r}
+petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+```
+
+```{r}
+#| include: false
+
+accuracyIndices_weekly_db_crowd_subset <- petersenlab::accuracyOverall(
+  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  dropUndefined = TRUE
+)
+
+rsquare_weekly_db_crowd_subset <- round(accuracyIndices_weekly_db_crowd_subset$rsquared, digits = 2)
+me_weekly_db_crowd_subset <- round(accuracyIndices_weekly_db_crowd_subset$ME, digits = 2)
+mae_weekly_db_crowd_subset <- round(accuracyIndices_weekly_db_crowd_subset$MAE, digits = 2)
+```
+
 ### Summarizing the Accuracy By Position {#sec-predictionAccuracyByPosition}
 
 ```{r}
@@ -4679,7 +5591,7 @@ mae_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$MAE, digits = 2)
 
 seasonalAccuracy <- data.frame(
   position = c(
-    "All",
+    "All Positions",
     "Quarterbacks",
     "Running Backs",
     "Wide Receivers",
@@ -4726,7 +5638,7 @@ seasonalAccuracy <- data.frame(
 
 seasonalAccuracy_subset <- data.frame(
   position = c(
-    "All",
+    "All Positions",
     "Quarterbacks",
     "Running Backs",
     "Wide Receivers",
@@ -4771,9 +5683,103 @@ seasonalAccuracy_subset <- data.frame(
   )
 )
 
+seasonalAccuracy_crowd <- data.frame(
+  position = c(
+    "All Positions",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_seasonal_overall_crowd,
+    rsquare_seasonal_qb_crowd,
+    rsquare_seasonal_rb_crowd,
+    rsquare_seasonal_wr_crowd,
+    rsquare_seasonal_te_crowd,
+    rsquare_seasonal_k_crowd,
+    rsquare_seasonal_dl_crowd,
+    rsquare_seasonal_lb_crowd,
+    rsquare_seasonal_db_crowd
+  ),
+  me = c(
+    me_seasonal_overall_crowd,
+    me_seasonal_qb_crowd,
+    me_seasonal_rb_crowd,
+    me_seasonal_wr_crowd,
+    me_seasonal_te_crowd,
+    me_seasonal_k_crowd,
+    me_seasonal_dl_crowd,
+    me_seasonal_lb_crowd,
+    me_seasonal_db_crowd
+  ),
+  mae = c(
+    mae_seasonal_overall_crowd,
+    mae_seasonal_qb_crowd,
+    mae_seasonal_rb_crowd,
+    mae_seasonal_wr_crowd,
+    mae_seasonal_te_crowd,
+    mae_seasonal_k_crowd,
+    mae_seasonal_dl_crowd,
+    mae_seasonal_lb_crowd,
+    mae_seasonal_db_crowd
+  )
+)
+
+seasonalAccuracy_crowd_subset <- data.frame(
+  position = c(
+    "All Positions",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_seasonal_overall_crowd_subset,
+    rsquare_seasonal_qb_crowd_subset,
+    rsquare_seasonal_rb_crowd_subset,
+    rsquare_seasonal_wr_crowd_subset,
+    rsquare_seasonal_te_crowd_subset,
+    rsquare_seasonal_k_crowd_subset,
+    rsquare_seasonal_dl_crowd_subset,
+    rsquare_seasonal_lb_crowd_subset,
+    rsquare_seasonal_db_crowd_subset
+  ),
+  me = c(
+    me_seasonal_overall_crowd_subset,
+    me_seasonal_qb_crowd_subset,
+    me_seasonal_rb_crowd_subset,
+    me_seasonal_wr_crowd_subset,
+    me_seasonal_te_crowd_subset,
+    me_seasonal_k_crowd_subset,
+    me_seasonal_dl_crowd_subset,
+    me_seasonal_lb_crowd_subset,
+    me_seasonal_db_crowd_subset
+  ),
+  mae = c(
+    mae_seasonal_overall_crowd_subset,
+    mae_seasonal_qb_crowd_subset,
+    mae_seasonal_rb_crowd_subset,
+    mae_seasonal_wr_crowd_subset,
+    mae_seasonal_te_crowd_subset,
+    mae_seasonal_k_crowd_subset,
+    mae_seasonal_dl_crowd_subset,
+    mae_seasonal_lb_crowd_subset,
+    mae_seasonal_db_crowd_subset
+  )
+)
+
 weeklyAccuracy <- data.frame(
   position = c(
-    "All",
+    "All Positions",
     "Quarterbacks",
     "Running Backs",
     "Wide Receivers",
@@ -4820,7 +5826,7 @@ weeklyAccuracy <- data.frame(
 
 weeklyAccuracy_subset <- data.frame(
   position = c(
-    "All",
+    "All Positions",
     "Quarterbacks",
     "Running Backs",
     "Wide Receivers",
@@ -4864,6 +5870,100 @@ weeklyAccuracy_subset <- data.frame(
     mae_weekly_db_subset
   )
 )
+
+weeklyAccuracy_crowd <- data.frame(
+  position = c(
+    "All Positions",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_weekly_overall_crowd,
+    rsquare_weekly_qb_crowd,
+    rsquare_weekly_rb_crowd,
+    rsquare_weekly_wr_crowd,
+    rsquare_weekly_te_crowd,
+    rsquare_weekly_k_crowd,
+    rsquare_weekly_dl_crowd,
+    rsquare_weekly_lb_crowd,
+    rsquare_weekly_db_crowd
+  ),
+  me = c(
+    me_weekly_overall_crowd,
+    me_weekly_qb_crowd,
+    me_weekly_rb_crowd,
+    me_weekly_wr_crowd,
+    me_weekly_te_crowd,
+    me_weekly_k_crowd,
+    me_weekly_dl_crowd,
+    me_weekly_lb_crowd,
+    me_weekly_db_crowd
+  ),
+  mae = c(
+    mae_weekly_overall_crowd,
+    mae_weekly_qb_crowd,
+    mae_weekly_rb_crowd,
+    mae_weekly_wr_crowd,
+    mae_weekly_te_crowd,
+    mae_weekly_k_crowd,
+    mae_weekly_dl_crowd,
+    mae_weekly_lb_crowd,
+    mae_weekly_db_crowd
+  )
+)
+
+weeklyAccuracy_crowd_subset <- data.frame(
+  position = c(
+    "All Positions",
+    "Quarterbacks",
+    "Running Backs",
+    "Wide Receivers",
+    "Tight Ends",
+    "Kickers",
+    "Defensive Linemen",
+    "Linebackers",
+    "Defensive Backs"
+  ), 
+  rsquared = c(
+    rsquare_weekly_overall_crowd_subset,
+    rsquare_weekly_qb_crowd_subset,
+    rsquare_weekly_rb_crowd_subset,
+    rsquare_weekly_wr_crowd_subset,
+    rsquare_weekly_te_crowd_subset,
+    rsquare_weekly_k_crowd_subset,
+    rsquare_weekly_dl_crowd_subset,
+    rsquare_weekly_lb_crowd_subset,
+    rsquare_weekly_db_crowd_subset
+  ),
+  me = c(
+    me_weekly_overall_crowd_subset,
+    me_weekly_qb_crowd_subset,
+    me_weekly_rb_crowd_subset,
+    me_weekly_wr_crowd_subset,
+    me_weekly_te_crowd_subset,
+    me_weekly_k_crowd_subset,
+    me_weekly_dl_crowd_subset,
+    me_weekly_lb_crowd_subset,
+    me_weekly_db_crowd_subset
+  ),
+  mae = c(
+    mae_weekly_overall_crowd_subset,
+    mae_weekly_qb_crowd_subset,
+    mae_weekly_rb_crowd_subset,
+    mae_weekly_wr_crowd_subset,
+    mae_weekly_te_crowd_subset,
+    mae_weekly_k_crowd_subset,
+    mae_weekly_dl_crowd_subset,
+    mae_weekly_lb_crowd_subset,
+    mae_weekly_db_crowd_subset
+  )
+)
 ```
 
 We summarize the accuracy of seasonal projections by position in Tables [-@tbl-seasonalAccuracyByPosition] and [-@tbl-seasonalAccuracyByPositionSubset].
@@ -4890,6 +5990,28 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
+```{r}
+#| label: tbl-seasonalCrowdAccuracyByPosition
+#| tbl-cap: "Accuracy of Crowd-Averaged Seasonal Projections By Position."
+#| echo: false
+
+knitr::kable(
+  seasonalAccuracy_crowd,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
+```
+
+```{r}
+#| label: tbl-seasonalCrowdAccuracyByPositionSubset
+#| tbl-cap: "Accuracy of Crowd-Averaged Seasonal Projections By Position, Among Players with Greater than 100 Projected or Actual Points."
+#| echo: false
+
+knitr::kable(
+  seasonalAccuracy_crowd_subset,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
+```
+
 We summarize the accuracy of weekly projections by position in Tables [-@tbl-weeeklyAccuracyByPosition] and [-@tbl-weeklyAccuracyByPositionSubset].
 
 ```{r}
@@ -4910,6 +6032,28 @@ knitr::kable(
 
 knitr::kable(
   weeklyAccuracy_subset,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
+```
+
+```{r}
+#| label: tbl-weeklyCrowdAccuracyByPosition
+#| tbl-cap: "Accuracy of Crowd-Averaged Weekly Projections By Position."
+#| echo: false
+
+knitr::kable(
+  weeklyAccuracy_crowd,
+  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
+  booktabs = TRUE)
+```
+
+```{r}
+#| label: tbl-weeklyCrowdAccuracyByPositionSubset
+#| tbl-cap: "Accuracy of Crowd-Averaged Weekly Projections By Position, Among Players with Greater than 6 Projected or Actual Points."
+#| echo: false
+
+knitr::kable(
+  weeklyAccuracy_crowd_subset,
   col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
   booktabs = TRUE)
 ```
