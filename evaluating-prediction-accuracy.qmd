@@ -2550,28 +2550,6 @@ plot(
 ## Accuracy of Fantasy Projections {#sec-accuracyProjections}
 
 Below are estimates of projection accuracy and [calibration plots](#sec-calibrationPlot) for [seasonal](#sec-accuracyProjectionsSeasonal) and [weekly](#sec-accuracyProjectionsWeekly) projections.
-In general, projections showed moderate accuracy in predicting players' fantasy performance.
-Projections showed moderate accuracy in terms of [discrimination](#sec-discrimination), based on [$R^2$](#sec-coefficientOfDetermination).
-However, projections were not highly accurate.
-Projections showed some [miscalibration](#sec-calibrationIndices) with respect to actual fantasy points.
-In general, projected showed a modest tendency to underpredict performance at lower levels of projected points and a moderate-to-strong tendency overpredict performance at higher levels of projected points, an example of the overextremity form of [miscalibration](#sec-calibration).
-As a reminder, the overextremity form of [miscalibration](#sec-calibration) is an example of the overprecision form of [overconfidence](#sec-cognitiveBiasesOverconfidence).
-That is, projection sources appear to be [overconfident](#sec-cognitiveBiasesOverconfidence) in their projections of player performance.
-Relatedly, crowd-averaged projections tend to be more accurate than individual sources of projections [@Kartes2024; archived at <https://perma.cc/69F7-LLTN>; @Petersen2017; archived at <https://perma.cc/BG2W-ANUF>].
-
-The association between projected and actual fantasy points tended to flatten at the higher levels of projected points, for some positions, including Running Backs, Kickers, and defensive players.
-A consequence of this pattern, from the perspective of draft strategy, is that it would not make sense to draft players projected to score more than the flattening of the projected–actual curve.
-For instance, drafting a highly routed Wide Receiver may be safer than drafting a highly ranked Running Back, who may be more prone to injury.
-This finding is consistent with findings from @Petersen2017 [archived at <https://perma.cc/BG2W-ANUF>], who found that projections were more accurate for Quarterbacks and Wide Receivers than for Running Backs; projections were the least accurate for Kickers, Defensive Backs, and Defense/Special Teams.
-These finding were also extended by @Kartes2025 (archived at <https://perma.cc/R3WS-CAKD>) whose evaluation of the accuracy of projections by position found that:
-
-a. Quarterbacks with preseason ranks of 6–10 showed the greatest systematic underperformance relative to their projections, suggesting that you should either draft an elite Quarterback (ranked 1–5) or wait until later rounds to draft multiple lower-ranked Quarterbacks.
-a. Elite Running Backs (with preseason ranks of 1–5) showed strong underperformance (relative to projections), suggesting that you should draft Running Backs ranked 6 and below.
-a. Wide Receivers showed among the more consistent and predictable patterns in projections, suggesting that it may be safer to draft a top Wide Receiver than top-ranked players at other positions.
-a. Tight Ends showed relative inaccuracy of projections with limited upside concentrated among a few players, which means it is difficult, at the outset, to predict which Tight Ends will excel; based on this, @Kartes2025 suggested avoiding overpaying for mid-tier Tight Ends; to either draft a Tight End early or to wait until later rounds.
-
-This does *not* mean that you should intentionally draft a 6th ranked Running Back instead of the top-ranked Running Back.
-Instead, what it may mean is that, instead of drafting the top-ranked Running Back, you may be better off drafting the top-ranked Wide Receiver and to get a value player at Running Back in a subsequent pick.
 
 ### Seasonal Projections {#sec-accuracyProjectionsSeasonal}
 
@@ -2599,6 +2577,30 @@ accuracyIndices_seasonal_overall <- petersenlab::accuracyOverall(
 rsquare_seasonal_overall <- round(accuracyIndices_seasonal_overall$rsquared, digits = 2)
 me_seasonal_overall <- round(accuracyIndices_seasonal_overall$ME, digits = 2)
 mae_seasonal_overall <- round(accuracyIndices_seasonal_overall$MAE, digits = 2)
+```
+
+In the data object, each projection source has a row for each player and season.
+Thus, the $R^2$ may be higher for this aggregated object than it is for many of the individual sources.
+To calculate the accuracy by source, we could use the following code:
+
+```{r}
+accuracy_by_source <- projectionsWithActuals_seasonal %>%
+  filter(!is.na(data_src)) %>% 
+  filter(data_src != "FantasyPros") %>% # remove crowd-averaged source; we compare to crowd average later
+  group_by(data_src) %>%
+  summarise(
+    accuracy = list(
+      accuracyOverall(
+        predicted = raw_points,
+        actual = fantasyPoints,
+        dropUndefined = TRUE
+      )
+    ),
+    .groups = "drop"
+  )
+
+accuracy_by_source
+accuracy_by_source$accuracy
 ```
 
 The intercept and slope of the best-fit line can be estimated using regression, as in below:
@@ -5990,6 +5992,8 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
+We summarize the accuracy of crowd-averaged seasonal projections by position in Tables [-@tbl-seasonalCrowdAccuracyByPosition] and [-@tbl-seasonalCrowdAccuracyByPositionSubset].
+
 ```{r}
 #| label: tbl-seasonalCrowdAccuracyByPosition
 #| tbl-cap: "Accuracy of Crowd-Averaged Seasonal Projections By Position."
@@ -6036,6 +6040,8 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
+We summarize the accuracy of crowd-averaged seasonal projections by position in Tables [-@tbl-weeklyCrowdAccuracyByPosition] and [-@tbl-weeklyCrowdAccuracyByPositionSubset].
+
 ```{r}
 #| label: tbl-weeklyCrowdAccuracyByPosition
 #| tbl-cap: "Accuracy of Crowd-Averaged Weekly Projections By Position."
@@ -6058,11 +6064,48 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
+In general, projections showed moderate accuracy in predicting players' fantasy performance.
+Projections showed moderate accuracy in terms of [discrimination](#sec-discrimination), based on [$R^2$](#sec-coefficientOfDetermination).
+However, projections were not highly accurate.
+Projections showed some [miscalibration](#sec-calibrationIndices) with respect to actual fantasy points.
+In general, projected showed a modest tendency to underpredict performance at lower levels of projected points and a moderate-to-strong tendency overpredict performance at higher levels of projected points, an example of the overextremity form of [miscalibration](#sec-calibration).
+As a reminder, the overextremity form of [miscalibration](#sec-calibration) is an example of the overprecision form of [overconfidence](#sec-cognitiveBiasesOverconfidence).
+That is, projection sources appear to be [overconfident](#sec-cognitiveBiasesOverconfidence) in their projections of player performance.
+
+For seasonal projections, in terms of comparison by position, projections showed greatest discrimination ($R^2$) for Quarterbacks, followed by Running Backs/Tight Ends, and Wide Receivers.
+Predictions for defensive players and kickers showed a negative $R^2$, indicating that projections would have been more accurate merely by predicting the mean of the actual values for every observation (i.e., [predicting from the base rate](#sec-predictingFromBaseRate)).
+In terms of comparison by projection source, crowd-averaged projections showed greater accuracy than individual projection sources (i.e., "experts") in terms of discrimination ($R^2$) and calibration (MAE).
+This was especially the case when examining individual sources separately (rather than in one combined object).
+
+For weekly projections, in terms of comparison by position, projections showed greatest discrimination ($R^2$) for Running Backs, followed by Wide Receivers, Quarterbacks, and Tight Ends.
+Predictions for defensive players and kickers showed a negative $R^2$, indicating that projections would have been more accurate merely by predicting the mean of the actual values for every observation (i.e., [predicting from the base rate](#sec-predictingFromBaseRate)).
+In terms of comparison by projection source, crowd-averaged projections showed greater accuracy than individual projection sources in terms of discrimination ($R^2$) and calibration (MAE).
+
+In summary, we found that, for both seasonal and weekly projections, crowd-averaged projections showed greater accuracy than individual projection sources (i.e., "experts"), consistent with prior findings [@Kartes2024; archived at <https://perma.cc/69F7-LLTN>; @Petersen2017; archived at <https://perma.cc/BG2W-ANUF>].
+Nevertheless projections—including individual sources and crowd-averaged—were not highly accurate.
+Projections tended not to explain more than about two-thirds of the variance in players' performance, and frequently explained well less than half of the variance, particularly when distinguishing between players with high (i.e, more than 100) projected or actual points—who are the players that are the most important to distinguish, because those are the players that you are most likely trying to decide between when drafting.
+Thus, although projections for offensive positions (besides Kickers) do better than chance, there remains considerable room for improvement in predictive accuracy.
+The modest accuracy of projections likely reflects that human behavior is multiply determined and hard to predict.
+
+The association between projected and actual fantasy points tended to flatten at the higher levels of projected points, for some positions, including Running Backs, Kickers, and defensive players.
+A consequence of this pattern, from the perspective of draft strategy, is that it would not make sense to draft players projected to score more than the flattening of the projected–actual curve.
+For instance, drafting a highly routed Wide Receiver may be safer than drafting a highly ranked Running Back, who may be more prone to injury.
+This finding is consistent with findings from @Petersen2017 [archived at <https://perma.cc/BG2W-ANUF>], who found that projections were more accurate for Quarterbacks and Wide Receivers than for Running Backs; projections were the least accurate for Kickers, Defensive Backs, and Defense/Special Teams.
+These finding were also extended by @Kartes2025 (archived at <https://perma.cc/R3WS-CAKD>) whose evaluation of the accuracy of projections by position found that:
+
+a. Quarterbacks with preseason ranks of 6–10 showed the greatest systematic underperformance relative to their projections, suggesting that you should either draft an elite Quarterback (ranked 1–5) or wait until later rounds to draft multiple lower-ranked Quarterbacks.
+a. Elite Running Backs (with preseason ranks of 1–5) showed strong underperformance (relative to projections), suggesting that you should draft Running Backs ranked 6 and below.
+a. Wide Receivers showed among the more consistent and predictable patterns in projections, suggesting that it may be safer to draft a top Wide Receiver than top-ranked players at other positions.
+a. Tight Ends showed relative inaccuracy of projections with limited upside concentrated among a few players, which means it is difficult, at the outset, to predict which Tight Ends will excel; based on this, @Kartes2025 suggested avoiding overpaying for mid-tier Tight Ends; to either draft a Tight End early or to wait until later rounds.
+
+This does *not* mean that you should intentionally draft a 6th ranked Running Back instead of the top-ranked Running Back.
+Instead, what it may mean is that, instead of drafting the top-ranked Running Back, you may be better off drafting the top-ranked Wide Receiver and to get a value player at Running Back in a subsequent pick.
+
 ## Ways to Improve Prediction Accuracy {#sec-waysToImprovePredictionAccuracy}
 
 On the whole, experts' predictions are inaccurate.
 Experts' predictions from many different domains tend to be inaccurate, including political scientists [@Tetlock2017], physicians [@Koehler2002], clinical psychologists [@Oskamp1965], stock market traders and corporate financial officers [@Skala2008], seismologists' predictions of earthquakes [@Hough2016], economists' predictions about the economy [@Makridakis2009], lawyers [@Koehler2002], and business managers [@Russo1992].
-Thus, I would not put much confidence in the predictions by fantasy football fundits.
+Thus, I would not put much confidence in the predictions by fantasy football pundits.
 The most common pattern of experts' predictions is that they show overextremity, that is, their predictions have probability judgments that tend to be too extreme, as described in Section @sec-calibration.
 Overextremity of experts' predictions reflects the [overprecision](#sec-cognitiveBiasesOverconfidence) type of [overconfidence bias](#sec-cognitiveBiasesOverconfidence).
 The degree of confidence of a person's predictions is often not a good indicator of the accuracy of their predictions [and confidence and prediction accuracy are sometimes inversely associated; @Silver2012].
