@@ -104,99 +104,6 @@ Nevertheless, individual sources tend to be even less accurate.
 
 The [`petersenlab` package](https://cran.r-project.org/web/packages/petersenlab/index.html) [@R-petersenlab] has the `wisdomOfCrowd()` function that computes the overall accuracy of the crowd-averaged projections, including the bracketing rate of the individual projections.
 
-### Seasonal Projections {#sec-accuracyOfCrowdSeasonal}
-
-```{r}
-# insert example using historical projections: wisdomOfCrowd()
-
-seasonalIndividualSources <- projectionsWithActuals_seasonal %>%
-  filter(!is.na(raw_points)) %>% 
-  filter(!is.na(fantasyPoints)) %>% 
-  group_by(player_id, season) %>%
-  filter(n() >= 2) %>% # at least 2 projections
-  summarise(
-    numProjections = n(),
-    type = "individual",
-    petersenlab::wisdomOfCrowd(
-      predicted = raw_points,
-      actual = unique(fantasyPoints),
-      dropUndefined = TRUE
-      )[1,],
-    .groups = "drop"
-  )
-
-seasonalCrowd <- projectionsWithActuals_seasonal %>%
-  filter(!is.na(raw_points)) %>% 
-  filter(!is.na(fantasyPoints)) %>% 
-  group_by(player_id, season) %>%
-  filter(n() >= 2) %>% # at least 2 projections
-  summarise(
-    numProjections = n(),
-    type = "crowd",
-    petersenlab::wisdomOfCrowd(
-      predicted = raw_points,
-      actual = unique(fantasyPoints),
-      dropUndefined = TRUE
-      )[2,],
-    .groups = "drop"
-  )
-
-seasonalIndividualSourcesAndCrowd <- bind_rows(
-  seasonalIndividualSources,
-  seasonalCrowd
-)
-
-seasonalIndividualSources <- seasonalIndividualSources %>% 
-  left_join(
-    player_stats_seasonal,
-    by = c("player_id", "season")
-  )
-
-seasonalCrowd <- seasonalCrowd %>% 
-  left_join(
-    player_stats_seasonal,
-    by = c("player_id", "season")
-  )
-
-seasonalIndividualSourcesAndCrowd <- seasonalIndividualSourcesAndCrowd %>% 
-  left_join(
-    player_stats_seasonal,
-    by = c("player_id", "season")
-  )
-```
-
-```{r}
-#| label: fig-bracketingRateSeasonal
-#| fig-cap: "Distribution of Bracketing Rate Across Players For Seasonal Projections."
-#| fig-alt: "Distribution of Bracketing Rate Across Players For Seasonal Projections."
-
-ggplot2::ggplot(
-  data = seasonalIndividualSources %>%
-    filter(position_group %in% c("QB","RB","WR","TE")),
-  mapping = aes(
-    x = bracketingRate)
-) +
-  geom_histogram(
-    color = "#000000",
-    fill = "#0099F8"
-  ) +
-  labs(
-    x = "Bracketing Rate",
-    y = "Count",
-    title = "Histogram of Bracketing Rate (Seasonal Projections)"
-  ) +
-  theme_classic() +
-  theme(axis.title.y = element_text(angle = 0, vjust = 0.5))
-```
-
-Proportion of players whose bracketing rate was zero:
-
-```{r}
-#length()
-```
-
-### Weekly Projections {#sec-accuracyOfCrowdWeekly}
-
 ### Examples {#sec-accuracyOfCrowdExamples}
 
 Below are examples where the predictions a) are centered on the truth, b) bracket the truth, and c) do not bracket the truth.
@@ -746,6 +653,200 @@ Third, the experts may interact and discuss with one another.
 Interaction and discussion among experts may lead them to follow the herd and conform their projections to what each other predict.
 This has been terms informational influence and may reflect the [anchoring and adjustment heuristic](#sec-heuristicsAnchoringAdjustment) [@Larrick2024].
 In any case, they are able to see each other's projections and make change their projections, accordingly.
+
+### Seasonal Projections {#sec-accuracyOfCrowdSeasonal}
+
+```{r}
+seasonalIndividualSources <- projectionsWithActuals_seasonal %>%
+  filter(!is.na(raw_points)) %>% 
+  filter(!is.na(fantasyPoints)) %>% 
+  group_by(player_id, season) %>%
+  filter(n() >= 2) %>% # at least 2 projections
+  summarise(
+    numProjections = n(),
+    type = "individual",
+    petersenlab::wisdomOfCrowd(
+      predicted = raw_points,
+      actual = unique(fantasyPoints),
+      dropUndefined = TRUE
+      )[1,],
+    .groups = "drop"
+  )
+
+seasonalCrowd <- projectionsWithActuals_seasonal %>%
+  filter(!is.na(raw_points)) %>% 
+  filter(!is.na(fantasyPoints)) %>% 
+  group_by(player_id, season) %>%
+  filter(n() >= 2) %>% # at least 2 projections
+  summarise(
+    numProjections = n(),
+    type = "crowd",
+    petersenlab::wisdomOfCrowd(
+      predicted = raw_points,
+      actual = unique(fantasyPoints),
+      dropUndefined = TRUE
+      )[2,],
+    .groups = "drop"
+  )
+
+seasonalIndividualSourcesAndCrowd <- bind_rows(
+  seasonalIndividualSources,
+  seasonalCrowd
+)
+
+seasonalIndividualSources <- seasonalIndividualSources %>% 
+  left_join(
+    player_stats_seasonal,
+    by = c("player_id", "season")
+  )
+
+seasonalCrowd <- seasonalCrowd %>% 
+  left_join(
+    player_stats_seasonal,
+    by = c("player_id", "season")
+  )
+
+seasonalIndividualSourcesAndCrowd <- seasonalIndividualSourcesAndCrowd %>% 
+  left_join(
+    player_stats_seasonal,
+    by = c("player_id", "season")
+  )
+```
+
+```{r}
+seasonalIndividualSources %>% 
+  select(player_display_name, position, season, numProjections, bracketingRate, ME:RMSLE)
+```
+
+```{r}
+#| label: fig-bracketingRateSeasonal
+#| fig-cap: "Distribution of Bracketing Rate Across Players For Seasonal Projections."
+#| fig-alt: "Distribution of Bracketing Rate Across Players For Seasonal Projections."
+
+ggplot2::ggplot(
+  data = seasonalIndividualSources %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = bracketingRate)
+) +
+  geom_histogram(
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  labs(
+    x = "Bracketing Rate",
+    y = "Count",
+    title = "Histogram of Bracketing Rate (Seasonal Projections)"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5))
+```
+
+Proportion of players whose bracketing rate was zero:
+
+```{r}
+seasonalIndividualSources %>% 
+  filter(!is.na(bracketingRate)) %>% 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
+  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
+```
+
+### Weekly Projections {#sec-accuracyOfCrowdWeekly}
+
+```{r}
+weeklyIndividualSources <- projectionsWithActuals_weekly %>%
+  filter(!is.na(raw_points)) %>% 
+  filter(!is.na(fantasyPoints)) %>% 
+  group_by(player_id, season, week) %>%
+  filter(n() >= 2) %>% # at least 2 projections
+  summarise(
+    numProjections = n(),
+    type = "individual",
+    petersenlab::wisdomOfCrowd(
+      predicted = raw_points,
+      actual = unique(fantasyPoints),
+      dropUndefined = TRUE
+      )[1,],
+    .groups = "drop"
+  )
+
+weeklyCrowd <- projectionsWithActuals_weekly %>%
+  filter(!is.na(raw_points)) %>% 
+  filter(!is.na(fantasyPoints)) %>% 
+  group_by(player_id, season, week) %>%
+  filter(n() >= 2) %>% # at least 2 projections
+  summarise(
+    numProjections = n(),
+    type = "crowd",
+    petersenlab::wisdomOfCrowd(
+      predicted = raw_points,
+      actual = unique(fantasyPoints), # [1] error w/o [1] because have more than one unique value for a given player-season-week
+      dropUndefined = TRUE
+      )[2,],
+    .groups = "drop"
+  )
+
+weeklyIndividualSourcesAndCrowd <- bind_rows(
+  weeklyIndividualSources,
+  weeklyCrowd
+)
+
+weeklyIndividualSources <- weeklyIndividualSources %>% 
+  left_join(
+    player_stats_weekly,
+    by = c("player_id", "season", "week")
+  )
+
+weeklyCrowd <- weeklyCrowd %>% 
+  left_join(
+    player_stats_weekly,
+    by = c("player_id", "season", "week")
+  )
+
+weeklyIndividualSourcesAndCrowd <- weeklyIndividualSourcesAndCrowd %>% 
+  left_join(
+    player_stats_weekly,
+    by = c("player_id", "season", "week")
+  )
+```
+
+```{r}
+weeklyIndividualSources %>% 
+  select(player_display_name, position, season, week, numProjections, bracketingRate, ME:RMSLE)
+```
+
+```{r}
+#| label: fig-bracketingRateWeekly
+#| fig-cap: "Distribution of Bracketing Rate Across Players For Weekly Projections."
+#| fig-alt: "Distribution of Bracketing Rate Across Players For Weekly Projections."
+
+ggplot2::ggplot(
+  data = weeklyIndividualSources %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = bracketingRate)
+) +
+  geom_histogram(
+    color = "#000000",
+    fill = "#0099F8"
+  ) +
+  labs(
+    x = "Bracketing Rate",
+    y = "Count",
+    title = "Histogram of Bracketing Rate (Weekly Projections)"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5))
+```
+
+Proportion of players whose bracketing rate was zero:
+
+```{r}
+weeklyIndividualSources %>% 
+  filter(!is.na(bracketingRate)) %>% 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
+  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
+```
 
 ## How Well Do People Incorporate Advice From Others? {#sec-incoporateAdvice}
 
