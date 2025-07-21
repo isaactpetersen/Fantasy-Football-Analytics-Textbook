@@ -231,6 +231,7 @@ The default values are provided in the `Usage` section and are in @tbl-seqFuncti
 
 What each argument represents (i.e., the meaning of `from`, `to`, `by`, etc.) is provided in the `Arguments` section of the documentation.
 You can specify a function and its arguments either by providing values for each argument in the order indicated by the function, or by naming its arguments.
+Naming arguments explicitly (rather than merely relying on order) is considered best practice because it is safer—doing so prevents you from accidentally assigning an input to the wrong argument.
 
 Here is an example of providing values to the arguments in the order indicated by the function, to create a sequence of numbers from 1 to 9:
 
@@ -298,13 +299,17 @@ Hopefully, that provides an example for how to learn about a particular function
 ## Create a Vector {#sec-createVector}
 
 A vector is a series of elements that can be numeric or character.
-It has one dimension (length).
-To create a vector, use the `c()` function to combine elements into a vector.
+Character elements should be specified in quotes.
+A vector has one dimension (length).
+To create a vector, use the `c()` function to combine elements into a vector ("c" stands for combine).
 And, we use the assignment operator (`<-`) to assign the vector to an object named `exampleVector`, so we can access it later.
 Anything on the right side of an assignment operator gets assigned to the object name on the left side of the assignment operator.
 
 ```{r}
 exampleVector <- c(40, 30, 24, 20, 18, 23, 27, 32, 26, 23, NA, 37)
+
+exampleVector2 <- c(
+  "A","B1","B2","This is a sentence.","This is another sentence.")
 ```
 
 We can then access the contents of the object by calling its name:
@@ -373,6 +378,7 @@ Here is how you load a `.RData` file using a *relative path* (i.e., a path relat
 load(file = "./data/nfl_players.RData")
 ```
 
+The direction of the slashes matters—you should use forward slashes (not backslashes)!
 To determine where you working directory is, you can type:
 
 ```{r}
@@ -416,6 +422,7 @@ save(
   file = "./data/nfl_players.RData")
 ```
 
+The direction of the slashes matters—you should use forward slashes (not backslashes)!
 The following code saves a file to an *absolute path*:
 
 ```{r}
@@ -453,6 +460,8 @@ names(fantasyPoints)
 ```
 
 ## Logical Operators {#sec-logicalOperators}
+
+Logical Operators evaluate one or more elements for a condition, and return `TRUE`, `FALSE`, or if the element was missing, `NA`.
 
 ### Is Equal To: `==` {#sec-logicalOperatorEqual}
 
@@ -502,6 +511,12 @@ players$position %in% c("RB","WR")
 !(players$position %in% c("RB","WR"))
 ```
 
+The [`petersenlab`](https://github.com/DevPsyLab/petersenlab) package [@R-petersenlab] has a convenience function, `%ni%`, for the logical operator of determining whether an element is *not* in a value of another vector:
+
+```{r}
+players$position %ni% c("RB","WR")
+```
+
 ### Is Missing: `is.na()` {#sec-logicalOperatorMissing}
 
 ```{r}
@@ -516,14 +531,26 @@ is.na(players$age)
 
 ### And: `&`{#sec-logicalOperatorAnd}
 
+The "and" operator (`&`) is used to string together multiple logical operators that all must evaluate as `TRUE` in order for the combined evaluation to evaluate as `TRUE`; otherwise, the combined evaluation evaluates as `FALSE`.
+
 ```{r}
 players$position == "WR" & players$age > 26
 ```
 
 ### Or: `|` {#sec-logicalOperatorOr}
 
+The "or" operator (`|`) is used to string together multiple logical operators, any of which must evaluate as `TRUE` in order for the combined evaluation to evaluate as `TRUE`; otherwise, the combined evaluation evaluates as `FALSE`.
+
 ```{r}
 players$position == "WR" | players$age > 23
+```
+
+### which() {#sec-logicalOperatorWhich}
+
+The operator, `which()`, can be used to obtain the TRUE indices of an object, which is useful for [subsetting](#sec-subset).
+
+```{r}
+which(players$position == "RB")
 ```
 
 ## If...Else Conditions {#sec-ifelse}
@@ -532,6 +559,7 @@ We can use the construction, `if()...else if()...else()` if we want to perform c
 The typical construction of `if()...else if()...else()` operates such that it first checks if the first `if()` condition is true.
 If the first `if()` condition is true, it performs the operation specified and terminates the process.
 If the first `if()` condition is not true, it checks the `else if()` conditions in order until one of them is true.
+There can be multiple `else if()` conditions.
 For the first true `else if()` condition, it performs the operation specified and terminates the process.
 If none of the `else if()` conditions is true, it performs the operation specified under `else()` and then terminates the process.
 The construction, `if()...else if()...else()` can only be used on one value at a time.
@@ -1268,11 +1296,12 @@ Loops are fine for basic computations, but other approaches (such as the `apply(
 ## Create a Function {#sec-createFunction}
 
 Now, let's put together what we have learned to create a useful function.
-Functions are useful if you want to perform an operation multiple times.
+Functions are useful if you want to perform an operation multiple times, especially if you want to be able to manipulate various settings to make slight modifications each time.
 Any operation that you want to perform multiple times, you can create a function to accomplish.
 Use of a function can save you time without needed to retype out all of the code each time.
 For instance, let's say you want to convert temperature between Fahrenheit and Celsius, you could create a function to do that.
 In this case, our function has two arguments: `temperature` (in degrees) and `unit` of the original temperature (`F` for Fahrenheit or `C` for Celsius, where the default unit is Fahrenheit).
+That allows us to make the slight modification of which unit is the input temperature and to change the calculation accordingly.
 
 ```{r}
 convert_temperature <- function(temperature, unit = "F"){ # specify the arguments and any defaults
