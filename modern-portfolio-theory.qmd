@@ -12,6 +12,7 @@ This chapter provides an overview of modern portfolio theory.
 library("quantmod")
 library("fPortfolio")
 library("NMOF")
+library("GGally")
 library("tidyverse")
 ```
 
@@ -22,14 +23,20 @@ library("tidyverse")
 #| include: false
 
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projectedPoints_seasonal.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_actualFantasyPoints_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_playerIDs.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_schedules.RData", fsep = ""))
 ```
 
 ```{r}
 load(file = "./data/players_projectedPoints_seasonal.RData")
+load(file = "./data/player_stats_seasonal.RData")
 load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/nfl_actualFantasyPoints_weekly.RData")
 load(file = "./data/nfl_playerIDs.RData")
+load(file = "./data/nfl_schedules.RData")
 ```
 
 ## Overview {#sec-modernPortfolioTheoryOverview}
@@ -106,10 +113,190 @@ Having multiple players on a juggernaut offense can be a boon, but it can be cha
 However, sometimes having two players on the same team might be beneficial because some positions may be uncorrelated or even negatively correlated, which can also reduce risk.
 For instance, the performance of the Tight End and Running Back on the same team tends to be slightly negatively correlated, so it might not be a bad idea to start the Tight End and Running Back from the same team.
 For a correlation matrix of all positions on the team, see: <https://assets-global.website-files.com/5f1af76ed86d6771ad48324b/607a4434a565aa7763bd1312_AndyAsh-Sharpstack-RPpaper.pdf> [@Sherman2021; archived at <https://perma.cc/JQ6G-KSRT>] and <https://www.4for4.com/2018/preseason/definitive-guide-stacking-draftkings> [@4for4Staff2018; archived at <https://perma.cc/JZH3-ZM5V>].
+We generate a correlation matrix of positions in @sec-stacking.
 
 Another important idea from modern portfolio theory is that, if you want to achieve higher returns, you may be able to by accepting additional—and the right combination of—risk.
 In general, risk is positively correlated with return.
 That is, receiving higher returns generally requires taking on additional risk—at least as long as we stay along the [efficient frontier](#sec-efficientFrontier), described next.
+
+### Stacking {#sec-stacking}
+
+Stacking involves selecting players on the same team (e.g., multiple players on the Dallas Cowboys).
+To help inform the process of stacking, we evaluate the inter-correlation of performance in a given week across players on the same team and on opposing teams.
+We determine QB1, RB1, RB2, WR1, WR2, WR3, TE1, and K1 for each combination of team and season based on how many fantasy points a player scored over the entire season.
+
+```{r}
+# Identify the QB1, RB1, RB2, WR1, WR2, WR3, TE1, and K1 for each team-season combination
+qb1ByTeamSeasonPosition <- player_stats_seasonal %>% 
+  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) %>% 
+  filter(position_group %in% c("QB")) %>% 
+  group_by(team, season, position_group) %>% 
+  arrange(-fantasyPoints) %>% 
+  slice_max(
+    fantasyPoints,
+    with_ties = FALSE) %>%
+  ungroup() %>% 
+  arrange(season, team, position_group) %>% 
+  select(team, season, position_group, player_id) %>% 
+  mutate(position = "QB1")
+
+rbsByTeamSeasonPosition <- player_stats_seasonal %>% 
+  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) %>% 
+  filter(position_group %in% c("RB")) %>% 
+  group_by(team, season, position_group) %>% 
+  arrange(-fantasyPoints) %>% 
+  slice_max(
+    fantasyPoints,
+    n = 2,
+    with_ties = FALSE) %>% 
+  mutate(position = paste0("RB", row_number())) %>% 
+  ungroup() %>% 
+  arrange(season, team, position_group) %>% 
+  select(team, season, position_group, player_id, position)
+
+wrsByTeamSeasonPosition <- player_stats_seasonal %>% 
+  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) %>% 
+  filter(position_group %in% c("WR")) %>% 
+  group_by(team, season, position_group) %>% 
+  arrange(-fantasyPoints) %>% 
+  slice_max(
+    fantasyPoints,
+    n = 3,
+    with_ties = FALSE) %>% 
+  mutate(position = paste0("WR", row_number())) %>% 
+  ungroup() %>% 
+  arrange(season, team, position_group) %>% 
+  select(team, season, position_group, player_id, position)
+
+te1ByTeamSeasonPosition <- player_stats_seasonal %>% 
+  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) %>% 
+  filter(position_group %in% c("TE")) %>% 
+  group_by(team, season, position_group) %>% 
+  arrange(-fantasyPoints) %>% 
+  slice_max(
+    fantasyPoints,
+    with_ties = FALSE) %>%
+  ungroup() %>% 
+  arrange(season, team, position_group) %>% 
+  select(team, season, position_group, player_id) %>% 
+  mutate(position = "TE1")
+
+k1ByTeamSeasonPosition <- player_stats_seasonal %>% 
+  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) %>% 
+  filter(position_group %in% c("K")) %>% 
+  group_by(team, season, position_group) %>% 
+  arrange(-fantasyPoints) %>% 
+  slice_max(
+    fantasyPoints,
+    with_ties = FALSE) %>%
+  ungroup() %>% 
+  arrange(season, team, position_group) %>% 
+  select(team, season, position_group, player_id) %>% 
+  mutate(position = "K1")
+
+topRankedPlayersByTeamSeasonPosition <- dplyr::bind_rows(
+  qb1ByTeamSeasonPosition,
+  rbsByTeamSeasonPosition,
+  wrsByTeamSeasonPosition,
+  te1ByTeamSeasonPosition,
+  k1ByTeamSeasonPosition
+)
+
+fantasyPointsForTopRankedPlayers_weekly <- dplyr::left_join(
+  topRankedPlayersByTeamSeasonPosition,
+  player_stats_weekly %>% select(team, season, week, player_id, fantasyPoints, game_id),
+  by = c("team","season","player_id")
+)
+
+# add game_id to dst data
+
+# first attempt: match on home_team
+dst_with_game_home <- nfl_actualFantasyPoints_dst_weekly %>%
+  left_join(
+    nfl_schedules %>% select(game_id, season, week, home_team),
+    by = c("season", "week", "team" = "home_team")
+  )
+
+# second attempt: match on away_team
+dst_with_game_away <- nfl_actualFantasyPoints_dst_weekly %>%
+  left_join(
+    nfl_schedules %>% select(game_id, season, week, away_team),
+    by = c("season", "week", "team" = "away_team")
+  )
+
+# Combine the two (one will have NA for game_id, the other will have the match)
+dst_with_game_id <- dplyr::bind_rows(
+  dst_with_game_home,
+  dst_with_game_away) %>%
+  filter(!is.na(game_id)) # keep only matched rows
+
+dst_with_game_id_subset <- dst_with_game_id %>% 
+  select(team, season, week, fantasyPoints, game_id) %>%
+  mutate(
+    position = "DST",
+    position_group = "DST")
+
+fantasyPointsSameTeam_weekly <- dplyr::bind_rows(
+  fantasyPointsForTopRankedPlayers_weekly,
+  dst_with_game_id_subset
+) %>% 
+  select(-player_id) %>% 
+  filter(!is.na(game_id))
+
+fantasyPointsOpponent_weekly <- fantasyPointsSameTeam_weekly %>%
+  rename(
+    opp_team = team,
+    opp_fantasyPoints = fantasyPoints
+  )
+
+fantasyPointsCombined_weekly <- fantasyPointsSameTeam_weekly %>%
+  inner_join(
+    fantasyPointsOpponent_weekly %>% select(game_id, opp_team, position, opp_fantasyPoints),
+    by = c("game_id", "position")
+  ) %>%
+  filter(team != opp_team) # exclude matching to own team
+
+# Pivot to wide format for team positions
+team_points_wide <- fantasyPointsCombined_weekly %>%
+  select(team, season, week, position, fantasyPoints) %>%
+  tidyr::pivot_wider(
+    names_from = position,
+    values_from = fantasyPoints)
+
+# Pivot to wide format for opponent positions
+opp_points_wide <- fantasyPointsCombined_weekly %>%
+  select(team, season, week, position, opp_fantasyPoints) %>%
+  tidyr::pivot_wider(
+    names_from = position,
+    values_from = opp_fantasyPoints,
+    names_prefix = "opp_")
+
+# Join both so each row has team and opponent positions side by side
+combined_points_wide <- dplyr::left_join(
+  team_points_wide,
+  opp_points_wide,
+  by = c("team", "season", "week")
+)
+```
+
+Here is a correlation matrix of players' weekly performance across positions within a given team and their opponent:
+
+```{r}
+cor(
+  combined_points_wide %>% select(QB1:opp_DST),
+  use = "pairwise.complete.obs") %>% 
+  round(., 2)
+```
+
+In @fig-correlationMatrixPlot, we depict a correlation matrix plot using the `ggcorr()` function of the `GGally` [@R-GGally] package.
+
+```{r}
+#| label: fig-correlationMatrixPlot
+#| fig-cap: "Correlation Matrix Plot."
+#| fig-alt: "Correlation Matrix Plot."
+
+GGally::ggcorr(combined_points_wide %>% select(QB1:opp_DST))
+```
 
 ## The Efficient Frontier of a Stock Portfolio {#sec-efficientFrontier}
 
