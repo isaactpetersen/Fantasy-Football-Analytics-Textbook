@@ -2340,11 +2340,11 @@ opt_params_qb
 gc()
 ```
 
-A learning rate of 1 is very high for boosting.
-Even if a learning rate of 1 did well in tuning, we use a lower learning rate (0.1) to avoid overfitting.
-We also added some light regularization (`lambda_l2`) for better generalization.
-We also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^5 (32).
-We set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 10.
+We use the optimal parameters identified during tuning.
+We use a low learning rate (0.1) to avoid overfitting.
+We set some light regularization (`lambda_l2`) for better generalization.
+We also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^6 (64)—though the number will not reach greater than $2^\text{max_depth} = 2^5 = 32$.
+We set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 100.
 
 #### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
 
@@ -2367,12 +2367,12 @@ gp_data_qb <- gpboost::gpb.Dataset(
 params_qb <- list(
   learning_rate = 0.1,
   max_depth = 5,
-  min_data_in_leaf = 10,
-  lambda_l2 = 1,
-  num_leaves = 2^5,
+  min_data_in_leaf = 100,
+  lambda_l2 = 5,
+  num_leaves = 2^6,
   num_threads = num_cores)
 
-nrounds_qb <- 123 # identify optimal number of trees through iteration and cross-validation
+nrounds_qb <- 84 # identify optimal number of trees through iteration and cross-validation
 
 #gp_model_qb$set_optim_params(params = list(optimizer_cov = "nelder_mead")) # to speed up model estimation
 ```
