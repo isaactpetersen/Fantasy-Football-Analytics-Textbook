@@ -640,6 +640,14 @@ nfl_players %>%
 
 ## Subset {#sec-subset}
 
+To subset a vector, use brackets to specify the elements to keep:
+
+```{r}
+#| eval: false
+
+vector[elementsToKeep]
+```
+
 To subset a data frame, use brackets to specify the subset of rows and columns to keep, where the value/vector before the comma specifies the rows to keep, and the value/vector after the comma specifies the columns to keep:
 
 ```{r}
@@ -650,9 +658,9 @@ dataframe[rowsToKeep, columnsToKeep]
 
 You can subset by using any of the following:
 
-- numeric indices of the rows/columns to keep (or drop)
+- numeric indices of the elements/rows/columns to keep (or drop)
 - names of the rows/columns to keep (or drop)
-- values of `TRUE` and `FALSE` corresponding to which rows/columns to keep
+- values of `TRUE` and `FALSE` corresponding to which elements/rows/columns to keep
 
 ### One Variable {#sec-subsetOneVariable}
 
@@ -836,11 +844,34 @@ length(nfl_players$display_name)
 
 ### Number of Missing Elements {#sec-dataCharacteristicsMissingElements}
 
+Missing elements are stored in R as `NA`.
+You can determine how many missing elements there are in a data frame using the following syntax:
+
+```{r}
+length(which(is.na(nfl_players)))
+```
+
+You can determine how many missing elements there are in a variable using the following syntax:
+
 ```{r}
 length(nfl_players$college_name[which(is.na(nfl_players$college_name))])
 ```
 
 ### Number of Non-Missing Elements {#sec-dataCharacteristicsNonMissingElements}
+
+You can determine how many non-missing elements there are in a data frame using the following syntax:
+
+```{r}
+length(which(!is.na(nfl_players)))
+```
+
+You can determine how many rows in the data frame have no missing data using the following syntax:
+
+```{r}
+nrow(na.omit(nfl_players))
+```
+
+You can determine how many non-missing elements there are in a vector using the following syntax:
 
 ```{r}
 length(nfl_players$college_name[which(!is.na(nfl_players$college_name))])
@@ -1233,7 +1264,8 @@ dataLong <- dplyr::full_join(
   players %>% dplyr::select(-age),
   fantasyPoints_weekly,
   by = c("ID")
-)
+) %>% 
+  arrange(ID, season, week)
 
 dataLong
 
@@ -1351,6 +1383,19 @@ Because the default unit is "F", we do not need to specify the unit if our input
 convert_temperature(
   c(0, 10, 20, 30, 40, 50)
 )
+```
+
+## Commenting Code {#sec-comment}
+
+To comment your code, using the `#` sign.
+Anything on the line that appears after the `#` sign will be interpreted as a comment and will not be evaluated by R.
+It is important to comment your code frequently with what you are doing doing and why so that you and others know how to read it.
+
+```{r}
+x <- 1 # this line will run
+       # this line will NOT run: x <- 2
+
+x
 ```
 
 # Conclusion {#sec-gettingStartedConclusion}
