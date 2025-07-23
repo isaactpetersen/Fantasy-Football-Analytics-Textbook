@@ -120,7 +120,7 @@ Instead, machine learning cares about prediction—it cares about a predictor va
 Machine learning can be useful for leveraging big data and lots of predictor variable to develop predictive models with greater accuracy.
 However, many machine learning techniques are black boxes—it is often unclear how or why certain predictions are made, which can make it difficult to interpret the model's decisions and understand the underlying relationships between variables.
 Machine learning tends to be a data-driven, atheoretical technique.
-This can result in overfitting.
+This can result in [overfitting](#sec-overfitting).
 Thus, when estimating machine learning models, it is common to keep a hold-out sample for use in [cross-validation](#sec-crossValidation) to evaluate the extent of shrinkage of model coefficients.
 The data that the model is trained on is known as the "training data".
 The data that the model was not trained on but is then is independently tested on—i.e., the hold-out sample—is the "test data".
@@ -2341,7 +2341,7 @@ gc()
 ```
 
 We use the optimal parameters identified during tuning.
-We use a low learning rate (0.1) to avoid overfitting.
+We use a low learning rate (0.1) to avoid [overfitting](#sec-overfitting).
 We set some light regularization (`lambda_l2`) for better generalization.
 We also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at $2^6$ (64)—though the number will not reach greater than $2^{\text{max_depth}} = 2^5 = 32$.
 We set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 100.
@@ -2583,7 +2583,8 @@ mae_minimum <- min(
 )
 ```
 
-We examined multiple machine learning models to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
+We examined multiple machine learning models that included many predictor variables to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
+We also compared them to simpler models, including a [regression model with one predictor](#sec-regressionOnePredictor) and a [regression model with multiple predictors](#sec-regressionMultiplePredictors) to deteremine the [incremental validity](#sec-incrementalValidity) of the machine learning models above and beyond the simpler models.
 A summary of the accuracy of the machine learning models is in @tbl-machineLearningModelSummary.
 
 ```{r}
@@ -2597,7 +2598,7 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
-The most accurate models, in terms of [discrimination](#sec-discrimination) ($R^2$), had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using the [tree-boosting model](#sec-treeBoosting) and with [regression with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
+The most accurate models, in terms of [discrimination](#sec-discrimination) ($R^2$), had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using one of two approaches—a [tree-boosting model](#sec-treeBoosting) with many predictors or a [regression model with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
 The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate (in terms of $R^2$) than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and the other [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
 This suggests that the other predictors examined did not have [incremental validity](#sec-incrementalValidity)—they did not show utility above and beyond a player's fantasy points in predicting their future fantasy points.
 If anything, considering the additional predictor variables showed *decremental* validity—the inclusion of the additional variables worsened prediction, possibly by weakening the predictive association of the previous season's fantasy points and misattributing its predictive effect to other, related predictors in the model.
@@ -2613,7 +2614,7 @@ The most accurate model in terms of [calibration](#sec-calibration) ([mean absol
 However, even in the most accurate model, the predicted values were over `{r} petersenlab::apa(mae_minimum, decimals = 0)` points away from the actual values, suggesting that the model-predicted values were not particularly accurate.
 In sum, the [regression model with one predictor](#sec-regressionOnePredictor) was the most accurate in terms of differentiating between players ($R^2$), whereas the [tree-boosting model](#sec-treeBoosting) was the most accurate in terms of how close the predicted values were to the actual values.
 
-The most accurate of models all explained less than half of the variance in players' future fantasy points.
+All models explained less than half of the variance in players' future fantasy points.
 Thus, there remains considerable variance to be explained.
 The considerable unexplained variance suggests that we are missing key variables that are important predictors of future fantasy performance.
 It is also consistent with the conclusion from many other domains in psychology that human behavior is challenging to predict [@PetersenPrinciplesPsychAssessment].
@@ -2629,7 +2630,7 @@ There are various types of machine learning models.
 Machine learning can incorporate many predictor variables, so it is important to perform [cross-validation](#sec-crossValidation) to avoid [overfitting](#sec-overfitting).
 We examined multiple machine learning models to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
 All models explained less than half of the variance in players' fantasy points.
-The most accurate model, in terms of [discrimination](#sec-discrimination), was achieved using regression with one predictor: the player's fantasy points in the previous season.
+The most accurate model, in terms of [discrimination](#sec-discrimination) ($R^2$), was achieved using regression with one predictor: the player's fantasy points in the previous season.
 The most accurate model in terms of [calibration](#sec-calibration) ([mean absolute error](#sec-meanAbsoluteError)) was the [tree-boosting model](#sec-treeBoosting), which accounted for the longitudinal nature of the data.
 The considerable unexplained variance suggests that we are missing key variables that are important predictors of future fantasy performance.
 
