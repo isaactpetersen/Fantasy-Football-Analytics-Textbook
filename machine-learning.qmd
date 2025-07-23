@@ -2343,7 +2343,7 @@ gc()
 We use the optimal parameters identified during tuning.
 We use a low learning rate (0.1) to avoid overfitting.
 We set some light regularization (`lambda_l2`) for better generalization.
-We also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at 2^6 (64)—though the number will not reach greater than $2^\text{max_depth} = 2^5 = 32$.
+We also set the maximum tree depth (`max_depth`) at 5 to capture complex (up to 5-way) interactions, and set the maximum number of terminal nodes (`num_leaves`) per tree at $2^6$ (64)—though the number will not reach greater than $2^{\text{max_depth}} = 2^5 = 32$.
 We set the minimum number of samples in any leaf (`min_data_in_leaf`) to be 100.
 
 #### Specify Model and Tuning Parameters {#sec-treeBoostingSpecifyModel}
@@ -2457,6 +2457,41 @@ accuracyIndices_treeBoosting <- petersenlab::accuracyOverall(
 rsquare_treeBoosting <- round(accuracyIndices_treeBoosting$rsquared, digits = 2)
 me_treeBoosting <- round(accuracyIndices_treeBoosting$ME, digits = 2)
 mae_treeBoosting <- round(accuracyIndices_treeBoosting$MAE, digits = 2)
+```
+
+@fig-treeBoostingModel depicts the predicted versus actual fantasy points for the model on the test data.
+
+```{r}
+#| label: fig-treeBoostingModel
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Tree-Boosting Model."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Tree-Boosting Model."
+
+# Calculate combined range for axes
+axis_limits <- range(c(predictedVsActual$predictedPoints, predictedVsActual$actualPoints), na.rm = TRUE)
+
+ggplot(
+  predictedVsActual,
+  aes(
+    x = predictedPoints,
+    y = actualPoints)) +
+  geom_point(
+    size = 2,
+    alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    color = "blue",
+    linetype = "dashed") +
+  coord_equal(
+    xlim = axis_limits,
+    ylim = axis_limits) +
+  labs(
+    title = "Predicted vs Actual Fantasy Points (Test Data)",
+    x = "Predicted Fantasy Points",
+    y = "Actual Fantasy Points"
+  ) +
+  theme_classic() +
+  theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
 #### Generate Predictions for Next Season {#sec-treeBoostingModelPredictions}
