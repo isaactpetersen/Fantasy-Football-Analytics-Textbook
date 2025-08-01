@@ -204,12 +204,455 @@ For examples of highlighting in figures, see Figures [-@fig-lineChartHighlightin
 
 It is also important to use color schemes with distinguishable colors.
 Good color schemes for sequential, diverging, and qualitative (i.e., categorical) data are provided by ColorBrewer (<https://colorbrewer2.org>) and are available using the `scale_color_brewer()` and `scale_fill_brewer()` functions of the `ggplot2` package [@R-ggplot2], as demonstrated in @fig-barPlotColorScheme (@sec-barPlotModifiedColorScheme).
+Good colorblind-friendly color schemes for binned (`_b`), continuous (`_c`), and discrete (i.e., categorical; `_d`) scales are available using the `scale_color_viridis_X()` and `scale_fill_viridis_X()` functions of the `ggplot2` package [@R-ggplot2] (where `X` is `b`, `c`, or `d`, depending on whether you want a binned, continuous, discrete scale). 
 There are a variety of resources for color schemes that are accessible to color-blind viewers:
 
 - <https://www.datylon.com/blog/data-visualization-for-colorblind-readers> [@Kilin2022; archived at <https://perma.cc/7VTA-Y8YS>]
 - the `viridis` package [@R-viridis; @Garnier2024a_packages]
   - <https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html> (archived at <https://perma.cc/NK9K-HL7L>)
 - @Nunez2018
+
+## `ggplot2` Syntax {#sec-ggplot2Syntax}
+
+### General Syntax {#sec-ggplot2SyntaxGeneral}
+
+The `ggplot2` package [@R-ggplot2] is based on the grammar of graphics [@ggplot3rdEd], which is the principle that you can build any graph from three components: 1) the data set, 2) the coordinate system, and 3) the geoms—visual marks that represent data points.
+The general syntax for plots created using the `ggplot2` package [@R-ggplot2] is:
+
+```{r}
+#| eval: false
+
+ggplot2::ggplot(
+  data = INSERT, # 1) data set
+  mapping = aes(
+    x = variableName1, # name of variable on x-axis
+    y = variableName2) # name of variable on y-axis
+) +
+  coord_cartesian( # 2) coordinate system
+    xlim = c(NA, NA), # set limits (min and max) of x-axis
+    ylim = c(NA, NA)) + # set limits (min and max) of y-axis
+  INSERT_GEOM_FUNCTIONS # 3) geom(s)
+```
+
+The `coord_cartesian()` function can be used to specify the axis limits; however, this function is not required and the plot will apply sensible limits by default.
+In addition, there are optional settings you can specify or modify, such as [axis titles](#sec-scatterplotPlotLabels), [axis labels](#sec-scatterplotAxes), [faceting](#sec-faceting), and the [theme](#sec-scatterplotTheme).
+
+Here is a template including these potential modifications:
+
+```{r}
+#| eval: false
+
+ggplot2::ggplot(
+  data = INSERT, # 1) data set
+  mapping = aes(
+    x = variableName1, # name of variable on x-axis
+    y = variableName2) # name of variable on y-axis
+) +
+  coord_cartesian( # 2) coordinate system
+    xlim = c(NA, NA), # set limits (min and max) of x-axis
+    ylim = c(NA, NA)) + # set limits (min and max) of y-axis
+  INSERT_GEOM_FUNCTIONS + # 3) geom(s)
+  scale_x_continuous(
+    breaks = INSERT # specify x-axis labels
+  ) +
+  scale_y_continuous(
+    breaks = INSERT # specify y-axis labels
+  ) +
+  labs( # add plot labels
+    x = "INSERT", # x-axis title
+    y = "INSERT", # y-axis title
+    title = "INSERT", # plot title
+    subtitle = "INSERT", # plot subtitle
+    caption = "Add a caption below plot", # plot caption
+    alt = "Add alt text to the plot" # plot alt-text
+  ) +
+  INSERT_THEME_NAME + # apply theme
+  facet_wrap(vars(INSERT_VARIABLES_TO_FACET)) # facet by one or more variables
+```
+
+### Geoms {#sec-ggplot2SyntaxGeoms}
+
+Here is a list of common geoms available in `ggplot2` (there are many others):
+
+- [histogram](#sec-histogram): `geom_histogram()`
+- [density plot](#sec-densityPlot): `geom_density()`
+- [box-and-whisker plot](#sec-boxAndWhiskerPlot): `geom_boxplot()`
+- [violin plot](#sec-violinPlot): `geom_violin()`
+- [bar plot](#sec-barPlot): `geom_bar()`
+- [scatterplot](#sec-scatterplot): `geom_point()`
+- [rug plot](#sec-scatterplotRugPlot): `geom_rug()`
+- [line chart](#sec-lineChart): `geom_line()`
+- statistical summary (e.g., [best-fit line](#sec-scatterplotBestFitLine)): `geom_smooth()`
+
+### Color {#sec-ggplot2SyntaxColor}
+
+In `ggplot2`, you can specify the color of a geom using one of two parameters: 1) `fill` and 2) `color`.
+The `fill` parameter specifies the color inside the geom.
+The `color` parameter specifies the outline/border color of the geom.
+
+The colors to use in the `fill` and `color` parameters can be specified by name (as in @fig-colorByName), hexadecimal (HEX) codes (as in @fig-colorByHEX), RGB values (as in @fig-colorByRGB), or by palettes (e.g., ColorBrewer or viridis; as in Figures [-@fig-multipleColorsByPaletteColorBrewer] and [-@fig-multipleColorsByPaletteViridis]).
+
+```{r}
+#| label: fig-colorByName
+#| fig-cap: "Specifying the Color/Fill by Name."
+#| fig-alt: "Specifying the Color/Fill by Name."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints,
+    fill = position_group)
+) +
+  geom_histogram(
+    color = "black",
+    fill = "forestgreen"
+  )
+```
+
+You can see a full list of color names available using the `colors()` function:
+
+```{r}
+colors()
+```
+
+However, you can use any color by specifying its HEX code, as in @fig-colorByHEX.
+
+```{r}
+#| label: fig-colorByHEX
+#| fig-cap: "Specifying the Color/Fill by Hexadecimal Code."
+#| fig-alt: "Specifying the Color/Fill by Hexadecimal Code."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints,
+    fill = position_group)
+) +
+  geom_histogram(
+    color = "#000000",
+    fill = "#228B22"
+  )
+```
+
+you can use any color by specifying its values in red-green-blue (RGB) color space using the `rgb()` function, as in @fig-colorByRGB.
+
+```{r}
+#| label: fig-colorByRGB
+#| fig-cap: "Specifying the Color/Fill by RGB Value."
+#| fig-alt: "Specifying the Color/Fill by RGB Value."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints)
+) +
+  geom_histogram(
+    color = rgb(
+      red = 0,
+      green = 0,
+      blue = 0,
+      maxColorValue = 255
+    ),
+    fill = rgb(
+      red = 34,
+      green = 139,
+      blue = 34,
+      maxColorValue = 255
+    )
+  )
+```
+
+We can allow the colors to differ by group by specifying the `fill` parameter in the mapping aesthetics, as in @fig-colorByGroup.
+
+```{r}
+#| label: fig-colorByGroup
+#| fig-cap: "Specifying Color By Group."
+#| fig-alt: "Specifying Color By Group."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints,
+    fill = position_group)
+) +
+  geom_density(
+    color = "black",
+    alpha = 0.7
+  )
+```
+
+We can specify multiple colors manually using the `scale_fill_manual()` function, as in @fig-multipleColorsManually.
+
+```{r}
+#| label: fig-multipleColorsManually
+#| fig-cap: "Specifying Multiple Colors Manually."
+#| fig-alt: "Specifying Multiple Colors Manually."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints,
+    fill = position_group)
+) +
+  geom_density(
+    color = "black",
+    alpha = 0.7
+  ) +
+  scale_fill_manual(
+    values = c(
+      "QB" = "red", # or could use hex, rgb, etc.
+      "RB" = "blue", # or could use hex, rgb, etc.
+      "WR" = "green", # or could use hex, rgb, etc.
+      "TE" = "yellow") # or could use hex, rgb, etc.
+    )
+```
+
+We can also specify the colors using a palette, such as by the ColorBrewer palette using the `scale_fill_brewer()` function (as in @fig-multipleColorsByPaletteColorBrewer) or the viridis palette using the `scale_fill_viridis_d()` function (as in @fig-multipleColorsByPaletteViridis).
+
+```{r}
+#| label: fig-multipleColorsByPaletteColorBrewer
+#| fig-cap: "Specifying Multiple Colors Using the Color Brewer Palette."
+#| fig-alt: "Specifying Multiple Colors Using the Color Brewer Palette."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints,
+    fill = position_group)
+) +
+  geom_density(
+    color = "black",
+    alpha = 0.7
+  ) +
+  scale_fill_brewer(palette = "Set1") # see ?scale_fill_brewer for list of available palettes
+```
+
+```{r}
+#| label: fig-multipleColorsByPaletteViridis
+#| fig-cap: "Specifying Multiple Colors Using the Viridis Palette."
+#| fig-alt: "Specifying Multiple Colors Using the Viridis Palette."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(position_group %in% c("QB","RB","WR","TE")),
+  mapping = aes(
+    x = fantasyPoints,
+    fill = position_group)
+) +
+  geom_density(
+    color = "black",
+    alpha = 0.7
+  ) +
+  scale_fill_viridis_d(option = "viridis") # see ?scale_fill_viridis_d for list of available palettes
+```
+
+### Line Type {#sec-ggplot2SyntaxLineType}
+
+Common line types include "solid" lines, "dashed" lines, and "dotted" lines.
+A full list of line types available is provided here: <https://ggplot2.tidyverse.org/articles/ggplot2-specs.html> (archived at <https://perma.cc/N9ED-6LUS>).
+To specify the line type, you can use the `linetype` parameter, as in @fig-lineType.
+
+```{r}
+#| label: fig-lineType
+#| fig-cap: "Specifying Line Type."
+#| fig-alt: "Specifying Line Type."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    group = player_display_name)
+) +
+  geom_line(
+    linetype = "dashed"
+  )
+```
+
+We can allow the line type to differ by group by specifying the `linetype` parameter in the mapping aesthetics, as in @fig-lineTypeByGroup.
+
+```{r}
+#| label: fig-lineTypeByGroup
+#| fig-cap: "Specifying Line Type By Group."
+#| fig-alt: "Specifying Line Type By Group."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    linetype = player_display_name)
+) +
+  geom_line()
+```
+
+We can specify the line types manually using the `scale_linetype_manual()` function as in @fig-lineTypeByGroupManually.
+
+```{r}
+#| label: fig-lineTypeByGroupManually
+#| fig-cap: "Specifying Line Type By Group Manually."
+#| fig-alt: "Specifying Line Type By Group Manually."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    group = player_display_name,
+    linetype = player_display_name)
+) +
+  geom_line() +
+  scale_linetype_manual(
+    values = c(
+      "Tom Brady" = "solid",
+      "Peyton Manning" = "dashed")
+    )
+```
+
+### Line Width {#sec-ggplot2SyntaxLineType}
+
+To specify the line width, you can use the `linewidth` parameter, as in @fig-linewidth.
+
+```{r}
+#| label: fig-linewidth
+#| fig-cap: "Specifying Line Width."
+#| fig-alt: "Specifying Line Width."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    group = player_display_name)
+) +
+  geom_line(
+    linewidth = 4
+  )
+```
+
+### Point Shape {#sec-ggplot2SyntaxPointShape}
+
+Common point shapes include circles, triangles, squares, etc.
+A full list of point shapes available is provided here: <https://ggplot2.tidyverse.org/articles/ggplot2-specs.html> (archived at <https://perma.cc/N9ED-6LUS>).
+To specify the point shape, you can use the `shape` parameter, as in @fig-pointShape.
+
+```{r}
+#| label: fig-pointShape
+#| fig-cap: "Specifying Point Shape."
+#| fig-alt: "Specifying Point Shape."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    group = player_display_name)
+) +
+  geom_point(
+    shape = 2
+  )
+```
+
+We can allow the point shape to differ by group by specifying the `shape` parameter in the mapping aesthetics, as in @fig-pointShapeByGroup.
+
+```{r}
+#| label: fig-pointShapeByGroup
+#| fig-cap: "Specifying Point Shape By Group."
+#| fig-alt: "Specifying Point Shape By Group."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    shape = player_display_name)
+) +
+  geom_point()
+```
+
+We can specify the point shape manually using the `scale_shape_manual()` function as in @fig-pointShapeByGroupManually.
+
+```{r}
+#| label: fig-pointShapeByGroupManually
+#| fig-cap: "Specifying Point Shape By Group Manually."
+#| fig-alt: "Specifying Point Shape By Group Manually."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    shape = player_display_name)
+) +
+  geom_point() +
+  scale_shape_manual(
+    values = c(
+      "Tom Brady" = 1,
+      "Peyton Manning" = 3)
+    )
+```
+
+### Size of Points and Text {#sec-ggplot2SyntaxSize}
+
+To specify the size of points and text, you can use the `size` and `base_size` parameters, respectively, as in @fig-sizePointsText.
+
+```{r}
+#| label: fig-sizePointsText
+#| fig-cap: "Specifying Size of Points and Text."
+#| fig-alt: "Specifying Size of Points and Text."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    group = player_display_name)
+) +
+  geom_point(
+    size = 2 # size of points
+  ) +
+  theme_classic(
+    base_size = 20 # font size
+  )
+```
+
+You can also specify the font size separately for particular elements, as in @fig-sizeTextManually.
+
+```{r}
+#| label: fig-sizeTextManually
+#| fig-cap: "Specifying Size of Text Manually for Particular Elements."
+#| fig-alt: "Specifying Size of Text Manually for Particular Elements."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>%
+    filter(player_display_name %in% c("Tom Brady")),
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    group = player_display_name)
+) +
+  geom_point() +
+  theme(
+    axis.title.x = element_text(size = 30), # font size for x-axis title
+    axis.title.y = element_text(size = 30), # font size for y-axis title
+    axis.text.x  = element_text(size = 12), # font size for x-axis labels
+    axis.text.y  = element_text(size = 12)  # font size for y-axis labels
+  )
+```
 
 ## Univariate Distribution {#sec-univariateDistribution}
 
@@ -646,10 +1089,10 @@ ggplot2::ggplot(
     breaks = seq(from = 0, to = 2500, by = 250)
   ) +
   labs( # add plot labels
-    x = "Running Back's Age (years)",
-    y = "Rushing Yards (Season)",
-    title = "NFL Rushing Yards (Season) by Player Age",
-    subtitle = "(Among Running Backs)"
+    x = "Running Back's Age (years)", # x-axis title
+    y = "Rushing Yards (Season)", # y-axis title
+    title = "NFL Rushing Yards (Season) by Player Age", # plot title
+    subtitle = "(Among Running Backs)" # plot subtitle
   )
 ```
 
