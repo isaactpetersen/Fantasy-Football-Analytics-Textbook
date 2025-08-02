@@ -954,12 +954,8 @@ For instance, you might include the player's age as a covariate in a model that 
 
 Let's say we want to use a number of variables to predict a wide receiver's fantasy performance.
 We want to consider several [predictors](#sec-correlationalStudy), including the player's age, height, weight, and target share.
+Target share is computed as the number of targets a player receives divided by the team's total number of targets.
 We have only a few [predictors](#sec-correlationalStudy) and our sample size is large enough such that [overfitting](#sec-overfitting) is not likely a concern.
-
-On a weekly basis, target share is computed as the number of targets a player receives divided by the team's total number of targets.
-It would be nice to compute it this way for seasonal data, as well; however, for calculating seasonal target share, the `nflfastR` [@R-nflfastR] package currently sums up the player's weekly target share.
-Thus, seasonal target share (unlike weekly target share)—as it is currently calculated—does not range from 0–1.
-For example, if a player has a weekly target share of 15%, that would be a seasonal (cross-week-summed) target share of 2.55 ($0.15 \times 17 \; \text{games} = 2.55$).
 
 ### Examine Descriptive Statistics {#sec-multipleRegressionFantasyPointsWRsDescriptive}
 
@@ -1491,7 +1487,7 @@ ggplot2::ggplot(
 ```
 
 We could also generate the model-implied prediction of fantasy points for any value of the [predictor variables](#sec-correlationalStudy).
-For instance, here are the number of fantasy points expected for a Wide Receiver who is 23 years old, is 6'2" tall (72 inches), weighs 200 pounds, and has a (cross-week-summed) target share of 3 (which reflects an approximate target share of 17.6% percent per game; i.e., $0.176 = \frac{3}{17 \; \text{games}}$):
+For instance, here are the number of fantasy points expected for a Wide Receiver who is 23 years old, is 6'2" tall (72 inches), weighs 200 pounds, and has a target share of 50% (i.e., 0.5):
 
 ```{r}
 predict(
@@ -1500,7 +1496,7 @@ predict(
     age = 23,
     height = 72,
     weight = 200,
-    target_share = 3
+    target_share = .5
   )
 )
 ```
@@ -1514,7 +1510,7 @@ predictedValue <- predict(
     age = 23,
     height = 72,
     weight = 200,
-    target_share = 3
+    target_share = .5
   )
 )
 ```
@@ -1528,7 +1524,7 @@ Here is the computation:
 age <- 23
 height <- 72
 weight <- 200
-target_share <- 3
+target_share <- .5
 
 beta0 <- coef(quadraticTermsRegressionModel)[["(Intercept)"]]
 beta1 <- coef(quadraticTermsRegressionModel)[["age"]]
