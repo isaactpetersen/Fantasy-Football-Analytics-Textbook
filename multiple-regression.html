@@ -1939,8 +1939,7 @@ Figure&nbsp;11.6: Over-fitting Model in Red Relative to the True Distribution of
 <p>Covariates are variables that you include in the statistical model to try to control for them so you can better isolate the unique contribution of the <a href="research-methods.html#sec-correlationalStudy">predictor variable</a>(s) in relation to the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a>. Use of covariates examines the association between the <a href="research-methods.html#sec-correlationalStudy">predictor variable</a> and the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> when holding people’s level constant on the covariates. Inclusion of <a href="causal-inference.html#sec-causalDiagramConfounding">confounds</a> as covariates allows potentially gaining a more accurate estimate of the causal effect of the <a href="research-methods.html#sec-correlationalStudy">predictor variable</a> on the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a>. Ideally, you want to include any and all <a href="causal-inference.html#sec-causalDiagramConfounding">confounds</a> as covariates. As described in <a href="research-methods.html#sec-correlationCausation" class="quarto-xref"><span>Section 8.5.2.1</span></a>, <a href="causal-inference.html#sec-causalDiagramConfounding">confounds</a> are third variables that influence both the <a href="research-methods.html#sec-correlationalStudy">predictor variable</a> and the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> and explain their association. Covariates are potentially (but not necessarily) <a href="causal-inference.html#sec-causalDiagramConfounding">confounds</a>. For instance, you might include the player’s age as a covariate in a model that examines whether a player’s 40-yard dash time at the NFL Combine predicts their fantasy points in their rookie year, but it may not be a <a href="causal-inference.html#sec-causalDiagramConfounding">confound</a>.</p>
 </section><section id="sec-multipleRegressionFantasyPointsWRs" class="level2" data-number="11.9"><h2 data-number="11.9" class="anchored" data-anchor-id="sec-multipleRegressionFantasyPointsWRs">
 <span class="header-section-number">11.9</span> Example: Predicting Wide Receivers’ Fantasy Points</h2>
-<p>Let’s say we want to use a number of variables to predict a wide receiver’s fantasy performance. We want to consider several <a href="research-methods.html#sec-correlationalStudy">predictors</a>, including the player’s age, height, weight, and target share. We have only a few <a href="research-methods.html#sec-correlationalStudy">predictors</a> and our sample size is large enough such that <a href="#sec-overfitting">overfitting</a> is not likely a concern.</p>
-<p>On a weekly basis, target share is computed as the number of targets a player receives divided by the team’s total number of targets. It would be nice to compute it this way for seasonal data, as well; however, for calculating seasonal target share, the <code>nflfastR</code> <span class="citation" data-cites="R-nflfastR">(<a href="references.html#ref-R-nflfastR" role="doc-biblioref">Carl &amp; Baldwin, 2024</a>)</span> package currently sums up the player’s weekly target share. Thus, seasonal target share (unlike weekly target share)—as it is currently calculated—does not range from 0–1. For example, if a player has a weekly target share of 15%, that would be a seasonal (cross-week-summed) target share of 2.55 (<span class="math inline">\(0.15 \times 17 \; \text{games} = 2.55\)</span>).</p>
+<p>Let’s say we want to use a number of variables to predict a wide receiver’s fantasy performance. We want to consider several <a href="research-methods.html#sec-correlationalStudy">predictors</a>, including the player’s age, height, weight, and target share. Target share is computed as the number of targets a player receives divided by the team’s total number of targets. We have only a few <a href="research-methods.html#sec-correlationalStudy">predictors</a> and our sample size is large enough such that <a href="#sec-overfitting">overfitting</a> is not likely a concern.</p>
 <section id="sec-multipleRegressionFantasyPointsWRsDescriptive" class="level3" data-number="11.9.1"><h3 data-number="11.9.1" class="anchored" data-anchor-id="sec-multipleRegressionFantasyPointsWRsDescriptive">
 <span class="header-section-number">11.9.1</span> Examine Descriptive Statistics</h3>
 <p>Let’s first examine <a href="basic-statistics.html#sec-descriptiveStatistics">descriptive statistics</a> of the predictor and outcome variables.</p>
@@ -2729,7 +2728,7 @@ Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Poin
 </div>
 </div>
 </div>
-<p>We could also generate the model-implied prediction of fantasy points for any value of the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>. For instance, here are the number of fantasy points expected for a Wide Receiver who is 23 years old, is 6’2” tall (72 inches), weighs 200 pounds, and has a (cross-week-summed) target share of 3 (which reflects an approximate target share of 17.6% percent per game; i.e., <span class="math inline">\(0.176 = \frac{3}{17 \; \text{games}}\)</span>):</p>
+<p>We could also generate the model-implied prediction of fantasy points for any value of the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a>. For instance, here are the number of fantasy points expected for a Wide Receiver who is 23 years old, is 6’2” tall (72 inches), weighs 200 pounds, and has a target share of 50% (i.e., 0.5):</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1"></a><span class="fu">predict</span>(</span>
 <span id="cb80-2"><a href="#cb80-2"></a>  quadraticTermsRegressionModel,</span>
@@ -2737,21 +2736,21 @@ Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Poin
 <span id="cb80-4"><a href="#cb80-4"></a>    <span class="at">age =</span> <span class="dv">23</span>,</span>
 <span id="cb80-5"><a href="#cb80-5"></a>    <span class="at">height =</span> <span class="dv">72</span>,</span>
 <span id="cb80-6"><a href="#cb80-6"></a>    <span class="at">weight =</span> <span class="dv">200</span>,</span>
-<span id="cb80-7"><a href="#cb80-7"></a>    <span class="at">target_share =</span> <span class="dv">3</span></span>
+<span id="cb80-7"><a href="#cb80-7"></a>    <span class="at">target_share =</span> .<span class="dv">5</span></span>
 <span id="cb80-8"><a href="#cb80-8"></a>  )</span>
 <span id="cb80-9"><a href="#cb80-9"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>        1 
--5199.483 </code></pre>
+<pre><code>       1 
+321.9066 </code></pre>
 </div>
 </div>
-<p>The player would be expected to score -5199 fantasy points.</p>
+<p>The player would be expected to score 322 fantasy points.</p>
 <p>We can calculate this by substituting in the regression coefficients and predictor values. Here is the computation:</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb82"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1"></a>age <span class="ot">&lt;-</span> <span class="dv">23</span></span>
 <span id="cb82-2"><a href="#cb82-2"></a>height <span class="ot">&lt;-</span> <span class="dv">72</span></span>
 <span id="cb82-3"><a href="#cb82-3"></a>weight <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb82-4"><a href="#cb82-4"></a>target_share <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb82-4"><a href="#cb82-4"></a>target_share <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
 <span id="cb82-5"><a href="#cb82-5"></a></span>
 <span id="cb82-6"><a href="#cb82-6"></a>beta0 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"(Intercept)"</span>]]</span>
 <span id="cb82-7"><a href="#cb82-7"></a>beta1 <span class="ot">&lt;-</span> <span class="fu">coef</span>(quadraticTermsRegressionModel)[[<span class="st">"age"</span>]]</span>
@@ -2766,7 +2765,7 @@ Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Poin
 <span id="cb82-16"><a href="#cb82-16"></a>predictedFantasyPoints <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1<span class="sc">*</span>age <span class="sc">+</span> beta2<span class="sc">*</span>(age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> beta3<span class="sc">*</span>height <span class="sc">+</span> beta4<span class="sc">*</span>(height<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> beta5<span class="sc">*</span>weight <span class="sc">+</span> beta6<span class="sc">*</span>(weight<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> beta7<span class="sc">*</span>target_share <span class="sc">+</span> beta8<span class="sc">*</span>(target_share<span class="sc">^</span><span class="dv">2</span>)</span>
 <span id="cb82-17"><a href="#cb82-17"></a>predictedFantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>[1] -5199.483</code></pre>
+<pre><code>[1] 321.9066</code></pre>
 </div>
 </div>
 <p>The model formula with substituted values is in <a href="#eq-quadraticTermsRegressionModelSubstitute" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>:</p>
@@ -2775,8 +2774,8 @@ Figure&nbsp;11.11: Model-Implied Predictions of A Wide Receiver’s Fantasy Poin
   \text{fantasy points} \; = \; &amp;\beta_0 + \beta_1 \cdot \text{age} + \beta_2 \cdot \text{age}^2 + \beta_3 \cdot \text{height} + \beta_4 \cdot \text{height}^2 + \\
   &amp;\beta_5 \cdot \text{weight} + \beta_6 \cdot \text{weight}^2 + \beta_7 \cdot \text{target share} + \beta_8 \cdot \text{target share}^2 + \epsilon \\
   = &amp;137.86 + 3.70 \cdot 23 + -0.06 \cdot 23^2 + -3.86 \cdot 72 + 0.02 \cdot 72^2 + \\
-  &amp;-0.51 \cdot 200 + 0.00 \cdot 200^2 + 1120.79 \cdot 3 + -951.24 \cdot 3^2 + \epsilon \\
-  = &amp;-5199.48
+  &amp;-0.51 \cdot 200 + 0.00 \cdot 200^2 + 1120.79 \cdot 0 + -951.24 \cdot 0^2 + \epsilon \\
+  = &amp;321.91
 \end{aligned}
 \tag{11.8}\]</span></span></p>
 </section></section><section id="sec-multipleRegressionExamplesAddressingAssumptions" class="level3" data-number="11.9.6"><h3 data-number="11.9.6" class="anchored" data-anchor-id="sec-multipleRegressionExamplesAddressingAssumptions">
@@ -4463,9 +4462,6 @@ Ben-Shachar, M. S., Makowski, D., Lüdecke, D., Patil, I., Wiernik, B. M., Thér
 </div>
 <div id="ref-R-brms" class="csl-entry" role="listitem">
 Bürkner, P.-C. (2024). <em><span class="nocase">brms</span>: <span>Bayesian</span> regression models using <span>Stan</span></em>. <a href="https://doi.org/10.32614/CRAN.package.brms">https://doi.org/10.32614/CRAN.package.brms</a>
-</div>
-<div id="ref-R-nflfastR" class="csl-entry" role="listitem">
-Carl, S., &amp; Baldwin, B. (2024). <em><span class="nocase">nflfastR</span>: Functions to efficiently access <span>NFL</span> play by play data</em>. <a href="https://doi.org/10.32614/CRAN.package.nflfastR">https://doi.org/10.32614/CRAN.package.nflfastR</a>
 </div>
 <div id="ref-R-ordinal" class="csl-entry" role="listitem">
 Christensen, R. H. B. (2024). <em><span class="nocase">ordinal</span>: Regression models for ordinal data</em>. <a href="https://doi.org/10.32614/CRAN.package.ordinal">https://doi.org/10.32614/CRAN.package.ordinal</a>
