@@ -54,6 +54,7 @@ Multiple regression is an extension of [correlation](#sec-correlation).
 [Correlation](#sec-correlation) examines the association between one [predictor variables](#sec-correlationalStudy) and one [outcome variable](#sec-correlationalStudy).
 Multiple regression examines the association between *multiple* [predictor variables](#sec-correlationalStudy) and one [outcome variable](#sec-correlationalStudy).
 It allows obtaining a more accurate estimate of the unique contribution of a given [predictor variable](#sec-correlationalStudy), by controlling for other variables ([covariates](#sec-covariates)).
+By including multiple [predictor variables](#sec-correlationalStudy) in prediction of the [outcome variable](#sec-correlationalStudy), it also allows improved prediction accuracy.
 
 Regression with one [predictor variable](#sec-correlationalStudy) takes the form of @eq-regression:
 
@@ -160,7 +161,7 @@ Otherwise said, having more data gives more precise estimates and thus increases
 
 A *confidence interval* represents a range of plausible values such that, with repeated sampling, the true value falls within a given interval with some confidence.
 Our parameter estimate for the regression coefficient, plus or minus 1 standard error, reflects the 68% confidence interval for the coefficient.
-The 95% confidence interval is computed as the parameter estimated plus or minus 1.96 standard errors.
+The 95% confidence interval is computed as the parameter estimated plus or minus 1.96 standard errors (because in a standard normal distribution, the middle 95% of the distribution lies between −1.96 and +1.96).
 For instance, if the parameter estimate for the regression coefficient is 0.50, and the standard error is 0.10, the 95% confidence interval is [0.30, 0.70]: $0.5 - (1.96 \times 0.10) = 0.3$; $0.5 + (1.96 \times 0.10) = 0.7$.
 That is, if we used the same sampling procedure repeatedly, the true value of the regression coefficient would be expected to be 95% of the time somewhere between 0.30 to 0.70.
 
@@ -624,6 +625,8 @@ If the residuals are intercorrelated, it may be necessary to account for the gro
 #### Normally Distributed Residuals {#sec-assumptionsRegressionEvaluatingNormallyDistributedResiduals}
 
 To examine whether residuals are normally distributed, we can examine quantile–quantile (QQ) plots and probability–probability (PP) plots.
+QQ plots depict quantiles of a sample distribution (y-axis) compared to the quantiles of a theoretical (in this case, normal) distribution (x-axis).
+PP plots depict cumulative probabilities of a sample distribution (y-axis) compared to those of a theoretical (in this case, normal) distribution (x-axis).
 QQ plots are particularly useful for identifying deviations from normality in the tails of the distribution; PP plots are particularly useful for identifying deviations from normality in the center of the distribution.
 Researchers tend to be more concerned about the tails of the distribution, because extreme values tend to have a greater impact on inferences, so researchers tend to use QQ plots more often than PP plots.
 Various examples of QQ plots and deviations from normality are depicted in @fig-distributionQQplots.
@@ -868,12 +871,14 @@ where $p$ is the number of [predictor variables](#sec-correlationalStudy) in the
 
 Statistical models applied to big data (e.g., data with many [predictor variables](#sec-correlationalStudy)) can *overfit* the data, which means that the statistical model accounts for error variance, which will not generalize to future samples.
 So, even though an overfitting statistical model appears to be accurate because it is accounting for more variance, it is not actually that accurate—it will predict new data less accurately than how accurately it accounts for the data with which the model was built.
+Overfitting is most likely to occur when the model is too complex relative to the sample size (e.g., many [predictor variables](#sec-correlationalStudy) or parameters)
 In the case of fantasy football analytics, this is especially relevant because there are hundreds if not thousands of variables we could consider for inclusion and many, many players when considering historical data.
 
 Consider an example where you develop an algorithm to predict players' fantasy performance based on 2024 data using hundreds of [predictor variables](#sec-correlationalStudy).
 To some extent, these [predictor variables](#sec-correlationalStudy) will likely account for true variance (i.e., signal) and error variance (i.e., noise).
 If we were to apply the same algorithm based on the `r as.integer(format(Sys.Date(), "%Y")) - 1` prediction model to `r as.integer(format(Sys.Date(), "%Y"))` data, the prediction model would likely predict less accurately than with `r as.integer(format(Sys.Date(), "%Y")) - 1` data.
-The regression coefficients tend to become weaker when applied to new data, a phenomenon called [shrinkage](#sec-shrinkage), which is described in @sec-shrinkage.
+The regression coefficients (and resulting accuracy) tend to become weaker when applied to new data, a phenomenon called [shrinkage](#sec-shrinkage), which is described in @sec-shrinkage.
+For instance, shrinking is observed when applying multiple regression models to new data in @sec-fittingModels-regression and when applying [machine learning](#sec-machineLearning) models to new data in @sec-fittingModels-machineLearning.
 The regression coefficients in the [FILL IN]
 
 In @fig-overfittingModel, the blue line represents the true distribution of the data, and the red line is an overfitting model:

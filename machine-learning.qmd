@@ -1344,6 +1344,10 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
+accuracyIndices_onePredictor_train <- tune::collect_metrics(cv_results)
+
+rsquare_onePredictor_train <- round(as.numeric(accuracyIndices_onePredictor_train[accuracyIndices_onePredictor_train$.metric == "rsq", c("mean")]), digits = 2)
+
 accuracyIndices_onePredictor <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
@@ -1354,6 +1358,8 @@ rsquare_onePredictor <- round(accuracyIndices_onePredictor$rsquared, digits = 2)
 me_onePredictor <- round(accuracyIndices_onePredictor$ME, digits = 2)
 mae_onePredictor <- round(accuracyIndices_onePredictor$MAE, digits = 2)
 ```
+
+There was modest [shrinkage](#sec-shrinkage) from the training model to the test model: the $R^2$ for the model on the training data was `{r} rsquare_onePredictor_train`; the $R^2$ for the same model applied to the test data was `{r} rsquare_onePredictor`.
 
 @fig-regressionOnePredictor depicts the predicted versus actual fantasy points for the model on the test data.
 
@@ -1471,6 +1477,10 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
+accuracyIndices_multiplePredictors_train <- tune::collect_metrics(cv_results)
+
+rsquare_multiplePredictors_train <- round(as.numeric(accuracyIndices_multiplePredictors_train[accuracyIndices_multiplePredictors_train$.metric == "rsq", c("mean")]), digits = 2)
+
 accuracyIndices_multiplePredictors <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
@@ -1481,6 +1491,8 @@ rsquare_multiplePredictors <- round(accuracyIndices_multiplePredictors$rsquared,
 me_multiplePredictors <- round(accuracyIndices_multiplePredictors$ME, digits = 2)
 mae_multiplePredictors <- round(accuracyIndices_multiplePredictors$MAE, digits = 2)
 ```
+
+There was modest [shrinkage](#sec-shrinkage) from the training model to the test model: the $R^2$ for the model on the training data was `{r} rsquare_multiplePredictors_train`; the $R^2$ for the same model applied to the test data was `{r} rsquare_multiplePredictors`.
 
 @fig-regressionMultiplePredictors depicts the predicted versus actual fantasy points for the model on the test data.
 
@@ -1628,6 +1640,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
+accuracyIndices_lasso_train <- tune::collect_metrics(cv_results)
+
+rsquare_lasso_train <- accuracyIndices_lasso_train %>% 
+  filter(.metric == "rsq" & penalty == best_penalty$penalty) %>% 
+  select(mean) %>% 
+  pull() %>% 
+  as.numeric() %>% 
+  round(., 2)
+
 accuracyIndices_lasso <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
@@ -1638,6 +1659,8 @@ rsquare_lasso <- round(accuracyIndices_lasso$rsquared, digits = 2)
 me_lasso <- round(accuracyIndices_lasso$ME, digits = 2)
 mae_lasso <- round(accuracyIndices_lasso$MAE, digits = 2)
 ```
+
+There was modest [shrinkage](#sec-shrinkage) from the training model to the test model: the $R^2$ for the model on the training data was `{r} rsquare_lasso_train`; the $R^2$ for the same model applied to the test data was `{r} rsquare_lasso`.
 
 @fig-lassoModel depicts the predicted versus actual fantasy points for the model on the test data.
 
@@ -1780,6 +1803,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
+accuracyIndices_ridge_train <- tune::collect_metrics(cv_results)
+
+rsquare_ridge_train <- accuracyIndices_ridge_train %>% 
+  filter(.metric == "rsq" & penalty == best_penalty$penalty) %>% 
+  select(mean) %>% 
+  pull() %>% 
+  as.numeric() %>% 
+  round(., 2)
+
 accuracyIndices_ridge <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
@@ -1790,6 +1822,8 @@ rsquare_ridge <- round(accuracyIndices_ridge$rsquared, digits = 2)
 me_ridge <- round(accuracyIndices_ridge$ME, digits = 2)
 mae_ridge <- round(accuracyIndices_ridge$MAE, digits = 2)
 ```
+
+There was modest [shrinkage](#sec-shrinkage) from the training model to the test model: the $R^2$ for the model on the training data was `{r} rsquare_ridge_train`; the $R^2$ for the same model applied to the test data was `{r} rsquare_ridge`.
 
 @fig-ridgeRegressionModel depicts the predicted versus actual fantasy points for the model on the test data.
 
@@ -1941,6 +1975,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
+accuracyIndices_elasticNet_train <- tune::collect_metrics(cv_results)
+
+rsquare_elasticNet_train <- accuracyIndices_elasticNet_train %>% 
+  filter(.metric == "rsq" & penalty == best_penalty$penalty & mixture == best_penalty$mixture) %>% 
+  select(mean) %>% 
+  pull() %>% 
+  as.numeric() %>% 
+  round(., 2)
+
 accuracyIndices_elasticNet <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
@@ -1951,6 +1994,8 @@ rsquare_elasticNet <- round(accuracyIndices_elasticNet$rsquared, digits = 2)
 me_elasticNet <- round(accuracyIndices_elasticNet$ME, digits = 2)
 mae_elasticNet <- round(accuracyIndices_elasticNet$MAE, digits = 2)
 ```
+
+There was modest [shrinkage](#sec-shrinkage) from the training model to the test model: the $R^2$ for the model on the training data was `{r} rsquare_elasticNet_train`; the $R^2$ for the same model applied to the test data was `{r} rsquare_elasticNet`.
 
 @fig-elasticNetModel depicts the predicted versus actual fantasy points for the model on the test data.
 
@@ -2121,6 +2166,15 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
+accuracyIndices_randomForest_train <- tune::collect_metrics(cv_results)
+
+rsquare_randomForest_train <- accuracyIndices_randomForest_train %>% 
+  filter(.metric == "rsq" & mtry == best_penalty$mtry & min_n == best_penalty$min_n) %>% 
+  select(mean) %>% 
+  pull() %>% 
+  as.numeric() %>% 
+  round(., 2)
+
 accuracyIndices_randomForest <- petersenlab::accuracyOverall(
   predicted = df$pred,
   actual = df$fantasyPoints_lag,
@@ -2131,6 +2185,8 @@ rsquare_randomForest <- round(accuracyIndices_randomForest$rsquared, digits = 2)
 me_randomForest <- round(accuracyIndices_randomForest$ME, digits = 2)
 mae_randomForest <- round(accuracyIndices_randomForest$MAE, digits = 2)
 ```
+
+There was modest [shrinkage](#sec-shrinkage) from the training model to the test model: the $R^2$ for the model on the training data was `{r} rsquare_randomForest_train`; the $R^2$ for the same model applied to the test data was `{r} rsquare_randomForest`.
 
 @fig-randomForestModel depicts the predicted versus actual fantasy points for the model on the test data.
 
