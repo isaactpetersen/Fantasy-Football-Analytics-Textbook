@@ -1923,7 +1923,7 @@ So, multicollinearity is less of a concern for [machine learning](#sec-machineLe
 
 An important consideration in multiple regression is how missing data are handled.
 Multiple regression in `R` using the `lm()` function applies listwise deletion.
-*Listwise deletion* removes any row (in the data file) from analysis that has a missing value on the [outcome variable](#sec-correlationalStudy) or any of the [predictor variables](#sec-correlationalStudy).
+*Listwise deletion* (also called complete case analysis) removes any row (in the data file) from analysis that has a missing value on the [outcome variable](#sec-correlationalStudy) or any of the [predictor variables](#sec-correlationalStudy).
 Removing all rows from analysis that have any missingness in the model variables can be a problem because missingness is often not completely at random—missingness often occurs systematically (i.e., for a reason).
 For instance, participants may be less likely to have data for all variables if they are from a lower socioeconomic status background and do not have the time to participate in all study procedures.
 Thus, applying listwise deletion, we might systematically exclude participants from lower socioeconomic status backgrounds (or other groups), which could lead to less generalizable inferences.
@@ -1933,6 +1933,7 @@ Various approaches to handle missingness include pairwise deletion (aka availabl
 
 ### Pairwise Deletion {#sec-multipleRegressionPairwiseDeletion}
 
+Pairwise deletion (also called available case analysis) uses all available data for each pair of variables when estimating the covariances, and the resulting covariance matrix can be used to estimate a multiple regression model.
 We can estimate a regression model that uses pairwise deletion using the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
 
 ```{r}
@@ -1967,6 +1968,9 @@ summary(
 
 ### Multiple Imputation {#sec-multipleRegressionMultipleImputation}
 
+Multiple imputation takes a data set with missingness and it uses available information on other variables to estimate what likely values could have been for the missing value.
+It repeats the imputation multiple times, so there are multiple imputed data sets, which can give a sense of the degree of uncertainty of each imputed value.
+The model is then fit to each of the multiply imputed data sets separately, and the results are combined.
 We can multiply impute data using the `mice` package [@vanBuuren2011_packages; @R-mice].
 
 ```{r}
@@ -2092,6 +2096,8 @@ summary(mice::pool(imp_regression))
 
 ### Full Information Maximum Likelihood {#sec-multipleRegressionFIML}
 
+Full information maximum likelihood (FIML) estimates model parameters using all available data for each case, without imputing missing values.
+FIML is commonly used for handling missingness in approaches to latent variable modeling, such as [factor analysis](#sec-factorAnalysis) and structural equation modeling.
 We can estimate a regression model that uses full information maximum likelihood using the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
 
 ```{r}
@@ -2140,9 +2146,9 @@ regressionWithClusterVariable
 performance::r2(regressionWithClusterVariable)
 ```
 
-## Impact of Outliers {#sec-multipleRegressionOutliers}
+## Impact of Outliers and Restricted Range {#sec-multipleRegressionOutliers}
 
-[As with correlation](#sec-correlationOutliers), multiple regression can be strongly impacted by outliers.
+[As with correlation](#sec-correlation), multiple regression can be strongly impacted by [outliers](#sec-correlationOutliers) and [restricted range](#sec-correlationRestrictedRange).
 
 ### Robust Regression {#sec-multipleRegressionRobustRegression}
 
