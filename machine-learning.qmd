@@ -2469,6 +2469,27 @@ gp_model_qb_importance
 gpboost::gpb.plot.importance(gp_model_qb_importance)
 ```
 
+#### Evaluate Accuracy of Model on Training Data {#sec-treeBoostingModelAccuracyTraining}
+
+```{r}
+# Model-implied predictions
+pred_train_qb <- predict(
+  gp_model_fit_qb,
+  data = data_train_qb_matrix[, pred_vars_qb],
+  group_data_pred = data_train_qb_matrix[, "gsis_id"],
+  group_rand_coef_data_pred = cbind(
+    data_train_qb_matrix[, "ageCentered20"],
+    data_train_qb_matrix[, "ageCentered20Quadratic"]),
+  predict_var = FALSE,
+  pred_latent = FALSE)
+
+petersenlab::accuracyOverall(
+  predicted = pred_train_qb[["response_mean"]],
+  actual = data_train_qb_matrix[, "fantasyPoints_lag"],
+  dropUndefined = TRUE
+)
+```
+
 #### Evaluate Accuracy of Model on Test Data {#sec-treeBoostingModelAccuracy}
 
 ```{r}
@@ -2504,6 +2525,14 @@ petersenlab::accuracyOverall(
 ```{r}
 #| include: false
 
+accuracyIndices_treeBoosting_train <- petersenlab::accuracyOverall(
+  predicted = pred_train_qb[["response_mean"]],
+  actual = data_train_qb_matrix[, "fantasyPoints_lag"],
+  dropUndefined = TRUE
+)
+
+rsquare_treeBoosting_train <- round(accuracyIndices_treeBoosting_train$rsquared, digits = 2)
+
 accuracyIndices_treeBoosting <- petersenlab::accuracyOverall(
   predicted = predictedVsActual$predictedPoints,
   actual = predictedVsActual$actualPoints,
@@ -2514,6 +2543,8 @@ rsquare_treeBoosting <- round(accuracyIndices_treeBoosting$rsquared, digits = 2)
 me_treeBoosting <- round(accuracyIndices_treeBoosting$ME, digits = 2)
 mae_treeBoosting <- round(accuracyIndices_treeBoosting$MAE, digits = 2)
 ```
+
+There was moderate [shrinkage](#sec-shrinkage) from the training model to the test model: the $R^2$ for the model on the training data was `{r} rsquare_treeBoosting_train`; the $R^2$ for the same model applied to the test data was `{r} rsquare_treeBoosting`.
 
 @fig-treeBoostingModel depicts the predicted versus actual fantasy points for the model on the test data.
 
