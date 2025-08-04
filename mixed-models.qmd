@@ -60,7 +60,11 @@ We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` obj
 
 ## Overview of Mixed Models {#sec-mixedModelsOverview}
 
-We will discuss a modeling framework that goes by many terms, including mixed models, mixed-effects models, multilevel models, hierarchical linear models.
+Mixed models are simply regression models that account for the nested or hierarchical structure of the data.
+Mixed models can be be used to address the [assumption in multiple regression](#sec-assumptionsRegression) that the residuals are independent (i.e., uncorrelated).
+When data come from the same group, that can lead to residuals being correlated, so accounting for the grouping-level structure can address the assumption.
+
+The modeling framework goes by many terms, including mixed models, mixed-effects models, multilevel models, hierarchical linear models.
 They are sometimes called multilevel models and hierarchical linear models, whose name emphasizes the hierarchical structure of the data because the data are nonindependent.
 When observations (i.e., data points) are collected from multiple lower-level units (e.g., people) in an upper-level unit (e.g., married couple, family, classroom, school, neighborhood, team), the data from the lower-level units are considered "nested" within the upper-level unit.
 In this context, *nested data* refers to multiple observations from the same upper-level unit.
@@ -2434,6 +2438,8 @@ bayesianMixedModelFit %>%
 ### Plots of Model-Implied Fantasy Points by Position and Age {#sec-fantasyPointsByAgePlots}
 
 ```{r}
+#| label: generate-model-implied-predictions-fantasy-points-by-position-age
+
 # From Quadratic Model: All Players
 pointsPerSeason_positionAge_newData$fantasyPoints_quadratic <- predict(
   object = pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience,
@@ -2468,7 +2474,7 @@ pointsPerSeason_positionAge_newData$fantasyPoints_depthGAM <- predict(
 model_levels <- levels(bayesianMixedModelFit$data$player_idFactor)
 
 pointsPerSeason_positionAge_newData$player_idFactor <- factor(
-  rep(levels(player_stats_seasonal_offense_subset$player_idFactor)[1], nrow(pointsPerSeason_positionAge_newData)), 
+  rep(model_levels[1], nrow(pointsPerSeason_positionAge_newData)), 
   levels = model_levels
 )
 
