@@ -73,6 +73,7 @@ For example, multiple players may come from the same team, and the players' perf
 Thus, data from multiple players on a given team are considered nested within that team.
 Longitudinal data can also be considered nested data, in which time points are nested within the person (i.e., the same player provides an observation across multiple time points).
 As we will discuss, it is important to account for levels of nesting when the observations are nonindependent.
+Mixed models provide a framework for accounting for levels of nesting, in order to account for why data from the same upper-level unit are likely to be intercorrelated.
 
 These models are also sometimes called mixed models or mixed-effects models because the models can include a mix of fixed and random effects.
 Fixed effects are effects that are constant across individuals (i.e., upper-level units).
@@ -80,7 +81,7 @@ Random effects are effects that vary across individuals (i.e., upper-level units
 For instance, consider a longitudinal study of fantasy performance as a function of age.
 If we have longitudinal data for multiple players, the time points are nested within players.
 Examining the association between age as a fixed effect in relation to fantasy performance would examine the association between a player's age and their fantasy performance while holding the association between age and fantasy performance constant across all players.
-That is, it would assume that all players show the same trajectory such as increase for 4 years then decrease.
+That is, it would assume that all players show the same trajectory such as increase from ages 20 to 24 and then decrease.
 Examining the association between age as a random effect in relation to fantasy performance would examine the association between a player's age and their fantasy performance while allowing the association between age and fantasy performance to vary across players.
 That is, it would allow the possibility that some players improve with age, whereas other players decline in performance with age.
 
@@ -92,7 +93,7 @@ Thus, inclusion of random effects without the corresponding fixed effect can lea
 ### Ecological Fallacy {#sec-ecologicalFallacy}
 
 As described in @sec-fallaciesEcological, the ecological fallacy is the error of drawing inferences about an individual from group-level data.
-An type of ecological fallacy is [Simpson's paradox](#sec-simpsonsParadox).
+A type of ecological fallacy is [Simpson's paradox](#sec-simpsonsParadox).
 
 ### Simpson's Paradox {#sec-simpsonsParadox}
 
@@ -118,8 +119,45 @@ In short, we often need to account for the groups or "levels" within which peopl
 When multiple observations are nested within the same upper-level unit, they are often correlated.
 That is, some variance is attributable to the lower-level unit (e.g., the player) and some variance is attributable to the upper-level unit (e.g., the team).
 It is important to evaluate how much variance is attributable to the upper-level unit.
+A way of evaluating how much variance is attributed to an upper-level unit is with the intraclass correlation coefficient (ICC).
 If substantial variance is attributable to the upper-level unit, it is important to account for the nested structure of the data.
 Mixed models are a useful approach to account for data with a nested structure so you can avoid committing the ecological fallacy.
+
+## Data Structure {#sec-mixedModelDataStructure}
+
+When estimating mixed models, it is important to know the structure of the data.
+Examples of data from nonindependent units include nested data, multiple membership data, and cross-classified data, as depicted in @fig-nestedDataStructures.
+
+::: {#fig-nestedDataStructures}
+![](images/nestedData.png){fig-alt="Various Data Structures Involving Data from Nonindependent Units, Including Nested data, Multiple Membership Data, and Cross-Classified Data."}
+
+Various Data Structures Involving Data from Nonindependent Units, Including Nested data, Multiple Membership Data, and Cross-Classified Data.
+:::
+
+One example of nonindependent data is if your data are *nested*.
+When data are collected from multiple lower-level units (e.g., people) in an upper-level unit (e.g., married couple, family, classroom, school, neighborhood), and each lower-level unit belongs to one and only one higher-level unit, the data from the lower-level units are considered nested within the upper-level unit.
+For example, multiple participants in your sample may come from the same classroom.
+Data from multiple people can be nested within the same family, classroom, school, etc.
+Longitudinal data can also be considered nested data, in which time points are nested within the participant (i.e., the same participant provides an observation across multiple time points).
+And if you have multiple informants of a child's behavior (e.g., parent-, teacher-, friend-, and self-report), the ratings could also be nested within the participant (i.e., there are ratings from multiple informants of the same child).
+
+Another form of nonindependent data is when data involve *multiple membership*.
+Data involve multiple membership when the lower-level units belong to more than one upper-level unit.
+As an example of multiple membership, children may have more than one teacher, and therefore, in a modeling sense, children "belong" to more than one teacher cluster.
+
+Another form of nonindependent data is when data are *cross-classified* (also called crossed).
+Data are cross-classified when the lower-level units are classified by two or more upper-level units, but the upper-level units are not hierarchical or nested within one another.
+For instance, children may be nested within the crossing of schools and neighborhoods.
+That is, children are nested within schools, and children are also nested within neighborhoods; however, children attending the same school may not necessarily be from the same neighborhood.
+The data would still have a two-level hierarchy, but the data would be nested in specific school-neighborhood combinations.
+That is, children are nested within the cross-classification of schools and neighborhoods.
+
+Applied to longitudinal fantasy football data, Most simply, players' longitudinal performance data would be modeled as nested data with a two-level model: timepoints nested within players.
+However, you could get more complicated.
+For instance, you could estimate a three-level model of timepoints nested within players nested within teams.
+This would help account for players's productivity benefitting or taking a hit from being on a given team, and it would account for players changing teams.
+Alternatively, consistent with @Usami2018, you could estimate a cross-classified model of players' individual observations/measurement occasions belonging to two upper-level units: players and time points (e.g., week 1, week 2, 2025 season, etc.).
+This would help account for systematic effects that are specific to a given timepoint (e.g., week or season).
 
 ## Fantasy Points Per Season by Position, Age, and Experience {#sec-fantasyPointsByAgeExperience}
 
