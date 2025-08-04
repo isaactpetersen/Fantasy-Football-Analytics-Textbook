@@ -123,7 +123,7 @@ A way of evaluating how much variance is attributed to an upper-level unit is wi
 If substantial variance is attributable to the upper-level unit, it is important to account for the nested structure of the data.
 Mixed models are a useful approach to account for data with a nested structure so you can avoid committing the ecological fallacy.
 
-## Data Structure {#sec-mixedModelDataStructure}
+### Data Structure {#sec-mixedModelDataStructure}
 
 When estimating mixed models, it is important to know the structure of the data.
 Examples of data from nonindependent units include nested data, multiple membership data, and cross-classified data, as depicted in @fig-nestedDataStructures.
@@ -159,6 +159,16 @@ This would help account for players's productivity benefitting or taking a hit f
 Alternatively, consistent with @Usami2018, you could estimate a cross-classified model of players' individual observations/measurement occasions belonging to two upper-level units: players and time points (e.g., week 1, week 2, 2025 season, etc.).
 This would help account for systematic effects that are specific to a given timepoint (e.g., week or season).
 
+### Comparing Model Fit {#sec-mixedModelCompareModels}
+
+When trying to determine what predictors to include and how complex of a model to fit, it can be helpful to compare a variety a models to determine how well they fit the data (i.e., how much variance they account for).
+To compare non-nested models, you can use fit criteria such as Akaike information criterion (AIC), which penalizes model complexity.
+If two models are nested, you can compare their model fit using a likelihood ratio test.
+Two models are considered nested if one model includes all of the terms of the original model along with additional terms.
+The simpler model is considered "nested within" the more complex model.
+In the likelihood ratio test, a significant difference indicates that the more complex model is significantly better fitting than the simpler model.
+If the likelihood ratio test is non-significant, it indicates that the more complex model is not significantly better fitting, and thus you should prefer the more parsimonious model.
+
 ## Fantasy Points Per Season by Position, Age, and Experience {#sec-fantasyPointsByAgeExperience}
 
 In this chapter, we use mixed models to demonstrate how to model trajectories (growth curves) of players' fantasy points as a function of age.
@@ -183,7 +193,6 @@ player_stats_seasonal_offense_subset$position[which(player_stats_seasonal_offens
 player_stats_seasonal_offense_subset$player_idFactor <- factor(player_stats_seasonal_offense_subset$player_id)
 player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seasonal_offense_subset$position)
 ```
-
 
 ```{r}
 #| eval: false
@@ -888,10 +897,12 @@ ggplot2::ggplot(
 
 #### Compare Models {#sec-fantasyPointsByAgeExperienceModelsRegressionCompare}
 
-We compare models using the `bbmle` [@R-bbmle] and `MuMIn` [@R-MuMIn] packages.
+We compare nested models using an $F$-test with the `anova()` function.
+We compare non-nested models using the `bbmle` [@R-bbmle] and `MuMIn` [@R-MuMIn] packages.
 
 ```{r}
 anova(
+  pointsPerSeason_nullModel,
   pointsPerSeason_linearRegression,
   pointsPerSeason_quadraticRegression
 )
@@ -1716,10 +1727,7 @@ mixedModels2 <- list(
 ```{r}
 anova(
   pointsPerSeason_randomIntercepts,
-  pointsPerSeason_position
-)
-
-anova(
+  pointsPerSeason_position,
   pointsPerSeason_positionAgeFixedLinearSlopes,
   pointsPerSeason_positionAgeRandomLinearSlopes,
   pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopes,
@@ -1955,7 +1963,7 @@ plot(
 performance::check_model(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSlopesInteractionExperience)
 ```
 
-##### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
+#### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
 
 ```{r}
 #| label: parallel-cores-mixed-models
@@ -1993,7 +2001,7 @@ performance::r2(pointsPerSeason_gam)
 AIC(pointsPerSeason_gam)
 ```
 
-###### Compare Models {#sec-fantasyPointsByAgeExperienceModelsAgeGAMcompare}
+##### Compare Models {#sec-fantasyPointsByAgeExperienceModelsAgeGAMcompare}
 
 ```{r}
 linearMixedModelsVsGAM <- list(
