@@ -2463,9 +2463,26 @@ pointsPerSeason_positionAge_newData$fantasyPoints_depthGAM <- predict(
   newdata.guaranteed = TRUE,
   exclude = "s(player_idFactor,ageCentered20)"
 )
+
+# From Bayesian Model: All Players
+model_levels <- levels(bayesianMixedModelFit$data$player_idFactor)
+
+pointsPerSeason_positionAge_newData$player_idFactor <- factor(
+  rep(levels(player_stats_seasonal_offense_subset$player_idFactor)[1], nrow(pointsPerSeason_positionAge_newData)), 
+  levels = model_levels
+)
+
+modelPredictions_bayesian <- predict(
+  object = bayesianMixedModelFit,
+  newdata = pointsPerSeason_positionAge_newData,
+  re_formula = NA,
+  summary = TRUE
+)
+
+pointsPerSeason_positionAge_newData$fantasyPoints_bayesian <- modelPredictions_bayesian[,"Estimate"]
 ```
 
-Plots of model-implied fantasy points by position and age are in Figures [-@fig-fantasyPointsByAgeQuadratic]–[-@fig-fantasyPointsByAgeGAMdepth].
+Plots of model-implied fantasy points by position and age are in Figures [-@fig-fantasyPointsByAgeQuadratic]–[-@fig-fantasyPointsByAgeBayesian].
 
 #### Quadratic Model {#sec-fantasyPointsByAgePlotsQuadratic}
 
@@ -2579,7 +2596,37 @@ ggplot2::ggplot(
   guides(color = guide_legend(override.aes = list(fill = NA))) # transparent legend background
 ```
 
+#### Bayesian Mixed Model {#sec-fantasyPointsByAgePlotsBayesian}
+
+```{r}
+#| label: fig-fantasyPointsByAgeBayesian
+#| fig-cap: "Plot of Implied Trajectories of Fantasy Points by Age from a Bayesian Mixed Model."
+#| fig-alt: "Plot of Implied Trajectories of Fantasy Points by Age from a Bayesian Mixed Model."
+#| code-fold: true
+
+ggplot2::ggplot(
+  data = pointsPerSeason_positionAge_newData,
+  mapping = aes(
+    x = age,
+    y = fantasyPoints_bayesian,
+    color = positionFactor
+  )
+) + 
+  geom_smooth() +
+  labs(
+    x = "Player Age (years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age and Position",
+    subtitle = "Bayesian Mixed Model with All Players",
+    color = "Position"
+  ) +
+  theme_classic() +
+  guides(color = guide_legend(override.aes = list(fill = NA))) # transparent legend background
+```
+
 ### Plots of Individuals' Model-Implied Fantasy Points by Age {#sec-fantasyPointsIndividualByAgePlots}
+
+We provide plots of individuals' model-implied fantasy points by age from the Bayesian mixed model in @sec-timeSeriesBayesianModelImpliedPredictions.
 
 ```{r}
 player_stats_seasonal_offense_subsetCC$fantasyPoints_quadratic <- predict(
