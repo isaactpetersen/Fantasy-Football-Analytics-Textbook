@@ -9,7 +9,22 @@ This chapter provides an overview of the major types of drafts in fantasy footba
 ### Load Packages {#sec-draftLoadPackages}
 
 ```{r}
+library("tidyverse")
+```
 
+### Load Data {#sec-draftLoadData}
+
+```{r}
+#| eval: false
+#| include: false
+
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+```
+
+```{r}
+load(file = "./data/player_stats_seasonal.RData")
+load(file = "./data/player_stats_weekly.RData")
 ```
 
 ## Types of Fantasy Drafts {#sec-draftTypes}
@@ -143,6 +158,203 @@ In contrast to your starting lineup, you may look to draft players on your bench
 An alternative to the "stars and scrubs" approach is to wait to draft more "high-value" players after other managers have over-paid for players.
 In any case, having some small amount of cap left over toward the end of the draft can help you draft good value players to fill out your bench spots for cheap (e.g., $2).
 Having some depth can help you offset the risk of injuries and the possibility that some of your starters may underperform their expectation, which is quite likely given how [challenging it is to predict fantasy performance](#sec-accuracyOfCrowd).
+
+## Draft Analysis {#sec-draftAnalysis}
+
+### Fantasy Points by (End-of-Season) Position Rank and Position {#sec-expectedPointsByPositionRank}
+
+```{r}
+fantasyPointsByPositionRank <- player_stats_seasonal %>% 
+  filter(position_group %in% c("QB","RB","WR","TE","K","DL","LB","DB")) %>% 
+  group_by(position_group, season) %>% 
+  arrange(position_group, season, -fantasyPoints) %>% 
+  mutate(positionRank = row_number())
+```
+
+A plot of fantasy points by end-of-season position rank and position is depicted in @fig-expectedPointsByPositionRank1.
+
+```{r}
+#| label: fig-expectedPointsByPositionRank1
+#| fig-cap: "Fantasy Points by End-of-Season Position Rank and Position."
+#| fig-alt: "Fantasy Points by End-of-Season Position Rank and Position."
+#| code-fold: true
+
+ggplot(
+  data = fantasyPointsByPositionRank %>% filter(positionRank <= 200),
+  mapping = aes(
+    x = positionRank,
+    y = fantasyPoints
+  )
+) + 
+  geom_point(
+    alpha = 0.3
+  ) +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) + # don't add space between axes and data
+  labs(
+    x = "End-of-Season Position Rank",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by End-of-Season Position Rank"
+  ) +
+  theme_bw() +
+  facet_wrap(vars(position_group)) # facet by position_group
+```
+
+In @fig-expectedPointsByPositionRank2, we overlay the smoothed best-fit line for each position onto the same graphing area for direct comparison.
+
+```{r}
+#| label: fig-expectedPointsByPositionRank2
+#| fig-cap: "Fantasy Points by End-of-Season Position Rank and Position."
+#| fig-alt: "Fantasy Points by End-of-Season Position Rank and Position."
+#| code-fold: true
+
+palette_OkabeIto_black <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000")
+
+ggplot(
+  data = fantasyPointsByPositionRank %>% filter(positionRank <= 200),
+  mapping = aes(
+    x = positionRank,
+    y = fantasyPoints,
+    color = position_group
+  )
+) + 
+  geom_smooth(
+    linewidth = 1.5,
+    se = FALSE) +
+  coord_cartesian(
+    ylim = c(0,NA), # set limits of y-axis
+    expand = FALSE) + # don't add space between axes and data
+  scale_color_manual(
+    values = palette_OkabeIto_black
+  ) +
+  labs(
+    x = "End-of-Season Position Rank",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by End-of-Season Position Rank",
+    color = "Position Group"
+  ) +
+  theme_classic()
+```
+
+In @fig-expectedPointsByPositionRank3, we limit the position rank to ranks less than or equal to 30, for easier comparison of positions' comparative dropoff at the top position ranks.
+
+```{r}
+#| label: fig-expectedPointsByPositionRank3
+#| fig-cap: "Fantasy Points by End-of-Season Position Rank and Position."
+#| fig-alt: "Fantasy Points by End-of-Season Position Rank and Position."
+#| code-fold: true
+
+ggplot(
+  data = fantasyPointsByPositionRank %>% filter(positionRank <= 30),
+  mapping = aes(
+    x = positionRank,
+    y = fantasyPoints,
+    color = position_group
+  )
+) + 
+  geom_smooth(
+    linewidth = 1.5,
+    se = FALSE) +
+  coord_cartesian(
+    ylim = c(0,425), # set limits of y-axis
+    expand = FALSE) + # don't add space between axes and data
+  scale_color_manual(
+    values = palette_OkabeIto_black
+  ) +
+  labs(
+    x = "End-of-Season Position Rank",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by End-of-Season Position Rank",
+    subtitle = "Position Rank \u2264 30", # \u2264: <= symbol
+    color = "Position Group"
+  ) +
+  theme_classic()
+```
+
+It appears that Running Backs show the fastest dropoff (i.e., steepest negative slope), followed by Tight Ends, Quarterbacks, Wide Receivers, and then defensive positions.
+So, identifying the top-scoring Running Back can be of great benefit.
+
+However, the style of gameplay has changed.
+@fig-expectedPointsByPositionRank4 depicts the same data since 2020.
+
+```{r}
+#| label: fig-expectedPointsByPositionRank4
+#| fig-cap: "Fantasy Points by End-of-Season Position Rank and Position."
+#| fig-alt: "Fantasy Points by End-of-Season Position Rank and Position."
+#| code-fold: true
+
+ggplot(
+  data = fantasyPointsByPositionRank %>% filter(positionRank <= 30 & season >= 2020),
+  mapping = aes(
+    x = positionRank,
+    y = fantasyPoints,
+    color = position_group
+  )
+) + 
+  geom_smooth(
+    linewidth = 1.5,
+    se = FALSE) +
+  coord_cartesian(
+    ylim = c(0,425), # set limits of y-axis
+    expand = FALSE) + # don't add space between axes and data
+  scale_color_manual(
+    values = palette_OkabeIto_black
+  ) +
+  labs(
+    x = "End-of-Season Position Rank",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by End-of-Season Position Rank",
+    subtitle = "Position Rank \u2264 30, Since 2020", # \u2264: <= symbol
+    color = "Position Group"
+  ) +
+  theme_classic()
+```
+
+Although Running Backs appear to show the fastest dropoff, Quarterbacks and Wide Receivers have appeared to overtake them in terms of fantasy points.
+
+@fig-pointsBySeasonByPosition depicts the mean fantasy points of the top 10 players at each position by season.
+
+```{r}
+#| label: fig-pointsBySeasonByPosition
+#| fig-cap: "Mean Fantasy Points of Top 10 Players at Each Position by Season."
+#| fig-alt: "Mean Fantasy Points of Top 10 Players at Each Position by Season."
+#| code-fold: true
+
+meanFantasyPointsTop10ByPosition <- fantasyPointsByPositionRank %>% 
+  filter(positionRank <= 10) %>% 
+  summarise(
+    fantasyPoints = mean(fantasyPoints, na.rm = TRUE),
+    .groups = "drop_last"
+  )
+
+ggplot(
+  data = meanFantasyPointsTop10ByPosition,
+  mapping = aes(
+    x = season,
+    y = fantasyPoints,
+    color = position_group
+  )
+) + 
+  geom_line(
+    linewidth = 1.5) +
+  coord_cartesian(
+    ylim = c(0,425), # set limits of y-axis
+    expand = FALSE) + # don't add space between axes and data
+  scale_color_manual(
+    values = palette_OkabeIto_black
+  ) +
+  labs(
+    x = "Season",
+    y = "Mean Fantasy Points",
+    title = "Mean Fantasy Points of Top 10 Players at Each Position by Season",
+    color = "Position Group"
+  ) +
+  theme_classic()
+```
+
+The trend suggests that, since 2000, Quarterbacks have increased in fantasy points scored, and Running Backs have decreased in fantasy points scored.
 
 ## Conclusion {#sec-draftConclusion}
 
