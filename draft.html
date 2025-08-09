@@ -945,8 +945,7 @@ Figure&nbsp;7.5: Mean Fantasy Points of Top 10 Players at Each Position by Seaso
 </div>
 <p>Next, we set up the constraints. Our example is adapted from <a href="https://stackoverflow.com/questions/15147398/optimize-value-with-linear-or-non-linear-constraints-in-r" class="uri">https://stackoverflow.com/questions/15147398/optimize-value-with-linear-or-non-linear-constraints-in-r</a>. Our constraints were:</p>
 <ol type="1">
-<li>9 total players of the following number at each of following positions:</li>
-</ol>
+<li>9 total players of the following number at each of following positions:
 <ul>
 <li>1 Quarterback</li>
 <li>2 Running Backs</li>
@@ -956,7 +955,9 @@ Figure&nbsp;7.5: Mean Fantasy Points of Top 10 Players at Each Position by Seaso
 <li>1 K</li>
 <li>1 DST</li>
 </ul>
-<p>and 2) salary cap of $200.</p>
+</li>
+<li>salary cap of $200.</li>
+</ol>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># number of players</span></span>
 <span id="cb10-2"><a href="#cb10-2"></a>num.players <span class="ot">&lt;-</span> <span class="fu">nrow</span>(mostRecentProjections)</span>
@@ -964,46 +965,42 @@ Figure&nbsp;7.5: Mean Fantasy Points of Top 10 Players at Each Position by Seaso
 <span id="cb10-4"><a href="#cb10-4"></a><span class="co"># 1 for every player</span></span>
 <span id="cb10-5"><a href="#cb10-5"></a>total_players <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span>, num.players)</span>
 <span id="cb10-6"><a href="#cb10-6"></a></span>
-<span id="cb10-7"><a href="#cb10-7"></a><span class="co"># objective:</span></span>
-<span id="cb10-8"><a href="#cb10-8"></a><span class="co">#f &lt;- pts</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co"># the variables are booleans</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>var.types <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"B"</span>, num.players)</span>
 <span id="cb10-9"><a href="#cb10-9"></a></span>
-<span id="cb10-10"><a href="#cb10-10"></a><span class="co"># the variable are booleans</span></span>
-<span id="cb10-11"><a href="#cb10-11"></a>var.types <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"B"</span>, num.players)</span>
-<span id="cb10-12"><a href="#cb10-12"></a></span>
-<span id="cb10-13"><a href="#cb10-13"></a><span class="co"># the constraints</span></span>
-<span id="cb10-14"><a href="#cb10-14"></a></span>
-<span id="cb10-15"><a href="#cb10-15"></a>A <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb10-16"><a href="#cb10-16"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"QB"</span>),                <span class="co"># num QB</span></span>
-<span id="cb10-17"><a href="#cb10-17"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"RB"</span>),                <span class="co"># num RB</span></span>
-<span id="cb10-18"><a href="#cb10-18"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"WR"</span>),                <span class="co"># num WR</span></span>
-<span id="cb10-19"><a href="#cb10-19"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"TE"</span>),                <span class="co"># num TE</span></span>
-<span id="cb10-20"><a href="#cb10-20"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"K"</span>),                 <span class="co"># num K</span></span>
-<span id="cb10-21"><a href="#cb10-21"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DST"</span>),               <span class="co"># num DST</span></span>
-<span id="cb10-22"><a href="#cb10-22"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)), <span class="co"># num flex</span></span>
-<span id="cb10-23"><a href="#cb10-23"></a>  total_players,</span>
-<span id="cb10-24"><a href="#cb10-24"></a>  mostRecentProjections<span class="sc">$</span>cost)                                   <span class="co"># player cost</span></span>
-<span id="cb10-25"><a href="#cb10-25"></a></span>
-<span id="cb10-26"><a href="#cb10-26"></a>dir <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="co"># the constraints</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a>A <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb10-12"><a href="#cb10-12"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"QB"</span>),                <span class="co"># num QB</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"RB"</span>),                <span class="co"># num RB</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"WR"</span>),                <span class="co"># num WR</span></span>
+<span id="cb10-15"><a href="#cb10-15"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"TE"</span>),                <span class="co"># num TE</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"K"</span>),                 <span class="co"># num K</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DST"</span>),               <span class="co"># num DST</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)), <span class="co"># num flex</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a>  total_players,</span>
+<span id="cb10-20"><a href="#cb10-20"></a>  mostRecentProjections<span class="sc">$</span>cost)                                   <span class="co"># player cost</span></span>
+<span id="cb10-21"><a href="#cb10-21"></a></span>
+<span id="cb10-22"><a href="#cb10-22"></a>dir <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-23"><a href="#cb10-23"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-24"><a href="#cb10-24"></a>  <span class="st">"&gt;="</span>,</span>
+<span id="cb10-25"><a href="#cb10-25"></a>  <span class="st">"&gt;="</span>,</span>
+<span id="cb10-26"><a href="#cb10-26"></a>  <span class="st">"&gt;="</span>,</span>
 <span id="cb10-27"><a href="#cb10-27"></a>  <span class="st">"=="</span>,</span>
-<span id="cb10-28"><a href="#cb10-28"></a>  <span class="st">"&gt;="</span>,</span>
-<span id="cb10-29"><a href="#cb10-29"></a>  <span class="st">"&gt;="</span>,</span>
-<span id="cb10-30"><a href="#cb10-30"></a>  <span class="st">"&gt;="</span>,</span>
-<span id="cb10-31"><a href="#cb10-31"></a>  <span class="st">"=="</span>,</span>
-<span id="cb10-32"><a href="#cb10-32"></a>  <span class="st">"=="</span>,</span>
-<span id="cb10-33"><a href="#cb10-33"></a>  <span class="st">"=="</span>,</span>
-<span id="cb10-34"><a href="#cb10-34"></a>  <span class="st">"=="</span>,</span>
-<span id="cb10-35"><a href="#cb10-35"></a>  <span class="st">"&lt;="</span>)</span>
-<span id="cb10-36"><a href="#cb10-36"></a></span>
-<span id="cb10-37"><a href="#cb10-37"></a>b <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb10-38"><a href="#cb10-38"></a>  <span class="dv">1</span>,   <span class="co"># 1 QB</span></span>
-<span id="cb10-39"><a href="#cb10-39"></a>  <span class="dv">2</span>,   <span class="co"># at least 2 RBs</span></span>
-<span id="cb10-40"><a href="#cb10-40"></a>  <span class="dv">2</span>,   <span class="co"># at least 2 WRs</span></span>
-<span id="cb10-41"><a href="#cb10-41"></a>  <span class="dv">1</span>,   <span class="co"># at least 1 TE</span></span>
-<span id="cb10-42"><a href="#cb10-42"></a>  <span class="dv">1</span>,   <span class="co"># 1 K</span></span>
-<span id="cb10-43"><a href="#cb10-43"></a>  <span class="dv">1</span>,   <span class="co"># 1 DST</span></span>
-<span id="cb10-44"><a href="#cb10-44"></a>  <span class="dv">6</span>,   <span class="co"># 1 RB/WR/TE flex (i.e., 6 total RB/WR/TEs)</span></span>
-<span id="cb10-45"><a href="#cb10-45"></a>  <span class="dv">9</span>,   <span class="co"># 9 total players</span></span>
-<span id="cb10-46"><a href="#cb10-46"></a>  <span class="dv">200</span>) <span class="co"># salary cap of $200</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-28"><a href="#cb10-28"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-29"><a href="#cb10-29"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-30"><a href="#cb10-30"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-31"><a href="#cb10-31"></a>  <span class="st">"&lt;="</span>)</span>
+<span id="cb10-32"><a href="#cb10-32"></a></span>
+<span id="cb10-33"><a href="#cb10-33"></a>b <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-34"><a href="#cb10-34"></a>  <span class="dv">1</span>,   <span class="co"># 1 QB</span></span>
+<span id="cb10-35"><a href="#cb10-35"></a>  <span class="dv">2</span>,   <span class="co"># at least 2 RBs</span></span>
+<span id="cb10-36"><a href="#cb10-36"></a>  <span class="dv">2</span>,   <span class="co"># at least 2 WRs</span></span>
+<span id="cb10-37"><a href="#cb10-37"></a>  <span class="dv">1</span>,   <span class="co"># at least 1 TE</span></span>
+<span id="cb10-38"><a href="#cb10-38"></a>  <span class="dv">1</span>,   <span class="co"># 1 K</span></span>
+<span id="cb10-39"><a href="#cb10-39"></a>  <span class="dv">1</span>,   <span class="co"># 1 DST</span></span>
+<span id="cb10-40"><a href="#cb10-40"></a>  <span class="dv">6</span>,   <span class="co"># 1 RB/WR/TE flex (i.e., 6 total RB/WR/TEs)</span></span>
+<span id="cb10-41"><a href="#cb10-41"></a>  <span class="dv">9</span>,   <span class="co"># 9 total players</span></span>
+<span id="cb10-42"><a href="#cb10-42"></a>  <span class="dv">200</span>) <span class="co"># salary cap of $200</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>The optimizer thus seeks to identify the lineup with the most projected points that meets the above constraints (within a salary cap of $200). We perform the optimization using the <code><a href="https://rdrr.io/pkg/Rglpk/man/Rglpk_solve.html">Rglpk::Rglpk_solve_LP()</a></code> function of the <code>Rglpk</code> package <span class="citation" data-cites="R-Rglpk">(<a href="references.html#ref-R-Rglpk" role="doc-biblioref">Theussl &amp; Hornik, 2024</a>)</span>.</p>
