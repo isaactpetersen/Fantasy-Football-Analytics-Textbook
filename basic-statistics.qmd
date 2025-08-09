@@ -16,6 +16,7 @@ library("pwrss")
 library("WebPower")
 library("grid")
 library("psych")
+library("SimDesign")
 library("tidyverse")
 ```
 
@@ -1814,49 +1815,101 @@ pwr::pwr.anova.test(
   k = numGroups)
 ```
 
+##### Simulation {#sec-statisticalPowerOneWayANOVAsimulation}
+
 The power analysis code above assumes the groups are of equal size (i.e., a balanced design).
 If the design is unbalanced (i.e., there are different numbers of participants in each group), it may be necessary to conduct a power analysis via a simulation.
-Below is an example of evaluating the statistical power for detecting an effect unbalanced designs via simulation:
+Below is an example of evaluating the statistical power for detecting an effect unbalanced designs via simulation using the `SimDesign` [@R-SimDesign; @Chalmers2020_packages] package.
+We discuss simulation more in @sec-simulation.
+
+###### 1. Design Matrix {#sec-statisticalPowerOneWayANOVAsimulationDesign}
+
+First, we set up the design matrix using the `SimDesign::createDesign()` function:
 
 ```{r}
-nSim <- 1000 # number of simulations
+Design <- SimDesign::createDesign(
+  nGroup1 = c(10),
+  nGroup2 = c(25, 50, 100),
+  f       = c(.10, .25, .40), # small, medium, large effect sizes
+  alpha   = 0.05
+)
+```
 
-# Function to generate data and perform ANOVA
-simulate_anova <- function(nGroup1, nGroup2, f, alpha) {
-  # Means for each group
-  mean1 <- 0
-  mean2 <- f * sqrt((nGroup1 + nGroup2) / 2)
-  
-  # Generate data
-  group1 <- rnorm(nGroup1, mean = mean1, sd = 1)
-  group2 <- rnorm(nGroup2, mean = mean2, sd = 1)
-  
-  # Combine data
-  data <- data.frame(
-    value = c(group1, group2),
-    group = factor(rep(c("Group1", "Group2"), c(nGroup1, nGroup2)))
-  )
-  
-  # Perform ANOVA
-  aov_result <- aov(value ~ group, data = data)
+###### 2. Generate {#sec-statisticalPowerOneWayANOVAsimulationGenerate}
+
+Second, we set up the `Generate()` function:
+
+```{r}
+Generate <- function(condition, fixed_objects = NULL) {
+  with(condition, {
+    # Means for each group
+    mean1 <- 0
+    mean2 <- f * sqrt((nGroup1 + nGroup2) / 2)
+    
+    # Generate data
+    group1 <- rnorm(nGroup1, mean = mean1, sd = 1)
+    group2 <- rnorm(nGroup2, mean = mean2, sd = 1)
+    
+    data.frame(
+      value = c(group1, group2),
+      group = factor(rep(c("Group1", "Group2"), 
+                         c(nGroup1, nGroup2)))
+    )
+  })
+}
+```
+
+###### 3. Analyse {#sec-statisticalPowerOneWayANOVAsimulationAnalyse}
+
+Third, we set up the `Analyse()` function:
+
+```{r}
+Analyse <- function(condition, dat, fixed_objects = NULL) {
+  aov_result <- aov(value ~ group, data = dat)
   p_value <- summary(aov_result)[[1]][["Pr(>F)"]][1]
   
-  # Check if p-value is less than alpha
-  return(p_value < alpha)
+  data.frame(
+    p_value  = p_value,
+    rejectH0 = as.numeric(p_value < condition$alpha)
+  )
 }
+```
 
-# Run simulations
-set.seed(52242) # for reproducibility
-powerSimulationOneWayAnova <- replicate(
-  nSim,
-  simulate_anova(
-    nGroup1 = 10,
-    nGroup2 = 25,
-    f = effectSize_f,
-    alpha = alpha))
+###### 4. Summarise {#sec-statisticalPowerOneWayANOVAsimulationSummarize}
 
-# Estimate power
-mean(powerSimulationOneWayAnova)
+Fourth, we set up the `Summarise()` function:
+
+```{r}
+Summarise <- function(condition, results, fixed_objects = NULL) {
+  # Estimated power = proportion of rejections
+  Power <- mean(results$rejectH0)
+  
+  data.frame(Power = Power)
+}
+```
+
+###### 5. Run the Simulation {#sec-statisticalPowerOneWayANOVAsimulationRun}
+
+Fifth, we run the simulation using the `SimDesign::runSimulation()` function:
+
+```{r}
+monteCarloSim_results <- SimDesign::runSimulation(
+  design       = Design,
+  replications = 1000,
+  generate     = Generate,
+  analyse      = Analyse,
+  summarise    = Summarise,
+  seed = genSeeds(Design, iseed = 52242), # for reproducibility
+  parallel = TRUE # for faster (parallel) processing
+)
+```
+
+###### Simulation Results {#sec-statisticalPowerOneWayANOVAsimulationResults}
+
+Here are the simulation results:
+
+```{r}
+monteCarloSim_results
 ```
 
 #### Factorial ANOVA {#sec-statisticalPowerFactorialANOVA}
