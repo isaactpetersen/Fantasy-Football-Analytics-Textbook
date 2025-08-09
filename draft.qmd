@@ -10,6 +10,7 @@ This chapter provides an overview of the major types of drafts in fantasy footba
 
 ```{r}
 library("tidyverse")
+library("Rglpk")
 ```
 
 ### Load Data {#sec-draftLoadData}
@@ -20,11 +21,13 @@ library("tidyverse")
 
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
+load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/players_projections_seasonal.RData", fsep = ""))
 ```
 
 ```{r}
 load(file = "./data/player_stats_seasonal.RData")
 load(file = "./data/player_stats_weekly.RData")
+load(file = "./data/players_projections_seasonal.RData")
 ```
 
 ## Types of Fantasy Drafts {#sec-draftTypes}
@@ -145,6 +148,10 @@ As described in @sec-wisdomOfCrowd, herding occurs when people align their behav
 For instance, @Lee2022 found evidence that when Quarterbacks, Kickers, and Defenses were drafted by one team, subsequent teams were more likely to draft a player of that position.
 The same was not the case for Running Backs, Wide Receivers, and Tight Ends.
 
+FantasyFootballAnalytics.net provides tools to help you win your [snake draft](#sec-draftSnake): <https://fantasyfootballanalytics.net/win-your-snake-draft>.
+For draft tools for [snake drafts](#sec-draftSnake), see the Fantasy Football Analytics web application: <https://apps.fantasyfootballanalytics.net>.
+The web application allows users to specify their custom league settings to calculate projected points that are customized to their league and helps users select which players to draft that maximize the players' [value over replacement players](#sec-fantasyValueVORP) (VORP).
+
 ### Auction Draft {#sec-draftStrategyAuction}
 
 According to [an analysis](https://harvardsportsanalysis.wordpress.com/wp-content/uploads/2012/04/fantasyfootballdraftanalysis1.pdf) by the Harvard Sports Analysis Collective, the majority of the manager's salary cap should be spent on the starting lineup, and you should spend less on bench players [@Chakravarthy2012; archived at <https://perma.cc/P7RX-92UU>].
@@ -158,6 +165,10 @@ In contrast to your starting lineup, you may look to draft players on your bench
 An alternative to the "stars and scrubs" approach is to wait to draft more "high-value" players after other managers have over-paid for players.
 In any case, having some small amount of cap left over toward the end of the draft can help you draft good value players to fill out your bench spots for cheap (e.g., $2).
 Having some depth can help you offset the risk of injuries and the possibility that some of your starters may underperform their expectation, which is quite likely given how [challenging it is to predict fantasy performance](#sec-accuracyOfCrowd).
+
+FantasyFootballAnalytics.net provides tools to help you win your [auction draft](#sec-draftSnake) (<https://fantasyfootballanalytics.net/win-your-snake-draft>) and daily fantasy sports (DFS) leagues (<https://fantasyfootballanalytics.net/how-to/dfsoptimizerhelp>).
+For draft and player selection tools for [auction drafts](#sec-draftSnake) and DFS leagues, see the Fantasy Football Analytics web application: <https://apps.fantasyfootballanalytics.net>.
+The web application allows users to specify their custom league settings to calculate projected points that are customized to their league, and to identify the optimal lineup given their league settings and salary cap.
 
 ## Draft Analysis {#sec-draftAnalysis}
 
@@ -358,6 +369,144 @@ ggplot(
 ```
 
 The trend suggests that, since 2000, Quarterbacks have increased in fantasy points scored, and Running Backs have decreased in fantasy points scored.
+
+### Lineup Optimization {#sec-lineupOptimization}
+
+For [auction drafts](#sec-draftAuction) and daily fantasy sports (DFS) leagues, a key goal is to select the best lineup or team within the given cap.
+For instance, in an [auction drafts](#sec-draftAuction), you may have a \$200 cap and your goal is to draft the best team that you can with the \$200.
+Using a mixed-integer programming solver, we can identify the lineup with the most projected points given a particular salary cap.
+For projected points for a player, we use their average projected points across all available projection sources.
+For a player's estimated cost, we use their [Average Auction Value](#sec-fantasyValueADPAAV) (AAV), rounded up to the nearest integer.
+
+We first subset and prepare the data so we can perform the lineup optimization.
+
+```{r}
+mostRecentProjections <- players_projections_seasonal_average_merged %>% 
+  filter(season == max(season, na.rm = TRUE)) %>% 
+  filter(pos %in% c("QB","RB","WR","TE","K","DST")) %>% 
+  filter(avg_type == "average")
+
+# Convert NAs for fantasy points to zero
+mostRecentProjections$points[which(is.na(mostRecentProjections$points))] <- 0
+
+# Convert NA for AAV to $1
+mostRecentProjections$aav[which(is.na(mostRecentProjections$aav))] <- 1
+
+# Round up AAV to nearest integer
+mostRecentProjections$cost <- ceiling(mostRecentProjections$aav)
+
+mostRecentProjections$name <- paste(mostRecentProjections$first_name, mostRecentProjections$last_name)
+```
+
+Next, we set up the constraints.
+Our example is adapted from <https://stackoverflow.com/questions/15147398/optimize-value-with-linear-or-non-linear-constraints-in-r>.
+Our constraints were:
+
+1) 9 total players of the following number at each of following positions:
+- 1 Quarterback
+- 2 Running Backs
+- 2 Wide Receivers
+- 1 Tight End
+- 1 Flex: RB/WR/TE
+- 1 K
+- 1 DST
+
+and 2) salary cap of \$200.
+
+```{r}
+# number of players
+num.players <- nrow(mostRecentProjections)
+
+# 1 for every player
+total_players <- rep(1, num.players)
+
+# objective:
+#f <- pts
+
+# the variable are booleans
+var.types <- rep("B", num.players)
+
+# the constraints
+
+A <- rbind(
+  as.numeric(mostRecentProjections$pos == "QB"),                # num QB
+  as.numeric(mostRecentProjections$pos == "RB"),                # num RB
+  as.numeric(mostRecentProjections$pos == "WR"),                # num WR
+  as.numeric(mostRecentProjections$pos == "TE"),                # num TE
+  as.numeric(mostRecentProjections$pos == "K"),                 # num K
+  as.numeric(mostRecentProjections$pos == "DST"),               # num DST
+  as.numeric(mostRecentProjections$pos %in% c("RB","WR","TE")), # num flex
+  total_players,
+  mostRecentProjections$cost)                                   # player cost
+
+dir <- c(
+  "==",
+  ">=",
+  ">=",
+  ">=",
+  "==",
+  "==",
+  "==",
+  "==",
+  "<=")
+
+b <- c(
+  1,   # 1 QB
+  2,   # at least 2 RBs
+  2,   # at least 2 WRs
+  1,   # at least 1 TE
+  1,   # 1 K
+  1,   # 1 DST
+  6,   # 1 RB/WR/TE flex (i.e., 6 total RB/WR/TEs)
+  9,   # 9 total players
+  200) # salary cap of $200
+```
+
+The optimizer thus seeks to identify the lineup with the most projected points that meets the above constraints (within a salary cap of $200).
+We perform the optimization using the `Rglpk::Rglpk_solve_LP()` function of the `Rglpk` package [@R-Rglpk].
+
+```{r}
+sol <- Rglpk::Rglpk_solve_LP(
+  obj = mostRecentProjections$points,
+  mat = A,
+  dir = dir,
+  rhs = b,
+  types = var.types,
+  max = TRUE)
+```
+
+Here is the solution obtained by the solver:
+
+```{r}
+sol
+```
+
+A zero for `status` indicates that it found a solution:
+
+```{r}
+sol$status
+```
+
+Here is the maximum value obtained in terms of the sum of projected points for the optimal lineup:
+
+```{r}
+sol$optimum
+```
+
+Here is a vector indicating whether or not a given player was selected for the optimal lineup (0 = no; 1 = yes):
+
+```{r}
+sol$solution
+```
+
+Here is the optimal lineup that maximized the sum of projected points within the salary cap:
+
+```{r}
+mostRecentProjections[which(sol$solution == 1), c("name","pos","points")]
+```
+
+For a web application that includes a lineup optimizer for selecting the optimal lineup for [auction drafts](#sec-draftAuction) and for DFS leagues, see the Fantasy Football Analytics web application: <https://apps.fantasyfootballanalytics.net>.
+The web application allows users to specify their custom league settings, select players to draft or exclude, and exclude risky players, among other features.
 
 ## Conclusion {#sec-draftConclusion}
 
