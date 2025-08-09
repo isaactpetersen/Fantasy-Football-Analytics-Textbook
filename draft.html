@@ -592,6 +592,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <a href="#sec-draftAnalysis" id="toc-sec-draftAnalysis" class="nav-link" data-scroll-target="#sec-draftAnalysis"><span class="header-section-number">7.4</span> Draft Analysis</a>
   <ul>
 <li><a href="#sec-expectedPointsByPositionRank" id="toc-sec-expectedPointsByPositionRank" class="nav-link" data-scroll-target="#sec-expectedPointsByPositionRank"><span class="header-section-number">7.4.1</span> Fantasy Points by (End-of-Season) Position Rank and Position</a></li>
+  <li><a href="#sec-lineupOptimization" id="toc-sec-lineupOptimization" class="nav-link" data-scroll-target="#sec-lineupOptimization"><span class="header-section-number">7.4.2</span> Lineup Optimization</a></li>
   </ul>
 </li>
   <li><a href="#sec-draftConclusion" id="toc-sec-draftConclusion" class="nav-link" data-scroll-target="#sec-draftConclusion"><span class="header-section-number">7.5</span> Conclusion</a></li>
@@ -648,14 +649,16 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <section id="sec-draftLoadPackages" class="level3" data-number="7.1.1"><h3 data-number="7.1.1" class="anchored" data-anchor-id="sec-draftLoadPackages">
 <span class="header-section-number">7.1.1</span> Load Packages</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"Rglpk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section><section id="sec-draftLoadData" class="level3" data-number="7.1.2"><h3 data-number="7.1.2" class="anchored" data-anchor-id="sec-draftLoadData">
 <span class="header-section-number">7.1.2</span> Load Data</h3>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/player_stats_seasonal.RData"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/player_stats_weekly.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/player_stats_weekly.RData"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"./data/players_projections_seasonal.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section></section><section id="sec-draftTypes" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-draftTypes">
@@ -705,10 +708,12 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <span class="header-section-number">7.3.2</span> Snake Draft</h3>
 <p>In general, your goal is to draft the team whose weekly starting lineup has the greatest <a href="player-evaluation.html#sec-fantasyValueVORP">VORP</a>. Consequently, you are often looking to pick the player with the highest <a href="player-evaluation.html#sec-fantasyValueVORP">VORP</a> at a given selection, while keeping in mind (a) the <a href="player-evaluation.html#sec-fantasyValueDropoff">dropoff</a> of players at other positions and (b) which players may be available at subsequent picks so that you do not sacrifice too much later value with a given selection. For instance, if a particular Quarterback has a slightly higher <a href="player-evaluation.html#sec-fantasyValueVORP">VORP</a> than a particular Running Back, but the Quarterback is likely to be available at the manager’s next pick but the Running Back is likely to be unavailable at their next pick, it might make more sense to draft the Running Back.</p>
 <p>Herding behavior is common in snake drafts. As described in <a href="decision-making.html#sec-wisdomOfCrowd" class="quarto-xref"><span>Section 26.3</span></a>, herding occurs when people align their behavior with others. For instance, <span class="citation" data-cites="Lee2022">Lee &amp; Liu (<a href="references.html#ref-Lee2022" role="doc-biblioref">2022</a>)</span> found evidence that when Quarterbacks, Kickers, and Defenses were drafted by one team, subsequent teams were more likely to draft a player of that position. The same was not the case for Running Backs, Wide Receivers, and Tight Ends.</p>
+<p>FantasyFootballAnalytics.net provides tools to help you win your <a href="#sec-draftSnake">snake draft</a>: <a href="https://fantasyfootballanalytics.net/win-your-snake-draft" class="uri">https://fantasyfootballanalytics.net/win-your-snake-draft</a>. For draft tools for <a href="#sec-draftSnake">snake drafts</a>, see the Fantasy Football Analytics web application: <a href="https://apps.fantasyfootballanalytics.net" class="uri">https://apps.fantasyfootballanalytics.net</a>. The web application allows users to specify their custom league settings to calculate projected points that are customized to their league and helps users select which players to draft that maximize the players’ <a href="player-evaluation.html#sec-fantasyValueVORP">value over replacement players</a> (VORP).</p>
 </section><section id="sec-draftStrategyAuction" class="level3" data-number="7.3.3"><h3 data-number="7.3.3" class="anchored" data-anchor-id="sec-draftStrategyAuction">
 <span class="header-section-number">7.3.3</span> Auction Draft</h3>
 <p>According to <a href="https://harvardsportsanalysis.wordpress.com/wp-content/uploads/2012/04/fantasyfootballdraftanalysis1.pdf">an analysis</a> by the Harvard Sports Analysis Collective, the majority of the manager’s salary cap should be spent on the starting lineup, and you should spend less on bench players [<span class="citation" data-cites="Chakravarthy2012">Chakravarthy (<a href="references.html#ref-Chakravarthy2012" role="doc-biblioref">2012</a>)</span>; archived at <a href="https://perma.cc/P7RX-92UU" class="uri">https://perma.cc/P7RX-92UU</a>]. This is known as the “stars and scrubs” draft strategy. Based on the analysis, the author recommended applying a 10% premium to the top players and a 10% discount to the lower-tiered players. The idea behind the approach is that a player on your bench does not contribute to the team’s points and, thus, most players drafted to your bench do not contribute much to the team’s points throughout the season. That said, bench players can be important in the case of a starter’s injury or under-performance. So, it is recommended to draft starters with lower <a href="player-evaluation.html#sec-fantasyValueUncertainty">uncertainty</a> who are safer. In contrast to your starting lineup, you may look to draft players on your bench who have greater <a href="player-evaluation.html#sec-fantasyValueUncertainty">uncertainty</a> for their high reward potential in a low-risk selection given the lower price.</p>
 <p>An alternative to the “stars and scrubs” approach is to wait to draft more “high-value” players after other managers have over-paid for players. In any case, having some small amount of cap left over toward the end of the draft can help you draft good value players to fill out your bench spots for cheap (e.g., $2). Having some depth can help you offset the risk of injuries and the possibility that some of your starters may underperform their expectation, which is quite likely given how <a href="decision-making.html#sec-accuracyOfCrowd">challenging it is to predict fantasy performance</a>.</p>
+<p>FantasyFootballAnalytics.net provides tools to help you win your <a href="#sec-draftSnake">auction draft</a> (<a href="https://fantasyfootballanalytics.net/win-your-snake-draft" class="uri">https://fantasyfootballanalytics.net/win-your-snake-draft</a>) and daily fantasy sports (DFS) leagues (<a href="https://fantasyfootballanalytics.net/how-to/dfsoptimizerhelp" class="uri">https://fantasyfootballanalytics.net/how-to/dfsoptimizerhelp</a>). For draft and player selection tools for <a href="#sec-draftSnake">auction drafts</a> and DFS leagues, see the Fantasy Football Analytics web application: <a href="https://apps.fantasyfootballanalytics.net" class="uri">https://apps.fantasyfootballanalytics.net</a>. The web application allows users to specify their custom league settings to calculate projected points that are customized to their league, and to identify the optimal lineup given their league settings and salary cap.</p>
 </section></section><section id="sec-draftAnalysis" class="level2" data-number="7.4"><h2 data-number="7.4" class="anchored" data-anchor-id="sec-draftAnalysis">
 <span class="header-section-number">7.4</span> Draft Analysis</h2>
 <section id="sec-expectedPointsByPositionRank" class="level3" data-number="7.4.1"><h3 data-number="7.4.1" class="anchored" data-anchor-id="sec-expectedPointsByPositionRank">
@@ -916,13 +921,210 @@ Figure&nbsp;7.5: Mean Fantasy Points of Top 10 Players at Each Position by Seaso
 </div>
 </div>
 <p>The trend suggests that, since 2000, Quarterbacks have increased in fantasy points scored, and Running Backs have decreased in fantasy points scored.</p>
+</section><section id="sec-lineupOptimization" class="level3" data-number="7.4.2"><h3 data-number="7.4.2" class="anchored" data-anchor-id="sec-lineupOptimization">
+<span class="header-section-number">7.4.2</span> Lineup Optimization</h3>
+<p>For <a href="#sec-draftAuction">auction drafts</a> and daily fantasy sports (DFS) leagues, a key goal is to select the best lineup or team within the given cap. For instance, in an <a href="#sec-draftAuction">auction drafts</a>, you may have a $200 cap and your goal is to draft the best team that you can with the $200. Using a mixed-integer programming solver, we can identify the lineup with the most projected points given a particular salary cap. For projected points for a player, we use their average projected points across all available projection sources. For a player’s estimated cost, we use their <a href="player-evaluation.html#sec-fantasyValueADPAAV">Average Auction Value</a> (AAV), rounded up to the nearest integer.</p>
+<p>We first subset and prepare the data so we can perform the lineup optimization.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>mostRecentProjections <span class="ot">&lt;-</span> players_projections_seasonal_average_merged <span class="sc">%&gt;%</span> </span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">filter</span>(season <span class="sc">==</span> <span class="fu">max</span>(season, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="fu">filter</span>(pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>,<span class="st">"K"</span>,<span class="st">"DST"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="fu">filter</span>(avg_type <span class="sc">==</span> <span class="st">"average"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co"># Convert NAs for fantasy points to zero</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>mostRecentProjections<span class="sc">$</span>points[<span class="fu">which</span>(<span class="fu">is.na</span>(mostRecentProjections<span class="sc">$</span>points))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="co"># Convert NA for AAV to $1</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a>mostRecentProjections<span class="sc">$</span>aav[<span class="fu">which</span>(<span class="fu">is.na</span>(mostRecentProjections<span class="sc">$</span>aav))] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="co"># Round up AAV to nearest integer</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a>mostRecentProjections<span class="sc">$</span>cost <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(mostRecentProjections<span class="sc">$</span>aav)</span>
+<span id="cb9-14"><a href="#cb9-14"></a></span>
+<span id="cb9-15"><a href="#cb9-15"></a>mostRecentProjections<span class="sc">$</span>name <span class="ot">&lt;-</span> <span class="fu">paste</span>(mostRecentProjections<span class="sc">$</span>first_name, mostRecentProjections<span class="sc">$</span>last_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Next, we set up the constraints. Our example is adapted from <a href="https://stackoverflow.com/questions/15147398/optimize-value-with-linear-or-non-linear-constraints-in-r" class="uri">https://stackoverflow.com/questions/15147398/optimize-value-with-linear-or-non-linear-constraints-in-r</a>. Our constraints were:</p>
+<ol type="1">
+<li>9 total players of the following number at each of following positions:</li>
+</ol>
+<ul>
+<li>1 Quarterback</li>
+<li>2 Running Backs</li>
+<li>2 Wide Receivers</li>
+<li>1 Tight End</li>
+<li>1 Flex: RB/WR/TE</li>
+<li>1 K</li>
+<li>1 DST</li>
+</ul>
+<p>and 2) salary cap of $200.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># number of players</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>num.players <span class="ot">&lt;-</span> <span class="fu">nrow</span>(mostRecentProjections)</span>
+<span id="cb10-3"><a href="#cb10-3"></a></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co"># 1 for every player</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a>total_players <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span>, num.players)</span>
+<span id="cb10-6"><a href="#cb10-6"></a></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co"># objective:</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="co">#f &lt;- pts</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a></span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="co"># the variable are booleans</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a>var.types <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"B"</span>, num.players)</span>
+<span id="cb10-12"><a href="#cb10-12"></a></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="co"># the constraints</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a></span>
+<span id="cb10-15"><a href="#cb10-15"></a>A <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb10-16"><a href="#cb10-16"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"QB"</span>),                <span class="co"># num QB</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"RB"</span>),                <span class="co"># num RB</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"WR"</span>),                <span class="co"># num WR</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"TE"</span>),                <span class="co"># num TE</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"K"</span>),                 <span class="co"># num K</span></span>
+<span id="cb10-21"><a href="#cb10-21"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">==</span> <span class="st">"DST"</span>),               <span class="co"># num DST</span></span>
+<span id="cb10-22"><a href="#cb10-22"></a>  <span class="fu">as.numeric</span>(mostRecentProjections<span class="sc">$</span>pos <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)), <span class="co"># num flex</span></span>
+<span id="cb10-23"><a href="#cb10-23"></a>  total_players,</span>
+<span id="cb10-24"><a href="#cb10-24"></a>  mostRecentProjections<span class="sc">$</span>cost)                                   <span class="co"># player cost</span></span>
+<span id="cb10-25"><a href="#cb10-25"></a></span>
+<span id="cb10-26"><a href="#cb10-26"></a>dir <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-27"><a href="#cb10-27"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-28"><a href="#cb10-28"></a>  <span class="st">"&gt;="</span>,</span>
+<span id="cb10-29"><a href="#cb10-29"></a>  <span class="st">"&gt;="</span>,</span>
+<span id="cb10-30"><a href="#cb10-30"></a>  <span class="st">"&gt;="</span>,</span>
+<span id="cb10-31"><a href="#cb10-31"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-32"><a href="#cb10-32"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-33"><a href="#cb10-33"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-34"><a href="#cb10-34"></a>  <span class="st">"=="</span>,</span>
+<span id="cb10-35"><a href="#cb10-35"></a>  <span class="st">"&lt;="</span>)</span>
+<span id="cb10-36"><a href="#cb10-36"></a></span>
+<span id="cb10-37"><a href="#cb10-37"></a>b <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-38"><a href="#cb10-38"></a>  <span class="dv">1</span>,   <span class="co"># 1 QB</span></span>
+<span id="cb10-39"><a href="#cb10-39"></a>  <span class="dv">2</span>,   <span class="co"># at least 2 RBs</span></span>
+<span id="cb10-40"><a href="#cb10-40"></a>  <span class="dv">2</span>,   <span class="co"># at least 2 WRs</span></span>
+<span id="cb10-41"><a href="#cb10-41"></a>  <span class="dv">1</span>,   <span class="co"># at least 1 TE</span></span>
+<span id="cb10-42"><a href="#cb10-42"></a>  <span class="dv">1</span>,   <span class="co"># 1 K</span></span>
+<span id="cb10-43"><a href="#cb10-43"></a>  <span class="dv">1</span>,   <span class="co"># 1 DST</span></span>
+<span id="cb10-44"><a href="#cb10-44"></a>  <span class="dv">6</span>,   <span class="co"># 1 RB/WR/TE flex (i.e., 6 total RB/WR/TEs)</span></span>
+<span id="cb10-45"><a href="#cb10-45"></a>  <span class="dv">9</span>,   <span class="co"># 9 total players</span></span>
+<span id="cb10-46"><a href="#cb10-46"></a>  <span class="dv">200</span>) <span class="co"># salary cap of $200</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The optimizer thus seeks to identify the lineup with the most projected points that meets the above constraints (within a salary cap of $200). We perform the optimization using the <code><a href="https://rdrr.io/pkg/Rglpk/man/Rglpk_solve.html">Rglpk::Rglpk_solve_LP()</a></code> function of the <code>Rglpk</code> package <span class="citation" data-cites="R-Rglpk">(<a href="references.html#ref-R-Rglpk" role="doc-biblioref">Theussl &amp; Hornik, 2024</a>)</span>.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>sol <span class="ot">&lt;-</span> Rglpk<span class="sc">::</span><span class="fu">Rglpk_solve_LP</span>(</span>
+<span id="cb11-2"><a href="#cb11-2"></a>  <span class="at">obj =</span> mostRecentProjections<span class="sc">$</span>points,</span>
+<span id="cb11-3"><a href="#cb11-3"></a>  <span class="at">mat =</span> A,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="at">dir =</span> dir,</span>
+<span id="cb11-5"><a href="#cb11-5"></a>  <span class="at">rhs =</span> b,</span>
+<span id="cb11-6"><a href="#cb11-6"></a>  <span class="at">types =</span> var.types,</span>
+<span id="cb11-7"><a href="#cb11-7"></a>  <span class="at">max =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Here is the solution obtained by the solver:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>sol</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>$optimum
+[1] 2141.228
+
+$solution
+  [1] 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ [38] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ [75] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+[112] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[149] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[186] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[223] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[260] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0
+[297] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[334] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[371] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[408] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[445] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[482] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[519] 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[556] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[593] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[630] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[667] 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[704] 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[741] 0 0 0 0
+
+$status
+[1] 0
+
+$solution_dual
+[1] NA
+
+$auxiliary
+$auxiliary$primal
+[1]   1   2   3   1   1   1   6   9 200
+
+$auxiliary$dual
+[1] NA
+
+
+$sensitivity_report
+[1] NA</code></pre>
+</div>
+</div>
+<p>A zero for <code>status</code> indicates that it found a solution:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>sol<span class="sc">$</span>status</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>Here is the maximum value obtained in terms of the sum of projected points for the optimal lineup:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>sol<span class="sc">$</span>optimum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 2141.228</code></pre>
+</div>
+</div>
+<p>Here is a vector indicating whether or not a given player was selected for the optimal lineup (0 = no; 1 = yes):</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>sol<span class="sc">$</span>solution</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ [38] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ [75] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+[112] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[149] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[186] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[223] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[260] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0
+[297] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[334] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[371] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[408] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[445] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[482] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[519] 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[556] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[593] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[630] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[667] 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[704] 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[741] 0 0 0 0</code></pre>
+</div>
+</div>
+<p>Here is the optimal lineup that maximized the sum of projected points within the salary cap:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>mostRecentProjections[<span class="fu">which</span>(sol<span class="sc">$</span>solution <span class="sc">==</span> <span class="dv">1</span>), <span class="fu">c</span>(<span class="st">"name"</span>,<span class="st">"pos"</span>,<span class="st">"points"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["pos"],"name":[2],"type":["chr"],"align":["left"]},{"label":["points"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"Jalen Hurts","2":"QB","3":"352.4674"},{"1":"Christian McCaffrey","2":"RB","3":"353.1007"},{"1":"Alvin Kamara","2":"RB","3":"243.8496"},{"1":"DeVonta Smith","2":"WR","3":"241.0229"},{"1":"Zay Flowers","2":"WR","3":"226.0864"},{"1":"Christian Kirk","2":"WR","3":"219.9217"},{"1":"Sam LaPorta","2":"TE","3":"227.0881"},{"1":"Brandon Aubrey","2":"K","3":"155.4606"},{"1":"Baltimore Ravens","2":"DST","3":"122.2304"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>For a web application that includes a lineup optimizer for selecting the optimal lineup for <a href="#sec-draftAuction">auction drafts</a> and for DFS leagues, see the Fantasy Football Analytics web application: <a href="https://apps.fantasyfootballanalytics.net" class="uri">https://apps.fantasyfootballanalytics.net</a>. The web application allows users to specify their custom league settings, select players to draft or exclude, and exclude risky players, among other features.</p>
 </section></section><section id="sec-draftConclusion" class="level2" data-number="7.5"><h2 data-number="7.5" class="anchored" data-anchor-id="sec-draftConclusion">
 <span class="header-section-number">7.5</span> Conclusion</h2>
 <p>The two major draft types are <a href="#sec-draftSnake">snake drafts</a> and <a href="#sec-draftAuction">auction drafts</a>. <a href="#sec-draftAuction">Auction drafts</a> take longer than <a href="#sec-draftSnake">snake drafts</a> but are more fair because every player is available to every manager, so long as the manager is able and willing to bid enough. There is no one right draft strategy. In general, it is helpful to draft players with the best value over other players at their position.</p>
 </section><section id="sec-draftSessionInfo" class="level2" data-number="7.6"><h2 data-number="7.6" class="anchored" data-anchor-id="sec-draftSessionInfo">
 <span class="header-section-number">7.6</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
@@ -945,9 +1147,9 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] lubridate_1.9.4 forcats_1.0.0   stringr_1.5.1   dplyr_1.1.4    
- [5] purrr_1.1.0     readr_2.1.5     tidyr_1.3.1     tibble_3.3.0   
- [9] ggplot2_3.5.2   tidyverse_2.0.0
+ [1] Rglpk_0.6-5.1   slam_0.1-55     lubridate_1.9.4 forcats_1.0.0  
+ [5] stringr_1.5.1   dplyr_1.1.4     purrr_1.1.0     readr_2.1.5    
+ [9] tidyr_1.3.1     tibble_3.3.0    ggplot2_3.5.2   tidyverse_2.0.0
 
 loaded via a namespace (and not attached):
  [1] Matrix_1.7-3       gtable_0.3.6       jsonlite_2.0.0     compiler_4.5.1    
@@ -976,6 +1178,9 @@ Lee, M. D., &amp; Liu, S. (2022). Drafting strategies in fantasy football: A stu
 </div>
 <div id="ref-Ryan2013a" class="csl-entry" role="listitem">
 Ryan, J. (2013). <em>Beating the <span>NBA</span> draft: Does any team outperform expectations?</em> <a href="https://harvardsportsanalysis.org/2013/11/beating-the-nba-draft-does-any-team-outperform-expectations">https://harvardsportsanalysis.org/2013/11/beating-the-nba-draft-does-any-team-outperform-expectations</a>
+</div>
+<div id="ref-R-Rglpk" class="csl-entry" role="listitem">
+Theussl, S., &amp; Hornik, K. (2024). <em><span>Rglpk</span>: <span>R/GNU</span> linear programming kit interface</em>. <a href="https://R-Forge.R-project.org/projects/rglp/">https://R-Forge.R-project.org/projects/rglp/</a>
 </div>
 </div>
 </section></main><!-- /main --><h3>Feedback</h3>
