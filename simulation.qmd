@@ -145,8 +145,8 @@ vars_by_pos <- list(
 
 #### Bootstrapping Function {#sec-simulationProjectedPointsBootstrappingFunction}
 
-For performing the bootstrapping, we leverage the `data.table` [@R-data.table], `future` [@R-future], and `future.apply` [@R-future.apply] packages for speed (by using parallel processing) and memory efficiency.
-We use the `progressr` [@R-progressr] package to create a progress bar.
+For performing the bootstrapping, we leverage the `data.table` [@R-data.table] (`data.table::as.data.table()`; `data.table::data.table()`; `data.table::rbindlist()`), `future` [@R-future] (`future::plan()`; `future::multisession()`), and `future.apply` [@R-future.apply] (`future.apply::future_lapply()`) packages for speed (by using parallel processing) and memory efficiency.
+We use the `progressr` [@R-progressr] package (`progressr::handlers()`; `progressr::with_progress()`; `progressr::progressor()`) to create a progress bar.
 
 ```{r}
 #| label: function-for-bootstrap-simulation
@@ -242,6 +242,8 @@ gc()
 
 #### Score Fantasy Points from the Simulation {#sec-simulationProjectedPointsBootstrappingScore}
 
+`data.table::setnames()`
+
 ```{r}
 #| label: put-simulated-data-in-format-for-scoring1
 
@@ -260,6 +262,8 @@ bootstappedStatsByPosition <- split(
 rm(bootstappedStats)
 gc()
 ```
+
+`base::lapply()`
 
 ```{r}
 #| label: put-simulated-data-in-format-for-scoring2
@@ -637,8 +641,8 @@ all_proj <- all_proj %>%
 #### Optimal Distribution for Each Player {#sec-simulationProjectedPointsMonteCarloOptimalDistribution}
 
 For each player, we identify the optimal distribution as either a normal distribution , or as a skew-normal distribution.
-The normal distribution was fit using the `fitdist()` function of the `fitdistrplus` package [@R-fitdistrplus; @DelignetteMuller2015_packages].
-The skew-normal distribution was fit using the `selm()` function of the `sn` package [@R-sn; @Azzalini2023_packages].
+The normal distribution was fit using the `fitdistrplus::fitdist()` function of the `fitdistrplus` package [@R-fitdistrplus; @DelignetteMuller2015_packages].
+The skew-normal distribution was fit using the `sn::selm()` function of the `sn` package [@R-sn; @Azzalini2023_packages].
 
 ```{r}
 # Function to identify the "best" distribution (Normal vs Skew‑Normal) for every player (tries both families and picks by AIC; uses empirical distribution if fewer than 2 unique scores)
@@ -823,7 +827,7 @@ Summarise <- function(condition, results, fixed_objects = NULL) {
 
 #### `SimDesign` Step 5: Run the Simulation {#sec-simulationProjectedPointsMonteCarloRun}
 
-Now, we can run the model.
+Now, we can run the model using the `SimDesign::runSimulation()` function.
 
 ::: {#nte-monteCarloSimulation .callout-note title="Monte Carlo Simulation"}
 Note: the following code that runs the simulation takes a while.

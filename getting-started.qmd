@@ -85,7 +85,8 @@ To get started, follow the following steps:
      "parallelly","doParallel","missRanger","ggridges","powerjoin","caret",
      "LongituRF","gpboost","mgcv","rms","car","lavaan","lavaanPlot","lavaangui",
      "mice","miceadds","interactions","robustbase","ordinal","MASS",
-     "data.table","future","future.apply","SimDesign","domir","GGally","Rglpk"))
+     "data.table","future","future.apply","SimDesign","domir","GGally","Rglpk",
+     "TTR"))
    ```
 1. Some necessary packages, including the [`ffanalytics` package](https://github.com/FantasyFootballAnalytics/ffanalytics) [@R-ffanalytics], are hosted in GitHub (and are not hosted on the Comprehensive R Archive Network [CRAN]) and thus need to be installed using the following code (after installing the `remotes` package [@R-remotes] above)[^petersenlabPackageGitHub]:
    ```{r}
@@ -149,7 +150,7 @@ For example:
 
 ## Install Packages {#sec-installingPackages}
 
-You can install `R` packages using the following syntax:
+You can install `R` packages using the `utils::install.packages()` function with the following syntax:
 
 ```{r}
 #| eval: false
@@ -175,7 +176,7 @@ install.packages(c("PACKAGE1","PACKAGE2","PACKAGE3"))
 
 ## Load Packages {#sec-loadPackages}
 
-You can load a given library using the following syntax:
+You can load a given library using the `base::library()` function with the following syntax:
 
 ```{r}
 #| eval: false
@@ -203,9 +204,9 @@ You can learn about a particular function and its arguments by entering a questi
 ?NAME_OF_FUNCTION()
 ```
 
-Below, we provide examples for how to learn about and use functions and arguments, by using the `seq()` function as an example.
-The `seq()` function creates a sequence of numbers.
-To learn about the `seq()` function, which creates a sequence of numbers, you can execute the following command:
+Below, we provide examples for how to learn about and use functions and arguments, by using the `base::seq()` function as an example.
+The `base::seq()` function creates a sequence of numbers.
+To learn about the `base::seq()` function, which creates a sequence of numbers, you can execute the following command:
 
 ```{r}
 #| eval: false
@@ -213,7 +214,7 @@ To learn about the `seq()` function, which creates a sequence of numbers, you ca
 ?seq()
 ```
 
-This is what the documentation shows for the `seq()` function in the `Usage` section:
+This is what the documentation shows for the `base::seq()` function in the `Usage` section:
 
 ```{r}
 #| eval: false
@@ -227,7 +228,7 @@ seq(
   ...)
 ```
 
-Based on this information, we know that the `seq()` function takes the following arguments:
+Based on this information, we know that the `base::seq()` function takes the following arguments:
 
 - `from`
 - `to`
@@ -321,7 +322,7 @@ Hopefully, that provides an example for how to learn about a particular function
 A vector is a series of elements that can be numeric or character.
 Character elements should be specified in quotes.
 A vector has one dimension (length).
-To create a vector, use the `c()` function to combine elements into a vector ("c" stands for combine).
+To create a vector, use the `base::c()` function to combine elements into a vector ("c" stands for combine).
 And, we use the assignment operator (`<-`) to assign the vector to an object named `exampleVector`, so we can access it later.
 Anything on the right side of an assignment operator gets assigned to the object name on the left side of the assignment operator.
 
@@ -341,7 +342,7 @@ exampleVector
 ## Create a Data Frame {#sec-createDF}
 
 A data frame has two dimensions: rows and columns.
-Here is an example of creating a data frame, while using the assignment operator (`<-`) to assign the data frame to an object so we can access it later:
+Here is an example of creating a data frame using the `base::data.frame()` function, while using the assignment operator (`<-`) to assign the data frame to an object so we can access it later:
 
 ```{r}
 players <- data.frame(
@@ -368,12 +369,22 @@ fantasyPoints <- data.frame(
   fantasyPoints = c(250, 170, 65, 15)
 )
 
+
+```
+
+We can also create a data frame from all combinations of variables, using the `base::expand.grid()` function:
+
+```{r}
 fantasyPoints_weekly <- expand.grid(
   ID = 1:12,
   season = c(2022, 2023),
   week = 1:17
 )
+```
 
+We can create a vector that is randomly sampled from values using the `base::sample()` function:
+
+```{r}
 set.seed(52242)
 fantasyPoints_weekly$fantasyPoints <- sample(
   0:35,
@@ -384,7 +395,7 @@ fantasyPoints_weekly$fantasyPoints <- sample(
 
 ## Create a List {#sec-createList}
 
-A list can store multiple data frames in one object:
+A list can store multiple data frames in one object using the `base::list()` function:
 
 ```{r}
 exampleList <- list(players, fantasyPoints, fantasyPoints_weekly)
@@ -392,20 +403,20 @@ exampleList <- list(players, fantasyPoints, fantasyPoints_weekly)
 
 ## Load a Data Frame {#sec-gettingStartedLoadData}
 
-Here is how you load a `.RData` file using a *relative path* (i.e., a path relative to the working directory, where the working directory is represented by a period):
+Here is how you load a `.RData` file using a *relative path* (i.e., a path relative to the working directory, where the working directory is represented by a period) using the `base::load()` function:
 
 ```{r}
 load(file = "./data/nfl_players.RData")
 ```
 
 The direction of the slashes matters—you should use forward slashes (not backslashes)!
-To determine where you working directory is, you can type:
+To determine where you working directory is, you can use the `base::getwd()` function:
 
 ```{r}
 getwd()
 ```
 
-To change your working directory, you can type:
+To change your working directory, you can use the `base::setwd()` function:
 
 ```{r}
 #| eval: false
@@ -418,10 +429,10 @@ The following code loads a file from an *absolute path*:
 ```{r}
 #| eval: false
 
-nfl_players <- read.csv("C:/Users/myusername/nfl_players.RData")
+load("C:/Users/myusername/nfl_players.RData")
 ```
 
-Here is how you load a `.csv` file:
+Here is how you load a `.csv` file using the `utils::read.csv()` function:
 
 ```{r}
 #| eval: false
@@ -432,7 +443,7 @@ nfl_players <- read.csv("C:/Users/myusername/nfl_players.csv") # absolute path
 
 ## Save a Data Frame {#sec-gettingStartedSaveData}
 
-Here is how you save a `.RData` file using a *relative path* (i.e., relative to your working directory):
+Here is how you save a `.RData` file using a *relative path* (i.e., relative to your working directory) using the `base::save()` function:
 
 ```{r}
 #| eval: false
@@ -453,7 +464,7 @@ save(
   file = "C:/Users/myusername/nfl_players.RData")
 ```
 
-Here is how you save a `.csv` file:
+Here is how you save a `.csv` file using the `utils::write.csv()` function:
 
 ```{r}
 #| eval: false
@@ -469,7 +480,7 @@ write.csv(
 
 ## Variable Names {#sec-variableNames}
 
-To see the names of variables in a data frame, use the following syntax:
+To see the names of variables in a data frame, use the `base::names()` function:
 
 ```{r}
 names(nfl_players)
@@ -531,13 +542,15 @@ players$position %in% c("RB","WR")
 !(players$position %in% c("RB","WR"))
 ```
 
-The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] has a convenience function, `%ni%`, for the logical operator of determining whether an element is *not* in a value of another vector:
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] has a convenience function, `petersenlab::\`%ni%\``, for the logical operator of determining whether an element is *not* in a value of another vector:
 
 ```{r}
 players$position %ni% c("RB","WR")
 ```
 
 ### Is Missing: `is.na()` {#sec-logicalOperatorMissing}
+
+`base::is.na()`
 
 ```{r}
 is.na(players$age)
@@ -567,7 +580,7 @@ players$position == "WR" | players$age > 23
 
 ### which() {#sec-logicalOperatorWhich}
 
-The operator, `which()`, can be used to obtain the TRUE indices of an object, which is useful for [subsetting](#sec-subset).
+The operator, `base::which()`, can be used to obtain the TRUE indices of an object, which is useful for [subsetting](#sec-subset).
 
 ```{r}
 which(players$position == "RB")
@@ -601,7 +614,7 @@ if(player_rank <= 10){ # check this condition first
 }
 ```
 
-To apply conditional operations to a vector, we can use the `ifelse()` function.
+To apply conditional operations to a vector, we can use the `base::ifelse()` function.
 
 ```{r}
 player_rank <- c(1, 10, 20, 40, 100)
@@ -639,8 +652,8 @@ Saving the intermediate object can be a waste of time to do if you are not inter
 An alternative approach is to use piping.
 Piping allows taking the result from one computation and sending it to the next computation, thus allowing a chain of computations without saving the intermediate object at each step.
 
-In base `R`, you can perform piping with the `|>` expression.
-In `tidyverse` you can perform piping with the `%>%` expression.
+In base `R`, you can perform piping with the `base::\`|>\`` expression.
+In `tidyverse`, you can perform piping with the `magrittr::\`%>%\`` expression.
 
 #### Base `R` {#sec-pipingBaseR}
 
@@ -736,6 +749,8 @@ players[,!(names(players) %in% dropVars)]
 
 #### Tidyverse {#sec-subsetParticularColumnsTidyverse}
 
+In `tidyverse`, you cans select particular columns using the `dplyr::select()` function.
+
 ```{r}
 players %>%
   dplyr::select(name, age)
@@ -776,6 +791,8 @@ players[which(players$position == "RB"),]
 
 #### Tidyverse {#sec-subsetParticularRowsTidyverse}
 
+In `tidyverse`, you cans select particular columns using the `dplyr::filter()` function.
+
 ```{r}
 players %>%
   filter(position == "WR")
@@ -801,6 +818,8 @@ players[which(players$position == "RB"), subsetVars]
 
 #### Tidyverse {#sec-subsetParticularRowsAndColumnsTidyverse}
 
+In `tidyverse`, you cans select particular rows and columns using the `dplyr::filter()` and `dplyr::select()` functions, respectively.
+
 ```{r}
 players %>%
   dplyr::filter(position == "RB") %>%
@@ -811,7 +830,7 @@ players %>%
 
 ### All Data {#sec-viewDataAll}
 
-To view data, use the following syntax:
+To view data, use the `utils::View()` function:
 
 ```{r}
 #| eval: false
@@ -821,7 +840,7 @@ View(players)
 
 ### First 6 Rows/Elements {#sec-viewDataHead}
 
-To view only the first six rows (if a data frame) or elements (if a vector), use the following syntax:
+To view only the first six rows (if a data frame) or elements (if a vector), use the `utils::head()` function:
 
 ```{r}
 head(nfl_players)
@@ -842,31 +861,35 @@ players %>%
 
 ### Data Structure {#sec-dataCharacteristicsStructure}
 
+`utils::str()`
+
 ```{r}
 str(nfl_players)
 ```
 
 ### Data Dimensions {#sec-dataCharacteristicsDimensions}
 
-Number of rows and columns:
+Number of rows and columns (`base::dim()`):
 
 ```{r}
 dim(nfl_players)
 ```
 
-Number of rows:
+Number of rows (`base::nrow()`):
 
 ```{r}
 nrow(nfl_players)
 ```
 
-Number of columns:
+Number of columns (`base::ncol()`):
 
 ```{r}
 ncol(nfl_players)
 ```
 
 ### Number of Elements {#sec-dataCharacteristicsLength}
+
+`base::length()`
 
 ```{r}
 length(nfl_players$display_name)
@@ -895,7 +918,7 @@ You can determine how many non-missing elements there are in a data frame using 
 length(which(!is.na(nfl_players)))
 ```
 
-You can determine how many rows in the data frame have no missing data using the following syntax:
+You can determine how many rows in the data frame have no missing data using the following syntax and the `stats::na.omit()` function:
 
 ```{r}
 nrow(na.omit(nfl_players))
@@ -944,7 +967,7 @@ players$oldVar2[which(players$age < 30)] <- "young"
 players$oldVar2[which(players$age >= 30)] <- "old"
 ```
 
-Recode multiple variables:
+Recode multiple variables using the `dplyr::mutate()` and `dplyr::case_match()` functions:
 
 ```{r}
 players %>%
@@ -958,6 +981,8 @@ players %>%
 
 ## Rename Variables {#renameVars}
 
+`dplyr::rename()`
+
 ```{r}
 players <- players %>% 
   dplyr::rename(
@@ -965,7 +990,7 @@ players <- players %>%
     newVar2 = oldVar2)
 ```
 
-Using a vector of variable names:
+Using a vector of variable names with the `dplyr::rename_with()` function:
 
 ```{r}
 #| eval: false
@@ -979,7 +1004,7 @@ players <- players %>%
 
 ## Convert the Types of Variables {#convertVarTypes}
 
-One variable:
+One variable (`base::factor()`; `base::as.numeric()`; `base::as.integer()`; `base::as.character()`):
 
 ```{r}
 players$factorVar <- factor(players$ID)
@@ -1043,6 +1068,7 @@ Thus, you want the keys to uniquely identify each row.
 In the example below, `player` is present in each object, so we can merge by `player`; however, each object has multiple rows with the same player.
 For example, `mergeExample1A` has three rows for `player` A; `mergeExample1B` has two rows for `player` A.
 Thus, when we merge them, the resulting object has many more rows than each respective object (even though neither object has players that the other object does not).
+Below, we merge data using the `dplyr::full_join()` function:
 
 ```{r}
 mergeExample1A <- data.frame(
@@ -1070,7 +1096,7 @@ So, it will add a suffix (e.g., `.x`, `.y`) to each common variable to indicate 
 In general, apart from the keys, you should not include variables with the same name in two objects to be merged.
 To prevent this, either remove or rename the shared variable in one of the objects, or include the shared variable as a key.
 However, as described above, you should include it as a key ***only*** if you want to use its values to align the rows from each object.
-Below is an example of merging two objects with the same variable name (i.e., points) that is not used as a key.
+Below is an example of merging two objects with the same variable name (i.e., points) that is not used as a key, using the `dplyr::full_join()` function.
 
 ```{r}
 mergeExample2A <- data.frame(
@@ -1095,6 +1121,7 @@ When two objects are merged that have different formats, the resulting data obje
 For instance, consider that you want to merge two objects, object A and object B.
 Object A is in `player` form and object B is in `player`-`season`-`week` form.
 When you merge them, the resulting data object will be in `player`-`season`-`week` form.
+Below, we merge data using the `dplyr::full_join()` function:
 
 ```{r}
 mergeExample3A <- data.frame(
@@ -1160,7 +1187,7 @@ Types of Merges/Joins.
 
 A full outer join includes all rows in `x` **or** `y`.
 It returns columns from `x` and `y`.
-Here is how to merge two data frames using a full outer join (i.e., "full join"):
+Here is how to merge two data frames using a full outer join (i.e., "full join"; `dplyr::full_join()`):
 
 ```{r}
 fullJoinData <- dplyr::full_join(
@@ -1177,7 +1204,7 @@ dim(fullJoinData)
 
 A left outer join includes all rows in `x`.
 It returns columns from `x` and `y`.
-Here is how to merge two data frames using a left outer join ("left join"):
+Here is how to merge two data frames using a left outer join ("left join"; `dplyr::left_join()`):
 
 ```{r}
 leftJoinData <- dplyr::left_join(
@@ -1194,7 +1221,7 @@ dim(leftJoinData)
 
 A right outer join includes all rows in `y`.
 It returns columns from `x` and `y`.
-Here is how to merge two data frames using a right outer join ("right join"):
+Here is how to merge two data frames using a right outer join ("right join"; `dplyr::right_join()`):
 
 ```{r}
 rightJoinData <- dplyr::right_join(
@@ -1212,7 +1239,7 @@ dim(rightJoinData)
 An inner join includes all rows that are in **both** `x` **and** `y`.
 An inner join will return one row of `x` for each matching row of `y`, and can duplicate values of records on either side (left or right) if `x` and `y` have more than one matching record.
 It returns columns from `x` and `y`.
-Here is how to merge two data frames using an inner join:
+Here is how to merge two data frames using an inner join (`dplyr::inner_join()`):
 
 ```{r}
 innerJoinData <- dplyr::inner_join(
@@ -1231,7 +1258,7 @@ A semi join is a filter.
 A left semi join returns all rows from `x` **with** a match in `y`.
 That is, it filters out records from `x` that are not in `y`.
 Unlike an [inner join](#innerJoin), a left semi join will never duplicate rows of `x`, and it includes columns from only `x` (not from `y`).
-Here is how to merge two data frames using a left semi join:
+Here is how to merge two data frames using a left semi join (`dplyr::semi_join()`):
 
 ```{r}
 semiJoinData <- dplyr::semi_join(
@@ -1250,7 +1277,7 @@ An anti join is a filter.
 A left anti join returns all rows from `x` **without** a match in `y`.
 That is, it filters out records from `x` that are in `y`.
 It returns columns from only `x` (not from `y`).
-Here is how to merge two data frames using a left anti join:
+Here is how to merge two data frames using a left anti join (`dplyr::anti_join()`):
 
 ```{r}
 antiJoinData <- dplyr::anti_join(
@@ -1265,7 +1292,7 @@ dim(antiJoinData)
 
 #### Cross Join {#sec-crossJoin}
 
-A cross join combines each row in `x` with each row in `y`.
+A cross join combines each row in `x` with each row in `y` (`dplyr::cross_join()`).
 
 ```{r}
 crossJoinData <- dplyr::cross_join(
@@ -1308,7 +1335,7 @@ names(dataLong)
 
 Below, we transform the data from long form to wide form.
 The long data are in "`player`-`season`-`week` form".
-We widen the data by two variables (`season` and `week`), using `tidyverse`, so that the data are now in "`player` form" (where each row is uniquely identified by the `ID` variable):
+We widen the data by two variables (`season` and `week`), using `tidyverse`, so that the data are now in "`player` form" (where each row is uniquely identified by the `ID` variable) using the `tidyr::pivot_wider()` function:
 
 ```{r}
 dataWide <- dataLong %>% 
@@ -1326,7 +1353,7 @@ names(dataWide)
 
 ### Transform Data from Wide to Long {#sec-wideToLong}
 
-Conversely, we can also restructure data from wide to long.
+Conversely, we can also restructure data from wide to long using the `tidyr::pivot_longer()` function.
 Here are the data in long form, after they have been transformed from wide form using `tidyverse`:
 
 ```{r}

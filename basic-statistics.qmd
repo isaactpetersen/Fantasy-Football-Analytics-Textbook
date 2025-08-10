@@ -86,7 +86,7 @@ exampleValues_pseudomedian <- DescTools::HodgesLehmann(exampleValues)
 ```
 
 The Hodges-Lehmann statistic (aka pseudomedian) is computed as the median of all pairwise means, and it is also robust to outliers.
-The pseudomedian can be computed using the `DescTools` package [@R-DescTools].
+The pseudomedian can be computed using the `DescTools::HodgesLehmann()` function of the `DescTools` package [@R-DescTools].
 The pseudomedian of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_pseudomedian`.
 The pseudomedian is an example of a robust average—an index of the center of a distribution that is less sensitive to outliers.
 
@@ -98,7 +98,7 @@ exampleValues_mode <- petersenlab::Mode(exampleValues)
 
 The mode is the most common/frequent value.
 The mode of the values of 0, 0, 10, 15, 20, 30, and 1000 is `{r} exampleValues_mode`.
-The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `Mode()` function for computing the mode of a set of data.
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `petersenlab::Mode()` function for computing the mode of a set of data.
 
 If you want to give some values more weight to others, you can calculate a weighted mean and a weighted median (or other quantile), while assigning a weight to each value.
 The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains various functions for computing the weighted median (i.e., a weighted quantile at the 0.5 quantile, which is equivalent to the 50th percentile) based on @Akinshin2023.
@@ -106,31 +106,31 @@ Because some projections are outliers, we use a trimmed version of the weighted 
 
 Below is R code to estimate each:
 
-- mean:
+- mean (`base::mean()`):
 
 ```{r}
 mean(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- median:
+- median (`stats::median()`):
 
 ```{r}
 median(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- Hodges-Lehmann statistic (aka pseudomedian):
+- Hodges-Lehmann statistic (aka pseudomedian; `DescTools::HodgesLehmann()`):
 
 ```{r}
 DescTools::HodgesLehmann(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- mode:
+- mode (`petersenlab::Mode()`):
 
 ```{r}
 petersenlab::Mode(player_stats_seasonal$fantasyPoints)
 ```
 
-- weighted mean:
+- weighted mean (`stats::weighted.mean()`):
 
 ```{r}
 weighted.mean(
@@ -142,7 +142,7 @@ weighted.mean(
   na.rm = TRUE)
 ```
 
-- weighted median:
+- weighted median (`petersenlab::wthdquantile()`):
 
 ```{r}
 petersenlab::wthdquantile(
@@ -215,19 +215,19 @@ Because some projections are outliers, we use a trimmed version of the weighted 
 
 Below is R code to estimate each:
 
-- standard deviation:
+- standard deviation (`stats::sd()`):
 
 ```{r}
 sd(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- variance:
+- variance (`stats::var()`):
 
 ```{r}
 var(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- range:
+- range (`base::range()`):
 
 ```{r}
 range(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
@@ -235,20 +235,20 @@ range(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 max(player_stats_seasonal$fantasyPoints, na.rm = TRUE) - min(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- minimum and maximum:
+- minimum (`base::min()`) and maximum (`base::max()`):
 
 ```{r}
 min(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 max(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- quantiles (in this case, the 10th and 90th quantiles):
+- quantiles (in this case, the 10th and 90th quantiles; `stats::quantile()`):
 
 ```{r}
 quantile(player_stats_seasonal$fantasyPoints, c(0.10, 0.90), na.rm = TRUE)
 ```
 
-- weighted quantiles (in this case, the 10th and 90th quantiles):
+- weighted quantiles (in this case, the 10th and 90th quantiles; `petersenlab::wthdquantile()`):
 
 ```{r}
 petersenlab::wthdquantile(
@@ -260,13 +260,13 @@ petersenlab::wthdquantile(
   probs = c(0.10, 0.90))
 ```
 
-- interquartile range (IQR):
+- interquartile range (IQR; `stats::IQR()`):
 
 ```{r}
 IQR(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- median absolute deviation:
+- median absolute deviation (`stats::mad()`):
 
 ```{r}
 mad(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
@@ -295,15 +295,15 @@ Positive kurtosis values reflect a leptokurtic distribution, where there are hea
 Negative kurtosis values reflect a platykurtic distribution, where there are lighter tails and a flatter peak than a normal distribution, indicating fewer extreme values.
 Fantasy points tend to have a leptokurtic distribution.
 
-Below is R code to estimate each:
+Below is R code to estimate each using the `psych::skew()` and `psych::kurtosis()` functions of the `psych` package [@R-psych]:
 
-- skewness:
+- skewness (`psych::skew()`):
 
 ```{r}
 psych::skew(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
-- kurtosis:
+- kurtosis (`psych::kurtosi()`):
 
 ```{r}
 psych::kurtosi(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
@@ -390,7 +390,7 @@ $$ {#eq-zScore}
 
 where $x$ is the observed score, $\bar{x}$ is the mean observed score, and $s_x$ is the standard deviation of the observed scores.
 
-You can easily convert a variable to a *z* score using the `scale()` function:
+You can easily convert a variable to a *z* score using the `base::scale()` function:
 
 ```{r}
 #| eval: false
@@ -402,7 +402,7 @@ With a standard normal curve, 68% of scores fall within one standard deviation o
 95% of scores fall within two standard deviations of the mean.
 99.7% of scores fall within three standard deviations of the mean.
 
-The area under a normal curve within one standard deviation of the mean is calculated below using the `pnorm()` function, which calculates the cumulative density function for a normal curve.
+The area under a normal curve within one standard deviation of the mean is calculated below using the `stats::pnorm()` function, which calculates the cumulative density function for a normal curve.
 
 ```{r}
 stdDeviations <- 1
@@ -489,7 +489,7 @@ polygon(c(stdDeviations * -1, x, stdDeviations),
         col = "blue")
 ```
 
-If you want to determine the *z* score associated with a particular percentile in a normal distribution, you can use the `qnorm()` function.
+If you want to determine the *z* score associated with a particular percentile in a normal distribution, you can use the `stats::qnorm()` function.
 For instance, the *z* score associated with the 37th percentile is:
 
 ```{r}
@@ -1324,13 +1324,13 @@ where $N$ is sample size.
 df_oneSampleTtest <- N - 1
 ```
 
-One-tailed test:
+One-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha, df_oneSampleTtest)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha/2, df_oneSampleTtest)
@@ -1350,13 +1350,13 @@ where $n_1$ is the sample size of group 1 and $n_2$ is the sample size of group 
 df_independentSamplesTtest <- nGroup1 + nGroup2 - 2
 ```
 
-One-tailed test:
+One-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha, df_independentSamplesTtest)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha/2, df_independentSamplesTtest)
@@ -1376,13 +1376,13 @@ where $N$ is sample size (i.e., the number of paired observations).
 df_pairedSamplesTtest <- N - 1
 ```
 
-One-tailed test:
+One-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha, df_pairedSamplesTtest)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha/2, df_pairedSamplesTtest)
@@ -1406,13 +1406,13 @@ df_betweenOneWayANOVA <- numGroups - 1
 df_withinOneWayANOVA <- N - numGroups
 ```
 
-One-tailed test:
+One-tailed test (`stats::qf()`):
 
 ```{r}
 qf(1 - alpha, df_betweenOneWayANOVA, df_withinOneWayANOVA)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qf()`):
 
 ```{r}
 qf(1 - alpha/2, df_betweenOneWayANOVA, df_withinOneWayANOVA)
@@ -1440,37 +1440,37 @@ df_interaction <- df_factorA * df_factorB
 df_error <- numLevelsFactorA * numLevelsFactorB * (N - 1)
 ```
 
-Factor A (one-tailed test):
+Factor A (one-tailed test; `stats::qf()`):
 
 ```{r}
 qf(1 - alpha, df_factorA, df_error)
 ```
 
-Factor B (one-tailed test):
+Factor B (one-tailed test; `stats::qf()`):
 
 ```{r}
 qf(1 - alpha, df_factorB, df_error)
 ```
 
-Interaction (one-tailed test):
+Interaction (one-tailed test; `stats::qf()`):
 
 ```{r}
 qf(1 - alpha, df_interaction, df_error)
 ```
 
-Factor A (two-tailed test):
+Factor A (two-tailed test; `stats::qf()`):
 
 ```{r}
 qf(1 - alpha/2, df_factorA, df_error)
 ```
 
-Factor B (two-tailed test):
+Factor B (two-tailed test; `stats::qf()`):
 
 ```{r}
 qf(1 - alpha/2, df_factorB, df_error)
 ```
 
-Interaction (two-tailed test):
+Interaction (two-tailed test; `stats::qf()`):
 
 ```{r}
 qf(1 - alpha/2, df_interaction, df_error)
@@ -1494,13 +1494,13 @@ df1_RMANOVA <- numMeasurements - 1
 df2_RMANOVA <- (numMeasurements - 1) * (N - 1)
 ```
 
-One-tailed test:
+One-tailed test (`stats::qf()`):
 
 ```{r}
 qf(1 - alpha, df1_RMANOVA, df2_RMANOVA)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qf()`):
 
 ```{r}
 qf(1 - alpha/2, df1_RMANOVA, df2_RMANOVA)
@@ -1520,13 +1520,13 @@ where $N$ is sample size.
 df_correlation <- N - 2
 ```
 
-One-tailed test:
+One-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha, df_correlation)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qt()`):
 
 ```{r}
 qt(1 - alpha/2, df_correlation)
@@ -1550,13 +1550,13 @@ df1_regression <- numPredictors
 df2_regression <- N - numPredictors - 1
 ```
 
-One-tailed test:
+One-tailed test (`stats::qf()`):
 
 ```{r}
 qf(1 - alpha, df1_regression, df2_regression)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qf()`):
 
 ```{r}
 qf(1 - alpha/2, df1_regression, df2_regression)
@@ -1576,13 +1576,13 @@ where $c$ is the number of categories.
 df_chisquareGOF <- numCategories - 1
 ```
 
-One-tailed test:
+One-tailed test (`stats::qchisq()`):
 
 ```{r}
 qchisq(1 - alpha, df_chisquareGOF)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qchisq()`):
 
 ```{r}
 qchisq(1 - alpha/2, df_chisquareGOF)
@@ -1602,13 +1602,13 @@ where $r$ is the number of rows in the contingency table and $c$ is the number o
 df_chisquareAssociation <- (numRows - 1) * (numColumns - 1)
 ```
 
-One-tailed test:
+One-tailed test (`stats::qchisq()`):
 
 ```{r}
 qchisq(1 - alpha, df_chisquareAssociation)
 ```
 
-Two-tailed test:
+Two-tailed test (`stats::qchisq()`):
 
 ```{r}
 qchisq(1 - alpha/2, df_chisquareAssociation)
@@ -1643,7 +1643,7 @@ If your [sample size](#sec-sampleVsPopulation) is too small and you do not detec
 
 #### One-Sample *t*-Test {#sec-statisticalPowerOneSampleTtest}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.t.test()`):
 
 ```{r}
 pwr::pwr.t.test(
@@ -1680,7 +1680,7 @@ pwr::pwr.t.test(
 
 ##### Balanced Group Sizes {#sec-statisticalPowerIndependentSamplesTtestBalanced}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.t.test()`):
 
 ```{r}
 pwr::pwr.t.test(
@@ -1715,7 +1715,7 @@ pwr::pwr.t.test(
 
 ##### Unbalanced Group Sizes {#sec-statisticalPowerIndependentSamplesTtestUnbalanced}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.t2n.test()`):
 
 ```{r}
 pwr::pwr.t2n.test(
@@ -1750,7 +1750,7 @@ pwr::pwr.t2n.test(
 
 #### Paired-Samples *t*-Test {#sec-statisticalPowerPairedSamplesTtest}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.t.test()`):
 
 ```{r}
 pwr::pwr.t.test(
@@ -1785,7 +1785,7 @@ pwr::pwr.t.test(
 
 #### One-Way ANOVA {#sec-statisticalPowerOneWayANOVA}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.anova.test()`):
 
 ```{r}
 pwr::pwr.anova.test(
@@ -1795,7 +1795,7 @@ pwr::pwr.anova.test(
   k = numGroups)
 ```
 
-Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
+Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.anova.test()`):
 
 ```{r}
 pwr::pwr.anova.test(
@@ -1805,7 +1805,7 @@ pwr::pwr.anova.test(
   k = numGroups)
 ```
 
-Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance)):
+Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.anova.test()`):
 
 ```{r}
 pwr::pwr.anova.test(
@@ -1893,6 +1893,8 @@ Summarise <- function(condition, results, fixed_objects = NULL) {
 Fifth, we run the simulation using the `SimDesign::runSimulation()` function:
 
 ```{r}
+#| output: false
+
 monteCarloSim_results <- SimDesign::runSimulation(
   design       = Design,
   replications = 1000,
@@ -1918,7 +1920,7 @@ The power analysis code below assumes the groups are of equal size (i.e., a bala
 If the design is unbalanced (i.e., there are different numbers of participants in each group), it may be necessary to conduct a power analysis via a simulation.
 See @sec-statisticalPowerOneWayANOVA for an example power analysis simulation for one-way ANOVA.
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.anova.test()`):
 
 ```{r}
 pwr::pwr.anova.test(
@@ -1986,7 +1988,7 @@ pwr::pwr.anova.test(
 
 #### Repeated Measures ANOVA {#sec-statisticalPowerRepeatedMeasuresANOVA}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance); `WebPower::wp.rmanova()`):
 
 ```{r}
 WebPower::wp.rmanova(
@@ -2072,7 +2074,7 @@ WebPower::wp.rmanova(
 
 #### Correlation {#sec-statisticalPowerCorrelation}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size per group, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.r.test()`):
 
 ```{r}
 pwr::pwr.r.test(
@@ -2104,7 +2106,7 @@ pwr::pwr.r.test(
 
 #### Multiple Regression {#sec-statisticalPowerMultipleRegression}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.f2.test()`):
 
 ```{r}
 pwr::pwr.f2.test(
@@ -2156,7 +2158,7 @@ pwr::pwr.f2.test(
 
 #### Chi-Square Goodness-of-Fit Test {#sec-statisticalPowerChiSquareGOF}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.chisq.test()`):
 
 ```{r}
 pwr::pwr.chisq.test(
@@ -2188,7 +2190,7 @@ pwr::pwr.chisq.test(
 
 #### Chi-Square Test for Association {#sec-statisticalPowerChiSquareAssociation}
 
-Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance)):
+Solving for statistical power achieved (given [effect size](#sec-practicalSignificance), sample size, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.chisq.test()`):
 
 ```{r}
 pwr::pwr.chisq.test(

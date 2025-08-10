@@ -1236,7 +1236,7 @@ For example, in a 10-fold cross-validation (i.e., $k = 10$), as used below, the 
 *k*-fold cross-validation is widely used because it tends to yield stable estimates of model performance, by balancing bias and variance.
 It is also computationally efficient, requiring only *k* model fits to evaluate model performance.
 
-We set up the *k* folds using the `group_vfold_cv()` function of the `rsample` package [@R-rsample].
+We set up the *k* folds using the `rsample::group_vfold_cv()` function of the `rsample` package [@R-rsample].
 
 ```{r}
 set.seed(52242) # for reproducibility
@@ -1257,7 +1257,7 @@ However, LOO tends to be less computationally efficient because it requires more
 LOO tends to have low bias, producing performance estimates closer to those obtained when fitting the model to the full dataset, because each model is trained on nearly all the data.
 However, LOO also tends to have high variance in its error estimates, because each validation fold contains only a single observation, making those estimates more sensitive to individual data points.
 
-We set up the LOO folds using the `loo_cv()` function of the `rsample` package [@R-rsample].
+We set up the LOO folds using the `rsample::loo_cv()` function of the `rsample` package [@R-rsample].
 
 ```{r}
 set.seed(52242) # for reproducibility
@@ -1274,13 +1274,13 @@ We describe linear regression in @sec-multipleRegression.
 Below, we fit a linear regression model with one predictor and evaluate it with [cross-validation](#sec-crossValidation).
 We also evaluate its accuracy on the hold-out (test) data.
 For each of the models, we fit and evaluate the models using the `tidymodels` ecosystem of packages [@R-tidymodels; @Kuhn2020_packages].
-we specify our model formula using the `recipe()` function of the `recipes` package [@R-recipes].
-We define the model using the `linear_reg()`, `set_engine()`, and `set_mode()` functions of the `parsnip` package [@R-parsnip].
-We specify the workflow using the `workflow()`, `add_recipe()`, and `add_model()` functions of the `workflows` package [@R-workflows].
-We fit the cross-validation model using the `fit_resamples()` function of the `tune` package [@R-tune].
-We specify the accuracy metrics to evaluate using the `metric_set()` function of the `yardstick` package [@R-yardstick].
-We fit the final model using the `fit()` function of the `workflows` package [@R-workflows].
-We evaluate the accuracy of the model's predictions on the test data using the `accuracyOverall()` of the [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab].
+we specify our model formula using the `recipes::recipe()` function of the `recipes` package [@R-recipes].
+We define the model using the `parsnip::linear_reg()`, `parsnip::set_engine()`, and `parsnip::set_mode()` functions of the `parsnip` package [@R-parsnip].
+We specify the workflow using the `workflows::workflow()`, `workflows::add_recipe()`, and `workflows::add_model()` functions of the `workflows` package [@R-workflows].
+We fit the cross-validation model using the `tune::fit_resamples()` function of the `tune` package [@R-tune].
+We specify the accuracy metrics to evaluate using the `yardstick::metric_set()` function of the `yardstick` package [@R-yardstick].
+We fit the final model using the `workflows::fit()` function of the `workflows` package [@R-workflows].
+We evaluate the accuracy of the model's predictions on the test data using the `petersenlab::accuracyOverall()` of the [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab].
 
 ```{r}
 # Set seed for reproducibility
@@ -1559,8 +1559,8 @@ After tuning the model, we evaluate its accuracy on the hold-out (test) data.
 
 The LASSO models were fit using the `glmnet` package [@R-glmnet; @Friedman2010_packages; @Tay2023_packages].
 
-For the machine learning models, we perform the parameter tuning using the `tune()`, `tune_grid()`, `select_best()`, and `finalize_workflow()` functions of the `tune` package [@R-tune].
-We specify the grid of possible parameter values using the `grid_regular()` function of the `dials` package [@R-dials].
+For the machine learning models, we perform the parameter tuning using the `tune::tune()`, `tune::tune_grid()`, `tune::select_best()`, and `tune::finalize_workflow()` functions of the `tune` package [@R-tune].
+We specify the grid of possible parameter values using the `dials::grid_regular()` function of the `dials` package [@R-dials].
 
 ```{r}
 # Set seed for reproducibility
@@ -2067,7 +2067,7 @@ This can reduce variance by producing simpler, more generalizable trees—but ma
 After tuning the model, we evaluate its accuracy on the hold-out (test) data.
 
 The random forest models were fit using the `ranger` package [@R-ranger; @Wright2017_packages].
-We specify the grid of possible parameter values using the `grid_random()`, `update.parameters()`, `mtry()`, and `min_n()` functions of the `dials` package [@R-dials] and the `extract_parameter_set_dials()` function of the `hardhat` package [@R-hardhat].
+We specify the grid of possible parameter values using the `dials::grid_random()`, `dials::update.parameters()`, `dials::mtry()`, and `dials::min_n()` functions of the `dials` package [@R-dials] and the `hardhat::extract_parameter_set_dials()` function of the `hardhat` package [@R-hardhat].
 
 ```{r}
 # Set seed for reproducibility
@@ -2256,7 +2256,7 @@ However, in our case, this assumption does not hold because the data are longitu
 In the approaches below, using a random forest model (this section) and a [tree-boosting model](#sec-treeBoosting) (in @sec-treeBoosting), we address this by explicitly accounting for the nesting of longitudinal observations within players.
 
 Approaches to estimating random forest models with longitudinal data are described by @Hu2023.
-Below, we fit longitudinal random forest models using the `MERF()` function of the `LongituRF` package [@R-LongituRF].
+Below, we fit longitudinal random forest models using the `LongituRF::MERF()` function of the `LongituRF` package [@R-LongituRF].
 
 ```{r}
 smerf <- LongituRF::MERF(
@@ -2338,6 +2338,7 @@ nrounds <- 2000 # maximum number of boosting iterations (i.e., number of trees b
 For identifying the optimal tuning parameters for boosting, we partition the training data into inner training data and validation data.
 We randomly split the training data into 80% inner training data and 20% held-out validation data.
 We then use the [mean absolute error](#sec-meanAbsoluteError) as our index of prediction accuracy on the held-out validation data.
+We use the `gpboost::gpb.Dataset()` function to specify the data, the `gpboost::GPModel()` function to specify the model, and the `gpboost::gpb.grid.search.tune.parameters()` function to identify the optimal tuning parameters for that model.
 
 ```{r}
 #| label: tuning-parameters-machine-learning
@@ -2435,6 +2436,8 @@ nrounds_qb <- 84 # identify optimal number of trees through iteration and cross-
 
 #### Fit Model {#sec-treeBoostingFitModel}
 
+We use the `gpboost::gpb.train()` function to fit the specified model with the specified tuning parameters and dataset.
+
 ```{r}
 #| label: fit-model-machine-learning
 
@@ -2456,7 +2459,11 @@ gc()
 
 ```{r}
 summary(gp_model_qb) # estimated random effects model
+```
 
+We evaluate the importance of features using the `gpboost::gpb.importance()` and `gpboost::gpb.plot.importance()` functions:
+
+```{r}
 gp_model_qb_importance <- gpboost::gpb.importance(gp_model_fit_qb)
 gp_model_qb_importance
 ```

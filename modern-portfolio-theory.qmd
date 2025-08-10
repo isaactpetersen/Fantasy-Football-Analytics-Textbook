@@ -10,6 +10,7 @@ This chapter provides an overview of modern portfolio theory.
 
 ```{r}
 library("quantmod")
+library("TTR")
 library("fPortfolio")
 library("NMOF")
 library("GGally")
@@ -292,7 +293,7 @@ cor(
   round(., 2)
 ```
 
-In @fig-correlationMatrixPlot, we depict a correlation matrix plot using the `ggcorr()` function of the `GGally` [@R-GGally] package.
+In @fig-correlationMatrixPlot, we depict a correlation matrix plot using the `GGally::ggcorr()` function of the `GGally` [@R-GGally] package.
 
 ```{r}
 #| label: fig-correlationMatrixPlot
@@ -340,6 +341,9 @@ quantmod::getSymbols(symbols)
 
 ### Calculate Stock Returns {#sec-calculateStockReturns}
 
+We download closing prices using the `quantmod::Cl()` function of the `quantmod` package [@R-quantmod].
+We calculate returns from the closing prices using the `TTR::ROC()` function of the `TTR` package [@R-TTR].
+
 ```{r}
 prices <- do.call(
   merge,
@@ -367,6 +371,7 @@ minYear <- format(as.Date(row.names(returns_ts)), "%Y") %>%
 ### Create Portfolio {#sec-createPortfolio}
 
 We use the `fPortfolio` package [@R-fPortfolio] to determine the optimal portfolio.
+We specify the portfolio specifications using the `fPortfolio::portfolioSpec()` function.
 
 ```{r}
 portfolioSpec <- fPortfolio::portfolioSpec()
@@ -375,6 +380,8 @@ fPortfolio::setNFrontierPoints(portfolioSpec) <- 1000
 ```
 
 ### Determine the Efficient Frontier {#sec-determineEfficientFrontier}
+
+We determine the efficient frontier using the `fPortfolio::portfolioFrontier()` function.
 
 ```{r}
 efficientFrontier <- fPortfolio::portfolioFrontier(
@@ -436,13 +443,18 @@ text(
 
 The tangency portfolio is the portfolio with the highest Sharpe ratio—i.e., the highest ratio of return to risk.
 In other words, it is the portfolio with the greatest risk-adjusted returns.
+We identify the tangency portfolio using the `fPortfolio::tangencyPortfolio()` function.
 
 ```{r}
 # Find the tangency portfolio (portfolio with the highest Sharpe ratio)
 tangencyPortfolio <- fPortfolio::tangencyPortfolio(
   data = returns_ts,
   spec = portfolioSpec)
+```
 
+We extract the optimal weights for each asset at the tangency portfolio using the `fPortfolio::getWeights()` function.
+
+```{r}
 # Extract optimal weights
 tangencyPortfolio_optimalWeights <- fPortfolio::getWeights(tangencyPortfolio)
 tangencyPortfolio_optimalWeights
@@ -453,7 +465,7 @@ summary(tangencyPortfolio)
 
 #### Portfolio with Max Return at a Given Risk Level {#sec-maxReturnPortfolio}
 
-If the `maxreturnPortfolio()` function worked as expected, the following could should work for determining the portfolio with the maximum return at each of various risk levels.
+If the `fPortfolio::maxreturnPortfolio()` function worked as expected, the following could should work for determining the portfolio with the maximum return at each of various risk levels.
 However, there is a known bug in the `fportfolio` package [@R-fPortfolio] that the optimal portfolio (based on maximum returns) does not change when changing the target risk level, suggesting that it is not taking into account the target risk level specified by the user (see here: <https://stackoverflow.com/q/78784306/2029527>).
 
 ```{r}
@@ -801,7 +813,7 @@ all_proj_summary_noNA_removeZeroVar <- all_proj_summary_noNA %>%
   filter(var > 0)
 ```
 
-Below, we use the `mvFrontier()` function from the `NMOF` package [@R-NMOF; @Gilli2019_packages; @Schumann20112024_packages] to compute the efficient frontier.
+Below, we use the `NMOF::mvFrontier()` function from the `NMOF` package [@R-NMOF; @Gilli2019_packages; @Schumann20112024_packages] to compute the efficient frontier.
 
 ```{r}
 const_cor <- function(rho, numAssets) {
@@ -1123,7 +1135,7 @@ player_stats_weekly_recent_summary_noNA_removeZeroVar <- player_stats_weekly_rec
   filter(var > 0)
 ```
 
-Below, we use the `mvFrontier()` function from the `NMOF` package [@R-NMOF; @Gilli2019_packages; @Schumann20112024_packages] to compute the efficient frontier.
+Below, we use the `NMOF::mvFrontier()` function from the `NMOF` package [@R-NMOF; @Gilli2019_packages; @Schumann20112024_packages] to compute the efficient frontier.
 
 ```{r}
 varCovMatrix2 <- diag(player_stats_weekly_recent_summary_noNA_removeZeroVar$sd) %*% const_cor(0, nrow(player_stats_weekly_recent_summary_noNA_removeZeroVar)) %*% diag(player_stats_weekly_recent_summary_noNA_removeZeroVar$sd) # create a variance-covariance matrix assuming assets/players are uncorrelated
@@ -1164,7 +1176,7 @@ In summary, fantasy football is similar to stock picking.
 You are most likely to pick the best players if you go with the [wisdom of the crowd](#sec-wisdomOfTheCrowd) (e.g., average projections across projection sources) and diversify.
 Players—like stocks—have expected returns and risk associated with them.
 You can think of constructing your team like constructing a stock portfolio, where your goal is to gain the maximum expected returns for a given level of risk.
-The greater risk you are willing to take, the greater the potential returns, but alse the lower the potential downside if the players underperform.
+The greater risk you are willing to take, the greater the potential returns, but also the lower the potential downside if the players underperform.
 Thus, you may want your team to be composed of a diverse combination of some higher risk players and some lower risk players.
 We demonstrate the [efficient frontier](#sec-efficientFrontier) as a valuable tool for identifying the combination of players with the maximum expected returns relative to their risk.
 Most projections are public information, so you might wonder whether using crowd projections gains you anything because everybody else has access to public information.
