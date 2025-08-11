@@ -1316,7 +1316,7 @@ We have already described several accuracy indices, including percent accuracy, 
 We describe these and other indices in greater detail below.
 
 The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `petersenlab::accuracyAtCutoff()` function that computes many accuracy indices for the prediction of categorical outcome variables.
-In the example below, we compute the accuracy of predictions for which Running Backs or Wide Receivers will score 300 or more fantasy points, using a cutoff for average projected fantasy points of 300.
+In the example below, we compute the accuracy of predictions for which Running Backs or Wide Receivers will score 300 or more fantasy points, using a cutoff for projected fantasy points of 300.
 
 ```{r}
 petersenlab::accuracyAtCutoff(
@@ -1327,7 +1327,7 @@ petersenlab::accuracyAtCutoff(
 ```
 
 The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `petersenlab::accuracyAtEachCutoff()` function that computes many accuracy indices for the prediction of categorical outcome variables at each possible cutoff.
-In the example below, we compute the accuracy of predictions for which Running Backs or Wide Receivers will score 300 or more fantasy points, at each possible cutoff for average projected fantasy points.
+In the example below, we compute the accuracy of predictions for which Running Backs or Wide Receivers will score 300 or more fantasy points, at each possible cutoff for projected fantasy points.
 
 ```{r}
 petersenlab::accuracyAtEachCutoff(
@@ -1834,6 +1834,34 @@ It is called "calibration-in-the-small" (as opposed to calibration-in-the-large,
 Values closer to zero reflect greater accuracy.
 Values above zero indicate that the predicted values are, on average, greater than the observed values.
 Values below zero indicate that the observed values are, on average, greater than the predicted values.
+
+### Optimal Cutoff {#sec-optimalCutoff}
+
+The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.html) package [@R-petersenlab] contains the `petersenlab::optimalCutoff()` function that identifies the cutoff that optimizes each of various accuracy estimates.
+
+```{r}
+#| eval: false
+
+petersenlab::optimalCutoff(
+  predicted = projectionsWithActuals_seasonal_subset$raw_points,
+  actual = projectionsWithActuals_seasonal_subset$truth)
+```
+
+```{r}
+#| include: false
+
+optimalCutoff <- petersenlab::optimalCutoff(
+  predicted = projectionsWithActuals_seasonal_subset$raw_points,
+  actual = projectionsWithActuals_seasonal_subset$truth)
+```
+
+```{r}
+#| echo: false
+
+for(i in 1:length(optimalCutoff)){
+  print(head(optimalCutoff[[i]]))
+}
+```
 
 ## Threshold-Independent Accuracy Indices {#sec-thresholdIndependentAccuracy}
 
@@ -2554,6 +2582,14 @@ plot(
   rocCurve,
   legacy.axes = TRUE,
   print.auc = TRUE)
+```
+
+We can identify the cutoff that optimizes each of various accuracy estimates.
+
+```{r}
+petersenlab::optimalCutoff(
+  predicted = player_stats_weekly_example$rushing_yards_priorGame,
+  actual = player_stats_weekly_example$rush_200_yds)
 ```
 
 ## Accuracy of Fantasy Projections {#sec-accuracyProjections}
