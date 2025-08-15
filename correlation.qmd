@@ -608,13 +608,30 @@ abline(lm(
   lty = 2)
 ```
 
-Also note that, although the ([Pearson](#sec-correlationExamplesPearson)) correlation reflects the strength of the (linear) association between two variables, it does not reflect the slope of that association, as depicted in @fig-correlationExamples.
+Also note that, although the ([Pearson](#sec-correlationExamplesPearson)) correlation reflects the strength of the (linear) association between two variables, it does not reflect the (unstandardized) slope of that association, as depicted in @fig-correlationExamples.
 
 ::: {#fig-correlationExamples}
 ![](images/correlationExamples.png){fig-alt="Several sets of ($x$, $y$) points, with the ([Pearson](#sec-correlationExamplesPearson)) correlation coefficient of $x$ and $y$ for each set. The ([Pearson](#sec-correlationExamplesPearson)) correlation reflects the strength and direction of a linear association (top row), but not the slope of that association (middle), nor many aspects of nonlinear associations (bottom). N.B.: the figure in the center has a slope of 0 but in that case the correlation coefficient is undefined because the variance of $y$ is zero. From <https://en.wikipedia.org/wiki/File:Correlation_examples2.svg>."}
 
 Several sets of ($x$, $y$) points, with the ([Pearson](#sec-correlationExamplesPearson)) correlation coefficient of $x$ and $y$ for each set. The ([Pearson](#sec-correlationExamplesPearson)) correlation reflects the strength and direction of a linear association (top row), but not the slope of that association (middle), nor many aspects of nonlinear associations (bottom). N.B.: the figure in the center has a slope of 0 but in that case the correlation coefficient is undefined because the variance of $y$ is zero. From <https://en.wikipedia.org/wiki/File:Correlation_examples2.svg>.
 :::
+
+The [Pearson](#sec-correlationExamplesPearson) correlation coefficient can be greatly impacted by the extent of variability in the data, differences in the shapes of the two distributions, [nonlinearity](#sec-correlationExamplesNonlinear), [outliers](#sec-correlationOutliers), characteristics of the sample, and measurement error [@Goodwin2006].
+These factors tend to have greater impact when the sample size is smaller (compared to when the sample size is larger).
+The [Pearson](#sec-correlationExamplesPearson) correlation coefficient tends to be smaller when:
+
+- there is low variability in one or both variables (i.e., [restricted range](#sec-correlationRestrictedRange))
+- the two distributions show dissimilar shapes (in terms of [skewness and kurtosis](#sec-descriptiveStatisticsShape))
+- the underlying association is nonlinear, such that [Pearson](#sec-correlationExamplesPearson) correlation does not capture the association
+- [outliers](#sec-correlationOutliers) weaken the apparent linear trend
+- the association differs across subgroups of the sample
+- the data contain random measurement error
+
+By contrast, the association between two variables can be artificially inflated by factors such as:
+
+- [outliers](#sec-correlationOutliers) that happen to fall along a linear trend
+- systematic measurement error (e.g., common method bias)
+- third variable [confounding](#sec-causalDiagramConfounding)
 
 ## Example: Player Height and Fantasy Points {#sec-correlationHeightFantasyPoints}
 
@@ -816,6 +833,12 @@ Notice the diagonal values are all 1.0.
 That is because a variable is perfectly correlated with itself.
 Also notice that the values above the diagonal are a mirror image of (i.e., they are the same as) the respective values below the diagonal.
 The association between two variables is the same regardless of the order (i.e., which is the [predictor variable](#sec-correlationalStudy) and which is the [outcome variable](#sec-correlationalStudy)); that is, the association between variables A and B is the same as the association between variables B and A.
+
+You can compute a correlation manually using the *z*-scores, as in @eq-pearsonCorrelation:
+
+```{r}
+sum(scale(complete_cases$height) * scale(complete_cases$fantasyPoints)) / nrow(complete_cases)
+```
 
 If you just want the Pearson correlation between two variables, you can use the following syntax.
 
@@ -1172,6 +1195,8 @@ In section @sec-multipleRegressionNonIndependence, we demonstrate how to account
 ## Impact of Outliers {#sec-correlationOutliers}
 
 The correlation coefficient is strongly impacted by outliers—i.e., extreme (i.e., very large or very small) values relative to the other observations.
+Outliers can arise from errors that arise from data collection, measurement, or data entry, or they could represent valid (albeit atypical) values [@Goodwin2006].
+Outliers can either artificially weaken the estimate of association—if they weaken the apparent linear trend—or artificially strengthen it—if they happen to fall along a linear trend.
 Consider the following example:
 
 ```{r}
