@@ -1103,21 +1103,34 @@ Here is how to compute the correlation ratio (eta; $\eta$) using the `stats::aov
 #| label: correlation-ratio
 
 mod <- stats::aov(
-  fantasyPoints ~ height,
+  fantasyPoints ~ factor(height), # convert the predictor variable to a categorical variable (i.e., factor); if there are too many unique values, can also consider binning the variable into ranges
   data = player_stats_seasonal)
 
-correlationRatio <- effectsize::eta_squared(mod)
+etaSquared <- effectsize::eta_squared(mod)
+print(etaSquared, digits = 9)
+
+correlationRatio <- etaSquared
 
 cols_to_sqrt <- intersect(
   colnames(correlationRatio),
   c("Eta2", "CI_low", "CI_high"))
 
-correlationRatio[cols_to_sqrt] <- sqrt(correlationRatio[cols_to_sqrt])
+correlationRatio[cols_to_sqrt] <- sqrt(correlationRatio[cols_to_sqrt]) # take the square root of eta-squared to get eta
 
 correlationRatio <- correlationRatio %>%
   rename(Eta = Eta2)
 
-correlationRatio
+print(correlationRatio, digits = 9)
+
+# the correlation ratio (eta) is equivalent to square root of R-squared (when the predictor is converted to a factor)
+Rsquared <- summary(stats::lm(
+  fantasyPoints ~ factor(height),
+  data = player_stats_seasonal))$r.squared
+
+Rsquared
+
+Rvalue <- sqrt(Rsquared)
+Rvalue
 ```
 
 We can estimate a distance correlation using the `correlation::correlation()` function of the correlation package [@R-correlation; @Makowski2020_packages].
