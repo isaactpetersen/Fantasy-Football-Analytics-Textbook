@@ -1094,13 +1094,35 @@ psych::partial.r(
 
 ### Nonlinear Correlation {#sec-correlationExamplesNonlinear}
 
-An example of a nonlinear correlation is a distance correlation and the xi ($\xi$) coefficient.
+Examples of a nonlinear correlation include the correlation ratio [$\eta$; @Goodwin2006], distance correlation, and the xi ($\xi$) coefficient [@Chatterjee2021].
 These estimates of nonlinear correlation only range from 0–1 (where 0 represents no association and 1 represents a strong association), so they are interpreted differently than a traditional correlation coefficient (which can be negative).
+
+Here is how to compute the correlation ratio (eta; $\eta$) using the `stats::aov()` and `effectsize::eta_squared()` functions:
+
+```{r}
+mod <- stats::aov(
+  fantasyPoints ~ height,
+  data = player_stats_seasonal)
+
+correlationRatio <- effectsize::eta_squared(mod)
+
+cols_to_sqrt <- intersect(
+  colnames(correlationRatio),
+  c("Eta2", "CI_low", "CI_high"))
+
+correlationRatio[cols_to_sqrt] <- sqrt(correlationRatio[cols_to_sqrt])
+
+correlationRatio <- correlationRatio %>%
+  rename(Eta = Eta2)
+
+correlationRatio
+```
+
 We can estimate a distance correlation using the `correlation::correlation()` function of the correlation package [@R-correlation; @Makowski2020_packages].
 
 ```{r}
-correlation(
-  data = player_stats_seasonal %>% select(draftround, fantasyPoints),
+correlation::correlation(
+  data = player_stats_seasonal %>% select(height, fantasyPoints),
   method = "distance"
 )
 ```
@@ -1295,12 +1317,12 @@ Another approach is the percentage bend correlation, which gives less weight to 
 We can estimate the each using the `correlation::correlation()` function of the correlation package [@R-correlation; @Makowski2020_packages].
 
 ```{r}
-correlation(
+correlation::correlation(
   data = data.frame(v1, v2),
   method = "biweight"
 )
 
-correlation(
+correlation::correlation(
   data = data.frame(v1, v2),
   method = "percentage"
 )
