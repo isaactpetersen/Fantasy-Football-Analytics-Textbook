@@ -106,15 +106,18 @@ In addition, as described in @sec-internalExternalValidityTradeoffs, experimenta
 
 ### Quasi-Experimental Designs {#sec-causalInferenceQuasiExperiment}
 
-Although [experimental designs](#sec-causalInferenceExperiment) provide the strongest tests of causality, manytimes they are impossible, unethical, or impractical to conduct.
+Although [experimental designs](#sec-causalInferenceExperiment) provide the strongest tests of causality, many times they are impossible, unethical, or impractical to conduct.
 For instance, it would likely not be practical to randomly assign National Football League (NFL) players to either consume or not consume sports drink before their games.
 Players have their pregame rituals and routines and many would likely not agree to participate in such a study.
-Thus, we often rely on quasi-experimental designs such as natural experiments and [observational/correlational designs](#sec-correlationalStudy).
+Moreover, as described in @sec-internalExternalValidityTradeoffs, [experimental designs](#sec-causalInferenceExperiment) tend to be lower in [external validity](#sec-externalValidity) and thus their findings may not always generalize to how things occur in the real world.
+In addition, [experimental designs](#sec-causalInferenceExperiment) commonly have sample sizes that are too small to study rare-but-serious outcomes [@DOnofrio2020].
+Thus, we often rely on (and need!) quasi-experimental designs such as natural experiments and [observational/correlational designs](#sec-correlationalStudy).
 
 We cannot directly test or establish causality from a non-experimental research design.
 Nevertheless, we can leverage various analysis approaches and design features that, in combination with other studies using different research methods, collectively strengthen our ability to make causal inferences.
 For instance, there are are no experiments in humans showing that smoking causes cancer—randomly assigning people to smoke or not smoke would not be ethical.
 The causal inference that smoking causes cancer was derived from a combination of experimental studies in rodents and observational studies in humans.
+To the extent that findings across designs that have different threats to [research design validity](#sec-researchDesignValidity) show similar results in terms of the association between the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy), the case for causality is strengthened [@DOnofrio2020].
 
 #### Longitudinal Designs {#sec-causalInferenceLongitudinal}
 
@@ -170,7 +173,7 @@ For instance, we can simultaneously evaluate the extent to which sports drink pr
 
 #### Within-Subject Analyses {#sec-causalInferenceWithinSubject}
 
-Another design feature of [longitudinal designs](#sec-causalInferenceLongitudinal) that can lead to greater [internal validity](#sec-internalValidity) is the use of within-subject analyses.
+Another design feature of [longitudinal designs](#sec-causalInferenceLongitudinal) that can lead to greater [internal validity](#sec-internalValidity) is the use of within-subject analyses, including interrupted time series designs [@DOnofrio2020].
 Between-subject analyses, might examine, for instance, whether players who consume more sports drink perform better on average compared to players who consume less sports drink.
 However, there are other between-person differences that could explain any observed between-subject associations between sports drink consumption and players performance.
 Another approach could be to apply within-subject analyses.
@@ -213,9 +216,9 @@ If some people consume sports drink whereas others do not, matching would mean f
 Another way to control for a variable is to include the variable as a [covariate](#sec-covariates) in the model.
 Inclusion of a [covariate](#sec-covariates) attempts to control for the variable by examining the association between the [predictor variable](#sec-correlationalStudy) and the [outcome variable](#sec-correlationalStudy) while holding the [covariate](#sec-covariates) variables constant.
 For example, if you want to control for a player's education level in examining the association between sports drink consumption and performance, you could statistically control for player education by including the player's education level as a [covariate](#sec-covariates) in predicting performance.
-Such a model would examine whether, when accounting for education level, there is an association between sports drink consumption and player performance.
+Such a model would examine whether, when accounting for education level (by holding education level constant—i.e., partialing out the association between education level and player performance), there is an association between sports drink consumption and player performance.
 
-Another way to control for a variable is to stratify based on the variable—e.g., you can examine the association between the variables of interest within subgroups of the control variable.
+Another way to control for a variable is to conduct a stratified analysis based on the variable—e.g., you can examine the association between the variables of interest within subgroups of the control variable [@DOnofrio2020].
 For instance, taking the example of controlling for a player's education in examining the association between sports drink consumption and performance, you could examine the association between sports drink consumption and performance separately for various education levels: a) high school or lower, b) some college, c) college degree, d) graduate degree.
 
 In each of these examples, you are controlling for player education for purposes of examining the effect of sports drink consumption on performance.
@@ -261,6 +264,7 @@ It is assumed that the trait/outcome is attributable to genetic factors to the e
 Alternatively, researchers could compare full siblings versus half-siblings, or they could compare full siblings versus first cousins.
 
 Genetically informed designs are not as relevant for fantasy football analytics, but they are useful to present as one of various design features that researchers can draw upon to strengthen their ability to make causal inferences.
+One of the limitations of genetically informed designs is that they cannot, without inclusion of measured factors, rule out the influence of factors that are not shared by family members [@DOnofrio2020].
 
 ## Causal Diagrams {#sec-causalDiagrams}
 
@@ -271,6 +275,9 @@ A causal diagram depicts the hypothesized causal processes that link two or more
 A common form of causal diagrams is the directed acyclic graph (DAG).
 DAGs provide a helpful tool to communicate about causal questions and help identify how to avoid bias (i.e., overestimation) in associations between variables due to [confounding](#sec-causalDiagramConfounding) (i.e., common causes) [@Digitale2022].
 For instance, from a DAG, it is possible to determine what variables it is important to control for (and how)—and just as importantly, what not to control for—in order to get unbiased estimates of the effect of one variable on another variable or of the association between two variables of interest.
+Thus, when designing and conducting studies, it is good to get in the habit of drawing causal diagrams to make your hypotheses, knowledge, and assumptions explicit [@DOnofrio2020].
+Using a causal diagram (DAG), it is also valuable to specify any potential alternative hypotheses, so that the researcher can design studies to evaluate and rule out potential alternative hypotheses.
+
 To create DAGs, you can use the `R` package `dagitty` [@R-dagitty; @Textor2016_packages] or the associated browser-based extension, DAGitty: <https://dagitty.net> (archived at <https://perma.cc/U9BY-VZE2>).
 Examples of various causal diagrams that could explain why `X` is associated with `Y` are in Figures [-@fig-XCausesY], [-@fig-YCausesX] and [-@fig-ZCausesXandY].
 
@@ -423,8 +430,16 @@ Confounding occurs when two variables—that are both caused by another variable
 That is, two variables share a common cause, and the common cause leads the variables to be associated even though they are not causally related.
 The common cause—i.e., the variable that influences the two variables—is known as a confound (or confounder).
 Nevertheless, causal effects and confounding—though competing hypotheses—are not mutually exclusive [@DOnofrio2020].
-A predictor can have an association with an outcome that is partly driven by confounding and partly driven by a causal effect.
+A [predictor](#sec-correlationalStudy) can have an association with an [outcome](#sec-correlationalStudy) that is partly driven by confounding and partly driven by a causal effect.
 A key goal, then is determining the extent to which the observed association reflects confounding versus a causal effect.
+
+Confounding is among the most common sources of bias in [observational studies](#sec-correlationalStudy) in terms of accurately estimating the causal effect of one variable on another, because among all the processes that influence one's exposure on a risk factor (i.e., [predictor variable](#sec-correlationalStudy)), some of the processes also likely influence the [outcome variable](#sec-correlationalStudy) [i.e., and are thus confounds; @DOnofrio2020].
+Two common sources of confounding that are often neglected are previous behavior and genetics [@DOnofrio2020].
+Part of the challenge in observational studies is that there can be known and unknown sources of confounding [@DOnofrio2020].
+In addition, the sources of counfounding can be either measured or unmeasured.
+Because some sources of confounding are likely to be unknown and/or unmeasured, it is unlikely that any single observational study can account for all sources of confounding [@DOnofrio2020].
+The causal diagram is thus useful for determining what sources of confounding a given study can and cannot address [@DOnofrio2020].
+
 An example of confounding is depicted in @fig-counfounding:
 
 ```{r}
@@ -461,6 +476,23 @@ dagitty::adjustmentSets(
 
 The output indicates that, to obtain an unbiased estimate of the causal association between two variables, it is necessary to control for any confounding [@Lederer2019].
 That is, to obtain an unbiased estimate of the causal association between player endurance (`X`) and field goals made (`Y`), it is necessary to control for stadium altitude (`Z`).
+
+Another challenge with confounding is that all constructs are measured with error.
+Thus, including a measure of a confound as a covariate in a model will only partially account for the confound.
+The remaining effect of the confound on the outcome (after controlling for the measured confound via a covariate) is called residual confounding [@DOnofrio2020].
+
+#### Systematic Measurement Error {#sec-systematicMeasurementError}
+
+Another common source of bias, in terms of accurately estimating the causal effect of one variable on another, that functions similarly to [confounding](#sec-causalDiagramConfounding) is systematic measurement error (as opposed to random measurement error).
+Systematic measurement error is measurement error that influences scores consistently for a person or across the sample.
+Systematic measurement error is described in [@PetersenPrinciplesPsychAssessment](https://isaactpetersen.github.io/Principles-Psychological-Assessment/reliability.html#systematicError).
+Let's consider that a researcher wants to study the effects of player stress on their happiness.
+The researcher selects a questionnaire that assesses player stress and a questionnaire that assesses happiness and assesses players on both.
+To some degree, the measurements will both be influenced by nonconstruct factors, because both measurements come from the same measurement method (questionnaire; i.e., common method bias) and from the same rater (i.e., common informant bias).
+People have response styles that lead them to have a tendency to rate themselves—regardless of the construct of interest—as better or worse than they actually are.
+For instance, Person A may rate themselves as better off in terms of stress and happiness (i.e., lower stress, higher happiness) than they actually are, whereas Person B may rate themselves as worse off in terms of stress and happiness (i.e., higher stress, lower happiness) than they actually are.
+Because these response styles influence both measurements and are not the construct of interest (i.e., stress or happiness), they function like [confounding](#sec-causalDiagramConfounding) in that the influence both variables and can explain, to some degree, why the variables are correlated for reasons other than a causal effect of player stress on their happiness.
+Unlike [confounding](#sec-causalDiagramConfounding), however, systematic measurement error does not just influence observational studies—it influences [experimental designs](#sec-experiment) as well.
 
 ### Mediation {#sec-causalDiagramMediation}
 
@@ -657,7 +689,7 @@ dagitty::adjustmentSets(
 
 As the output indicates, we should not control for the collider when examining the association between the two causes of the collider.
 That is, we should not control for injury status (`M`) when examining the association between diet (`X`) and coaching strategy.
-Controlling for the collider leads to confounding and can artificially induce an association between the two causes of the collider despite no causal association between them [@Lederer2019].
+Controlling for the collider leads to [confounding](#sec-causalDiagramConfounding) and can artificially induce an association between the two causes of the collider despite no causal association between them [@Lederer2019].
 Obtaining a distorted or artificial association between two variables due to inappropriately controlling for a collider is known as *collider bias*.
 
 Consider another example:
