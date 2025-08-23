@@ -34,7 +34,7 @@ library("magrittr")
 library("viridis")
 library("viridisLite")
 library("msir")
-library("caret")
+library("tidymodels")
 library("tidyverse")
 ```
 
@@ -2135,58 +2135,108 @@ where PRESS is the predictive residual sum of squares, and $\text{SS}_\text{tota
 
 It is preferable to examine predictive $R^2$ using new data that the model was not trained on—i.e., cross-validation, either in an independent sample (i.e., external cross-validation) or in a hold-out sample (i.e., internal cross-validation on test data).
 
-For example, here is an example of estimating predictive $R^2$ using 10-fold cross-validation using the `caret` package [@R-caret].
+For example, here is an example of estimating predictive $R^2$ using [10-fold cross-validation](#sec-kFoldCrossValidation) using the `tidymodels` ecosystem of packages [@R-tidymodels; @Kuhn2020_packages].
 
 ```{r}
-#| eval: false
-
+# Set seed for reproducibility
 set.seed(52242)
 
-# Set up 10-fold cross-validation
-train_control <- caret::trainControl(
-  method = "cv",
-  number = 10)
+# Set up Cross-Validation
+folds_kFold <- rsample::group_vfold_cv(
+  projectionsWithActuals_seasonal,
+  group = player_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
+  v = 10) # 10-fold cross-validation
 
-# Fit the model with cross-validation
-model_cv <- caret::train(
-  outcomeVariable ~ predictorVariable1 + predictorVariable2,
-  data = mydata,
-  method = "lm",
-  na.action = na.exclude,
-  trControl = train_control,
-  metric = "Rsquared")
+folds <- folds_kFold
 
-# View R-squared across the folds
-model_cv$results$Rsquared
-```
+# Define Recipe (Formula)
+rec <- recipes::recipe(
+  fantasyPoints ~ raw_points, # use all predictors
+  data = projectionsWithActuals_seasonal)
 
-Here is an example of estimating predictive $R^2$ with a training and testing data set using the `caret` package [@R-caret].
+# Define Model
+lm_spec <- parsnip::linear_reg() %>%
+  parsnip::set_engine("lm") %>%
+  parsnip::set_mode("regression")
 
-```{r}
-#| eval: false
+# Workflow
+lm_wf <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(lm_spec)
 
-set.seed(52242)
-
-inTrain <- caret::createDataPartition(
-  y = as.factor(mydata$outcomeVariable),
-  p = .75, # the proportion of data for the training data set
-  list = FALSE
+# Fit Model with Cross-Validation
+cv_results <- tune::fit_resamples(
+  lm_wf,
+  resamples = folds,
+  metrics = yardstick::metric_set(rmse, mae, rsq),
+  control = tune::control_resamples(save_pred = TRUE)
 )
 
-training <- mydata[ inTrain,]
-testing  <- mydata[-inTrain,]
+# View Cross-Validation metrics
+tune::collect_metrics(cv_results)
 
-training_model <- lm(
-  outcomeVariable ~ predictorVariable1 + predictorVariable2,
+# Fold-level R-squared
+tune::collect_metrics(cv_results, summarize = FALSE) %>%
+  filter(.metric == "rsq") %>%
+  select(id, .estimate)
+```
+
+Here is an example of estimating predictive $R^2$ with a training and hold-out (testing) data set:
+
+```{r}
+# Set seed for reproducibility
+set.seed(52242)
+
+# Create 75/25 split
+split <- rsample::group_initial_split(
+  projectionsWithActuals_seasonal,
+  group = player_id,
+  prop = 0.75)
+
+# Fit model on training, evaluate on testing
+last_fit_results <- tune::last_fit(
+  lm_wf,
+  split = split,
+  metrics = yardstick::metric_set(rmse, mae, rsq)
+)
+
+# View predictive R-squared and other metrics
+tune::collect_metrics(last_fit_results)
+```
+
+Or, alternatively:
+
+```{r}
+#| eval: false
+
+# Set seed for reproducibility
+set.seed(52242)
+
+# Create 75/25 split
+split <- rsample::group_initial_split(
+  projectionsWithActuals_seasonal,
+  group = player_id,
+  prop = 0.75)
+
+training <- rsample::training(split)
+testing  <- rsample::testing(split)
+
+# Fit model on training set
+training_model <- parsnip::fit(
+  lm_wf,
   data = training)
 
-testing_predictions <- predict(
+# Predict on test set
+predictions <- predict(
   training_model,
-  newdata = testing)
+  new_data = testing) %>%
+  bind_cols(testing)
 
-petersenlab::accuracyOverall(
-  predicted = testing_predictions,
-  actual = testing$outcomeVariable)$rsquared
+# Predictive R-squared
+yardstick::rsq(
+  predictions,
+  truth = fantasyPoints,
+  estimate = .pred)
 ```
 
 ### Discrimination {#sec-discriminationIndices}
