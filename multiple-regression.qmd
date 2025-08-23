@@ -12,7 +12,7 @@ This chapter provides an overview of multiple regression.
 library("petersenlab")
 library("rms")
 library("car")
-library("caret")
+library("bestNormalize")
 library("lme4")
 library("performance")
 library("lavaan")
@@ -1745,20 +1745,17 @@ hist(
   main = "Histogram of Fantasy Points")
 ```
 
-We can apply a Yeo-Johnson transformation to the [outcome variable](#sec-correlationalStudy) to generate a more normally distributed variable.
-A Yeo-Johnson transformation estimates the optimal transformation to make the variable more normally distributed.
-Let's use a Yeo-Johnson transformation of fantasy points:
+We can apply a transformation to the [outcome variable](#sec-correlationalStudy) to generate a more normally distributed variable using the `bestNormalize::bestNormalize()` function of the `bestNormalize` package [@R-bestNormalize; @Peterson2021_packages; @Peterson2020_packages].
 
 ```{r}
-yjTransformed <- caret::preProcess(
-  player_stats_seasonal["fantasyPoints"],
-  method = c("YeoJohnson"))
+obj <- bestNormalize::bestNormalize(player_stats_seasonal$fantasyPoints)
+player_stats_seasonal$fantasyPoints_transformed <- predict(obj)
 
-yjTransformed
-
-player_stats_seasonal$fantasyPoints_transformed <- predict(
-  yjTransformed,
-  newdata = player_stats_seasonal["fantasyPoints"])$fantasyPoints
+# Can back-transform transformed values back to the original metric later if needed:
+original <- predict(
+  obj,
+  newdata = player_stats_seasonal$fantasyPoints_transformed,
+  inverse = TRUE)
 ```
 
 The histogram of the transformed variable is in @fig-histogramFantasyPointsTransformed.
