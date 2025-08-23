@@ -734,7 +734,7 @@ window.Quarto = {
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"petersenlab"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(<span class="st">"rms"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(<span class="st">"car"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"caret"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(<span class="st">"bestNormalize"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(<span class="st">"lme4"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6"></a><span class="fu">library</span>(<span class="st">"performance"</span>)</span>
 <span id="cb1-7"><a href="#cb1-7"></a><span class="fu">library</span>(<span class="st">"lavaan"</span>)</span>
@@ -3063,33 +3063,23 @@ Figure&nbsp;11.23: Histogram of Fantasy Points (Among Wide Receivers).
 </div>
 </div>
 </div>
-<p>We can apply a Yeo-Johnson transformation to the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> to generate a more normally distributed variable. A Yeo-Johnson transformation estimates the optimal transformation to make the variable more normally distributed. Let’s use a Yeo-Johnson transformation of fantasy points:</p>
+<p>We can apply a transformation to the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> to generate a more normally distributed variable using the <code><a href="https://petersonr.github.io/bestNormalize/reference/bestNormalize.html">bestNormalize::bestNormalize()</a></code> function of the <code>bestNormalize</code> package <span class="citation" data-cites="R-bestNormalize Peterson2021_packages Peterson2020_packages">(<a href="references.html#ref-Peterson2021_packages" role="doc-biblioref">Peterson, 2021</a>; <a href="references.html#ref-R-bestNormalize" role="doc-biblioref">Peterson, 2023</a>; <a href="references.html#ref-Peterson2020_packages" role="doc-biblioref">Peterson &amp; Cavanaugh, 2020</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1"></a>yjTransformed <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">preProcess</span>(</span>
-<span id="cb101-2"><a href="#cb101-2"></a>  player_stats_seasonal[<span class="st">"fantasyPoints"</span>],</span>
-<span id="cb101-3"><a href="#cb101-3"></a>  <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"YeoJohnson"</span>))</span>
-<span id="cb101-4"><a href="#cb101-4"></a></span>
-<span id="cb101-5"><a href="#cb101-5"></a>yjTransformed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-stdout">
-<pre><code>Created from 41156 samples and 1 variables
-
-Pre-processing:
-  - ignored (0)
-  - Yeo-Johnson transformation (1)
-
-Lambda estimates for Yeo-Johnson transformation:
-0.18</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1"></a>player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
-<span id="cb103-2"><a href="#cb103-2"></a>  yjTransformed,</span>
-<span id="cb103-3"><a href="#cb103-3"></a>  <span class="at">newdata =</span> player_stats_seasonal[<span class="st">"fantasyPoints"</span>])<span class="sc">$</span>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1"></a>obj <span class="ot">&lt;-</span> bestNormalize<span class="sc">::</span><span class="fu">bestNormalize</span>(player_stats_seasonal<span class="sc">$</span>fantasyPoints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1"></a>player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(obj)</span>
+<span id="cb102-2"><a href="#cb102-2"></a></span>
+<span id="cb102-3"><a href="#cb102-3"></a><span class="co"># Can back-transform transformed values back to the original metric later if needed:</span></span>
+<span id="cb102-4"><a href="#cb102-4"></a>original <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb102-5"><a href="#cb102-5"></a>  obj,</span>
+<span id="cb102-6"><a href="#cb102-6"></a>  <span class="at">newdata =</span> player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed,</span>
+<span id="cb102-7"><a href="#cb102-7"></a>  <span class="at">inverse =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>The histogram of the transformed variable is in <a href="#fig-histogramFantasyPointsTransformed" class="quarto-xref">Figure&nbsp;<span>11.24</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1"></a><span class="fu">hist</span>(</span>
-<span id="cb104-2"><a href="#cb104-2"></a>  player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)],</span>
-<span id="cb104-3"><a href="#cb104-3"></a>  <span class="at">main =</span> <span class="st">"Histogram of Fantasy Points (Transformed)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1"></a><span class="fu">hist</span>(</span>
+<span id="cb103-2"><a href="#cb103-2"></a>  player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)],</span>
+<span id="cb103-3"><a href="#cb103-3"></a>  <span class="at">main =</span> <span class="st">"Histogram of Fantasy Points (Transformed)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-histogramFantasyPointsTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points (Among Wide Receivers), Transformed.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramFantasyPointsTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3103,13 +3093,13 @@ Figure&nbsp;11.24: Histogram of Fantasy Points (Among Wide Receivers), Transform
 </div>
 <p>Now we can refit the model.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1"></a>linearRegressionModel_outcomeTransformed <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb105-2"><a href="#cb105-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb105-3"><a href="#cb105-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb105-4"><a href="#cb105-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb105-5"><a href="#cb105-5"></a>)</span>
-<span id="cb105-6"><a href="#cb105-6"></a></span>
-<span id="cb105-7"><a href="#cb105-7"></a><span class="fu">summary</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1"></a>linearRegressionModel_outcomeTransformed <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb104-2"><a href="#cb104-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb104-3"><a href="#cb104-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb104-4"><a href="#cb104-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb104-5"><a href="#cb104-5"></a>)</span>
+<span id="cb104-6"><a href="#cb104-6"></a></span>
+<span id="cb104-7"><a href="#cb104-7"></a><span class="fu">summary</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3118,37 +3108,37 @@ lm(formula = fantasyPoints_transformed ~ age + height + weight +
     filter(position %in% c("WR")), na.action = "na.exclude")
 
 Residuals:
-     Min       1Q   Median       3Q      Max 
--18.3306  -0.6618   0.2290   0.8845   6.7486 
+    Min      1Q  Median      3Q     Max 
+-7.6898 -0.2314  0.0787  0.3327  3.0328 
 
 Coefficients:
-                          Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)               2.373486   0.821447   2.889  0.00388 ** 
-age                       0.033732   0.007723   4.367 1.29e-05 ***
-height                   -0.009173   0.014496  -0.633  0.52690    
-weight                    0.003643   0.002302   1.582  0.11366    
-I(log(target_share + 1)) 27.866921   0.296506  93.984  &lt; 2e-16 ***
+                           Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)              -1.0023793  0.3386383  -2.960  0.00309 ** 
+age                       0.0137253  0.0031839   4.311 1.66e-05 ***
+height                   -0.0029027  0.0059758  -0.486  0.62718    
+weight                    0.0015978  0.0009491   1.683  0.09235 .  
+I(log(target_share + 1)) 11.6558461  0.1222334  95.357  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1.574 on 4432 degrees of freedom
+Residual standard error: 0.649 on 4432 degrees of freedom
   (952 observations deleted due to missingness)
-Multiple R-squared:  0.6767,    Adjusted R-squared:  0.6764 
-F-statistic:  2319 on 4 and 4432 DF,  p-value: &lt; 2.2e-16</code></pre>
+Multiple R-squared:  0.6831,    Adjusted R-squared:  0.6828 
+F-statistic:  2388 on 4 and 4432 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <p>The residual plot is in <a href="#fig-residualPlotsOutcomeTransformed" class="quarto-xref">Figure&nbsp;<span>11.25</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb107"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1"></a>car<span class="sc">::</span><span class="fu">residualPlots</span>(</span>
-<span id="cb107-2"><a href="#cb107-2"></a>  linearRegressionModel_outcomeTransformed,</span>
-<span id="cb107-3"><a href="#cb107-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1"></a>car<span class="sc">::</span><span class="fu">residualPlots</span>(</span>
+<span id="cb106-2"><a href="#cb106-2"></a>  linearRegressionModel_outcomeTransformed,</span>
+<span id="cb106-3"><a href="#cb106-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>                         Test stat Pr(&gt;|Test stat|)    
-age                         0.0663           0.9472    
-height                     -0.3612           0.7180    
-weight                     -1.5995           0.1098    
-I(log(target_share + 1))  -48.2540           &lt;2e-16 ***
-Tukey test                -48.8390           &lt;2e-16 ***
+age                        -0.1390           0.8894    
+height                     -0.4390           0.6607    
+weight                     -1.5104           0.1310    
+I(log(target_share + 1))  -46.7411           &lt;2e-16 ***
+Tukey test                -47.2803           &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
@@ -3165,12 +3155,12 @@ Figure&nbsp;11.25: Residual Plots After Transformation of Fantasy Points.
 </div>
 <p>The spread-level plot is in <a href="#fig-spreadLevelPlotOutcomeTransformed" class="quarto-xref">Figure&nbsp;<span>11.26</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb109"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1"></a>car<span class="sc">::</span><span class="fu">spreadLevelPlot</span>(</span>
-<span id="cb109-2"><a href="#cb109-2"></a>  linearRegressionModel_outcomeTransformed,</span>
-<span id="cb109-3"><a href="#cb109-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1"></a>car<span class="sc">::</span><span class="fu">spreadLevelPlot</span>(</span>
+<span id="cb108-2"><a href="#cb108-2"></a>  linearRegressionModel_outcomeTransformed,</span>
+<span id="cb108-3"><a href="#cb108-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
-Suggested power transformation:  1.890813 </code></pre>
+Suggested power transformation:  1.063421 </code></pre>
 </div>
 <div class="cell-output-display">
 <div id="fig-spreadLevelPlotOutcomeTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Spread-Level Plot After Transformation of Fantasy Points.">
@@ -3188,15 +3178,15 @@ Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points.
 <span class="header-section-number">11.9.6.3</span> Uncorrelated Residuals</h4>
 <p>To determine if residuals are correlated given the nested structure of the data, we can examine the proportion of variance that is attributable to the particular player. To do this, we can estimate the intraclass correlation coefficient (ICC) from a <a href="mixed-models.html">mixed model</a> using the <code>performance</code> package <span class="citation" data-cites="Ludecke2021_packages R-performance">(<a href="references.html#ref-Ludecke2021_packages" role="doc-biblioref">Lüdecke et al., 2021</a>; <a href="references.html#ref-R-performance" role="doc-biblioref">Lüdecke, Makowski, Ben-Shachar, Patil, Waggoner, et al., 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb111"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1"></a>mixedModel <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
-<span id="cb111-2"><a href="#cb111-2"></a>  fantasyPoints_transformed <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> player_id),</span>
-<span id="cb111-3"><a href="#cb111-3"></a>  <span class="at">data =</span> player_stats_seasonal)</span>
-<span id="cb111-4"><a href="#cb111-4"></a></span>
-<span id="cb111-5"><a href="#cb111-5"></a>performance<span class="sc">::</span><span class="fu">icc</span>(mixedModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb110"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1"></a>mixedModel <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb110-2"><a href="#cb110-2"></a>  fantasyPoints_transformed <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> player_id),</span>
+<span id="cb110-3"><a href="#cb110-3"></a>  <span class="at">data =</span> player_stats_seasonal)</span>
+<span id="cb110-4"><a href="#cb110-4"></a></span>
+<span id="cb110-5"><a href="#cb110-5"></a>performance<span class="sc">::</span><span class="fu">icc</span>(mixedModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["ICC_adjusted"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["ICC_unadjusted"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["optional"],"name":[3],"type":["lgl"],"align":["right"]}],"data":[{"1":"0.5871773","2":"0.5871773","3":"FALSE"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["ICC_adjusted"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["ICC_unadjusted"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["optional"],"name":[3],"type":["lgl"],"align":["right"]}],"data":[{"1":"0.5873826","2":"0.5873826","3":"FALSE"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -3206,10 +3196,10 @@ Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points.
 <span class="header-section-number">11.9.6.4</span> Normally Distributed Residuals</h4>
 <p>We can examine whether residuals are normally distributed using quantile–quantile (QQ) plots and probability–probability (PP) plots, as in Figures <a href="#fig-qqPlot" class="quarto-xref"><span>11.27</span></a> and <a href="#fig-ppPlot" class="quarto-xref"><span>11.28</span></a>. If the residuals are normally distributed, they should stay close to the diagonal reference line.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb112"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1"></a>car<span class="sc">::</span><span class="fu">qqPlot</span>(</span>
-<span id="cb112-2"><a href="#cb112-2"></a>  linearRegressionModel_outcomeTransformed,</span>
-<span id="cb112-3"><a href="#cb112-3"></a>  <span class="at">main =</span> <span class="st">"QQ Plot"</span>,</span>
-<span id="cb112-4"><a href="#cb112-4"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb111"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1"></a>car<span class="sc">::</span><span class="fu">qqPlot</span>(</span>
+<span id="cb111-2"><a href="#cb111-2"></a>  linearRegressionModel_outcomeTransformed,</span>
+<span id="cb111-3"><a href="#cb111-3"></a>  <span class="at">main =</span> <span class="st">"QQ Plot"</span>,</span>
+<span id="cb111-4"><a href="#cb111-4"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 1338 1843</code></pre>
 </div>
@@ -3225,8 +3215,8 @@ Figure&nbsp;11.27: Residual Plots After Transformation of Fantasy Points.
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb114"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1"></a>petersenlab<span class="sc">::</span><span class="fu">ppPlot</span>(</span>
-<span id="cb114-2"><a href="#cb114-2"></a>  linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb113"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1"></a>petersenlab<span class="sc">::</span><span class="fu">ppPlot</span>(</span>
+<span id="cb113-2"><a href="#cb113-2"></a>  linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-ppPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Residual Plots After Transformation of Fantasy Points.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3317,7 +3307,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 <p>Then, what are the regression coefficients? We do not know what are the correct regression coefficients because each of the possibilities fits the data equally well. Thus, when estimating the regression model, we could obtain arbitrary estimates of the regression coefficients with an enormous standard error around each estimate. In general, multicollinearity increases the uncertainty (i.e., standard errors and confidence intervals) around the parameter estimates. Any <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> that have a correlation above ~ <span class="math inline">\(r = .30\)</span> with each other could have an impact on the confidence interval of the regression coefficient. As the correlations among the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> increase, the chance of getting an arbitrary answer increases, sometimes called “bouncing betas.” So, it is important to examine a correlation matrix of the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> before putting them in the same regression model. You can also examine indices such as variance inflation factor (VIF), where a value greater than 5 or 10 indicates multicollinearity.</p>
 <p>Here are the VIFs from our earlier model:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb115"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1"></a>car<span class="sc">::</span><span class="fu">vif</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb114"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1"></a>car<span class="sc">::</span><span class="fu">vif</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>                     age                   height                   weight 
                 1.019535                 2.095026                 2.111745 
@@ -3334,33 +3324,33 @@ I(log(target_share + 1))
 <span class="header-section-number">11.11.1</span> Pairwise Deletion</h3>
 <p>Pairwise deletion (also called available case analysis) uses all available data for each pair of variables when estimating the correlations/covariances, and the resulting correlation/covariance matrix can be used to estimate a multiple regression model. We can estimate a regression model that uses pairwise deletion using the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb117"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1"></a>player_stats_seasonal<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(player_stats_seasonal<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
-<span id="cb117-2"><a href="#cb117-2"></a></span>
-<span id="cb117-3"><a href="#cb117-3"></a>modelData <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb117-4"><a href="#cb117-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb117-5"><a href="#cb117-5"></a>  <span class="fu">select</span>(fantasyPoints_transformed, age, height, weight, target_share_log)</span>
-<span id="cb117-6"><a href="#cb117-6"></a></span>
-<span id="cb117-7"><a href="#cb117-7"></a>numObs <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">complete.cases</span>(modelData))</span>
-<span id="cb117-8"><a href="#cb117-8"></a>varMeans <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(modelData, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb117-9"><a href="#cb117-9"></a>varCovariances <span class="ot">&lt;-</span> <span class="fu">cov</span>(modelData, <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span>
-<span id="cb117-10"><a href="#cb117-10"></a></span>
-<span id="cb117-11"><a href="#cb117-11"></a>pairwiseRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb117-12"><a href="#cb117-12"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
-<span id="cb117-13"><a href="#cb117-13"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
-<span id="cb117-14"><a href="#cb117-14"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
-<span id="cb117-15"><a href="#cb117-15"></a><span class="st">'</span></span>
-<span id="cb117-16"><a href="#cb117-16"></a></span>
-<span id="cb117-17"><a href="#cb117-17"></a>pairwiseRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">lavaan</span>(</span>
-<span id="cb117-18"><a href="#cb117-18"></a>  pairwiseRegression_syntax,</span>
-<span id="cb117-19"><a href="#cb117-19"></a>  <span class="at">sample.mean =</span> varMeans,</span>
-<span id="cb117-20"><a href="#cb117-20"></a>  <span class="at">sample.cov =</span> varCovariances,</span>
-<span id="cb117-21"><a href="#cb117-21"></a>  <span class="at">sample.nobs =</span> numObs</span>
-<span id="cb117-22"><a href="#cb117-22"></a>)</span>
-<span id="cb117-23"><a href="#cb117-23"></a></span>
-<span id="cb117-24"><a href="#cb117-24"></a><span class="fu">summary</span>(</span>
-<span id="cb117-25"><a href="#cb117-25"></a>  pairwiseRegression_fit,</span>
-<span id="cb117-26"><a href="#cb117-26"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb117-27"><a href="#cb117-27"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb116"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1"></a>player_stats_seasonal<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(player_stats_seasonal<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb116-2"><a href="#cb116-2"></a></span>
+<span id="cb116-3"><a href="#cb116-3"></a>modelData <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb116-4"><a href="#cb116-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb116-5"><a href="#cb116-5"></a>  <span class="fu">select</span>(fantasyPoints_transformed, age, height, weight, target_share_log)</span>
+<span id="cb116-6"><a href="#cb116-6"></a></span>
+<span id="cb116-7"><a href="#cb116-7"></a>numObs <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">complete.cases</span>(modelData))</span>
+<span id="cb116-8"><a href="#cb116-8"></a>varMeans <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(modelData, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb116-9"><a href="#cb116-9"></a>varCovariances <span class="ot">&lt;-</span> <span class="fu">cov</span>(modelData, <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span>
+<span id="cb116-10"><a href="#cb116-10"></a></span>
+<span id="cb116-11"><a href="#cb116-11"></a>pairwiseRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb116-12"><a href="#cb116-12"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
+<span id="cb116-13"><a href="#cb116-13"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
+<span id="cb116-14"><a href="#cb116-14"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
+<span id="cb116-15"><a href="#cb116-15"></a><span class="st">'</span></span>
+<span id="cb116-16"><a href="#cb116-16"></a></span>
+<span id="cb116-17"><a href="#cb116-17"></a>pairwiseRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">lavaan</span>(</span>
+<span id="cb116-18"><a href="#cb116-18"></a>  pairwiseRegression_syntax,</span>
+<span id="cb116-19"><a href="#cb116-19"></a>  <span class="at">sample.mean =</span> varMeans,</span>
+<span id="cb116-20"><a href="#cb116-20"></a>  <span class="at">sample.cov =</span> varCovariances,</span>
+<span id="cb116-21"><a href="#cb116-21"></a>  <span class="at">sample.nobs =</span> numObs</span>
+<span id="cb116-22"><a href="#cb116-22"></a>)</span>
+<span id="cb116-23"><a href="#cb116-23"></a></span>
+<span id="cb116-24"><a href="#cb116-24"></a><span class="fu">summary</span>(</span>
+<span id="cb116-25"><a href="#cb116-25"></a>  pairwiseRegression_fit,</span>
+<span id="cb116-26"><a href="#cb116-26"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb116-27"><a href="#cb116-27"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 1 iteration
 
@@ -3384,58 +3374,58 @@ Parameter Estimates:
 Regressions:
                               Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv
   fantasyPoints_transformed ~                                             
-    age                          0.055    0.008    7.305    0.000    0.055
-    height                       0.008    0.014    0.574    0.566    0.008
-    weight                       0.004    0.002    1.645    0.100    0.004
-    target_shar_lg              27.725    0.295   94.041    0.000   27.725
+    age                          0.023    0.003    7.282    0.000    0.023
+    height                       0.004    0.006    0.732    0.464    0.004
+    weight                       0.002    0.001    1.772    0.076    0.002
+    target_shar_lg              11.596    0.121   95.503    0.000   11.596
   Std.all
          
-    0.063
-    0.007
-    0.020
-    0.811
+    0.062
+    0.009
+    0.021
+    0.815
 
 Intercepts:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
-   .fntsyPnts_trns    0.543    0.818    0.664    0.507    0.543    0.196
+   .fntsyPnts_trns   -1.767    0.337   -5.243    0.000   -1.767   -1.535
 
 Variances:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
-   .fntsyPnts_trns    2.450    0.052   47.101    0.000    2.450    0.320
+   .fntsyPnts_trns    0.416    0.009   47.101    0.000    0.416    0.313
 
 R-Square:
                    Estimate
-    fntsyPnts_trns    0.680</code></pre>
+    fntsyPnts_trns    0.687</code></pre>
 </div>
 </div>
 </section><section id="sec-multipleRegressionMultipleImputation" class="level3" data-number="11.11.2"><h3 data-number="11.11.2" class="anchored" data-anchor-id="sec-multipleRegressionMultipleImputation">
 <span class="header-section-number">11.11.2</span> Multiple Imputation</h3>
 <p>Multiple imputation takes a data set with missingness and it uses available information on other variables to estimate what likely values could have been for the missing value. It repeats the imputation multiple times, so there are multiple imputed data sets, which can give a sense of the degree of uncertainty of each imputed value. The model is then fit to each of the multiply imputed data sets separately, and the results are combined. We can multiply impute data using the <code>mice</code> package <span class="citation" data-cites="vanBuuren2011_packages R-mice">(<a href="references.html#ref-vanBuuren2011_packages" role="doc-biblioref">van Buuren &amp; Groothuis-Oudshoorn, 2011</a>, <a href="references.html#ref-R-mice" role="doc-biblioref">2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb119"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1"></a>numImputations <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb119-2"><a href="#cb119-2"></a></span>
-<span id="cb119-3"><a href="#cb119-3"></a>dataToImpute <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb119-4"><a href="#cb119-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb119-5"><a href="#cb119-5"></a>  <span class="fu">select</span>(player_id, position, <span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> </span>
-<span id="cb119-6"><a href="#cb119-6"></a>  <span class="fu">select</span>(</span>
-<span id="cb119-7"><a href="#cb119-7"></a>    player_id<span class="sc">:</span>games, carries<span class="sc">:</span>wopr, fantasy_points, fantasy_points_ppr,</span>
-<span id="cb119-8"><a href="#cb119-8"></a>    rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,</span>
-<span id="cb119-9"><a href="#cb119-9"></a>    rush_100_yds<span class="sc">:</span>draftround, height<span class="sc">:</span>target_share_log) <span class="sc">%&gt;%</span> </span>
-<span id="cb119-10"><a href="#cb119-10"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(fantasy_points_ppr, ageCentered20, target_share_log)) <span class="co"># drop collinear variables</span></span>
-<span id="cb119-11"><a href="#cb119-11"></a></span>
-<span id="cb119-12"><a href="#cb119-12"></a>predictors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"targets"</span>,<span class="st">"receiving_yards"</span>,<span class="st">"receiving_air_yards"</span>,<span class="st">"receiving_yards_after_catch"</span>,<span class="st">"receiving_first_downs"</span>,<span class="st">"racr"</span>)</span>
-<span id="cb119-13"><a href="#cb119-13"></a></span>
-<span id="cb119-14"><a href="#cb119-14"></a>dataToImpute<span class="sc">$</span>player_id_integer <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">as.factor</span>(dataToImpute<span class="sc">$</span>player_id))</span>
-<span id="cb119-15"><a href="#cb119-15"></a></span>
-<span id="cb119-16"><a href="#cb119-16"></a>varsToImpute <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"age"</span>,<span class="st">"height"</span>,<span class="st">"weight"</span>,<span class="st">"target_share"</span>)</span>
-<span id="cb119-17"><a href="#cb119-17"></a>Y <span class="ot">&lt;-</span> varsToImpute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb118"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1"></a>numImputations <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb118-2"><a href="#cb118-2"></a></span>
+<span id="cb118-3"><a href="#cb118-3"></a>dataToImpute <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb118-4"><a href="#cb118-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb118-5"><a href="#cb118-5"></a>  <span class="fu">select</span>(player_id, position, <span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> </span>
+<span id="cb118-6"><a href="#cb118-6"></a>  <span class="fu">select</span>(</span>
+<span id="cb118-7"><a href="#cb118-7"></a>    player_id<span class="sc">:</span>games, carries<span class="sc">:</span>wopr, fantasy_points, fantasy_points_ppr,</span>
+<span id="cb118-8"><a href="#cb118-8"></a>    rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,</span>
+<span id="cb118-9"><a href="#cb118-9"></a>    rush_100_yds<span class="sc">:</span>draftround, height<span class="sc">:</span>target_share_log) <span class="sc">%&gt;%</span> </span>
+<span id="cb118-10"><a href="#cb118-10"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(fantasy_points_ppr, ageCentered20, target_share_log)) <span class="co"># drop collinear variables</span></span>
+<span id="cb118-11"><a href="#cb118-11"></a></span>
+<span id="cb118-12"><a href="#cb118-12"></a>predictors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"targets"</span>,<span class="st">"receiving_yards"</span>,<span class="st">"receiving_air_yards"</span>,<span class="st">"receiving_yards_after_catch"</span>,<span class="st">"receiving_first_downs"</span>,<span class="st">"racr"</span>)</span>
+<span id="cb118-13"><a href="#cb118-13"></a></span>
+<span id="cb118-14"><a href="#cb118-14"></a>dataToImpute<span class="sc">$</span>player_id_integer <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">as.factor</span>(dataToImpute<span class="sc">$</span>player_id))</span>
+<span id="cb118-15"><a href="#cb118-15"></a></span>
+<span id="cb118-16"><a href="#cb118-16"></a>varsToImpute <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"age"</span>,<span class="st">"height"</span>,<span class="st">"weight"</span>,<span class="st">"target_share"</span>)</span>
+<span id="cb118-17"><a href="#cb118-17"></a>Y <span class="ot">&lt;-</span> varsToImpute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, let’s specify the imputation method—we use the two-level predictive mean matching (<code>2l.pmm</code>) method from the <code>miceadds</code> package <span class="citation" data-cites="R-miceadds">(<a href="references.html#ref-R-miceadds" role="doc-biblioref">Robitzsch et al., 2024</a>)</span> to account for the nonindependent data (owing to multiple seasons per player):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb120"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1"></a>meth <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.method</span>(dataToImpute)</span>
-<span id="cb120-2"><a href="#cb120-2"></a>meth[<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(meth)] <span class="ot">&lt;-</span> <span class="st">""</span></span>
-<span id="cb120-3"><a href="#cb120-3"></a>meth[Y] <span class="ot">&lt;-</span> <span class="st">"2l.pmm"</span> <span class="co"># specify the imputation method here; this can differ by outcome variable</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb119"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1"></a>meth <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.method</span>(dataToImpute)</span>
+<span id="cb119-2"><a href="#cb119-2"></a>meth[<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(meth)] <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb119-3"><a href="#cb119-3"></a>meth[Y] <span class="ot">&lt;-</span> <span class="st">"2l.pmm"</span> <span class="co"># specify the imputation method here; this can differ by outcome variable</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, let’s specify the prediction matrix. A predictor matrix is a matrix of values, where:</p>
@@ -3463,30 +3453,30 @@ R-Square:
 </li>
 </ul>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb121"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1"></a>pred <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.predictorMatrix</span>(dataToImpute)</span>
-<span id="cb121-2"><a href="#cb121-2"></a>pred[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(pred), <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(pred)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb121-3"><a href="#cb121-3"></a>pred[Y, <span class="st">"player_id_integer"</span>] <span class="ot">&lt;-</span> (<span class="sc">-</span><span class="dv">2</span>) <span class="co"># cluster variable</span></span>
-<span id="cb121-4"><a href="#cb121-4"></a>pred[Y, predictors] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictors</span></span>
-<span id="cb121-5"><a href="#cb121-5"></a>pred[Y, <span class="st">"age"</span>] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># random effect predictor</span></span>
-<span id="cb121-6"><a href="#cb121-6"></a>pred[Y, Y] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictor</span></span>
-<span id="cb121-7"><a href="#cb121-7"></a></span>
-<span id="cb121-8"><a href="#cb121-8"></a><span class="fu">diag</span>(pred) <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb120"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1"></a>pred <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.predictorMatrix</span>(dataToImpute)</span>
+<span id="cb120-2"><a href="#cb120-2"></a>pred[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(pred), <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(pred)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb120-3"><a href="#cb120-3"></a>pred[Y, <span class="st">"player_id_integer"</span>] <span class="ot">&lt;-</span> (<span class="sc">-</span><span class="dv">2</span>) <span class="co"># cluster variable</span></span>
+<span id="cb120-4"><a href="#cb120-4"></a>pred[Y, predictors] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictors</span></span>
+<span id="cb120-5"><a href="#cb120-5"></a>pred[Y, <span class="st">"age"</span>] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># random effect predictor</span></span>
+<span id="cb120-6"><a href="#cb120-6"></a>pred[Y, Y] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictor</span></span>
+<span id="cb120-7"><a href="#cb120-7"></a></span>
+<span id="cb120-8"><a href="#cb120-8"></a><span class="fu">diag</span>(pred) <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, let’s run the imputation:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb122"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1"></a>imp <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">mice</span>(</span>
-<span id="cb122-2"><a href="#cb122-2"></a>  <span class="fu">as.data.frame</span>(dataToImpute),</span>
-<span id="cb122-3"><a href="#cb122-3"></a>  <span class="at">method =</span> meth,</span>
-<span id="cb122-4"><a href="#cb122-4"></a>  <span class="at">predictorMatrix =</span> pred,</span>
-<span id="cb122-5"><a href="#cb122-5"></a>  <span class="at">m =</span> numImputations,</span>
-<span id="cb122-6"><a href="#cb122-6"></a>  <span class="at">maxit =</span> <span class="dv">5</span>, <span class="co"># generally use 100 maximum iterations; this example uses 5 for speed</span></span>
-<span id="cb122-7"><a href="#cb122-7"></a>  <span class="at">seed =</span> <span class="dv">52242</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb121"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1"></a>imp <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">mice</span>(</span>
+<span id="cb121-2"><a href="#cb121-2"></a>  <span class="fu">as.data.frame</span>(dataToImpute),</span>
+<span id="cb121-3"><a href="#cb121-3"></a>  <span class="at">method =</span> meth,</span>
+<span id="cb121-4"><a href="#cb121-4"></a>  <span class="at">predictorMatrix =</span> pred,</span>
+<span id="cb121-5"><a href="#cb121-5"></a>  <span class="at">m =</span> numImputations,</span>
+<span id="cb121-6"><a href="#cb121-6"></a>  <span class="at">maxit =</span> <span class="dv">5</span>, <span class="co"># generally use 100 maximum iterations; this example uses 5 for speed</span></span>
+<span id="cb121-7"><a href="#cb121-7"></a>  <span class="at">seed =</span> <span class="dv">52242</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Below are some imputation diagnostics. Trace plots are in <a href="#fig-miTracePlots" class="quarto-xref">Figure&nbsp;<span>11.30</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb123"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1"></a><span class="fu">plot</span>(imp, <span class="fu">c</span>(<span class="st">"target_share"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb122"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1"></a><span class="fu">plot</span>(imp, <span class="fu">c</span>(<span class="st">"target_share"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-miTracePlots" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Trace plots from multiple imputation.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miTracePlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3500,7 +3490,7 @@ Figure&nbsp;11.30: Trace plots from multiple imputation.
 </div>
 <p>A density plot is in <a href="#fig-miDensityPlot" class="quarto-xref">Figure&nbsp;<span>11.31</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1"></a><span class="fu">densityplot</span>(imp, <span class="sc">~</span> target_share)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb123"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1"></a><span class="fu">densityplot</span>(imp, <span class="sc">~</span> target_share)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-miDensityPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Density plot from multiple imputation.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miDensityPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3515,33 +3505,35 @@ Figure&nbsp;11.31: Density plot from multiple imputation.
 <p>The imputated data does not match well the distribution of the observed data. Thus, it may be necessary to select a different imputation method for more accurate imputation.</p>
 <p>Now, let’s do some post-processing:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb125"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1"></a>imp_long <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">complete</span>(</span>
-<span id="cb125-2"><a href="#cb125-2"></a>  imp,</span>
-<span id="cb125-3"><a href="#cb125-3"></a>  <span class="at">action =</span> <span class="st">"long"</span>,</span>
-<span id="cb125-4"><a href="#cb125-4"></a>  <span class="at">include =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb125-5"><a href="#cb125-5"></a></span>
-<span id="cb125-6"><a href="#cb125-6"></a>imp_long<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(imp_long<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
-<span id="cb125-7"><a href="#cb125-7"></a></span>
-<span id="cb125-8"><a href="#cb125-8"></a>imp_long<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
-<span id="cb125-9"><a href="#cb125-9"></a>  yjTransformed,</span>
-<span id="cb125-10"><a href="#cb125-10"></a>  <span class="at">newdata =</span> imp_long[<span class="st">"fantasyPoints"</span>])<span class="sc">$</span>fantasyPoints</span>
-<span id="cb125-11"><a href="#cb125-11"></a></span>
-<span id="cb125-12"><a href="#cb125-12"></a>imp_mids <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">as.mids</span>(imp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1"></a>imp_long <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">complete</span>(</span>
+<span id="cb124-2"><a href="#cb124-2"></a>  imp,</span>
+<span id="cb124-3"><a href="#cb124-3"></a>  <span class="at">action =</span> <span class="st">"long"</span>,</span>
+<span id="cb124-4"><a href="#cb124-4"></a>  <span class="at">include =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb124-5"><a href="#cb124-5"></a></span>
+<span id="cb124-6"><a href="#cb124-6"></a>imp_long<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(imp_long<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb124-7"><a href="#cb124-7"></a></span>
+<span id="cb124-8"><a href="#cb124-8"></a>imp_long<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb124-9"><a href="#cb124-9"></a>  yjTransformed,</span>
+<span id="cb124-10"><a href="#cb124-10"></a>  <span class="at">newdata =</span> imp_long[<span class="st">"fantasyPoints"</span>])<span class="sc">$</span>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'predict': object 'yjTransformed' not found</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb126"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1"></a>imp_mids <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">as.mids</span>(imp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now let’s estimate multiple regression with the multiply imputed data:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb126"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1"></a>imp_regression <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
-<span id="cb126-2"><a href="#cb126-2"></a>  imp_mids,</span>
-<span id="cb126-3"><a href="#cb126-3"></a>  <span class="fu">lm</span>(</span>
-<span id="cb126-4"><a href="#cb126-4"></a>    fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share_log)</span>
-<span id="cb126-5"><a href="#cb126-5"></a>  )</span>
-<span id="cb126-6"><a href="#cb126-6"></a></span>
-<span id="cb126-7"><a href="#cb126-7"></a><span class="fu">summary</span>(mice<span class="sc">::</span><span class="fu">pool</span>(imp_regression))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb127"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1"></a>imp_regression <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb127-2"><a href="#cb127-2"></a>  imp_mids,</span>
+<span id="cb127-3"><a href="#cb127-3"></a>  <span class="fu">lm</span>(</span>
+<span id="cb127-4"><a href="#cb127-4"></a>    fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share_log)</span>
+<span id="cb127-5"><a href="#cb127-5"></a>  )</span>
+<span id="cb127-6"><a href="#cb127-6"></a></span>
+<span id="cb127-7"><a href="#cb127-7"></a><span class="fu">summary</span>(mice<span class="sc">::</span><span class="fu">pool</span>(imp_regression))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["term"],"name":[1],"type":["fct"],"align":["left"]},{"label":["estimate"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["std.error"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["statistic"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"(Intercept)","2":"0.471652299","3":"0.927650110","4":"0.5084377","5":"1457.5798","6":"6.112234e-01"},{"1":"age","2":"0.080912501","3":"0.008445045","4":"9.5810619","5":"1351.7639","6":"4.409273e-21"},{"1":"height","2":"-0.010178059","3":"0.016370414","4":"-0.6217350","5":"1051.0276","6":"5.342510e-01"},{"1":"weight","2":"0.009757019","3":"0.002543316","4":"3.8363378","5":"2925.1406","6":"1.275208e-04"},{"1":"target_share_log","2":"24.272436483","3":"0.369227888","4":"65.7383617","5":"113.2331","6":"4.956508e-92"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["term"],"name":[1],"type":["fct"],"align":["left"]},{"label":["estimate"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["std.error"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["statistic"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"(Intercept)","2":"-1.776115288","3":"0.383352474","4":"-4.6331129","5":"1408.1844","6":"3.935070e-06"},{"1":"age","2":"0.033331886","3":"0.003489931","4":"9.5508724","5":"1307.0007","6":"6.088406e-21"},{"1":"height","2":"-0.003527271","3":"0.006766403","4":"-0.5212918","5":"1008.8915","6":"6.022779e-01"},{"1":"weight","2":"0.004138453","3":"0.001051036","4":"3.9374969","5":"2810.5492","6":"8.433558e-05"},{"1":"target_share_log","2":"10.154447725","3":"0.153607756","4":"66.1063475","5":"100.4433","6":"1.311165e-84"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -3550,25 +3542,25 @@ Figure&nbsp;11.31: Density plot from multiple imputation.
 <span class="header-section-number">11.11.3</span> Full Information Maximum Likelihood</h3>
 <p>Full information maximum likelihood (FIML) estimates model parameters using all available data for each case, without imputing missing values. FIML is commonly used for handling missingness in approaches to latent variable modeling, such as <a href="factor-analysis.html">factor analysis</a> and structural equation modeling. We can estimate a regression model that uses full information maximum likelihood using the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb127"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1"></a>fimlRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb127-2"><a href="#cb127-2"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
-<span id="cb127-3"><a href="#cb127-3"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
-<span id="cb127-4"><a href="#cb127-4"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
-<span id="cb127-5"><a href="#cb127-5"></a><span class="st">'</span></span>
-<span id="cb127-6"><a href="#cb127-6"></a></span>
-<span id="cb127-7"><a href="#cb127-7"></a>fimlRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb127-8"><a href="#cb127-8"></a>  fimlRegression_syntax,</span>
-<span id="cb127-9"><a href="#cb127-9"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb127-10"><a href="#cb127-10"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb127-11"><a href="#cb127-11"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span></span>
-<span id="cb127-12"><a href="#cb127-12"></a>)</span>
-<span id="cb127-13"><a href="#cb127-13"></a></span>
-<span id="cb127-14"><a href="#cb127-14"></a><span class="fu">summary</span>(</span>
-<span id="cb127-15"><a href="#cb127-15"></a>  fimlRegression_fit,</span>
-<span id="cb127-16"><a href="#cb127-16"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb127-17"><a href="#cb127-17"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb128"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1"></a>fimlRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb128-2"><a href="#cb128-2"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
+<span id="cb128-3"><a href="#cb128-3"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
+<span id="cb128-4"><a href="#cb128-4"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
+<span id="cb128-5"><a href="#cb128-5"></a><span class="st">'</span></span>
+<span id="cb128-6"><a href="#cb128-6"></a></span>
+<span id="cb128-7"><a href="#cb128-7"></a>fimlRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb128-8"><a href="#cb128-8"></a>  fimlRegression_syntax,</span>
+<span id="cb128-9"><a href="#cb128-9"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb128-10"><a href="#cb128-10"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb128-11"><a href="#cb128-11"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span></span>
+<span id="cb128-12"><a href="#cb128-12"></a>)</span>
+<span id="cb128-13"><a href="#cb128-13"></a></span>
+<span id="cb128-14"><a href="#cb128-14"></a><span class="fu">summary</span>(</span>
+<span id="cb128-15"><a href="#cb128-15"></a>  fimlRegression_fit,</span>
+<span id="cb128-16"><a href="#cb128-16"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb128-17"><a href="#cb128-17"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>lavaan 0.6-19 ended normally after 58 iterations
+<pre><code>lavaan 0.6-19 ended normally after 48 iterations
 
   Estimator                                         ML
   Optimization method                           NLMINB
@@ -3591,66 +3583,66 @@ Parameter Estimates:
 Regressions:
                               Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv
   fantasyPoints_transformed ~                                             
-    age                          0.040    0.007    5.443    0.000    0.040
-    height                      -0.003    0.014   -0.212    0.832   -0.003
-    weight                       0.004    0.002    1.741    0.082    0.004
-    target_shar_lg              27.770    0.285   97.531    0.000   27.770
+    age                          0.016    0.003    5.375    0.000    0.016
+    height                      -0.000    0.006   -0.065    0.948   -0.000
+    weight                       0.002    0.001    1.853    0.064    0.002
+    target_shar_lg              11.614    0.117   98.894    0.000   11.614
   Std.all
          
-    0.046
-   -0.003
-    0.021
-    0.813
+    0.045
+   -0.001
+    0.022
+    0.816
 
 Covariances:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
   age ~~                                                                
-    height           -0.297    0.101   -2.945    0.003   -0.297   -0.040
+    height           -0.297    0.101   -2.946    0.003   -0.297   -0.040
     weight           -0.155    0.637   -0.243    0.808   -0.155   -0.003
-    target_shar_lg    0.037    0.004   10.100    0.000    0.037    0.145
+    target_shar_lg    0.037    0.004   10.115    0.000    0.037    0.145
   height ~~                                                             
-    weight           24.979    0.584   42.755    0.000   24.979    0.716
-    target_shar_lg    0.016    0.003    5.808    0.000    0.016    0.082
+    weight           24.979    0.584   42.756    0.000   24.979    0.716
+    target_shar_lg    0.016    0.003    5.827    0.000    0.016    0.082
   weight ~~                                                             
-    target_shar_lg    0.152    0.017    8.931    0.000    0.152    0.127
+    target_shar_lg    0.152    0.017    8.957    0.000    0.152    0.127
 
 Intercepts:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
-   .fntsyPnts_trns    1.704    0.796    2.142    0.032    1.704    0.616
-    age              26.254    0.043  611.427    0.000   26.254    8.329
-    height           72.606    0.032 2269.504    0.000   72.606   30.916
-    weight          200.480    0.202  991.395    0.000  200.480   13.505
-    target_shar_lg    0.081    0.001   70.753    0.000    0.081    0.997
+   .fntsyPnts_trns   -1.277    0.328   -3.891    0.000   -1.277   -1.109
+    age              26.254    0.043  611.422    0.000   26.254    8.329
+    height           72.606    0.032 2269.513    0.000   72.606   30.916
+    weight          200.480    0.202  991.398    0.000  200.480   13.505
+    target_shar_lg    0.081    0.001   70.829    0.000    0.081    0.997
 
 Variances:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
-   .fntsyPnts_trns    2.467    0.052   47.691    0.000    2.467    0.322
-    age               9.936    0.191   51.909    0.000    9.936    1.000
-    height            5.516    0.106   51.908    0.000    5.516    1.000
-    weight          220.372    4.245   51.908    0.000  220.372    1.000
-    target_shar_lg    0.007    0.000   49.109    0.000    0.007    1.000
+   .fntsyPnts_trns    0.419    0.009   47.679    0.000    0.419    0.316
+    age               9.936    0.191   51.908    0.000    9.936    1.000
+    height            5.515    0.106   51.909    0.000    5.515    1.000
+    weight          220.370    4.245   51.909    0.000  220.370    1.000
+    target_shar_lg    0.007    0.000   49.154    0.000    0.007    1.000
 
 R-Square:
                    Estimate
-    fntsyPnts_trns    0.678</code></pre>
+    fntsyPnts_trns    0.684</code></pre>
 </div>
 </div>
 </section></section><section id="sec-multipleRegressionNonIndependence" class="level2" data-number="11.12"><h2 data-number="11.12" class="anchored" data-anchor-id="sec-multipleRegressionNonIndependence">
 <span class="header-section-number">11.12</span> Addressing Non-Independence of Observations</h2>
 <p>Please note that the <span class="math inline">\(p\)</span>-value for regression coefficients assumes that the observations are independent—in particular, that the residuals are not correlated. However, the observations are not independent in the <code>player_stats_seasonal</code> dataframe used above, because the same player has multiple rows—one row corresponding to each season they played. This non-independence violates the traditional assumptions of the significance of regression coefficients. We could address this assumption by analyzing only one season from each player or by estimating the significance of the regression coefficients using cluster-robust standard errors. For simplicity in the models above, we present results above from the whole dataframe. In <a href="mixed-models.html" class="quarto-xref"><span>Chapter 12</span></a>, we discuss <a href="mixed-models.html">mixed model</a> approaches that handle repeated measures and other data that violate assumptions of non-independence. Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors with the <code>rms</code> package <span class="citation" data-cites="R-rms">(<a href="references.html#ref-R-rms" role="doc-biblioref">Harrell, Jr., 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb129"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1"></a>player_stats_seasonal_subset <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb129-2"><a href="#cb129-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb129-3"><a href="#cb129-3"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
-<span id="cb129-4"><a href="#cb129-4"></a></span>
-<span id="cb129-5"><a href="#cb129-5"></a>regressionWithClusterVariable <span class="ot">&lt;-</span> rms<span class="sc">::</span><span class="fu">robcov</span>(rms<span class="sc">::</span><span class="fu">ols</span>(</span>
-<span id="cb129-6"><a href="#cb129-6"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb129-7"><a href="#cb129-7"></a>  <span class="at">data =</span> player_stats_seasonal_subset,</span>
-<span id="cb129-8"><a href="#cb129-8"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb129-9"><a href="#cb129-9"></a>  <span class="at">y =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb129-10"><a href="#cb129-10"></a>  <span class="at">cluster =</span> player_stats_seasonal_subset<span class="sc">$</span>player_id) <span class="co">#account for nested data within player</span></span>
-<span id="cb129-11"><a href="#cb129-11"></a></span>
-<span id="cb129-12"><a href="#cb129-12"></a>regressionWithClusterVariable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb130"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1"></a>player_stats_seasonal_subset <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb130-2"><a href="#cb130-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb130-3"><a href="#cb130-3"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
+<span id="cb130-4"><a href="#cb130-4"></a></span>
+<span id="cb130-5"><a href="#cb130-5"></a>regressionWithClusterVariable <span class="ot">&lt;-</span> rms<span class="sc">::</span><span class="fu">robcov</span>(rms<span class="sc">::</span><span class="fu">ols</span>(</span>
+<span id="cb130-6"><a href="#cb130-6"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb130-7"><a href="#cb130-7"></a>  <span class="at">data =</span> player_stats_seasonal_subset,</span>
+<span id="cb130-8"><a href="#cb130-8"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb130-9"><a href="#cb130-9"></a>  <span class="at">y =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb130-10"><a href="#cb130-10"></a>  <span class="at">cluster =</span> player_stats_seasonal_subset<span class="sc">$</span>player_id) <span class="co">#account for nested data within player</span></span>
+<span id="cb130-11"><a href="#cb130-11"></a></span>
+<span id="cb130-12"><a href="#cb130-12"></a>regressionWithClusterVariable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Frequencies of Missing Values Due to Each Variable
 fantasyPoints_transformed                       age                    height 
@@ -3666,28 +3658,28 @@ rms::ols(formula = fantasyPoints_transformed ~ age + height +
 
                                                       Model Likelihood    Discrimination    
                                                             Ratio Test           Indexes    
- Obs                                        4437    LR chi2    5009.98    R2       0.677    
- sigma                                    1.5744    d.f.             4    R2 adj   0.676    
- d.f.                                       4432    Pr(&gt; chi2)  0.0000    g        2.428    
+ Obs                                        4437    LR chi2    5098.25    R2       0.683    
+ sigma                                    0.6490    d.f.             4    R2 adj   0.683    
+ d.f.                                       4432    Pr(&gt; chi2)  0.0000    g        1.016    
 Cluster onplayer_stats_seasonal_subset$player_id                                            
  Clusters                                   1292                                            
 
 Residuals
 
      Min       1Q   Median       3Q      Max 
--18.3306  -0.6618   0.2290   0.8845   6.7486 
+-7.68982 -0.23138  0.07868  0.33270  3.03276 
 
              Coef    S.E.   t     Pr(&gt;|t|)
-Intercept     2.3735 1.0482  2.26 0.0236  
-age           0.0337 0.0089  3.78 0.0002  
-height       -0.0092 0.0183 -0.50 0.6171  
-weight        0.0036 0.0027  1.34 0.1789  
-target_share 27.8669 1.0949 25.45 &lt;0.0001 </code></pre>
+Intercept    -1.0024 0.4302 -2.33 0.0198  
+age           0.0137 0.0036  3.76 0.0002  
+height       -0.0029 0.0075 -0.39 0.6998  
+weight        0.0016 0.0011  1.43 0.1531  
+target_share 11.6558 0.4596 25.36 &lt;0.0001 </code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb131"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(regressionWithClusterVariable)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb132"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(regressionWithClusterVariable)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># R2 for Linear Regression
-  R2: 0.677</code></pre>
+  R2: 0.683</code></pre>
 </div>
 </div>
 </section><section id="sec-multipleRegressionOutliers" class="level2" data-number="11.13"><h2 data-number="11.13" class="anchored" data-anchor-id="sec-multipleRegressionOutliers">
@@ -3697,12 +3689,12 @@ target_share 27.8669 1.0949 25.45 &lt;0.0001 </code></pre>
 <span class="header-section-number">11.13.1</span> Robust Regression</h3>
 <p>To address outliers, there are various approaches to robust regression. One approach is to use an MM-type estimator, such as is used in the <code><a href="https://rdrr.io/pkg/robustbase/man/lmrob.html">robustbase::lmrob()</a></code> and <code><a href="https://rdrr.io/pkg/robustbase/man/glmrob.html">robustbase::glmrob()</a></code> functions of the <code>robustbase</code> package <span class="citation" data-cites="R-robustbase Todorov2009_packages">(<a href="references.html#ref-R-robustbase" role="doc-biblioref">Maechler et al., 2024</a>; <a href="references.html#ref-Todorov2009_packages" role="doc-biblioref">Todorov &amp; Filzmoser, 2009</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb133"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1"></a>robustRegression <span class="ot">&lt;-</span> robustbase<span class="sc">::</span><span class="fu">lmrob</span>(</span>
-<span id="cb133-2"><a href="#cb133-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb133-3"><a href="#cb133-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
-<span id="cb133-4"><a href="#cb133-4"></a>)</span>
-<span id="cb133-5"><a href="#cb133-5"></a></span>
-<span id="cb133-6"><a href="#cb133-6"></a><span class="fu">summary</span>(robustRegression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1"></a>robustRegression <span class="ot">&lt;-</span> robustbase<span class="sc">::</span><span class="fu">lmrob</span>(</span>
+<span id="cb134-2"><a href="#cb134-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb134-3"><a href="#cb134-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
+<span id="cb134-4"><a href="#cb134-4"></a>)</span>
+<span id="cb134-5"><a href="#cb134-5"></a></span>
+<span id="cb134-6"><a href="#cb134-6"></a><span class="fu">summary</span>(robustRegression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3711,30 +3703,30 @@ robustbase::lmrob(formula = fantasyPoints_transformed ~ age + height + weight +
     c("WR")))
  \--&gt; method = "MM"
 Residuals:
-     Min       1Q   Median       3Q      Max 
--20.8013  -0.7763   0.1021   0.7743   7.0129 
+    Min      1Q  Median      3Q     Max 
+-8.5424 -0.2885  0.0131  0.2655  3.0997 
 
 Coefficients:
                            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)               3.9267186  0.6750051   5.817  6.4e-09 ***
-age                       0.0033425  0.0056495   0.592    0.554    
-height                   -0.0146743  0.0120894  -1.214    0.225    
-weight                    0.0006476  0.0018724   0.346    0.729    
-I(log(target_share + 1)) 31.7037140  0.3244958  97.701  &lt; 2e-16 ***
+(Intercept)              -0.2041773  0.2341573  -0.872    0.383    
+age                       0.0001486  0.0020360   0.073    0.942    
+height                   -0.0056493  0.0041741  -1.353    0.176    
+weight                    0.0001317  0.0006516   0.202    0.840    
+I(log(target_share + 1)) 12.9291586  0.1110105 116.468   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 1.053 
+Robust residual standard error: 0.4013 
   (952 observations deleted due to missingness)
-Multiple R-squared:  0.8088,    Adjusted R-squared:  0.8086 
-Convergence in 15 IRWLS iterations
+Multiple R-squared:  0.8469,    Adjusted R-squared:  0.8468 
+Convergence in 13 IRWLS iterations
 
 Robustness weights: 
- 56 observations c(134,175,221,260,277,343,368,480,481,705,706,1059,1094,1114,1130,1131,1186,1314,1315,1350,1425,1437,1486,1513,1549,1699,2172,2188,2203,2228,2264,2437,2577,2636,2671,2745,2779,2787,2918,2946,3251,3260,3428,3508,3551,3669,3697,3788,3905,3920,3921,4042,4061,4158,4242,4372)
+ 68 observations c(134,164,175,221,260,277,343,368,374,480,481,705,706,1059,1094,1114,1130,1131,1186,1234,1314,1315,1350,1425,1437,1486,1513,1549,1699,1786,1960,2143,2172,2188,2203,2222,2228,2264,2413,2437,2469,2577,2636,2671,2745,2779,2787,2918,2946,3120,3251,3260,3428,3508,3550,3551,3668,3669,3697,3788,3905,3920,3921,4042,4061,4158,4242,4372)
      are outliers with |weight| = 0 ( &lt; 2.3e-05); 
- 332 weights are ~= 1. The remaining 4049 ones are summarized as
+ 378 weights are ~= 1. The remaining 3991 ones are summarized as
      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-0.0004601 0.8472000 0.9408000 0.8754000 0.9837000 0.9990000 
+0.0002297 0.8587000 0.9494000 0.8689000 0.9864000 0.9990000 
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         1.548e+00         5.000e-01         4.685e+00         1.000e-07 
@@ -3758,105 +3750,105 @@ seed : int(0) </code></pre>
 <p>Another approach to handling outliers is to use boostrapping, which involves fitting models to various bootstrap resamples of the data. Bootstrap samples are datasets generated by sampling repeatedly with replacement.</p>
 <p>We set up the bootstrap folds using the <code><a href="https://rsample.tidymodels.org/reference/bootstraps.html">rsample::bootstraps()</a></code> function of the <code>rsample</code> package <span class="citation" data-cites="R-rsample">(<a href="references.html#ref-R-rsample" role="doc-biblioref">Frick et al., 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb135"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
-<span id="cb135-2"><a href="#cb135-2"></a>bootstrapSamples <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
-<span id="cb135-3"><a href="#cb135-3"></a></span>
-<span id="cb135-4"><a href="#cb135-4"></a><span class="co"># Create bootstrap resamples (with apparent = TRUE)</span></span>
-<span id="cb135-5"><a href="#cb135-5"></a>boots <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">bootstraps</span>(</span>
-<span id="cb135-6"><a href="#cb135-6"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb135-7"><a href="#cb135-7"></a>  <span class="at">times =</span> bootstrapSamples,</span>
-<span id="cb135-8"><a href="#cb135-8"></a>  <span class="at">apparent =</span> <span class="cn">TRUE</span></span>
-<span id="cb135-9"><a href="#cb135-9"></a>)</span>
-<span id="cb135-10"><a href="#cb135-10"></a></span>
-<span id="cb135-11"><a href="#cb135-11"></a><span class="co"># Define recipe</span></span>
-<span id="cb135-12"><a href="#cb135-12"></a>rec <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(</span>
-<span id="cb135-13"><a href="#cb135-13"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share,</span>
-<span id="cb135-14"><a href="#cb135-14"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
-<span id="cb135-15"><a href="#cb135-15"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb135-16"><a href="#cb135-16"></a>  recipes<span class="sc">::</span><span class="fu">step_log</span>(target_share, <span class="at">offset =</span> <span class="dv">1</span>) <span class="co"># replace I(log(target_share + 1))</span></span>
-<span id="cb135-17"><a href="#cb135-17"></a></span>
-<span id="cb135-18"><a href="#cb135-18"></a><span class="co"># Define model spec and workflow</span></span>
-<span id="cb135-19"><a href="#cb135-19"></a>lm_spec <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb135-20"><a href="#cb135-20"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb135-21"><a href="#cb135-21"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
-<span id="cb135-22"><a href="#cb135-22"></a></span>
-<span id="cb135-23"><a href="#cb135-23"></a>lm_workflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb135-24"><a href="#cb135-24"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(rec) <span class="sc">%&gt;%</span></span>
-<span id="cb135-25"><a href="#cb135-25"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_spec)</span>
-<span id="cb135-26"><a href="#cb135-26"></a></span>
-<span id="cb135-27"><a href="#cb135-27"></a><span class="co"># Function for fitting the models on the bootstrap samples</span></span>
-<span id="cb135-28"><a href="#cb135-28"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(split, ...) {</span>
-<span id="cb135-29"><a href="#cb135-29"></a>  analysis_data <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">analysis</span>(split)</span>
-<span id="cb135-30"><a href="#cb135-30"></a>  fit <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">fit</span>(lm_workflow, <span class="at">data =</span> analysis_data)</span>
-<span id="cb135-31"><a href="#cb135-31"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(fit)</span>
-<span id="cb135-32"><a href="#cb135-32"></a>}</span>
-<span id="cb135-33"><a href="#cb135-33"></a></span>
-<span id="cb135-34"><a href="#cb135-34"></a><span class="co"># Fit bootstrap models and save results</span></span>
-<span id="cb135-35"><a href="#cb135-35"></a>boot_models <span class="ot">&lt;-</span> boots <span class="sc">%&gt;%</span></span>
-<span id="cb135-36"><a href="#cb135-36"></a>  <span class="fu">mutate</span>(<span class="at">coef_info =</span> purrr<span class="sc">::</span><span class="fu">map</span>(splits, fit_lm))</span>
-<span id="cb135-37"><a href="#cb135-37"></a></span>
-<span id="cb135-38"><a href="#cb135-38"></a><span class="co"># Extract bootstrapped coefficient estimates</span></span>
-<span id="cb135-39"><a href="#cb135-39"></a>boot_coefs <span class="ot">&lt;-</span> boot_models <span class="sc">%&gt;%</span></span>
-<span id="cb135-40"><a href="#cb135-40"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(coef_info)</span>
-<span id="cb135-41"><a href="#cb135-41"></a></span>
-<span id="cb135-42"><a href="#cb135-42"></a><span class="co"># Percentile confidence intervals</span></span>
-<span id="cb135-43"><a href="#cb135-43"></a>percentile_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_pctl</span>(</span>
-<span id="cb135-44"><a href="#cb135-44"></a>  <span class="at">.data =</span> boot_models,</span>
-<span id="cb135-45"><a href="#cb135-45"></a>  <span class="at">statistics =</span> coef_info)</span>
-<span id="cb135-46"><a href="#cb135-46"></a></span>
-<span id="cb135-47"><a href="#cb135-47"></a><span class="co"># Bias-corrected and accelerated confidence intervals</span></span>
-<span id="cb135-48"><a href="#cb135-48"></a>bca_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_bca</span>(</span>
-<span id="cb135-49"><a href="#cb135-49"></a>  <span class="at">.data =</span> boot_models,</span>
-<span id="cb135-50"><a href="#cb135-50"></a>  <span class="at">statistics =</span> coef_info,</span>
-<span id="cb135-51"><a href="#cb135-51"></a>  <span class="at">.fn =</span> fit_lm</span>
-<span id="cb135-52"><a href="#cb135-52"></a>)</span>
-<span id="cb135-53"><a href="#cb135-53"></a></span>
-<span id="cb135-54"><a href="#cb135-54"></a><span class="co"># View confidence intervals</span></span>
-<span id="cb135-55"><a href="#cb135-55"></a>percentile_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
+<span id="cb136-2"><a href="#cb136-2"></a>bootstrapSamples <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb136-3"><a href="#cb136-3"></a></span>
+<span id="cb136-4"><a href="#cb136-4"></a><span class="co"># Create bootstrap resamples (with apparent = TRUE)</span></span>
+<span id="cb136-5"><a href="#cb136-5"></a>boots <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">bootstraps</span>(</span>
+<span id="cb136-6"><a href="#cb136-6"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb136-7"><a href="#cb136-7"></a>  <span class="at">times =</span> bootstrapSamples,</span>
+<span id="cb136-8"><a href="#cb136-8"></a>  <span class="at">apparent =</span> <span class="cn">TRUE</span></span>
+<span id="cb136-9"><a href="#cb136-9"></a>)</span>
+<span id="cb136-10"><a href="#cb136-10"></a></span>
+<span id="cb136-11"><a href="#cb136-11"></a><span class="co"># Define recipe</span></span>
+<span id="cb136-12"><a href="#cb136-12"></a>rec <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(</span>
+<span id="cb136-13"><a href="#cb136-13"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share,</span>
+<span id="cb136-14"><a href="#cb136-14"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
+<span id="cb136-15"><a href="#cb136-15"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb136-16"><a href="#cb136-16"></a>  recipes<span class="sc">::</span><span class="fu">step_log</span>(target_share, <span class="at">offset =</span> <span class="dv">1</span>) <span class="co"># replace I(log(target_share + 1))</span></span>
+<span id="cb136-17"><a href="#cb136-17"></a></span>
+<span id="cb136-18"><a href="#cb136-18"></a><span class="co"># Define model spec and workflow</span></span>
+<span id="cb136-19"><a href="#cb136-19"></a>lm_spec <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb136-20"><a href="#cb136-20"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb136-21"><a href="#cb136-21"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb136-22"><a href="#cb136-22"></a></span>
+<span id="cb136-23"><a href="#cb136-23"></a>lm_workflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb136-24"><a href="#cb136-24"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(rec) <span class="sc">%&gt;%</span></span>
+<span id="cb136-25"><a href="#cb136-25"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_spec)</span>
+<span id="cb136-26"><a href="#cb136-26"></a></span>
+<span id="cb136-27"><a href="#cb136-27"></a><span class="co"># Function for fitting the models on the bootstrap samples</span></span>
+<span id="cb136-28"><a href="#cb136-28"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(split, ...) {</span>
+<span id="cb136-29"><a href="#cb136-29"></a>  analysis_data <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">analysis</span>(split)</span>
+<span id="cb136-30"><a href="#cb136-30"></a>  fit <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">fit</span>(lm_workflow, <span class="at">data =</span> analysis_data)</span>
+<span id="cb136-31"><a href="#cb136-31"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(fit)</span>
+<span id="cb136-32"><a href="#cb136-32"></a>}</span>
+<span id="cb136-33"><a href="#cb136-33"></a></span>
+<span id="cb136-34"><a href="#cb136-34"></a><span class="co"># Fit bootstrap models and save results</span></span>
+<span id="cb136-35"><a href="#cb136-35"></a>boot_models <span class="ot">&lt;-</span> boots <span class="sc">%&gt;%</span></span>
+<span id="cb136-36"><a href="#cb136-36"></a>  <span class="fu">mutate</span>(<span class="at">coef_info =</span> purrr<span class="sc">::</span><span class="fu">map</span>(splits, fit_lm))</span>
+<span id="cb136-37"><a href="#cb136-37"></a></span>
+<span id="cb136-38"><a href="#cb136-38"></a><span class="co"># Extract bootstrapped coefficient estimates</span></span>
+<span id="cb136-39"><a href="#cb136-39"></a>boot_coefs <span class="ot">&lt;-</span> boot_models <span class="sc">%&gt;%</span></span>
+<span id="cb136-40"><a href="#cb136-40"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(coef_info)</span>
+<span id="cb136-41"><a href="#cb136-41"></a></span>
+<span id="cb136-42"><a href="#cb136-42"></a><span class="co"># Percentile confidence intervals</span></span>
+<span id="cb136-43"><a href="#cb136-43"></a>percentile_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_pctl</span>(</span>
+<span id="cb136-44"><a href="#cb136-44"></a>  <span class="at">.data =</span> boot_models,</span>
+<span id="cb136-45"><a href="#cb136-45"></a>  <span class="at">statistics =</span> coef_info)</span>
+<span id="cb136-46"><a href="#cb136-46"></a></span>
+<span id="cb136-47"><a href="#cb136-47"></a><span class="co"># Bias-corrected and accelerated confidence intervals</span></span>
+<span id="cb136-48"><a href="#cb136-48"></a>bca_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_bca</span>(</span>
+<span id="cb136-49"><a href="#cb136-49"></a>  <span class="at">.data =</span> boot_models,</span>
+<span id="cb136-50"><a href="#cb136-50"></a>  <span class="at">statistics =</span> coef_info,</span>
+<span id="cb136-51"><a href="#cb136-51"></a>  <span class="at">.fn =</span> fit_lm</span>
+<span id="cb136-52"><a href="#cb136-52"></a>)</span>
+<span id="cb136-53"><a href="#cb136-53"></a></span>
+<span id="cb136-54"><a href="#cb136-54"></a><span class="co"># View confidence intervals</span></span>
+<span id="cb136-55"><a href="#cb136-55"></a>percentile_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":[".lower"],"name":[2],"type":["dbl"],"align":["right"]},{"label":[".estimate"],"name":[3],"type":["dbl"],"align":["right"]},{"label":[".upper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":[".alpha"],"name":[5],"type":["dbl"],"align":["right"]},{"label":[".method"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"(Intercept)","2":"0.7369273451","3":"2.406487641","4":"4.091332302","5":"0.05","6":"percentile"},{"1":"age","2":"0.0171421145","3":"0.033563100","4":"0.050252799","5":"0.05","6":"percentile"},{"1":"height","2":"-0.0401659258","3":"-0.009677881","4":"0.020670424","5":"0.05","6":"percentile"},{"1":"target_share","2":"26.0293608204","3":"27.914049300","4":"29.775478919","5":"0.05","6":"percentile"},{"1":"weight","2":"-0.0007009008","3":"0.003666608","4":"0.008002306","5":"0.05","6":"percentile"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":[".lower"],"name":[2],"type":["dbl"],"align":["right"]},{"label":[".estimate"],"name":[3],"type":["dbl"],"align":["right"]},{"label":[".upper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":[".alpha"],"name":[5],"type":["dbl"],"align":["right"]},{"label":[".method"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"(Intercept)","2":"-1.6916168936","3":"-0.988722343","4":"-0.284690679","5":"0.05","6":"percentile"},{"1":"age","2":"0.0068215245","3":"0.013650336","4":"0.020368190","5":"0.05","6":"percentile"},{"1":"height","2":"-0.0159039342","3":"-0.003116373","4":"0.009543703","5":"0.05","6":"percentile"},{"1":"target_share","2":"10.8858918872","3":"11.675710115","4":"12.455239383","5":"0.05","6":"percentile"},{"1":"weight","2":"-0.0001844542","3":"0.001609894","4":"0.003442048","5":"0.05","6":"percentile"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a>bca_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a>bca_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":[".lower"],"name":[2],"type":["dbl"],"align":["right"]},{"label":[".estimate"],"name":[3],"type":["dbl"],"align":["right"]},{"label":[".upper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":[".alpha"],"name":[5],"type":["dbl"],"align":["right"]},{"label":[".method"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"(Intercept)","2":"0.6816791085","3":"2.406487641","4":"4.032547015","5":"0.05","6":"BCa"},{"1":"age","2":"0.0183483367","3":"0.033563100","4":"0.050985370","5":"0.05","6":"BCa"},{"1":"height","2":"-0.0390665178","3":"-0.009677881","4":"0.021060204","5":"0.05","6":"BCa"},{"1":"weight","2":"-0.0007771743","3":"0.003666608","4":"0.007944101","5":"0.05","6":"BCa"},{"1":"target_share","2":"25.7948232046","3":"27.914049300","4":"29.570016286","5":"0.05","6":"BCa"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":[".lower"],"name":[2],"type":["dbl"],"align":["right"]},{"label":[".estimate"],"name":[3],"type":["dbl"],"align":["right"]},{"label":[".upper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":[".alpha"],"name":[5],"type":["dbl"],"align":["right"]},{"label":[".method"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"(Intercept)","2":"-1.7255468931","3":"-0.988722343","4":"-0.313488623","5":"0.05","6":"BCa"},{"1":"age","2":"0.0073574202","3":"0.013650336","4":"0.020939553","5":"0.05","6":"BCa"},{"1":"height","2":"-0.0155382230","3":"-0.003116373","4":"0.009865642","5":"0.05","6":"BCa"},{"1":"weight","2":"-0.0001938237","3":"0.001609894","4":"0.003419203","5":"0.05","6":"BCa"},{"1":"target_share","2":"10.7933476906","3":"11.675710115","4":"12.370332420","5":"0.05","6":"BCa"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
 </div>
 <p>The distributions of the regression coefficients across boostraps are depicted in <a href="#fig-bootstrapRegressionCoefficients" class="quarto-xref">Figure&nbsp;<span>11.32</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a><span class="fu">ggplot</span>(</span>
-<span id="cb137-2"><a href="#cb137-2"></a>  <span class="at">data =</span> boot_coefs,</span>
-<span id="cb137-3"><a href="#cb137-3"></a>  <span class="fu">aes</span>(<span class="at">x =</span> estimate)) <span class="sc">+</span></span>
-<span id="cb137-4"><a href="#cb137-4"></a>  <span class="fu">geom_histogram</span>(</span>
-<span id="cb137-5"><a href="#cb137-5"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
-<span id="cb137-6"><a href="#cb137-6"></a>    <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb137-7"><a href="#cb137-7"></a>  <span class="fu">facet_wrap</span>(</span>
-<span id="cb137-8"><a href="#cb137-8"></a>    <span class="sc">~</span> term,</span>
-<span id="cb137-9"><a href="#cb137-9"></a>    <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb137-10"><a href="#cb137-10"></a>  <span class="fu">geom_vline</span>(</span>
-<span id="cb137-11"><a href="#cb137-11"></a>    <span class="at">data =</span> percentile_intervals,</span>
-<span id="cb137-12"><a href="#cb137-12"></a>    <span class="fu">aes</span>(</span>
-<span id="cb137-13"><a href="#cb137-13"></a>      <span class="at">xintercept =</span> .lower),</span>
-<span id="cb137-14"><a href="#cb137-14"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
-<span id="cb137-15"><a href="#cb137-15"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb137-16"><a href="#cb137-16"></a>  <span class="fu">geom_vline</span>(</span>
-<span id="cb137-17"><a href="#cb137-17"></a>    <span class="at">data =</span> percentile_intervals,</span>
-<span id="cb137-18"><a href="#cb137-18"></a>    <span class="fu">aes</span>(</span>
-<span id="cb137-19"><a href="#cb137-19"></a>      <span class="at">xintercept =</span> .upper),</span>
-<span id="cb137-20"><a href="#cb137-20"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
-<span id="cb137-21"><a href="#cb137-21"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb137-22"><a href="#cb137-22"></a>  <span class="fu">labs</span>(</span>
-<span id="cb137-23"><a href="#cb137-23"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Distributions of Coefficients"</span>,</span>
-<span id="cb137-24"><a href="#cb137-24"></a>    <span class="at">x =</span> <span class="st">"Coefficient Estimate"</span>,</span>
-<span id="cb137-25"><a href="#cb137-25"></a>    <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
-<span id="cb137-26"><a href="#cb137-26"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb138-2"><a href="#cb138-2"></a>  <span class="at">data =</span> boot_coefs,</span>
+<span id="cb138-3"><a href="#cb138-3"></a>  <span class="fu">aes</span>(<span class="at">x =</span> estimate)) <span class="sc">+</span></span>
+<span id="cb138-4"><a href="#cb138-4"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb138-5"><a href="#cb138-5"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
+<span id="cb138-6"><a href="#cb138-6"></a>    <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb138-7"><a href="#cb138-7"></a>  <span class="fu">facet_wrap</span>(</span>
+<span id="cb138-8"><a href="#cb138-8"></a>    <span class="sc">~</span> term,</span>
+<span id="cb138-9"><a href="#cb138-9"></a>    <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb138-10"><a href="#cb138-10"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb138-11"><a href="#cb138-11"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb138-12"><a href="#cb138-12"></a>    <span class="fu">aes</span>(</span>
+<span id="cb138-13"><a href="#cb138-13"></a>      <span class="at">xintercept =</span> .lower),</span>
+<span id="cb138-14"><a href="#cb138-14"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb138-15"><a href="#cb138-15"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb138-16"><a href="#cb138-16"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb138-17"><a href="#cb138-17"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb138-18"><a href="#cb138-18"></a>    <span class="fu">aes</span>(</span>
+<span id="cb138-19"><a href="#cb138-19"></a>      <span class="at">xintercept =</span> .upper),</span>
+<span id="cb138-20"><a href="#cb138-20"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb138-21"><a href="#cb138-21"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb138-22"><a href="#cb138-22"></a>  <span class="fu">labs</span>(</span>
+<span id="cb138-23"><a href="#cb138-23"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Distributions of Coefficients"</span>,</span>
+<span id="cb138-24"><a href="#cb138-24"></a>    <span class="at">x =</span> <span class="st">"Coefficient Estimate"</span>,</span>
+<span id="cb138-25"><a href="#cb138-25"></a>    <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb138-26"><a href="#cb138-26"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-bootstrapRegressionCoefficients" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Parameter Estimates Across Bootstraps.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-bootstrapRegressionCoefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3877,24 +3869,24 @@ Figure&nbsp;11.32: Histogram of Parameter Estimates Across Bootstraps.
 </ul>
 <p>First, we mean-center the <a href="research-methods.html#sec-correlationalStudy">predictors</a>. In this case, we center the <a href="research-methods.html#sec-correlationalStudy">predictors</a> around the mean of height and weight for Wide Receivers:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb138-2"><a href="#cb138-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb139-2"><a href="#cb139-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we compute the interaction term as the multiplication of the two centered <a href="research-methods.html#sec-correlationalStudy">predictors</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we fit the moderated multiple regression model:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb140-2"><a href="#cb140-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
-<span id="cb140-3"><a href="#cb140-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb140-4"><a href="#cb140-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb140-5"><a href="#cb140-5"></a>)</span>
-<span id="cb140-6"><a href="#cb140-6"></a></span>
-<span id="cb140-7"><a href="#cb140-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb141-2"><a href="#cb141-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
+<span id="cb141-3"><a href="#cb141-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb141-4"><a href="#cb141-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb141-5"><a href="#cb141-5"></a>)</span>
+<span id="cb141-6"><a href="#cb141-6"></a></span>
+<span id="cb141-7"><a href="#cb141-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3903,40 +3895,40 @@ lm(formula = fantasyPoints_transformed ~ height_centered + weight_centered +
     filter(position %in% c("WR")), na.action = "na.exclude")
 
 Residuals:
-     Min       1Q   Median       3Q      Max 
--11.1162  -2.0928   0.3443   2.2965   5.5387 
+    Min      1Q  Median      3Q     Max 
+-3.9342 -0.8338  0.0573  0.9657  3.0803 
 
 Coefficients:
                                   Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)                      5.6129049  0.0445328 126.040  &lt; 2e-16 ***
-height_centered                 -0.0289282  0.0229691  -1.259   0.2079    
-weight_centered                  0.0259022  0.0036211   7.153 9.62e-13 ***
-height_centered:weight_centered -0.0017483  0.0009675  -1.807   0.0708 .  
+(Intercept)                      0.4251074  0.0185309  22.940  &lt; 2e-16 ***
+height_centered                 -0.0111228  0.0095578  -1.164   0.2446    
+weight_centered                  0.0109193  0.0015068   7.247 4.88e-13 ***
+height_centered:weight_centered -0.0007124  0.0004026  -1.769   0.0769 .  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 2.746 on 5385 degrees of freedom
-Multiple R-squared:  0.01561,   Adjusted R-squared:  0.01506 
-F-statistic: 28.46 on 3 and 5385 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 1.143 on 5385 degrees of freedom
+Multiple R-squared:  0.01631,   Adjusted R-squared:  0.01576 
+F-statistic: 29.77 on 3 and 5385 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <p>This model is equivalent to the model that includes the interaction term explicitly:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb142-2"><a href="#cb142-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
-<span id="cb142-3"><a href="#cb142-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb142-4"><a href="#cb142-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb142-5"><a href="#cb142-5"></a>)</span>
-<span id="cb142-6"><a href="#cb142-6"></a></span>
-<span id="cb142-7"><a href="#cb142-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb143-2"><a href="#cb143-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
+<span id="cb143-3"><a href="#cb143-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb143-4"><a href="#cb143-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb143-5"><a href="#cb143-5"></a>)</span>
+<span id="cb143-6"><a href="#cb143-6"></a></span>
+<span id="cb143-7"><a href="#cb143-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, we can visualize the interaction to understand it. We create an interaction plot (<a href="#fig-interactionPlot" class="quarto-xref">Figure&nbsp;<span>11.33</span></a>) and Johnson-Neyman plot (<a href="#fig-johnsonNeymanPlot" class="quarto-xref">Figure&nbsp;<span>11.34</span></a>) using the <code>interactions</code> package <span class="citation" data-cites="R-interactions">(<a href="references.html#ref-R-interactions" role="doc-biblioref">Long, 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
-<span id="cb143-2"><a href="#cb143-2"></a>  moderationModel,</span>
-<span id="cb143-3"><a href="#cb143-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb143-4"><a href="#cb143-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
+<span id="cb144-2"><a href="#cb144-2"></a>  moderationModel,</span>
+<span id="cb144-3"><a href="#cb144-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb144-4"><a href="#cb144-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-interactionPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Interaction Plot from Moderated Multiple Regression.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-interactionPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3949,15 +3941,15 @@ Figure&nbsp;11.33: Interaction Plot from Moderated Multiple Regression.
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
-<span id="cb144-2"><a href="#cb144-2"></a>  moderationModel,</span>
-<span id="cb144-3"><a href="#cb144-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb144-4"><a href="#cb144-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb144-5"><a href="#cb144-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
+<span id="cb145-2"><a href="#cb145-2"></a>  moderationModel,</span>
+<span id="cb145-3"><a href="#cb145-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb145-4"><a href="#cb145-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb145-5"><a href="#cb145-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>JOHNSON-NEYMAN INTERVAL
 
-When weight_centered is INSIDE the interval [16.16, 136.16], the slope of
+When weight_centered is INSIDE the interval [22.81, 86.32], the slope of
 height_centered is p &lt; .05.
 
 Note: The range of observed values of weight_centered is [-47.48, 64.52]</code></pre>
@@ -3975,11 +3967,11 @@ Figure&nbsp;11.34: Johnson-Neyman Plot from Moderated Multiple Regression.
 </div>
 <p>Here is a simple slopes analysis:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
-<span id="cb146-2"><a href="#cb146-2"></a>  moderationModel,</span>
-<span id="cb146-3"><a href="#cb146-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb146-4"><a href="#cb146-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb146-5"><a href="#cb146-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb147"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
+<span id="cb147-2"><a href="#cb147-2"></a>  moderationModel,</span>
+<span id="cb147-3"><a href="#cb147-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb147-4"><a href="#cb147-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb147-5"><a href="#cb147-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>SIMPLE SLOPES ANALYSIS
 
@@ -3987,53 +3979,32 @@ Slope of height_centered when weight_centered = -1.484626e+01 (- 1 SD):
 
    Est.   S.E.   t val.      p
 ------- ------ -------- ------
-  -0.00   0.03    -0.12   0.91
+  -0.00   0.01    -0.05   0.96
 
 Slope of height_centered when weight_centered = -1.002064e-16 (Mean): 
 
    Est.   S.E.   t val.      p
 ------- ------ -------- ------
-  -0.03   0.02    -1.26   0.21
+  -0.01   0.01    -1.16   0.24
 
 Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD): 
 
    Est.   S.E.   t val.      p
 ------- ------ -------- ------
-  -0.05   0.03    -1.93   0.05</code></pre>
+  -0.02   0.01    -1.84   0.07</code></pre>
 </div>
 </div>
 </section><section id="sec-multipleRegressionMediation" class="level2" data-number="11.15"><h2 data-number="11.15" class="anchored" data-anchor-id="sec-multipleRegressionMediation">
 <span class="header-section-number">11.15</span> Mediation</h2>
 <p>A mediation model takes the following general form in the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb148-2"><a href="#cb148-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb148-3"><a href="#cb148-3"></a><span class="st">  Y ~ direct*X</span></span>
-<span id="cb148-4"><a href="#cb148-4"></a><span class="st">  </span></span>
-<span id="cb148-5"><a href="#cb148-5"></a><span class="st">  # mediator</span></span>
-<span id="cb148-6"><a href="#cb148-6"></a><span class="st">  M ~ a*X</span></span>
-<span id="cb148-7"><a href="#cb148-7"></a><span class="st">  Y ~ b*M</span></span>
-<span id="cb148-8"><a href="#cb148-8"></a><span class="st">  </span></span>
-<span id="cb148-9"><a href="#cb148-9"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb148-10"><a href="#cb148-10"></a><span class="st">  indirect := a*b</span></span>
-<span id="cb148-11"><a href="#cb148-11"></a><span class="st">  </span></span>
-<span id="cb148-12"><a href="#cb148-12"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb148-13"><a href="#cb148-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
-<span id="cb148-14"><a href="#cb148-14"></a><span class="st">  </span></span>
-<span id="cb148-15"><a href="#cb148-15"></a><span class="st">  # proportion mediated</span></span>
-<span id="cb148-16"><a href="#cb148-16"></a><span class="st">  Pm := abs(indirect) / total</span></span>
-<span id="cb148-17"><a href="#cb148-17"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<p>Let’s substitute in our <a href="research-methods.html#sec-correlationalStudy">predictor</a>, <a href="research-methods.html#sec-correlationalStudy">outcome</a>, and hypothesized <a href="research-methods.html#sec-mediation">mediator</a>. In this case, we predict that receiving touchdowns partially accounts for the association between Wide Receiver’s target share and their fantasy points. This is a silly example because fantasy points are derived, in part, from touchdowns, so of course touchdowns will partially account for almost any effect on Wide Receivers’ fantasy points. This example is merely for demonstrating the process of developing and examining a mediation model.</p>
-<div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
 <span id="cb149-2"><a href="#cb149-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb149-3"><a href="#cb149-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb149-3"><a href="#cb149-3"></a><span class="st">  Y ~ direct*X</span></span>
 <span id="cb149-4"><a href="#cb149-4"></a><span class="st">  </span></span>
 <span id="cb149-5"><a href="#cb149-5"></a><span class="st">  # mediator</span></span>
-<span id="cb149-6"><a href="#cb149-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
-<span id="cb149-7"><a href="#cb149-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
+<span id="cb149-6"><a href="#cb149-6"></a><span class="st">  M ~ a*X</span></span>
+<span id="cb149-7"><a href="#cb149-7"></a><span class="st">  Y ~ b*M</span></span>
 <span id="cb149-8"><a href="#cb149-8"></a><span class="st">  </span></span>
 <span id="cb149-9"><a href="#cb149-9"></a><span class="st">  # indirect effect = a*b</span></span>
 <span id="cb149-10"><a href="#cb149-10"></a><span class="st">  indirect := a*b</span></span>
@@ -4046,29 +4017,50 @@ Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD):
 <span id="cb149-17"><a href="#cb149-17"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>Let’s substitute in our <a href="research-methods.html#sec-correlationalStudy">predictor</a>, <a href="research-methods.html#sec-correlationalStudy">outcome</a>, and hypothesized <a href="research-methods.html#sec-mediation">mediator</a>. In this case, we predict that receiving touchdowns partially accounts for the association between Wide Receiver’s target share and their fantasy points. This is a silly example because fantasy points are derived, in part, from touchdowns, so of course touchdowns will partially account for almost any effect on Wide Receivers’ fantasy points. This example is merely for demonstrating the process of developing and examining a mediation model.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb150"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb150-2"><a href="#cb150-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb150-3"><a href="#cb150-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb150-4"><a href="#cb150-4"></a><span class="st">  </span></span>
+<span id="cb150-5"><a href="#cb150-5"></a><span class="st">  # mediator</span></span>
+<span id="cb150-6"><a href="#cb150-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
+<span id="cb150-7"><a href="#cb150-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
+<span id="cb150-8"><a href="#cb150-8"></a><span class="st">  </span></span>
+<span id="cb150-9"><a href="#cb150-9"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb150-10"><a href="#cb150-10"></a><span class="st">  indirect := a*b</span></span>
+<span id="cb150-11"><a href="#cb150-11"></a><span class="st">  </span></span>
+<span id="cb150-12"><a href="#cb150-12"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb150-13"><a href="#cb150-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
+<span id="cb150-14"><a href="#cb150-14"></a><span class="st">  </span></span>
+<span id="cb150-15"><a href="#cb150-15"></a><span class="st">  # proportion mediated</span></span>
+<span id="cb150-16"><a href="#cb150-16"></a><span class="st">  Pm := abs(indirect) / total</span></span>
+<span id="cb150-17"><a href="#cb150-17"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <p>To get a robust estimate of the indirect effect, we obtain bootstrapped estimates from 1,000 bootstrap draws. Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, but this example uses only 1,000 bootstrap draws for a shorter runtime.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb150"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb150-2"><a href="#cb150-2"></a>  mediationModel,</span>
-<span id="cb150-3"><a href="#cb150-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb150-4"><a href="#cb150-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb150-5"><a href="#cb150-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb150-6"><a href="#cb150-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb150-7"><a href="#cb150-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb150-8"><a href="#cb150-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb150-9"><a href="#cb150-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb150-10"><a href="#cb150-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb151-2"><a href="#cb151-2"></a>  mediationModel,</span>
+<span id="cb151-3"><a href="#cb151-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb151-4"><a href="#cb151-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb151-5"><a href="#cb151-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb151-6"><a href="#cb151-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb151-7"><a href="#cb151-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb151-8"><a href="#cb151-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb151-9"><a href="#cb151-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb151-10"><a href="#cb151-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a><span class="fu">summary</span>(</span>
-<span id="cb151-2"><a href="#cb151-2"></a>  mediationFit,</span>
-<span id="cb151-3"><a href="#cb151-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb151-4"><a href="#cb151-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb151-5"><a href="#cb151-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a><span class="fu">summary</span>(</span>
+<span id="cb152-2"><a href="#cb152-2"></a>  mediationFit,</span>
+<span id="cb152-3"><a href="#cb152-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb152-4"><a href="#cb152-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb152-5"><a href="#cb152-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>lavaan 0.6-19 ended normally after 16 iterations
+<pre><code>lavaan 0.6-19 ended normally after 20 iterations
 
   Estimator                                         ML
   Optimization method                           NLMINB
@@ -4084,7 +4076,7 @@ Model Test User Model:
 
 Model Test Baseline Model:
 
-  Test statistic                              9274.292
+  Test statistic                              9587.535
   Degrees of freedom                                 3
   P-value                                        0.000
 
@@ -4098,12 +4090,12 @@ User Model versus Baseline Model:
 
 Loglikelihood and Information Criteria:
 
-  Loglikelihood user model (H0)             -17772.527
-  Loglikelihood unrestricted model (H1)     -17772.527
+  Loglikelihood user model (H0)             -12892.830
+  Loglikelihood unrestricted model (H1)     -12892.830
                                                       
-  Akaike (AIC)                               35563.053
-  Bayesian (BIC)                             35622.382
-  Sample-size adjusted Bayesian (SABIC)      35593.783
+  Akaike (AIC)                               25803.660
+  Bayesian (BIC)                             25862.989
+  Sample-size adjusted Bayesian (SABIC)      25834.390
 
 Root Mean Square Error of Approximation:
 
@@ -4127,95 +4119,95 @@ Parameter Estimates:
 
   Standard errors                            Bootstrap
   Number of requested bootstrap draws             1000
-  Number of successful bootstrap draws            1000
+  Number of successful bootstrap draws             997
 
 Regressions:
                               Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv
   fantasyPoints_transformed ~                                             
-    trgt_sh (drct)              14.213    1.533    9.271    0.000   14.213
+    trgt_sh (drct)               5.795    0.628    9.221    0.000    5.795
   receiving_tds ~                                                         
-    trgt_sh    (a)              21.853    1.309   16.696    0.000   21.853
+    trgt_sh    (a)              21.859    1.307   16.724    0.000   21.859
   fantasyPoints_transformed ~                                             
-    rcvng_t    (b)               0.401    0.035   11.393    0.000    0.401
+    rcvng_t    (b)               0.175    0.014   12.229    0.000    0.175
   Std.all
          
-    0.485
+    0.475
          
     0.701
          
-    0.426
+    0.447
 
 Intercepts:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
-   .fntsyPnts_trns    3.420    0.059   58.149    0.000    3.420    1.236
-   .receiving_tds     0.335    0.101    3.303    0.001    0.335    0.114
-    target_share      0.088    0.001   64.770    0.000    0.088    0.929
+   .fntsyPnts_trns   -0.495    0.024  -20.546    0.000   -0.495   -0.430
+   .receiving_tds     0.334    0.101    3.297    0.001    0.334    0.114
+    target_share      0.088    0.001   64.775    0.000    0.088    0.930
 
 Variances:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
-   .fntsyPnts_trns    2.247    0.103   21.744    0.000    2.247    0.294
-   .receiving_tds     4.399    0.287   15.336    0.000    4.399    0.508
-    target_share      0.009    0.001   15.897    0.000    0.009    1.000
+   .fntsyPnts_trns    0.367    0.018   20.584    0.000    0.367    0.277
+   .receiving_tds     4.398    0.286   15.354    0.000    4.398    0.508
+    target_share      0.009    0.001   15.902    0.000    0.009    1.000
 
 R-Square:
                    Estimate
-    fntsyPnts_trns    0.706
+    fntsyPnts_trns    0.723
     receiving_tds     0.492
 
 Defined Parameters:
                    Estimate  Std.Err  z-value  P(&gt;|z|)   Std.lv  Std.all
-    indirect          8.760    0.328   26.702    0.000    8.760    0.299
-    total            22.973    1.293   17.773    0.000   22.973    0.784
-    Pm                0.381    0.032   11.872    0.000    0.381    0.381</code></pre>
+    indirect          3.827    0.124   30.812    0.000    3.827    0.314
+    total             9.622    0.543   17.704    0.000    9.622    0.788
+    Pm                0.398    0.031   12.646    0.000    0.398    0.398</code></pre>
 </div>
 </div>
 <p>We can also estimate a model with multiple hypothesized <a href="#sec-mediations">mediators</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb153-2"><a href="#cb153-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb153-3"><a href="#cb153-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
-<span id="cb153-4"><a href="#cb153-4"></a><span class="st">  </span></span>
-<span id="cb153-5"><a href="#cb153-5"></a><span class="st">  # mediator</span></span>
-<span id="cb153-6"><a href="#cb153-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
-<span id="cb153-7"><a href="#cb153-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
-<span id="cb153-8"><a href="#cb153-8"></a><span class="st">  </span></span>
-<span id="cb153-9"><a href="#cb153-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
-<span id="cb153-10"><a href="#cb153-10"></a><span class="st">  </span></span>
-<span id="cb153-11"><a href="#cb153-11"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb153-12"><a href="#cb153-12"></a><span class="st">  indirect1 := a1*b1</span></span>
-<span id="cb153-13"><a href="#cb153-13"></a><span class="st">  indirect2 := a2*b2</span></span>
-<span id="cb153-14"><a href="#cb153-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
-<span id="cb153-15"><a href="#cb153-15"></a><span class="st">  </span></span>
-<span id="cb153-16"><a href="#cb153-16"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb153-17"><a href="#cb153-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
-<span id="cb153-18"><a href="#cb153-18"></a><span class="st">  </span></span>
-<span id="cb153-19"><a href="#cb153-19"></a><span class="st">  # proportion mediated</span></span>
-<span id="cb153-20"><a href="#cb153-20"></a><span class="st">  Pm1 := abs(indirect1) / total</span></span>
-<span id="cb153-21"><a href="#cb153-21"></a><span class="st">  Pm2 := abs(indirect2) / total</span></span>
-<span id="cb153-22"><a href="#cb153-22"></a><span class="st">  PmTotal := abs(indirectTotal) / total</span></span>
-<span id="cb153-23"><a href="#cb153-23"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb154-2"><a href="#cb154-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb154-3"><a href="#cb154-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb154-4"><a href="#cb154-4"></a><span class="st">  </span></span>
+<span id="cb154-5"><a href="#cb154-5"></a><span class="st">  # mediator</span></span>
+<span id="cb154-6"><a href="#cb154-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
+<span id="cb154-7"><a href="#cb154-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
+<span id="cb154-8"><a href="#cb154-8"></a><span class="st">  </span></span>
+<span id="cb154-9"><a href="#cb154-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
+<span id="cb154-10"><a href="#cb154-10"></a><span class="st">  </span></span>
+<span id="cb154-11"><a href="#cb154-11"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb154-12"><a href="#cb154-12"></a><span class="st">  indirect1 := a1*b1</span></span>
+<span id="cb154-13"><a href="#cb154-13"></a><span class="st">  indirect2 := a2*b2</span></span>
+<span id="cb154-14"><a href="#cb154-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
+<span id="cb154-15"><a href="#cb154-15"></a><span class="st">  </span></span>
+<span id="cb154-16"><a href="#cb154-16"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb154-17"><a href="#cb154-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
+<span id="cb154-18"><a href="#cb154-18"></a><span class="st">  </span></span>
+<span id="cb154-19"><a href="#cb154-19"></a><span class="st">  # proportion mediated</span></span>
+<span id="cb154-20"><a href="#cb154-20"></a><span class="st">  Pm1 := abs(indirect1) / total</span></span>
+<span id="cb154-21"><a href="#cb154-21"></a><span class="st">  Pm2 := abs(indirect2) / total</span></span>
+<span id="cb154-22"><a href="#cb154-22"></a><span class="st">  PmTotal := abs(indirectTotal) / total</span></span>
+<span id="cb154-23"><a href="#cb154-23"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb154-2"><a href="#cb154-2"></a>  multipleMediatorModel,</span>
-<span id="cb154-3"><a href="#cb154-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb154-4"><a href="#cb154-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb154-5"><a href="#cb154-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb154-6"><a href="#cb154-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb154-7"><a href="#cb154-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb154-8"><a href="#cb154-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb154-9"><a href="#cb154-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb154-10"><a href="#cb154-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb155-2"><a href="#cb155-2"></a>  multipleMediatorModel,</span>
+<span id="cb155-3"><a href="#cb155-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb155-4"><a href="#cb155-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb155-5"><a href="#cb155-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb155-6"><a href="#cb155-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb155-7"><a href="#cb155-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb155-8"><a href="#cb155-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb155-9"><a href="#cb155-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb155-10"><a href="#cb155-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a><span class="fu">summary</span>(</span>
-<span id="cb155-2"><a href="#cb155-2"></a>  multipleMediatorFit,</span>
-<span id="cb155-3"><a href="#cb155-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb155-4"><a href="#cb155-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb155-5"><a href="#cb155-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a><span class="fu">summary</span>(</span>
+<span id="cb156-2"><a href="#cb156-2"></a>  multipleMediatorFit,</span>
+<span id="cb156-3"><a href="#cb156-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb156-4"><a href="#cb156-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb156-5"><a href="#cb156-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 33 iterations
 
@@ -4228,32 +4220,32 @@ Defined Parameters:
 
 Model Test User Model:
                                                       
-  Test statistic                              3190.289
+  Test statistic                              3188.635
   Degrees of freedom                                 1
   P-value (Chi-square)                           0.000
 
 Model Test Baseline Model:
 
-  Test statistic                             20796.992
+  Test statistic                             21288.443
   Degrees of freedom                                 6
   P-value                                        0.000
 
 User Model versus Baseline Model:
 
-  Comparative Fit Index (CFI)                    0.847
-  Tucker-Lewis Index (TLI)                       0.080
+  Comparative Fit Index (CFI)                    0.850
+  Tucker-Lewis Index (TLI)                       0.101
                                                       
-  Robust Comparative Fit Index (CFI)             0.842
-  Robust Tucker-Lewis Index (TLI)                0.049
+  Robust Comparative Fit Index (CFI)             0.845
+  Robust Tucker-Lewis Index (TLI)                0.070
 
 Loglikelihood and Information Criteria:
 
-  Loglikelihood user model (H0)             -53416.617
-  Loglikelihood unrestricted model (H1)     -51821.473
+  Loglikelihood user model (H0)             -48446.990
+  Loglikelihood unrestricted model (H1)     -46852.672
                                                       
-  Akaike (AIC)                              106859.235
-  Bayesian (BIC)                            106944.932
-  Sample-size adjusted Bayesian (SABIC)     106903.623
+  Akaike (AIC)                               96919.980
+  Bayesian (BIC)                             97005.677
+  Sample-size adjusted Bayesian (SABIC)      96964.367
 
 Root Mean Square Error of Approximation:
 
@@ -4277,73 +4269,73 @@ Parameter Estimates:
 
   Standard errors                            Bootstrap
   Number of requested bootstrap draws             1000
-  Number of successful bootstrap draws            1000
+  Number of successful bootstrap draws             998
 
 Regressions:
                               Estimate   Std.Err  z-value  P(&gt;|z|)   Std.lv 
   fantasyPoints_transformed ~                                               
-    trgt_sh (drct)                4.121    0.792    5.204    0.000     4.121
+    trgt_sh (drct)                1.550    0.303    5.109    0.000     1.550
   receiving_tds ~                                                           
-    trgt_sh   (a1)               22.440    1.281   17.514    0.000    22.440
+    trgt_sh   (a1)               22.442    1.282   17.502    0.000    22.442
   receiving_yards ~                                                         
-    trgt_sh   (a2)             3472.583  196.560   17.667    0.000  3472.583
+    trgt_sh   (a2)             3472.359  196.760   17.648    0.000  3472.359
   fantasyPoints_transformed ~                                               
-    rcvng_t   (b1)                0.039    0.011    3.500    0.000     0.039
-    rcvng_y   (b2)                0.005    0.000   27.240    0.000     0.005
+    rcvng_t   (b1)                0.023    0.004    5.884    0.000     0.023
+    rcvng_y   (b2)                0.002    0.000   30.525    0.000     0.002
   Std.all
          
-    0.143
+    0.130
          
     0.728
          
     0.848
          
-    0.042
-    0.732
+    0.059
+    0.742
 
 Intercepts:
                    Estimate   Std.Err  z-value  P(&gt;|z|)   Std.lv   Std.all
-   .fntsyPnts_trns     3.190    0.030  104.646    0.000     3.190    1.161
-   .receiving_tds      0.282    0.099    2.857    0.004     0.282    0.096
-   .receiving_yrds    70.408   15.353    4.586    0.000    70.408    0.180
-    target_share       0.088    0.001   65.149    0.000     0.088    0.920
+   .fntsyPnts_trns    -0.592    0.012  -48.449    0.000    -0.592   -0.520
+   .receiving_tds      0.281    0.099    2.850    0.004     0.281    0.096
+   .receiving_yrds    70.411   15.370    4.581    0.000    70.411    0.180
+    target_share       0.088    0.001   65.111    0.000     0.088    0.920
 
 Variances:
                    Estimate   Std.Err  z-value  P(&gt;|z|)   Std.lv   Std.all
-   .fntsyPnts_trns     1.646    0.036   45.284    0.000     1.646    0.218
-   .receiving_tds      4.062    0.261   15.542    0.000     4.062    0.469
-   .receiving_yrds 42850.451 5566.673    7.698    0.000 42850.451    0.280
-    target_share       0.009    0.001   15.159    0.000     0.009    1.000
+   .fntsyPnts_trns     0.260    0.007   37.490    0.000     0.260    0.200
+   .receiving_tds      4.061    0.262   15.524    0.000     4.061    0.469
+   .receiving_yrds 42860.728 5571.178    7.693    0.000 42860.728    0.281
+    target_share       0.009    0.001   15.139    0.000     0.009    1.000
 
 R-Square:
                    Estimate 
-    fntsyPnts_trns     0.782
+    fntsyPnts_trns     0.800
     receiving_tds      0.531
-    receiving_yrds     0.720
+    receiving_yrds     0.719
 
 Defined Parameters:
                    Estimate   Std.Err  z-value  P(&gt;|z|)   Std.lv   Std.all
-    indirect1          0.871    0.249    3.496    0.000     0.871    0.030
-    indirect2         17.858    0.595   30.010    0.000    17.858    0.621
-    indirectTotal     18.729    0.581   32.247    0.000    18.729    0.651
-    total             22.849    1.278   17.873    0.000    22.849    0.794
-    Pm1                0.038    0.011    3.609    0.000     0.038    0.038
-    Pm2                0.782    0.027   28.728    0.000     0.782    0.782
-    PmTotal            0.820    0.024   33.662    0.000     0.820    0.820</code></pre>
+    indirect1          0.516    0.090    5.746    0.000     0.516    0.043
+    indirect2          7.510    0.256   29.382    0.000     7.510    0.629
+    indirectTotal      8.027    0.266   30.169    0.000     8.027    0.672
+    total              9.576    0.538   17.795    0.000     9.576    0.802
+    Pm1                0.054    0.009    6.146    0.000     0.054    0.054
+    Pm2                0.784    0.024   32.067    0.000     0.784    0.784
+    PmTotal            0.838    0.022   37.485    0.000     0.838    0.838</code></pre>
 </div>
 </div>
 </section><section id="sec-multipleRegressionBayesian" class="level2" data-number="11.16"><h2 data-number="11.16" class="anchored" data-anchor-id="sec-multipleRegressionBayesian">
 <span class="header-section-number">11.16</span> Bayesian Multiple Regression</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb157"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
-<span id="cb157-2"><a href="#cb157-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb157-3"><a href="#cb157-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb157-4"><a href="#cb157-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
-<span id="cb157-5"><a href="#cb157-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
+<span id="cb158-2"><a href="#cb158-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb158-3"><a href="#cb158-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb158-4"><a href="#cb158-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
+<span id="cb158-5"><a href="#cb158-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb159"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> Family: gaussian 
   Links: mu = identity; sigma = identity 
@@ -4354,25 +4346,25 @@ Formula: fantasyPoints_transformed ~ age + height + weight + I(log(target_share 
 
 Regression Coefficients:
                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept              2.38      0.84     0.72     4.01 1.00     3585     3386
-age                    0.03      0.01     0.02     0.05 1.00     4121     2648
-height                -0.01      0.01    -0.04     0.02 1.00     3335     2946
-weight                 0.00      0.00    -0.00     0.01 1.00     3647     3236
-Ilogtarget_shareP1    27.87      0.29    27.30    28.44 1.00     3776     2511
+Intercept             -1.01      0.33    -1.67    -0.34 1.00     3814     3231
+age                    0.01      0.00     0.01     0.02 1.00     6040     2932
+height                -0.00      0.01    -0.01     0.01 1.00     3635     2882
+weight                 0.00      0.00    -0.00     0.00 1.00     3790     3337
+Ilogtarget_shareP1    11.66      0.12    11.42    11.90 1.00     2976     2667
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     1.57      0.02     1.54     1.61 1.00     4161     2949
+sigma     0.65      0.01     0.64     0.66 1.00     3472     2808
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># Bayesian R2 with Compatibility Interval
 
-  Conditional R2: 0.677 (95% CI [0.668, 0.685])</code></pre>
+  Conditional R2: 0.683 (95% CI [0.673, 0.691])</code></pre>
 </div>
 </div>
 </section><section id="sec-multipleRegressionConclusion" class="level2" data-number="11.17"><h2 data-number="11.17" class="anchored" data-anchor-id="sec-multipleRegressionConclusion">
@@ -4381,7 +4373,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </section><section id="sec-multipleRegressionSessionInfo" class="level2" data-number="11.18"><h2 data-number="11.18" class="anchored" data-anchor-id="sec-multipleRegressionSessionInfo">
 <span class="header-section-number">11.18</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb162"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
@@ -4410,68 +4402,69 @@ other attached packages:
 [10] workflows_1.2.0     tune_1.3.0          tidyr_1.3.1        
 [13] tibble_3.3.0        rsample_1.3.1       recipes_1.3.1      
 [16] purrr_1.1.0         parsnip_1.3.2       modeldata_1.5.1    
-[19] infer_1.0.9         dplyr_1.1.4         dials_1.4.1        
-[22] scales_1.4.0        tidymodels_1.3.0    effectsize_1.0.1   
-[25] broom_1.0.9         MASS_7.3-65         ordinal_2023.12-4.1
-[28] robustbase_0.99-4-1 parallelly_1.45.1   brms_2.22.0        
-[31] Rcpp_1.1.0          interactions_1.2.0  miceadds_3.17-44   
-[34] mice_3.18.0         lavaan_0.6-19       performance_0.15.0 
-[37] lme4_1.1-37         Matrix_1.7-3        caret_7.0-1        
-[40] lattice_0.22-7      ggplot2_3.5.2       car_3.1-3          
-[43] carData_3.0-5       rms_8.0-0           Hmisc_5.2-3        
-[46] petersenlab_1.2.0  
+[19] infer_1.0.9         ggplot2_3.5.2       dplyr_1.1.4        
+[22] dials_1.4.1         scales_1.4.0        tidymodels_1.3.0   
+[25] effectsize_1.0.1    broom_1.0.9         MASS_7.3-65        
+[28] ordinal_2023.12-4.1 robustbase_0.99-4-1 parallelly_1.45.1  
+[31] brms_2.22.0         Rcpp_1.1.0          interactions_1.2.0 
+[34] miceadds_3.17-44    mice_3.18.0         lavaan_0.6-19      
+[37] performance_0.15.0  lme4_1.1-37         Matrix_1.7-3       
+[40] bestNormalize_1.9.1 car_3.1-3           carData_3.0-5      
+[43] rms_8.0-0           Hmisc_5.2-3         petersenlab_1.2.0  
 
 loaded via a namespace (and not attached):
   [1] fs_1.6.6             matrixStats_1.5.0    sparsevctrs_0.3.4   
   [4] DiceDesign_1.10      httr_1.4.7           RColorBrewer_1.1-3  
-  [7] insight_1.4.0        numDeriv_2016.8-1.1  tools_4.5.1         
- [10] backports_1.5.0      R6_2.6.1             mgcv_1.9-3          
- [13] jomo_2.7-6           withr_3.0.2          Brobdingnag_1.2-9   
- [16] gridExtra_2.3        quantreg_6.1         cli_3.6.5           
- [19] mix_1.0-13           sandwich_3.1-1       domir_1.2.0         
- [22] labeling_0.4.3       mvtnorm_1.3-3        polspline_1.1.25    
- [25] proxy_0.4-27         QuickJSR_1.8.0       pbivnorm_0.6.0      
- [28] StanHeaders_2.32.10  foreign_0.8-90       readxl_1.4.5        
- [31] rstudioapi_0.17.1    generics_0.1.4       shape_1.4.6.1       
- [34] distributional_0.5.0 inline_0.3.21        loo_2.8.0           
- [37] DescTools_0.99.60    abind_1.4-8          lifecycle_1.0.4     
- [40] multcomp_1.4-28      yaml_2.3.10          grid_4.5.1          
- [43] mitml_0.4-5          haven_2.5.5          jtools_2.3.0        
- [46] pillar_1.11.0        boot_1.3-31          gld_2.6.7           
- [49] estimability_1.5.1   future.apply_1.20.0  codetools_0.2-20    
- [52] pan_1.9              glue_1.8.0           V8_6.0.6            
- [55] data.table_1.17.8    vctrs_0.6.5          Rdpack_2.6.4        
- [58] cellranger_1.1.0     gtable_0.3.6         datawizard_1.2.0    
- [61] gower_1.0.2          xfun_0.53            rbibutils_2.3       
- [64] prodlim_2025.04.28   coda_0.19-4.1        reformulas_0.4.1    
- [67] survival_3.8-3       timeDate_4041.110    iterators_1.0.14    
- [70] hardhat_1.4.2        lava_1.8.1           TH.data_1.1-3       
- [73] ipred_0.9-15         nlme_3.1-168         rstan_2.32.7        
- [76] tensorA_0.36.2.1     rpart_4.1.24         colorspace_2.1-1    
- [79] DBI_1.2.3            nnet_7.3-20          processx_3.8.6      
- [82] Exact_3.3            mnormt_2.1.1         tidyselect_1.2.1    
- [85] emmeans_1.11.2       compiler_4.5.1       curl_7.0.0          
- [88] glmnet_4.1-10        htmlTable_2.4.3      SparseM_1.84-2      
- [91] expm_1.0-0           bayestestR_0.16.1    posterior_1.6.1     
- [94] checkmate_2.3.3      DEoptimR_1.1-4       psych_2.5.6         
- [97] quadprog_1.5-8       callr_3.7.6          digest_0.6.37       
-[100] minqa_1.2.8          rmarkdown_2.29       htmltools_0.5.8.1   
-[103] pkgconfig_2.0.3      base64enc_0.1-3      lhs_1.2.0           
-[106] fastmap_1.2.0        rlang_1.1.6          htmlwidgets_1.6.4   
-[109] farver_2.1.2         zoo_1.8-14           jsonlite_2.0.0      
-[112] broom.mixed_0.2.9.6  ModelMetrics_1.2.2.2 magrittr_2.0.3      
-[115] Formula_1.2-5        bayesplot_1.13.0     parameters_0.28.0   
-[118] GPfit_1.0-9          ucminf_1.2.2         furrr_0.3.1         
-[121] stringi_1.8.7        pROC_1.19.0.1        rootSolve_1.8.2.4   
-[124] plyr_1.8.9           pkgbuild_1.4.8       parallel_4.5.1      
-[127] listenv_0.9.1        lmom_3.2             splines_4.5.1       
-[130] pander_0.6.6         hms_1.1.3            ps_1.9.1            
-[133] reshape2_1.4.4       stats4_4.5.1         rstantools_2.4.0    
-[136] evaluate_1.0.4       mitools_2.4          RcppParallel_5.1.10 
-[139] nloptr_2.2.1         tzdb_0.5.0           foreach_1.5.2       
-[142] MatrixModels_0.5-4   xtable_1.8-4         e1071_1.7-16        
-[145] viridisLite_0.4.2    class_7.3-23         cluster_2.1.8.1     
-[148] timechange_0.3.0     globals_0.18.0       bridgesampling_1.1-2</code></pre>
+  [7] insight_1.4.0        doParallel_1.0.17    numDeriv_2016.8-1.1 
+ [10] tools_4.5.1          doRNG_1.8.6.2        backports_1.5.0     
+ [13] R6_2.6.1             nortest_1.0-4        mgcv_1.9-3          
+ [16] jomo_2.7-6           withr_3.0.2          Brobdingnag_1.2-9   
+ [19] gridExtra_2.3        quantreg_6.1         cli_3.6.5           
+ [22] domir_1.2.0          mix_1.0-13           sandwich_3.1-1      
+ [25] labeling_0.4.3       mvtnorm_1.3-3        polspline_1.1.25    
+ [28] proxy_0.4-27         QuickJSR_1.8.0       pbivnorm_0.6.0      
+ [31] StanHeaders_2.32.10  foreign_0.8-90       readxl_1.4.5        
+ [34] rstudioapi_0.17.1    generics_0.1.4       shape_1.4.6.1       
+ [37] distributional_0.5.0 inline_0.3.21        loo_2.8.0           
+ [40] DescTools_0.99.60    abind_1.4-8          lifecycle_1.0.4     
+ [43] multcomp_1.4-28      yaml_2.3.10          grid_4.5.1          
+ [46] mitml_0.4-5          butcher_0.3.6        lattice_0.22-7      
+ [49] haven_2.5.5          jtools_2.3.0         pillar_1.11.0       
+ [52] boot_1.3-31          gld_2.6.7            estimability_1.5.1  
+ [55] future.apply_1.20.0  codetools_0.2-20     pan_1.9             
+ [58] glue_1.8.0           V8_6.0.6             data.table_1.17.8   
+ [61] vctrs_0.6.5          Rdpack_2.6.4         cellranger_1.1.0    
+ [64] gtable_0.3.6         datawizard_1.2.0     gower_1.0.2         
+ [67] xfun_0.53            rbibutils_2.3        prodlim_2025.04.28  
+ [70] coda_0.19-4.1        reformulas_0.4.1     survival_3.8-3      
+ [73] timeDate_4041.110    iterators_1.0.14     hardhat_1.4.2       
+ [76] lava_1.8.1           TH.data_1.1-3        ipred_0.9-15        
+ [79] nlme_3.1-168         rstan_2.32.7         tensorA_0.36.2.1    
+ [82] rpart_4.1.24         colorspace_2.1-1     DBI_1.2.3           
+ [85] nnet_7.3-20          processx_3.8.6       Exact_3.3           
+ [88] mnormt_2.1.1         tidyselect_1.2.1     emmeans_1.11.2      
+ [91] compiler_4.5.1       curl_7.0.0           glmnet_4.1-10       
+ [94] htmlTable_2.4.3      SparseM_1.84-2       expm_1.0-0          
+ [97] bayestestR_0.16.1    posterior_1.6.1      checkmate_2.3.3     
+[100] DEoptimR_1.1-4       psych_2.5.6          quadprog_1.5-8      
+[103] callr_3.7.6          digest_0.6.37        minqa_1.2.8         
+[106] rmarkdown_2.29       htmltools_0.5.8.1    pkgconfig_2.0.3     
+[109] base64enc_0.1-3      lhs_1.2.0            fastmap_1.2.0       
+[112] rlang_1.1.6          htmlwidgets_1.6.4    farver_2.1.2        
+[115] zoo_1.8-14           jsonlite_2.0.0       broom.mixed_0.2.9.6 
+[118] magrittr_2.0.3       Formula_1.2-5        bayesplot_1.13.0    
+[121] parameters_0.28.0    GPfit_1.0-9          ucminf_1.2.2        
+[124] furrr_0.3.1          stringi_1.8.7        rootSolve_1.8.2.4   
+[127] plyr_1.8.9           pkgbuild_1.4.8       parallel_4.5.1      
+[130] listenv_0.9.1        lmom_3.2             splines_4.5.1       
+[133] pander_0.6.6         hms_1.1.3            ps_1.9.1            
+[136] rngtools_1.5.2       reshape2_1.4.4       stats4_4.5.1        
+[139] rstantools_2.4.0     evaluate_1.0.4       mitools_2.4         
+[142] RcppParallel_5.1.10  nloptr_2.2.1         tzdb_0.5.0          
+[145] foreach_1.5.2        MatrixModels_0.5-4   xtable_1.8-4        
+[148] e1071_1.7-16         viridisLite_0.4.2    class_7.3-23        
+[151] cluster_2.1.8.1      timechange_0.3.0     globals_0.18.0      
+[154] bridgesampling_1.1-2</code></pre>
 </div>
 </div>
 
@@ -4533,6 +4526,15 @@ Petersen, I. T. (2024). <em>Principles of psychological assessment: With applied
 </div>
 <div id="ref-PetersenPrinciplesPsychAssessment" class="csl-entry" role="listitem">
 Petersen, I. T. (2025). <em>Principles of psychological assessment: With applied examples in <span>R</span></em>. University of Iowa Libraries. <a href="https://doi.org/10.25820/work.007199">https://doi.org/10.25820/work.007199</a>
+</div>
+<div id="ref-Peterson2021_packages" class="csl-entry" role="listitem">
+Peterson, R. A. (2021). Finding optimal normalizing transformations via <span class="nocase">bestNormalize</span>. <em><span>The R Journal</span></em>, <em>13</em>(1), 310–329. <a href="https://doi.org/10.32614/RJ-2021-041">https://doi.org/10.32614/RJ-2021-041</a>
+</div>
+<div id="ref-R-bestNormalize" class="csl-entry" role="listitem">
+Peterson, R. A. (2023). <em><span class="nocase">bestNormalize</span>: Normalizing transformation functions</em>. <a href="https://doi.org/10.32614/CRAN.package.bestNormalize">https://doi.org/10.32614/CRAN.package.bestNormalize</a>
+</div>
+<div id="ref-Peterson2020_packages" class="csl-entry" role="listitem">
+Peterson, R. A., &amp; Cavanaugh, J. E. (2020). Ordered quantile normalization: A semiparametric transformation built for the cross-validation era. <em>Journal of Applied Statistics</em>, <em>47</em>(13-15), 2312–2327. <a href="https://doi.org/10.1080/02664763.2019.1630372">https://doi.org/10.1080/02664763.2019.1630372</a>
 </div>
 <div id="ref-R-MASS" class="csl-entry" role="listitem">
 Ripley, B., &amp; Venables, B. (2025). <em><span>MASS</span>: Support functions and datasets for <span>Venables</span> and <span class="nocase">Ripley’s MASS</span></em>. <a href="https://doi.org/10.32614/CRAN.package.MASS">https://doi.org/10.32614/CRAN.package.MASS</a>
