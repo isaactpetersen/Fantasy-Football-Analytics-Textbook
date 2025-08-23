@@ -3541,23 +3541,25 @@ Figure&nbsp;11.31: Density plot from multiple imputation.
 <span id="cb126-6"><a href="#cb126-6"></a>imp_long<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(imp_long<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
 <span id="cb126-7"><a href="#cb126-7"></a></span>
 <span id="cb126-8"><a href="#cb126-8"></a>imp_long<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
-<span id="cb126-9"><a href="#cb126-9"></a>  yjTransformed,</span>
-<span id="cb126-10"><a href="#cb126-10"></a>  <span class="at">newdata =</span> imp_long[<span class="st">"fantasyPoints"</span>])<span class="sc">$</span>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><div class="cell-output cell-output-error">
-<pre><code>Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'predict': object 'yjTransformed' not found</code></pre>
-</div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb128"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1"></a>imp_mids <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">as.mids</span>(imp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb126-9"><a href="#cb126-9"></a>  bnTransformed,</span>
+<span id="cb126-10"><a href="#cb126-10"></a>  <span class="at">newdata =</span> imp_long[[<span class="st">"fantasyPoints"</span>]])</span>
+<span id="cb126-11"><a href="#cb126-11"></a></span>
+<span id="cb126-12"><a href="#cb126-12"></a>imp_mids <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">as.mids</span>(imp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now let’s estimate multiple regression with the multiply imputed data:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb129"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1"></a>imp_regression <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
-<span id="cb129-2"><a href="#cb129-2"></a>  imp_mids,</span>
-<span id="cb129-3"><a href="#cb129-3"></a>  <span class="fu">lm</span>(</span>
-<span id="cb129-4"><a href="#cb129-4"></a>    fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share_log)</span>
-<span id="cb129-5"><a href="#cb129-5"></a>  )</span>
-<span id="cb129-6"><a href="#cb129-6"></a></span>
-<span id="cb129-7"><a href="#cb129-7"></a><span class="fu">summary</span>(mice<span class="sc">::</span><span class="fu">pool</span>(imp_regression))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb127"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1"></a>imp_regression <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb127-2"><a href="#cb127-2"></a>  imp_mids,</span>
+<span id="cb127-3"><a href="#cb127-3"></a>  <span class="fu">lm</span>(</span>
+<span id="cb127-4"><a href="#cb127-4"></a>    fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share_log)</span>
+<span id="cb127-5"><a href="#cb127-5"></a>  )</span>
+<span id="cb127-6"><a href="#cb127-6"></a></span>
+<span id="cb127-7"><a href="#cb127-7"></a>mice<span class="sc">::</span><span class="fu">pool</span>(imp_regression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-error">
+<pre><code>Error in (function (..., row.names = NULL, check.rows = FALSE, check.names = TRUE, : arguments imply differing number of rows: 1, 0</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb129"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1"></a><span class="fu">summary</span>(mice<span class="sc">::</span><span class="fu">pool</span>(imp_regression))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
