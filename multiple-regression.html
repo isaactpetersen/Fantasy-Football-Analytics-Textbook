@@ -3065,21 +3065,49 @@ Figure&nbsp;11.23: Histogram of Fantasy Points (Among Wide Receivers).
 </div>
 <p>We can apply a transformation to the <a href="research-methods.html#sec-correlationalStudy">outcome variable</a> to generate a more normally distributed variable using the <code><a href="https://petersonr.github.io/bestNormalize/reference/bestNormalize.html">bestNormalize::bestNormalize()</a></code> function of the <code>bestNormalize</code> package <span class="citation" data-cites="R-bestNormalize Peterson2021_packages Peterson2020_packages">(<a href="references.html#ref-Peterson2021_packages" role="doc-biblioref">Peterson, 2021</a>; <a href="references.html#ref-R-bestNormalize" role="doc-biblioref">Peterson, 2023</a>; <a href="references.html#ref-Peterson2020_packages" role="doc-biblioref">Peterson &amp; Cavanaugh, 2020</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1"></a>obj <span class="ot">&lt;-</span> bestNormalize<span class="sc">::</span><span class="fu">bestNormalize</span>(player_stats_seasonal<span class="sc">$</span>fantasyPoints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details><details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1"></a>player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(obj)</span>
-<span id="cb102-2"><a href="#cb102-2"></a></span>
-<span id="cb102-3"><a href="#cb102-3"></a><span class="co"># Can back-transform transformed values back to the original metric later if needed:</span></span>
-<span id="cb102-4"><a href="#cb102-4"></a>original <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
-<span id="cb102-5"><a href="#cb102-5"></a>  obj,</span>
-<span id="cb102-6"><a href="#cb102-6"></a>  <span class="at">newdata =</span> player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed,</span>
-<span id="cb102-7"><a href="#cb102-7"></a>  <span class="at">inverse =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1"></a>bnTransformed <span class="ot">&lt;-</span> bestNormalize<span class="sc">::</span><span class="fu">bestNormalize</span>(player_stats_seasonal<span class="sc">$</span>fantasyPoints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Here are the transformation results—in this case, the best-fitting transformation is an ordered quantile (ORQ) normalization transformation:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1"></a>bnTransformed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>Best Normalizing transformation with 41156 Observations
+ Estimated Normality Statistics (Pearson P / df, lower =&gt; more normal):
+ - arcsinh(x): 15.4849
+ - Center+scale: 108.5775
+ - Double Reversed Log_b(x+a): 144.3802
+ - Exp(x): 77.6528
+ - Log_b(x+a): 15.1748
+ - orderNorm (ORQ): 4.2877
+ - sqrt(x + a): 39.6506
+ - Yeo-Johnson: 8.1302
+Estimation method: Out-of-sample via CV with 10 folds and 5 repeats
+ 
+Based off these, bestNormalize chose:
+orderNorm Transformation with 41156 nonmissing obs and ties
+ - 4951 unique values 
+ - Original quantiles:
+    0%    25%    50%    75%   100% 
+ -7.28   8.50  29.30  69.98 485.10 </code></pre>
+</div>
+</div>
+<p>Then, we apply the best-fitting transformation to the variable, to create a transformed variable that is more normally distributed.</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1"></a>player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(bnTransformed)</span>
+<span id="cb104-2"><a href="#cb104-2"></a></span>
+<span id="cb104-3"><a href="#cb104-3"></a><span class="co"># Can back-transform transformed values back to the original metric later if needed:</span></span>
+<span id="cb104-4"><a href="#cb104-4"></a>original <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb104-5"><a href="#cb104-5"></a>  bnTransformed,</span>
+<span id="cb104-6"><a href="#cb104-6"></a>  <span class="at">newdata =</span> player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed,</span>
+<span id="cb104-7"><a href="#cb104-7"></a>  <span class="at">inverse =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>The histogram of the transformed variable is in <a href="#fig-histogramFantasyPointsTransformed" class="quarto-xref">Figure&nbsp;<span>11.24</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1"></a><span class="fu">hist</span>(</span>
-<span id="cb103-2"><a href="#cb103-2"></a>  player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)],</span>
-<span id="cb103-3"><a href="#cb103-3"></a>  <span class="at">main =</span> <span class="st">"Histogram of Fantasy Points (Transformed)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1"></a><span class="fu">hist</span>(</span>
+<span id="cb105-2"><a href="#cb105-2"></a>  player_stats_seasonal<span class="sc">$</span>fantasyPoints_transformed[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)],</span>
+<span id="cb105-3"><a href="#cb105-3"></a>  <span class="at">main =</span> <span class="st">"Histogram of Fantasy Points (Transformed)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-histogramFantasyPointsTransformed" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Fantasy Points (Among Wide Receivers), Transformed.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-histogramFantasyPointsTransformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3093,13 +3121,13 @@ Figure&nbsp;11.24: Histogram of Fantasy Points (Among Wide Receivers), Transform
 </div>
 <p>Now we can refit the model.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1"></a>linearRegressionModel_outcomeTransformed <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb104-2"><a href="#cb104-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb104-3"><a href="#cb104-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb104-4"><a href="#cb104-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb104-5"><a href="#cb104-5"></a>)</span>
-<span id="cb104-6"><a href="#cb104-6"></a></span>
-<span id="cb104-7"><a href="#cb104-7"></a><span class="fu">summary</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1"></a>linearRegressionModel_outcomeTransformed <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb106-2"><a href="#cb106-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb106-3"><a href="#cb106-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb106-4"><a href="#cb106-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb106-5"><a href="#cb106-5"></a>)</span>
+<span id="cb106-6"><a href="#cb106-6"></a></span>
+<span id="cb106-7"><a href="#cb106-7"></a><span class="fu">summary</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3129,9 +3157,9 @@ F-statistic:  2388 on 4 and 4432 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <p>The residual plot is in <a href="#fig-residualPlotsOutcomeTransformed" class="quarto-xref">Figure&nbsp;<span>11.25</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1"></a>car<span class="sc">::</span><span class="fu">residualPlots</span>(</span>
-<span id="cb106-2"><a href="#cb106-2"></a>  linearRegressionModel_outcomeTransformed,</span>
-<span id="cb106-3"><a href="#cb106-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1"></a>car<span class="sc">::</span><span class="fu">residualPlots</span>(</span>
+<span id="cb108-2"><a href="#cb108-2"></a>  linearRegressionModel_outcomeTransformed,</span>
+<span id="cb108-3"><a href="#cb108-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>                         Test stat Pr(&gt;|Test stat|)    
 age                        -0.1390           0.8894    
@@ -3155,9 +3183,9 @@ Figure&nbsp;11.25: Residual Plots After Transformation of Fantasy Points.
 </div>
 <p>The spread-level plot is in <a href="#fig-spreadLevelPlotOutcomeTransformed" class="quarto-xref">Figure&nbsp;<span>11.26</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1"></a>car<span class="sc">::</span><span class="fu">spreadLevelPlot</span>(</span>
-<span id="cb108-2"><a href="#cb108-2"></a>  linearRegressionModel_outcomeTransformed,</span>
-<span id="cb108-3"><a href="#cb108-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb110"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1"></a>car<span class="sc">::</span><span class="fu">spreadLevelPlot</span>(</span>
+<span id="cb110-2"><a href="#cb110-2"></a>  linearRegressionModel_outcomeTransformed,</span>
+<span id="cb110-3"><a href="#cb110-3"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Suggested power transformation:  1.063421 </code></pre>
@@ -3178,11 +3206,11 @@ Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points.
 <span class="header-section-number">11.9.6.3</span> Uncorrelated Residuals</h4>
 <p>To determine if residuals are correlated given the nested structure of the data, we can examine the proportion of variance that is attributable to the particular player. To do this, we can estimate the intraclass correlation coefficient (ICC) from a <a href="mixed-models.html">mixed model</a> using the <code>performance</code> package <span class="citation" data-cites="Ludecke2021_packages R-performance">(<a href="references.html#ref-Ludecke2021_packages" role="doc-biblioref">Lüdecke et al., 2021</a>; <a href="references.html#ref-R-performance" role="doc-biblioref">Lüdecke, Makowski, Ben-Shachar, Patil, Waggoner, et al., 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb110"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1"></a>mixedModel <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
-<span id="cb110-2"><a href="#cb110-2"></a>  fantasyPoints_transformed <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> player_id),</span>
-<span id="cb110-3"><a href="#cb110-3"></a>  <span class="at">data =</span> player_stats_seasonal)</span>
-<span id="cb110-4"><a href="#cb110-4"></a></span>
-<span id="cb110-5"><a href="#cb110-5"></a>performance<span class="sc">::</span><span class="fu">icc</span>(mixedModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb112"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1"></a>mixedModel <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb112-2"><a href="#cb112-2"></a>  fantasyPoints_transformed <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> player_id),</span>
+<span id="cb112-3"><a href="#cb112-3"></a>  <span class="at">data =</span> player_stats_seasonal)</span>
+<span id="cb112-4"><a href="#cb112-4"></a></span>
+<span id="cb112-5"><a href="#cb112-5"></a>performance<span class="sc">::</span><span class="fu">icc</span>(mixedModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -3196,10 +3224,10 @@ Figure&nbsp;11.26: Spread-Level Plot After Transformation of Fantasy Points.
 <span class="header-section-number">11.9.6.4</span> Normally Distributed Residuals</h4>
 <p>We can examine whether residuals are normally distributed using quantile–quantile (QQ) plots and probability–probability (PP) plots, as in Figures <a href="#fig-qqPlot" class="quarto-xref"><span>11.27</span></a> and <a href="#fig-ppPlot" class="quarto-xref"><span>11.28</span></a>. If the residuals are normally distributed, they should stay close to the diagonal reference line.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb111"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1"></a>car<span class="sc">::</span><span class="fu">qqPlot</span>(</span>
-<span id="cb111-2"><a href="#cb111-2"></a>  linearRegressionModel_outcomeTransformed,</span>
-<span id="cb111-3"><a href="#cb111-3"></a>  <span class="at">main =</span> <span class="st">"QQ Plot"</span>,</span>
-<span id="cb111-4"><a href="#cb111-4"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb113"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1"></a>car<span class="sc">::</span><span class="fu">qqPlot</span>(</span>
+<span id="cb113-2"><a href="#cb113-2"></a>  linearRegressionModel_outcomeTransformed,</span>
+<span id="cb113-3"><a href="#cb113-3"></a>  <span class="at">main =</span> <span class="st">"QQ Plot"</span>,</span>
+<span id="cb113-4"><a href="#cb113-4"></a>  <span class="at">id =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 1338 1843</code></pre>
 </div>
@@ -3215,8 +3243,8 @@ Figure&nbsp;11.27: Residual Plots After Transformation of Fantasy Points.
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb113"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1"></a>petersenlab<span class="sc">::</span><span class="fu">ppPlot</span>(</span>
-<span id="cb113-2"><a href="#cb113-2"></a>  linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb115"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1"></a>petersenlab<span class="sc">::</span><span class="fu">ppPlot</span>(</span>
+<span id="cb115-2"><a href="#cb115-2"></a>  linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-ppPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Residual Plots After Transformation of Fantasy Points.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3307,7 +3335,7 @@ Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for
 <p>Then, what are the regression coefficients? We do not know what are the correct regression coefficients because each of the possibilities fits the data equally well. Thus, when estimating the regression model, we could obtain arbitrary estimates of the regression coefficients with an enormous standard error around each estimate. In general, multicollinearity increases the uncertainty (i.e., standard errors and confidence intervals) around the parameter estimates. Any <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> that have a correlation above ~ <span class="math inline">\(r = .30\)</span> with each other could have an impact on the confidence interval of the regression coefficient. As the correlations among the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> increase, the chance of getting an arbitrary answer increases, sometimes called “bouncing betas.” So, it is important to examine a correlation matrix of the <a href="research-methods.html#sec-correlationalStudy">predictor variables</a> before putting them in the same regression model. You can also examine indices such as variance inflation factor (VIF), where a value greater than 5 or 10 indicates multicollinearity.</p>
 <p>Here are the VIFs from our earlier model:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb114"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1"></a>car<span class="sc">::</span><span class="fu">vif</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb116"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1"></a>car<span class="sc">::</span><span class="fu">vif</span>(linearRegressionModel_outcomeTransformed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>                     age                   height                   weight 
                 1.019535                 2.095026                 2.111745 
@@ -3324,33 +3352,33 @@ I(log(target_share + 1))
 <span class="header-section-number">11.11.1</span> Pairwise Deletion</h3>
 <p>Pairwise deletion (also called available case analysis) uses all available data for each pair of variables when estimating the correlations/covariances, and the resulting correlation/covariance matrix can be used to estimate a multiple regression model. We can estimate a regression model that uses pairwise deletion using the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb116"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1"></a>player_stats_seasonal<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(player_stats_seasonal<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
-<span id="cb116-2"><a href="#cb116-2"></a></span>
-<span id="cb116-3"><a href="#cb116-3"></a>modelData <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb116-4"><a href="#cb116-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb116-5"><a href="#cb116-5"></a>  <span class="fu">select</span>(fantasyPoints_transformed, age, height, weight, target_share_log)</span>
-<span id="cb116-6"><a href="#cb116-6"></a></span>
-<span id="cb116-7"><a href="#cb116-7"></a>numObs <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">complete.cases</span>(modelData))</span>
-<span id="cb116-8"><a href="#cb116-8"></a>varMeans <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(modelData, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb116-9"><a href="#cb116-9"></a>varCovariances <span class="ot">&lt;-</span> <span class="fu">cov</span>(modelData, <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span>
-<span id="cb116-10"><a href="#cb116-10"></a></span>
-<span id="cb116-11"><a href="#cb116-11"></a>pairwiseRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb116-12"><a href="#cb116-12"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
-<span id="cb116-13"><a href="#cb116-13"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
-<span id="cb116-14"><a href="#cb116-14"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
-<span id="cb116-15"><a href="#cb116-15"></a><span class="st">'</span></span>
-<span id="cb116-16"><a href="#cb116-16"></a></span>
-<span id="cb116-17"><a href="#cb116-17"></a>pairwiseRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">lavaan</span>(</span>
-<span id="cb116-18"><a href="#cb116-18"></a>  pairwiseRegression_syntax,</span>
-<span id="cb116-19"><a href="#cb116-19"></a>  <span class="at">sample.mean =</span> varMeans,</span>
-<span id="cb116-20"><a href="#cb116-20"></a>  <span class="at">sample.cov =</span> varCovariances,</span>
-<span id="cb116-21"><a href="#cb116-21"></a>  <span class="at">sample.nobs =</span> numObs</span>
-<span id="cb116-22"><a href="#cb116-22"></a>)</span>
-<span id="cb116-23"><a href="#cb116-23"></a></span>
-<span id="cb116-24"><a href="#cb116-24"></a><span class="fu">summary</span>(</span>
-<span id="cb116-25"><a href="#cb116-25"></a>  pairwiseRegression_fit,</span>
-<span id="cb116-26"><a href="#cb116-26"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb116-27"><a href="#cb116-27"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb118"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1"></a>player_stats_seasonal<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(player_stats_seasonal<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb118-2"><a href="#cb118-2"></a></span>
+<span id="cb118-3"><a href="#cb118-3"></a>modelData <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb118-4"><a href="#cb118-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb118-5"><a href="#cb118-5"></a>  <span class="fu">select</span>(fantasyPoints_transformed, age, height, weight, target_share_log)</span>
+<span id="cb118-6"><a href="#cb118-6"></a></span>
+<span id="cb118-7"><a href="#cb118-7"></a>numObs <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">complete.cases</span>(modelData))</span>
+<span id="cb118-8"><a href="#cb118-8"></a>varMeans <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(modelData, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb118-9"><a href="#cb118-9"></a>varCovariances <span class="ot">&lt;-</span> <span class="fu">cov</span>(modelData, <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span>
+<span id="cb118-10"><a href="#cb118-10"></a></span>
+<span id="cb118-11"><a href="#cb118-11"></a>pairwiseRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb118-12"><a href="#cb118-12"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
+<span id="cb118-13"><a href="#cb118-13"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
+<span id="cb118-14"><a href="#cb118-14"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
+<span id="cb118-15"><a href="#cb118-15"></a><span class="st">'</span></span>
+<span id="cb118-16"><a href="#cb118-16"></a></span>
+<span id="cb118-17"><a href="#cb118-17"></a>pairwiseRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">lavaan</span>(</span>
+<span id="cb118-18"><a href="#cb118-18"></a>  pairwiseRegression_syntax,</span>
+<span id="cb118-19"><a href="#cb118-19"></a>  <span class="at">sample.mean =</span> varMeans,</span>
+<span id="cb118-20"><a href="#cb118-20"></a>  <span class="at">sample.cov =</span> varCovariances,</span>
+<span id="cb118-21"><a href="#cb118-21"></a>  <span class="at">sample.nobs =</span> numObs</span>
+<span id="cb118-22"><a href="#cb118-22"></a>)</span>
+<span id="cb118-23"><a href="#cb118-23"></a></span>
+<span id="cb118-24"><a href="#cb118-24"></a><span class="fu">summary</span>(</span>
+<span id="cb118-25"><a href="#cb118-25"></a>  pairwiseRegression_fit,</span>
+<span id="cb118-26"><a href="#cb118-26"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb118-27"><a href="#cb118-27"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 1 iteration
 
@@ -3402,30 +3430,30 @@ R-Square:
 <span class="header-section-number">11.11.2</span> Multiple Imputation</h3>
 <p>Multiple imputation takes a data set with missingness and it uses available information on other variables to estimate what likely values could have been for the missing value. It repeats the imputation multiple times, so there are multiple imputed data sets, which can give a sense of the degree of uncertainty of each imputed value. The model is then fit to each of the multiply imputed data sets separately, and the results are combined. We can multiply impute data using the <code>mice</code> package <span class="citation" data-cites="vanBuuren2011_packages R-mice">(<a href="references.html#ref-vanBuuren2011_packages" role="doc-biblioref">van Buuren &amp; Groothuis-Oudshoorn, 2011</a>, <a href="references.html#ref-R-mice" role="doc-biblioref">2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb118"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1"></a>numImputations <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb118-2"><a href="#cb118-2"></a></span>
-<span id="cb118-3"><a href="#cb118-3"></a>dataToImpute <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb118-4"><a href="#cb118-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb118-5"><a href="#cb118-5"></a>  <span class="fu">select</span>(player_id, position, <span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> </span>
-<span id="cb118-6"><a href="#cb118-6"></a>  <span class="fu">select</span>(</span>
-<span id="cb118-7"><a href="#cb118-7"></a>    player_id<span class="sc">:</span>games, carries<span class="sc">:</span>wopr, fantasy_points, fantasy_points_ppr,</span>
-<span id="cb118-8"><a href="#cb118-8"></a>    rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,</span>
-<span id="cb118-9"><a href="#cb118-9"></a>    rush_100_yds<span class="sc">:</span>draftround, height<span class="sc">:</span>target_share_log) <span class="sc">%&gt;%</span> </span>
-<span id="cb118-10"><a href="#cb118-10"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(fantasy_points_ppr, ageCentered20, target_share_log)) <span class="co"># drop collinear variables</span></span>
-<span id="cb118-11"><a href="#cb118-11"></a></span>
-<span id="cb118-12"><a href="#cb118-12"></a>predictors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"targets"</span>,<span class="st">"receiving_yards"</span>,<span class="st">"receiving_air_yards"</span>,<span class="st">"receiving_yards_after_catch"</span>,<span class="st">"receiving_first_downs"</span>,<span class="st">"racr"</span>)</span>
-<span id="cb118-13"><a href="#cb118-13"></a></span>
-<span id="cb118-14"><a href="#cb118-14"></a>dataToImpute<span class="sc">$</span>player_id_integer <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">as.factor</span>(dataToImpute<span class="sc">$</span>player_id))</span>
-<span id="cb118-15"><a href="#cb118-15"></a></span>
-<span id="cb118-16"><a href="#cb118-16"></a>varsToImpute <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"age"</span>,<span class="st">"height"</span>,<span class="st">"weight"</span>,<span class="st">"target_share"</span>)</span>
-<span id="cb118-17"><a href="#cb118-17"></a>Y <span class="ot">&lt;-</span> varsToImpute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb120"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1"></a>numImputations <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb120-2"><a href="#cb120-2"></a></span>
+<span id="cb120-3"><a href="#cb120-3"></a>dataToImpute <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb120-4"><a href="#cb120-4"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb120-5"><a href="#cb120-5"></a>  <span class="fu">select</span>(player_id, position, <span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> </span>
+<span id="cb120-6"><a href="#cb120-6"></a>  <span class="fu">select</span>(</span>
+<span id="cb120-7"><a href="#cb120-7"></a>    player_id<span class="sc">:</span>games, carries<span class="sc">:</span>wopr, fantasy_points, fantasy_points_ppr,</span>
+<span id="cb120-8"><a href="#cb120-8"></a>    rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,</span>
+<span id="cb120-9"><a href="#cb120-9"></a>    rush_100_yds<span class="sc">:</span>draftround, height<span class="sc">:</span>target_share_log) <span class="sc">%&gt;%</span> </span>
+<span id="cb120-10"><a href="#cb120-10"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(fantasy_points_ppr, ageCentered20, target_share_log)) <span class="co"># drop collinear variables</span></span>
+<span id="cb120-11"><a href="#cb120-11"></a></span>
+<span id="cb120-12"><a href="#cb120-12"></a>predictors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"targets"</span>,<span class="st">"receiving_yards"</span>,<span class="st">"receiving_air_yards"</span>,<span class="st">"receiving_yards_after_catch"</span>,<span class="st">"receiving_first_downs"</span>,<span class="st">"racr"</span>)</span>
+<span id="cb120-13"><a href="#cb120-13"></a></span>
+<span id="cb120-14"><a href="#cb120-14"></a>dataToImpute<span class="sc">$</span>player_id_integer <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">as.factor</span>(dataToImpute<span class="sc">$</span>player_id))</span>
+<span id="cb120-15"><a href="#cb120-15"></a></span>
+<span id="cb120-16"><a href="#cb120-16"></a>varsToImpute <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"age"</span>,<span class="st">"height"</span>,<span class="st">"weight"</span>,<span class="st">"target_share"</span>)</span>
+<span id="cb120-17"><a href="#cb120-17"></a>Y <span class="ot">&lt;-</span> varsToImpute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, let’s specify the imputation method—we use the two-level predictive mean matching (<code>2l.pmm</code>) method from the <code>miceadds</code> package <span class="citation" data-cites="R-miceadds">(<a href="references.html#ref-R-miceadds" role="doc-biblioref">Robitzsch et al., 2024</a>)</span> to account for the nonindependent data (owing to multiple seasons per player):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb119"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1"></a>meth <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.method</span>(dataToImpute)</span>
-<span id="cb119-2"><a href="#cb119-2"></a>meth[<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(meth)] <span class="ot">&lt;-</span> <span class="st">""</span></span>
-<span id="cb119-3"><a href="#cb119-3"></a>meth[Y] <span class="ot">&lt;-</span> <span class="st">"2l.pmm"</span> <span class="co"># specify the imputation method here; this can differ by outcome variable</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb121"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1"></a>meth <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.method</span>(dataToImpute)</span>
+<span id="cb121-2"><a href="#cb121-2"></a>meth[<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(meth)] <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb121-3"><a href="#cb121-3"></a>meth[Y] <span class="ot">&lt;-</span> <span class="st">"2l.pmm"</span> <span class="co"># specify the imputation method here; this can differ by outcome variable</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, let’s specify the prediction matrix. A predictor matrix is a matrix of values, where:</p>
@@ -3453,30 +3481,30 @@ R-Square:
 </li>
 </ul>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb120"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1"></a>pred <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.predictorMatrix</span>(dataToImpute)</span>
-<span id="cb120-2"><a href="#cb120-2"></a>pred[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(pred), <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(pred)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb120-3"><a href="#cb120-3"></a>pred[Y, <span class="st">"player_id_integer"</span>] <span class="ot">&lt;-</span> (<span class="sc">-</span><span class="dv">2</span>) <span class="co"># cluster variable</span></span>
-<span id="cb120-4"><a href="#cb120-4"></a>pred[Y, predictors] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictors</span></span>
-<span id="cb120-5"><a href="#cb120-5"></a>pred[Y, <span class="st">"age"</span>] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># random effect predictor</span></span>
-<span id="cb120-6"><a href="#cb120-6"></a>pred[Y, Y] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictor</span></span>
-<span id="cb120-7"><a href="#cb120-7"></a></span>
-<span id="cb120-8"><a href="#cb120-8"></a><span class="fu">diag</span>(pred) <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb122"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1"></a>pred <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">make.predictorMatrix</span>(dataToImpute)</span>
+<span id="cb122-2"><a href="#cb122-2"></a>pred[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(pred), <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(pred)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb122-3"><a href="#cb122-3"></a>pred[Y, <span class="st">"player_id_integer"</span>] <span class="ot">&lt;-</span> (<span class="sc">-</span><span class="dv">2</span>) <span class="co"># cluster variable</span></span>
+<span id="cb122-4"><a href="#cb122-4"></a>pred[Y, predictors] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictors</span></span>
+<span id="cb122-5"><a href="#cb122-5"></a>pred[Y, <span class="st">"age"</span>] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># random effect predictor</span></span>
+<span id="cb122-6"><a href="#cb122-6"></a>pred[Y, Y] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># fixed effect predictor</span></span>
+<span id="cb122-7"><a href="#cb122-7"></a></span>
+<span id="cb122-8"><a href="#cb122-8"></a><span class="fu">diag</span>(pred) <span class="ot">&lt;-</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, let’s run the imputation:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb121"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1"></a>imp <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">mice</span>(</span>
-<span id="cb121-2"><a href="#cb121-2"></a>  <span class="fu">as.data.frame</span>(dataToImpute),</span>
-<span id="cb121-3"><a href="#cb121-3"></a>  <span class="at">method =</span> meth,</span>
-<span id="cb121-4"><a href="#cb121-4"></a>  <span class="at">predictorMatrix =</span> pred,</span>
-<span id="cb121-5"><a href="#cb121-5"></a>  <span class="at">m =</span> numImputations,</span>
-<span id="cb121-6"><a href="#cb121-6"></a>  <span class="at">maxit =</span> <span class="dv">5</span>, <span class="co"># generally use 100 maximum iterations; this example uses 5 for speed</span></span>
-<span id="cb121-7"><a href="#cb121-7"></a>  <span class="at">seed =</span> <span class="dv">52242</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb123"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1"></a>imp <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">mice</span>(</span>
+<span id="cb123-2"><a href="#cb123-2"></a>  <span class="fu">as.data.frame</span>(dataToImpute),</span>
+<span id="cb123-3"><a href="#cb123-3"></a>  <span class="at">method =</span> meth,</span>
+<span id="cb123-4"><a href="#cb123-4"></a>  <span class="at">predictorMatrix =</span> pred,</span>
+<span id="cb123-5"><a href="#cb123-5"></a>  <span class="at">m =</span> numImputations,</span>
+<span id="cb123-6"><a href="#cb123-6"></a>  <span class="at">maxit =</span> <span class="dv">5</span>, <span class="co"># generally use 100 maximum iterations; this example uses 5 for speed</span></span>
+<span id="cb123-7"><a href="#cb123-7"></a>  <span class="at">seed =</span> <span class="dv">52242</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Below are some imputation diagnostics. Trace plots are in <a href="#fig-miTracePlots" class="quarto-xref">Figure&nbsp;<span>11.30</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb122"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1"></a><span class="fu">plot</span>(imp, <span class="fu">c</span>(<span class="st">"target_share"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1"></a><span class="fu">plot</span>(imp, <span class="fu">c</span>(<span class="st">"target_share"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-miTracePlots" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Trace plots from multiple imputation.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miTracePlots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3490,7 +3518,7 @@ Figure&nbsp;11.30: Trace plots from multiple imputation.
 </div>
 <p>A density plot is in <a href="#fig-miDensityPlot" class="quarto-xref">Figure&nbsp;<span>11.31</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb123"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1"></a><span class="fu">densityplot</span>(imp, <span class="sc">~</span> target_share)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb125"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1"></a><span class="fu">densityplot</span>(imp, <span class="sc">~</span> target_share)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-miDensityPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Density plot from multiple imputation.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-miDensityPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3505,31 +3533,31 @@ Figure&nbsp;11.31: Density plot from multiple imputation.
 <p>The imputated data does not match well the distribution of the observed data. Thus, it may be necessary to select a different imputation method for more accurate imputation.</p>
 <p>Now, let’s do some post-processing:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1"></a>imp_long <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">complete</span>(</span>
-<span id="cb124-2"><a href="#cb124-2"></a>  imp,</span>
-<span id="cb124-3"><a href="#cb124-3"></a>  <span class="at">action =</span> <span class="st">"long"</span>,</span>
-<span id="cb124-4"><a href="#cb124-4"></a>  <span class="at">include =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb124-5"><a href="#cb124-5"></a></span>
-<span id="cb124-6"><a href="#cb124-6"></a>imp_long<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(imp_long<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
-<span id="cb124-7"><a href="#cb124-7"></a></span>
-<span id="cb124-8"><a href="#cb124-8"></a>imp_long<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
-<span id="cb124-9"><a href="#cb124-9"></a>  yjTransformed,</span>
-<span id="cb124-10"><a href="#cb124-10"></a>  <span class="at">newdata =</span> imp_long[<span class="st">"fantasyPoints"</span>])<span class="sc">$</span>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb126"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1"></a>imp_long <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">complete</span>(</span>
+<span id="cb126-2"><a href="#cb126-2"></a>  imp,</span>
+<span id="cb126-3"><a href="#cb126-3"></a>  <span class="at">action =</span> <span class="st">"long"</span>,</span>
+<span id="cb126-4"><a href="#cb126-4"></a>  <span class="at">include =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb126-5"><a href="#cb126-5"></a></span>
+<span id="cb126-6"><a href="#cb126-6"></a>imp_long<span class="sc">$</span>target_share_log <span class="ot">&lt;-</span> <span class="fu">log</span>(imp_long<span class="sc">$</span>target_share <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb126-7"><a href="#cb126-7"></a></span>
+<span id="cb126-8"><a href="#cb126-8"></a>imp_long<span class="sc">$</span>fantasyPoints_transformed <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb126-9"><a href="#cb126-9"></a>  yjTransformed,</span>
+<span id="cb126-10"><a href="#cb126-10"></a>  <span class="at">newdata =</span> imp_long[<span class="st">"fantasyPoints"</span>])<span class="sc">$</span>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-error">
 <pre><code>Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'predict': object 'yjTransformed' not found</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb126"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1"></a>imp_mids <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">as.mids</span>(imp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb128"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1"></a>imp_mids <span class="ot">&lt;-</span> mice<span class="sc">::</span><span class="fu">as.mids</span>(imp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now let’s estimate multiple regression with the multiply imputed data:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb127"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1"></a>imp_regression <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
-<span id="cb127-2"><a href="#cb127-2"></a>  imp_mids,</span>
-<span id="cb127-3"><a href="#cb127-3"></a>  <span class="fu">lm</span>(</span>
-<span id="cb127-4"><a href="#cb127-4"></a>    fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share_log)</span>
-<span id="cb127-5"><a href="#cb127-5"></a>  )</span>
-<span id="cb127-6"><a href="#cb127-6"></a></span>
-<span id="cb127-7"><a href="#cb127-7"></a><span class="fu">summary</span>(mice<span class="sc">::</span><span class="fu">pool</span>(imp_regression))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb129"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1"></a>imp_regression <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb129-2"><a href="#cb129-2"></a>  imp_mids,</span>
+<span id="cb129-3"><a href="#cb129-3"></a>  <span class="fu">lm</span>(</span>
+<span id="cb129-4"><a href="#cb129-4"></a>    fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share_log)</span>
+<span id="cb129-5"><a href="#cb129-5"></a>  )</span>
+<span id="cb129-6"><a href="#cb129-6"></a></span>
+<span id="cb129-7"><a href="#cb129-7"></a><span class="fu">summary</span>(mice<span class="sc">::</span><span class="fu">pool</span>(imp_regression))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -3542,23 +3570,23 @@ Figure&nbsp;11.31: Density plot from multiple imputation.
 <span class="header-section-number">11.11.3</span> Full Information Maximum Likelihood</h3>
 <p>Full information maximum likelihood (FIML) estimates model parameters using all available data for each case, without imputing missing values. FIML is commonly used for handling missingness in approaches to latent variable modeling, such as <a href="factor-analysis.html">factor analysis</a> and structural equation modeling. We can estimate a regression model that uses full information maximum likelihood using the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb128"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1"></a>fimlRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb128-2"><a href="#cb128-2"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
-<span id="cb128-3"><a href="#cb128-3"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
-<span id="cb128-4"><a href="#cb128-4"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
-<span id="cb128-5"><a href="#cb128-5"></a><span class="st">'</span></span>
-<span id="cb128-6"><a href="#cb128-6"></a></span>
-<span id="cb128-7"><a href="#cb128-7"></a>fimlRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb128-8"><a href="#cb128-8"></a>  fimlRegression_syntax,</span>
-<span id="cb128-9"><a href="#cb128-9"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb128-10"><a href="#cb128-10"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb128-11"><a href="#cb128-11"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span></span>
-<span id="cb128-12"><a href="#cb128-12"></a>)</span>
-<span id="cb128-13"><a href="#cb128-13"></a></span>
-<span id="cb128-14"><a href="#cb128-14"></a><span class="fu">summary</span>(</span>
-<span id="cb128-15"><a href="#cb128-15"></a>  fimlRegression_fit,</span>
-<span id="cb128-16"><a href="#cb128-16"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb128-17"><a href="#cb128-17"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb130"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1"></a>fimlRegression_syntax <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb130-2"><a href="#cb130-2"></a><span class="st">  fantasyPoints_transformed ~ age + height + weight + target_share_log</span></span>
+<span id="cb130-3"><a href="#cb130-3"></a><span class="st">  fantasyPoints_transformed ~~ fantasyPoints_transformed</span></span>
+<span id="cb130-4"><a href="#cb130-4"></a><span class="st">  fantasyPoints_transformed ~ 1</span></span>
+<span id="cb130-5"><a href="#cb130-5"></a><span class="st">'</span></span>
+<span id="cb130-6"><a href="#cb130-6"></a></span>
+<span id="cb130-7"><a href="#cb130-7"></a>fimlRegression_fit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb130-8"><a href="#cb130-8"></a>  fimlRegression_syntax,</span>
+<span id="cb130-9"><a href="#cb130-9"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb130-10"><a href="#cb130-10"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb130-11"><a href="#cb130-11"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span></span>
+<span id="cb130-12"><a href="#cb130-12"></a>)</span>
+<span id="cb130-13"><a href="#cb130-13"></a></span>
+<span id="cb130-14"><a href="#cb130-14"></a><span class="fu">summary</span>(</span>
+<span id="cb130-15"><a href="#cb130-15"></a>  fimlRegression_fit,</span>
+<span id="cb130-16"><a href="#cb130-16"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb130-17"><a href="#cb130-17"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 48 iterations
 
@@ -3631,18 +3659,18 @@ R-Square:
 <span class="header-section-number">11.12</span> Addressing Non-Independence of Observations</h2>
 <p>Please note that the <span class="math inline">\(p\)</span>-value for regression coefficients assumes that the observations are independent—in particular, that the residuals are not correlated. However, the observations are not independent in the <code>player_stats_seasonal</code> dataframe used above, because the same player has multiple rows—one row corresponding to each season they played. This non-independence violates the traditional assumptions of the significance of regression coefficients. We could address this assumption by analyzing only one season from each player or by estimating the significance of the regression coefficients using cluster-robust standard errors. For simplicity in the models above, we present results above from the whole dataframe. In <a href="mixed-models.html" class="quarto-xref"><span>Chapter 12</span></a>, we discuss <a href="mixed-models.html">mixed model</a> approaches that handle repeated measures and other data that violate assumptions of non-independence. Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors with the <code>rms</code> package <span class="citation" data-cites="R-rms">(<a href="references.html#ref-R-rms" role="doc-biblioref">Harrell, Jr., 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb130"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1"></a>player_stats_seasonal_subset <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb130-2"><a href="#cb130-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb130-3"><a href="#cb130-3"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
-<span id="cb130-4"><a href="#cb130-4"></a></span>
-<span id="cb130-5"><a href="#cb130-5"></a>regressionWithClusterVariable <span class="ot">&lt;-</span> rms<span class="sc">::</span><span class="fu">robcov</span>(rms<span class="sc">::</span><span class="fu">ols</span>(</span>
-<span id="cb130-6"><a href="#cb130-6"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb130-7"><a href="#cb130-7"></a>  <span class="at">data =</span> player_stats_seasonal_subset,</span>
-<span id="cb130-8"><a href="#cb130-8"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb130-9"><a href="#cb130-9"></a>  <span class="at">y =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb130-10"><a href="#cb130-10"></a>  <span class="at">cluster =</span> player_stats_seasonal_subset<span class="sc">$</span>player_id) <span class="co">#account for nested data within player</span></span>
-<span id="cb130-11"><a href="#cb130-11"></a></span>
-<span id="cb130-12"><a href="#cb130-12"></a>regressionWithClusterVariable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb132"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1"></a>player_stats_seasonal_subset <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb132-2"><a href="#cb132-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb132-3"><a href="#cb132-3"></a>  <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
+<span id="cb132-4"><a href="#cb132-4"></a></span>
+<span id="cb132-5"><a href="#cb132-5"></a>regressionWithClusterVariable <span class="ot">&lt;-</span> rms<span class="sc">::</span><span class="fu">robcov</span>(rms<span class="sc">::</span><span class="fu">ols</span>(</span>
+<span id="cb132-6"><a href="#cb132-6"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb132-7"><a href="#cb132-7"></a>  <span class="at">data =</span> player_stats_seasonal_subset,</span>
+<span id="cb132-8"><a href="#cb132-8"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb132-9"><a href="#cb132-9"></a>  <span class="at">y =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb132-10"><a href="#cb132-10"></a>  <span class="at">cluster =</span> player_stats_seasonal_subset<span class="sc">$</span>player_id) <span class="co">#account for nested data within player</span></span>
+<span id="cb132-11"><a href="#cb132-11"></a></span>
+<span id="cb132-12"><a href="#cb132-12"></a>regressionWithClusterVariable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Frequencies of Missing Values Due to Each Variable
 fantasyPoints_transformed                       age                    height 
@@ -3676,7 +3704,7 @@ height       -0.0029 0.0075 -0.39 0.6998
 weight        0.0016 0.0011  1.43 0.1531  
 target_share 11.6558 0.4596 25.36 &lt;0.0001 </code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb132"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(regressionWithClusterVariable)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(regressionWithClusterVariable)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># R2 for Linear Regression
   R2: 0.683</code></pre>
@@ -3689,12 +3717,12 @@ target_share 11.6558 0.4596 25.36 &lt;0.0001 </code></pre>
 <span class="header-section-number">11.13.1</span> Robust Regression</h3>
 <p>To address outliers, there are various approaches to robust regression. One approach is to use an MM-type estimator, such as is used in the <code><a href="https://rdrr.io/pkg/robustbase/man/lmrob.html">robustbase::lmrob()</a></code> and <code><a href="https://rdrr.io/pkg/robustbase/man/glmrob.html">robustbase::glmrob()</a></code> functions of the <code>robustbase</code> package <span class="citation" data-cites="R-robustbase Todorov2009_packages">(<a href="references.html#ref-R-robustbase" role="doc-biblioref">Maechler et al., 2024</a>; <a href="references.html#ref-Todorov2009_packages" role="doc-biblioref">Todorov &amp; Filzmoser, 2009</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1"></a>robustRegression <span class="ot">&lt;-</span> robustbase<span class="sc">::</span><span class="fu">lmrob</span>(</span>
-<span id="cb134-2"><a href="#cb134-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb134-3"><a href="#cb134-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
-<span id="cb134-4"><a href="#cb134-4"></a>)</span>
-<span id="cb134-5"><a href="#cb134-5"></a></span>
-<span id="cb134-6"><a href="#cb134-6"></a><span class="fu">summary</span>(robustRegression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a>robustRegression <span class="ot">&lt;-</span> robustbase<span class="sc">::</span><span class="fu">lmrob</span>(</span>
+<span id="cb136-2"><a href="#cb136-2"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb136-3"><a href="#cb136-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
+<span id="cb136-4"><a href="#cb136-4"></a>)</span>
+<span id="cb136-5"><a href="#cb136-5"></a></span>
+<span id="cb136-6"><a href="#cb136-6"></a><span class="fu">summary</span>(robustRegression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3750,61 +3778,61 @@ seed : int(0) </code></pre>
 <p>Another approach to handling outliers is to use boostrapping, which involves fitting models to various bootstrap resamples of the data. Bootstrap samples are datasets generated by sampling repeatedly with replacement.</p>
 <p>We set up the bootstrap folds using the <code><a href="https://rsample.tidymodels.org/reference/bootstraps.html">rsample::bootstraps()</a></code> function of the <code>rsample</code> package <span class="citation" data-cites="R-rsample">(<a href="references.html#ref-R-rsample" role="doc-biblioref">Frick et al., 2025</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
-<span id="cb136-2"><a href="#cb136-2"></a>bootstrapSamples <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
-<span id="cb136-3"><a href="#cb136-3"></a></span>
-<span id="cb136-4"><a href="#cb136-4"></a><span class="co"># Create bootstrap resamples (with apparent = TRUE)</span></span>
-<span id="cb136-5"><a href="#cb136-5"></a>boots <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">bootstraps</span>(</span>
-<span id="cb136-6"><a href="#cb136-6"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb136-7"><a href="#cb136-7"></a>  <span class="at">times =</span> bootstrapSamples,</span>
-<span id="cb136-8"><a href="#cb136-8"></a>  <span class="at">apparent =</span> <span class="cn">TRUE</span></span>
-<span id="cb136-9"><a href="#cb136-9"></a>)</span>
-<span id="cb136-10"><a href="#cb136-10"></a></span>
-<span id="cb136-11"><a href="#cb136-11"></a><span class="co"># Define recipe</span></span>
-<span id="cb136-12"><a href="#cb136-12"></a>rec <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(</span>
-<span id="cb136-13"><a href="#cb136-13"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share,</span>
-<span id="cb136-14"><a href="#cb136-14"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
-<span id="cb136-15"><a href="#cb136-15"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb136-16"><a href="#cb136-16"></a>  recipes<span class="sc">::</span><span class="fu">step_log</span>(target_share, <span class="at">offset =</span> <span class="dv">1</span>) <span class="co"># replace I(log(target_share + 1))</span></span>
-<span id="cb136-17"><a href="#cb136-17"></a></span>
-<span id="cb136-18"><a href="#cb136-18"></a><span class="co"># Define model spec and workflow</span></span>
-<span id="cb136-19"><a href="#cb136-19"></a>lm_spec <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb136-20"><a href="#cb136-20"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb136-21"><a href="#cb136-21"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
-<span id="cb136-22"><a href="#cb136-22"></a></span>
-<span id="cb136-23"><a href="#cb136-23"></a>lm_workflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb136-24"><a href="#cb136-24"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(rec) <span class="sc">%&gt;%</span></span>
-<span id="cb136-25"><a href="#cb136-25"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_spec)</span>
-<span id="cb136-26"><a href="#cb136-26"></a></span>
-<span id="cb136-27"><a href="#cb136-27"></a><span class="co"># Function for fitting the models on the bootstrap samples</span></span>
-<span id="cb136-28"><a href="#cb136-28"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(split, ...) {</span>
-<span id="cb136-29"><a href="#cb136-29"></a>  analysis_data <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">analysis</span>(split)</span>
-<span id="cb136-30"><a href="#cb136-30"></a>  fit <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">fit</span>(lm_workflow, <span class="at">data =</span> analysis_data)</span>
-<span id="cb136-31"><a href="#cb136-31"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(fit)</span>
-<span id="cb136-32"><a href="#cb136-32"></a>}</span>
-<span id="cb136-33"><a href="#cb136-33"></a></span>
-<span id="cb136-34"><a href="#cb136-34"></a><span class="co"># Fit bootstrap models and save results</span></span>
-<span id="cb136-35"><a href="#cb136-35"></a>boot_models <span class="ot">&lt;-</span> boots <span class="sc">%&gt;%</span></span>
-<span id="cb136-36"><a href="#cb136-36"></a>  <span class="fu">mutate</span>(<span class="at">coef_info =</span> purrr<span class="sc">::</span><span class="fu">map</span>(splits, fit_lm))</span>
-<span id="cb136-37"><a href="#cb136-37"></a></span>
-<span id="cb136-38"><a href="#cb136-38"></a><span class="co"># Extract bootstrapped coefficient estimates</span></span>
-<span id="cb136-39"><a href="#cb136-39"></a>boot_coefs <span class="ot">&lt;-</span> boot_models <span class="sc">%&gt;%</span></span>
-<span id="cb136-40"><a href="#cb136-40"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(coef_info)</span>
-<span id="cb136-41"><a href="#cb136-41"></a></span>
-<span id="cb136-42"><a href="#cb136-42"></a><span class="co"># Percentile confidence intervals</span></span>
-<span id="cb136-43"><a href="#cb136-43"></a>percentile_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_pctl</span>(</span>
-<span id="cb136-44"><a href="#cb136-44"></a>  <span class="at">.data =</span> boot_models,</span>
-<span id="cb136-45"><a href="#cb136-45"></a>  <span class="at">statistics =</span> coef_info)</span>
-<span id="cb136-46"><a href="#cb136-46"></a></span>
-<span id="cb136-47"><a href="#cb136-47"></a><span class="co"># Bias-corrected and accelerated confidence intervals</span></span>
-<span id="cb136-48"><a href="#cb136-48"></a>bca_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_bca</span>(</span>
-<span id="cb136-49"><a href="#cb136-49"></a>  <span class="at">.data =</span> boot_models,</span>
-<span id="cb136-50"><a href="#cb136-50"></a>  <span class="at">statistics =</span> coef_info,</span>
-<span id="cb136-51"><a href="#cb136-51"></a>  <span class="at">.fn =</span> fit_lm</span>
-<span id="cb136-52"><a href="#cb136-52"></a>)</span>
-<span id="cb136-53"><a href="#cb136-53"></a></span>
-<span id="cb136-54"><a href="#cb136-54"></a><span class="co"># View confidence intervals</span></span>
-<span id="cb136-55"><a href="#cb136-55"></a>percentile_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a><span class="fu">set.seed</span>(<span class="dv">52242</span>)</span>
+<span id="cb138-2"><a href="#cb138-2"></a>bootstrapSamples <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb138-3"><a href="#cb138-3"></a></span>
+<span id="cb138-4"><a href="#cb138-4"></a><span class="co"># Create bootstrap resamples (with apparent = TRUE)</span></span>
+<span id="cb138-5"><a href="#cb138-5"></a>boots <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">bootstraps</span>(</span>
+<span id="cb138-6"><a href="#cb138-6"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb138-7"><a href="#cb138-7"></a>  <span class="at">times =</span> bootstrapSamples,</span>
+<span id="cb138-8"><a href="#cb138-8"></a>  <span class="at">apparent =</span> <span class="cn">TRUE</span></span>
+<span id="cb138-9"><a href="#cb138-9"></a>)</span>
+<span id="cb138-10"><a href="#cb138-10"></a></span>
+<span id="cb138-11"><a href="#cb138-11"></a><span class="co"># Define recipe</span></span>
+<span id="cb138-12"><a href="#cb138-12"></a>rec <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(</span>
+<span id="cb138-13"><a href="#cb138-13"></a>  fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> target_share,</span>
+<span id="cb138-14"><a href="#cb138-14"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>))</span>
+<span id="cb138-15"><a href="#cb138-15"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb138-16"><a href="#cb138-16"></a>  recipes<span class="sc">::</span><span class="fu">step_log</span>(target_share, <span class="at">offset =</span> <span class="dv">1</span>) <span class="co"># replace I(log(target_share + 1))</span></span>
+<span id="cb138-17"><a href="#cb138-17"></a></span>
+<span id="cb138-18"><a href="#cb138-18"></a><span class="co"># Define model spec and workflow</span></span>
+<span id="cb138-19"><a href="#cb138-19"></a>lm_spec <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb138-20"><a href="#cb138-20"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb138-21"><a href="#cb138-21"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb138-22"><a href="#cb138-22"></a></span>
+<span id="cb138-23"><a href="#cb138-23"></a>lm_workflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb138-24"><a href="#cb138-24"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(rec) <span class="sc">%&gt;%</span></span>
+<span id="cb138-25"><a href="#cb138-25"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_spec)</span>
+<span id="cb138-26"><a href="#cb138-26"></a></span>
+<span id="cb138-27"><a href="#cb138-27"></a><span class="co"># Function for fitting the models on the bootstrap samples</span></span>
+<span id="cb138-28"><a href="#cb138-28"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(split, ...) {</span>
+<span id="cb138-29"><a href="#cb138-29"></a>  analysis_data <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">analysis</span>(split)</span>
+<span id="cb138-30"><a href="#cb138-30"></a>  fit <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">fit</span>(lm_workflow, <span class="at">data =</span> analysis_data)</span>
+<span id="cb138-31"><a href="#cb138-31"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(fit)</span>
+<span id="cb138-32"><a href="#cb138-32"></a>}</span>
+<span id="cb138-33"><a href="#cb138-33"></a></span>
+<span id="cb138-34"><a href="#cb138-34"></a><span class="co"># Fit bootstrap models and save results</span></span>
+<span id="cb138-35"><a href="#cb138-35"></a>boot_models <span class="ot">&lt;-</span> boots <span class="sc">%&gt;%</span></span>
+<span id="cb138-36"><a href="#cb138-36"></a>  <span class="fu">mutate</span>(<span class="at">coef_info =</span> purrr<span class="sc">::</span><span class="fu">map</span>(splits, fit_lm))</span>
+<span id="cb138-37"><a href="#cb138-37"></a></span>
+<span id="cb138-38"><a href="#cb138-38"></a><span class="co"># Extract bootstrapped coefficient estimates</span></span>
+<span id="cb138-39"><a href="#cb138-39"></a>boot_coefs <span class="ot">&lt;-</span> boot_models <span class="sc">%&gt;%</span></span>
+<span id="cb138-40"><a href="#cb138-40"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(coef_info)</span>
+<span id="cb138-41"><a href="#cb138-41"></a></span>
+<span id="cb138-42"><a href="#cb138-42"></a><span class="co"># Percentile confidence intervals</span></span>
+<span id="cb138-43"><a href="#cb138-43"></a>percentile_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_pctl</span>(</span>
+<span id="cb138-44"><a href="#cb138-44"></a>  <span class="at">.data =</span> boot_models,</span>
+<span id="cb138-45"><a href="#cb138-45"></a>  <span class="at">statistics =</span> coef_info)</span>
+<span id="cb138-46"><a href="#cb138-46"></a></span>
+<span id="cb138-47"><a href="#cb138-47"></a><span class="co"># Bias-corrected and accelerated confidence intervals</span></span>
+<span id="cb138-48"><a href="#cb138-48"></a>bca_intervals <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">int_bca</span>(</span>
+<span id="cb138-49"><a href="#cb138-49"></a>  <span class="at">.data =</span> boot_models,</span>
+<span id="cb138-50"><a href="#cb138-50"></a>  <span class="at">statistics =</span> coef_info,</span>
+<span id="cb138-51"><a href="#cb138-51"></a>  <span class="at">.fn =</span> fit_lm</span>
+<span id="cb138-52"><a href="#cb138-52"></a>)</span>
+<span id="cb138-53"><a href="#cb138-53"></a></span>
+<span id="cb138-54"><a href="#cb138-54"></a><span class="co"># View confidence intervals</span></span>
+<span id="cb138-55"><a href="#cb138-55"></a>percentile_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -3812,7 +3840,7 @@ seed : int(0) </code></pre>
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb137"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1"></a>bca_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>bca_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -3823,32 +3851,32 @@ seed : int(0) </code></pre>
 </div>
 <p>The distributions of the regression coefficients across boostraps are depicted in <a href="#fig-bootstrapRegressionCoefficients" class="quarto-xref">Figure&nbsp;<span>11.32</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1"></a><span class="fu">ggplot</span>(</span>
-<span id="cb138-2"><a href="#cb138-2"></a>  <span class="at">data =</span> boot_coefs,</span>
-<span id="cb138-3"><a href="#cb138-3"></a>  <span class="fu">aes</span>(<span class="at">x =</span> estimate)) <span class="sc">+</span></span>
-<span id="cb138-4"><a href="#cb138-4"></a>  <span class="fu">geom_histogram</span>(</span>
-<span id="cb138-5"><a href="#cb138-5"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
-<span id="cb138-6"><a href="#cb138-6"></a>    <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb138-7"><a href="#cb138-7"></a>  <span class="fu">facet_wrap</span>(</span>
-<span id="cb138-8"><a href="#cb138-8"></a>    <span class="sc">~</span> term,</span>
-<span id="cb138-9"><a href="#cb138-9"></a>    <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb138-10"><a href="#cb138-10"></a>  <span class="fu">geom_vline</span>(</span>
-<span id="cb138-11"><a href="#cb138-11"></a>    <span class="at">data =</span> percentile_intervals,</span>
-<span id="cb138-12"><a href="#cb138-12"></a>    <span class="fu">aes</span>(</span>
-<span id="cb138-13"><a href="#cb138-13"></a>      <span class="at">xintercept =</span> .lower),</span>
-<span id="cb138-14"><a href="#cb138-14"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
-<span id="cb138-15"><a href="#cb138-15"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb138-16"><a href="#cb138-16"></a>  <span class="fu">geom_vline</span>(</span>
-<span id="cb138-17"><a href="#cb138-17"></a>    <span class="at">data =</span> percentile_intervals,</span>
-<span id="cb138-18"><a href="#cb138-18"></a>    <span class="fu">aes</span>(</span>
-<span id="cb138-19"><a href="#cb138-19"></a>      <span class="at">xintercept =</span> .upper),</span>
-<span id="cb138-20"><a href="#cb138-20"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
-<span id="cb138-21"><a href="#cb138-21"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb138-22"><a href="#cb138-22"></a>  <span class="fu">labs</span>(</span>
-<span id="cb138-23"><a href="#cb138-23"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Distributions of Coefficients"</span>,</span>
-<span id="cb138-24"><a href="#cb138-24"></a>    <span class="at">x =</span> <span class="st">"Coefficient Estimate"</span>,</span>
-<span id="cb138-25"><a href="#cb138-25"></a>    <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
-<span id="cb138-26"><a href="#cb138-26"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb140-2"><a href="#cb140-2"></a>  <span class="at">data =</span> boot_coefs,</span>
+<span id="cb140-3"><a href="#cb140-3"></a>  <span class="fu">aes</span>(<span class="at">x =</span> estimate)) <span class="sc">+</span></span>
+<span id="cb140-4"><a href="#cb140-4"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb140-5"><a href="#cb140-5"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
+<span id="cb140-6"><a href="#cb140-6"></a>    <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb140-7"><a href="#cb140-7"></a>  <span class="fu">facet_wrap</span>(</span>
+<span id="cb140-8"><a href="#cb140-8"></a>    <span class="sc">~</span> term,</span>
+<span id="cb140-9"><a href="#cb140-9"></a>    <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb140-10"><a href="#cb140-10"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb140-11"><a href="#cb140-11"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb140-12"><a href="#cb140-12"></a>    <span class="fu">aes</span>(</span>
+<span id="cb140-13"><a href="#cb140-13"></a>      <span class="at">xintercept =</span> .lower),</span>
+<span id="cb140-14"><a href="#cb140-14"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb140-15"><a href="#cb140-15"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb140-16"><a href="#cb140-16"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb140-17"><a href="#cb140-17"></a>    <span class="at">data =</span> percentile_intervals,</span>
+<span id="cb140-18"><a href="#cb140-18"></a>    <span class="fu">aes</span>(</span>
+<span id="cb140-19"><a href="#cb140-19"></a>      <span class="at">xintercept =</span> .upper),</span>
+<span id="cb140-20"><a href="#cb140-20"></a>    <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb140-21"><a href="#cb140-21"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb140-22"><a href="#cb140-22"></a>  <span class="fu">labs</span>(</span>
+<span id="cb140-23"><a href="#cb140-23"></a>    <span class="at">title =</span> <span class="st">"Bootstrap Distributions of Coefficients"</span>,</span>
+<span id="cb140-24"><a href="#cb140-24"></a>    <span class="at">x =</span> <span class="st">"Coefficient Estimate"</span>,</span>
+<span id="cb140-25"><a href="#cb140-25"></a>    <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb140-26"><a href="#cb140-26"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-bootstrapRegressionCoefficients" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Histogram of Parameter Estimates Across Bootstraps.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-bootstrapRegressionCoefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3869,24 +3897,24 @@ Figure&nbsp;11.32: Histogram of Parameter Estimates Across Bootstraps.
 </ul>
 <p>First, we mean-center the <a href="research-methods.html#sec-correlationalStudy">predictors</a>. In this case, we center the <a href="research-methods.html#sec-correlationalStudy">predictors</a> around the mean of height and weight for Wide Receivers:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb139-2"><a href="#cb139-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1"></a>player_stats_seasonal<span class="sc">$</span>height_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>height[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb141-2"><a href="#cb141-2"></a>player_stats_seasonal<span class="sc">$</span>weight_centered <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>weight <span class="sc">-</span> <span class="fu">mean</span>(player_stats_seasonal<span class="sc">$</span>weight[<span class="fu">which</span>(player_stats_seasonal<span class="sc">$</span>position <span class="sc">==</span> <span class="st">"WR"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we compute the interaction term as the multiplication of the two centered <a href="research-methods.html#sec-correlationalStudy">predictors</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb140"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb142"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1"></a>player_stats_seasonal<span class="sc">$</span>heightXweight <span class="ot">&lt;-</span> player_stats_seasonal<span class="sc">$</span>height_centered <span class="sc">*</span> player_stats_seasonal<span class="sc">$</span>weight_centered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Then, we fit the moderated multiple regression model:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb141-2"><a href="#cb141-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
-<span id="cb141-3"><a href="#cb141-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb141-4"><a href="#cb141-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb141-5"><a href="#cb141-5"></a>)</span>
-<span id="cb141-6"><a href="#cb141-6"></a></span>
-<span id="cb141-7"><a href="#cb141-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb143-2"><a href="#cb143-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> height_centered<span class="sc">:</span>weight_centered,</span>
+<span id="cb143-3"><a href="#cb143-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb143-4"><a href="#cb143-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb143-5"><a href="#cb143-5"></a>)</span>
+<span id="cb143-6"><a href="#cb143-6"></a></span>
+<span id="cb143-7"><a href="#cb143-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -3914,21 +3942,21 @@ F-statistic: 29.77 on 3 and 5385 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <p>This model is equivalent to the model that includes the interaction term explicitly:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb143-2"><a href="#cb143-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
-<span id="cb143-3"><a href="#cb143-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb143-4"><a href="#cb143-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
-<span id="cb143-5"><a href="#cb143-5"></a>)</span>
-<span id="cb143-6"><a href="#cb143-6"></a></span>
-<span id="cb143-7"><a href="#cb143-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>moderationModel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb145-2"><a href="#cb145-2"></a>  fantasyPoints_transformed <span class="sc">~</span> height_centered <span class="sc">+</span> weight_centered <span class="sc">+</span> heightXweight,</span>
+<span id="cb145-3"><a href="#cb145-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb145-4"><a href="#cb145-4"></a>  <span class="at">na.action =</span> <span class="st">"na.exclude"</span></span>
+<span id="cb145-5"><a href="#cb145-5"></a>)</span>
+<span id="cb145-6"><a href="#cb145-6"></a></span>
+<span id="cb145-7"><a href="#cb145-7"></a><span class="fu">summary</span>(moderationModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, we can visualize the interaction to understand it. We create an interaction plot (<a href="#fig-interactionPlot" class="quarto-xref">Figure&nbsp;<span>11.33</span></a>) and Johnson-Neyman plot (<a href="#fig-johnsonNeymanPlot" class="quarto-xref">Figure&nbsp;<span>11.34</span></a>) using the <code>interactions</code> package <span class="citation" data-cites="R-interactions">(<a href="references.html#ref-R-interactions" role="doc-biblioref">Long, 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
-<span id="cb144-2"><a href="#cb144-2"></a>  moderationModel,</span>
-<span id="cb144-3"><a href="#cb144-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb144-4"><a href="#cb144-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1"></a>interactions<span class="sc">::</span><span class="fu">interact_plot</span>(</span>
+<span id="cb146-2"><a href="#cb146-2"></a>  moderationModel,</span>
+<span id="cb146-3"><a href="#cb146-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb146-4"><a href="#cb146-4"></a>  <span class="at">modx =</span> weight_centered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div id="fig-interactionPlot" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Interaction Plot from Moderated Multiple Regression.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-interactionPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3941,11 +3969,11 @@ Figure&nbsp;11.33: Interaction Plot from Moderated Multiple Regression.
 </div>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
-<span id="cb145-2"><a href="#cb145-2"></a>  moderationModel,</span>
-<span id="cb145-3"><a href="#cb145-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb145-4"><a href="#cb145-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb145-5"><a href="#cb145-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb147"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1"></a>interactions<span class="sc">::</span><span class="fu">johnson_neyman</span>(</span>
+<span id="cb147-2"><a href="#cb147-2"></a>  moderationModel,</span>
+<span id="cb147-3"><a href="#cb147-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb147-4"><a href="#cb147-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb147-5"><a href="#cb147-5"></a>  <span class="at">alpha =</span> .<span class="dv">05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>JOHNSON-NEYMAN INTERVAL
 
@@ -3967,11 +3995,11 @@ Figure&nbsp;11.34: Johnson-Neyman Plot from Moderated Multiple Regression.
 </div>
 <p>Here is a simple slopes analysis:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb147"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
-<span id="cb147-2"><a href="#cb147-2"></a>  moderationModel,</span>
-<span id="cb147-3"><a href="#cb147-3"></a>  <span class="at">pred =</span> height_centered,</span>
-<span id="cb147-4"><a href="#cb147-4"></a>  <span class="at">modx =</span> weight_centered,</span>
-<span id="cb147-5"><a href="#cb147-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a>interactions<span class="sc">::</span><span class="fu">sim_slopes</span>(</span>
+<span id="cb149-2"><a href="#cb149-2"></a>  moderationModel,</span>
+<span id="cb149-3"><a href="#cb149-3"></a>  <span class="at">pred =</span> height_centered,</span>
+<span id="cb149-4"><a href="#cb149-4"></a>  <span class="at">modx =</span> weight_centered,</span>
+<span id="cb149-5"><a href="#cb149-5"></a>  <span class="at">johnson_neyman =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>SIMPLE SLOPES ANALYSIS
 
@@ -3998,67 +4026,67 @@ Slope of height_centered when weight_centered =  1.484626e+01 (+ 1 SD):
 <span class="header-section-number">11.15</span> Mediation</h2>
 <p>A mediation model takes the following general form in the <code>lavaan</code> package <span class="citation" data-cites="Rosseel2012_packages R-lavaan">(<a href="references.html#ref-Rosseel2012_packages" role="doc-biblioref">Rosseel, 2012</a>; <a href="references.html#ref-R-lavaan" role="doc-biblioref">Rosseel et al., 2024</a>)</span>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb149-2"><a href="#cb149-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb149-3"><a href="#cb149-3"></a><span class="st">  Y ~ direct*X</span></span>
-<span id="cb149-4"><a href="#cb149-4"></a><span class="st">  </span></span>
-<span id="cb149-5"><a href="#cb149-5"></a><span class="st">  # mediator</span></span>
-<span id="cb149-6"><a href="#cb149-6"></a><span class="st">  M ~ a*X</span></span>
-<span id="cb149-7"><a href="#cb149-7"></a><span class="st">  Y ~ b*M</span></span>
-<span id="cb149-8"><a href="#cb149-8"></a><span class="st">  </span></span>
-<span id="cb149-9"><a href="#cb149-9"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb149-10"><a href="#cb149-10"></a><span class="st">  indirect := a*b</span></span>
-<span id="cb149-11"><a href="#cb149-11"></a><span class="st">  </span></span>
-<span id="cb149-12"><a href="#cb149-12"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb149-13"><a href="#cb149-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
-<span id="cb149-14"><a href="#cb149-14"></a><span class="st">  </span></span>
-<span id="cb149-15"><a href="#cb149-15"></a><span class="st">  # proportion mediated</span></span>
-<span id="cb149-16"><a href="#cb149-16"></a><span class="st">  Pm := abs(indirect) / total</span></span>
-<span id="cb149-17"><a href="#cb149-17"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb151-2"><a href="#cb151-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb151-3"><a href="#cb151-3"></a><span class="st">  Y ~ direct*X</span></span>
+<span id="cb151-4"><a href="#cb151-4"></a><span class="st">  </span></span>
+<span id="cb151-5"><a href="#cb151-5"></a><span class="st">  # mediator</span></span>
+<span id="cb151-6"><a href="#cb151-6"></a><span class="st">  M ~ a*X</span></span>
+<span id="cb151-7"><a href="#cb151-7"></a><span class="st">  Y ~ b*M</span></span>
+<span id="cb151-8"><a href="#cb151-8"></a><span class="st">  </span></span>
+<span id="cb151-9"><a href="#cb151-9"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb151-10"><a href="#cb151-10"></a><span class="st">  indirect := a*b</span></span>
+<span id="cb151-11"><a href="#cb151-11"></a><span class="st">  </span></span>
+<span id="cb151-12"><a href="#cb151-12"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb151-13"><a href="#cb151-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
+<span id="cb151-14"><a href="#cb151-14"></a><span class="st">  </span></span>
+<span id="cb151-15"><a href="#cb151-15"></a><span class="st">  # proportion mediated</span></span>
+<span id="cb151-16"><a href="#cb151-16"></a><span class="st">  Pm := abs(indirect) / total</span></span>
+<span id="cb151-17"><a href="#cb151-17"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Let’s substitute in our <a href="research-methods.html#sec-correlationalStudy">predictor</a>, <a href="research-methods.html#sec-correlationalStudy">outcome</a>, and hypothesized <a href="research-methods.html#sec-mediation">mediator</a>. In this case, we predict that receiving touchdowns partially accounts for the association between Wide Receiver’s target share and their fantasy points. This is a silly example because fantasy points are derived, in part, from touchdowns, so of course touchdowns will partially account for almost any effect on Wide Receivers’ fantasy points. This example is merely for demonstrating the process of developing and examining a mediation model.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb150"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb150-2"><a href="#cb150-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb150-3"><a href="#cb150-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
-<span id="cb150-4"><a href="#cb150-4"></a><span class="st">  </span></span>
-<span id="cb150-5"><a href="#cb150-5"></a><span class="st">  # mediator</span></span>
-<span id="cb150-6"><a href="#cb150-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
-<span id="cb150-7"><a href="#cb150-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
-<span id="cb150-8"><a href="#cb150-8"></a><span class="st">  </span></span>
-<span id="cb150-9"><a href="#cb150-9"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb150-10"><a href="#cb150-10"></a><span class="st">  indirect := a*b</span></span>
-<span id="cb150-11"><a href="#cb150-11"></a><span class="st">  </span></span>
-<span id="cb150-12"><a href="#cb150-12"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb150-13"><a href="#cb150-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
-<span id="cb150-14"><a href="#cb150-14"></a><span class="st">  </span></span>
-<span id="cb150-15"><a href="#cb150-15"></a><span class="st">  # proportion mediated</span></span>
-<span id="cb150-16"><a href="#cb150-16"></a><span class="st">  Pm := abs(indirect) / total</span></span>
-<span id="cb150-17"><a href="#cb150-17"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a>mediationModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb152-2"><a href="#cb152-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb152-3"><a href="#cb152-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb152-4"><a href="#cb152-4"></a><span class="st">  </span></span>
+<span id="cb152-5"><a href="#cb152-5"></a><span class="st">  # mediator</span></span>
+<span id="cb152-6"><a href="#cb152-6"></a><span class="st">  receiving_tds ~ a*target_share</span></span>
+<span id="cb152-7"><a href="#cb152-7"></a><span class="st">  fantasyPoints_transformed ~ b*receiving_tds</span></span>
+<span id="cb152-8"><a href="#cb152-8"></a><span class="st">  </span></span>
+<span id="cb152-9"><a href="#cb152-9"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb152-10"><a href="#cb152-10"></a><span class="st">  indirect := a*b</span></span>
+<span id="cb152-11"><a href="#cb152-11"></a><span class="st">  </span></span>
+<span id="cb152-12"><a href="#cb152-12"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb152-13"><a href="#cb152-13"></a><span class="st">  total := abs(direct) + abs(indirect)</span></span>
+<span id="cb152-14"><a href="#cb152-14"></a><span class="st">  </span></span>
+<span id="cb152-15"><a href="#cb152-15"></a><span class="st">  # proportion mediated</span></span>
+<span id="cb152-16"><a href="#cb152-16"></a><span class="st">  Pm := abs(indirect) / total</span></span>
+<span id="cb152-17"><a href="#cb152-17"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>To get a robust estimate of the indirect effect, we obtain bootstrapped estimates from 1,000 bootstrap draws. Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, but this example uses only 1,000 bootstrap draws for a shorter runtime.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb151-2"><a href="#cb151-2"></a>  mediationModel,</span>
-<span id="cb151-3"><a href="#cb151-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb151-4"><a href="#cb151-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb151-5"><a href="#cb151-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb151-6"><a href="#cb151-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb151-7"><a href="#cb151-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb151-8"><a href="#cb151-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb151-9"><a href="#cb151-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb151-10"><a href="#cb151-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1"></a>mediationFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb153-2"><a href="#cb153-2"></a>  mediationModel,</span>
+<span id="cb153-3"><a href="#cb153-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb153-4"><a href="#cb153-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb153-5"><a href="#cb153-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb153-6"><a href="#cb153-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb153-7"><a href="#cb153-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb153-8"><a href="#cb153-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb153-9"><a href="#cb153-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb153-10"><a href="#cb153-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1"></a><span class="fu">summary</span>(</span>
-<span id="cb152-2"><a href="#cb152-2"></a>  mediationFit,</span>
-<span id="cb152-3"><a href="#cb152-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb152-4"><a href="#cb152-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb152-5"><a href="#cb152-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a><span class="fu">summary</span>(</span>
+<span id="cb154-2"><a href="#cb154-2"></a>  mediationFit,</span>
+<span id="cb154-3"><a href="#cb154-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb154-4"><a href="#cb154-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb154-5"><a href="#cb154-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 20 iterations
 
@@ -4163,51 +4191,51 @@ Defined Parameters:
 </div>
 <p>We can also estimate a model with multiple hypothesized <a href="#sec-mediations">mediators</a>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
-<span id="cb154-2"><a href="#cb154-2"></a><span class="st">  # direct effect (cPrime)</span></span>
-<span id="cb154-3"><a href="#cb154-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
-<span id="cb154-4"><a href="#cb154-4"></a><span class="st">  </span></span>
-<span id="cb154-5"><a href="#cb154-5"></a><span class="st">  # mediator</span></span>
-<span id="cb154-6"><a href="#cb154-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
-<span id="cb154-7"><a href="#cb154-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
-<span id="cb154-8"><a href="#cb154-8"></a><span class="st">  </span></span>
-<span id="cb154-9"><a href="#cb154-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
-<span id="cb154-10"><a href="#cb154-10"></a><span class="st">  </span></span>
-<span id="cb154-11"><a href="#cb154-11"></a><span class="st">  # indirect effect = a*b</span></span>
-<span id="cb154-12"><a href="#cb154-12"></a><span class="st">  indirect1 := a1*b1</span></span>
-<span id="cb154-13"><a href="#cb154-13"></a><span class="st">  indirect2 := a2*b2</span></span>
-<span id="cb154-14"><a href="#cb154-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
-<span id="cb154-15"><a href="#cb154-15"></a><span class="st">  </span></span>
-<span id="cb154-16"><a href="#cb154-16"></a><span class="st">  # total effect (c)</span></span>
-<span id="cb154-17"><a href="#cb154-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
-<span id="cb154-18"><a href="#cb154-18"></a><span class="st">  </span></span>
-<span id="cb154-19"><a href="#cb154-19"></a><span class="st">  # proportion mediated</span></span>
-<span id="cb154-20"><a href="#cb154-20"></a><span class="st">  Pm1 := abs(indirect1) / total</span></span>
-<span id="cb154-21"><a href="#cb154-21"></a><span class="st">  Pm2 := abs(indirect2) / total</span></span>
-<span id="cb154-22"><a href="#cb154-22"></a><span class="st">  PmTotal := abs(indirectTotal) / total</span></span>
-<span id="cb154-23"><a href="#cb154-23"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a>multipleMediatorModel <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb156-2"><a href="#cb156-2"></a><span class="st">  # direct effect (cPrime)</span></span>
+<span id="cb156-3"><a href="#cb156-3"></a><span class="st">  fantasyPoints_transformed ~ direct*target_share</span></span>
+<span id="cb156-4"><a href="#cb156-4"></a><span class="st">  </span></span>
+<span id="cb156-5"><a href="#cb156-5"></a><span class="st">  # mediator</span></span>
+<span id="cb156-6"><a href="#cb156-6"></a><span class="st">  receiving_tds ~ a1*target_share</span></span>
+<span id="cb156-7"><a href="#cb156-7"></a><span class="st">  receiving_yards ~ a2*target_share</span></span>
+<span id="cb156-8"><a href="#cb156-8"></a><span class="st">  </span></span>
+<span id="cb156-9"><a href="#cb156-9"></a><span class="st">  fantasyPoints_transformed ~ b1*receiving_tds + b2*receiving_yards</span></span>
+<span id="cb156-10"><a href="#cb156-10"></a><span class="st">  </span></span>
+<span id="cb156-11"><a href="#cb156-11"></a><span class="st">  # indirect effect = a*b</span></span>
+<span id="cb156-12"><a href="#cb156-12"></a><span class="st">  indirect1 := a1*b1</span></span>
+<span id="cb156-13"><a href="#cb156-13"></a><span class="st">  indirect2 := a2*b2</span></span>
+<span id="cb156-14"><a href="#cb156-14"></a><span class="st">  indirectTotal := indirect1 + indirect2</span></span>
+<span id="cb156-15"><a href="#cb156-15"></a><span class="st">  </span></span>
+<span id="cb156-16"><a href="#cb156-16"></a><span class="st">  # total effect (c)</span></span>
+<span id="cb156-17"><a href="#cb156-17"></a><span class="st">  total := abs(direct) + abs(indirectTotal)</span></span>
+<span id="cb156-18"><a href="#cb156-18"></a><span class="st">  </span></span>
+<span id="cb156-19"><a href="#cb156-19"></a><span class="st">  # proportion mediated</span></span>
+<span id="cb156-20"><a href="#cb156-20"></a><span class="st">  Pm1 := abs(indirect1) / total</span></span>
+<span id="cb156-21"><a href="#cb156-21"></a><span class="st">  Pm2 := abs(indirect2) / total</span></span>
+<span id="cb156-22"><a href="#cb156-22"></a><span class="st">  PmTotal := abs(indirectTotal) / total</span></span>
+<span id="cb156-23"><a href="#cb156-23"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
-<span id="cb155-2"><a href="#cb155-2"></a>  multipleMediatorModel,</span>
-<span id="cb155-3"><a href="#cb155-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb155-4"><a href="#cb155-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
-<span id="cb155-5"><a href="#cb155-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
-<span id="cb155-6"><a href="#cb155-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
-<span id="cb155-7"><a href="#cb155-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
-<span id="cb155-8"><a href="#cb155-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
-<span id="cb155-9"><a href="#cb155-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
-<span id="cb155-10"><a href="#cb155-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb157"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1"></a>multipleMediatorFit <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">sem</span>(</span>
+<span id="cb157-2"><a href="#cb157-2"></a>  multipleMediatorModel,</span>
+<span id="cb157-3"><a href="#cb157-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb157-4"><a href="#cb157-4"></a>  <span class="at">se =</span> <span class="st">"bootstrap"</span>,</span>
+<span id="cb157-5"><a href="#cb157-5"></a>  <span class="at">bootstrap =</span> <span class="dv">1000</span>, <span class="co"># generally use 10,000 bootstrap draws; this example uses 1,000 for speed</span></span>
+<span id="cb157-6"><a href="#cb157-6"></a>  <span class="at">parallel =</span> <span class="st">"multicore"</span>, <span class="co"># parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC</span></span>
+<span id="cb157-7"><a href="#cb157-7"></a>  <span class="at">iseed =</span> <span class="dv">52242</span>, <span class="co"># for reproducibility</span></span>
+<span id="cb157-8"><a href="#cb157-8"></a>  <span class="at">missing =</span> <span class="st">"ML"</span>,</span>
+<span id="cb157-9"><a href="#cb157-9"></a>  <span class="at">estimator =</span> <span class="st">"ML"</span>,</span>
+<span id="cb157-10"><a href="#cb157-10"></a>  <span class="at">fixed.x =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Here are the model results:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a><span class="fu">summary</span>(</span>
-<span id="cb156-2"><a href="#cb156-2"></a>  multipleMediatorFit,</span>
-<span id="cb156-3"><a href="#cb156-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb156-4"><a href="#cb156-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb156-5"><a href="#cb156-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a><span class="fu">summary</span>(</span>
+<span id="cb158-2"><a href="#cb158-2"></a>  multipleMediatorFit,</span>
+<span id="cb158-3"><a href="#cb158-3"></a>  <span class="at">fit.measures =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb158-4"><a href="#cb158-4"></a>  <span class="at">standardized =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb158-5"><a href="#cb158-5"></a>  <span class="at">rsquare =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>lavaan 0.6-19 ended normally after 33 iterations
 
@@ -4327,15 +4355,15 @@ Defined Parameters:
 </section><section id="sec-multipleRegressionBayesian" class="level2" data-number="11.16"><h2 data-number="11.16" class="anchored" data-anchor-id="sec-multipleRegressionBayesian">
 <span class="header-section-number">11.16</span> Bayesian Multiple Regression</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
-<span id="cb158-2"><a href="#cb158-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
-<span id="cb158-3"><a href="#cb158-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
-<span id="cb158-4"><a href="#cb158-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
-<span id="cb158-5"><a href="#cb158-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a>bayesianMultipleRegressionModel <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
+<span id="cb160-2"><a href="#cb160-2"></a>  <span class="at">formula =</span> fantasyPoints_transformed <span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(target_share <span class="sc">+</span> <span class="dv">1</span>)),</span>
+<span id="cb160-3"><a href="#cb160-3"></a>  <span class="at">data =</span> player_stats_seasonal <span class="sc">%&gt;%</span> <span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>)),</span>
+<span id="cb160-4"><a href="#cb160-4"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>()</span>
+<span id="cb160-5"><a href="#cb160-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb159"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a><span class="fu">summary</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> Family: gaussian 
   Links: mu = identity; sigma = identity 
@@ -4360,7 +4388,7 @@ Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(bayesianMultipleRegressionModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># Bayesian R2 with Compatibility Interval
 
@@ -4373,7 +4401,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </section><section id="sec-multipleRegressionSessionInfo" class="level2" data-number="11.18"><h2 data-number="11.18" class="anchored" data-anchor-id="sec-multipleRegressionSessionInfo">
 <span class="header-section-number">11.18</span> Session Info</h2>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb165"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
