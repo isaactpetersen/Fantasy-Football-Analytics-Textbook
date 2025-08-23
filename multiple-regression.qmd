@@ -1748,12 +1748,23 @@ hist(
 We can apply a transformation to the [outcome variable](#sec-correlationalStudy) to generate a more normally distributed variable using the `bestNormalize::bestNormalize()` function of the `bestNormalize` package [@R-bestNormalize; @Peterson2021_packages; @Peterson2020_packages].
 
 ```{r}
-obj <- bestNormalize::bestNormalize(player_stats_seasonal$fantasyPoints)
-player_stats_seasonal$fantasyPoints_transformed <- predict(obj)
+bnTransformed <- bestNormalize::bestNormalize(player_stats_seasonal$fantasyPoints)
+```
+
+Here are the transformation results—in this case, the best-fitting transformation is an ordered quantile (ORQ) normalization transformation:
+
+```{r}
+bnTransformed
+```
+
+Then, we apply the best-fitting transformation to the variable, to create a transformed variable that is more normally distributed.
+
+```{r}
+player_stats_seasonal$fantasyPoints_transformed <- predict(bnTransformed)
 
 # Can back-transform transformed values back to the original metric later if needed:
 original <- predict(
-  obj,
+  bnTransformed,
   newdata = player_stats_seasonal$fantasyPoints_transformed,
   inverse = TRUE)
 ```
