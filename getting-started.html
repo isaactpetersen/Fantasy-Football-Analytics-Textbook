@@ -148,17 +148,17 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
 <meta property="og:title" content="3&nbsp; Getting Started with R for Data Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/images/joinTypes.png">
+<meta property="og:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/images/merge.png">
 <meta property="og:site_name" content="Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
-<meta property="og:image:alt" content="Types of Merges/Joins.">
-<meta property="og:image:height" content="1645">
-<meta property="og:image:width" content="2743">
+<meta property="og:image:alt" content="Example of Merging Two Data Frames.">
+<meta property="og:image:height" content="280">
+<meta property="og:image:width" content="1759">
 <meta name="twitter:title" content="3&nbsp; Getting Started with R for Data Analysis – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta name="twitter:description" content="">
-<meta name="twitter:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/images/joinTypes.png">
-<meta name="twitter:image:alt" content="Types of Merges/Joins.">
-<meta name="twitter:image-height" content="1645">
-<meta name="twitter:image-width" content="2743">
+<meta name="twitter:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/images/merge.png">
+<meta name="twitter:image:alt" content="Example of Merging Two Data Frames.">
+<meta name="twitter:image-height" content="280">
+<meta name="twitter:image-width" content="1759">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -2086,28 +2086,80 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.26</span> Merging/Joins</h2>
 <section id="sec-mergingOverview" class="level3" data-number="3.26.1"><h3 data-number="3.26.1" class="anchored" data-anchor-id="sec-mergingOverview">
 <span class="header-section-number">3.26.1</span> Overview</h3>
+<p>If we have two data frames that we want to combine into one we would perform what is called a merge. Let’s say we want to examine how players’ fantasy performance differs by age. Assume we have players’ age in one data frame and players’ fantasy points in a separate data frame. To examine how age and fantasy performance is related, we will need to have both variables in the same data frame. Thus, to examine age in relation to fantasy performance, we would need to merge both data frames so that the variables age and fantasy points are in the same data frame. However, to merge successfully, we need to indicate how the rows in the first data frame can be connected to the rows in the second data frame. For instance, if the player’s ID is a variable in both data frames, we could use the player’s ID as a “key” to indicate how to merge the rows from both data frames. The merged object, then, would retain the keys (i.e., player ID) and the variables from each object (i.e., age and fantasy points). An example of merge the two data frames in this example is depicted in <a href="#fig-merge" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>.</p>
+<div id="fig-merge" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Example of Merging Two Data Frames.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-merge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/merge.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;3.1: “Example of Merging Two Data Frames.”"><img src="images/merge.png" class="img-fluid figure-img" style="width:100.0%" alt="Example of Merging Two Data Frames."></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-merge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.1: “Example of Merging Two Data Frames.”
+</figcaption></figure>
+</div>
+<p>Here is a code example:</p>
+<div class="cell">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb159"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1"></a>dataframeA <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb159-2"><a href="#cb159-2"></a>  <span class="at">id =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb159-3"><a href="#cb159-3"></a>  <span class="at">age =</span> <span class="fu">c</span>(<span class="dv">24</span>, <span class="dv">26</span>, <span class="dv">30</span>)</span>
+<span id="cb159-4"><a href="#cb159-4"></a>)</span>
+<span id="cb159-5"><a href="#cb159-5"></a></span>
+<span id="cb159-6"><a href="#cb159-6"></a>dataframeB <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb159-7"><a href="#cb159-7"></a>  <span class="at">id =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb159-8"><a href="#cb159-8"></a>  <span class="at">fantasyPoints =</span> <span class="fu">c</span>(<span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">250</span>)</span>
+<span id="cb159-9"><a href="#cb159-9"></a>)</span>
+<span id="cb159-10"><a href="#cb159-10"></a></span>
+<span id="cb159-11"><a href="#cb159-11"></a>mergedDataframe <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb159-12"><a href="#cb159-12"></a>  dataframeA,</span>
+<span id="cb159-13"><a href="#cb159-13"></a>  dataframeB,</span>
+<span id="cb159-14"><a href="#cb159-14"></a>  <span class="at">by =</span> <span class="st">"id"</span></span>
+<span id="cb159-15"><a href="#cb159-15"></a>)</span>
+<span id="cb159-16"><a href="#cb159-16"></a></span>
+<span id="cb159-17"><a href="#cb159-17"></a>dataframeA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["id"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["age"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"24"},{"1":"2","2":"26"},{"1":"3","2":"30"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a>dataframeB</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["id"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["fantasyPoints"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"200"},{"1":"2","2":"300"},{"1":"3","2":"250"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a>mergedDataframe</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["id"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["age"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["fantasyPoints"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"24","3":"200"},{"1":"2","2":"26","3":"300"},{"1":"3","2":"30","3":"250"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
 <p>Merging (also called joining) merges two data objects using a shared set of variables called “keys.” The keys are the variable(s) that are used to align the rows from the two objects. The data for the given key(s) in the first object get paired with (i.e., get placed in the same row as) the data for that same key in the second object. In general, each row should have a value on each of the keys; there should be no missingness in the keys. To merge two objects, the key(s) that will be used to match the records must be present in both objects. The keys are used to merge the variables in object 1 (<code>x</code>) with the variables in object 2 (<code>y</code>). Different merge types select different rows to merge.</p>
 <p>For some data objects, you might want to combine information for the same player from multiple data objects. If each data object is in <code>player</code> form (i.e., <code>player_id</code> uniquely identifies each row), you might merge by the player’s identification number (e.g., <code>player_id</code>). In this case, the key uniquely identifies each row.</p>
 <p>However, some data objects have multiple keys. For instance, in long form data objects, each player may have multiple rows corresponding to multiple seasons. In this case, the keys may be <code>player_id</code> and <code>season</code>—that is, the data are in <code>player</code>-<code>season</code> form. If object 1 and object 2 are both in <code>player</code>-<code>season</code> form, we would use <code>player_id</code> and <code>season</code> as the keys to merge the two objects. In this case, the keys uniquely identify each row; that is, they account for the levels of nesting.</p>
 <p>However, if the data objects are of different form, we would select the keys as the variable(s) that represent the lowest common denominator of variables used to join the data objects that are present in both objects. For instance, assume that object 1 is in <code>player</code>-<code>season</code> form. For object 2, each player has multiple rows corresponding to seasons and games/weeks—in this case, object 2 is in <code>player</code>-<code>season</code>-<code>week</code> form. Object 1 does not have the <code>week</code> variable, so it cannot be used to join the objects. Thus, we would use <code>player_id</code> and <code>season</code> as the keys to merge the two objects, because both variables are present in both objects.</p>
 <p>It is important not to have rows with duplicate values on the keys. For instance, if there is more than one row with the same <code>player_id</code> in each object (or multiple rows in object 2 with the same combination of <code>player_id</code>, <code>season</code>, and <code>week</code>), then each row with that <code>player_id</code> in object 1 gets paired with each row with that <code>player_id</code> in object 2. The many possible combinations can lead to the resulting object greatly expanding in terms of the number of rows. Thus, you want the keys to uniquely identify each row. In the example below, <code>player</code> is present in each object, so we can merge by <code>player</code>; however, each object has multiple rows with the same player. For example, <code>mergeExample1A</code> has three rows for <code>player</code> A; <code>mergeExample1B</code> has two rows for <code>player</code> A. Thus, when we merge them, the resulting object has many more rows than each respective object (even though neither object has players that the other object does not). Below, we merge data using the <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">dplyr::full_join()</a></code> function:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb159"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1"></a>mergeExample1A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb159-2"><a href="#cb159-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
-<span id="cb159-3"><a href="#cb159-3"></a>  <span class="at">age =</span> <span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">22</span>,<span class="dv">24</span>,<span class="dv">26</span>,<span class="dv">28</span>)</span>
-<span id="cb159-4"><a href="#cb159-4"></a>)</span>
-<span id="cb159-5"><a href="#cb159-5"></a></span>
-<span id="cb159-6"><a href="#cb159-6"></a>mergeExample1B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb159-7"><a href="#cb159-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
-<span id="cb159-8"><a href="#cb159-8"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>)</span>
-<span id="cb159-9"><a href="#cb159-9"></a>)</span>
-<span id="cb159-10"><a href="#cb159-10"></a></span>
-<span id="cb159-11"><a href="#cb159-11"></a>mergeExample1 <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
-<span id="cb159-12"><a href="#cb159-12"></a>  mergeExample1A,</span>
-<span id="cb159-13"><a href="#cb159-13"></a>  mergeExample1B,</span>
-<span id="cb159-14"><a href="#cb159-14"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
-<span id="cb159-15"><a href="#cb159-15"></a></span>
-<span id="cb159-16"><a href="#cb159-16"></a>mergeExample1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb162"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1"></a>mergeExample1A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb162-2"><a href="#cb162-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
+<span id="cb162-3"><a href="#cb162-3"></a>  <span class="at">age =</span> <span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">22</span>,<span class="dv">24</span>,<span class="dv">26</span>,<span class="dv">28</span>)</span>
+<span id="cb162-4"><a href="#cb162-4"></a>)</span>
+<span id="cb162-5"><a href="#cb162-5"></a></span>
+<span id="cb162-6"><a href="#cb162-6"></a>mergeExample1B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb162-7"><a href="#cb162-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
+<span id="cb162-8"><a href="#cb162-8"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>)</span>
+<span id="cb162-9"><a href="#cb162-9"></a>)</span>
+<span id="cb162-10"><a href="#cb162-10"></a></span>
+<span id="cb162-11"><a href="#cb162-11"></a>mergeExample1 <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb162-12"><a href="#cb162-12"></a>  mergeExample1A,</span>
+<span id="cb162-13"><a href="#cb162-13"></a>  mergeExample1B,</span>
+<span id="cb162-14"><a href="#cb162-14"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
+<span id="cb162-15"><a href="#cb162-15"></a></span>
+<span id="cb162-16"><a href="#cb162-16"></a>mergeExample1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2115,29 +2167,29 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a><span class="fu">dim</span>(mergeExample1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a><span class="fu">dim</span>(mergeExample1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 10  3</code></pre>
 </div>
 </div>
 <p>Note: if the two objects include variables with the same name (apart from the keys), <code>R</code> will not know how you want each to appear in the merged object. So, it will add a suffix (e.g., <code>.x</code>, <code>.y</code>) to each common variable to indicate which object (i.e., object <code>x</code> or object <code>y</code>) the variable came from, where object <code>x</code> is the first object—i.e., the object to which object <code>y</code> (the second object) is merged. In general, apart from the keys, you should not include variables with the same name in two objects to be merged. To prevent this, either remove or rename the shared variable in one of the objects, or include the shared variable as a key. However, as described above, you should include it as a key <strong><em>only</em></strong> if you want to use its values to align the rows from each object. Below is an example of merging two objects with the same variable name (i.e., points) that is not used as a key, using the <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">dplyr::full_join()</a></code> function.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb162"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1"></a>mergeExample2A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb162-2"><a href="#cb162-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span>),</span>
-<span id="cb162-3"><a href="#cb162-3"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">22</span>,<span class="dv">24</span>,<span class="dv">26</span>,<span class="dv">28</span>)</span>
-<span id="cb162-4"><a href="#cb162-4"></a>)</span>
-<span id="cb162-5"><a href="#cb162-5"></a></span>
-<span id="cb162-6"><a href="#cb162-6"></a>mergeExample2B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb162-7"><a href="#cb162-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"F"</span>),</span>
-<span id="cb162-8"><a href="#cb162-8"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>)</span>
-<span id="cb162-9"><a href="#cb162-9"></a>)</span>
-<span id="cb162-10"><a href="#cb162-10"></a></span>
-<span id="cb162-11"><a href="#cb162-11"></a>mergeExample2 <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
-<span id="cb162-12"><a href="#cb162-12"></a>  mergeExample2A,</span>
-<span id="cb162-13"><a href="#cb162-13"></a>  mergeExample2B,</span>
-<span id="cb162-14"><a href="#cb162-14"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
-<span id="cb162-15"><a href="#cb162-15"></a></span>
-<span id="cb162-16"><a href="#cb162-16"></a>mergeExample2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb165"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1"></a>mergeExample2A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb165-2"><a href="#cb165-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span>),</span>
+<span id="cb165-3"><a href="#cb165-3"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">22</span>,<span class="dv">24</span>,<span class="dv">26</span>,<span class="dv">28</span>)</span>
+<span id="cb165-4"><a href="#cb165-4"></a>)</span>
+<span id="cb165-5"><a href="#cb165-5"></a></span>
+<span id="cb165-6"><a href="#cb165-6"></a>mergeExample2B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb165-7"><a href="#cb165-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"F"</span>),</span>
+<span id="cb165-8"><a href="#cb165-8"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>)</span>
+<span id="cb165-9"><a href="#cb165-9"></a>)</span>
+<span id="cb165-10"><a href="#cb165-10"></a></span>
+<span id="cb165-11"><a href="#cb165-11"></a>mergeExample2 <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb165-12"><a href="#cb165-12"></a>  mergeExample2A,</span>
+<span id="cb165-13"><a href="#cb165-13"></a>  mergeExample2B,</span>
+<span id="cb165-14"><a href="#cb165-14"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
+<span id="cb165-15"><a href="#cb165-15"></a></span>
+<span id="cb165-16"><a href="#cb165-16"></a>mergeExample2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2148,24 +2200,24 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 </div>
 <p>When two objects are merged that have different formats, the resulting data object inherits the format of the data object that has more levels of nesting. For instance, consider that you want to merge two objects, object A and object B. Object A is in <code>player</code> form and object B is in <code>player</code>-<code>season</code>-<code>week</code> form. When you merge them, the resulting data object will be in <code>player</code>-<code>season</code>-<code>week</code> form. Below, we merge data using the <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">dplyr::full_join()</a></code> function:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a>mergeExample3A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb163-2"><a href="#cb163-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span>),</span>
-<span id="cb163-3"><a href="#cb163-3"></a>  <span class="at">weight =</span> <span class="fu">c</span>(<span class="dv">225</span>,<span class="dv">250</span>,<span class="dv">275</span>,<span class="dv">300</span>,<span class="dv">325</span>)</span>
-<span id="cb163-4"><a href="#cb163-4"></a>)</span>
-<span id="cb163-5"><a href="#cb163-5"></a></span>
-<span id="cb163-6"><a href="#cb163-6"></a>mergeExample3B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb163-7"><a href="#cb163-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
-<span id="cb163-8"><a href="#cb163-8"></a>  <span class="at">season =</span> <span class="fu">c</span>(<span class="dv">2023</span>,<span class="dv">2023</span>,<span class="dv">2024</span>,<span class="dv">2024</span>,<span class="dv">2024</span>,<span class="dv">2024</span>),</span>
-<span id="cb163-9"><a href="#cb163-9"></a>  <span class="at">week =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>),</span>
-<span id="cb163-10"><a href="#cb163-10"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>,<span class="dv">30</span>,<span class="dv">35</span>)</span>
-<span id="cb163-11"><a href="#cb163-11"></a>)</span>
-<span id="cb163-12"><a href="#cb163-12"></a></span>
-<span id="cb163-13"><a href="#cb163-13"></a>mergeExample3 <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
-<span id="cb163-14"><a href="#cb163-14"></a>  mergeExample3A,</span>
-<span id="cb163-15"><a href="#cb163-15"></a>  mergeExample3B,</span>
-<span id="cb163-16"><a href="#cb163-16"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
-<span id="cb163-17"><a href="#cb163-17"></a></span>
-<span id="cb163-18"><a href="#cb163-18"></a>mergeExample3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb166"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1"></a>mergeExample3A <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb166-2"><a href="#cb166-2"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span>),</span>
+<span id="cb166-3"><a href="#cb166-3"></a>  <span class="at">weight =</span> <span class="fu">c</span>(<span class="dv">225</span>,<span class="dv">250</span>,<span class="dv">275</span>,<span class="dv">300</span>,<span class="dv">325</span>)</span>
+<span id="cb166-4"><a href="#cb166-4"></a>)</span>
+<span id="cb166-5"><a href="#cb166-5"></a></span>
+<span id="cb166-6"><a href="#cb166-6"></a>mergeExample3B <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb166-7"><a href="#cb166-7"></a>  <span class="at">player =</span> <span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"B"</span>),</span>
+<span id="cb166-8"><a href="#cb166-8"></a>  <span class="at">season =</span> <span class="fu">c</span>(<span class="dv">2023</span>,<span class="dv">2023</span>,<span class="dv">2024</span>,<span class="dv">2024</span>,<span class="dv">2024</span>,<span class="dv">2024</span>),</span>
+<span id="cb166-9"><a href="#cb166-9"></a>  <span class="at">week =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>),</span>
+<span id="cb166-10"><a href="#cb166-10"></a>  <span class="at">points =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">25</span>,<span class="dv">30</span>,<span class="dv">35</span>)</span>
+<span id="cb166-11"><a href="#cb166-11"></a>)</span>
+<span id="cb166-12"><a href="#cb166-12"></a></span>
+<span id="cb166-13"><a href="#cb166-13"></a>mergeExample3 <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb166-14"><a href="#cb166-14"></a>  mergeExample3A,</span>
+<span id="cb166-15"><a href="#cb166-15"></a>  mergeExample3B,</span>
+<span id="cb166-16"><a href="#cb166-16"></a>  <span class="at">by =</span> <span class="st">"player"</span>)</span>
+<span id="cb166-17"><a href="#cb166-17"></a></span>
+<span id="cb166-18"><a href="#cb166-18"></a>mergeExample3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2178,7 +2230,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.26.2</span> Data Before Merging</h3>
 <p>Here are the data in the <code>players</code> object:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb164"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1"></a>players</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb167"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1"></a>players</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2186,7 +2238,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb165"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1"></a><span class="fu">dim</span>(players)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb168"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1"></a><span class="fu">dim</span>(players)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 12 10</code></pre>
 </div>
@@ -2194,7 +2246,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <p>The data are structured in ID form. That is, every row in the dataset is uniquely identified by the variable, <code>ID</code>.</p>
 <p>Here are the data in the <code>fantasyPoints</code> object:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb167"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1"></a>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb170"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1"></a>fantasyPoints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2202,7 +2254,7 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb168"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1"></a><span class="fu">dim</span>(fantasyPoints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb171"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb171-1"><a href="#cb171-1"></a><span class="fu">dim</span>(fantasyPoints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 4 2</code></pre>
 </div>
@@ -2211,25 +2263,25 @@ Table&nbsp;3.1: Arguments and defaults for the <code><a href="https://rdrr.io/r/
 <span class="header-section-number">3.26.3</span> Types of Joins</h3>
 <section id="sec-mergeTypesVisual" class="level4" data-number="3.26.3.1"><h4 data-number="3.26.3.1" class="anchored" data-anchor-id="sec-mergeTypesVisual">
 <span class="header-section-number">3.26.3.1</span> Visual Overview of Join Types</h4>
-<p><a href="#fig-joinTypes" class="quarto-xref">Figure&nbsp;<span>3.1</span></a> depicts various types of merges/joins. Object <code>x</code> is the circle labeled as <code>x</code>. Object <code>y</code> is the circle labeled as <code>y</code>. The area of overlap in the Venn diagram indicates the rows on the keys that are shared between the two objects (e.g., the same <code>player_id</code>, <code>season</code>, and <code>week</code>). The non-overlapping area indicates the rows on the keys that are unique to each object. The shaded blue area indicates which rows (on the keys) are kept in the merged object from each of the two objects, when using each of the merge types. For instance, a left outer join keeps the shared rows and the rows that are unique to object <code>x</code>, but it drops the rows that are unique to object <code>y</code>.</p>
+<p><a href="#fig-joinTypes" class="quarto-xref">Figure&nbsp;<span>3.2</span></a> depicts various types of merges/joins. Object <code>x</code> is the circle labeled as <code>x</code>. Object <code>y</code> is the circle labeled as <code>y</code>. The area of overlap in the Venn diagram indicates the rows on the keys that are shared between the two objects (e.g., the same <code>player_id</code>, <code>season</code>, and <code>week</code>). The non-overlapping area indicates the rows on the keys that are unique to each object. The shaded blue area indicates which rows (on the keys) are kept in the merged object from each of the two objects, when using each of the merge types. For instance, a left outer join keeps the shared rows and the rows that are unique to object <code>x</code>, but it drops the rows that are unique to object <code>y</code>.</p>
 <div id="fig-joinTypes" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Types of Merges/Joins.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-joinTypes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/joinTypes.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;3.1: Types of Merges/Joins."><img src="images/joinTypes.png" class="img-fluid figure-img" style="width:100.0%" alt="Types of Merges/Joins."></a>
+<a href="images/joinTypes.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;3.2: Types of Merges/Joins."><img src="images/joinTypes.png" class="img-fluid figure-img" style="width:100.0%" alt="Types of Merges/Joins."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-joinTypes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.1: Types of Merges/Joins.
+Figure&nbsp;3.2: Types of Merges/Joins.
 </figcaption></figure>
 </div>
 </section><section id="sec-fullJoin" class="level4" data-number="3.26.3.2"><h4 data-number="3.26.3.2" class="anchored" data-anchor-id="sec-fullJoin">
 <span class="header-section-number">3.26.3.2</span> Full Outer Join</h4>
 <p>A full outer join includes all rows in <code>x</code> <strong>or</strong> <code>y</code>. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using a full outer join (i.e., “full join”; <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">dplyr::full_join()</a></code>):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb170"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1"></a>fullJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
-<span id="cb170-2"><a href="#cb170-2"></a>  players,</span>
-<span id="cb170-3"><a href="#cb170-3"></a>  fantasyPoints,</span>
-<span id="cb170-4"><a href="#cb170-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb170-5"><a href="#cb170-5"></a></span>
-<span id="cb170-6"><a href="#cb170-6"></a>fullJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb173"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1"></a>fullJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb173-2"><a href="#cb173-2"></a>  players,</span>
+<span id="cb173-3"><a href="#cb173-3"></a>  fantasyPoints,</span>
+<span id="cb173-4"><a href="#cb173-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb173-5"><a href="#cb173-5"></a></span>
+<span id="cb173-6"><a href="#cb173-6"></a>fullJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2237,7 +2289,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb171"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb171-1"><a href="#cb171-1"></a><span class="fu">dim</span>(fullJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb174"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1"></a><span class="fu">dim</span>(fullJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 14 11</code></pre>
 </div>
@@ -2246,12 +2298,12 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.26.3.3</span> Left Outer Join</h4>
 <p>A left outer join includes all rows in <code>x</code>. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using a left outer join (“left join”; <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">dplyr::left_join()</a></code>):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb173"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1"></a>leftJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
-<span id="cb173-2"><a href="#cb173-2"></a>  players,</span>
-<span id="cb173-3"><a href="#cb173-3"></a>  fantasyPoints,</span>
-<span id="cb173-4"><a href="#cb173-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb173-5"><a href="#cb173-5"></a></span>
-<span id="cb173-6"><a href="#cb173-6"></a>leftJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb176"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1"></a>leftJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb176-2"><a href="#cb176-2"></a>  players,</span>
+<span id="cb176-3"><a href="#cb176-3"></a>  fantasyPoints,</span>
+<span id="cb176-4"><a href="#cb176-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb176-5"><a href="#cb176-5"></a></span>
+<span id="cb176-6"><a href="#cb176-6"></a>leftJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2259,7 +2311,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb174"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1"></a><span class="fu">dim</span>(leftJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb177"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb177-1"><a href="#cb177-1"></a><span class="fu">dim</span>(leftJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 12 11</code></pre>
 </div>
@@ -2268,12 +2320,12 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.26.3.4</span> Right Outer Join</h4>
 <p>A right outer join includes all rows in <code>y</code>. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using a right outer join (“right join”; <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">dplyr::right_join()</a></code>):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb176"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1"></a>rightJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">right_join</span>(</span>
-<span id="cb176-2"><a href="#cb176-2"></a>  players,</span>
-<span id="cb176-3"><a href="#cb176-3"></a>  fantasyPoints,</span>
-<span id="cb176-4"><a href="#cb176-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb176-5"><a href="#cb176-5"></a></span>
-<span id="cb176-6"><a href="#cb176-6"></a>rightJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb179"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb179-1"><a href="#cb179-1"></a>rightJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">right_join</span>(</span>
+<span id="cb179-2"><a href="#cb179-2"></a>  players,</span>
+<span id="cb179-3"><a href="#cb179-3"></a>  fantasyPoints,</span>
+<span id="cb179-4"><a href="#cb179-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb179-5"><a href="#cb179-5"></a></span>
+<span id="cb179-6"><a href="#cb179-6"></a>rightJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2281,7 +2333,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb177"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb177-1"><a href="#cb177-1"></a><span class="fu">dim</span>(rightJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb180"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1"></a><span class="fu">dim</span>(rightJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1]  4 11</code></pre>
 </div>
@@ -2290,12 +2342,12 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.26.3.5</span> Inner Join</h4>
 <p>An inner join includes only those rows in <code>x</code> that have a matching record in <code>y</code> (i.e., the record must be in both <code>x</code> and <code>y</code>). An inner join will return that rows of <code>x</code> and <code>y</code> that have matching records, and can duplicate values of records on either side (left or right) if <code>x</code> and <code>y</code> have more than one matching record. It returns columns from <code>x</code> and <code>y</code>. Here is how to merge two data frames using an inner join (<code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">dplyr::inner_join()</a></code>):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb179"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb179-1"><a href="#cb179-1"></a>innerJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
-<span id="cb179-2"><a href="#cb179-2"></a>  players,</span>
-<span id="cb179-3"><a href="#cb179-3"></a>  fantasyPoints,</span>
-<span id="cb179-4"><a href="#cb179-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb179-5"><a href="#cb179-5"></a></span>
-<span id="cb179-6"><a href="#cb179-6"></a>innerJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb182"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1"></a>innerJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb182-2"><a href="#cb182-2"></a>  players,</span>
+<span id="cb182-3"><a href="#cb182-3"></a>  fantasyPoints,</span>
+<span id="cb182-4"><a href="#cb182-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb182-5"><a href="#cb182-5"></a></span>
+<span id="cb182-6"><a href="#cb182-6"></a>innerJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2303,7 +2355,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb180"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1"></a><span class="fu">dim</span>(innerJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb183"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb183-1"><a href="#cb183-1"></a><span class="fu">dim</span>(innerJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1]  2 11</code></pre>
 </div>
@@ -2312,12 +2364,12 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.26.3.6</span> Semi Join</h4>
 <p>A semi join is a filter. A left semi join returns all rows from <code>x</code> <strong>with</strong> a match in <code>y</code>. That is, it filters out records from <code>x</code> that are not in <code>y</code>. Unlike an <a href="#innerJoin">inner join</a>, a left semi join will never duplicate rows of <code>x</code>, and it includes columns from only <code>x</code> (not from <code>y</code>). Here is how to merge two data frames using a left semi join (<code><a href="https://dplyr.tidyverse.org/reference/filter-joins.html">dplyr::semi_join()</a></code>):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb182"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1"></a>semiJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">semi_join</span>(</span>
-<span id="cb182-2"><a href="#cb182-2"></a>  players,</span>
-<span id="cb182-3"><a href="#cb182-3"></a>  fantasyPoints,</span>
-<span id="cb182-4"><a href="#cb182-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb182-5"><a href="#cb182-5"></a></span>
-<span id="cb182-6"><a href="#cb182-6"></a>semiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb185"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1"></a>semiJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">semi_join</span>(</span>
+<span id="cb185-2"><a href="#cb185-2"></a>  players,</span>
+<span id="cb185-3"><a href="#cb185-3"></a>  fantasyPoints,</span>
+<span id="cb185-4"><a href="#cb185-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb185-5"><a href="#cb185-5"></a></span>
+<span id="cb185-6"><a href="#cb185-6"></a>semiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2325,7 +2377,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb183"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb183-1"><a href="#cb183-1"></a><span class="fu">dim</span>(semiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb186"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1"></a><span class="fu">dim</span>(semiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1]  2 10</code></pre>
 </div>
@@ -2334,12 +2386,12 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.26.3.7</span> Anti Join</h4>
 <p>An anti join is a filter. A left anti join returns all rows from <code>x</code> <strong>without</strong> a match in <code>y</code>. That is, it filters out records from <code>x</code> that are in <code>y</code>. It returns columns from only <code>x</code> (not from <code>y</code>). Here is how to merge two data frames using a left anti join (<code><a href="https://dplyr.tidyverse.org/reference/filter-joins.html">dplyr::anti_join()</a></code>):</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb185"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1"></a>antiJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(</span>
-<span id="cb185-2"><a href="#cb185-2"></a>  players,</span>
-<span id="cb185-3"><a href="#cb185-3"></a>  fantasyPoints,</span>
-<span id="cb185-4"><a href="#cb185-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb185-5"><a href="#cb185-5"></a></span>
-<span id="cb185-6"><a href="#cb185-6"></a>antiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb188"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb188-1"><a href="#cb188-1"></a>antiJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(</span>
+<span id="cb188-2"><a href="#cb188-2"></a>  players,</span>
+<span id="cb188-3"><a href="#cb188-3"></a>  fantasyPoints,</span>
+<span id="cb188-4"><a href="#cb188-4"></a>  <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb188-5"><a href="#cb188-5"></a></span>
+<span id="cb188-6"><a href="#cb188-6"></a>antiJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2347,7 +2399,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb186"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1"></a><span class="fu">dim</span>(antiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb189"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb189-1"><a href="#cb189-1"></a><span class="fu">dim</span>(antiJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 10 10</code></pre>
 </div>
@@ -2356,11 +2408,11 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.26.3.8</span> Cross Join</h4>
 <p>A cross join combines each row in <code>x</code> with each row in <code>y</code> (<code><a href="https://dplyr.tidyverse.org/reference/cross_join.html">dplyr::cross_join()</a></code>).</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb188"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb188-1"><a href="#cb188-1"></a>crossJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">cross_join</span>(</span>
-<span id="cb188-2"><a href="#cb188-2"></a>  players,</span>
-<span id="cb188-3"><a href="#cb188-3"></a>  fantasyPoints)</span>
-<span id="cb188-4"><a href="#cb188-4"></a></span>
-<span id="cb188-5"><a href="#cb188-5"></a>crossJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb191"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb191-1"><a href="#cb191-1"></a>crossJoinData <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">cross_join</span>(</span>
+<span id="cb191-2"><a href="#cb191-2"></a>  players,</span>
+<span id="cb191-3"><a href="#cb191-3"></a>  fantasyPoints)</span>
+<span id="cb191-4"><a href="#cb191-4"></a></span>
+<span id="cb191-5"><a href="#cb191-5"></a>crossJoinData</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2368,7 +2420,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb189"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb189-1"><a href="#cb189-1"></a><span class="fu">dim</span>(crossJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb192"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1"></a><span class="fu">dim</span>(crossJoinData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 48 12</code></pre>
 </div>
@@ -2378,14 +2430,14 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <p>Depending on the analysis, it may be important to restructure the data to be in long or wide form. When the data are in wide form, each player has only one row. When the data are in long form, each player has multiple rows—e.g., a row for each game. The data structure is called wide or long form because a dataset in wide form has more columns and fewer rows (i.e., it appears wider and shorter), whereas a dataset in long form has more rows and fewer columns (i.e., it appears narrower and taller).</p>
 <p>Here are the original data in long form. The data are structured in “<code>player</code>-<code>season</code>-<code>week</code> form”. That is, every row in the dataset is uniquely identified by the combination of variables, <code>ID</code>, <code>season</code>, and <code>week</code>—these are the keys. This is an example of long form, because each player has multiple rows.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb191"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb191-1"><a href="#cb191-1"></a>dataLong <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
-<span id="cb191-2"><a href="#cb191-2"></a>  players <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>age),</span>
-<span id="cb191-3"><a href="#cb191-3"></a>  fantasyPoints_weekly,</span>
-<span id="cb191-4"><a href="#cb191-4"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ID"</span>)</span>
-<span id="cb191-5"><a href="#cb191-5"></a>) <span class="sc">%&gt;%</span> </span>
-<span id="cb191-6"><a href="#cb191-6"></a>  <span class="fu">arrange</span>(ID, season, week)</span>
-<span id="cb191-7"><a href="#cb191-7"></a></span>
-<span id="cb191-8"><a href="#cb191-8"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb194"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1"></a>dataLong <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb194-2"><a href="#cb194-2"></a>  players <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>age),</span>
+<span id="cb194-3"><a href="#cb194-3"></a>  fantasyPoints_weekly,</span>
+<span id="cb194-4"><a href="#cb194-4"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ID"</span>)</span>
+<span id="cb194-5"><a href="#cb194-5"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb194-6"><a href="#cb194-6"></a>  <span class="fu">arrange</span>(ID, season, week)</span>
+<span id="cb194-7"><a href="#cb194-7"></a></span>
+<span id="cb194-8"><a href="#cb194-8"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2393,11 +2445,11 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb192"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb195"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb195-1"><a href="#cb195-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 408  12</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb194"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb197"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb197-1"><a href="#cb197-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> [1] "ID"            "name"          "position"      "newVar1"      
  [5] "newVar2"       "factorVar"     "numericVar"    "integerVar"   
@@ -2408,13 +2460,13 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.27.1</span> Transform Data from Long to Wide</h3>
 <p>Below, we transform the data from long form to wide form. The long data are in “<code>player</code>-<code>season</code>-<code>week</code> form”. We widen the data by two variables (<code>season</code> and <code>week</code>), using the <code>tidyverse</code> ecosystem of packages <span class="citation" data-cites="R-tidyverse Wickham2019_packages">(<a href="references.html#ref-Wickham2019_packages" role="doc-biblioref">Wickham et al., 2019</a>; <a href="references.html#ref-R-tidyverse" role="doc-biblioref">Wickham, 2023</a>)</span>, so that the data are now in “<code>player</code> form” (where each row is uniquely identified by the <code>ID</code> variable) using the <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">tidyr::pivot_wider()</a></code> function:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb196"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb196-1"><a href="#cb196-1"></a>dataWide <span class="ot">&lt;-</span> dataLong <span class="sc">%&gt;%</span> </span>
-<span id="cb196-2"><a href="#cb196-2"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb196-3"><a href="#cb196-3"></a>    <span class="at">names_from =</span> <span class="fu">c</span>(season, week),</span>
-<span id="cb196-4"><a href="#cb196-4"></a>    <span class="at">names_glue =</span> <span class="st">"{.value}_{season}_week{week}"</span>,</span>
-<span id="cb196-5"><a href="#cb196-5"></a>    <span class="at">values_from =</span> fantasyPoints)</span>
-<span id="cb196-6"><a href="#cb196-6"></a></span>
-<span id="cb196-7"><a href="#cb196-7"></a>dataWide</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb199"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb199-1"><a href="#cb199-1"></a>dataWide <span class="ot">&lt;-</span> dataLong <span class="sc">%&gt;%</span> </span>
+<span id="cb199-2"><a href="#cb199-2"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb199-3"><a href="#cb199-3"></a>    <span class="at">names_from =</span> <span class="fu">c</span>(season, week),</span>
+<span id="cb199-4"><a href="#cb199-4"></a>    <span class="at">names_glue =</span> <span class="st">"{.value}_{season}_week{week}"</span>,</span>
+<span id="cb199-5"><a href="#cb199-5"></a>    <span class="at">values_from =</span> fantasyPoints)</span>
+<span id="cb199-6"><a href="#cb199-6"></a></span>
+<span id="cb199-7"><a href="#cb199-7"></a>dataWide</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2422,11 +2474,11 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb197"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb197-1"><a href="#cb197-1"></a><span class="fu">dim</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb200"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb200-1"><a href="#cb200-1"></a><span class="fu">dim</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 12 43</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb199"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb199-1"><a href="#cb199-1"></a><span class="fu">names</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb202"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb202-1"><a href="#cb202-1"></a><span class="fu">names</span>(dataWide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> [1] "ID"                        "name"                     
  [3] "position"                  "newVar1"                  
@@ -2456,14 +2508,14 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.27.2</span> Transform Data from Wide to Long</h3>
 <p>Conversely, we can also restructure data from wide to long using the <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">tidyr::pivot_longer()</a></code> function. Here are the data in long form, after they have been transformed from wide form using the <code>tidyverse</code> ecosystem of packages <span class="citation" data-cites="R-tidyverse Wickham2019_packages">(<a href="references.html#ref-Wickham2019_packages" role="doc-biblioref">Wickham et al., 2019</a>; <a href="references.html#ref-R-tidyverse" role="doc-biblioref">Wickham, 2023</a>)</span>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb201"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb201-1"><a href="#cb201-1"></a>dataLong <span class="ot">&lt;-</span> dataWide <span class="sc">%&gt;%</span> </span>
-<span id="cb201-2"><a href="#cb201-2"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
-<span id="cb201-3"><a href="#cb201-3"></a>    <span class="at">cols =</span> fantasyPoints_2022_week1<span class="sc">:</span>fantasyPoints_2023_week17,</span>
-<span id="cb201-4"><a href="#cb201-4"></a>    <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"week"</span>),</span>
-<span id="cb201-5"><a href="#cb201-5"></a>    <span class="at">names_pattern =</span> <span class="st">"fantasyPoints_(.*)_week(.*)"</span>,</span>
-<span id="cb201-6"><a href="#cb201-6"></a>    <span class="at">values_to =</span> <span class="st">"fantasyPoints"</span>)</span>
-<span id="cb201-7"><a href="#cb201-7"></a></span>
-<span id="cb201-8"><a href="#cb201-8"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb204"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb204-1"><a href="#cb204-1"></a>dataLong <span class="ot">&lt;-</span> dataWide <span class="sc">%&gt;%</span> </span>
+<span id="cb204-2"><a href="#cb204-2"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
+<span id="cb204-3"><a href="#cb204-3"></a>    <span class="at">cols =</span> fantasyPoints_2022_week1<span class="sc">:</span>fantasyPoints_2023_week17,</span>
+<span id="cb204-4"><a href="#cb204-4"></a>    <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"week"</span>),</span>
+<span id="cb204-5"><a href="#cb204-5"></a>    <span class="at">names_pattern =</span> <span class="st">"fantasyPoints_(.*)_week(.*)"</span>,</span>
+<span id="cb204-6"><a href="#cb204-6"></a>    <span class="at">values_to =</span> <span class="st">"fantasyPoints"</span>)</span>
+<span id="cb204-7"><a href="#cb204-7"></a></span>
+<span id="cb204-8"><a href="#cb204-8"></a>dataLong</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
@@ -2471,11 +2523,11 @@ Figure&nbsp;3.1: Types of Merges/Joins.
   </script>
 </div>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb202"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb202-1"><a href="#cb202-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb205"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1"></a><span class="fu">dim</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 408  12</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb204"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb204-1"><a href="#cb204-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb207"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1"></a><span class="fu">names</span>(dataLong)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code> [1] "ID"            "name"          "position"      "newVar1"      
  [5] "newVar2"       "factorVar"     "numericVar"    "integerVar"   
@@ -2486,10 +2538,10 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.28</span> Loops</h2>
 <p>If you want to perform the same computation multiple times, it can be faster to do it in a loop compared to writing out the same computation many times. For instance, here is a loop that runs from 1 to 12 (the number of players in the <code>players</code> object), incrementing by 1 after each iteration. The loop prints each element of a vector (i.e., the player’s name) and the loop index (<code>i</code>) that indicates where the loop is in terms of its iterations:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb206"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb206-1"><a href="#cb206-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(players<span class="sc">$</span>ID)){</span>
-<span id="cb206-2"><a href="#cb206-2"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"The loop is at index:"</span>, i, <span class="at">sep =</span> <span class="st">" "</span>))</span>
-<span id="cb206-3"><a href="#cb206-3"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"My favorite player is:"</span>, players<span class="sc">$</span>name[i], <span class="at">sep =</span> <span class="st">" "</span>))</span>
-<span id="cb206-4"><a href="#cb206-4"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb209"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(players<span class="sc">$</span>ID)){</span>
+<span id="cb209-2"><a href="#cb209-2"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"The loop is at index:"</span>, i, <span class="at">sep =</span> <span class="st">" "</span>))</span>
+<span id="cb209-3"><a href="#cb209-3"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"My favorite player is:"</span>, players<span class="sc">$</span>name[i], <span class="at">sep =</span> <span class="st">" "</span>))</span>
+<span id="cb209-4"><a href="#cb209-4"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] "The loop is at index: 1"
 [1] "My favorite player is: Ken Cussion"
@@ -2522,56 +2574,56 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.29</span> Create a Function</h2>
 <p>Now, let’s put together what we have learned to create a useful function. Functions are useful if you want to perform an operation multiple times, especially if you want to be able to manipulate various settings to make slight modifications each time. Any operation that you want to perform multiple times, you can create a function to accomplish. Use of a function can save you time without needed to retype out all of the code each time. For instance, let’s say you want to convert temperature between Fahrenheit and Celsius, you could create a function to do that. In this case, our function has two arguments: <code>temperature</code> (in degrees) and <code>unit</code> of the original temperature (<code>F</code> for Fahrenheit or <code>C</code> for Celsius, where the default unit is Fahrenheit). That allows us to make the slight modification of which unit is the input temperature and to change the calculation accordingly.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb208"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb208-1"><a href="#cb208-1"></a>convert_temperature <span class="ot">&lt;-</span> <span class="cf">function</span>(temperature, <span class="at">unit =</span> <span class="st">"F"</span>){ <span class="co"># specify the arguments and any defaults</span></span>
-<span id="cb208-2"><a href="#cb208-2"></a>  <span class="cf">if</span>(unit <span class="sc">==</span> <span class="st">"F"</span>){ <span class="co"># if the input temperature(s) in Fahrenheit</span></span>
-<span id="cb208-3"><a href="#cb208-3"></a>    newtemp <span class="ot">&lt;-</span> (temperature <span class="sc">-</span> <span class="dv">32</span>) <span class="sc">/</span> (<span class="dv">9</span><span class="sc">/</span><span class="dv">5</span>)</span>
-<span id="cb208-4"><a href="#cb208-4"></a>  } <span class="cf">else</span> <span class="cf">if</span>(unit <span class="sc">==</span> <span class="st">"C"</span>){ <span class="co"># if the input temperature(s) in Celsius</span></span>
-<span id="cb208-5"><a href="#cb208-5"></a>    newtemp <span class="ot">&lt;-</span> (temperature <span class="sc">*</span> (<span class="dv">9</span><span class="sc">/</span><span class="dv">5</span>)) <span class="sc">+</span> <span class="dv">32</span></span>
-<span id="cb208-6"><a href="#cb208-6"></a>  }</span>
-<span id="cb208-7"><a href="#cb208-7"></a>  </span>
-<span id="cb208-8"><a href="#cb208-8"></a>  <span class="fu">return</span>(newtemp) <span class="co"># this is what is returned by the function</span></span>
-<span id="cb208-9"><a href="#cb208-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb211"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1"></a>convert_temperature <span class="ot">&lt;-</span> <span class="cf">function</span>(temperature, <span class="at">unit =</span> <span class="st">"F"</span>){ <span class="co"># specify the arguments and any defaults</span></span>
+<span id="cb211-2"><a href="#cb211-2"></a>  <span class="cf">if</span>(unit <span class="sc">==</span> <span class="st">"F"</span>){ <span class="co"># if the input temperature(s) in Fahrenheit</span></span>
+<span id="cb211-3"><a href="#cb211-3"></a>    newtemp <span class="ot">&lt;-</span> (temperature <span class="sc">-</span> <span class="dv">32</span>) <span class="sc">/</span> (<span class="dv">9</span><span class="sc">/</span><span class="dv">5</span>)</span>
+<span id="cb211-4"><a href="#cb211-4"></a>  } <span class="cf">else</span> <span class="cf">if</span>(unit <span class="sc">==</span> <span class="st">"C"</span>){ <span class="co"># if the input temperature(s) in Celsius</span></span>
+<span id="cb211-5"><a href="#cb211-5"></a>    newtemp <span class="ot">&lt;-</span> (temperature <span class="sc">*</span> (<span class="dv">9</span><span class="sc">/</span><span class="dv">5</span>)) <span class="sc">+</span> <span class="dv">32</span></span>
+<span id="cb211-6"><a href="#cb211-6"></a>  }</span>
+<span id="cb211-7"><a href="#cb211-7"></a>  </span>
+<span id="cb211-8"><a href="#cb211-8"></a>  <span class="fu">return</span>(newtemp) <span class="co"># this is what is returned by the function</span></span>
+<span id="cb211-9"><a href="#cb211-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now we can use the function to convert temperatures between Fahrenheit and Celsius. A temperature of 32°F is equal to 0°C. A temperature of 0°C is equal to 89.6°F.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb209"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1"></a><span class="fu">convert_temperature</span>(</span>
-<span id="cb209-2"><a href="#cb209-2"></a>  <span class="at">temperature =</span> <span class="dv">32</span>,</span>
-<span id="cb209-3"><a href="#cb209-3"></a>  <span class="at">unit =</span> <span class="st">"F"</span></span>
-<span id="cb209-4"><a href="#cb209-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb212"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb212-1"><a href="#cb212-1"></a><span class="fu">convert_temperature</span>(</span>
+<span id="cb212-2"><a href="#cb212-2"></a>  <span class="at">temperature =</span> <span class="dv">32</span>,</span>
+<span id="cb212-3"><a href="#cb212-3"></a>  <span class="at">unit =</span> <span class="st">"F"</span></span>
+<span id="cb212-4"><a href="#cb212-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb211"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1"></a><span class="fu">convert_temperature</span>(</span>
-<span id="cb211-2"><a href="#cb211-2"></a>  <span class="at">temperature =</span> <span class="dv">32</span>,</span>
-<span id="cb211-3"><a href="#cb211-3"></a>  <span class="at">unit =</span> <span class="st">"C"</span></span>
-<span id="cb211-4"><a href="#cb211-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb214"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb214-1"><a href="#cb214-1"></a><span class="fu">convert_temperature</span>(</span>
+<span id="cb214-2"><a href="#cb214-2"></a>  <span class="at">temperature =</span> <span class="dv">32</span>,</span>
+<span id="cb214-3"><a href="#cb214-3"></a>  <span class="at">unit =</span> <span class="st">"C"</span></span>
+<span id="cb214-4"><a href="#cb214-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 89.6</code></pre>
 </div>
 </div>
 <p>We can also convert the temperature for a vector of values at once:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb213"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb213-1"><a href="#cb213-1"></a><span class="fu">convert_temperature</span>(</span>
-<span id="cb213-2"><a href="#cb213-2"></a>  <span class="at">temperature =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>),</span>
-<span id="cb213-3"><a href="#cb213-3"></a>  <span class="at">unit =</span> <span class="st">"F"</span></span>
-<span id="cb213-4"><a href="#cb213-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb216"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb216-1"><a href="#cb216-1"></a><span class="fu">convert_temperature</span>(</span>
+<span id="cb216-2"><a href="#cb216-2"></a>  <span class="at">temperature =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>),</span>
+<span id="cb216-3"><a href="#cb216-3"></a>  <span class="at">unit =</span> <span class="st">"F"</span></span>
+<span id="cb216-4"><a href="#cb216-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] -17.777778 -12.222222  -6.666667  -1.111111   4.444444  10.000000</code></pre>
 </div>
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb215"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb215-1"><a href="#cb215-1"></a><span class="fu">convert_temperature</span>(</span>
-<span id="cb215-2"><a href="#cb215-2"></a>  <span class="at">temperature =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>),</span>
-<span id="cb215-3"><a href="#cb215-3"></a>  <span class="at">unit =</span> <span class="st">"C"</span></span>
-<span id="cb215-4"><a href="#cb215-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb218"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb218-1"><a href="#cb218-1"></a><span class="fu">convert_temperature</span>(</span>
+<span id="cb218-2"><a href="#cb218-2"></a>  <span class="at">temperature =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>),</span>
+<span id="cb218-3"><a href="#cb218-3"></a>  <span class="at">unit =</span> <span class="st">"C"</span></span>
+<span id="cb218-4"><a href="#cb218-4"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1]  32  50  68  86 104 122</code></pre>
 </div>
 </div>
 <p>Because the default unit is “F”, we do not need to specify the unit if our input temperatures are in Fahrenheit:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb217"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb217-1"><a href="#cb217-1"></a><span class="fu">convert_temperature</span>(</span>
-<span id="cb217-2"><a href="#cb217-2"></a>  <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>)</span>
-<span id="cb217-3"><a href="#cb217-3"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb220"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb220-1"><a href="#cb220-1"></a><span class="fu">convert_temperature</span>(</span>
+<span id="cb220-2"><a href="#cb220-2"></a>  <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>)</span>
+<span id="cb220-3"><a href="#cb220-3"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] -17.777778 -12.222222  -6.666667  -1.111111   4.444444  10.000000</code></pre>
 </div>
@@ -2580,10 +2632,10 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">3.30</span> Commenting Code</h2>
 <p>To comment your code, using the <code>#</code> sign. Anything on the line that appears after the <code>#</code> sign will be interpreted as a comment and will not be evaluated by R. It is important to comment your code frequently with what you are doing doing and why so that you and others know how to read it.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb219"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># this line will run</span></span>
-<span id="cb219-2"><a href="#cb219-2"></a>       <span class="co"># this line will NOT run: x &lt;- 2</span></span>
-<span id="cb219-3"><a href="#cb219-3"></a></span>
-<span id="cb219-4"><a href="#cb219-4"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb222"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb222-1"><a href="#cb222-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># this line will run</span></span>
+<span id="cb222-2"><a href="#cb222-2"></a>       <span class="co"># this line will NOT run: x &lt;- 2</span></span>
+<span id="cb222-3"><a href="#cb222-3"></a></span>
+<span id="cb222-4"><a href="#cb222-4"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 1</code></pre>
 </div>
@@ -2595,7 +2647,7 @@ Figure&nbsp;3.1: Types of Merges/Joins.
 <span class="header-section-number">4.1</span> Session Info</h2>
 <p>At the end of each chapter in which <code>R</code> code is used, I provide the session information, which describes the system and operating system the code was run on and the versions of each package. That way, if you get different results from me, you can see which session settings differ, to help with reproducibility. If you run the (all of) the exact same code as is provided in the text, in the exact same order, with the exact same setup (platform, operating system, package versions, etc.) and the exact same data, you should get the exact same answer as is in the text. That is the idea of reproducibility—getting the exact same result with the exact same inputs. Reproducibility is crucial for studies to achieve greater confidence in their findings and to ensure better replicability of findings across studies.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb221"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb224"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb224-1"><a href="#cb224-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>R version 4.5.1 (2025-06-13)
 Platform: x86_64-pc-linux-gnu
