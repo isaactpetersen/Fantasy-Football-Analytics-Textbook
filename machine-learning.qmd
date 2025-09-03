@@ -56,7 +56,7 @@ load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fan
 #load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_pbp.RData", fsep = ""))
 
 # Calculated Data - Processed
-load(file = "./data/nfl_actualStats_career.RData")
+load(file = "./data/nfl_actualStats_player_career.RData")
 load(file = "./data/nfl_actualStats_seasonal.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_weekly.RData", fsep = ""))
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/player_stats_seasonal.RData", fsep = ""))
@@ -92,7 +92,7 @@ load(file = "./data/nfl_expectedFantasyPoints_weekly.RData")
 #load(file = "./data/nfl_expectedFantasyPoints_pbp.RData")
 
 # Calculated Data - Processed
-load(file = "./data/nfl_actualStats_career.RData")
+load(file = "./data/nfl_actualStats_player_career.RData")
 load(file = "./data/nfl_actualStats_seasonal.RData")
 load(file = "./data/player_stats_weekly.RData")
 load(file = "./data/player_stats_seasonal.RData")
@@ -104,6 +104,8 @@ load(file = "./data/player_stats_seasonal.RData")
 
 gc()
 ```
+
+We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` objects in @sec-calculatePlayerAge.
 
 ### Specify Options {#machineLearningSpecifyOptions}
 
@@ -300,9 +302,6 @@ player_stats_weekly_offense <- player_stats_weekly %>%
   filter(position_group %in% c("QB","RB","WR","TE")) %>% 
   rename(gsis_id = player_id)
 
-nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
-  rename(gsis_id = player_id)
-
 ## Rename other variables to ensure common names
 
 ## Ensure variables with the same name have the same type
@@ -310,14 +309,13 @@ nfl_players <- nfl_players %>%
   mutate(
     birth_date = as.Date(birth_date),
     jersey_number = as.character(jersey_number),
-    gsis_it_id = as.character(gsis_it_id),
+    nfl_id = as.character(nfl_id),
     years_of_experience = as.integer(years_of_experience))
 
 player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
   mutate(
     birth_date = as.Date(birth_date),
-    jersey_number = as.character(jersey_number),
-    gsis_it_id = as.character(gsis_it_id))
+    jersey_number = as.character(jersey_number))
 
 nfl_rosters <- nfl_rosters %>% 
   mutate(
@@ -466,19 +464,19 @@ playerMerged <- playerListToMerge %>%
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id"),
-    conflict = coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
+    conflict = powerjoin::coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 
 playerSeasonMerged <- playerSeasonListToMerge %>% 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season"),
-    conflict = coalesce_xy) # where the objects have the same variable name (e.g., team), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
+    conflict = powerjoin::coalesce_xy) # where the objects have the same variable name (e.g., team), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 
 playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>% 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season","week"),
-    conflict = coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
+    conflict = powerjoin::coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 ```
 
 ```{r}
@@ -503,9 +501,9 @@ Then we merge the player data with the seasonal data:
 
 seasonalData <- powerjoin::power_full_join(
   playerSeasonMerged,
-  playerMerged %>% select(-age, -years_of_experience, -team, -team_abbr, -team_seq, -current_team_id), # drop variables from id objects that change from year to year (and thus are not necessarily accurate for a given season)
+  playerMerged %>% select(-age, -years_of_experience, -team, -latest_team, -last_season, -pff_status), # drop variables from id objects that change from year to year (and thus are not necessarily accurate for a given season)
   by = "gsis_id",
-  conflict = coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
+  conflict = powerjoin::coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 ) %>% 
   filter(!is.na(season)) %>% 
   select(gsis_id, season, player_display_name, position, team, games, everything())
@@ -535,7 +533,7 @@ seasonalAndWeeklyData <- powerjoin::power_full_join(
   playerSeasonWeekMerged,
   seasonalData,
   by = c("gsis_id","season"),
-  conflict = coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
+  conflict = powerjoin::coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 ) %>% 
   filter(!is.na(week)) %>% 
   select(gsis_id, season, week, full_name, position, team, everything())
@@ -667,12 +665,7 @@ seasonalData_lag %>% select_if(is.factor)
 seasonalData_lag %>% select_if(is.logical)
 
 dropVars <- c(
-  "birth_date", "loaded", "full_name", "player_name", "player_display_name", "display_name", "suffix", "headshot_url", "player", "pos",
-  "espn_id", "sportradar_id", "yahoo_id", "rotowire_id", "pff_id", "fantasy_data_id", "sleeper_id", "pfr_id",
-  "pfr_player_id", "cfb_player_id", "pfr_player_name", "esb_id", "gsis_it_id", "smart_id",
-  "college", "college_name", "team_abbr", "current_team_id", "college_conference", "draft_club", "status_description_abbr",
-  "status_short_description", "short_name", "headshot", "uniform_number", "jersey_number", "first_name", "last_name",
-  "football_name", "team")
+  "birth_date", "player_display_name", "team", "player_name", "headshot_url", "season_type", "fg_made_list", "fg_missed_list", "fg_blocked_list", "gwfg_distance_list", "pff_status", "startdate", "pos", "merge_name", "pfr_player_id", "cfb_player_id", "hof", "category", "side", "college", "car_av", "display_name", "common_first_name", "first_name", "last_name", "short_name", "football_name", "suffix", "esb_id", "nfl_id", "pff_id", "otc_id", "espn_id", "smart_id", "ngs_position_group", "ngs_position", "headshot", "college_name", "college_conference", "jersey_number", "status", "ngs_status", "ngs_status_short_description", "pff_position", "draft_team", "pfr_player_name", "pfr_id")
 
 seasonalData_lag_subset <- seasonalData_lag %>% 
   dplyr::select(-any_of(dropVars))
@@ -696,7 +689,7 @@ seasonalData_lag_subsetQB <- seasonalData_lag_subset %>%
   filter(position == "QB") %>% 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
+    height, weight, rookie_season, draft_pick,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     completions:rushing_2pt_conversions, special_teams_tds, contains(".pass"), contains(".rush"))
 
@@ -704,7 +697,7 @@ seasonalData_lag_subsetRB <- seasonalData_lag_subset %>%
   filter(position == "RB") %>% 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
+    height, weight, rookie_season, draft_pick,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 
@@ -712,7 +705,7 @@ seasonalData_lag_subsetWR <- seasonalData_lag_subset %>%
   filter(position == "WR") %>% 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
+    height, weight, rookie_season, draft_pick,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 
@@ -720,7 +713,7 @@ seasonalData_lag_subsetTE <- seasonalData_lag_subset %>%
   filter(position == "TE") %>% 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
-    height, weight, rookie_year, draft_number,
+    height, weight, rookie_season, draft_pick,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 ```
