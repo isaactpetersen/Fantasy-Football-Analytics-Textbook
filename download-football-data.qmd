@@ -1516,6 +1516,125 @@ load(file = "./data/nfl_participation.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_participation.RData", fsep = ""))
 ```
 
+### Historical Actual Team Statistics {#sec-downloadActualTeamStats}
+
+@HoTeamStats provide a Data Dictionary for historical actual team statistics data at the following link: <https://nflreadr.nflverse.com/articles/dictionary_team_stats.html>.
+You can also access the data dictionary via `R` using the following syntax:
+
+```{r}
+#| eval: false
+
+nflreadr::dictionary_team_stats
+```
+
+You can download the data using the following syntax:
+
+```{r}
+#| eval: false
+
+nfl_actualStats_team_weekly_raw <- progressr::with_progress(
+  nflreadr::load_team_stats(
+    seasons = TRUE,
+    summary_level = "week"))
+
+nfl_actualStats_team_seasonal_reg_raw <- progressr::with_progress(
+  nflreadr::load_team_stats(
+    seasons = TRUE,
+    summary_level = "reg"))
+
+nfl_actualStats_team_seasonal_regPost_raw <- progressr::with_progress(
+  nflreadr::load_team_stats(
+    seasons = TRUE,
+    summary_level = "reg+post"))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_team_weekly_raw,
+  nfl_actualStats_team_seasonal_reg_raw,
+  nfl_actualStats_team_seasonal_regPost_raw,
+  file = "./data/nfl_actualStats_team_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_team_raw.RData")
+```
+
+The `nfl_actualStats_team_weekly_raw` object is in `season`-`week`-`team` form.
+That is, each row should be uniquely identified by the combination of `season`, `week`, and `team`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_team_weekly <- nfl_actualStats_team_weekly_raw %>% 
+  select(season, week, team, everything()) %>% 
+  arrange(season, week, team)
+```
+
+Let's check for duplicate `season`-`week`-`team` instances:
+
+```{r}
+nfl_actualStats_team_weekly %>% 
+  group_by(season, week, team) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Here are the variable names:
+
+```{r}
+names(nfl_actualStats_team_weekly) %>% as.data.frame()
+```
+
+The `nfl_actualStats_team_seasonal_reg_raw` and `nfl_actualStats_team_seasonal_regPost_raw` objects are in `season`-`team` form.
+That is, each row should be uniquely identified by the combination of `season` and `team`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_team_seasonal_reg <- nfl_actualStats_team_seasonal_reg_raw %>% 
+  select(season, team, everything()) %>% 
+  arrange(season, team)
+
+nfl_actualStats_team_seasonal_regPost <- nfl_actualStats_team_seasonal_regPost_raw %>% 
+  select(season, team, everything()) %>% 
+  arrange(season, team)
+```
+
+Let's check for duplicate `season`-`week`-`team` instances:
+
+```{r}
+nfl_actualStats_team_seasonal_reg %>% 
+  group_by(season, team) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_team_seasonal_regPost %>% 
+  group_by(season, team) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_team_weekly,
+  nfl_actualStats_team_seasonal_reg,
+  nfl_actualStats_team_seasonal_regPost,
+  file = "./data/nfl_actualStats_team.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_team.RData")
+```
+
 ### Historical Actual Player Statistics {#sec-downloadActualStats}
 
 #### Season-by-Season Statistics {#sec-downloadActualSeasonalStats}
