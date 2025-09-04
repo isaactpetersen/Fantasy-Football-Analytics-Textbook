@@ -1644,6 +1644,88 @@ load(file = "./data/nfl_actualStats_team.RData")
 
 ### Historical Actual Player Statistics {#sec-downloadActualStats}
 
+We can download historical actual player statistics as a function of different timeframes, including [week-by-week](#sec-downloadActualWeeklyStats) and [season-by-season](#sec-downloadActualSeasonalStats).
+
+#### Week-by-Week Statistics {#sec-downloadActualWeeklyStats}
+
+We can download historical week-by-week actual player statistics using the `nflreadr::load_player_stats()` function from the `nflreadr` package [@R-nflreadr].
+Nevertheless, we could also calculate historical actual week-by-week statistics, as in @sec-calculateActualWeeklyStats
+@HoPlayerStats provide a Data Dictionary for statistics for offensive players at the following link: <https://nflreadr.nflverse.com/articles/dictionary_player_stats.html>.
+@HoPlayerStatsDefense provide a Data Dictionary for statistics for defensive players at the following link: <https://nflreadr.nflverse.com/articles/dictionary_player_stats_def.html>.
+You can also access the data dictionary via `R` using the following syntax:
+
+```{r}
+#| eval: false
+
+nflreadr::dictionary_player_stats
+```
+
+You can download the data using the following syntax:
+
+```{r}
+#| eval: false
+
+nfl_actualStats_player_weekly_raw <- progressr::with_progress(
+  nflreadr::load_player_stats(
+    seasons = TRUE,
+    summary_level = "week"))
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_player_weekly_raw,
+  file = "./data/nfl_actualStats_player_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_player_weekly_raw.RData")
+```
+
+The `nfl_actualStats_weekly` object is in `player`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_player_weekly <- nfl_actualStats_player_weekly_raw %>% 
+  select(player_id, season, week, everything()) %>% 
+  arrange(player_display_name, player_id, season, week)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+nfl_actualStats_player_weekly %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Here are the variable names:
+
+```{r}
+names(nfl_actualStats_player_weekly) %>% as.data.frame()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_player_weekly,
+  file = "./data/nfl_actualStats_player_weekly.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_player_weekly.RData")
+```
+
 #### Season-by-Season Statistics {#sec-downloadActualSeasonalStats}
 
 We can download historical season-by-season actual player statistics using the `nflreadr::load_player_stats()` function from the `nflreadr` package [@R-nflreadr].
@@ -1742,85 +1824,6 @@ load(file = "./data/nfl_actualStats_player_seasonal.RData")
 #### Career Statistics {#sec-downloadActualCareerStats}
 
 We calculate historical actual career statistics in @sec-calculateActualCareerStats.
-
-#### Week-by-Week Statistics {#sec-downloadActualWeeklyStats}
-
-We can download historical week-by-week actual player statistics using the `nflreadr::load_player_stats()` function from the `nflreadr` package [@R-nflreadr].
-@HoPlayerStats provide a Data Dictionary for statistics for offensive players at the following link: <https://nflreadr.nflverse.com/articles/dictionary_player_stats.html>.
-@HoPlayerStatsDefense provide a Data Dictionary for statistics for defensive players at the following link: <https://nflreadr.nflverse.com/articles/dictionary_player_stats_def.html>.
-You can also access the data dictionary via `R` using the following syntax:
-
-```{r}
-#| eval: false
-
-nflreadr::dictionary_player_stats
-```
-
-You can download the data using the following syntax:
-
-```{r}
-#| eval: false
-
-nfl_actualStats_player_weekly_raw <- progressr::with_progress(
-  nflreadr::load_player_stats(
-    seasons = TRUE,
-    summary_level = "week"))
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_actualStats_player_weekly_raw,
-  file = "./data/nfl_actualStats_player_weekly_raw.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_actualStats_player_weekly_raw.RData")
-```
-
-The `nfl_actualStats_weekly` object is in `player`-`season`-`week` form.
-That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week`.
-Let's rearrange the data accordingly:
-
-```{r}
-nfl_actualStats_player_weekly <- nfl_actualStats_player_weekly_raw %>% 
-  select(player_id, season, week, everything()) %>% 
-  arrange(player_display_name, player_id, season, week)
-```
-
-Let's check for duplicate `player`-`season`-`week` instances:
-
-```{r}
-nfl_actualStats_player_weekly %>% 
-  group_by(player_id, season, week) %>% 
-  filter(n() > 1) %>% 
-  head()
-```
-
-Here are the variable names:
-
-```{r}
-names(nfl_actualStats_player_weekly) %>% as.data.frame()
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_actualStats_player_weekly,
-  file = "./data/nfl_actualStats_player_weekly.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_actualStats_player_weekly.RData")
-```
 
 ### Injuries {#sec-injuries}
 
@@ -3508,7 +3511,7 @@ players_projections_seasonal_average <- players_projections_seasonal_average %>%
 
 players_projections_weekly_average <- players_projections_weekly_average %>% 
   add_ecr() %>% 
-  #add_uncertainty() %>% # currently throws an error
+  add_uncertainty() %>% # comment out if throws an error
   add_player_info()
 ```
 
@@ -3549,7 +3552,102 @@ load(file = "./data/players_projectedPoints_weekly.RData")
 
 ### Historical Actual Player Statistics {#sec-calculateActualStats}
 
-In addition to week-by-week actual player statistics, we can also compute historical actual player statistics as a function of different timeframes, including season-by-season and career statistics.
+We can compute historical actual player statistics as a function of different timeframes, including [week-by-week](#sec-calculateActualWeeklyStats), [season-by-season](#sec-calculateActualSeasonalStats), and the [player's career](#sec-calculateActualCareerStats).
+
+#### Week-by-Week Statistics {#sec-calculateActualWeeklyStats}
+
+We already load players' week-by-week statistics [above](#sec-downloadActualWeeklyStats) using the `nflreadr::load_player_stats()` function from the `nflreadr` [@R-nflreadr] package.
+Nevertheless, we could compute players' weekly statistics from the play-by-play data using the `nflfastR::calculate_stats()` function from the `nflfastR` [@R-nflfastR] package:
+
+::: {#nte-downloadWeeklyActualStats .callout-note title="Downloading week-by-week statistics"}
+Note: the following code takes a while to run.
+:::
+
+```{r}
+#| eval: false
+nfl_actualStats_weekly_player_raw <- nflfastR::calculate_stats(
+  seasons = TRUE,
+  summary_level = "week")
+
+nfl_actualStats_weekly_team_raw <- nflfastR::calculate_stats(
+  seasons = TRUE,
+  summary_level = "week",
+  stat_type = "team")
+```
+
+```{r}
+#| include: false
+
+# garbage collection
+rm(nfl_pbp)
+gc()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_weekly_player_raw, nfl_actualStats_weekly_team_raw,
+  file = "./data/nfl_actualStats_weekly_raw.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_weekly_raw.RData")
+```
+
+The `nfl_actualStats_weekly` objects are in `player`-`season`-`week` form.
+That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_actualStats_weekly_player <- nfl_actualStats_weekly_player_raw %>% 
+  select(player_id, season, week, everything()) %>% 
+  arrange(player_display_name, player_id, season, week)
+
+nfl_actualStats_weekly_team <- nfl_actualStats_weekly_team_raw %>% 
+  select(season, week, team, everything()) %>% 
+  arrange(season, week, team)
+```
+
+Let's check for duplicate `player`-`season`-`week` instances:
+
+```{r}
+nfl_actualStats_weekly_player %>% 
+  group_by(player_id, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+
+nfl_actualStats_weekly_team %>% 
+  group_by(team, season, week) %>% 
+  filter(n() > 1) %>% 
+  head()
+```
+
+Here are the variable names:
+
+```{r}
+names(nfl_actualStats_weekly_player) %>% as.data.frame()
+
+names(nfl_actualStats_weekly_team) %>% as.data.frame()
+```
+
+```{r}
+#| eval: false
+
+save(
+  nfl_actualStats_weekly_player, nfl_actualStats_weekly_team,
+  file = "./data/nfl_actualStats_weekly.RData"
+)
+```
+
+```{r}
+#| include: false
+
+load(file = "./data/nfl_actualStats_weekly.RData")
+```
 
 #### Season-by-Season Statistics {#sec-calculateActualSeasonalStats}
 
@@ -3815,103 +3913,9 @@ save(
 load(file = "./data/nfl_actualStats_player_career.RData")
 ```
 
-#### Week-by-Week Statistics {#sec-calculateActualWeeklyStats}
-
-We already load players' week-by-week statistics [above](#sec-downloadActualWeeklyStats) using the `nflreadr::load_player_stats()` function from the `nflreadr` [@R-nflreadr] package.
-Nevertheless, we could compute players' weekly statistics from the play-by-play data using the `nflfastR::calculate_stats()` function from the `nflfastR` [@R-nflfastR] package:
-
-::: {#nte-downloadWeeklyActualStats .callout-note title="Downloading week-by-week statistics"}
-Note: the following code takes a while to run.
-:::
-
-```{r}
-#| eval: false
-nfl_actualStats_weekly_player_raw <- nflfastR::calculate_stats(
-  seasons = TRUE,
-  summary_level = "week")
-
-nfl_actualStats_weekly_team_raw <- nflfastR::calculate_stats(
-  seasons = TRUE,
-  summary_level = "week",
-  stat_type = "team")
-```
-
-```{r}
-#| include: false
-
-# garbage collection
-rm(nfl_pbp)
-gc()
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_actualStats_weekly_player_raw, nfl_actualStats_weekly_team_raw,
-  file = "./data/nfl_actualStats_weekly_raw.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_actualStats_weekly_raw.RData")
-```
-
-The `nfl_actualStats_weekly` objects are in `player`-`season`-`week` form.
-That is, each row should be uniquely identified by the combination of `player_id`, `season`, and `week`.
-Let's rearrange the data accordingly:
-
-```{r}
-nfl_actualStats_weekly_player <- nfl_actualStats_weekly_player_raw %>% 
-  select(player_id, season, week, everything()) %>% 
-  arrange(player_display_name, player_id, season, week)
-
-nfl_actualStats_weekly_team <- nfl_actualStats_weekly_team_raw %>% 
-  select(season, week, team, everything()) %>% 
-  arrange(season, week, team)
-```
-
-Let's check for duplicate `player`-`season`-`week` instances:
-
-```{r}
-nfl_actualStats_weekly_player %>% 
-  group_by(player_id, season, week) %>% 
-  filter(n() > 1) %>% 
-  head()
-
-nfl_actualStats_weekly_team %>% 
-  group_by(team, season, week) %>% 
-  filter(n() > 1) %>% 
-  head()
-```
-
-Here are the variable names:
-
-```{r}
-names(nfl_actualStats_weekly_player) %>% as.data.frame()
-
-names(nfl_actualStats_weekly_team) %>% as.data.frame()
-```
-
-```{r}
-#| eval: false
-
-save(
-  nfl_actualStats_weekly_player, nfl_actualStats_weekly_team,
-  file = "./data/nfl_actualStats_weekly.RData"
-)
-```
-
-```{r}
-#| include: false
-
-load(file = "./data/nfl_actualStats_weekly.RData")
-```
-
 ### Historical Actual Fantasy Points {#sec-calculateActualPoints}
 
+We can then calculate players' historical actual fantasy points for [week-by-week](#sec-calculateActualPointsWeekly), [season-by-season](#sec-calculateActualPointsSeasonal), and the [player's career](#sec-calculateActualPointsCareer).
 Specify scoring settings:
 
 #### Week-by-Week {#sec-calculateActualPointsWeekly}
