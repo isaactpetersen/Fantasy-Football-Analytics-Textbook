@@ -115,11 +115,12 @@ options(scipen = 999) # prevent scientific notation
 
 ## Overview of Machine Learning {#sec-machineLearningOverview}
 
+Machine learning is a class of algorithmic approaches that are used to identify patterns in data.
 Machine learning takes us away from focusing on [causal inference](#sec-causalInference).
 Machine learning does not care about which processes are causal—i.e., which processes influence the outcome.
 Instead, machine learning cares about prediction—it cares about a predictor variable to the extent that it increases predictive accuracy regardless of whether it is causally related to the outcome.
 
-Machine learning can be useful for leveraging big data and lots of predictor variable to develop predictive models with greater accuracy.
+Machine learning can be useful for leveraging big data and many predictor variables to develop predictive models with greater accuracy.
 However, many machine learning techniques are black boxes—it is often unclear how or why certain predictions are made, which can make it difficult to interpret the model's decisions and understand the underlying relationships between variables.
 Machine learning tends to be a data-driven, atheoretical technique.
 This can result in [overfitting](#sec-overfitting).
@@ -131,6 +132,8 @@ When the model is applied to an independent sample (i.e., the test data), the pr
 
 If the test data were collected as part of the same processes as the original data and were merely held out for purposes of analysis, this is called internal [cross-validation](#sec-crossValidation).
 If the test data were collected separately from the original data used to train the model, this is called external [cross-validation](#sec-crossValidation).
+
+Although machine learning tends to be data-driven in its execution, theory should still inform which variables are included in the model.
 
 Most machine learning methods were developed with cross-sectional data in mind.
 That is, they assume that each person has only one observation on the outcome variable.
@@ -153,30 +156,33 @@ This chapter discusses several key ones:
       - [least absolute shrinkage and selection option (LASSO) regression](#sec-lasso)
       - [ridge regression](#sec-ridgeRegression)
       - [elastic net regression](#sec-elasticNet)
-      - [random forest](#sec-randomForest)
+      - tree-based methods
+        - decision tree
+        - [random forest](#sec-randomForest)
+        - [gradient tree boosting](#sec-treeBoosting)
     - categorical outcome (i.e., classification)
       - [logistic regression](#sec-multipleRegressionTypes)
       - support vector machine
       - [random forest](#sec-randomForest)
-      - boosting
-        - [tree boosting](#sec-treeBoosting)
+      - tree-based methods
 - unsupervised learning
     - [cluster analysis](#sec-clusterAnalysis)
     - [principal component analysis](#sec-pca)
     - [factor analysis](#sec-factorAnalysis)
 - semi-supervised learning
 - reinforcement learning
-    - deep learning
+- deep learning / neural network
 - ensemble
-
-*Ensemble* machine learning methods combine multiple machine learning approaches with the goal that combining multiple approaches might lead to more accurate predictions than any one method might be able to achieve on its own.
 
 ### Supervised Learning {#sec-machineLearningTypesSupervised}
 
-Supervised learning involves learning from data where the correct classification or outcome is known.
+Supervised learning involves learning from data where the correct classification or outcome is known (and the classification is thus part of the data).
 For instance, predicting how many points a player will score is a supervised learning task, because there is a ground truth—the actual number of points scored—that can be used to train and evaluate the model.
+If the outcome variable is categorical, the approach involves classification.
+If the outcome vairable is continuous, the approach involves regression.
 
-Unlike linear and logistic regression, various machine learning techniques can handle [multicollinearity](#sec-multipleRegressionMulticollinearity), including [LASSO regression](#sec-lasso), [ridge regression](#sec-ridgeRegression), and [elastic net regression](#sec-elasticNet).
+Unlike linear and logistic regression, various machine learning techniques can handle [multicollinearity](#sec-multipleRegressionMulticollinearity), including [LASSO regression](#sec-lasso), [ridge regression](#sec-ridgeRegression), and [elastic net regression](#sec-elasticNet) via regularization.
+Regularization involves penalizing model complexity to avoid [overfitting](#sec-overfitting) [@Ramasubramanian2016].
 [Least absolute shrinkage and selection option (LASSO) regression](#sec-lasso) performs selection of which predictor variables to keep in the model by shrinking some coefficients to zero, effectively removing them from the model.
 [Ridge regression](#sec-ridgeRegression) shrinks the coefficients of predictor variables toward zero, but not to zero, so it does not perform selection of which predictor variables to retain; this allows it to yield stable estimates for multiple correlated predictor variables in the context of [multicollinearity](#sec-multipleRegressionMulticollinearity).
 [Elastic net](#sec-elasticNet) involves a combination of [LASSO](#sec-lasso) and [ridge](#sec-ridgeRegression) regression; it performs selection of which predictor variables to keep by shrinking the coefficients of some predictor variables to zero (like [LASSO](#sec-lasso), for variable selection), and it shrinks the coefficients of some predictor variables toward zero (like [ridge](#sec-ridgeRegression), for handling [multicollinearity](#sec-multipleRegressionMulticollinearity) among correlated predictors).
@@ -193,6 +199,7 @@ Unsupervised learning is used to discover hidden patterns, groupings, or structu
 For instance, if we want to identify different subtypes of Wide Receivers based on their playing style or performance metrics, or uncover underlying dimensions in a large dataset, we would use an unsupervised learning approach.
 
 We describe [cluster analysis](#sec-clusterAnalysis) in @sec-clusterAnalysis.
+We describe [factor analysis](#sec-factorAnalysis) in @sec-factorAnalysis.
 We describe [principal component analysis](#sec-pca) in @sec-pca.
 
 ### Semi-supervised Learning {#sec-machineLearningTypesSemisupervised}
@@ -203,6 +210,10 @@ Semi-supervised learning combines supervised learning and unsupervised learning 
 
 Reinforcement learning involves an agent learning to make decisions by interacting with the environment.
 Through trial and error, the agent receives feedback in the form of rewards or penalties and learns a strategy that maximizes the cumulative reward over time.
+
+### Ensemble Learing {#sec-machineLearningTypesEnsemble}
+
+*Ensemble* machine learning methods combine multiple machine learning approaches with the goal that combining multiple approaches might lead to more accurate predictions than any one method might be able to achieve on its own.
 
 ## Data Processing {#sec-machineLearningDataProcessing}
 
@@ -742,7 +753,7 @@ For internal [cross-validation](#sec-crossValidation), it is common to divide th
 
 The training set is used to fit the model.
 It is usually the largest portion of the data.
-We fit various models to the training set based on which parameters we want to evaluate (e.g., how many trees to use in a tree-boosting model).
+We fit various models to the training set based on which parameters we want to evaluate (e.g., how many trees to use in a [gradient tree boosting model](#sec-treeBoosting)).
 
 The models fit with the training set are then evaluated using the unseen observations in the validation set.
 The validation set is used to tune the model parameters and prevent [overfitting](#sec-overfitting).
@@ -1222,6 +1233,7 @@ However, the examples could be applied to any of the positions.
 There are various approaches to [cross-validation](#sec-crossValidation).
 In the examples below, we use [*k*-fold cross-validation](#sec-kFoldCrossValidation).
 However, we also provide the code to apply [leave-one-out (LOO) cross-validation](#sec-looCrossValidation).
+[*k*-fold](#sec-kFoldCrossValidation) and [LOO](#sec-looCrossValidation) cross-validation are both forms of *internal* cross-validation.
 
 ### *k*-Fold Cross-Validation {#sec-kFoldCrossValidation}
 
@@ -1247,6 +1259,7 @@ folds_kFold <- rsample::group_vfold_cv(
 Leave-one-out (LOO) cross-validation partitions the data into *n* folds, where *n* is the sample size.
 In each of the *n* iterations, the model is trained on $n - 1$ observations and is evaluated on the one left out.
 For example, in a LOO cross-validation with 100 players, the model is trained 100 times, each time leaving out a different player for validation.
+LOO cross-validation is a special case of [*k*-fold cross-validation](#sec-kFoldCrossValidation) where $k = n$.
 LOO cross-validation is especially useful when the dataset is small—too small to form reliable training sets in [*k*-fold cross-validation](#sec-kFoldCrossValidation) (e.g., with $k = 5$ or $k = 10$, which divide the sample into 5 or 10 folds, respectively).
 However, LOO tends to be less computationally efficient because it requires more model fits than [*k*-fold cross-validation](#sec-kFoldCrossValidation).
 LOO tends to have low bias, producing performance estimates closer to those obtained when fitting the model to the full dataset, because each model is trained on nearly all the data.
@@ -2044,6 +2057,11 @@ newData_qb %>%
 
 ### Random Forest Machine Learning {#sec-randomForest}
 
+A random forest model combines the results of many decision trees.
+A decision tree splits the data into groups based on the values of the predictors, and then predicts the outcome within each group.
+A given decision tree can be noisy and prone to [overfitting](#sec-overfitting), so random forests build many trees, where each tree is trained on a random subset of the data and considers a random subset of predictors at each split.
+The random forest then averages the predictions of all the decision trees, to improve overall predictive accuracy.
+
 #### Assuming Independent Observations {#sec-randomForestIndependent}
 
 Below, we fit a random forest model.
@@ -2249,7 +2267,7 @@ gc()
 
 The above approaches to machine learning assume that the observations are independent across rows.
 However, in our case, this assumption does not hold because the data are longitudinal—each player has multiple seasons, and each row corresponds to a unique player–season combination.
-In the approaches below, using a random forest model (this section) and a [tree-boosting model](#sec-treeBoosting) (in @sec-treeBoosting), we address this by explicitly accounting for the nesting of longitudinal observations within players.
+In the approaches below, using a random forest model (this section) and a [gradient tree boosting model](#sec-treeBoosting) (in @sec-treeBoosting), we address this by explicitly accounting for the nesting of longitudinal observations within players.
 
 Approaches to estimating random forest models with longitudinal data are described by @Hu2023.
 Below, we fit longitudinal random forest models using the `LongituRF::MERF()` function of the `LongituRF` package [@R-LongituRF].
@@ -2292,9 +2310,12 @@ predict(
   time = data_test_qb[,c("ageCentered20")] %>% as.matrix())
 ```
 
-### Combining Tree-Boosting with Mixed Models {#sec-treeBoosting}
+### Combining Gradient Tree Boosting with Mixed Models {#sec-treeBoosting}
 
-To combine tree-boosting with mixed models, we use the `gpboost` package [@R-gpboost].
+To combine gradient tree boosting with mixed models, we use the `gpboost` package [@R-gpboost].
+Gradient tree boosting is similar to a [random forest model](#sec-randomForest).
+Gradient tree boosting builds trees one by one, each trying to correct the errors of the previous trees.
+By contrast, in a [random forest model](#sec-randomForest), all trees are built independently and then averaged.
 
 Adapted from here:
 <https://towardsdatascience.com/mixed-effects-machine-learning-for-longitudinal-panel-data-with-gpboost-part-iii-523bb38effc>
@@ -2553,8 +2574,8 @@ There was moderate [shrinkage](#sec-shrinkage) from the training model to the te
 
 ```{r}
 #| label: fig-treeBoostingModel
-#| fig-cap: "Predicted Versus Actual Fantasy Points for Tree-Boosting Model."
-#| fig-alt: "Predicted Versus Actual Fantasy Points for Tree-Boosting Model."
+#| fig-cap: "Predicted Versus Actual Fantasy Points for Gradient Tree Boosting Model."
+#| fig-alt: "Predicted Versus Actual Fantasy Points for Gradient Tree Boosting Model."
 
 # Calculate combined range for axes
 axis_limits <- range(c(predictedVsActual$predictedPoints, predictedVsActual$actualPoints), na.rm = TRUE)
@@ -2627,7 +2648,7 @@ machineLearningTable <- data.frame(
     "Ridge Regression",
     "Elastic Net",
     "Random Forest",
-    "Tree-Boosting"
+    "Gradient Tree Boosting"
   ), 
   rsquared = c(
     rsquare_onePredictor,
@@ -2688,9 +2709,9 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
-The most accurate models, in terms of [discrimination](#sec-discrimination) ($R^2$), had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using one of two approaches—a [tree-boosting model](#sec-treeBoosting) with many predictors or a [regression model with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
-The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate (in terms of $R^2$) than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and the other [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
-This suggests that the other predictors examined did not have [incremental validity](#sec-incrementalValidity)—they did not show utility above and beyond a player's fantasy points in predicting their future fantasy points.
+The most accurate models, in terms of [discrimination](#sec-discrimination) ($R^2$), had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using several approaches—including a [gradient tree boosting model](#sec-treeBoosting) with many predictors and a [regression model with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
+The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate (in terms of $R^2$) than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and were just as accurate, if not more accurate, than other [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
+This suggests that the other predictors examined did not have [incremental validity](#sec-incrementalValidity)—they did not show utility above and beyond a player's previous fantasy points in predicting their future fantasy points.
 If anything, considering the additional predictor variables showed *decremental* validity—the inclusion of the additional variables worsened prediction, possibly by weakening the predictive association of the previous season's fantasy points and misattributing its predictive effect to other, related predictors in the model.
 This is consistent with the common finding that simple models (and parsimony) are often preferable.
 As an example, @Youngstrom2018 found that simple models did just as well and in some cases better than [LASSO models](#sec-lasso) in classifying bipolar disorder.
@@ -2700,9 +2721,9 @@ Among the machine learning models, the [random forest model](#sec-randomForest) 
 However, it was still less accurate than a [simple regression model with one predictor](#sec-regressionOnePredictor).
 -->
 
-The most accurate model in terms of [calibration](#sec-calibration) ([mean absolute error](#sec-meanAbsoluteError)) was the [tree-boosting model](#sec-treeBoosting), which had a [mean absolute error](#sec-meanAbsoluteError) of `{r} mae_minimum`, and was just slightly more accurate than the [regression model with one predictor](#sec-regressionOnePredictor).
+The most accurate model in terms of [calibration](#sec-calibration) ([mean absolute error](#sec-meanAbsoluteError)) was the [gradient tree boosting model](#sec-treeBoosting), which had a [mean absolute error](#sec-meanAbsoluteError) of `{r} mae_minimum`, and was just slightly more accurate than the [regression model with one predictor](#sec-regressionOnePredictor).
 However, even in the most accurate model, the predicted values were over `{r} petersenlab::apa(mae_minimum, decimals = 0)` points away from the actual values, suggesting that the model-predicted values were not particularly accurate.
-In sum, the [regression model with one predictor](#sec-regressionOnePredictor) was the most accurate in terms of differentiating between players ($R^2$), whereas the [tree-boosting model](#sec-treeBoosting) was the most accurate in terms of how close the predicted values were to the actual values.
+In sum, the [regression model with one predictor](#sec-regressionOnePredictor) was the most accurate in terms of differentiating between players ($R^2$), whereas the [gradient tree boosting model](#sec-treeBoosting) was the most accurate in terms of how close the predicted values were to the actual values.
 
 All models explained less than half of the variance in players' future fantasy points.
 Thus, there remains considerable variance to be explained.
@@ -2721,7 +2742,7 @@ Machine learning can incorporate many predictor variables, so it is important to
 We examined multiple machine learning models to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
 All models explained less than half of the variance in players' fantasy points.
 The most accurate model, in terms of [discrimination](#sec-discrimination) ($R^2$), was achieved using regression with one predictor: the player's fantasy points in the previous season.
-The most accurate model in terms of [calibration](#sec-calibration) ([mean absolute error](#sec-meanAbsoluteError)) was the [tree-boosting model](#sec-treeBoosting), which accounted for the longitudinal nature of the data.
+The most accurate model in terms of [calibration](#sec-calibration) ([mean absolute error](#sec-meanAbsoluteError)) was the [gradient tree boosting model](#sec-treeBoosting), which accounted for the longitudinal nature of the data.
 The considerable unexplained variance suggests that we are missing key variables that are important predictors of future fantasy performance.
 
 ::: {.content-visible when-format="html"}
