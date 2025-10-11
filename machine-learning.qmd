@@ -2312,10 +2312,11 @@ predict(
 
 ### Combining Gradient Tree Boosting with Mixed Models {#sec-treeBoosting}
 
-To combine gradient tree boosting with mixed models, we use the `gpboost` package [@R-gpboost].
+To combine gradient tree boosting with [mixed models](#sec-mixedModels), we use the `gpboost` package [@R-gpboost].
 Gradient tree boosting is similar to a [random forest model](#sec-randomForest).
 Gradient tree boosting builds trees one by one, each trying to correct the errors of the previous trees.
 By contrast, in a [random forest model](#sec-randomForest), all trees are built independently and then averaged.
+This gradient tree boosting approach includes a [mixed model](#sec-mixedModels) to account for the longitudinal data nested within players.
 
 Adapted from here:
 <https://towardsdatascience.com/mixed-effects-machine-learning-for-longitudinal-panel-data-with-gpboost-part-iii-523bb38effc>
@@ -2695,7 +2696,7 @@ mae_minimum <- min(
 ```
 
 We examined multiple machine learning models that included many predictor variables to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
-We also compared them to simpler models, including a [regression model with one predictor](#sec-regressionOnePredictor) and a [regression model with multiple predictors](#sec-regressionMultiplePredictors) to deteremine the [incremental validity](#sec-incrementalValidity) of the machine learning models above and beyond the simpler models.
+We also compared them to simpler models, including a [regression model with one predictor](#sec-regressionOnePredictor) and a [regression model with multiple predictors](#sec-regressionMultiplePredictors) to determine the [incremental validity](#sec-incrementalValidity) of the machine learning models above and beyond the simpler models.
 A summary of the accuracy of the machine learning models is in @tbl-machineLearningModelSummary.
 
 ```{r}
@@ -2709,10 +2710,10 @@ knitr::kable(
   booktabs = TRUE)
 ```
 
-The most accurate models, in terms of [discrimination](#sec-discrimination) ($R^2$), had an $R^2$ of `{r} rsquare_maximum`, and it was achieved using several approaches—including a [gradient tree boosting model](#sec-treeBoosting) with many predictors and a [regression model with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
-The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate (in terms of $R^2$) than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and were just as accurate, if not more accurate, than other [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
+The most accurate models, in terms of [discrimination](#sec-discrimination) ($R^2$), had an $R^2$ near `{r} rsquare_maximum`, and it was achieved using several approaches—including a [gradient tree boosting model](#sec-treeBoosting) with many predictors and a [regression model with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season.
+The [regression model with one predictor](#sec-regressionOnePredictor) was more accurate (in terms of $R^2$) than a [regression model with multiple predictors](#sec-regressionMultiplePredictors) and was just as accurate, if not more accurate, than other [machine learning models](#sec-fittingModels-machineLearning) that leveraged multiple predictors.
 This suggests that the other predictors examined did not have [incremental validity](#sec-incrementalValidity)—they did not show utility above and beyond a player's previous fantasy points in predicting their future fantasy points.
-If anything, considering the additional predictor variables showed *decremental* validity—the inclusion of the additional variables worsened prediction, possibly by weakening the predictive association of the previous season's fantasy points and misattributing its predictive effect to other, related predictors in the model.
+If anything, considering the additional predictor variables showed *decremental* validity—the inclusion of the additional variables worsened prediction in several models, possibly by weakening the predictive association of the previous season's fantasy points and misattributing its predictive effect to other, related predictors in the model.
 This is consistent with the common finding that simple models (and parsimony) are often preferable.
 As an example, @Youngstrom2018 found that simple models did just as well and in some cases better than [LASSO models](#sec-lasso) in classifying bipolar disorder.
 
@@ -2722,8 +2723,9 @@ However, it was still less accurate than a [simple regression model with one pre
 -->
 
 The most accurate model in terms of [calibration](#sec-calibration) ([mean absolute error](#sec-meanAbsoluteError)) was the [gradient tree boosting model](#sec-treeBoosting), which had a [mean absolute error](#sec-meanAbsoluteError) of `{r} mae_minimum`, and was just slightly more accurate than the [regression model with one predictor](#sec-regressionOnePredictor).
+The [gradient tree boosting model](#sec-treeBoosting) being the most accurate suggests that it is important to account for the longitudinal data nested within players.
 However, even in the most accurate model, the predicted values were over `{r} petersenlab::apa(mae_minimum, decimals = 0)` points away from the actual values, suggesting that the model-predicted values were not particularly accurate.
-In sum, the [regression model with one predictor](#sec-regressionOnePredictor) was the most accurate in terms of differentiating between players ($R^2$), whereas the [gradient tree boosting model](#sec-treeBoosting) was the most accurate in terms of how close the predicted values were to the actual values.
+In sum, the [regression model with one predictor](#sec-regressionOnePredictor) and [gradient tree boosting model](#sec-treeBoosting) were the most accurate in terms of differentiating between players ($R^2$), whereas the [gradient tree boosting model](#sec-treeBoosting) was the most accurate in terms of how close the predicted values were to the actual values.
 
 All models explained less than half of the variance in players' future fantasy points.
 Thus, there remains considerable variance to be explained.
@@ -2741,7 +2743,7 @@ There are various types of machine learning models.
 Machine learning can incorporate many predictor variables, so it is important to perform [cross-validation](#sec-crossValidation) to avoid [overfitting](#sec-overfitting).
 We examined multiple machine learning models to identify the model that generates the most accurate prediction of Quarterbacks' future fantasy points.
 All models explained less than half of the variance in players' fantasy points.
-The most accurate model, in terms of [discrimination](#sec-discrimination) ($R^2$), was achieved using regression with one predictor: the player's fantasy points in the previous season.
+The most accurate model, in terms of [discrimination](#sec-discrimination) ($R^2$), was achieved using a [regression model with one predictor](#sec-regressionOnePredictor): the player's fantasy points in the previous season—and a [gradient tree boosting model](#sec-treeBoosting).
 The most accurate model in terms of [calibration](#sec-calibration) ([mean absolute error](#sec-meanAbsoluteError)) was the [gradient tree boosting model](#sec-treeBoosting), which accounted for the longitudinal nature of the data.
 The considerable unexplained variance suggests that we are missing key variables that are important predictors of future fantasy performance.
 
