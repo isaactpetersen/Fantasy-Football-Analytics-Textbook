@@ -3,7 +3,7 @@
 # Specify Season and Week Number ----
 
 season <- 2025
-weekNumber <- 7
+weekNumber <- 8
 
 # Processing ----
 season <- as.character(season)
@@ -15,7 +15,7 @@ library("tidyverse")
 
 # Download Weekly Projections ----
 players_projections_weekly_raw <- ffanalytics::scrape_data(
-  #pos = c("QB", "RB", "WR", "TE", "K", "DST"), # include this line (i.e., uncomment it out) if get an error in downstream steps due to insufficient sources of IDP projections
+  pos = c("QB", "RB", "WR", "TE", "K", "DST"), # include this line (i.e., uncomment it out) if get an error in downstream steps due to insufficient sources of IDP projections
   season = NULL, # NULL grabs the current season
   week = NULL) # NULL grabs the current week
 
