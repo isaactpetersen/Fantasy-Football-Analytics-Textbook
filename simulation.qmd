@@ -578,7 +578,24 @@ gc()
 
 ### Monte Carlo Simulation {#sec-simulationProjectedPointsMonteCarlo}
 
+In general, a Monte Carlo simulation study involves several steps:
+
+1. generate the data for the simulation from the relevant probabilty distribution(s)
+1. analyze the simulated data
+1. summarize the results across the simulation replications
+
+Below we conduct a Monte Carlo simulation to determine the range of each player's most likely points scored based on their projected points.
+To do this, we use the `SimDesign` [@R-SimDesign; @Chalmers2020_packages] package.
+
 #### `SimDesign` Package {#sec-simulationProjectedPointsMonteCarloSimDesign}
+
+The `SimDesign` [@R-SimDesign; @Chalmers2020_packages] package uses a five-step process to perform Monte Carlo simulations:
+
+1. Step 1—Design Grid: specify the fixed conditions to investigate in the simulation (e.g., sample size, generating distribution)
+1. Step 2—Generate: specify how to generate the data for the simulation from the relevant probabilty distribution(s)
+1. Step 3—Analyze: specify how to analyze the simulation data
+1. Step 4—Summarize: specify how to summarize the results across the simulation replications
+1. Step 5—Run the Simulation: run the simulation study (i.e., generate the data, analyze the simulated data, and summarize the results across the simulation replications)
 
 You can generate a template for Monte Carlo simulations in the `SimDesign` [@R-SimDesign; @Chalmers2020_packages] package using the following code:
 
@@ -640,7 +657,7 @@ all_proj <- all_proj %>%
 
 #### Optimal Distribution for Each Player {#sec-simulationProjectedPointsMonteCarloOptimalDistribution}
 
-For each player, we identify the optimal distribution as either a normal distribution , or as a skew-normal distribution.
+For each player, we identify the optimal distribution of their projected points across sources as either a normal distribution, or as a skew-normal distribution.
 The normal distribution was fit using the `fitdistrplus::fitdist()` function of the `fitdistrplus` package [@R-fitdistrplus; @DelignetteMuller2015_packages].
 The skew-normal distribution was fit using the `sn::selm()` function of the `sn` package [@R-sn; @Azzalini2023_packages].
 
@@ -730,7 +747,9 @@ proj_dists_tbl %>%
 
 #### `SimDesign` Step 1: Design Grid {#sec-simulationProjectedPointsMonteCarloDesign}
 
-Now we build the `SimDesign` design grid based on the number of projections that each player had.
+First, we define what combinations of conditions to study, which is called our design grid.
+In our simulation study, each player retains the same number of projections as they had in the original data, ensuring the simulation reflects real-world variation in data availability.
+This number of projections defines our design grid.
 
 ```{r}
 Design <- proj_dists_tbl %>%
@@ -753,6 +772,9 @@ any(is.na(names(proj_dists))) # should be FALSE
 ```
 
 #### `SimDesign` Step 2: Generate {#sec-simulationProjectedPointsMonteCarloGenerate}
+
+Second, we generate the data for the simulation from the relevant probabilty distribution function(s).
+In this case, we use a normal distribution or skew-normal distribution as our probability distribution function for a given player, depending on which distribution fits better to that player's distribution of projected points across sources (stored in `dist_info$type`).
 
 ```{r}
 Generate <- function(condition, fixed_objects = NULL) {
@@ -789,6 +811,8 @@ Generate <- function(condition, fixed_objects = NULL) {
 
 #### `SimDesign` Step 3: Analyze {#sec-simulationProjectedPointsMonteCarloAnalyze}
 
+Third, we analyze the simulated data.
+
 ```{r}
 Analyse <- function(condition, dat, fixed_objects = NULL) {
   tibble::tibble(
@@ -809,6 +833,8 @@ Analyse <- function(condition, dat, fixed_objects = NULL) {
 
 #### `SimDesign` Step 4: Summarize {#sec-simulationProjectedPointsMonteCarloSummarize}
 
+Fourth, we summarize the results across the simulation replications.
+
 ```{r}
 Summarise <- function(condition, results, fixed_objects = NULL) {
   dplyr::summarise(
@@ -827,7 +853,8 @@ Summarise <- function(condition, results, fixed_objects = NULL) {
 
 #### `SimDesign` Step 5: Run the Simulation {#sec-simulationProjectedPointsMonteCarloRun}
 
-Now, we can run the model using the `SimDesign::runSimulation()` function.
+Fifth, we run the simulation study.
+We run the simulation study using the `SimDesign::runSimulation()` function.
 
 ::: {#nte-monteCarloSimulation .callout-note title="Monte Carlo Simulation"}
 Note: the following code that runs the simulation takes a while.
