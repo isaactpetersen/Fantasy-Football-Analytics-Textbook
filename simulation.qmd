@@ -592,7 +592,7 @@ To do this, we use the `SimDesign` [@R-SimDesign; @Chalmers2020_packages] packag
 The `SimDesign` [@R-SimDesign; @Chalmers2020_packages] package uses a five-step process to perform Monte Carlo simulations:
 
 1. Step 1—Design Grid: specify the fixed conditions to investigate in the simulation (e.g., sample size, generating distribution)
-1. Step 2—Generate: specify how to generate the data for the simulation from the relevant probabilty distribution(s)
+1. Step 2—Generate: specify how to generate the data for the simulation from the relevant probability distribution(s)
 1. Step 3—Analyze: specify how to analyze the simulation data
 1. Step 4—Summarize: specify how to summarize the results across the simulation replications
 1. Step 5—Run the Simulation: run the simulation study (i.e., generate the data, analyze the simulated data, and summarize the results across the simulation replications)
@@ -641,6 +641,12 @@ res <- SimDesign::runSimulation(
 
 res
 ```
+
+When designing a Monte Carlo simulation, @Sigal2016 (p. 151) recommend the following:
+
+- beginning with a small number of replications and conditions (i.e., supplying a design object with fewer rows) to ensure that the code runs correctly, and increasing replications/conditions only when the majority of the bugs have been worked out
+- documenting strange aspects of your simulation or code that you are likely to forget
+- saving the state of your simulation in case of power failure or other mechanical failures (e.g., using the `save = TRUE` and/or `save_results = TRUE`, and/or `debug` arguments in `SimDesign::runSimulation()`), and, as necessary, performing debugging within a particular function (`debug` argument in `SimDesign::runSimulation()`)
 
 #### Prepare Data {#sec-simulationProjectedPointsMonteCarloPrepareData}
 
@@ -747,20 +753,28 @@ proj_dists_tbl %>%
 
 #### `SimDesign` Step 1: Design Grid {#sec-simulationProjectedPointsMonteCarloDesign}
 
-First, we define what combinations of conditions to study, which is called our design grid.
+First, we define what combinations of conditions to study (with one row per each unique combination), which is called our design grid.
+For the design grid, the columns are the design factors (e.g., sample size, generating distribution), and each row indicates a unique combination of the factors (e.g., *N* = 200, normal distribution; *N* = 500, normal distribution; *N* = 200, Poisson distribution; *N* = 500, Poisson distribution).
+When we execute the simulation, each row of the design grid object will be run sequentially.
+
 In our simulation study, each player retains the same number of projections as they had in the original data, ensuring the simulation reflects real-world variation in data availability.
 This number of projections defines our design grid.
+The design factors (columns) are the player (`id`) and the number of projections available for that player (`n_sources`).
+The rows, then are the combinations of player and number of projections available for that player.
 
 ```{r}
 Design <- proj_dists_tbl %>%
   dplyr::mutate(
     id,
-    n_sources = n_proj,
+    n_sources = n_proj, # number of projection sources available for player
     .keep = "none"
   )
+
+Design
 ```
 
 ```{r}
+#| include: false
 #| eval: false
 
 missing_ids <- setdiff(Design$id, names(proj_dists))
@@ -773,8 +787,11 @@ any(is.na(names(proj_dists))) # should be FALSE
 
 #### `SimDesign` Step 2: Generate {#sec-simulationProjectedPointsMonteCarloGenerate}
 
-Second, we generate the data for the simulation from the relevant probabilty distribution function(s).
-In this case, we use a normal distribution or skew-normal distribution as our probability distribution function for a given player, depending on which distribution fits better to that player's distribution of projected points across sources (stored in `dist_info$type`).
+Second, we generate the data for the simulation from the relevant probability distribution function(s).
+In this case, we use a normal distribution or skew-normal distribution as our probability distribution function for a given player, depending on which distribution fits better to that player's distribution of projected points across sources (stored in `proj_dists[["INSERT_ID"]]$type`).
+The `Generate()` function has a `condition` argument, which takes a single row from the design grid object (`Design`), and which controls the data generation for subsequent analysis.
+We use the (optional) `fixed_objects` argument so we can pass an object that should be held constant across all simulation replications—i.e., a "fixed" object.
+In this case, we pass—via the `proj_dists` object—the best-fitting distribution for each player (normal or skew-normal) to be used for all simulation replications.
 
 ```{r}
 Generate <- function(condition, fixed_objects = NULL) {
@@ -812,6 +829,9 @@ Generate <- function(condition, fixed_objects = NULL) {
 #### `SimDesign` Step 3: Analyze {#sec-simulationProjectedPointsMonteCarloAnalyze}
 
 Third, we analyze the simulated data.
+For each iteration of the simulation, the `Analyse()` function will return a vector with a requested variables: player (`id`), their simulated mean (`mean_pts`) and standard deviation (`sd_pts`) of projected fantasy points across sources, their the 10th (`q10`) and 90th (`q90`) quartiles of their distributions of projected points, and the simulated probability of the player scoring at least 100 (`p100`), 150 (`p150`), 200 (`p200`), 250 (`p250`), 300 (`p300`), and 350 (`p350`) fantasy points.
+We then combine all the rows into a tibble dataframe, with each player as a different row.
+A separate dataset is created for each of the simulation replications.
 
 ```{r}
 Analyse <- function(condition, dat, fixed_objects = NULL) {
@@ -834,6 +854,29 @@ Analyse <- function(condition, dat, fixed_objects = NULL) {
 #### `SimDesign` Step 4: Summarize {#sec-simulationProjectedPointsMonteCarloSummarize}
 
 Fourth, we summarize the results across the simulation replications.
+In this case, we calculate—for each variable—each player's mean and standard deviation across the datasets from the different simulation replications.
+
+Some potential metastatistics that can be computed include:
+
+- mean: `base::mean()`
+- standard deviation: `base::sd()`
+- bias: `SimDesign::bias()`
+- standardized bias: `SimDesign::bias(, type = "standardized")`
+- relative bias: `SimDesign::bias(, type = "relative")`
+- relative absolute bias: `SimDesign::RAB()` or `SimDesign::bias(, type = "abs_relative")`
+- mean absolute error (MAE): `SimDesign::MAE()`
+- normalized mean absolute error: `SimDesign::MAE(, type = "NMAE")`
+- standardized mean absolute error: `SimDesign::MAE(, type = "SMAE")`
+- root mean squared error (RMSE): `SimDesign::RMSE()`
+- normalized root mean squared error: `SimDesign::RMSE(, type = "NRMSE")`
+- standardized root mean squared error: `SimDesign::RMSE(, type = "SRMSE")`
+- root mean squared log error (RMSLE): `SimDesign::RMSE(, type = "RMSLE")`
+- integrated root mean squared error (IRMSE): `SimDesign::IRMSE()`
+- mean-square relative standard error (MSRSE): `SimDesign::MSRSE()`
+- coefficient of variation: `SimDesign::RMSE(, type = "CV")`
+- relative efficiency: `SimDesign::RE()`
+- empirical detection/rejection rate: `SimDesign::EDR()`
+- empirical coverage rate: `SimDesign::ECR()`
 
 ```{r}
 Summarise <- function(condition, results, fixed_objects = NULL) {
@@ -876,7 +919,7 @@ monteCarloSim_results <- SimDesign::runSimulation(
   generate = Generate,
   analyse = Analyse,
   summarise = Summarise,
-  fixed_objects = list(proj_dists = proj_dists),
+  fixed_objects = list(proj_dists = proj_dists), # passing a list of objects that should be held constant across all simulation replications — i.e., "fixed" objects
   seed = SimDesign::genSeeds(Design, iseed = 52242), # for reproducibility
   parallel = TRUE # for faster (parallel) processing
 )
