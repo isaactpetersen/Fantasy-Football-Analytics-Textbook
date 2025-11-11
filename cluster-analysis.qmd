@@ -65,6 +65,22 @@ Model-based clustering represents the data as coming from a mixture of probabili
 The various types of `mclust` models are provided here:
 <https://mclust-org.github.io/mclust/reference/mclustModelNames.html>.
 
+There are several model fit criteria we can use to identify the optimal number of tiers in terms of the tradeoff between fit and parsimony.
+For the Bayesian Information Criterion (BIC), closer to zero is better.
+For the Integrated Complete-data Likelihood (ICL), higher is better.
+For the bootstrapped likelihood ratio tests, a significant likelihood ratio test indicates that the model with more clusters fits significantly better than the model with fewer clusters.
+
+For univariate cluster analyses in the `mclust` package [@R-mclust; @Scrucca2023_packages], there are two types of models: ones with equal variance across clusters (`modelName = "E"`) and ones with different variances across clusters (`modelName = "V"`).
+Allowing different variances across clusters is a more complex model than forcing the clusters to have equal variances.
+
+For multivariate cluster analyses in the `mclust` package [@R-mclust; @Scrucca2023_packages], models are specified by a combination of volume, shape, and orientation.
+The model name is specified such that the first letter corresponds to the volume, the second letter corresponds to shape, and the third letter corresponds to orientation.
+In terms of volume, models can be of equal volume (`E`) or variable volume (`V`) across clusters.
+In terms of shape, models can be of equal (`E`), variable (`V`), or identity (`I`) shape.
+In terms of orientation, models can be of equal (`E`), variable (`V`), or identity (`I`) orientation.
+The varying types of volume, shape, and orientation combine to produce three general types of covariance structures: spherical (low complexity), diagonal (moderate complexity), and ellipsoidal (high complexity).
+Models that allow greater differences across clusters (i.e., more `V`'s) are more flexible and typically more complex.
+
 ### Tiers of Prior Season Fantasy Points {#sec-clusterAnalysisExample}
 
 #### Prepare Data {#sec-clusterAnalysisExamplePrepareData}
@@ -92,9 +108,9 @@ player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recent %
 
 #### Identify the Optimal Number of Tiers by Position {#sec-clusterAnalysisExampleNumTiers}
 
-##### Quarterbacks {#sec-clusterAnalysisExampleNumTiersQBs}
+We can evaluate how many clusters to keep, based on the tradeoff between fit and parsimony, using the `mclust::mclustBIC()` (BIC), `mclust::mclustICL()` (ICL), and `mclust::mclustBootstrapLRT()` (bootstrapped likelihood ratio tests) functions of the `mclust` package [@R-mclust; @Scrucca2023_packages].
 
-We can perform a cluster analysis using the `mclust::mclustBIC()`, `mclust::mclustICL()`, and `mclust::mclustBootstrapLRT()` functions of the `mclust` package [@R-mclust; @Scrucca2023_packages].
+##### Quarterbacks {#sec-clusterAnalysisExampleNumTiersQBs}
 
 ```{r}
 tiersQB_bic <- mclust::mclustBIC(
