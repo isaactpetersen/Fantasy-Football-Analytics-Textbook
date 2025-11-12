@@ -56,7 +56,7 @@ Time series analysis is useful when trying to generate forecasts from longitudin
 That is, time series analysis seeks to evaluate change over time to predict future values.
 
 There many different types of time series analyses.
-For simplicity, in this chapter, we use [autoregressive integrated moving average](#sec-timeSeriesARIMA) (ARIMA) models to demonstrate one approach to time series analysis.
+For simplicity, in this chapter, we use [autoregressive integrated moving average](#sec-timeSeriesARIMA) (ARIMA) and [exponential smoothing](#sec-timeSeriesExponentialSmoothing) models to demonstrate one approach to time series analysis.
 We also leverage [Bayesian mixed models](#sec-fantasyPointsByAgeExperienceModelsBayesian) to generate forecasts of future performance and plots of individuals model-implied performance by age and position.
 
 There are four (potential) key components of time series data:
@@ -87,7 +87,7 @@ They are specified in the following form: $\text{ARIMA}(p,d,q)$, where:
 
 ARIMA models assume that the data are stationary (i.e., there are no long-term trends), are non-seasonal (i.e., there is no consistency of the timing of the peaks or troughs in the line), and that earlier values influence later values.
 This may not strongly be the case in fantasy football, so ARIMA models may not be particularly useful in forecasting fantasy football performance.
-Other approaches, such as exponential smoothing, may be useful for data that show longer-term trends and seasonality [@Hyndman2021].
+Other approaches, such as [exponential smoothing](#sec-timeSeriesExponentialSmoothing), may be useful for data that show longer-term trends and seasonality [@Hyndman2021].
 Nevertheless, ARIMA models are widely used in forecasting financial markets and economic indicators.
 Thus, it is a useful technique to learn.
 
@@ -254,8 +254,8 @@ We can plot the model forecasts using the `forecast::autoplot()` function.
 
 ```{r}
 #| label: fig-timeSeriesProjectionTomBrady
-#| fig-cap: "Tom Brady's Historical and Projected Fantasy Points by Game."
-#| fig-alt: "Tom Brady's Historical and Projected Fantasy Points by Game."
+#| fig-cap: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
+#| fig-alt: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
 
 forecast::autoplot(forecast_tomBrady) + 
   labs(
@@ -269,10 +269,92 @@ forecast::autoplot(forecast_tomBrady) +
 
 ```{r}
 #| label: fig-timeSeriesProjectionPeytonManning
-#| fig-cap: "Peyton Manning's Historical and Projected Fantasy Points by Game."
-#| fig-alt: "Peyton Manning's Historical and Projected Fantasy Points by Game."
+#| fig-cap: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
+#| fig-alt: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
 
 forecast::autoplot(forecast_peytonManning) + 
+  labs(
+    x = "Game Number",
+    y = "Fantasy Points",
+    title = "Peyton Manning's Historical and Projected Fantasy Points by Game",
+    subtitle = "(if he were to have continued playing additional seasons)"
+  ) +
+  theme_classic()
+```
+
+## Exponential Smoothing {#sec-timeSeriesExponentialSmoothing}
+
+### Fit the Exponential Smoothing Model {#sec-exponentialSmoothingModel}
+
+We fit exponential smoothing models using the `forecast::ets()` function of the `forecast` package [@R-forecast; @Hyndman2008_packages]:
+
+```{r}
+ets_tomBrady <- forecast::ets(ts_tomBrady)
+ets_peytonManning <- forecast::ets(ts_peytonManning)
+```
+
+We can generate a plot of an ARIMA model using the `stats::arima()` function.
+
+```{r}
+#| label: fig-etsTomBrady
+#| fig-cap: "Model Summary of Exponential Smoothing Model fit to Tom Brady's Historical Performance by Game."
+#| fig-alt: "Model Summary of Exponential Smoothing Model fit to Tom Brady's Historical Performance by Game."
+
+summary(ets_tomBrady)
+forecast::checkresiduals(ets_tomBrady)
+```
+
+```{r}
+#| label: fig-etsPeytonManning
+#| fig-cap: "Model Summary of Exponential Smoothing Model fit to Peyton Manning's Historical Performance by Game."
+#| fig-alt: "Model Summary of Exponential Smoothing Model fit to Peyton Manning's Historical Performance by Game."
+
+summary(ets_peytonManning)
+forecast::checkresiduals(ets_peytonManning)
+```
+
+### Generate the Model Forecasts {#sec-exponentialSmoothingForecasts}
+
+We can generate model forecasts from the ARIMA model using the `forecast::forecast()` function.
+
+```{r}
+forecastETS_tomBrady <- forecast::forecast(
+  ets_tomBrady,
+  level = c(80, 95)) # 80% and 95% confidence intervals
+
+forecastETS_peytonManning <- forecast::forecast(
+  ets_peytonManning,
+  level = c(80, 95)) # 80% and 95% confidence intervals
+
+forecastETS_tomBrady
+forecastETS_peytonManning
+```
+
+### Plot the Model Forecasts {#sec-plotExponentialSmoothingForecast}
+
+We can plot the model forecasts using the `forecast::autoplot()` function.
+
+```{r}
+#| label: fig-etsProjectionTomBrady
+#| fig-cap: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
+#| fig-alt: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
+
+forecast::autoplot(forecastETS_tomBrady) + 
+  labs(
+    x = "Game Number",
+    y = "Fantasy Points",
+    title = "Tom Brady's Historical and Projected Fantasy Points by Game",
+    subtitle = "(if he were to have continued playing additional seasons)"
+  ) +
+  theme_classic()
+```
+
+```{r}
+#| label: fig-etsProjectionPeytonManning
+#| fig-cap: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
+#| fig-alt: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
+
+forecast::autoplot(forecastETS_peytonManning) + 
   labs(
     x = "Game Number",
     y = "Fantasy Points",
