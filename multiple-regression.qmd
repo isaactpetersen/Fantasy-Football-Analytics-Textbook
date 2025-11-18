@@ -25,6 +25,7 @@ library("robustbase")
 library("ordinal")
 library("MASS")
 library("broom")
+library("rockchalk")
 library("effectsize")
 library("tidymodels")
 library("tidyverse")
@@ -146,12 +147,16 @@ The intercept is the expected value of the [outcome variable](#sec-correlational
 - $\beta$ (beta) = standardized coefficient: direction and magnitude of the estimate (standard deviation scale)
 - $SE$ = standard error: uncertainty of unstandardized estimate
 
+### Unstandardized Regression Coefficient {#sec-multipleRegressionComponentsUnstandardizedCoefficient}
+
 The unstandardized regression coefficient ($B$) is interpreted such that, for every unit change in the [predictor variable](#sec-correlationalStudy), there is a __ unit change in the [outcome variable](#sec-correlationalStudy).
 For instance, when examining the association between age and fantasy points, if the unstandardized regression coefficient is 2.3, players score on average 2.3 more points for each additional year of age.
 (In reality, we might expect a nonlinear, inverted-U-shaped association between age and fantasy points such that players tend to reach their peak in the middle of their careers.)
 Unstandardized regression coefficients are tied to the metric of the raw data.
 Thus, a large unstandardized regression coefficient for two variables may mean completely different things.
 Holding the strength of the association constant, you tend to see larger unstandardized regression coefficients for variables with smaller units and smaller unstandardized regression coefficients for variables with larger units.
+
+### Standardized Regression Coefficient {#sec-multipleRegressionComponentsStandardizedCoefficient}
 
 Standardized regression coefficients can be obtained by standardizing the variables to [*z* scores](#sec-zScores) so they all have a mean of zero and standard deviation of one.
 The standardized regression coefficient ($\beta$) is interpreted such that, for every standard deviation change in the [predictor variable](#sec-correlationalStudy), there is a __ standard deviation change in the [outcome variable](#sec-correlationalStudy).
@@ -160,12 +165,16 @@ Standardized regression coefficients—though not the case in all instances—te
 Thus, standardized regression coefficients tend to be more comparable across variables and models compared to unstandardized regression coefficients.
 In this way, standardized regression coefficients provide a meaningful index of [effect size](#sec-practicalSignificance) and can be used to identify the [predictors](#sec-correlationalStudy) with the strongest [predictive validity](#sec-predictiveValidity).
 
+### Standard Error {#sec-multipleRegressionComponentsStandardError}
+
 The *standard error* of a regression coefficient represents the imprecision or uncertainty of the parameter.
 If we have less uncertainty (i.e., more confidence) about the parameter, the standard error will be small, reflecting greater precision of the regression coefficient.
 If we have more uncertainty (i.e., less confidence) about the parameter, the standard error will be large, reflecting less precision of the regression coefficient.
 If we used the same sampling procedure repeatedly and calculated the regression coefficient each time, the true parameter in the population would fall 68% of the time within the interval of:  $[\text{model parameter estimate for the regression coefficient} \pm 1 \text{ standard error}]$.
 The standard error is related to the sample size—the larger the sample size, the smaller the standard error (the greater the precision of our estimate of the regression coefficient).
 Otherwise said, having more data gives more precise estimates and thus increases [statistical power](#sec-statisticalPower).
+
+### Confidence Interval {#sec-multipleRegressionComponentsConfidenceInterval}
 
 A *confidence interval* represents a range of plausible values such that, with repeated sampling, the true value falls within a given interval with some confidence.
 Our parameter estimate for the regression coefficient, plus or minus 1 standard error, reflects the 68% confidence interval for the coefficient.
@@ -877,6 +886,12 @@ $$ {#eq-adjustedRSquared}
 
 where $p$ is the number of [predictor variables](#sec-correlationalStudy) in the model, and $n$ is the sample size.
 
+## How Much Variance Each Predictor Explains {#sec-multipleRegressionExplainedVariancePredictors}
+
+Another estimate of [effect size](#sec-practicalSignificance) in addition to [standardized regression coefficients](#sec-multipleRegressionComponentsStandardizedCoefficient) is the squared semi-partial correlation ($sr^2$).
+The squared semi-partial correlation reflects the proportion of variance in the [outcome variable](#sec-correlationalStudy) that is uniquely explained by each [predictor variable](#sec-correlationalStudy).
+The total model $R^2$ minus the sum of all the squared semi-partial correlations reflects the proportion of variance in the [outcome variable](#sec-correlationalStudy) that is explained by the common variance among the [predictor variables](#sec-correlationalStudy).
+
 ## Overfitting {#sec-overfitting}
 
 Statistical models applied to big data (e.g., data with many [predictor variables](#sec-correlationalStudy)) can *overfit* the data, which means that the statistical model accounts for error variance, which will not generalize to future samples.
@@ -1375,6 +1390,14 @@ quadraticTermsRegressionModelStandardized <- lm(
 summary(quadraticTermsRegressionModelStandardized)
 
 print(effectsize::standardize_parameters(quadraticTermsRegressionModel, method = "refit"), digits = 2)
+```
+
+### Squared Semi-Partial Correlation ($sr^2$) {#sec-multipleRegressionSquaredSemiPartialCorrelation}
+
+To estimate the [squared semi-partial correlation](#sec-multipleRegressionExplainedVariancePredictors) ($sr^2$), we use the `rockchalk::getDeltaRsquare()` function from the `rockchalk` package [@R-rockchalk].
+
+```{r}
+rockchalk::getDeltaRsquare(linearRegressionModel)
 ```
 
 ### Dominance Analysis {#sec-multipleRegressionDominanceAnalysis}
