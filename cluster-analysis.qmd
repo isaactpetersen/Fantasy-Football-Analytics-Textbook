@@ -12,6 +12,7 @@ This chapter provides an overview of cluster analysis.
 library("petersenlab")
 library("nflreadr")
 library("mclust")
+library("tidyLPA")
 library("plotly")
 library("tidyverse")
 ```
@@ -749,6 +750,38 @@ plot(
   G = numTypesWR - 1)
 ```
 
+We can also use the `tidyLPA` package [@R-tidyLPA; @Rosenberg2018_packages], which provides an interface to the `mclust` package [@R-mclust; @Scrucca2023_packages].
+
+```{r}
+# model 1 (EEI): Equal variances and covariances fixed to 0
+# model 2 (VVI): Varying variances and covariances fixed to 0
+# model 3 (EEE): Equal variances and equal covariances
+# model 4      : Varying variances and equal covariances (not able to be fit w/ mclust but can be fit using package = "mplus", if installed)
+# model 5      : Equal variances and varying covariances (not able to be fit w/ mclust but can be fit using package = "mplus", if installed)
+# model 6 (VVV): Varying variances and varying covariances
+
+wrTypes_lpa_classes <- tidyLPA::estimate_profiles(
+  df = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  n_profiles = 1:6,
+  models = c(1, 2, 3) #c(1, 2, 3, 6) takes too long to run because of the model with varying variances and varying covariances (model 6)
+)
+
+wrTypes_lpa_classes
+
+tidyLPA::compare_solutions(
+  wrTypes_lpa_classes,
+  statistics = c("AIC", "BIC", "Entropy", "BLRT_p"))
+
+wrTypes_lpa <- tidyLPA::estimate_profiles(
+  df = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  n_profiles = numTypesWR,
+  model = 3 # equal variances and equal covariances
+)
+
+wrTypes_lpa
+tidyLPA::get_fit(wrTypes_lpa)
+```
+
 ##### *k*-Means Clustering  {#sec-clusterAnalysisNumWRtypesKmeans}
 
 ```{r}
@@ -794,6 +827,10 @@ plot(
 plot(
   clusterModelWRtypes,
   what = "density")
+```
+
+```{r}
+tidyLPA::plot_profiles(wrTypes_lpa)
 ```
 
 #### Interpreting the Clusters {#sec-clusterAnalysisInterpretationWRtypes}
@@ -853,6 +890,28 @@ Type 3 ("Deep Threat/Boom-or-Bust") WRs:
 merged_dataWRs_cluster %>% 
   filter(type == 3) %>% 
   select(display_name)
+```
+
+And here are the clusters based on the `tidyLPA` [@R-tidyLPA; @Rosenberg2018_packages] solution:
+
+```{r}
+merged_dataWRs_cluster <- cbind(
+  merged_dataWRs_cluster,
+  tidyLPA::get_data(wrTypes_lpa) %>% 
+    select(model_number, classes_number, CPROB1:Class)
+)
+
+merged_dataWRs_cluster %>% 
+  select(display_name, CPROB1:Class)
+
+merged_dataWRs_cluster %>% 
+  group_by(Class) %>% 
+  summarise(across(
+    where(is.numeric),
+    ~ mean(., na.rm = TRUE)
+    )) %>% 
+  t() %>% 
+  round(., 2)
 ```
 
 ## Conclusion {#sec-clusterAnalysisConclusion}
