@@ -27,6 +27,7 @@ library("MASS")
 library("broom")
 library("rockchalk")
 library("effectsize")
+library("yhat")
 library("tidymodels")
 library("tidyverse")
 library("knitr")
@@ -1400,6 +1401,33 @@ To estimate the [squared semi-partial correlation](#sec-multipleRegressionExplai
 rockchalk::getDeltaRsquare(linearRegressionModel)
 ```
 
+### Commonality Analysis {#sec-multipleRegressionCommonalityAnalysis}
+
+Commonality analysis decomposes the model's $R^2$ into coefficients that represent the proportion of variance accounted for uniquely by each [predictor variable](#sec-correlationalStudy) and the proportion of variance accounted for that is shared in each possible combination of the [predictor variables](#sec-correlationalStudy).
+Below we conduct a commonality analysis using the `yhat::calc.yhat()`, `yhat::commonality()`, and `yhat::commonalityCoefficients()` functions of the `yhat` package [@R-yhat].
+
+```{r}
+yhat::calc.yhat(linearRegressionModel)
+
+apsOut <- yhat::aps(
+  dataMatrix = player_stats_seasonal %>% 
+    filter(position %in% c("WR")) %>% 
+    select(fantasyPoints, age, height, weight, target_share),
+  dv = "fantasyPoints",
+  ivlist = list("age", "height", "weight", "target_share"))
+
+yhat::commonality(apsOut)
+
+commonalityAnalysis <- yhat::commonalityCoefficients(
+  dataMatrix = player_stats_seasonal %>% 
+    filter(position %in% c("WR")) %>% 
+    select(fantasyPoints, age, height, weight, target_share),
+  dv = "fantasyPoints",
+  ivlist = list("age", "height", "weight", "target_share"))
+
+commonalityAnalysis
+```
+
 ### Dominance Analysis {#sec-multipleRegressionDominanceAnalysis}
 
 We can perform a dominance analysis to evaluate the relative importance of the [predictors](#sec-correlationalStudy) in the regression model.
@@ -1407,6 +1435,12 @@ To perform the dominance analysis, we use the `parameters::dominance_analysis()`
 
 ```{r}
 parameters::dominance_analysis(linearRegressionModel)
+```
+
+We can also conduct a dominance analysis using the `yhat::dominance()` function of the `yhat` package [@R-yhat].
+
+```{r}
+yhat::dominance(apsOut)
 ```
 
 ### Visualizing Regression Results {#sec-multipleRegressionVisualizingResults}
