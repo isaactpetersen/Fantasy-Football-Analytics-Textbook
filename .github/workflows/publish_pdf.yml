@@ -28,17 +28,34 @@ jobs:
       - name: Setup pandoc
         uses: r-lib/actions/setup-pandoc@v2 # update
         
-      - name: Install libcurl on Linux
+      - name: Install system dependencies
         if: runner.os == 'Linux'
-        run: sudo apt-get update -y && sudo apt-get install -y libcurl4-openssl-dev
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libharfbuzz-dev \
+            libfribidi-dev
         
       - name: Install tinytex
         uses: r-lib/actions/setup-tinytex@v2 # update
         
-      #- name: Install additional LaTeX packages
-      #  run: |
+      - name: Install additional LaTeX packages
+        run: |
           #tlmgr install url
           #tlmgr install underscore
+          tlmgr update --self
+          tlmgr install \
+            collectbox \
+            titling \
+            framed \
+            mdframed \
+            ulem \
+            hyperref \
+            url \
+            underscore \
+            xcolor \
+            csquotes
         
       - name: Install package dependencies
         uses: r-lib/actions/setup-r-dependencies@v2 # update
