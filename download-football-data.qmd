@@ -1345,10 +1345,26 @@ Note: the following code takes a while to run.
 :::
 
 ```{r}
-#| output: false
+#| eval: false
 
 nfl_4thdown_raw <- nfl4th::load_4th_pbp(
   seasons = 2014:nflreadr::most_recent_season())
+```
+
+```{r}
+#| include: false
+
+tryCatch(
+  {
+    nfl_4thdown_raw <- nfl4th::load_4th_pbp(
+      seasons = 2014:nflreadr::most_recent_season()
+    )
+  },
+  error = function(e) { # if errors out when trying to load the data using nfl4th::load_4th_pbp()
+    message("Primary load failed; falling back to OSF version...")
+    petersenlab::robust_load("https://osf.io/download/nhcrj/")
+  }
+)
 ```
 
 ```{r}
