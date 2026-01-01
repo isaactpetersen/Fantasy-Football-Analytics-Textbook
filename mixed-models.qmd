@@ -1996,6 +1996,8 @@ performance::check_model(pointsPerSeason_positionAgeRandomLinearFixedQuadraticSl
 
 #### Generalized Additive Model {#sec-fantasyPointsByAgeExperienceModelsAgeGAM}
 
+To fit a generalized additive model, we first determine how many cores are available for multicore processing.
+
 ```{r}
 #| label: parallel-cores-mixed-models
 #| include: false
@@ -2011,10 +2013,12 @@ num_cores <- parallelly::availableCores() - 1
 num_true_cores <- parallelly::availableCores(logical = FALSE) - 1
 ```
 
+We fit a generalized additive model using the `mgcv::bam()` function of the `mgcv` package [@R-mgcv; @Wood2017].
+
 ```{r}
 #| label: gam-mixed-models
 
-pointsPerSeason_gam <- bam( # using bam() instead of gam() for faster estimation due to large size of data
+pointsPerSeason_gam <- mgcv::bam( # using bam() instead of gam() for faster estimation due to large size of data
   fantasyPoints ~ positionFactor + s(ageCentered20, by = positionFactor) + years_of_experience + s(player_idFactor, ageCentered20, bs = "re"),
   data = player_stats_seasonal_offense_subset,
   nthreads = num_cores
