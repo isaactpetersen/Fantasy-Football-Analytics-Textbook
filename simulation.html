@@ -696,7 +696,8 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 <p>Below, we perform <a href="#sec-simulationProjectedPointsBootstrapping">bootstrapping</a> and <a href="#sec-simulationProjectedPointsMonteCarlo">Monte Carlo</a> simulations of projected statistics and points. However, it is worth noting that—as for any simulation—the quality of the results depend on the quality of the inputs. In this case, the quality of the simulation depends on the quality of the projections. If the projections are no good, the simulation results will not be trustworthy. Garbage in, garbage out. As we evaluated in <a href="evaluating-prediction-accuracy.html#sec-accuracyProjections" class="quarto-xref"><span>Section 17.12</span></a>, projections tend to show moderate accuracy for fantasy performance, but they are not highly accurate. Thus, we should treat simulation results arising from fantasy projections with a good dose of skepticism.</p>
 <section id="sec-simulationProjectedPointsBootstrapping" class="level3" data-number="24.3.1"><h3 data-number="24.3.1" class="anchored" data-anchor-id="sec-simulationProjectedPointsBootstrapping">
 <span class="header-section-number">24.3.1</span> Bootstrapping</h3>
-<p>In this example, we simulate players’ likely distribution of (projected) fantasy points based on bootstrapping players’ projected statisics (e.g., passing yards, passing touchdowns). That is, for each iteration of the bootstrap, we randomly draw a projected value from a projection source (with replacement), for each of various statistical categories. For instance, assume we have 10 projection sources for Tom Brady. In iteration 1, we may draw Brady’s projected passing yards from ESPN and projected passing touchdowns from numberFire (i.e., randomly selected projection sources). In iteration 2, we may draw Brady’s projected passing yards from Yahoo and projected passing touchdowns from CBS (i.e., randomly selected projection sources). We do this for many iterations. We can compute projected fantasy points at each iteration and then summarize the distribution of fantasy points for Tom Brady (and all players) across all iterations. This bootstrap simulation is valuable because it would give us a fuller distribution of the likely range of players’ performance than just the mean (or range) of projected points across sources.</p>
+<p>In this example, we simulate players’ likely distribution of (projected) fantasy points based on bootstrapping players’ projected statistics (e.g., passing yards, passing touchdowns). That is, for each iteration of the bootstrap, we randomly draw a projected value from a projection source (with replacement), for each of various statistical categories. For instance, assume we have 10 projection sources for Tom Brady. In iteration 1, we may draw Brady’s projected passing yards from ESPN and projected passing touchdowns from numberFire (i.e., randomly selected projection sources). In iteration 2, we may draw Brady’s projected passing yards from Yahoo and projected passing touchdowns from CBS (i.e., randomly selected projection sources). We do this for many iterations. We can compute projected fantasy points at each iteration and then summarize the distribution of fantasy points for Tom Brady (and all players) across all iterations.</p>
+<p>This bootstrap simulation is valuable because it would give us a fuller distribution of the likely range of players’ performance than just the mean (or range) of projected points across sources. The simulated distribution provides information about our <a href="player-evaluation.html#sec-fantasyValueUncertainty">uncertainty</a> of a player’s performance. For instance, using these distributions, we can then sample from the simulated distribution of likely fantasy points for each player to perform a simulation to identify the most optimal lineup across the simulation runs using our <a href="draft.html#sec-lineupOptimization">lineup optimizer</a> (described in <a href="draft.html#sec-lineupOptimization" class="quarto-xref"><span>Section 7.4.2</span></a>)</p>
 <section id="sec-simulationProjectedPointsBootstrappingPrepareData" class="level4" data-number="24.3.1.1"><h4 data-number="24.3.1.1" class="anchored" data-anchor-id="sec-simulationProjectedPointsBootstrappingPrepareData">
 <span class="header-section-number">24.3.1.1</span> Prepare Data</h4>
 <div class="cell">
@@ -773,7 +774,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 </section><section id="sec-simulationProjectedPointsBootstrappingFunction" class="level4" data-number="24.3.1.2"><h4 data-number="24.3.1.2" class="anchored" data-anchor-id="sec-simulationProjectedPointsBootstrappingFunction">
 <span class="header-section-number">24.3.1.2</span> Bootstrapping Function</h4>
-<p>For performing the bootstrapping, we leverage the <code>data.table</code> <span class="citation" data-cites="R-data.table">(<a href="references.html#ref-R-data.table" role="doc-biblioref">Barrett et al., 2025</a>)</span> (<code><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html">data.table::as.data.table()</a></code>; <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html">data.table::data.table()</a></code>; <code><a href="https://rdatatable.gitlab.io/data.table/reference/rbindlist.html">data.table::rbindlist()</a></code>), <code>future</code> <span class="citation" data-cites="R-future">(<a href="references.html#ref-R-future" role="doc-biblioref">Bengtsson, 2025a</a>)</span> (<code><a href="https://future.futureverse.org/reference/plan.html">future::plan()</a></code>; <code><a href="https://future.futureverse.org/reference/multisession.html">future::multisession()</a></code>), and <code>future.apply</code> <span class="citation" data-cites="R-future.apply">(<a href="references.html#ref-R-future.apply" role="doc-biblioref">Bengtsson, 2025b</a>)</span> (<code><a href="https://future.apply.futureverse.org/reference/future_lapply.html">future.apply::future_lapply()</a></code>) packages for speed (by using parallel processing) and memory efficiency. We use the <code>progressr</code> <span class="citation" data-cites="R-progressr">(<a href="references.html#ref-R-progressr" role="doc-biblioref">Bengtsson, 2024</a>)</span> package (<code><a href="https://progressr.futureverse.org/reference/handlers.html">progressr::handlers()</a></code>; <code><a href="https://progressr.futureverse.org/reference/with_progress.html">progressr::with_progress()</a></code>; <code><a href="https://progressr.futureverse.org/reference/progressor.html">progressr::progressor()</a></code>) to create a progress bar.</p>
+<p>For performing the bootstrapping, we leverage the <code>data.table</code> <span class="citation" data-cites="R-data.table">(<a href="references.html#ref-R-data.table" role="doc-biblioref">Barrett et al., 2025</a>)</span> (<code><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html">data.table::as.data.table()</a></code>; <code><a href="https://rdrr.io/pkg/data.table/man/data.table.html">data.table::data.table()</a></code>; <code><a href="https://rdrr.io/pkg/data.table/man/rbindlist.html">data.table::rbindlist()</a></code>), <code>future</code> <span class="citation" data-cites="R-future">(<a href="references.html#ref-R-future" role="doc-biblioref">Bengtsson, 2025a</a>)</span> (<code><a href="https://future.futureverse.org/reference/plan.html">future::plan()</a></code>; <code><a href="https://future.futureverse.org/reference/multisession.html">future::multisession()</a></code>), and <code>future.apply</code> <span class="citation" data-cites="R-future.apply">(<a href="references.html#ref-R-future.apply" role="doc-biblioref">Bengtsson, 2025b</a>)</span> (<code><a href="https://future.apply.futureverse.org/reference/future_lapply.html">future.apply::future_lapply()</a></code>) packages for speed (by using parallel processing) and memory efficiency. We use the <code>progressr</code> <span class="citation" data-cites="R-progressr">(<a href="references.html#ref-R-progressr" role="doc-biblioref">Bengtsson, 2024</a>)</span> package (<code><a href="https://progressr.futureverse.org/reference/handlers.html">progressr::handlers()</a></code>; <code><a href="https://progressr.futureverse.org/reference/with_progress.html">progressr::with_progress()</a></code>; <code><a href="https://progressr.futureverse.org/reference/progressor.html">progressr::progressor()</a></code>) to create a progress bar.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>bootstrapSimulation <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
 <span id="cb5-2"><a href="#cb5-2"></a>    projectedStats,</span>
@@ -843,7 +844,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
 </div>
 </section><section id="sec-simulationProjectedPointsBootstrappingScore" class="level4" data-number="24.3.1.4"><h4 data-number="24.3.1.4" class="anchored" data-anchor-id="sec-simulationProjectedPointsBootstrappingScore">
 <span class="header-section-number">24.3.1.4</span> Score Fantasy Points from the Simulation</h4>
-<p><code><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html">data.table::setnames()</a></code></p>
+<p><code><a href="https://rdrr.io/pkg/data.table/man/setattr.html">data.table::setnames()</a></code></p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>data.table<span class="sc">::</span><span class="fu">setnames</span>(bootstappedStats, <span class="st">"iteration"</span>, <span class="st">"data_src"</span>) <span class="co"># data.table equivalent to: bootstappedStats$data_src &lt;- bootstappedStats$iteration</span></span>
 <span id="cb7-2"><a href="#cb7-2"></a></span>
@@ -1078,7 +1079,7 @@ Figure&nbsp;24.1: Distribution of Projected Fantasy Points for Patrick Mahomes f
 </div>
 </div>
 </div>
-<p>Projections of two players—one with relatively narrow uncertainty and one with relatively wide uncertainty—are depicted in <a href="#fig-bootstrapping2" class="quarto-xref">Figure&nbsp;<span>24.2</span></a>.</p>
+<p>Projections of two players—one with relatively narrow <a href="player-evaluation.html#sec-fantasyValueUncertainty">uncertainty</a> and one with relatively wide <a href="player-evaluation.html#sec-fantasyValueUncertainty">uncertainty</a>—are depicted in <a href="#fig-bootstrapping2" class="quarto-xref">Figure&nbsp;<span>24.2</span></a>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
 <span id="cb22-2"><a href="#cb22-2"></a>  <span class="at">data =</span> bootstrappedFantasyPoints <span class="sc">%&gt;%</span></span>
@@ -1593,16 +1594,16 @@ other attached packages:
  [1] lubridate_1.9.4         forcats_1.0.1           stringr_1.6.0          
  [4] dplyr_1.1.4             purrr_1.2.1             readr_2.1.6            
  [7] tidyr_1.3.2             tibble_3.3.1            ggplot2_4.0.1          
-[10] tidyverse_2.0.0         sn_2.1.1                fitdistrplus_1.2-5     
+[10] tidyverse_2.0.0         sn_2.1.2                fitdistrplus_1.2-6     
 [13] survival_3.8-3          MASS_7.3-65             SimDesign_2.22         
 [16] progressr_0.18.0        future.apply_1.20.1     future_1.69.0          
-[19] data.table_1.18.0       ffanalytics_3.1.14.0000
+[19] data.table_1.18.2.1     ffanalytics_3.1.14.0000
 
 loaded via a namespace (and not attached):
   [1] RColorBrewer_1.1-3  rstudioapi_0.18.0   audio_0.1-12       
   [4] jsonlite_2.0.0      magrittr_2.0.4      farver_2.1.2       
   [7] nloptr_2.2.1        rmarkdown_2.30      fs_1.6.6           
- [10] vctrs_0.7.0         minqa_1.2.8         base64enc_0.1-3    
+ [10] vctrs_0.7.1         minqa_1.2.8         base64enc_0.1-3    
  [13] htmltools_0.5.9     haven_2.5.5         cellranger_1.1.0   
  [16] Formula_1.2-5       parallelly_1.46.1   htmlwidgets_1.6.4  
  [19] plyr_1.8.9          testthat_3.3.2      httr2_1.2.2        
@@ -1610,7 +1611,7 @@ loaded via a namespace (and not attached):
  [25] Matrix_1.7-4        R6_2.6.1            fastmap_1.2.0      
  [28] rbibutils_2.4.1     digest_0.6.39       Exact_3.3          
  [31] numDeriv_2016.8-1.1 colorspace_2.1-2    ps_1.9.1           
- [34] Hmisc_5.2-5         labeling_0.4.3      timechange_0.3.0   
+ [34] Hmisc_5.2-5         labeling_0.4.3      timechange_0.4.0   
  [37] httr_1.4.7          compiler_4.5.2      proxy_0.4-29       
  [40] withr_3.0.2         htmlTable_2.4.3     S7_0.2.1           
  [43] backports_1.5.0     DBI_1.2.3           psych_2.5.6        
@@ -1637,7 +1638,7 @@ loaded via a namespace (and not attached):
 [106] parallel_4.5.2      lme4_1.1-38         listenv_0.10.0     
 [109] viridisLite_0.4.2   mvtnorm_1.3-3       scales_1.4.0       
 [112] e1071_1.7-17        rrapply_1.2.8       rlang_1.1.7        
-[115] rvest_1.0.5         mnormt_2.1.1       </code></pre>
+[115] rvest_1.0.5         mnormt_2.1.2       </code></pre>
 </div>
 </div>
 
