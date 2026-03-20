@@ -8,7 +8,7 @@ library("purrr")
 
 filenames <- list.files(
   path = "./data/by_year",
-  pattern = "players_projectedPoints_weekly_.*\\.RData",
+  pattern = "players_projectedPoints_weekly_.*_week.*\\.RData",
   recursive = TRUE,
   full.names = TRUE)
 
@@ -113,7 +113,7 @@ for(i in unique(filenames_season)){
   assign(objectName_projections_merged, players_projections_weekly_average_merged)
   
   # Save Merged Data
-  save(
+  save( # don't keep the (revised) saved versions from prior seasons; only keep the revised saved version from the most recent season
     list = c(objectName_projectedPoints_combined_merged, objectName_projections_merged),
     file = paste("./data/by_year/players_projectedPoints_weekly", "_", i, ".RData", sep = "")
   )
