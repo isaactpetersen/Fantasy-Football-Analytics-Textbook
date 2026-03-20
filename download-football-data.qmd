@@ -35,6 +35,7 @@ If you have difficulty downloading the data files using the `nflreadr` [@R-nflre
 This chapter extensively uses merging to process the data for later use.
 See @sec-merging for a reminder of how to perform merging, the types of merges, and what you can expect when you merge data objects with different formats.
 Guidance for how to merge the various NFL-related data files is provided by @SharpeNFLDataSets: <https://github.com/nflverse/nfldata/blob/master/DATASETS.md>.
+The update and availability schedule for `nflverse` data is available online: <https://nflreadr.nflverse.com/articles/nflverse_data_schedule.html>.
 
 ```{r}
 #| eval: false
@@ -961,6 +962,8 @@ nfl_draftPicks %>%
   head()
 ```
 
+Bo Jackson (1986, 1987) and Craig Erickson (1991, 1992) were both drafted twice because they refused to sign with the the first team that drafted them.
+
 Here are the variable names:
 
 ```{r}
@@ -1066,6 +1069,10 @@ You can download the data using the following syntax:
 nfl_depthCharts_raw <- progressr::with_progress(
   nflreadr::load_depth_charts(seasons = TRUE))
 ```
+
+Note: "Please note that the data source has changed after the 2024 season.
+From 2025 onwards, depth charts are not assigned a week. Instead, each update provides a new ISO8601-formatted timestamp that users can assign to any point in time during the season.
+Each update is appended to the existing data with a new timestamp." (<https://nflreadr.nflverse.com/articles/nflverse_data_schedule.html#depth-chart-data>).
 
 ```{r}
 #| eval: false
@@ -1457,10 +1464,20 @@ nflreadr::dictionary_participation
 You can download the data using the following syntax:
 
 ```{r}
+#| eval: false
+
 nfl_participation_raw <- progressr::with_progress(
   nflreadr::load_participation(
     seasons = 2016:nflreadr::most_recent_season(), # participation data available after each season has ended per changelog for nflreadr v1.5.0 (https://cran.r-project.org/web/packages/nflreadr/news/news.html)
     include_pbp = TRUE))
+```
+
+```{r}
+#| include: false
+
+nfl_participation_raw <- nflreadr::load_participation(
+    seasons = 2016:nflreadr::most_recent_season(), # participation data available after each season has ended per changelog for nflreadr v1.5.0 (https://cran.r-project.org/web/packages/nflreadr/news/news.html)
+    include_pbp = TRUE)
 ```
 
 ```{r}
@@ -1860,6 +1877,9 @@ You can download the data using the following syntax:
 nfl_injuries_raw <- progressr::with_progress(
   nflreadr::load_injuries(seasons = TRUE))
 ```
+
+Note: "Our data source died after the 2024 season.
+At the moment, there is no 2025 data and there is no ETA yet as to when we will be able to make injury data available again." (<https://nflreadr.nflverse.com/articles/nflverse_data_schedule.html#injury-data>).
 
 ```{r}
 #| eval: false
@@ -2539,7 +2559,15 @@ nfl_advancedStatsPFR_seasonalByTeam %>%
   head()
 ```
 
-Aggregate variables  within each pass/rush/rec/def object by team for seasonal data (so seasonal data are in player-season form, not player-season-team form).
+Let's do some additional processing:
+
+```{r}
+# Drop players with missing values for pfr_id
+nfl_advancedStatsPFR_seasonalByTeam <- nfl_advancedStatsPFR_seasonalByTeam %>% 
+  filter(!is.na(pfr_id))
+```
+
+Aggregate variables within each pass/rush/rec/def object by team for seasonal data (so seasonal data are in player-season form, not player-season-team form).
 Depending on the variable, aggregation was performed using a sum, weighted mean (weighted by the number of games played for each team), or a recomputed percentage.
 
 ```{r}
@@ -2638,6 +2666,14 @@ nfl_advancedStatsPFR_weekly %>%
   head()
 ```
 
+Let's do some additional processing:
+
+```{r}
+# Drop players with missing values for pfr_id
+nfl_advancedStatsPFR_weekly <- nfl_advancedStatsPFR_weekly %>% 
+  filter(!is.na(pfr_player_id))
+```
+
 Merge with `gsis_id` for merging with other datasets:
 
 ```{r}
@@ -2672,17 +2708,18 @@ nfl_advancedStatsPFR_weekly <- left_join(
   nfl_playerIDs %>% 
     filter(!is.na(pfr_id)) %>% 
     filter(gsis_id != "00-0039137") %>% # drop DL Byron Young, keep OLB Byron Young
-    select(pfr_id, gsis_id) %>% 
-    unique(),
+    select(pfr_id, gsis_id, position) %>% 
+    distinct(pfr_id, gsis_id, .keep_all = TRUE),
   by = "pfr_id"
-)
+) %>% 
+  rename(pos = position)
 
 # Remove distinct players who were given the same `pfr_id` (to allow merging)
 nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0035665" & nfl_advancedStatsPFR_seasonal$pos %in% c("LB","LILB","RILB"))] <- NA # drop LB David Young, keep DB David Young
-#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035665" & nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA"))] <- NA # drop LB David Young, keep DB David Young
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035665" & nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA","DET"))] <- NA # drop LB David Young, keep DB David Young
 
 nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0035292" & nfl_advancedStatsPFR_seasonal$pos %in% c("LB","LILB","RILB"))] <- NA # drop LB David Young, keep DB David Young
-nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035292" & nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA"))] <- NA # drop LB David Young, keep DB David Young
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0035292" & nfl_advancedStatsPFR_weekly$team %in% c("TEN","MIA","DET"))] <- NA # drop LB David Young, keep DB David Young
 
 nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0033894" & nfl_advancedStatsPFR_seasonal$pos == "DB")] <- NA # drop S Marcus Williams, keep DB David Young
 #nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0033894" & nfl_advancedStatsPFR_weekly$pos == "DB")] <- NA # drop S Marcus Williams
@@ -2693,8 +2730,8 @@ nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_i
 nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0037106" & nfl_advancedStatsPFR_seasonal$pos == "DB")] <- NA # drop DB Jaylon Jones, keep CB Jaylon Jones
 #nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0037106" & nfl_advancedStatsPFR_weekly$pos == "DB")] <- NA # drop DB Jaylon Jones, keep CB Jaylon Jones
 
-nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0038549" & nfl_advancedStatsPFR_seasonal$pos == "WR")] <- NA # drop WR DJ TUrner, keep CB DJ Turner
-#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" & nfl_advancedStatsPFR_weekly$pos == "WR")] <- NA # drop WR DJ TUrner, keep CB DJ Turner
+nfl_advancedStatsPFR_seasonal$gsis_id[which(nfl_advancedStatsPFR_seasonal$gsis_id == "00-0038549" & nfl_advancedStatsPFR_seasonal$pos == "WR")] <- NA # drop WR DJ Turner, keep CB DJ Turner
+#nfl_advancedStatsPFR_weekly$gsis_id[which(nfl_advancedStatsPFR_weekly$gsis_id == "00-0038549" & nfl_advancedStatsPFR_weekly$pos == "WR")] <- NA # drop WR DJ Turner, keep CB DJ Turner
 ```
 
 Now, each row of the `nfl_advancedStatsPFR_seasonal` object should be uniquely identified by the combination of `gsis_id` (or `pfr_id`), and `season`.
@@ -3076,6 +3113,8 @@ nfl_expectedFantasyPoints_rush_raw <- progressr::with_progress(
 ```
 
 ```{r}
+#| include: false
+
 nfl_expectedFantasyPoints_weekly_raw <- nflreadr::load_ff_opportunity(
   seasons = TRUE,
   stat_type = "weekly",
