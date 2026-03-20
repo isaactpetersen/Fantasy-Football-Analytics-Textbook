@@ -2,12 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.36">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Isaac T. Petersen">
 <meta name="dcterms.date" content="today">
 <title>11&nbsp; Multiple Regression – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -88,19 +91,18 @@ div.csl-indent {
 <link href="./images/logo.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-de8274a4d1ecc1e6aaeaf6e5564b5074.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-b754b9fd3853d7e56faef54c29c5d52b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-3ff4805f19b0085abba01199065d0a21.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-975e726794ce811e14261b5ab5acfd7c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-130090a4f67d5a48627557ac2cc26c52.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1618a58ca6f78f2fb92914a64c678f15.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-130090a4f67d5a48627557ac2cc26c52.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-fafb56f8ea87c1ce114865742fef950f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-db5fbeba0252bc2f00653891054101b3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-fafb56f8ea87c1ce114865742fef950f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
@@ -146,7 +148,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
     document.body.classList.add('hypothesis-enabled');
   });
 </script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
-<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
 const typesetMath = (el) => {
   if (window.MathJax) {
     // MathJax Typeset
@@ -1225,22 +1227,22 @@ Note&nbsp;11.1: Bayesian beta regression
 <pre><code> Family: zero_one_inflated_beta 
   Links: mu = logit 
 Formula: target_share ~ age + height + weight 
-   Data: newdata %&gt;% filter(position %in% c("WR")) (Number of observations: 44308) 
+   Data: newdata %&gt;% filter(position %in% c("WR")) (Number of observations: 47079) 
   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
 Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept    -2.76      0.13    -3.00    -2.51 1.00     4624     3011
-age           0.02      0.00     0.02     0.02 1.00     6163     2738
-height       -0.01      0.00    -0.01    -0.00 1.00     4842     2812
-weight        0.01      0.00     0.00     0.01 1.00     4447     3271
+Intercept    -2.75      0.12    -2.99    -2.52 1.00     4979     2954
+age           0.02      0.00     0.02     0.02 1.00     5557     2732
+height       -0.01      0.00    -0.01    -0.00 1.00     5448     2503
+weight        0.01      0.00     0.00     0.01 1.00     4841     3534
 
 Further Distributional Parameters:
     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-phi    12.24      0.09    12.07    12.40 1.00     2333     2348
-zoi     0.13      0.00     0.13     0.14 1.00     2540     2413
-coi     0.00      0.00     0.00     0.00 1.00     2114     2134
+phi    12.22      0.09    12.05    12.39 1.00     2351     2190
+zoi     0.14      0.00     0.13     0.14 1.00     2134     2415
+coi     0.00      0.00     0.00     0.00 1.00     2375     2340
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1250,7 +1252,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </details><div class="cell-output cell-output-stdout">
 <pre><code># Bayesian R2 with Compatibility Interval
 
-  Conditional R2: 0.011 (95% CI [0.009, 0.012])</code></pre>
+  Conditional R2: 0.010 (95% CI [0.009, 0.011])</code></pre>
 </div>
 </div>
 </section></section><section id="sec-assumptionsRegression" class="level2" data-number="11.5"><h2 data-number="11.5" class="anchored" data-anchor-id="sec-assumptionsRegression">
@@ -1818,7 +1820,7 @@ Figure&nbsp;11.5: Conceptual Depiction of Proportion of Variance Explained (<spa
 Table&nbsp;11.1: Example Data of Predictor (x1) and Outcome (y) Used for Regression Model.
 </figcaption><div aria-describedby="tbl-regression1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <thead><tr class="header">
 <th style="text-align: right;">y</th>
 <th style="text-align: right;">x1</th>
@@ -1855,7 +1857,7 @@ Table&nbsp;11.1: Example Data of Predictor (x1) and Outcome (y) Used for Regress
 Table&nbsp;11.2: Example Data of Predictors (x1 and x2) and Outcome (y) Used for Regression Model.
 </figcaption><div aria-describedby="tbl-regression2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <thead><tr class="header">
 <th style="text-align: right;">y</th>
 <th style="text-align: right;">x1</th>
@@ -3516,7 +3518,7 @@ Figure&nbsp;11.29: Conceptual Depiction of Multicollinearity in Multiple Regress
 Table&nbsp;11.3: Example Data of Predictors (x1 and x2) and Outcome (y) Used for Regression Model.
 </figcaption><div aria-describedby="tbl-regression3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <thead><tr class="header">
 <th style="text-align: right;">y</th>
 <th style="text-align: right;">x1</th>
@@ -3672,7 +3674,7 @@ R-Square:
 </div>
 </section><section id="sec-multipleRegressionMultipleImputation" class="level3" data-number="11.13.2"><h3 data-number="11.13.2" class="anchored" data-anchor-id="sec-multipleRegressionMultipleImputation">
 <span class="header-section-number">11.13.2</span> Multiple Imputation</h3>
-<p>Multiple imputation takes a data set with missingness and it uses available information on other variables to estimate what likely values could have been for the missing value. It repeats the imputation multiple times, so there are multiple imputed data sets, which can give a sense of the degree of uncertainty of each imputed value. The model is then fit to each of the multiply imputed data sets separately, and the results are combined. We can multiply impute data using the <code>mice</code> package <span class="citation" data-cites="vanBuuren2011_packages R-mice">(<a href="references.html#ref-vanBuuren2011_packages" role="doc-biblioref">van Buuren &amp; Groothuis-Oudshoorn, 2011</a>, <a href="references.html#ref-R-mice" role="doc-biblioref">2024</a>)</span>.</p>
+<p>Multiple imputation takes a data set with missingness and it uses available information on other variables to estimate what likely values could have been for the missing value. It repeats the imputation multiple times, so there are multiple imputed data sets, which can give a sense of the degree of uncertainty of each imputed value. The model is then fit to each of the multiply imputed data sets separately, and the results are combined. We can multiply impute data using the <code>mice</code> package <span class="citation" data-cites="vanBuuren2011_packages R-mice">(<a href="references.html#ref-vanBuuren2011_packages" role="doc-biblioref"><span class="nocase">van Buuren &amp; Groothuis-Oudshoorn</span>, 2011</a>, <a href="references.html#ref-R-mice" role="doc-biblioref">2024</a>)</span>.</p>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb130"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1"></a>numImputations <span class="ot">&lt;-</span> <span class="dv">5</span></span>
 <span id="cb130-2"><a href="#cb130-2"></a></span>
@@ -4711,7 +4713,7 @@ loaded via a namespace (and not attached):
  [61] codetools_0.2-20      pan_1.9               glue_1.8.0           
  [64] V8_8.0.1              data.table_1.18.2.1   vctrs_0.7.1          
  [67] Rdpack_2.6.6          cellranger_1.1.0      gtable_0.3.6         
- [70] datawizard_1.3.0      gower_1.0.2           xfun_0.56            
+ [70] datawizard_1.3.0      gower_1.0.2           xfun_0.57            
  [73] openxlsx_4.2.8.1      rbibutils_2.4.1       prodlim_2026.03.11   
  [76] coda_0.19-4.1         reformulas_0.4.4      survival_3.8-6       
  [79] timeDate_4052.112     iterators_1.0.14      hardhat_1.4.2        
@@ -4845,10 +4847,10 @@ Rosseel, Y., Jorgensen, T. D., &amp; De Wilde, L. (2024). <em><span class="nocas
 Todorov, V., &amp; Filzmoser, P. (2009). An object-oriented framework for robust multivariate analysis. <em>Journal of Statistical Software</em>, <em>32</em>(3), 1–47. <a href="https://doi.org/10.18637/jss.v032.i03">https://doi.org/10.18637/jss.v032.i03</a>
 </div>
 <div id="ref-vanBuuren2011_packages" class="csl-entry" role="listitem">
-van Buuren, S., &amp; Groothuis-Oudshoorn, K. (2011). <span class="nocase">mice</span>: Multivariate imputation by chained equations in <span>R</span>. <em>Journal of Statistical Software</em>, <em>45</em>(3), 1–67. <a href="https://doi.org/10.18637/jss.v045.i03">https://doi.org/10.18637/jss.v045.i03</a>
+<span class="nocase">van Buuren, S., &amp; Groothuis-Oudshoorn, K.</span> (2011). <span class="nocase">mice</span>: Multivariate imputation by chained equations in <span>R</span>. <em>Journal of Statistical Software</em>, <em>45</em>(3), 1–67. <a href="https://doi.org/10.18637/jss.v045.i03">https://doi.org/10.18637/jss.v045.i03</a>
 </div>
 <div id="ref-R-mice" class="csl-entry" role="listitem">
-van Buuren, S., &amp; Groothuis-Oudshoorn, K. (2024). <em><span class="nocase">mice</span>: Multivariate imputation by chained equations</em>. <a href="https://doi.org/10.32614/CRAN.package.mice">https://doi.org/10.32614/CRAN.package.mice</a>
+<span class="nocase">van Buuren, S., &amp; Groothuis-Oudshoorn, K.</span> (2024). <em><span class="nocase">mice</span>: Multivariate imputation by chained equations</em>. <a href="https://doi.org/10.32614/CRAN.package.mice">https://doi.org/10.32614/CRAN.package.mice</a>
 </div>
 </div>
 </section></main><!-- /main --><h3>Feedback</h3>
