@@ -439,6 +439,8 @@ Component-plus-residual plots depict partial residuals on the y-axis as a functi
 
 Examples of linear and nonlinear associations are depicted with [scatterplots](#sec-scatterplot) in @fig-linearNonlinearAssociations.
 
+::: {.content-visible when-format="html"}
+
 ```{r}
 #| layout-ncol: 2
 #| label: fig-linearNonlinearAssociations
@@ -500,6 +502,70 @@ lines(
   lwd = 2,
   col = "blue")
 ```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{r}
+#| label: fig-linearNonlinearAssociations
+#| fig-cap: "Example Associations Depicted With Scatterplots."
+#| fig-alt: "Example Associations Depicted With Scatterplots."
+#| code-fold: true
+
+set.seed(52242)
+
+sampleSize <- 1000
+quadraticX <- runif(
+  sampleSize,
+  min = -4,
+  max = 4)
+linearY <- quadraticX + rnorm(sampleSize, mean = 0, sd = 0.5)
+quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
+quadraticData <- cbind(quadraticX, quadraticY) %>%
+  data.frame %>%
+  arrange(quadraticX)
+
+quadraticModel <- lm(
+  quadraticY ~ quadraticX + I(quadraticX ^ 2),
+  data = quadraticData)
+
+quadraticNewData <- data.frame(
+  quadraticX = seq(
+    from = min(quadraticData$quadraticX),
+    to = max(quadraticData$quadraticY),
+    length.out = sampleSize))
+
+quadraticNewData$quadraticY <- predict(
+  quadraticModel,
+  newdata = quadraticNewData)
+
+plot(
+  x = quadraticX,
+  y = linearY,
+  xlab = "",
+  ylab = "",
+  main = "Linear Association")
+
+abline(
+  lm(linearY ~ quadraticX),
+  lwd = 2,
+  col = "blue")
+
+plot(
+  x = quadraticData$quadraticX,
+  y = quadraticData$quadraticY,
+  xlab = "",
+  ylab = "",
+  main = "Nonlinear Association")
+
+lines(
+  quadraticNewData$quadraticY ~ quadraticNewData$quadraticX,
+  lwd = 2,
+  col = "blue")
+```
+
+:::
 
 If the shape of the association is nonlinear (as indicated by any of these plots), various approaches may be necessary such as including nonlinear terms (e.g., polynomial terms such as quadratic, cubic, quartic, or higher-degree terms), transforming the [predictors](#sec-correlationalStudy) (e.g., log, square root, inverse, exponential, Box-Cox, Yeo-Johnson transform), use of splines/piecewise regression, and generalized additive models.
 
@@ -679,6 +745,8 @@ Researchers tend to be more concerned about the tails of the distribution, becau
 Various examples of QQ plots and deviations from normality are depicted in @fig-distributionQQplots.
 If the residuals are normally distributed, they will stay close to the diagonal reference line of the QQ and PP plots.
 
+::: {.content-visible when-format="html"}
+
 ```{r}
 #| layout-ncol: 2
 #| label: fig-distributionQQplots
@@ -797,6 +865,117 @@ car::qqPlot(
   main = "QQ Plot",
   id = FALSE)
 ```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{r}
+#| label: fig-distributionQQplots
+#| fig-cap: "Quantile–Quantile (QQ) Plots of Various Distributions (Right Side) with the Histogram of the Associated Distribution (Left Side)."
+#| fig-alt: "Quantile–Quantile (QQ) Plots of Various Distributions (Right Side) with the Histogram of the Associated Distribution (Left Side)."
+#| code-fold: true
+
+set.seed(52242)
+
+sampleSize <- 10000
+
+distribution_normal <- rnorm(
+  sampleSize,
+  mean = 0,
+  sd = 1)
+
+distribution_bimodal <- c(
+  rnorm(
+    sampleSize/2,
+    mean = -2,
+    sd = 1),
+  rnorm(
+    sampleSize/2,
+    mean = 2,
+    sd = 1))
+
+distribution_negativeSkew <- -rlnorm(
+  sampleSize,
+  meanlog = 0,
+  sdlog = 1)
+
+distribution_positiveSkew <- rlnorm(
+  sampleSize,
+  meanlog = 0,
+  sdlog = 1)
+
+distribution_lightTailed <- runif(
+  sampleSize,
+  min = -2,
+  max = 2)
+
+distribution_heavyTailed <- rt(
+  sampleSize,
+  df = 2)
+
+hist(
+  distribution_normal,
+  main = "Normal Distribution",
+  col = "#0099F8")
+
+car::qqPlot(
+  distribution_normal,
+  main = "QQ Plot",
+  id = FALSE)
+
+hist(
+  distribution_bimodal,
+  main = "Bimodal Distribution",
+  col = "#0099F8")
+
+car::qqPlot(
+  distribution_bimodal,
+  main = "QQ Plot",
+  id = FALSE)
+
+hist(
+  distribution_negativeSkew,
+  main = "Negatively Skewed Distribution",
+  col = "#0099F8")
+
+car::qqPlot(
+  distribution_negativeSkew,
+  main = "QQ Plot",
+  id = FALSE)
+
+hist(
+  distribution_positiveSkew,
+  main = "Positively Skewed Distribution",
+  col = "#0099F8")
+
+car::qqPlot(
+  distribution_positiveSkew,
+  main = "QQ Plot",
+  id = FALSE)
+
+hist(
+  distribution_lightTailed,
+  main = "Platykurtic (Light Tailed) Distribution",
+  col = "#0099F8")
+
+car::qqPlot(
+  distribution_lightTailed,
+  main = "QQ Plot",
+  id = FALSE)
+
+hist(
+  distribution_heavyTailed,
+  main = "Leptokurtic (Heavy Tailed) Distribution",
+  col = "#0099F8")
+
+car::qqPlot(
+  distribution_heavyTailed,
+  main = "QQ Plot",
+  id = FALSE)
+```
+
+:::
 
 If the residuals are not normally distributed (i.e., they do not stay close to the diagonal reference line of the QQ and PP plots), it may be necessary to transform the [outcome variable](#sec-correlationalStudy) to be more normally distributed or to use a generalized linear model (GLM) that more closely matches the distribution of the [outcome variable](#sec-correlationalStudy) (e.g., Poisson, binomial, gamma).
 
@@ -1203,6 +1382,8 @@ ggplot2::ggplot(
 
 Then, let's examine the bivariate association of each using a [scatterplot](#sec-scatterplot) to evaluate for any potential nonlinearity, as depicted in @fig-scatterplots.
 
+::: {.content-visible when-format="html"}
+
 ```{r}
 #| layout-ncol: 2
 #| label: fig-scatterplots
@@ -1298,6 +1479,102 @@ ggplot2::ggplot(
   ) +
   theme_classic()
 ```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+```{r}
+#| label: fig-scatterplots
+#| fig-cap: "Scatterplots With Fantasy Points (Season) Among Wide Receivers. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+#| fig-alt: "Scatterplots With Fantasy Points (Season) Among Wide Receivers. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = age,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Age (Years)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Age",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = height,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Height (Inches)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Height",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = weight,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Player Weight (Pounds)",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Player Weight",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+
+ggplot2::ggplot(
+  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  aes(
+    x = target_share,
+    y = fantasyPoints)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(
+    method = "lm",
+    color = "black") +
+  geom_smooth() +
+  coord_cartesian(
+    ylim = c(0,NA),
+    expand = FALSE) +
+  labs(
+    x = "Target Share",
+    y = "Fantasy Points (Season)",
+    title = "Fantasy Points (Season) by Target Share",
+    subtitle = "(Among Wide Receivers)"
+  ) +
+  theme_classic()
+```
+
+:::
 
 There are some suggestions of potential nonlinearity, such as an inverted-U-shaped association between height and fantasy points, suggesting that there may an optimal range for height among Wide Receivers—being too short or too tall could be a disadvantage.
 In addition, target share shows a weakening association as target share increases.
