@@ -223,7 +223,7 @@ We fit a linear regression model using the `stats::lm()` function.
 
 linearRegression <- lm(
   fantasyPoints ~ age + height + weight + target_share,
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -240,7 +240,7 @@ To calculate the model $R^2$, we use the `performance::r2()` function of the `pe
 ```{r}
 #| label: logistic-regression
 
-newdata <- player_stats_weekly %>%
+newdata <- player_stats_weekly |>
   mutate( # create a binary variable to be used as the outcome variable
     receiving_td = case_when(
       is.na(receiving_tds) ~ NA_real_, # keep NA
@@ -251,7 +251,7 @@ newdata <- player_stats_weekly %>%
 
 logisticRegression <- glm(
   receiving_td ~ age + height + weight + target_share,
-  data = newdata %>% filter(position %in% c("WR")),
+  data = newdata |> filter(position %in% c("WR")),
   family = binomial(),
   na.action = "na.exclude"
 )
@@ -279,7 +279,7 @@ table(newdata$receiving_tdsFactor)
 
 ordinalRegression <- ordinal::clm(
   receiving_tdsFactor ~ age + height + target_share,
-  data = newdata %>% filter(position %in% c("WR")),
+  data = newdata |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -302,7 +302,7 @@ We fit a Poisson regression model using the `stats::glm()` function and specifyi
 
 poissonRegression <- glm(
   receiving_tds ~ age + height + weight + target_share,
-  data = newdata %>% filter(position %in% c("WR")),
+  data = newdata |> filter(position %in% c("WR")),
   family = poisson(),
   na.action = na.exclude
 )
@@ -326,7 +326,7 @@ We fit a negative binomial regression model using the `MASS::glm.nb()` function 
 
 negativeBinomialRegression <- MASS::glm.nb(
   receiving_tds ~ age + height + weight + target_share,
-  data = newdata %>% filter(position %in% c("WR")),
+  data = newdata |> filter(position %in% c("WR")),
   na.action = na.exclude,
   control = glm.control(maxit = 10000)
 )
@@ -363,7 +363,7 @@ load(url("https://osf.io/download/fe37j/"))
 
 betaRegression <- brms::brm(
   formula = target_share ~ age + height + weight,
-  data = newdata %>% filter(position %in% c("WR")),
+  data = newdata |> filter(position %in% c("WR")),
   family = zero_one_inflated_beta(),
   cores = 4,
   threads = threading(parallelly::availableCores()),
@@ -460,8 +460,8 @@ quadraticX <- runif(
   max = 4)
 linearY <- quadraticX + rnorm(sampleSize, mean = 0, sd = 0.5)
 quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
-quadraticData <- cbind(quadraticX, quadraticY) %>%
-  data.frame %>%
+quadraticData <- cbind(quadraticX, quadraticY) |>
+  data.frame |>
   arrange(quadraticX)
 
 quadraticModel <- lm(
@@ -524,8 +524,8 @@ quadraticX <- runif(
   max = 4)
 linearY <- quadraticX + rnorm(sampleSize, mean = 0, sd = 0.5)
 quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
-quadraticData <- cbind(quadraticX, quadraticY) %>%
-  data.frame %>%
+quadraticData <- cbind(quadraticX, quadraticY) |>
+  data.frame |>
   arrange(quadraticX)
 
 quadraticModel <- lm(
@@ -1131,8 +1131,8 @@ set.seed(52242)
 sampleSize <- 200
 quadraticX <- rnorm(sampleSize)
 quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
-quadraticData <- cbind(quadraticX, quadraticY) %>%
-  data.frame %>%
+quadraticData <- cbind(quadraticX, quadraticY) |>
+  data.frame |>
   arrange(quadraticX)
 
 quadraticModel <- lm(
@@ -1215,8 +1215,8 @@ We have only a few [predictors](#sec-correlationalStudy) and our sample size is 
 Let's first examine [descriptive statistics](#sec-descriptiveStatistics) of the [predictor](#sec-correlationalStudy) and [outcome](#sec-correlationalStudy) variables.
 
 ```{r}
-player_stats_seasonal %>% 
-  dplyr::select(fantasyPoints, age, height, weight, target_share) %>% 
+player_stats_seasonal |> 
+  dplyr::select(fantasyPoints, age, height, weight, target_share) |> 
   dplyr::summarise(across(
       everything(),
       .fns = list(
@@ -1234,11 +1234,11 @@ player_stats_seasonal %>%
         mode = ~ petersenlab::Mode(., multipleModes = "mean"),
         skewness = ~ psych::skew(., na.rm = TRUE),
         kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
-      .names = "{.col}.{.fn}")) %>%
+      .names = "{.col}.{.fn}")) |>
     tidyr::pivot_longer(
       cols = everything(),
       names_to = c("variable","index"),
-      names_sep = "\\.") %>% 
+      names_sep = "\\.") |> 
     tidyr::pivot_wider(
       names_from = index,
       values_from = value)
@@ -1259,7 +1259,7 @@ Let's also examine the distributions of the variables using a [density plot](#se
 #|   - "Target Share"
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>%
+  data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
     x = fantasyPoints)
@@ -1284,7 +1284,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>%
+  data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
     x = age)
@@ -1309,7 +1309,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>%
+  data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
     x = height)
@@ -1334,7 +1334,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>%
+  data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
     x = weight)
@@ -1359,7 +1359,7 @@ ggplot2::ggplot(
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>%
+  data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
     x = target_share)
@@ -1402,7 +1402,7 @@ Then, let's examine the bivariate association of each using a [scatterplot](#sec
 #|   - "Target Share"
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = age,
     y = fantasyPoints)) +
@@ -1423,7 +1423,7 @@ ggplot2::ggplot(
   theme_classic()
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = height,
     y = fantasyPoints)) +
@@ -1444,7 +1444,7 @@ ggplot2::ggplot(
   theme_classic()
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = weight,
     y = fantasyPoints)) +
@@ -1465,7 +1465,7 @@ ggplot2::ggplot(
   theme_classic()
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = target_share,
     y = fantasyPoints)) +
@@ -1498,7 +1498,7 @@ Then, let's examine the bivariate association of each using a [scatterplot](#sec
 #| fig-alt: "Scatterplots With Fantasy Points (Season) Among Wide Receivers. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = age,
     y = fantasyPoints)) +
@@ -1519,7 +1519,7 @@ ggplot2::ggplot(
   theme_classic()
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = height,
     y = fantasyPoints)) +
@@ -1540,7 +1540,7 @@ ggplot2::ggplot(
   theme_classic()
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = weight,
     y = fantasyPoints)) +
@@ -1561,7 +1561,7 @@ ggplot2::ggplot(
   theme_classic()
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = target_share,
     y = fantasyPoints)) +
@@ -1595,7 +1595,7 @@ Now that we have examined [descriptive statistics](#sec-descriptiveStatistics) a
 ```{r}
 linearRegressionModel <- lm(
   fantasyPoints ~ age + height + weight + target_share,
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 ```
@@ -1659,7 +1659,7 @@ Or, we can standardize the [outcome variable](#sec-correlationalStudy) and each 
 ```{r}
 linearRegressionModelStandardized <- lm(
   scale(fantasyPoints) ~ scale(age) + scale(height) + scale(weight) + scale(target_share),
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -1676,7 +1676,7 @@ Now let's consider whether any of the terms show curvilinear associations with f
 ```{r}
 quadraticTermsRegressionModel <- lm(
   fantasyPoints ~ age + I(age^2) + height + I(height^2) + weight + I(weight^2) + target_share + I(target_share^2),
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 ```
@@ -1707,7 +1707,7 @@ print(effectsize::standardize_parameters(quadraticTermsRegressionModel, method =
 ```{r}
 quadraticTermsRegressionModelStandardized <- lm(
   scale(fantasyPoints) ~ scale(age) + scale(I(age^2)) + scale(height) + scale(I(height^2)) + scale(weight) + scale(I(weight^2)) + scale(target_share) + scale(I(target_share^2)),
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -1733,8 +1733,8 @@ Below we conduct a commonality analysis using the `yhat::calc.yhat()`, `yhat::co
 yhat::calc.yhat(linearRegressionModel)
 
 apsOut <- yhat::aps(
-  dataMatrix = player_stats_seasonal %>% 
-    filter(position %in% c("WR")) %>% 
+  dataMatrix = player_stats_seasonal |> 
+    filter(position %in% c("WR")) |> 
     select(fantasyPoints, age, height, weight, target_share),
   dv = "fantasyPoints",
   ivlist = list("age", "height", "weight", "target_share"))
@@ -1742,8 +1742,8 @@ apsOut <- yhat::aps(
 yhat::commonality(apsOut)
 
 commonalityAnalysis <- yhat::commonalityCoefficients(
-  dataMatrix = player_stats_seasonal %>% 
-    filter(position %in% c("WR")) %>% 
+  dataMatrix = player_stats_seasonal |> 
+    filter(position %in% c("WR")) |> 
     select(fantasyPoints, age, height, weight, target_share),
   dv = "fantasyPoints",
   ivlist = list("age", "height", "weight", "target_share"))
@@ -2042,7 +2042,7 @@ Now we can re-fit the model with the log-transformed variable.
 ```{r}
 linearRegressionModel_logTargetShare <- lm(
   fantasyPoints ~ age + I(age^2) + height + I(height^2) + weight + I(weight^2) + I(log(target_share + 1)),
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -2177,7 +2177,7 @@ Now we can refit the model.
 ```{r}
 linearRegressionModel_outcomeTransformed <- lm(
   fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -2350,8 +2350,8 @@ We can estimate a regression model that uses pairwise deletion using the `lavaan
 ```{r}
 player_stats_seasonal$target_share_log <- log(player_stats_seasonal$target_share + 1)
 
-modelData <- player_stats_seasonal %>% 
-  filter(position %in% c("WR")) %>% 
+modelData <- player_stats_seasonal |> 
+  filter(position %in% c("WR")) |> 
   select(fantasyPoints_transformed, age, height, weight, target_share_log)
 
 numObs <- sum(complete.cases(modelData))
@@ -2387,13 +2387,13 @@ We can multiply impute data using the `mice` package [@vanBuuren2011_packages; @
 ```{r}
 numImputations <- 5
 
-dataToImpute <- player_stats_seasonal %>% 
-  filter(position %in% c("WR")) %>% 
-  select(player_id, position, where(is.numeric)) %>% 
+dataToImpute <- player_stats_seasonal |> 
+  filter(position %in% c("WR")) |> 
+  select(player_id, position, where(is.numeric)) |> 
   select(
     player_id:games, carries:wopr, fantasy_points, fantasy_points_ppr,
     rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,
-    rush_100_yds:draft_round, height:target_share_log) %>% 
+    rush_100_yds:draft_round, height:target_share_log) |> 
   select(-c(fantasy_points_ppr, ageCentered20, target_share_log)) # drop collinear variables
 
 predictors <- c("targets","receiving_yards","receiving_air_yards","receiving_yards_after_catch","receiving_first_downs","racr")
@@ -2523,7 +2523,7 @@ fimlRegression_syntax <- '
 
 fimlRegression_fit <- lavaan::sem(
   fimlRegression_syntax,
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   missing = "ML",
   fixed_x = FALSE
 )
@@ -2545,8 +2545,8 @@ In @sec-mixedModels, we discuss [mixed model](#sec-mixedModels) approaches that 
 Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors with the `rms` package [@R-rms].
 
 ```{r}
-player_stats_seasonal_subset <- player_stats_seasonal %>% 
-  filter(!is.na(player_id)) %>% 
+player_stats_seasonal_subset <- player_stats_seasonal |> 
+  filter(!is.na(player_id)) |> 
   filter(position %in% c("WR"))
 
 regressionWithClusterVariable <- rms::robcov(rms::ols(
@@ -2572,7 +2572,7 @@ One approach is to use an MM-type estimator, such as is used in the `robustbase:
 ```{r}
 robustRegression <- robustbase::lmrob(
   fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
-  data = player_stats_seasonal %>% filter(position %in% c("WR"))
+  data = player_stats_seasonal |> filter(position %in% c("WR"))
 )
 
 summary(robustRegression)
@@ -2589,7 +2589,7 @@ bootstrapSamples <- 2000
 
 # Create bootstrap resamples (with apparent = TRUE)
 boots <- rsample::bootstraps(
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   times = bootstrapSamples,
   apparent = TRUE
 )
@@ -2597,17 +2597,17 @@ boots <- rsample::bootstraps(
 # Define recipe
 rec <- recipes::recipe(
   fantasyPoints_transformed ~ age + height + weight + target_share,
-  data = player_stats_seasonal %>% filter(position %in% c("WR"))
-) %>%
+  data = player_stats_seasonal |> filter(position %in% c("WR"))
+) |>
   recipes::step_log(target_share, offset = 1) # replace I(log(target_share + 1))
 
 # Define model spec and workflow
-lm_spec <- parsnip::linear_reg() %>%
-  parsnip::set_engine("lm") %>%
+lm_spec <- parsnip::linear_reg() |>
+  parsnip::set_engine("lm") |>
   parsnip::set_mode("regression")
 
-lm_workflow <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+lm_workflow <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(lm_spec)
 
 # Function for fitting the models on the bootstrap samples
@@ -2618,11 +2618,11 @@ fit_lm <- function(split, ...) {
 }
 
 # Fit bootstrap models and save results
-boot_models <- boots %>%
+boot_models <- boots |>
   mutate(coef_info = purrr::map(splits, fit_lm))
 
 # Extract bootstrapped coefficient estimates
-boot_coefs <- boot_models %>%
+boot_coefs <- boot_models |>
   tidyr::unnest(coef_info)
 
 # Percentile confidence intervals
@@ -2705,7 +2705,7 @@ Then, we fit the moderated multiple regression model:
 ```{r}
 moderationModel <- lm(
   fantasyPoints_transformed ~ height_centered + weight_centered + height_centered:weight_centered,
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -2719,7 +2719,7 @@ This model is equivalent to the model that includes the interaction term explici
 
 moderationModel <- lm(
   fantasyPoints_transformed ~ height_centered + weight_centered + heightXweight,
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
@@ -2820,7 +2820,7 @@ Typically, we would obtain bootstrapped estimates from 10,000 bootstrap draws, b
 ```{r}
 mediationFit <- lavaan::sem(
   mediationModel,
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   se = "bootstrap",
   bootstrap = 1000, # generally use 10,000 bootstrap draws; this example uses 1,000 for speed
   parallel = "multicore", # parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC
@@ -2871,7 +2871,7 @@ multipleMediatorModel <- '
 ```{r}
 multipleMediatorFit <- lavaan::sem(
   multipleMediatorModel,
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   se = "bootstrap",
   bootstrap = 1000, # generally use 10,000 bootstrap draws; this example uses 1,000 for speed
   parallel = "multicore", # parallelization for speed: use "multicore" for Mac/Linux; "snow" for PC
@@ -2898,7 +2898,7 @@ summary(
 
 bayesianMultipleRegressionModel <- brm(
   formula = fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
-  data = player_stats_seasonal %>% filter(position %in% c("WR")),
+  data = player_stats_seasonal |> filter(position %in% c("WR")),
   family = gaussian()
 )
 ```

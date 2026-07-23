@@ -218,7 +218,7 @@ The crossover point, where the positive values becomes negative might indicate, 
 Regardless, the form/shape/steepness of the decline is still potentially meaningful even if the precise negative number at a given age is not.
 
 ```{r}
-player_stats_seasonal_offense_subset <- player_stats_seasonal %>% 
+player_stats_seasonal_offense_subset <- player_stats_seasonal |> 
   dplyr::filter(position_group %in% c("QB","RB","WR","TE") | position %in% c("K"))
 
 player_stats_seasonal_offense_subset$position[which(player_stats_seasonal_offense_subset$position == "HB")] <- "RB"
@@ -233,12 +233,12 @@ player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seaso
 
 for(i in unique(nfl_depthCharts$season)){
   print(i)
-  nfl_depthCharts %>%
-    filter(season == i) %>% 
-    select(week) %>% 
-    arrange(week) %>% 
-    unique() %>% 
-    pull() %>% 
+  nfl_depthCharts |>
+    filter(season == i) |> 
+    select(week) |> 
+    arrange(week) |> 
+    unique() |> 
+    pull() |> 
     print()
 }
 ```
@@ -247,28 +247,28 @@ for(i in unique(nfl_depthCharts$season)){
 seasons17week <- 2001:2020
 seasons18week <- 2021:max(nfl_depthCharts$season, na.rm = TRUE)
 
-endOfSeasonDepthCharts <- nfl_depthCharts %>% 
+endOfSeasonDepthCharts <- nfl_depthCharts |> 
   filter((season %in% seasons17week & week == 18) | (season %in% seasons18week & week == 19)) # get end-of-season depth charts
 
-qb1s <- endOfSeasonDepthCharts %>% 
+qb1s <- endOfSeasonDepthCharts |> 
   filter(position == "QB", depth_team == 1)
 
-fb1s <- endOfSeasonDepthCharts %>% 
+fb1s <- endOfSeasonDepthCharts |> 
   filter(position == "FB", depth_team == 1)
 
-k1s <- endOfSeasonDepthCharts %>% 
+k1s <- endOfSeasonDepthCharts |> 
   filter(position == "K", depth_team == 1)
 
-rb1s <- endOfSeasonDepthCharts %>% 
+rb1s <- endOfSeasonDepthCharts |> 
   filter(position == "RB", depth_team == 1)
 
-wr1s <- endOfSeasonDepthCharts %>% 
+wr1s <- endOfSeasonDepthCharts |> 
   filter(position == "WR", depth_team == 1)
 
-te1s <- endOfSeasonDepthCharts %>% 
+te1s <- endOfSeasonDepthCharts |> 
   filter(position == "TE", depth_team == 1)
 
-player_stats_seasonal_offense_subsetDepth <- player_stats_seasonal_offense_subset %>% 
+player_stats_seasonal_offense_subsetDepth <- player_stats_seasonal_offense_subset |> 
   filter(player_id %in% c(
     qb1s$gsis_id,
     fb1s$gsis_id,
@@ -296,7 +296,7 @@ pointsPerSeason_positionAge_newData$years_of_experience[which(pointsPerSeason_po
 Create an object with complete cases for generating the plots of individuals' model-implied fantasy points by age and position:
 
 ```{r}
-player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset %>%
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset |>
   filter(
     !is.na(player_idFactor),
     !is.na(fantasyPoints),
@@ -322,8 +322,8 @@ A [scatterplot](#sec-scatterplot) of Quarterbacks' fantasy points by age is in @
 #| code-fold: true
 
 plot_scatterplotFantasyPointsByAgeQB <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "QB") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "QB") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -362,7 +362,7 @@ Based on the [scatterplot](#sec-scatterplot) (and the bivariate association belo
 ```{r}
 cor.test(
   formula = ~ age + fantasyPoints,
-  data = player_stats_seasonal_offense_subset %>% filter(position == "QB")
+  data = player_stats_seasonal_offense_subset |> filter(position == "QB")
 )
 ```
 
@@ -377,8 +377,8 @@ A [scatterplot](#sec-scatterplot) of Fullbacks' fantasy points by age is in @fig
 #| code-fold: true
 
 plot_scatterplotFantasyPointsByAgeFB <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "FB") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "FB") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -425,8 +425,8 @@ A [scatterplot](#sec-scatterplot) of Running Backs' fantasy points by age is in 
 #| code-fold: true
 
 plot_scatterplotFantasyPointsByAgeRB <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "RB") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "RB") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -473,8 +473,8 @@ A [scatterplot](#sec-scatterplot) of Wide Receivers' fantasy points by age is in
 #| code-fold: true
 
 plot_scatterplotFantasyPointsByAgeWR <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "WR") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "WR") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -521,8 +521,8 @@ A [scatterplot](#sec-scatterplot) of Tight Ends' fantasy points by age is in @fi
 #| code-fold: true
 
 plot_scatterplotFantasyPointsByAgeTE <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "TE") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "TE") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -561,7 +561,7 @@ Based on the [scatterplot](#sec-scatterplot) (and the bivariate association belo
 ```{r}
 cor.test(
   formula = ~ age + fantasyPoints,
-  data = player_stats_seasonal_offense_subset %>% filter(position == "TE")
+  data = player_stats_seasonal_offense_subset |> filter(position == "TE")
 )
 ```
 
@@ -590,8 +590,8 @@ A plot of Quarterbacks' raw fantasy points data by age is in @fig-rawFantasyPoin
 #| code-fold: true
 
 plot_rawFantasyPointsByAgeQB <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "QB") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "QB") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -630,8 +630,8 @@ A plot of Fullbacks' raw fantasy points data by age is in @fig-rawFantasyPointsB
 #| code-fold: true
 
 plot_rawFantasyPointsByAgeFB <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "FB") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "FB") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -670,8 +670,8 @@ A plot of Running Backs' raw fantasy points data by age is in @fig-rawFantasyPoi
 #| code-fold: true
 
 plot_rawFantasyPointsByAgeRB <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "RB") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "RB") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -710,8 +710,8 @@ A plot of Wide Receivers' raw fantasy points data by age is in @fig-rawFantasyPo
 #| code-fold: true
 
 plot_rawFantasyPointsByAgeWR <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "WR") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "WR") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -750,8 +750,8 @@ A plot of Tight Ends' raw fantasy points data by age is in @fig-rawFantasyPoints
 #| code-fold: true
 
 plot_rawFantasyPointsByAgeTE <- ggplot(
-  data = player_stats_seasonal_offense_subset %>% 
-    filter(position == "TE") %>% 
+  data = player_stats_seasonal_offense_subset |> 
+    filter(position == "TE") |> 
     mutate(
       age = round(age, 2),
       fantasyPoints = round(fantasyPoints, 2)
@@ -1050,7 +1050,7 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomIntercepts <- predict
 )
 
 plot_individualFantasyPointsRandomIntercepts <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% 
+  data = player_stats_seasonal_offense_subsetCC |> 
     mutate(
       age = round(age, 2),
       fantasyPoints_randomIntercepts = round(fantasyPoints_randomIntercepts, 2)
@@ -1073,7 +1073,7 @@ plot_individualFantasyPointsRandomIntercepts <- ggplot(
       x = age,
       y = fantasyPoints_randomIntercepts
     ),
-    data = pointsPerSeason_positionAge_newData %>% 
+    data = pointsPerSeason_positionAge_newData |> 
       mutate(
         age = round(age, 2),
         fantasyPoints = round(fantasyPoints_randomIntercepts, 2)
@@ -1166,7 +1166,7 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_position <- predict(
 )
 
 plot_individualFantasyPointsPosition <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% 
+  data = player_stats_seasonal_offense_subsetCC |> 
     mutate(
       age = round(age, 2),
       fantasyPoints_position = round(fantasyPoints_position, 2)
@@ -1190,7 +1190,7 @@ plot_individualFantasyPointsPosition <- ggplot(
       y = fantasyPoints_position,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData %>% 
+    data = pointsPerSeason_positionAge_newData |> 
       mutate(
         age = round(age, 2),
         fantasyPoints_position = round(fantasyPoints_position, 2)
@@ -1284,7 +1284,7 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_fixedLinearSlopes <- predic
 )
 
 plot_individualFantasyPointsFixedLinearSlopes <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% 
+  data = player_stats_seasonal_offense_subsetCC |> 
     mutate(
       age = round(age, 2),
       fantasyPoints_fixedLinearSlopes = round(fantasyPoints_fixedLinearSlopes, 2)
@@ -1394,7 +1394,7 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearSlopes <- predi
 )
 
 plot_individualFantasyPointsRandomLinearSlopes <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% 
+  data = player_stats_seasonal_offense_subsetCC |> 
     mutate(
       age = round(age, 2),
       fantasyPoints_randomLinearSlopes = round(fantasyPoints_randomLinearSlopes, 2)
@@ -1418,7 +1418,7 @@ plot_individualFantasyPointsRandomLinearSlopes <- ggplot(
       y = fantasyPoints_randomLinearSlopes,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData %>% 
+    data = pointsPerSeason_positionAge_newData |> 
       mutate(
         age = round(age, 2),
         fantasyPoints_randomLinearSlopes = round(fantasyPoints_randomLinearSlopes, 2)
@@ -1511,7 +1511,7 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearFixedQuadraticS
 )
 
 plot_individualFantasyPointsRandomLinearFixedQuadracticSlopes <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% 
+  data = player_stats_seasonal_offense_subsetCC |> 
     mutate(
       age = round(age, 2),
       fantasyPoints_randomLinearFixedQuadraticSlopes = round(fantasyPoints_randomLinearFixedQuadraticSlopes, 2)
@@ -1536,7 +1536,7 @@ plot_individualFantasyPointsRandomLinearFixedQuadracticSlopes <- ggplot(
       y = fantasyPoints_randomLinearFixedQuadraticSlopes,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData %>% 
+    data = pointsPerSeason_positionAge_newData |> 
       mutate(
         age = round(age, 2),
         fantasyPoints_randomLinearFixedQuadraticSlopes = round(fantasyPoints_randomLinearFixedQuadraticSlopes, 2)
@@ -1638,7 +1638,7 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_randomLinearFixedQuadraticS
 )
 
 plot_individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% 
+  data = player_stats_seasonal_offense_subsetCC |> 
     mutate(
       age = round(age, 2),
       fantasyPoints_randomLinearFixedQuadraticSlopesInteraction = round(fantasyPoints_randomLinearFixedQuadraticSlopesInteraction, 2)
@@ -1662,7 +1662,7 @@ plot_individualFantasyPointsRandomLinearFixedQuadraticSlopesInteraction <- ggplo
       y = fantasyPoints_randomLinearFixedQuadraticSlopesInteraction,
       color = positionFactor
     ),
-    data = pointsPerSeason_positionAge_newData %>% 
+    data = pointsPerSeason_positionAge_newData |> 
       mutate(
         age = round(age, 2),
         fantasyPoints_randomLinearFixedQuadraticSlopesInteraction = round(fantasyPoints_randomLinearFixedQuadraticSlopesInteraction, 2)
@@ -2182,8 +2182,8 @@ player_stats_seasonal_offense_subset$fantasyPoints_posOnlyNoZeros <- player_stat
 player_stats_seasonal_offense_subset$fantasyPoints_posOnly[player_stats_seasonal_offense_subset$fantasyPoints < 0] <- 0
 player_stats_seasonal_offense_subset$fantasyPoints_posOnlyNoZeros[player_stats_seasonal_offense_subset$fantasyPoints <= 0] <- 0.01
 
-fantasyPointsVector <- player_stats_seasonal_offense_subset$fantasyPoints %>% 
-    na.omit() %>% 
+fantasyPointsVector <- player_stats_seasonal_offense_subset$fantasyPoints |> 
+    na.omit() |> 
     as.vector()
 
 fantasyPointsVector_posOnlyNoZeros <- fantasyPointsVector_posOnly <- fantasyPointsVector
@@ -2457,14 +2457,14 @@ To visualize the distribution of regression coefficients, we can use the `tidyba
 #| fig-cap: "Distributions of Regression Coefficients with 66% (Thick Line) and 95% (Thin Line) Credible Intervals from Bayesian Mixed Model."
 #| fig-alt: "Distributions of Regression Coefficients with 66% (Thick Line) and 95% (Thin Line) Credible Intervals from Bayesian Mixed Model."
 
-bayesianMixedModelFit %>%
-  tidybayes::tidy_draws() %>%
-  select(starts_with("b_")) %>%
+bayesianMixedModelFit |>
+  tidybayes::tidy_draws() |>
+  select(starts_with("b_")) |>
   pivot_longer(
     everything(),
     names_to = "term",
-    values_to = "estimate") %>%
-  mutate(term = sub("^b_", "", term)) %>%
+    values_to = "estimate") |>
+  mutate(term = sub("^b_", "", term)) |>
   ggplot(
     aes(
       x = estimate,
@@ -2726,18 +2726,18 @@ player_stats_seasonal_offense_subsetCC$fantasyPoints_gam <- predict(
 ```{r}
 #| code-fold: true
 
-zeroAge <- pointsPerSeason_positionAge_newData %>% 
-  group_by(positionFactor) %>% 
-  filter(fantasyPoints_gam < 0) %>% 
+zeroAge <- pointsPerSeason_positionAge_newData |> 
+  group_by(positionFactor) |> 
+  filter(fantasyPoints_gam < 0) |> 
   slice(which.min(age))
 
-peakAge <- pointsPerSeason_positionAge_newData %>% 
-  group_by(positionFactor) %>% 
+peakAge <- pointsPerSeason_positionAge_newData |> 
+  group_by(positionFactor) |> 
   slice(which.max(fantasyPoints_gam))
 
-peakAge2 <- pointsPerSeason_positionAge_newData %>% 
-  filter(age > 22) %>% 
-  group_by(positionFactor) %>% 
+peakAge2 <- pointsPerSeason_positionAge_newData |> 
+  filter(age > 22) |> 
+  group_by(positionFactor) |> 
   slice(which.max(fantasyPoints_gam))
 
 qbPeakAge <- round(peakAge$age[which(peakAge$positionFactor == "QB")], 0)
@@ -2767,7 +2767,7 @@ The model-predicted value of zero fantasy points for Quarterbacks is at age `{r}
 #| code-fold: true
 
 plot_individualFantasyPointsByAgeQB <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "QB"),
+  data = player_stats_seasonal_offense_subsetCC |> filter(position == "QB"),
   mapping = aes(
     x = age,
     y = fantasyPoints_gam,
@@ -2787,7 +2787,7 @@ plot_individualFantasyPointsByAgeQB <- ggplot(
       x = age,
       y = fantasyPoints_gam
     ),
-    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "QB"),
+    data = pointsPerSeason_positionAge_newData |> filter(positionFactor == "QB"),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
@@ -2828,7 +2828,7 @@ The model-predicted value of zero fantasy points for Fullbacks is at age `{r} fb
 #| code-fold: true
 
 plot_individualFantasyPointsByAgeFB <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "FB"),
+  data = player_stats_seasonal_offense_subsetCC |> filter(position == "FB"),
   mapping = aes(
     x = age,
     y = fantasyPoints_gam,
@@ -2848,7 +2848,7 @@ plot_individualFantasyPointsByAgeFB <- ggplot(
       x = age,
       y = fantasyPoints_gam
     ),
-    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "FB"),
+    data = pointsPerSeason_positionAge_newData |> filter(positionFactor == "FB"),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
@@ -2889,7 +2889,7 @@ The model-predicted value of zero fantasy points for Running Backs is at age `{r
 #| code-fold: true
 
 plot_individualFantasyPointsByAgeRB <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "RB"),
+  data = player_stats_seasonal_offense_subsetCC |> filter(position == "RB"),
   mapping = aes(
     x = age,
     y = fantasyPoints_gam,
@@ -2909,7 +2909,7 @@ plot_individualFantasyPointsByAgeRB <- ggplot(
       x = age,
       y = fantasyPoints_gam
     ),
-    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "RB"),
+    data = pointsPerSeason_positionAge_newData |> filter(positionFactor == "RB"),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
@@ -2950,7 +2950,7 @@ The model-predicted value of zero fantasy points for Wide Receivers is at age `{
 #| code-fold: true
 
 plot_individualFantasyPointsByAgeWR <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "WR"),
+  data = player_stats_seasonal_offense_subsetCC |> filter(position == "WR"),
   mapping = aes(
     x = age,
     y = fantasyPoints_gam,
@@ -2970,7 +2970,7 @@ plot_individualFantasyPointsByAgeWR <- ggplot(
       x = age,
       y = fantasyPoints_gam
     ),
-    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "WR"),
+    data = pointsPerSeason_positionAge_newData |> filter(positionFactor == "WR"),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2
@@ -3011,7 +3011,7 @@ The model-predicted value of zero fantasy points for Tight Ends is at age `{r} t
 #| code-fold: true
 
 plot_individualFantasyPointsByAgeTE <- ggplot(
-  data = player_stats_seasonal_offense_subsetCC %>% filter(position == "TE"),
+  data = player_stats_seasonal_offense_subsetCC |> filter(position == "TE"),
   mapping = aes(
     x = age,
     y = fantasyPoints_gam,
@@ -3031,7 +3031,7 @@ plot_individualFantasyPointsByAgeTE <- ggplot(
       x = age,
       y = fantasyPoints_gam
     ),
-    data = pointsPerSeason_positionAge_newData %>% filter(positionFactor == "TE"),
+    data = pointsPerSeason_positionAge_newData |> filter(positionFactor == "TE"),
     inherit.aes = FALSE,
     se = TRUE,
     linewidth = 2

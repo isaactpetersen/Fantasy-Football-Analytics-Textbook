@@ -318,13 +318,13 @@ gc()
 bootstrappedFantasyPoints$iteration <- bootstrappedFantasyPoints$data_src
 bootstrappedFantasyPoints$data_src <- NULL
 
-bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
+bootstrappedFantasyPoints <- bootstrappedFantasyPoints |> 
   left_join(
     nfl_playerIDs[,c("mfl_id","name","merge_name","team")],
     by = c("id" = "mfl_id")
   )
 
-bootstrappedFantasyPoints <- bootstrappedFantasyPoints %>% 
+bootstrappedFantasyPoints <- bootstrappedFantasyPoints |> 
   rename(projectedPoints = raw_points)
 ```
 
@@ -363,8 +363,8 @@ df <- ffanalytics:::source_points(data_result = l, scoring_rules = ffanalytics::
 ```{r}
 #| label: summarize-bootstrap-simulation-scores
 
-bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints %>% 
-  group_by(id) %>% 
+bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints |> 
+  group_by(id) |> 
   summarise(
     mean = mean(projectedPoints, na.rm = TRUE),
     SD = sd(projectedPoints, na.rm = TRUE),
@@ -396,12 +396,12 @@ gc()
 ```{r}
 #| label: merge-player-info
 
-bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary %>% 
+bootstrappedFantasyPoints_summary <- bootstrappedFantasyPoints_summary |> 
   left_join(
     nfl_playerIDs[,c("mfl_id","name","merge_name","team","position")],
     by = c("id" = "mfl_id")
-  ) %>% 
-  select(name, team, position, mean:kurtosis, everything()) %>% 
+  ) |> 
+  select(name, team, position, mean:kurtosis, everything()) |> 
   arrange(-mean)
 ```
 
@@ -415,8 +415,8 @@ gc()
 ```{r}
 #| label: display-bootstrap-simulation-summaries-qb
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position == "QB") %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position == "QB") |> 
   mutate(
     across(
       where(is.numeric),
@@ -426,8 +426,8 @@ bootstrappedFantasyPoints_summary %>%
 ```{r}
 #| label: display-bootstrap-simulation-summaries-rb
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position == "RB") %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position == "RB") |> 
   mutate(
     across(
       where(is.numeric),
@@ -437,8 +437,8 @@ bootstrappedFantasyPoints_summary %>%
 ```{r}
 #| label: display-bootstrap-simulation-summaries-wr
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position == "WR") %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position == "WR") |> 
   mutate(
     across(
       where(is.numeric),
@@ -448,8 +448,8 @@ bootstrappedFantasyPoints_summary %>%
 ```{r}
 #| label: display-bootstrap-simulation-summaries-te
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position == "TE") %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position == "TE") |> 
   mutate(
     across(
       where(is.numeric),
@@ -459,8 +459,8 @@ bootstrappedFantasyPoints_summary %>%
 ```{r}
 #| label: display-bootstrap-simulation-summaries-k
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position == c("K","PK")) %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position == c("K","PK")) |> 
   mutate(
     across(
       where(is.numeric),
@@ -470,8 +470,8 @@ bootstrappedFantasyPoints_summary %>%
 ```{r}
 #| label: display-bootstrap-simulation-summaries-dl
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position %in% c("DL","DT","DE")) %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position %in% c("DL","DT","DE")) |> 
   mutate(
     across(
       where(is.numeric),
@@ -481,8 +481,8 @@ bootstrappedFantasyPoints_summary %>%
 ```{r}
 #| label: display-bootstrap-simulation-summaries-lb
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position %in% c("LB","MLB","OLB")) %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position %in% c("LB","MLB","OLB")) |> 
   mutate(
     across(
       where(is.numeric),
@@ -492,8 +492,8 @@ bootstrappedFantasyPoints_summary %>%
 ```{r}
 #| label: display-bootstrap-simulation-summaries-db
 
-bootstrappedFantasyPoints_summary %>% 
-  filter(position %in% c("DB","S","CB")) %>% 
+bootstrappedFantasyPoints_summary |> 
+  filter(position %in% c("DB","S","CB")) |> 
   mutate(
     across(
       where(is.numeric),
@@ -505,8 +505,8 @@ bootstrappedFantasyPoints_summary %>%
 #| eval: false
 #| include: false
 
-bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(CV) %>% head
-bootstrappedFantasyPoints_summary %>% filter(mean > 100 & position == "QB") %>% arrange(-CV) %>% head
+bootstrappedFantasyPoints_summary |> filter(mean > 100 & position == "QB") |> arrange(CV) |> head
+bootstrappedFantasyPoints_summary |> filter(mean > 100 & position == "QB") |> arrange(-CV) |> head
 ```
 
 An example distribution of projected fantasy points is in @fig-bootstrapping1.
@@ -517,7 +517,7 @@ An example distribution of projected fantasy points is in @fig-bootstrapping1.
 #| fig-alt: "Distribution of Projected Fantasy Points for Patrick Mahomes from Bootstrapping."
 
 ggplot2::ggplot(
-  data = bootstrappedFantasyPoints %>%
+  data = bootstrappedFantasyPoints |>
     filter(pos == "QB" & name == "Patrick Mahomes"),
   mapping = aes(
     x = projectedPoints)
@@ -552,7 +552,7 @@ Projections of two players—one with relatively narrow [uncertainty](#sec-fanta
 #| fig-alt: "Distribution of Projected Fantasy Points for Two Players from Bootstrapping. There is relatively narrow uncertainty around projected fantasy points for Dak Prescott, whereas there is relatively wide uncertainty around the projected fantasy points for Drake Maye."
 
 ggplot2::ggplot(
-  data = bootstrappedFantasyPoints %>%
+  data = bootstrappedFantasyPoints |>
     filter(pos == "QB" & (name %in% c("Dak Prescott", "Drake Maye"))),
   mapping = aes(
     x = projectedPoints,
@@ -670,7 +670,7 @@ all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
 ```
 
 ```{r}
-all_proj <- all_proj %>% 
+all_proj <- all_proj |> 
   rename(projectedPoints = raw_points)
 ```
 
@@ -741,26 +741,26 @@ fit_best <- function(x) {
 ```
 
 ```{r}
-proj_dists_tbl <- all_proj %>%
-  filter(!is.na(id) & id != "") %>%
-  group_by(id) %>%
+proj_dists_tbl <- all_proj |>
+  filter(!is.na(id) & id != "") |>
+  group_by(id) |>
   summarise(
     dist_info = list(fit_best(projectedPoints)),
     n_proj = n(), # record of how many sources they have
     .groups = "drop"
   )
 
-proj_dists <- proj_dists_tbl %>%
-  filter(!is.na(id) & id != "") %>%
-  distinct(id, .keep_all = TRUE) %>%
+proj_dists <- proj_dists_tbl |>
+  filter(!is.na(id) & id != "") |>
+  distinct(id, .keep_all = TRUE) |>
   (\(x) setNames(x$dist_info, x$id))()
 ```
 
 ```{r}
-proj_dists_tbl %>%
+proj_dists_tbl |>
   dplyr::mutate(
     dist_type = purrr::map_chr(dist_info, ~ .x$type)
-  ) %>%
+  ) |>
   dplyr::count(dist_type)
 ```
 
@@ -776,7 +776,7 @@ The design factors (columns) are the player (`id`) and the number of projections
 The rows, then are the combinations of player and number of projections available for that player.
 
 ```{r}
-Design <- proj_dists_tbl %>%
+Design <- proj_dists_tbl |>
   dplyr::mutate(
     id,
     n_sources = n_proj, # number of projection sources available for player
@@ -943,12 +943,12 @@ monteCarloSim_results <- SimDesign::runSimulation(
 ```{r}
 #| eval: false
 
-monteCarloSim_results <- monteCarloSim_results %>% 
+monteCarloSim_results <- monteCarloSim_results |> 
   left_join(
     nfl_playerIDs[,c("mfl_id","name","merge_name","position","team")],
     by = c("id" = "mfl_id")
-  ) %>% 
-  select(name, team, position, everything()) %>% 
+  ) |> 
+  select(name, team, position, everything()) |> 
   arrange(-mean_pts_mean)
 ```
 
@@ -990,42 +990,42 @@ monteCarloSim_results
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position == "QB")
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position == "RB")
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position == "WR")
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position == "TE")
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position %in% c("K","PK"))
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position %in% c("DL","DT","DE"))
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position %in% c("LB","MLB","OLB"))
 ```
 
 ```{r}
-monteCarloSim_results %>% 
+monteCarloSim_results |> 
   filter(position %in% c("DB","S","CB"))
 ```
 

@@ -607,32 +607,32 @@ Rookies who play tend to be better players who were drafted in early rounds of t
 Thus, to more fairly compare rookies and non-rookies, we examine only players who were drafted in the first two rounds of the NFL Draft.
 
 ```{r}
-rookiesDraftedEarly <- player_stats_seasonal %>% 
-  filter(years_of_experience == 0) %>% 
-  filter(draft_round %in% c(1,2)) %>% 
-  arrange(player_id, season) %>% 
-  group_by(player_id) %>% 
-  slice_head(n = 1) %>% 
-  ungroup() %>% 
+rookiesDraftedEarly <- player_stats_seasonal |> 
+  filter(years_of_experience == 0) |> 
+  filter(draft_round %in% c(1,2)) |> 
+  arrange(player_id, season) |> 
+  group_by(player_id) |> 
+  slice_head(n = 1) |> 
+  ungroup() |> 
   mutate(
     rookie = 0,
     rookieLabel = "Rookie"
-  ) %>% 
+  ) |> 
   arrange(player_display_name)
 
-nonRookiesDraftedEarly <- player_stats_seasonal %>% 
-  filter(years_of_experience > 0) %>% 
-  filter(draft_round %in% c(1,2)) %>% 
+nonRookiesDraftedEarly <- player_stats_seasonal |> 
+  filter(years_of_experience > 0) |> 
+  filter(draft_round %in% c(1,2)) |> 
   mutate(
     rookie = 1,
     rookieLabel = "Non-rookie"
-  ) %>% 
+  ) |> 
   arrange(player_display_name)
 
 playersDraftedEarly <- bind_rows(
   rookiesDraftedEarly,
   nonRookiesDraftedEarly
-) %>% 
+) |> 
   mutate(rookieLabel = factor(rookieLabel, levels = c("Rookie","Non-rookie")))
 ```
 
@@ -642,7 +642,7 @@ playersDraftedEarly <- bind_rows(
 #| fig-alt: "Density Plot of Fantasy Points for Rookies Versus Non-Rookies by Position Among Players Who Were Drafted in the First Two Rounds of the National Football League Draft."
 
 ggplot2::ggplot(
-  data = playersDraftedEarly %>% filter(position %in% c("QB","RB","WR","TE")),
+  data = playersDraftedEarly |> filter(position %in% c("QB","RB","WR","TE")),
   aes(
     x = fantasyPoints)) + 
   geom_density(
@@ -664,16 +664,16 @@ ggplot2::ggplot(
 ### Quarterbacks {#sec-baseRateRookiePerformanceQBs}
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "QB") %>%
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "QB") |>
+  select(fantasyPoints) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "QB") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "QB") |>
+  select(fantasyPoints) |> 
   psych::describe()
 ```
 
@@ -682,53 +682,53 @@ rookiesDraftedEarly %>%
 #| fig-cap: "Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft."
 #| fig-alt: "Histogram of Fantasy Points Among Rookie Quarterbacks Who Were Drafted in the First Two Rounds of the National Football League Draft."
 
-rookiesDraftedEarly %>% 
-  filter(position == "QB") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "QB") |>
+  select(fantasyPoints) |> 
   hist()
 ```
 
 Among Quarterbacks who played a full season:
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "QB") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "QB") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "QB") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "QB") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 ```
 
 ### Running Backs {#sec-baseRateRookiePerformanceRBs}
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  select(fantasyPoints) |> 
   psych::describe()
 
-nonRookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  select(rushing_tds) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  select(rushing_tds) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  select(fantasyPoints) |> 
   psych::describe()
 
-rookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  select(rushing_tds) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  select(rushing_tds) |> 
   psych::describe()
 ```
 
@@ -737,65 +737,65 @@ rookiesDraftedEarly %>%
 #| fig-cap: "Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft."
 #| fig-alt: "Histogram of Fantasy Points Among Rookie Running Backs Who Were Drafted in the First Two Rounds of the National Football League Draft."
 
-rookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  select(fantasyPoints) |> 
   hist()
 ```
 
 Among Running Backs who played a full season:
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 
-nonRookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  filter(games >= 16) %>% 
-  select(rushing_tds) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  filter(games >= 16) |> 
+  select(rushing_tds) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 
-rookiesDraftedEarly %>% 
-  filter(position == "RB") %>%
-  filter(games >= 16) %>% 
-  select(rushing_tds) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "RB") |>
+  filter(games >= 16) |> 
+  select(rushing_tds) |> 
   psych::describe()
 ```
 
 ### Wide Receivers {#sec-baseRateRookiePerformanceWRs}
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  select(fantasyPoints) |> 
   psych::describe()
 
-nonRookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  select(receiving_tds) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  select(receiving_tds) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  select(fantasyPoints) |> 
   psych::describe()
 
-rookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  select(receiving_tds) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  select(receiving_tds) |> 
   psych::describe()
 ```
 
@@ -804,65 +804,65 @@ rookiesDraftedEarly %>%
 #| fig-cap: "Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft."
 #| fig-alt: "Histogram of Fantasy Points Among Rookie Wide Receivers Who Were Drafted in the First Two Rounds of the National Football League Draft."
 
-rookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  select(fantasyPoints) |> 
   hist()
 ```
 
 Among Wide Receivers who played a full season:
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 
-nonRookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  filter(games >= 16) %>% 
-  select(receiving_tds) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  filter(games >= 16) |> 
+  select(receiving_tds) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 
-rookiesDraftedEarly %>% 
-  filter(position == "WR") %>%
-  filter(games >= 16) %>% 
-  select(receiving_tds) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "WR") |>
+  filter(games >= 16) |> 
+  select(receiving_tds) |> 
   psych::describe()
 ```
 
 ### Tight Ends {#sec-baseRateRookiePerformanceTEs}
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  select(fantasyPoints) |> 
   psych::describe()
 
-nonRookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  select(receiving_tds) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  select(receiving_tds) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  select(fantasyPoints) |> 
   psych::describe()
 
-rookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  select(receiving_tds) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  select(receiving_tds) |> 
   psych::describe()
 ```
 
@@ -871,39 +871,39 @@ rookiesDraftedEarly %>%
 #| fig-cap: "Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft."
 #| fig-alt: "Histogram of Fantasy Points Among Rookie Tight Ends Who Were Drafted in the First Two Rounds of the National Football League Draft."
 
-rookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  select(fantasyPoints) |> 
   hist()
 ```
 
 Among Tight Ends who played a full season:
 
 ```{r}
-nonRookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 
-nonRookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  filter(games >= 16) %>% 
-  select(receiving_tds) %>% 
+nonRookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  filter(games >= 16) |> 
+  select(receiving_tds) |> 
   psych::describe()
 ```
 
 ```{r}
-rookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  filter(games >= 16) %>% 
-  select(fantasyPoints) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  filter(games >= 16) |> 
+  select(fantasyPoints) |> 
   psych::describe()
 
-rookiesDraftedEarly %>% 
-  filter(position == "TE") %>%
-  filter(games >= 16) %>% 
-  select(receiving_tds) %>% 
+rookiesDraftedEarly |> 
+  filter(position == "TE") |>
+  filter(games >= 16) |> 
+  select(receiving_tds) |> 
   psych::describe()
 ```
 

@@ -76,12 +76,12 @@ To evaluate the accuracy of projections, we must first merge projections with ac
 Below, we merge seasonal projections with actual performance.
 
 ```{r}
-player_stats_seasonal_subset <- player_stats_seasonal %>% 
+player_stats_seasonal_subset <- player_stats_seasonal |> 
   filter(!is.na(player_id))
 
-nfl_playerIDs_subset <- nfl_playerIDs %>% 
-  filter(!is.na(gsis_id)) %>% 
-  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
+nfl_playerIDs_subset <- nfl_playerIDs |> 
+  filter(!is.na(gsis_id)) |> 
+  distinct(gsis_id, .keep_all = TRUE) |> # keep only rows that do not have duplicate values of gsis_id
   select(-all_of(c("team", "position", "height", "weight", "age")))
 
 players_projectedPoints_seasonal_combined$season <- as.integer(players_projectedPoints_seasonal_combined$season)
@@ -91,7 +91,7 @@ player_stats_seasonal_subset_IDs <- left_join(
   player_stats_seasonal_subset,
   nfl_playerIDs_subset,
   by = c("player_id" = "gsis_id")
-) %>% 
+) |> 
   filter(!is.na(mfl_id))
 
 projectionsWithActuals_seasonal <- full_join(
@@ -103,12 +103,12 @@ projectionsWithActuals_seasonal <- full_join(
 
 crowdAveragedProjectionsWithActuals_seasonal <- full_join(
   player_stats_seasonal_subset_IDs,
-  players_projections_seasonal_average_merged %>% filter(avg_type == "average"),
+  players_projections_seasonal_average_merged |> filter(avg_type == "average"),
   by = c("mfl_id" = "id", "season"),
   suffix = c("", "_proj"),
 )
 
-projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal |> 
   unite(
     "player_id_season",
     player_id,
@@ -116,7 +116,7 @@ projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal %>%
     remove = FALSE
   )
 
-crowdAveragedProjectionsWithActuals_seasonal <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal <- crowdAveragedProjectionsWithActuals_seasonal |> 
   unite(
     "player_id_season",
     player_id,
@@ -128,20 +128,20 @@ crowdAveragedProjectionsWithActuals_seasonal <- crowdAveragedProjectionsWithActu
 Players in the `projectionsWithActuals_seasonal` object are (supposed to be) uniquely identified by `player_id`-`season`-`data_src`:
 
 ```{r}
-projectionsWithActuals_seasonal %>% 
-  filter(!is.na(player_id)) %>% 
-  group_by(player_id, season, data_src) %>% 
-  filter(n() > 1) %>% 
+projectionsWithActuals_seasonal |> 
+  filter(!is.na(player_id)) |> 
+  group_by(player_id, season, data_src) |> 
+  filter(n() > 1) |> 
   head()
 ```
 
 Players in the `crowdAveragedProjectionsWithActuals_seasonal` object are (supposed to be) uniquely identified by `player_id`-`season`-`avg_type`:
 
 ```{r}
-crowdAveragedProjectionsWithActuals_seasonal %>% 
-  filter(!is.na(player_id)) %>% 
-  group_by(player_id, season, avg_type) %>% 
-  filter(n() > 1) %>% 
+crowdAveragedProjectionsWithActuals_seasonal |> 
+  filter(!is.na(player_id)) |> 
+  group_by(player_id, season, avg_type) |> 
+  filter(n() > 1) |> 
   head()
 ```
 
@@ -155,57 +155,57 @@ save(
 ```
 
 ```{r}
-playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal %>% 
-  filter(raw_points > 100 | fantasyPoints > 100) %>% 
-  select(player_id_season) %>% 
+playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal |> 
+  filter(raw_points > 100 | fantasyPoints > 100) |> 
+  select(player_id_season) |> 
   pull()
 
-projectionsWithActuals_seasonal_qb <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_qb <- projectionsWithActuals_seasonal |> 
   filter(position_group == "QB")
 
-projectionsWithActuals_seasonal_rb <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_rb <- projectionsWithActuals_seasonal |> 
   filter(position_group == "RB")
 
-projectionsWithActuals_seasonal_wr <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_wr <- projectionsWithActuals_seasonal |> 
   filter(position_group == "WR")
 
-projectionsWithActuals_seasonal_te <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_te <- projectionsWithActuals_seasonal |> 
   filter(position_group == "TE")
 
-projectionsWithActuals_seasonal_k <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_k <- projectionsWithActuals_seasonal |> 
   filter(position == "K")
 
-projectionsWithActuals_seasonal_dl <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_dl <- projectionsWithActuals_seasonal |> 
   filter(position_group == "DL")
 
-projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal |> 
   filter(position_group == "LB")
 
-projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal %>% 
+projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal |> 
   filter(position_group == "DB")
 
-crowdAveragedProjectionsWithActuals_seasonal_qb <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_qb <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position_group == "QB")
 
-crowdAveragedProjectionsWithActuals_seasonal_rb <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_rb <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position_group == "RB")
 
-crowdAveragedProjectionsWithActuals_seasonal_wr <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_wr <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position_group == "WR")
 
-crowdAveragedProjectionsWithActuals_seasonal_te <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_te <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position_group == "TE")
 
-crowdAveragedProjectionsWithActuals_seasonal_k <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_k <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position == "K")
 
-crowdAveragedProjectionsWithActuals_seasonal_dl <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_dl <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position_group == "DL")
 
-crowdAveragedProjectionsWithActuals_seasonal_lb <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_lb <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position_group == "LB")
 
-crowdAveragedProjectionsWithActuals_seasonal_db <- crowdAveragedProjectionsWithActuals_seasonal %>% 
+crowdAveragedProjectionsWithActuals_seasonal_db <- crowdAveragedProjectionsWithActuals_seasonal |> 
   filter(position_group == "DB")
 ```
 
@@ -214,12 +214,12 @@ crowdAveragedProjectionsWithActuals_seasonal_db <- crowdAveragedProjectionsWithA
 Below, we merge weekly projections with actual performance.
 
 ```{r}
-player_stats_weekly_subset <- player_stats_weekly %>% 
+player_stats_weekly_subset <- player_stats_weekly |> 
   filter(!is.na(player_id))
 
-nfl_playerIDs_subset <- nfl_playerIDs %>% 
-  filter(!is.na(gsis_id)) %>% 
-  distinct(gsis_id, .keep_all = TRUE) %>% # keep only rows that do not have duplicate values of gsis_id
+nfl_playerIDs_subset <- nfl_playerIDs |> 
+  filter(!is.na(gsis_id)) |> 
+  distinct(gsis_id, .keep_all = TRUE) |> # keep only rows that do not have duplicate values of gsis_id
   select(-all_of(c("team", "position", "height", "weight", "age")))
 
 players_projectedPoints_weekly_combined$season <- as.integer(players_projectedPoints_weekly_combined$season)
@@ -229,7 +229,7 @@ player_stats_weekly_subset_IDs <- left_join(
   player_stats_weekly_subset,
   nfl_playerIDs_subset,
   by = c("player_id" = "gsis_id")
-) %>% 
+) |> 
   filter(!is.na(mfl_id))
 
 projectionsWithActuals_weekly <- full_join(
@@ -246,7 +246,7 @@ crowdAveragedProjectionsWithActuals_weekly <- full_join(
   suffix = c("", "_proj"),
 )
 
-projectionsWithActuals_weekly <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly <- projectionsWithActuals_weekly |> 
   unite(
     "player_id_season_week",
     player_id,
@@ -255,7 +255,7 @@ projectionsWithActuals_weekly <- projectionsWithActuals_weekly %>%
     remove = FALSE
   )
 
-crowdAveragedProjectionsWithActuals_weekly <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly <- crowdAveragedProjectionsWithActuals_weekly |> 
   unite(
     "player_id_season_week",
     player_id,
@@ -268,20 +268,20 @@ crowdAveragedProjectionsWithActuals_weekly <- crowdAveragedProjectionsWithActual
 Players in the `projectionsWithActuals_weekly` object are (supposed to be) uniquely identified by `player_id`-`season`-`week`-`data_src`:
 
 ```{r}
-projectionsWithActuals_weekly %>% 
-  filter(!is.na(player_id)) %>% 
-  group_by(player_id, season, week, data_src) %>% 
-  filter(n() > 1) %>% 
+projectionsWithActuals_weekly |> 
+  filter(!is.na(player_id)) |> 
+  group_by(player_id, season, week, data_src) |> 
+  filter(n() > 1) |> 
   head()
 ```
 
 Players in the `crowdAveragedProjectionsWithActuals_weekly` object are (supposed to be) uniquely identified by `player_id`-`season`-`week`-`avg_type`:
 
 ```{r}
-crowdAveragedProjectionsWithActuals_weekly %>% 
-  filter(!is.na(player_id)) %>% 
-  group_by(player_id, season, week, avg_type) %>% 
-  filter(n() > 1) %>% 
+crowdAveragedProjectionsWithActuals_weekly |> 
+  filter(!is.na(player_id)) |> 
+  group_by(player_id, season, week, avg_type) |> 
+  filter(n() > 1) |> 
   head()
 ```
 
@@ -295,57 +295,57 @@ save(
 ```
 
 ```{r}
-playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly %>% 
-  filter(raw_points > 6 | fantasyPoints > 6) %>% 
-  select(player_id_season_week) %>% 
+playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly |> 
+  filter(raw_points > 6 | fantasyPoints > 6) |> 
+  select(player_id_season_week) |> 
   pull()
 
-projectionsWithActuals_weekly_qb <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_qb <- projectionsWithActuals_weekly |> 
   filter(position_group == "QB")
 
-projectionsWithActuals_weekly_rb <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_rb <- projectionsWithActuals_weekly |> 
   filter(position_group == "RB")
 
-projectionsWithActuals_weekly_wr <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_wr <- projectionsWithActuals_weekly |> 
   filter(position_group == "WR")
 
-projectionsWithActuals_weekly_te <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_te <- projectionsWithActuals_weekly |> 
   filter(position_group == "TE")
 
-projectionsWithActuals_weekly_k <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_k <- projectionsWithActuals_weekly |> 
   filter(position == "K")
 
-projectionsWithActuals_weekly_dl <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_dl <- projectionsWithActuals_weekly |> 
   filter(position_group == "DL")
 
-projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly |> 
   filter(position_group == "LB")
 
-projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly %>% 
+projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly |> 
   filter(position_group == "DB")
 
-crowdAveragedProjectionsWithActuals_weekly_qb <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_qb <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position_group == "QB")
 
-crowdAveragedProjectionsWithActuals_weekly_rb <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_rb <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position_group == "RB")
 
-crowdAveragedProjectionsWithActuals_weekly_wr <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_wr <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position_group == "WR")
 
-crowdAveragedProjectionsWithActuals_weekly_te <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_te <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position_group == "TE")
 
-crowdAveragedProjectionsWithActuals_weekly_k <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_k <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position == "K")
 
-crowdAveragedProjectionsWithActuals_weekly_dl <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_dl <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position_group == "DL")
 
-crowdAveragedProjectionsWithActuals_weekly_lb <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_lb <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position_group == "LB")
 
-crowdAveragedProjectionsWithActuals_weekly_db <- crowdAveragedProjectionsWithActuals_weekly %>% 
+crowdAveragedProjectionsWithActuals_weekly_db <- crowdAveragedProjectionsWithActuals_weekly |> 
   filter(position_group == "DB")
 ```
 
@@ -819,7 +819,7 @@ hist_edible <- density(
   to = 150) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) %>%
+    y = y) |>
   mutate(area = x >= cutoff)
 
 hist_edible$type[hist_edible$area == TRUE] <- "edible_FP"
@@ -831,7 +831,7 @@ hist_inedible <- density(
   to = 150) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) %>%
+    y = y) |>
   mutate(area = x < cutoff)
 
 hist_inedible$type[hist_inedible$area == TRUE] <- "inedible_FN"
@@ -936,7 +936,7 @@ hist_edible <- density(
   to = 150) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) %>%
+    y = y) |>
   mutate(area = x >= cutoff)
 
 hist_edible$type[hist_edible$area == TRUE] <- "edible_FP"
@@ -948,7 +948,7 @@ hist_inedible <- density(
   to = 150) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) %>%
+    y = y) |>
   mutate(area = x < cutoff)
 
 hist_inedible$type[hist_inedible$area == TRUE] <- "inedible_FN"
@@ -1018,7 +1018,7 @@ hist_edible <- density(
   to = 150) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) %>%
+    y = y) |>
   mutate(area = x >= cutoff)
 
 hist_edible$type[hist_edible$area == TRUE] <- "edible_FP"
@@ -1030,7 +1030,7 @@ hist_inedible <- density(
   to = 150) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) %>%
+    y = y) |>
   mutate(area = x < cutoff)
 
 hist_inedible$type[hist_inedible$area == TRUE] <- "inedible_FN"
@@ -1094,8 +1094,8 @@ Thus, our cutoff or threshold is 300 or more projected points.
 The same player has multiple rows in the data file—one for each projection source.
 
 ```{r}
-projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal %>% 
-  filter(position_group %in% c("RB","WR")) %>% 
+projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal |> 
+  filter(position_group %in% c("RB","WR")) |> 
   filter(season == 2024)
 
 projectionsWithActuals_seasonal_subset$prediction <- ifelse(projectionsWithActuals_seasonal_subset$raw_points >= 300, 1, 0)
@@ -1354,8 +1354,8 @@ An example of a confusion matrix is in @fig-confusionMatrix1.
 Here is our 2x2 confusion matrix, predicting which Running Backs or Wide Receivers will score 300 or more fantasy points.
 
 ```{r}
-projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal %>% 
-  filter(position_group %in% c("RB","WR")) %>% 
+projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal |> 
+  filter(position_group %in% c("RB","WR")) |> 
   filter(season == 2024)
 
 projectionsWithActuals_seasonal_subset$prediction <- ifelse(projectionsWithActuals_seasonal_subset$raw_points >= 300, 1, 0)
@@ -2158,13 +2158,13 @@ rec <- recipes::recipe(
   data = projectionsWithActuals_seasonal)
 
 # Define Model
-lm_spec <- parsnip::linear_reg() %>%
-  parsnip::set_engine("lm") %>%
+lm_spec <- parsnip::linear_reg() |>
+  parsnip::set_engine("lm") |>
   parsnip::set_mode("regression")
 
 # Workflow
-lm_wf <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+lm_wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(lm_spec)
 
 # Fit Model with Cross-Validation
@@ -2179,8 +2179,8 @@ cv_results <- tune::fit_resamples(
 tune::collect_metrics(cv_results)
 
 # Fold-level R-squared
-tune::collect_metrics(cv_results, summarize = FALSE) %>%
-  filter(.metric == "rsq") %>%
+tune::collect_metrics(cv_results, summarize = FALSE) |>
+  filter(.metric == "rsq") |>
   select(id, .estimate)
 ```
 
@@ -2232,7 +2232,7 @@ training_model <- parsnip::fit(
 # Predict on test set
 predictions <- predict(
   training_model,
-  new_data = testing) %>%
+  new_data = testing) |>
   bind_cols(testing)
 
 # Predictive R-squared
@@ -2554,17 +2554,17 @@ For this example, let's predict whether or not a Running Back rushes for 200 yar
 To predict that, we will use the number of rushing yards the player had in the previous game.
 
 ```{r}
-player_stats_weekly_example <- player_stats_weekly %>% 
-  filter(position == "RB") %>% 
-  arrange(player_id, season, week) %>% 
-  group_by(player_id, season) %>% 
-  mutate(rushing_yards_priorGame = lag(rushing_yards)) %>% 
+player_stats_weekly_example <- player_stats_weekly |> 
+  filter(position == "RB") |> 
+  arrange(player_id, season, week) |> 
+  group_by(player_id, season) |> 
+  mutate(rushing_yards_priorGame = lag(rushing_yards)) |> 
   ungroup()
 ```
 
 ```{r}
-player_stats_weekly_example %>% 
-  select(player_id, season, week, rushing_yards, rushing_yards_priorGame) %>% 
+player_stats_weekly_example |> 
+  select(player_id, season, week, rushing_yards, rushing_yards_priorGame) |> 
   head()
 ```
 
@@ -2687,10 +2687,10 @@ Thus, the $R^2$ may be higher for this aggregated object than it is for many of 
 To calculate the accuracy by source, we could use the following code:
 
 ```{r}
-accuracy_by_source <- projectionsWithActuals_seasonal %>%
-  filter(!is.na(data_src)) %>% 
-  filter(data_src != "FantasyPros") %>% # remove crowd-averaged source; we compare to crowd average later
-  group_by(data_src) %>%
+accuracy_by_source <- projectionsWithActuals_seasonal |>
+  filter(!is.na(data_src)) |> 
+  filter(data_src != "FantasyPros") |> # remove crowd-averaged source; we compare to crowd average later
+  group_by(data_src) |>
   summarise(
     accuracy = list(
       accuracyOverall(

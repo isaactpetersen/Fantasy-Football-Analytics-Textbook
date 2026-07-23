@@ -94,20 +94,20 @@ The various types of `mclust` models are provided here:
 recentSeason <- max(player_stats_seasonal$season, na.rm = TRUE) # also works: nflreadr::most_recent_season()
 recentSeason
 
-player_stats_seasonal_offense_recent <- player_stats_seasonal %>% 
-  filter(season == recentSeason) %>% 
+player_stats_seasonal_offense_recent <- player_stats_seasonal |> 
+  filter(season == recentSeason) |> 
   filter(position_group %in% c("QB","RB","WR","TE"))
 
-player_stats_seasonal_offense_recentQB <- player_stats_seasonal_offense_recent %>% 
+player_stats_seasonal_offense_recentQB <- player_stats_seasonal_offense_recent |> 
   filter(position_group == "QB")
 
-player_stats_seasonal_offense_recentRB <- player_stats_seasonal_offense_recent %>% 
+player_stats_seasonal_offense_recentRB <- player_stats_seasonal_offense_recent |> 
   filter(position_group == "RB")
 
-player_stats_seasonal_offense_recentWR <- player_stats_seasonal_offense_recent %>% 
+player_stats_seasonal_offense_recentWR <- player_stats_seasonal_offense_recent |> 
   filter(position_group == "WR")
 
-player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recent %>% 
+player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recent |> 
   filter(position_group == "TE")
 ```
 
@@ -415,7 +415,7 @@ We can merge the player's classification into the dataset and plot each player's
 
 player_stats_seasonal_offense_recentQB$tier <- clusterModelQBs$classification
 
-player_stats_seasonal_offense_recentQB <- player_stats_seasonal_offense_recentQB %>%
+player_stats_seasonal_offense_recentQB <- player_stats_seasonal_offense_recentQB |>
   mutate(
     tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
   )
@@ -458,7 +458,7 @@ plotly::ggplotly(plot_qbTiers)
 
 player_stats_seasonal_offense_recentRB$tier <- clusterModelRBs$classification
 
-player_stats_seasonal_offense_recentRB <- player_stats_seasonal_offense_recentRB %>%
+player_stats_seasonal_offense_recentRB <- player_stats_seasonal_offense_recentRB |>
   mutate(
     tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
   )
@@ -501,7 +501,7 @@ plotly::ggplotly(plot_rbTiers)
 
 player_stats_seasonal_offense_recentWR$tier <- clusterModelWRs$classification
 
-player_stats_seasonal_offense_recentWR <- player_stats_seasonal_offense_recentWR %>%
+player_stats_seasonal_offense_recentWR <- player_stats_seasonal_offense_recentWR |>
   mutate(
     tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
   )
@@ -544,7 +544,7 @@ plotly::ggplotly(plot_wrTiers)
 
 player_stats_seasonal_offense_recentTE$tier <- clusterModelTEs$classification
 
-player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recentTE %>%
+player_stats_seasonal_offense_recentTE <- player_stats_seasonal_offense_recentTE |>
   mutate(
     tier = factor(max(tier, na.rm = TRUE) + 1 - tier)
   )
@@ -593,8 +593,8 @@ plotly::ggplotly(plot_teTiers)
 
 ```{r}
 # Compute Advanced PFR Stats by Career
-pfrVars <- nfl_advancedStatsPFR_seasonal %>% 
-  select(pocket_time.pass:cmp_percent.def, g, gs) %>% 
+pfrVars <- nfl_advancedStatsPFR_seasonal |> 
+  select(pocket_time.pass:cmp_percent.def, g, gs) |> 
   names()
 
 weightedAverageVars <- c(
@@ -618,12 +618,12 @@ sumVars <- pfrVars[pfrVars %ni% c(
   weightedAverageVars, recomputeVars,
   "merge_name", "loaded.pass", "loaded.rush", "loaded.rec", "loaded.def")]
 
-nfl_advancedStatsPFR_career <- nfl_advancedStatsPFR_seasonal %>% 
-  group_by(pfr_id, merge_name) %>% 
+nfl_advancedStatsPFR_career <- nfl_advancedStatsPFR_seasonal |> 
+  group_by(pfr_id, merge_name) |> 
   summarise(
     across(all_of(weightedAverageVars), ~ weighted.mean(.x, w = g, na.rm = TRUE)),
     across(all_of(sumVars), ~ sum(.x, na.rm = TRUE)),
-    .groups = "drop") %>% 
+    .groups = "drop") |> 
   mutate(
     drop_pct.pass = drops.pass / pass_attempts.pass,
     bad_throw_pct.pass = bad_throws.pass / pass_attempts.pass,
@@ -634,33 +634,33 @@ nfl_advancedStatsPFR_career <- nfl_advancedStatsPFR_seasonal %>%
     cmp_percent.def = cmp.def / tgt.def
   )
 
-uniqueCases <- nfl_advancedStatsPFR_seasonal %>% select(pfr_id, merge_name, gsis_id) %>% unique()
+uniqueCases <- nfl_advancedStatsPFR_seasonal |> select(pfr_id, merge_name, gsis_id) |> unique()
 
-uniqueCases %>%
-  group_by(pfr_id) %>% 
+uniqueCases |>
+  group_by(pfr_id) |> 
   filter(n() > 1)
 
-nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal %>% 
+nfl_advancedStatsPFR_seasonal <- nfl_advancedStatsPFR_seasonal |> 
   filter(pfr_id != "WillMa06" | merge_name != "MARCUSWILLIAMS" | !is.na(gsis_id))
 
 
 nfl_advancedStatsPFR_career <- left_join(
   nfl_advancedStatsPFR_career,
-  nfl_advancedStatsPFR_seasonal %>% select(pfr_id, merge_name, gsis_id) %>% unique(),
+  nfl_advancedStatsPFR_seasonal |> select(pfr_id, merge_name, gsis_id) |> unique(),
   by = c("pfr_id", "merge_name")
 )
 
 # Compute Player Stats Per Season
-player_stats_seasonal_careerWRs <- player_stats_seasonal %>% 
-  filter(position == "WR") %>% 
-  group_by(player_id) %>% 
+player_stats_seasonal_careerWRs <- player_stats_seasonal |> 
+  filter(position == "WR") |> 
+  group_by(player_id) |> 
   summarise(
     across(all_of(c("targets", "receptions", "receiving_air_yards")), ~ weighted.mean(.x, w = games, na.rm = TRUE)),
     .groups = "drop")
 
 # Drop players with no receiving air yards
-player_stats_seasonal_careerWRs <- player_stats_seasonal_careerWRs %>% 
-  filter(receiving_air_yards != 0) %>% 
+player_stats_seasonal_careerWRs <- player_stats_seasonal_careerWRs |> 
+  filter(receiving_air_yards != 0) |> 
   rename(
     targets_per_season = targets,
     receptions_per_season = receptions,
@@ -669,16 +669,16 @@ player_stats_seasonal_careerWRs <- player_stats_seasonal_careerWRs %>%
 
 # Merge
 playerListToMerge <- list(
-  nfl_players %>% select(gsis_id, display_name, position, height, weight),
-  nfl_combine %>% select(gsis_id, vertical, forty, ht, wt),
-  player_stats_seasonal_careerWRs %>% select(player_id, targets_per_season, receptions_per_season, receiving_air_yards_per_season) %>% 
+  nfl_players |> select(gsis_id, display_name, position, height, weight),
+  nfl_combine |> select(gsis_id, vertical, forty, ht, wt),
+  player_stats_seasonal_careerWRs |> select(player_id, targets_per_season, receptions_per_season, receiving_air_yards_per_season) |> 
     rename(gsis_id = player_id),
-  nfl_actualStats_career_player_inclPost %>% select(player_id, receptions, targets, receiving_air_yards, air_yards_share, target_share) %>% 
+  nfl_actualStats_career_player_inclPost |> select(player_id, receptions, targets, receiving_air_yards, air_yards_share, target_share) |> 
     rename(gsis_id = player_id),
-  nfl_advancedStatsPFR_career %>% select(gsis_id, adot.rec, rec.rec, brk_tkl.rec, drop.rec, drop_percent.rec)
+  nfl_advancedStatsPFR_career |> select(gsis_id, adot.rec, rec.rec, brk_tkl.rec, drop.rec, drop_percent.rec)
 )
 
-merged_data <- playerListToMerge %>% 
+merged_data <- playerListToMerge |> 
   reduce(
     full_join,
     by = c("gsis_id"),
@@ -688,7 +688,7 @@ merged_data <- playerListToMerge %>%
 Additional processing:
 
 ```{r}
-merged_data <- merged_data %>% 
+merged_data <- merged_data |> 
   mutate(
     height_coalesced = coalesce(height, ht),
     weight_coalesced = coalesce(weight, wt),
@@ -698,12 +698,12 @@ merged_data <- merged_data %>%
 
 merged_data$receiving_air_yards_per_rec[which(merged_data$receptions == 0)] <- 0
 
-merged_dataWRs <- merged_data %>% 
+merged_dataWRs <- merged_data |> 
   filter(position == "WR")
 
-merged_dataWRs_cluster <- merged_dataWRs %>% 
-  filter(receptions_coalesced >= 100) %>% # keep WRs with at least 100 receptions
-  select(gsis_id, display_name, vertical, forty, height_coalesced, weight_coalesced, adot.rec, drop_percent.rec, receiving_air_yards_per_rec, brk_tkl.rec, receptions_per_season) %>% #targets_per_season, receiving_air_yards_per_season, air_yards_share, target_share
+merged_dataWRs_cluster <- merged_dataWRs |> 
+  filter(receptions_coalesced >= 100) |> # keep WRs with at least 100 receptions
+  select(gsis_id, display_name, vertical, forty, height_coalesced, weight_coalesced, adot.rec, drop_percent.rec, receiving_air_yards_per_rec, brk_tkl.rec, receptions_per_season) |> #targets_per_season, receiving_air_yards_per_season, air_yards_share, target_share
   na.omit()
 ```
 
@@ -713,7 +713,7 @@ merged_dataWRs_cluster <- merged_dataWRs %>%
 
 ```{r}
 wrTypes_bic <- mclust::mclustBIC(
-  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  data = merged_dataWRs_cluster |> select(-gsis_id, -display_name),
   G = 1:9
 )
 
@@ -722,7 +722,7 @@ summary(wrTypes_bic)
 plot(wrTypes_bic)
 
 wrTypes_icl <- mclust::mclustICL(
-  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  data = merged_dataWRs_cluster |> select(-gsis_id, -display_name),
   G = 1:9
 )
 
@@ -741,7 +741,7 @@ numTypesWR <- 3
 #| eval: false
 
 wrTypes_bootstrap <- mclust::mclustBootstrapLRT(
-  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  data = merged_dataWRs_cluster |> select(-gsis_id, -display_name),
   modelName = "EVE") # ellipsoidal with equal volume, variable shape, and equal orientation (for multivariate data)
 
 wrTypes_bootstrap
@@ -761,7 +761,7 @@ We can also use the `tidyLPA` package [@R-tidyLPA; @Rosenberg2018_packages], whi
 # model 6 (VVV): Varying variances and varying covariances
 
 wrTypes_lpa_classes <- tidyLPA::estimate_profiles(
-  df = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  df = merged_dataWRs_cluster |> select(-gsis_id, -display_name),
   n_profiles = 1:6,
   models = c(1, 2, 3) #c(1, 2, 3, 6) takes too long to run because of the model with varying variances and varying covariances (model 6)
 )
@@ -773,7 +773,7 @@ tidyLPA::compare_solutions(
   statistics = c("AIC", "BIC", "Entropy", "BLRT_p"))
 
 wrTypes_lpa <- tidyLPA::estimate_profiles(
-  df = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  df = merged_dataWRs_cluster |> select(-gsis_id, -display_name),
   n_profiles = numTypesWR,
   model = 3 # equal variances and equal covariances
 )
@@ -786,7 +786,7 @@ tidyLPA::get_fit(wrTypes_lpa)
 
 ```{r}
 wrTypes_kMeans <- kmeans(
-  x = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  x = merged_dataWRs_cluster |> select(-gsis_id, -display_name),
   centers = numTypesWR)
 
 wrTypes_kMeans
@@ -796,7 +796,7 @@ wrTypes_kMeans
 
 ```{r}
 clusterModelWRtypes <- mclust::Mclust(
-  data = merged_dataWRs_cluster %>% select(-gsis_id, -display_name),
+  data = merged_dataWRs_cluster |> select(-gsis_id, -display_name),
   G = numTypesWR,
 )
 
@@ -840,13 +840,13 @@ table(clusterModelWRtypes$classification)
 
 merged_dataWRs_cluster$type <- clusterModelWRtypes$classification
 
-merged_dataWRs_cluster %>% 
-  group_by(type) %>% 
+merged_dataWRs_cluster |> 
+  group_by(type) |> 
   summarise(across(
     where(is.numeric),
     ~ mean(., na.rm = TRUE)
-    )) %>% 
-  t() %>% 
+    )) |> 
+  t() |> 
   round(., 2)
 ```
 
@@ -871,24 +871,24 @@ The tiers were not particularly distinguishable based on their height, weight, v
 Type 1 ("Elite/WR1") WRs:
 
 ```{r}
-merged_dataWRs_cluster %>% 
-  filter(type == 1) %>% 
+merged_dataWRs_cluster |> 
+  filter(type == 1) |> 
   select(display_name)
 ```
 
 Type 2 ("Consistent Contributor/WR2") WRs:
 
 ```{r}
-merged_dataWRs_cluster %>% 
-  filter(type == 2) %>% 
+merged_dataWRs_cluster |> 
+  filter(type == 2) |> 
   select(display_name)
 ```
 
 Type 3 ("Deep Threat/Boom-or-Bust") WRs:
 
 ```{r}
-merged_dataWRs_cluster %>% 
-  filter(type == 3) %>% 
+merged_dataWRs_cluster |> 
+  filter(type == 3) |> 
   select(display_name)
 ```
 
@@ -897,20 +897,20 @@ And here are the clusters based on the `tidyLPA` [@R-tidyLPA; @Rosenberg2018_pac
 ```{r}
 merged_dataWRs_cluster <- cbind(
   merged_dataWRs_cluster,
-  tidyLPA::get_data(wrTypes_lpa) %>% 
+  tidyLPA::get_data(wrTypes_lpa) |> 
     select(model_number, classes_number, CPROB1:Class)
 )
 
-merged_dataWRs_cluster %>% 
+merged_dataWRs_cluster |> 
   select(display_name, CPROB1:Class)
 
-merged_dataWRs_cluster %>% 
-  group_by(Class) %>% 
+merged_dataWRs_cluster |> 
+  group_by(Class) |> 
   summarise(across(
     where(is.numeric),
     ~ mean(., na.rm = TRUE)
-    )) %>% 
-  t() %>% 
+    )) |> 
+  t() |> 
   round(., 2)
 ```
 

@@ -792,26 +792,26 @@ players[,!(names(players) %in% dropVars)]
 In the `tidyverse` ecosystem of packages [@R-tidyverse; @Wickham2019_packages], you can select particular columns using the `dplyr::select()` function.
 
 ```{r}
-players %>%
+players |>
   dplyr::select(name, age)
 
-players %>%
+players |>
   dplyr::select(name:age)
 
-players %>%
+players |>
   dplyr::select(all_of(subsetVars))
 ```
 
 Or, to drop columns:
 
 ```{r}
-players %>%
+players |>
   dplyr::select(-name, -age)
 
-players %>%
+players |>
   dplyr::select(-c(name:age))
 
-players %>%
+players |>
   dplyr::select(-all_of(dropVars))
 ```
 
@@ -834,13 +834,13 @@ players[which(players$position == "RB"),]
 In the `tidyverse` ecosystem of packages [@R-tidyverse; @Wickham2019_packages], you can select particular columns using the `dplyr::filter()` function.
 
 ```{r}
-players %>%
+players |>
   filter(position == "WR")
 
-players %>%
+players |>
   filter(position == "WR", age <= 26)
 
-players %>%
+players |>
   filter(position == "WR" | age >= 26)
 ```
 
@@ -861,8 +861,8 @@ players[which(players$position == "RB"), subsetVars]
 In the `tidyverse` ecosystem of packages [@R-tidyverse; @Wickham2019_packages], you can select particular rows and columns using the `dplyr::filter()` and `dplyr::select()` functions, respectively.
 
 ```{r}
-players %>%
-  dplyr::filter(position == "RB") %>%
+players |>
+  dplyr::filter(position == "RB") |>
   dplyr::select(all_of(subsetVars))
 ```
 
@@ -890,10 +890,10 @@ head(nfl_players$display_name)
 ## Sort Data {#sec-sortData}
 
 ```{r}
-players %>% 
+players |> 
   arrange(position, age) #sort by position (ascending) then by age (ascending)
 
-players %>% 
+players |> 
   arrange(position, -age) #sort by position (ascending) then by age (descending)
 ```
 
@@ -1010,7 +1010,7 @@ players$oldVar2[which(players$age >= 30)] <- "old"
 Recode multiple variables using the `dplyr::mutate()` and `dplyr::case_match()` functions:
 
 ```{r}
-players %>%
+players |>
   dplyr::mutate(across(c(
     oldVar1:oldVar2),
     ~ case_match(
@@ -1024,7 +1024,7 @@ players %>%
 `dplyr::rename()`
 
 ```{r}
-players <- players %>% 
+players <- players |> 
   dplyr::rename(
     newVar1 = oldVar1,
     newVar2 = oldVar2)
@@ -1038,7 +1038,7 @@ Using a vector of variable names with the `dplyr::rename_with()` function:
 varNamesFrom <- c("oldVar1","oldVar2")
 varNamesTo <- c("newVar1","newVar2")
 
-players <- players %>% 
+players <- players |> 
   dplyr::rename_with(~ varNamesTo, all_of(varNamesFrom))
 ```
 
@@ -1056,18 +1056,18 @@ players$characterVar <- as.character(players$newVar2)
 Multiple variables:
 
 ```{r}
-players %>%
+players |>
   dplyr::mutate(across(c(
     ID,
     age),
     as.numeric))
 
-players %>%
+players |>
   dplyr::mutate(across(
     age:newVar1,
     as.character))
 
-players %>%
+players |>
   dplyr::mutate(across(
     where(is.factor),
     as.character))
@@ -1400,10 +1400,10 @@ This is an example of long form, because each player has multiple rows.
 
 ```{r}
 dataLong <- dplyr::full_join(
-  players %>% dplyr::select(-age),
+  players |> dplyr::select(-age),
   fantasyPoints_weekly,
   by = c("ID")
-) %>% 
+) |> 
   arrange(ID, season, week)
 
 dataLong
@@ -1420,7 +1420,7 @@ The long data are in "`player`-`season`-`week` form".
 We widen the data by two variables (`season` and `week`), using the `tidyverse` ecosystem of packages [@R-tidyverse; @Wickham2019_packages], so that the data are now in "`player` form" (where each row is uniquely identified by the `ID` variable) using the `tidyr::pivot_wider()` function:
 
 ```{r}
-dataWide <- dataLong %>% 
+dataWide <- dataLong |> 
   tidyr::pivot_wider(
     names_from = c(season, week),
     names_glue = "{.value}_{season}_week{week}",
@@ -1439,7 +1439,7 @@ Conversely, we can also restructure data from wide to long using the `tidyr::piv
 Here are the data in long form, after they have been transformed from wide form using the `tidyverse` ecosystem of packages [@R-tidyverse; @Wickham2019_packages]:
 
 ```{r}
-dataLong <- dataWide %>% 
+dataLong <- dataWide |> 
   tidyr::pivot_longer(
     cols = fantasyPoints_2022_week1:fantasyPoints_2023_week17,
     names_to = c("season", "week"),

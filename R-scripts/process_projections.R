@@ -13,8 +13,8 @@ filenames <- list.files(
   full.names = TRUE)
 
 filenames_season <- str_extract(filenames, "\\d{4}")
-filenames_week <- str_extract(filenames, "week\\d+") %>% 
-  str_remove("week") %>% 
+filenames_week <- str_extract(filenames, "week\\d+") |> 
+  str_remove("week") |> 
   as.integer()
 
 filenames_season <- filenames_season[which(!is.na(filenames_week))]
@@ -76,7 +76,7 @@ for(i in unique(filenames_season)){
     
     # Projected Points - Combined
     players_projectedPoints_weekly_combined <- bind_rows(players_projectedPoints_weekly)
-    players_projectedPoints_weekly_combined <- players_projectedPoints_weekly_combined %>% 
+    players_projectedPoints_weekly_combined <- players_projectedPoints_weekly_combined |> 
       select(season, week, everything())
     
     # Projections
@@ -99,14 +99,14 @@ for(i in unique(filenames_season)){
   objectName_projectedPoints_combined_merged <- paste("players_projectedPoints_weekly_combined_", i, sep = "")
   objectName_projections_merged <- paste("players_projections_weekly_average_", i, sep = "")
   
-  players_projectedPoints_weekly_combined_merged <- objectNames_projectedPoints_combined_subset %>%
-    map(get) %>%  # retrieve each object by name
-    bind_rows() %>% # bind all data frames by row
+  players_projectedPoints_weekly_combined_merged <- objectNames_projectedPoints_combined_subset |>
+    map(get) |>  # retrieve each object by name
+    bind_rows() |> # bind all data frames by row
     arrange(season, week)
   
-  players_projections_weekly_average_merged <- objectNames_projections_subset %>%
-    map(get) %>%  # retrieve each object by name
-    bind_rows() %>% # bind all data frames by row
+  players_projections_weekly_average_merged <- objectNames_projections_subset |>
+    map(get) |>  # retrieve each object by name
+    bind_rows() |> # bind all data frames by row
     arrange(season, week)
   
   assign(objectName_projectedPoints_combined_merged, players_projectedPoints_weekly_combined_merged)
@@ -122,15 +122,15 @@ for(i in unique(filenames_season)){
 objectNames_projectedPoints_combined_acrossSeasons <- paste("players_projectedPoints_weekly_combined_", unique(filenames_season), sep = "")
 objectNames_projections_weekly_average_acrossSeasons <- paste("players_projections_weekly_average_", unique(filenames_season), sep = "")
 
-players_projectedPoints_weekly_combined <- objectNames_projectedPoints_combined_acrossSeasons %>%
-  map(get) %>%  # retrieve each object by name
-  bind_rows() %>% # bind all data frames by row
+players_projectedPoints_weekly_combined <- objectNames_projectedPoints_combined_acrossSeasons |>
+  map(get) |>  # retrieve each object by name
+  bind_rows() |> # bind all data frames by row
   arrange(season, week)
 
-players_projections_weekly_average_merged <- objectNames_projections_weekly_average_acrossSeasons %>%
-  map(get) %>%  # retrieve each object by name
-  bind_rows() %>% # bind all data frames by row
-  select(season, week, everything()) %>% 
+players_projections_weekly_average_merged <- objectNames_projections_weekly_average_acrossSeasons |>
+  map(get) |>  # retrieve each object by name
+  bind_rows() |> # bind all data frames by row
+  select(season, week, everything()) |> 
   arrange(season, week)
 
 save(
@@ -173,7 +173,7 @@ for(i in 1:length(filenamesSeasonal_season)){
   players_projectedPoints_seasonal$DB$season <- filenamesSeasonal_season[i]
   
   players_projectedPoints_seasonal_combined <- bind_rows(players_projectedPoints_seasonal)
-  players_projectedPoints_seasonal_combined <- players_projectedPoints_seasonal_combined %>% 
+  players_projectedPoints_seasonal_combined <- players_projectedPoints_seasonal_combined |> 
     select(season, everything())
   
   # Projections
@@ -192,14 +192,14 @@ for(i in 1:length(filenamesSeasonal_season)){
 objectNames_projectedPoints_seasonal_acrossSeasons <- paste("players_projectedPoints_seasonal_", unique(filenamesSeasonal_season), sep = "")
 objectNames_projections_weekly_average_acrossSeasons <- objectNames_projections_seasonal
 
-players_projectedPoints_seasonal_combined <- objectNames_projectedPoints_seasonal_acrossSeasons %>%
-  map(get) %>%  # retrieve each object by name
-  bind_rows() %>% # bind all data frames by row
+players_projectedPoints_seasonal_combined <- objectNames_projectedPoints_seasonal_acrossSeasons |>
+  map(get) |>  # retrieve each object by name
+  bind_rows() |> # bind all data frames by row
   arrange(season)
 
-players_projections_seasonal_average_merged <- objectNames_projections_weekly_average_acrossSeasons %>%
-  map(get) %>%  # retrieve each object by name
-  bind_rows() %>% # bind all data frames by row
+players_projections_seasonal_average_merged <- objectNames_projections_weekly_average_acrossSeasons |>
+  map(get) |>  # retrieve each object by name
+  bind_rows() |> # bind all data frames by row
   arrange(season)
 
 save(

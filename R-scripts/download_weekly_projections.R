@@ -75,9 +75,9 @@ players_projections_weekly_average <- full_join(
 )
 
 # Add Additional Player Information ----
-players_projections_weekly_average <- players_projections_weekly_average %>% 
-  add_ecr() %>% 
-  add_uncertainty() %>% # comment out if throws an error
+players_projections_weekly_average <- players_projections_weekly_average |> 
+  add_ecr() |> 
+  add_uncertainty() |> # comment out if throws an error
   add_player_info()
 
 # Save Projected Points ----

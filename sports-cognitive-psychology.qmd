@@ -142,17 +142,17 @@ After the 2017 season, rates of going for it on fourth down increased dramatical
 #| fig-cap: "The Proportion of Fourth Downs That are Attempts to Go for it (Rather Than Punts or Field Goals)."
 #| fig-alt: "The Proportion of Fourth Downs That are Attempts to Go for it (Rather Than Punts or Field Goals)."
 
-nfl_pbp4thDown <- nfl_pbp %>% 
-  filter(down == 4) %>% 
+nfl_pbp4thDown <- nfl_pbp |> 
+  filter(down == 4) |> 
   filter(!(play_type %in% c("no_play","qb_kneel")))
 
 nfl_pbp4thDown$goForIt <- NA
 nfl_pbp4thDown$goForIt[which(nfl_pbp4thDown$play_type %in% c("field_goal","punt"))] <- 0
 nfl_pbp4thDown$goForIt[which(nfl_pbp4thDown$play_type %in% c("pass","run"))] <- 1
 
-nfl_pbp4thDownPlotData <- nfl_pbp4thDown %>% 
-  filter(!is.na(goForIt)) %>% 
-  group_by(season) %>% 
+nfl_pbp4thDownPlotData <- nfl_pbp4thDown |> 
+  filter(!is.na(goForIt)) |> 
+  group_by(season) |> 
   summarise(
     goForItPct = mean(goForIt, na.rm = TRUE),
     n = n(),
@@ -223,11 +223,11 @@ text_df <- tibble(
   color = c("black", "black")
 )
 
-nfl_4thdown %>%
+nfl_4thdown |>
   filter(
     vegas_wp > .2,
     between(go_boost, -10, 10),
-    season %in% c(2017, 2021)) %>%
+    season %in% c(2017, 2021)) |>
   ggplot(
     aes(
       x = go_boost,

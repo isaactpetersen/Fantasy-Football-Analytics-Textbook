@@ -643,8 +643,8 @@ We can examine this possibility separately by position.
 First, let's examine [descriptive statistics](#sec-descriptiveStatistics) of height and fantasy points (height is measured in inches):
 
 ```{r}
-player_stats_seasonal %>% 
-  dplyr::select(height, fantasyPoints) %>% 
+player_stats_seasonal |> 
+  dplyr::select(height, fantasyPoints) |> 
   dplyr::summarise(across(
       everything(),
       .fns = list(
@@ -665,11 +665,11 @@ player_stats_seasonal %>%
         mode = ~ petersenlab::Mode(., multipleModes = "mean"),
         skewness = ~ psych::skew(., na.rm = TRUE),
         kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
-      .names = "{.col}.{.fn}")) %>%
+      .names = "{.col}.{.fn}")) |>
     tidyr::pivot_longer(
       cols = everything(),
       names_to = c("variable","index"),
-      names_sep = "\\.") %>% 
+      names_sep = "\\.") |> 
     tidyr::pivot_wider(
       names_from = index,
       values_from = value)
@@ -740,7 +740,7 @@ As shown below, the negative covariance between height and fantasy points holds 
 
 ```{r}
 cov(
-  player_stats_seasonal %>% filter(position %in% c("QB","RB","WR","TE")) %>% select(height,fantasyPoints),
+  player_stats_seasonal |> filter(position %in% c("QB","RB","WR","TE")) |> select(height,fantasyPoints),
   use = "pairwise.complete.obs")
 ```
 
@@ -749,7 +749,7 @@ Here is the association for Quarterbacks:
 
 ```{r}
 cov(
-  player_stats_seasonal %>% filter(position == "QB") %>% select(height,fantasyPoints),
+  player_stats_seasonal |> filter(position == "QB") |> select(height,fantasyPoints),
   use = "pairwise.complete.obs")
 ```
 
@@ -757,7 +757,7 @@ Here is the association for Running Backs:
 
 ```{r}
 cov(
-  player_stats_seasonal %>% filter(position == "RB") %>% select(height,fantasyPoints),
+  player_stats_seasonal |> filter(position == "RB") |> select(height,fantasyPoints),
   use = "pairwise.complete.obs")
 ```
 
@@ -765,7 +765,7 @@ Here is the association for Wide Receivers:
 
 ```{r}
 cov(
-  player_stats_seasonal %>% filter(position == "WR") %>% select(height,fantasyPoints),
+  player_stats_seasonal |> filter(position == "WR") |> select(height,fantasyPoints),
   use = "pairwise.complete.obs")
 ```
 
@@ -773,7 +773,7 @@ Here is the association for Tight Ends:
 
 ```{r}
 cov(
-  player_stats_seasonal %>% filter(position == "TE") %>% select(height,fantasyPoints),
+  player_stats_seasonal |> filter(position == "TE") |> select(height,fantasyPoints),
   use = "pairwise.complete.obs")
 ```
 
@@ -880,7 +880,7 @@ Here is the association for Quarterbacks:
 ```{r}
 cor.test(
   ~ height + fantasyPoints,
-  data = player_stats_seasonal %>% 
+  data = player_stats_seasonal |> 
     filter(position == "QB")
 )
 ```
@@ -890,7 +890,7 @@ Here is the association for Running Backs:
 ```{r}
 cor.test(
   ~ height + fantasyPoints,
-  data = player_stats_seasonal %>% 
+  data = player_stats_seasonal |> 
     filter(position == "RB")
 )
 ```
@@ -900,7 +900,7 @@ Here is the association for Wide Receivers:
 ```{r}
 cor.test(
   ~ height + fantasyPoints,
-  data = player_stats_seasonal %>% 
+  data = player_stats_seasonal |> 
     filter(position == "WR")
 )
 ```
@@ -910,7 +910,7 @@ Here is the association for Tight Ends:
 ```{r}
 cor.test(
   ~ height + fantasyPoints,
-  data = player_stats_seasonal %>% 
+  data = player_stats_seasonal |> 
     filter(position == "TE")
 )
 ```
@@ -929,7 +929,7 @@ A [scatterplot](#sec-scatterplot) with best-fit line is in @fig-scatterplotWithB
 #| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height With Best-Fit Line. The linear best-fit line is in black. The nonlinear best-fit line is in blue."
 
 plot_scatterplot <- ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("QB","RB","WR","TE")),
+  data = player_stats_seasonal |> filter(position %in% c("QB","RB","WR","TE")),
   aes(
     x = height,
     y = fantasyPoints)) +
@@ -966,7 +966,7 @@ We now examine the association between height and fantasy points separately by p
 #| fig-alt: "Scatterplot of Fantasy Points (Season) by Player Height and Position With Best-Fit Line. The linear best-fit line for each position is in black. The nonlinear best-fit line for each group is represented by the color line."
 
 plot_scatterplotByPosition <- ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(position %in% c("QB","RB","WR","TE")),
+  data = player_stats_seasonal |> filter(position %in% c("QB","RB","WR","TE")),
   aes(
     x = height,
     y = fantasyPoints,
@@ -1006,7 +1006,7 @@ Interestingly, the best-fit lines suggest that the different positions have diff
 #| fig-alt: "Ridgeline Plot of Player Height by Position."
 
 ggplot2::ggplot(
-  data = player_stats_seasonal %>%
+  data = player_stats_seasonal |>
     filter(position %in% c("QB","RB","WR","TE")),
   mapping = aes(
     x = height,
@@ -1119,7 +1119,7 @@ cols_to_sqrt <- intersect(
 
 correlationRatio[cols_to_sqrt] <- sqrt(correlationRatio[cols_to_sqrt]) # take the square root of eta-squared to get eta
 
-correlationRatio <- correlationRatio %>%
+correlationRatio <- correlationRatio |>
   rename(Eta = Eta2)
 
 print(correlationRatio, digits = 9)
@@ -1141,8 +1141,8 @@ We can estimate a distance correlation using the `correlation::correlation()` fu
 #| label: distance-correlation
 
 correlation::correlation(
-  data = player_stats_seasonal %>% 
-    filter(season == max(season, na.rm = TRUE)) %>% 
+  data = player_stats_seasonal |> 
+    filter(season == max(season, na.rm = TRUE)) |> 
     select(draft_round, fantasyPoints),
   method = "distance"
 )
@@ -1408,13 +1408,13 @@ Now, consider the same association when we restrict the range to examine only th
 
 ```{r}
 cor.test(
-  player_stats_seasonal %>% 
-    filter(attempts < 450) %>% 
-    select(attempts) %>% 
+  player_stats_seasonal |> 
+    filter(attempts < 450) |> 
+    select(attempts) |> 
     pull(),
-  player_stats_seasonal %>% 
-    filter(attempts < 450) %>% 
-    select(passing_epa) %>% 
+  player_stats_seasonal |> 
+    filter(attempts < 450) |> 
+    select(passing_epa) |> 
     pull()
 )
 ```
@@ -1428,7 +1428,7 @@ The association is no longer positive and is weak in terms of [effect size](#sec
 #| code-fold: true
 
 plot_scatterplotWithRangeRestriction <- ggplot2::ggplot(
-  data = player_stats_seasonal %>% filter(attempts < 450),
+  data = player_stats_seasonal |> filter(attempts < 450),
   aes(
     x = attempts,
     y = passing_epa)) +

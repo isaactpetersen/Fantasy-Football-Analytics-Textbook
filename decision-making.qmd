@@ -654,11 +654,11 @@ In any case, they are able to see each other's projections and make change their
 ### Seasonal Projections {#sec-accuracyOfCrowdSeasonal}
 
 ```{r}
-seasonalIndividualSources <- projectionsWithActuals_seasonal %>%
-  filter(!is.na(raw_points)) %>% 
-  filter(!is.na(fantasyPoints)) %>% 
-  group_by(player_id, season) %>%
-  filter(n() >= 2) %>% # at least 2 projections
+seasonalIndividualSources <- projectionsWithActuals_seasonal |>
+  filter(!is.na(raw_points)) |> 
+  filter(!is.na(fantasyPoints)) |> 
+  group_by(player_id, season) |>
+  filter(n() >= 2) |> # at least 2 projections
   summarise(
     numProjections = n(),
     type = "individual",
@@ -670,11 +670,11 @@ seasonalIndividualSources <- projectionsWithActuals_seasonal %>%
     .groups = "drop"
   )
 
-seasonalCrowd <- projectionsWithActuals_seasonal %>%
-  filter(!is.na(raw_points)) %>% 
-  filter(!is.na(fantasyPoints)) %>% 
-  group_by(player_id, season) %>%
-  filter(n() >= 2) %>% # at least 2 projections
+seasonalCrowd <- projectionsWithActuals_seasonal |>
+  filter(!is.na(raw_points)) |> 
+  filter(!is.na(fantasyPoints)) |> 
+  group_by(player_id, season) |>
+  filter(n() >= 2) |> # at least 2 projections
   summarise(
     numProjections = n(),
     type = "crowd",
@@ -691,19 +691,19 @@ seasonalIndividualSourcesAndCrowd <- bind_rows(
   seasonalCrowd
 )
 
-seasonalIndividualSources <- seasonalIndividualSources %>% 
+seasonalIndividualSources <- seasonalIndividualSources |> 
   left_join(
     player_stats_seasonal,
     by = c("player_id", "season")
   )
 
-seasonalCrowd <- seasonalCrowd %>% 
+seasonalCrowd <- seasonalCrowd |> 
   left_join(
     player_stats_seasonal,
     by = c("player_id", "season")
   )
 
-seasonalIndividualSourcesAndCrowd <- seasonalIndividualSourcesAndCrowd %>% 
+seasonalIndividualSourcesAndCrowd <- seasonalIndividualSourcesAndCrowd |> 
   left_join(
     player_stats_seasonal,
     by = c("player_id", "season")
@@ -711,7 +711,7 @@ seasonalIndividualSourcesAndCrowd <- seasonalIndividualSourcesAndCrowd %>%
 ```
 
 ```{r}
-seasonalIndividualSources %>% 
+seasonalIndividualSources |> 
   select(player_display_name, position, season, numProjections, bracketingRate, ME:RMSLE)
 ```
 
@@ -721,7 +721,7 @@ seasonalIndividualSources %>%
 #| fig-alt: "Distribution of Bracketing Rate Across Players For Seasonal Projections."
 
 ggplot2::ggplot(
-  data = seasonalIndividualSources %>%
+  data = seasonalIndividualSources |>
     filter(position_group %in% c("QB","RB","WR","TE")),
   mapping = aes(
     x = bracketingRate)
@@ -742,19 +742,19 @@ ggplot2::ggplot(
 Below is the proportion of players whose bracketing rate was zero:
 
 ```{r}
-seasonalIndividualSources %>% 
-  filter(!is.na(bracketingRate)) %>% 
-  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
+seasonalIndividualSources |> 
+  filter(!is.na(bracketingRate)) |> 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) |> 
   summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
 ```
 
 ```{r}
 #| include: false
 
-proportionZeroBracketingRate_seasonal <- seasonalIndividualSources %>% 
-  filter(!is.na(bracketingRate)) %>% 
-  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
-  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n()) %>% 
+proportionZeroBracketingRate_seasonal <- seasonalIndividualSources |> 
+  filter(!is.na(bracketingRate)) |> 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) |> 
+  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n()) |> 
   as.numeric()
 ```
 
@@ -763,11 +763,11 @@ A high proportion (`{r} petersenlab::apa(proportionZeroBracketingRate_seasonal *
 ### Weekly Projections {#sec-accuracyOfCrowdWeekly}
 
 ```{r}
-weeklyIndividualSources <- projectionsWithActuals_weekly %>%
-  filter(!is.na(raw_points)) %>% 
-  filter(!is.na(fantasyPoints)) %>% 
-  group_by(player_id, season, week) %>%
-  filter(n() >= 2) %>% # at least 2 projections
+weeklyIndividualSources <- projectionsWithActuals_weekly |>
+  filter(!is.na(raw_points)) |> 
+  filter(!is.na(fantasyPoints)) |> 
+  group_by(player_id, season, week) |>
+  filter(n() >= 2) |> # at least 2 projections
   summarise(
     numProjections = n(),
     type = "individual",
@@ -779,11 +779,11 @@ weeklyIndividualSources <- projectionsWithActuals_weekly %>%
     .groups = "drop"
   )
 
-weeklyCrowd <- projectionsWithActuals_weekly %>%
-  filter(!is.na(raw_points)) %>% 
-  filter(!is.na(fantasyPoints)) %>% 
-  group_by(player_id, season, week) %>%
-  filter(n() >= 2) %>% # at least 2 projections
+weeklyCrowd <- projectionsWithActuals_weekly |>
+  filter(!is.na(raw_points)) |> 
+  filter(!is.na(fantasyPoints)) |> 
+  group_by(player_id, season, week) |>
+  filter(n() >= 2) |> # at least 2 projections
   summarise(
     numProjections = n(),
     type = "crowd",
@@ -800,19 +800,19 @@ weeklyIndividualSourcesAndCrowd <- bind_rows(
   weeklyCrowd
 )
 
-weeklyIndividualSources <- weeklyIndividualSources %>% 
+weeklyIndividualSources <- weeklyIndividualSources |> 
   left_join(
     player_stats_weekly,
     by = c("player_id", "season", "week")
   )
 
-weeklyCrowd <- weeklyCrowd %>% 
+weeklyCrowd <- weeklyCrowd |> 
   left_join(
     player_stats_weekly,
     by = c("player_id", "season", "week")
   )
 
-weeklyIndividualSourcesAndCrowd <- weeklyIndividualSourcesAndCrowd %>% 
+weeklyIndividualSourcesAndCrowd <- weeklyIndividualSourcesAndCrowd |> 
   left_join(
     player_stats_weekly,
     by = c("player_id", "season", "week")
@@ -820,7 +820,7 @@ weeklyIndividualSourcesAndCrowd <- weeklyIndividualSourcesAndCrowd %>%
 ```
 
 ```{r}
-weeklyIndividualSources %>% 
+weeklyIndividualSources |> 
   select(player_display_name, position, season, week, numProjections, bracketingRate, ME:RMSLE)
 ```
 
@@ -830,7 +830,7 @@ weeklyIndividualSources %>%
 #| fig-alt: "Distribution of Bracketing Rate Across Players For Weekly Projections."
 
 ggplot2::ggplot(
-  data = weeklyIndividualSources %>%
+  data = weeklyIndividualSources |>
     filter(position_group %in% c("QB","RB","WR","TE")),
   mapping = aes(
     x = bracketingRate)
@@ -851,19 +851,19 @@ ggplot2::ggplot(
 Below is the proportion of players whose bracketing rate was zero:
 
 ```{r}
-weeklyIndividualSources %>% 
-  filter(!is.na(bracketingRate)) %>% 
-  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
+weeklyIndividualSources |> 
+  filter(!is.na(bracketingRate)) |> 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) |> 
   summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n())
 ```
 
 ```{r}
 #| include: false
 
-proportionZeroBracketingRate_weekly <- weeklyIndividualSources %>% 
-  filter(!is.na(bracketingRate)) %>% 
-  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) %>% 
-  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n()) %>% 
+proportionZeroBracketingRate_weekly <- weeklyIndividualSources |> 
+  filter(!is.na(bracketingRate)) |> 
+  mutate(isZeroBracketingRate = ifelse(bracketingRate == 0, 1, 0)) |> 
+  summarise(proportionZeroBracketingRate = sum(isZeroBracketingRate) / n()) |> 
   as.numeric()
 ```
 

@@ -303,56 +303,56 @@ We also rename columns and change variable types to make sure they match the col
 
 # Prepare data for merging
 
-#nfl_actualFantasyPoints_player_weekly <- nfl_actualFantasyPoints_player_weekly %>% 
+#nfl_actualFantasyPoints_player_weekly <- nfl_actualFantasyPoints_player_weekly |> 
 #  rename(gsis_id = player_id)
 #
-#nfl_actualFantasyPoints_player_seasonal <- nfl_actualFantasyPoints_player_seasonal %>% 
+#nfl_actualFantasyPoints_player_seasonal <- nfl_actualFantasyPoints_player_seasonal |> 
 #  rename(gsis_id = player_id)
 
-player_stats_seasonal_offense <- player_stats_seasonal %>% 
-  filter(position_group %in% c("QB","RB","WR","TE")) %>% 
+player_stats_seasonal_offense <- player_stats_seasonal |> 
+  filter(position_group %in% c("QB","RB","WR","TE")) |> 
   rename(gsis_id = player_id)
 
-player_stats_weekly_offense <- player_stats_weekly %>% 
-  filter(position_group %in% c("QB","RB","WR","TE")) %>% 
+player_stats_weekly_offense <- player_stats_weekly |> 
+  filter(position_group %in% c("QB","RB","WR","TE")) |> 
   rename(gsis_id = player_id)
 
 ## Rename other variables to ensure common names
 
 ## Ensure variables with the same name have the same type
-nfl_players <- nfl_players %>% 
+nfl_players <- nfl_players |> 
   mutate(
     birth_date = as.Date(birth_date),
     jersey_number = as.character(jersey_number),
     nfl_id = as.character(nfl_id),
     years_of_experience = as.integer(years_of_experience))
 
-player_stats_seasonal_offense <- player_stats_seasonal_offense %>% 
+player_stats_seasonal_offense <- player_stats_seasonal_offense |> 
   mutate(
     birth_date = as.Date(birth_date),
     jersey_number = as.character(jersey_number))
 
-nfl_rosters <- nfl_rosters %>% 
+nfl_rosters <- nfl_rosters |> 
   mutate(
     draft_number = as.integer(draft_number))
 
-nfl_rosters_weekly <- nfl_rosters_weekly %>% 
+nfl_rosters_weekly <- nfl_rosters_weekly |> 
   mutate(
     draft_number = as.integer(draft_number))
 
-nfl_depthCharts <- nfl_depthCharts %>% 
+nfl_depthCharts <- nfl_depthCharts |> 
   mutate(
     season = as.integer(season))
 
-nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
-  rename(gsis_id = player_id) %>% 
+nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly |> 
+  rename(gsis_id = player_id) |> 
   mutate(
     season = as.integer(season),
-    receptions = as.integer(receptions)) %>% 
+    receptions = as.integer(receptions)) |> 
   distinct(gsis_id, season, week, .keep_all = TRUE) # drop duplicated rows
 
 ## Rename variables
-nfl_draftPicks <- nfl_draftPicks %>%
+nfl_draftPicks <- nfl_draftPicks |>
   rename(
     games_career = games,
     pass_completions_career = pass_completions,
@@ -372,19 +372,19 @@ nfl_draftPicks <- nfl_draftPicks %>%
   )
 
 ## Subset variables
-nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly %>% 
+nfl_expectedFantasyPoints_weekly <- nfl_expectedFantasyPoints_weekly |> 
   select(gsis_id:position, contains("_exp"), contains("_diff"), contains("_team")) #drop "raw stats" variables (e.g., rec_yards_gained) so they don't get coalesced with actual stats
 
 # Check duplicate ids
-player_stats_seasonal_offense %>% 
-  group_by(gsis_id, season) %>% 
-  filter(n() > 1) %>% 
+player_stats_seasonal_offense |> 
+  group_by(gsis_id, season) |> 
+  filter(n() > 1) |> 
   head()
 
-nfl_advancedStatsPFR_seasonal %>% 
-  group_by(gsis_id, season) %>% 
-  filter(n() > 1, !is.na(gsis_id)) %>% 
-  select(gsis_id, pfr_id, season, team, everything()) %>% 
+nfl_advancedStatsPFR_seasonal |> 
+  group_by(gsis_id, season) |> 
+  filter(n() > 1, !is.na(gsis_id)) |> 
+  select(gsis_id, pfr_id, season, team, everything()) |> 
   head()
 ```
 
@@ -455,40 +455,40 @@ We first merge variables from objects that have the same structure—player data
 
 # Create lists of objects to merge, depending on data structure: id; or id-season; or id-season-week
 playerListToMerge <- list(
-  nfl_players %>% filter(!is.na(gsis_id)),
-  nfl_draftPicks %>% filter(!is.na(gsis_id)) %>% select(-season)
+  nfl_players |> filter(!is.na(gsis_id)),
+  nfl_draftPicks |> filter(!is.na(gsis_id)) |> select(-season)
 )
 
 playerSeasonListToMerge <- list(
-  player_stats_seasonal_offense %>% filter(!is.na(gsis_id), !is.na(season)),
-  nfl_advancedStatsPFR_seasonal %>% filter(!is.na(gsis_id), !is.na(season))
+  player_stats_seasonal_offense |> filter(!is.na(gsis_id), !is.na(season)),
+  nfl_advancedStatsPFR_seasonal |> filter(!is.na(gsis_id), !is.na(season))
 )
 
 playerSeasonWeekListToMerge <- list(
-  nfl_rosters_weekly %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
+  nfl_rosters_weekly |> filter(!is.na(gsis_id), !is.na(season), !is.na(week)),
   #nfl_actualStats_offense_weekly,
-  nfl_expectedFantasyPoints_weekly %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week))
+  nfl_expectedFantasyPoints_weekly |> filter(!is.na(gsis_id), !is.na(season), !is.na(week))
   #nfl_advancedStatsPFR_weekly,
 )
 
 playerSeasonWeekPositionListToMerge <- list(
-  nfl_depthCharts %>% filter(!is.na(gsis_id), !is.na(season), !is.na(week))
+  nfl_depthCharts |> filter(!is.na(gsis_id), !is.na(season), !is.na(week))
 )
 
 # Merge data
-playerMerged <- playerListToMerge %>% 
+playerMerged <- playerListToMerge |> 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id"),
     conflict = powerjoin::coalesce_xy) # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 
-playerSeasonMerged <- playerSeasonListToMerge %>% 
+playerSeasonMerged <- playerSeasonListToMerge |> 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season"),
     conflict = powerjoin::coalesce_xy) # where the objects have the same variable name (e.g., team), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
 
-playerSeasonWeekMerged <- playerSeasonWeekListToMerge %>% 
+playerSeasonWeekMerged <- playerSeasonWeekListToMerge |> 
   reduce(
     powerjoin::power_full_join,
     by = c("gsis_id","season","week"),
@@ -517,11 +517,11 @@ Then we merge the player data with the seasonal data:
 
 seasonalData <- powerjoin::power_full_join(
   playerSeasonMerged,
-  playerMerged %>% select(-age, -years_of_experience, -team, -latest_team, -last_season, -pff_status), # drop variables from id objects that change from year to year (and thus are not necessarily accurate for a given season)
+  playerMerged |> select(-age, -years_of_experience, -team, -latest_team, -last_season, -pff_status), # drop variables from id objects that change from year to year (and thus are not necessarily accurate for a given season)
   by = "gsis_id",
   conflict = powerjoin::coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
-) %>% 
-  filter(!is.na(season)) %>% 
+) |> 
+  filter(!is.na(season)) |> 
   select(gsis_id, season, player_display_name, position, team, games, everything())
 ```
 
@@ -550,8 +550,8 @@ seasonalAndWeeklyData <- powerjoin::power_full_join(
   seasonalData,
   by = c("gsis_id","season"),
   conflict = powerjoin::coalesce_xy # where the objects have the same variable name (e.g., position), keep the values from object 1, unless it's NA, in which case use the relevant value from object 2
-) %>% 
-  filter(!is.na(week)) %>% 
+) |> 
+  filter(!is.na(week)) |> 
   select(gsis_id, season, week, full_name, position, team, everything())
 ```
 
@@ -564,14 +564,14 @@ gc()
 
 ```{r}
 # Duplicate cases
-seasonalData %>% 
-  group_by(gsis_id, season) %>% 
-  filter(n() > 1) %>% 
+seasonalData |> 
+  group_by(gsis_id, season) |> 
+  filter(n() > 1) |> 
   head()
 
-seasonalAndWeeklyData %>% 
-  group_by(gsis_id, season, week) %>% 
-  filter(n() > 1) %>% 
+seasonalAndWeeklyData |> 
+  group_by(gsis_id, season, week) |> 
+  filter(n() > 1) |> 
   head()
 ```
 
@@ -583,7 +583,7 @@ For purposes of machine learning, we set all character and logical columns to fa
 #| label: additional-processing-machine-learning
 
 # Convert character and logical variables to factors
-seasonalData <- seasonalData %>% 
+seasonalData <- seasonalData |> 
   mutate(
     across(
       where(is.character),
@@ -610,12 +610,12 @@ For variables that are not expected to change, such as a player's name and posit
 ```{r}
 #| label: fill-in-missing-data-machine-learning
 
-seasonalData <- seasonalData %>% 
-  arrange(gsis_id, season) %>% 
-  group_by(gsis_id) %>% 
+seasonalData <- seasonalData |> 
+  arrange(gsis_id, season) |> 
+  group_by(gsis_id) |> 
   fill(
     player_name, player_display_name, pos, position, position_group,
-    .direction = "downup") %>% 
+    .direction = "downup") |> 
   ungroup()
 ```
 
@@ -633,7 +633,7 @@ We create a new data object that contains the latest seasonal data, for merging 
 ```{r}
 #| label: create-new-data-machine-learning
 
-newData_seasonal <- seasonalData %>% 
+newData_seasonal <- seasonalData |> 
   filter(season == max(season, na.rm = TRUE))
 ```
 
@@ -648,15 +648,15 @@ We also retain the original same-year fantasy points variable (`fantasyPoints`) 
 ```{r}
 #| label: lag-fantasy-points-machine-learning
 
-seasonalData_lag <- seasonalData %>% 
-  arrange(gsis_id, season) %>% 
-  group_by(gsis_id) %>% 
+seasonalData_lag <- seasonalData |> 
+  arrange(gsis_id, season) |> 
+  group_by(gsis_id) |> 
   mutate(
     fantasyPoints_lag = lead(fantasyPoints)
-  ) %>% 
+  ) |> 
   ungroup()
 
-seasonalData_lag %>% 
+seasonalData_lag |> 
   select(gsis_id, player_display_name, season, fantasyPoints, fantasyPoints_lag) # verify that lagging worked as expected
 ```
 
@@ -675,15 +675,15 @@ Thus, all of the variables in the object are our [predictor](#sec-correlationalS
 ```{r}
 #| label: subset-data-machine-learning
 
-seasonalData_lag %>% select_if(~class(.) == "Date")
-seasonalData_lag %>% select_if(is.character)
-seasonalData_lag %>% select_if(is.factor)
-seasonalData_lag %>% select_if(is.logical)
+seasonalData_lag |> select_if(~class(.) == "Date")
+seasonalData_lag |> select_if(is.character)
+seasonalData_lag |> select_if(is.factor)
+seasonalData_lag |> select_if(is.logical)
 
 dropVars <- c(
   "birth_date", "player_display_name", "team", "player_name", "headshot_url", "season_type", "fg_made_list", "fg_missed_list", "fg_blocked_list", "gwfg_distance_list", "pff_status", "startdate", "pos", "merge_name", "pfr_player_id", "cfb_player_id", "hof", "category", "side", "college", "car_av", "display_name", "common_first_name", "first_name", "last_name", "short_name", "football_name", "suffix", "esb_id", "nfl_id", "pff_id", "otc_id", "espn_id", "smart_id", "ngs_position_group", "ngs_position", "headshot", "college_name", "college_conference", "jersey_number", "status", "ngs_status", "ngs_status_short_description", "pff_position", "draft_team", "pfr_player_name", "pfr_id")
 
-seasonalData_lag_subset <- seasonalData_lag %>% 
+seasonalData_lag_subset <- seasonalData_lag |> 
   dplyr::select(-any_of(dropVars))
 ```
 
@@ -701,32 +701,32 @@ Then, we separate the objects by position, so we can develop different machine l
 ```{r}
 #| label: separate-by-position-machine-learning
 
-seasonalData_lag_subsetQB <- seasonalData_lag_subset %>% 
-  filter(position == "QB") %>% 
+seasonalData_lag_subsetQB <- seasonalData_lag_subset |> 
+  filter(position == "QB") |> 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_season, draft_pick,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     completions:rushing_2pt_conversions, special_teams_tds, contains(".pass"), contains(".rush"))
 
-seasonalData_lag_subsetRB <- seasonalData_lag_subset %>% 
-  filter(position == "RB") %>% 
+seasonalData_lag_subsetRB <- seasonalData_lag_subset |> 
+  filter(position == "RB") |> 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_season, draft_pick,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 
-seasonalData_lag_subsetWR <- seasonalData_lag_subset %>% 
-  filter(position == "WR") %>% 
+seasonalData_lag_subsetWR <- seasonalData_lag_subset |> 
+  filter(position == "WR") |> 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_season, draft_pick,
     fantasy_points, fantasy_points_ppr, fantasyPoints, fantasyPoints_lag,
     carries:special_teams_tds, contains(".rush"), contains(".rec"))
 
-seasonalData_lag_subsetTE <- seasonalData_lag_subset %>% 
-  filter(position == "TE") %>% 
+seasonalData_lag_subsetTE <- seasonalData_lag_subset |> 
+  filter(position == "TE") |> 
   select(
     gsis_id, season, games, gs, years_of_experience, age, ageCentered20, ageCentered20Quadratic,
     height, weight, rookie_season, draft_pick,
@@ -850,24 +850,24 @@ retiredTEs <- unique(seasonalData_lag_te_all$gsis_id[which(seasonalData_lag_te_a
 numTEs <- length(unique(seasonalData_lag_te_all$gsis_id))
 teHoldoutIDs <- sample(retiredTEs, size = ceiling(.2 * numTEs)) # holdout 20% of players
   
-seasonalData_lag_qb_train <- seasonalData_lag_qb_all %>% 
+seasonalData_lag_qb_train <- seasonalData_lag_qb_all |> 
   filter(gsis_id %ni% qbHoldoutIDs)
-seasonalData_lag_qb_test <- seasonalData_lag_qb_all %>% 
+seasonalData_lag_qb_test <- seasonalData_lag_qb_all |> 
   filter(gsis_id %in% qbHoldoutIDs)
 
-seasonalData_lag_rb_train <- seasonalData_lag_rb_all %>% 
+seasonalData_lag_rb_train <- seasonalData_lag_rb_all |> 
   filter(gsis_id %ni% rbHoldoutIDs)
-seasonalData_lag_rb_test <- seasonalData_lag_rb_all %>% 
+seasonalData_lag_rb_test <- seasonalData_lag_rb_all |> 
   filter(gsis_id %in% rbHoldoutIDs)
 
-seasonalData_lag_wr_train <- seasonalData_lag_wr_all %>% 
+seasonalData_lag_wr_train <- seasonalData_lag_wr_all |> 
   filter(gsis_id %ni% wrHoldoutIDs)
-seasonalData_lag_wr_test <- seasonalData_lag_wr_all %>% 
+seasonalData_lag_wr_test <- seasonalData_lag_wr_all |> 
   filter(gsis_id %in% wrHoldoutIDs)
 
-seasonalData_lag_te_train <- seasonalData_lag_te_all %>% 
+seasonalData_lag_te_train <- seasonalData_lag_te_all |> 
   filter(gsis_id %ni% teHoldoutIDs)
-seasonalData_lag_te_test <- seasonalData_lag_te_all %>% 
+seasonalData_lag_te_test <- seasonalData_lag_te_all |> 
   filter(gsis_id %in% teHoldoutIDs)
 ```
 
@@ -966,11 +966,11 @@ seasonalData_lag_qb_all_imp
 
 data_all_qb <- seasonalData_lag_qb_all_imp$data
 data_all_qb$fantasyPointsMC_lag <- scale(data_all_qb$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_all_qb_matrix <- data_all_qb %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_all_qb_matrix <- data_all_qb |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
-newData_qb <- data_all_qb %>% 
-  filter(season == max(season, na.rm = TRUE)) %>% 
+newData_qb <- data_all_qb |> 
+  filter(season == max(season, na.rm = TRUE)) |> 
   select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_qb_matrix <- data_all_qb_matrix[
   data_all_qb_matrix[, "season"] == max(data_all_qb_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
@@ -991,8 +991,8 @@ seasonalData_lag_qb_train_imp
 
 data_train_qb <- seasonalData_lag_qb_train_imp$data
 data_train_qb$fantasyPointsMC_lag <- scale(data_train_qb$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_train_qb_matrix <- data_train_qb %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_train_qb_matrix <- data_train_qb |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 
 seasonalData_lag_qb_test_imp <- predict(
@@ -1001,8 +1001,8 @@ seasonalData_lag_qb_test_imp <- predict(
   seed = 52242)
 
 data_test_qb <- seasonalData_lag_qb_test_imp
-data_test_qb_matrix <- data_test_qb %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_test_qb_matrix <- data_test_qb |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 ```
 
@@ -1029,11 +1029,11 @@ seasonalData_lag_rb_all_imp
 
 data_all_rb <- seasonalData_lag_rb_all_imp$data
 data_all_rb$fantasyPointsMC_lag <- scale(data_all_rb$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_all_rb_matrix <- data_all_rb %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_all_rb_matrix <- data_all_rb |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
-newData_rb <- data_all_rb %>% 
-  filter(season == max(season, na.rm = TRUE)) %>% 
+newData_rb <- data_all_rb |> 
+  filter(season == max(season, na.rm = TRUE)) |> 
   select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_rb_matrix <- data_all_rb_matrix[
   data_all_rb_matrix[, "season"] == max(data_all_rb_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
@@ -1054,8 +1054,8 @@ seasonalData_lag_rb_train_imp
 
 data_train_rb <- seasonalData_lag_rb_train_imp$data
 data_train_rb$fantasyPointsMC_lag <- scale(data_train_rb$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_train_rb_matrix <- data_train_rb %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_train_rb_matrix <- data_train_rb |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 
 seasonalData_lag_rb_test_imp <- predict(
@@ -1064,8 +1064,8 @@ seasonalData_lag_rb_test_imp <- predict(
   seed = 52242)
 
 data_test_rb <- seasonalData_lag_rb_test_imp
-data_test_rb_matrix <- data_test_rb %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_test_rb_matrix <- data_test_rb |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 ```
 
@@ -1092,11 +1092,11 @@ seasonalData_lag_wr_all_imp
 
 data_all_wr <- seasonalData_lag_wr_all_imp$data
 data_all_wr$fantasyPointsMC_lag <- scale(data_all_wr$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_all_wr_matrix <- data_all_wr %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_all_wr_matrix <- data_all_wr |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
-newData_wr <- data_all_wr %>% 
-  filter(season == max(season, na.rm = TRUE)) %>% 
+newData_wr <- data_all_wr |> 
+  filter(season == max(season, na.rm = TRUE)) |> 
   select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_wr_matrix <- data_all_wr_matrix[
   data_all_wr_matrix[, "season"] == max(data_all_wr_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
@@ -1117,8 +1117,8 @@ seasonalData_lag_wr_train_imp
 
 data_train_wr <- seasonalData_lag_wr_train_imp$data
 data_train_wr$fantasyPointsMC_lag <- scale(data_train_wr$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_train_wr_matrix <- data_train_wr %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_train_wr_matrix <- data_train_wr |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 
 seasonalData_lag_wr_test_imp <- predict(
@@ -1127,8 +1127,8 @@ seasonalData_lag_wr_test_imp <- predict(
   seed = 52242)
 
 data_test_wr <- seasonalData_lag_wr_test_imp
-data_test_wr_matrix <- data_test_wr %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_test_wr_matrix <- data_test_wr |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 ```
 
@@ -1155,11 +1155,11 @@ seasonalData_lag_te_all_imp
 
 data_all_te <- seasonalData_lag_te_all_imp$data
 data_all_te$fantasyPointsMC_lag <- scale(data_all_te$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_all_te_matrix <- data_all_te %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_all_te_matrix <- data_all_te |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
-newData_te <- data_all_te %>% 
-  filter(season == max(season, na.rm = TRUE)) %>% 
+newData_te <- data_all_te |> 
+  filter(season == max(season, na.rm = TRUE)) |> 
   select(-fantasyPoints_lag, -fantasyPointsMC_lag)
 newData_te_matrix <- data_all_te_matrix[
   data_all_te_matrix[, "season"] == max(data_all_te_matrix[, "season"], na.rm = TRUE), # keep only rows with the most recent season
@@ -1180,8 +1180,8 @@ seasonalData_lag_te_train_imp
 
 data_train_te <- seasonalData_lag_te_train_imp$data
 data_train_te$fantasyPointsMC_lag <- scale(data_train_te$fantasyPoints_lag, scale = FALSE) # mean-centered
-data_train_te_matrix <- data_train_te %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_train_te_matrix <- data_train_te |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 
 seasonalData_lag_te_test_imp <- predict(
@@ -1190,8 +1190,8 @@ seasonalData_lag_te_test_imp <- predict(
   seed = 52242)
 
 data_test_te <- seasonalData_lag_te_test_imp
-data_test_te_matrix <- data_test_te %>%
-  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) %>% 
+data_test_te_matrix <- data_test_te |>
+  mutate(across(where(is.factor), ~ as.numeric(as.integer(.)))) |> 
   as.matrix()
 ```
 
@@ -1307,13 +1307,13 @@ rec <- recipes::recipe(
   data = data_train_qb)
 
 # Define Model
-lm_spec <- parsnip::linear_reg() %>%
-  parsnip::set_engine("lm") %>%
+lm_spec <- parsnip::linear_reg() |>
+  parsnip::set_engine("lm") |>
   parsnip::set_mode("regression")
 
 # Workflow
-lm_wf <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+lm_wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(lm_spec)
 
 # Fit Model with Cross-Validation
@@ -1333,16 +1333,16 @@ final_model <- workflows::fit(
   data = data_train_qb)
 
 # View Coefficients
-final_model %>% 
-  workflows::extract_fit_parsnip() %>% 
+final_model |> 
+  workflows::extract_fit_parsnip() |> 
   broom::tidy()
 
-final_model %>%
-  workflows::extract_fit_parsnip() %>% 
+final_model |>
+  workflows::extract_fit_parsnip() |> 
   effectsize::standardize_parameters()
 
 # Predict on Test Data
-df <- data_test_qb %>%
+df <- data_test_qb |>
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
 # Evaluate Accuracy of Predictions
@@ -1411,14 +1411,14 @@ ggplot(
 Below are the model predictions for next year's fantasy points:
 
 ```{r}
-newData_qb %>%
-  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+newData_qb |>
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) |> 
   left_join(
     .,
-    nfl_playerIDs %>% select(gsis_id, name),
+    nfl_playerIDs |> select(gsis_id, name),
     by = "gsis_id"
-  ) %>% 
-  select(name, fantasyPoints_lag) %>% 
+  ) |> 
+  select(name, fantasyPoints_lag) |> 
   arrange(-fantasyPoints_lag)
 ```
 
@@ -1437,16 +1437,16 @@ folds <- folds_kFold
 # Define Recipe (Formula)
 rec <- recipes::recipe(
   fantasyPoints_lag ~ ., # use all predictors
-  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+  data = data_train_qb |> select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
-lm_spec <- parsnip::linear_reg() %>%
-  parsnip::set_engine("lm") %>%
+lm_spec <- parsnip::linear_reg() |>
+  parsnip::set_engine("lm") |>
   parsnip::set_mode("regression")
 
 # Workflow
-lm_wf <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+lm_wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(lm_spec)
 
 # Fit Model with Cross-Validation
@@ -1466,16 +1466,16 @@ final_model <- workflows::fit(
   data = data_train_qb)
 
 # View Coefficients
-final_model %>% 
-  workflows::extract_fit_parsnip() %>% 
+final_model |> 
+  workflows::extract_fit_parsnip() |> 
   broom::tidy()
 
-final_model %>%
-  workflows::extract_fit_parsnip() %>% 
+final_model |>
+  workflows::extract_fit_parsnip() |> 
   effectsize::standardize_parameters()
 
 # Predict on Test Data
-df <- data_test_qb %>%
+df <- data_test_qb |>
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
 # Evaluate Accuracy of Predictions
@@ -1544,14 +1544,14 @@ ggplot(
 Below are the model predictions for next year's fantasy points:
 
 ```{r}
-newData_qb %>%
-  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+newData_qb |>
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) |> 
   left_join(
     .,
-    nfl_playerIDs %>% select(gsis_id, name),
+    nfl_playerIDs |> select(gsis_id, name),
     by = "gsis_id"
-  ) %>% 
-  select(name, fantasyPoints_lag) %>% 
+  ) |> 
+  select(name, fantasyPoints_lag) |> 
   arrange(-fantasyPoints_lag)
 ```
 
@@ -1584,18 +1584,18 @@ folds <- folds_kFold
 # Define Recipe (Formula)
 rec <- recipes::recipe(
   fantasyPoints_lag ~ ., # use all predictors
-  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+  data = data_train_qb |> select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
 lasso_spec <- 
   parsnip::linear_reg(
     penalty = tune::tune(),
-    mixture = 1) %>%
+    mixture = 1) |>
   parsnip::set_engine("glmnet")
 
 # Workflow
-lasso_wf <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+lasso_wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(lasso_spec)
 
 # Define grid of penalties to try (log scale is typical)
@@ -1633,12 +1633,12 @@ final_model <- workflows::fit(
   data = data_train_qb)
 
 # View Coefficients
-final_model %>% 
-  workflows::extract_fit_parsnip() %>% 
+final_model |> 
+  workflows::extract_fit_parsnip() |> 
   broom::tidy()
 
 # Predict on Test Data
-df <- data_test_qb %>%
+df <- data_test_qb |>
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
 # Evaluate Accuracy of Predictions
@@ -1654,11 +1654,11 @@ petersenlab::accuracyOverall(
 
 accuracyIndices_lasso_train <- tune::collect_metrics(cv_results)
 
-rsquare_lasso_train <- accuracyIndices_lasso_train %>% 
-  filter(.metric == "rsq" & penalty == best_penalty$penalty) %>% 
-  select(mean) %>% 
-  pull() %>% 
-  as.numeric() %>% 
+rsquare_lasso_train <- accuracyIndices_lasso_train |> 
+  filter(.metric == "rsq" & penalty == best_penalty$penalty) |> 
+  select(mean) |> 
+  pull() |> 
+  as.numeric() |> 
   round(., 2)
 
 accuracyIndices_lasso <- petersenlab::accuracyOverall(
@@ -1712,14 +1712,14 @@ ggplot(
 Below are the model predictions for next year's fantasy points:
 
 ```{r}
-newData_qb %>%
-  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+newData_qb |>
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) |> 
   left_join(
     .,
-    nfl_playerIDs %>% select(gsis_id, name),
+    nfl_playerIDs |> select(gsis_id, name),
     by = "gsis_id"
-  ) %>% 
-  select(name, fantasyPoints_lag) %>% 
+  ) |> 
+  select(name, fantasyPoints_lag) |> 
   arrange(-fantasyPoints_lag)
 ```
 
@@ -1747,18 +1747,18 @@ folds <- folds_kFold
 # Define Recipe (Formula)
 rec <- recipes::recipe(
   fantasyPoints_lag ~ ., # use all predictors
-  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+  data = data_train_qb |> select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
 ridge_spec <- 
   parsnip::linear_reg(
     penalty = tune::tune(),
-    mixture = 0) %>%
+    mixture = 0) |>
   parsnip::set_engine("glmnet")
 
 # Workflow
-ridge_wf <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+ridge_wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(ridge_spec)
 
 # Define grid of penalties to try (log scale is typical)
@@ -1796,12 +1796,12 @@ final_model <- workflows::fit(
   data = data_train_qb)
 
 # View Coefficients
-final_model %>% 
-  workflows::extract_fit_parsnip() %>% 
+final_model |> 
+  workflows::extract_fit_parsnip() |> 
   broom::tidy()
 
 # Predict on Test Data
-df <- data_test_qb %>%
+df <- data_test_qb |>
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
 # Evaluate Accuracy of Predictions
@@ -1817,11 +1817,11 @@ petersenlab::accuracyOverall(
 
 accuracyIndices_ridge_train <- tune::collect_metrics(cv_results)
 
-rsquare_ridge_train <- accuracyIndices_ridge_train %>% 
-  filter(.metric == "rsq" & penalty == best_penalty$penalty) %>% 
-  select(mean) %>% 
-  pull() %>% 
-  as.numeric() %>% 
+rsquare_ridge_train <- accuracyIndices_ridge_train |> 
+  filter(.metric == "rsq" & penalty == best_penalty$penalty) |> 
+  select(mean) |> 
+  pull() |> 
+  as.numeric() |> 
   round(., 2)
 
 accuracyIndices_ridge <- petersenlab::accuracyOverall(
@@ -1875,14 +1875,14 @@ ggplot(
 Below are the model predictions for next year's fantasy points:
 
 ```{r}
-newData_qb %>%
-  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+newData_qb |>
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) |> 
   left_join(
     .,
-    nfl_playerIDs %>% select(gsis_id, name),
+    nfl_playerIDs |> select(gsis_id, name),
     by = "gsis_id"
-  ) %>% 
-  select(name, fantasyPoints_lag) %>% 
+  ) |> 
+  select(name, fantasyPoints_lag) |> 
   arrange(-fantasyPoints_lag)
 ```
 
@@ -1917,18 +1917,18 @@ folds <- folds_kFold
 # Define Recipe (Formula)
 rec <- recipes::recipe(
   fantasyPoints_lag ~ ., # use all predictors
-  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+  data = data_train_qb |> select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
 enet_spec <- 
   parsnip::linear_reg(
     penalty = tune::tune(),
-    mixture = tune::tune()) %>%
+    mixture = tune::tune()) |>
   parsnip::set_engine("glmnet")
 
 # Workflow
-enet_wf <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+enet_wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(enet_spec)
 
 # Define a regular grid for both penalty and mixture
@@ -1968,12 +1968,12 @@ final_model <- workflows::fit(
   data = data_train_qb)
 
 # View Coefficients
-final_model %>% 
-  workflows::extract_fit_parsnip() %>% 
+final_model |> 
+  workflows::extract_fit_parsnip() |> 
   broom::tidy()
 
 # Predict on Test Data
-df <- data_test_qb %>%
+df <- data_test_qb |>
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
 # Evaluate Accuracy of Predictions
@@ -1989,11 +1989,11 @@ petersenlab::accuracyOverall(
 
 accuracyIndices_elasticNet_train <- tune::collect_metrics(cv_results)
 
-rsquare_elasticNet_train <- accuracyIndices_elasticNet_train %>% 
-  filter(.metric == "rsq" & penalty == best_penalty$penalty & mixture == best_penalty$mixture) %>% 
-  select(mean) %>% 
-  pull() %>% 
-  as.numeric() %>% 
+rsquare_elasticNet_train <- accuracyIndices_elasticNet_train |> 
+  filter(.metric == "rsq" & penalty == best_penalty$penalty & mixture == best_penalty$mixture) |> 
+  select(mean) |> 
+  pull() |> 
+  as.numeric() |> 
   round(., 2)
 
 accuracyIndices_elasticNet <- petersenlab::accuracyOverall(
@@ -2047,14 +2047,14 @@ ggplot(
 Below are the model predictions for next year's fantasy points:
 
 ```{r}
-newData_qb %>%
-  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+newData_qb |>
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) |> 
   left_join(
     .,
-    nfl_playerIDs %>% select(gsis_id, name),
+    nfl_playerIDs |> select(gsis_id, name),
     by = "gsis_id"
-  ) %>% 
-  select(name, fantasyPoints_lag) %>% 
+  ) |> 
+  select(name, fantasyPoints_lag) |> 
   arrange(-fantasyPoints_lag)
 ```
 
@@ -2096,32 +2096,32 @@ folds <- folds_kFold
 # Define Recipe (Formula)
 rec <- recipes::recipe(
   fantasyPoints_lag ~ ., # use all predictors
-  data = data_train_qb %>% select(-gsis_id, -fantasyPointsMC_lag))
+  data = data_train_qb |> select(-gsis_id, -fantasyPointsMC_lag))
 
 # Define Model
 rf_spec <- 
   parsnip::rand_forest(
     mtry = tune::tune(),
     min_n = tune::tune(),
-    trees = 500) %>%
-  parsnip::set_mode("regression") %>%
+    trees = 500) |>
+  parsnip::set_mode("regression") |>
   parsnip::set_engine(
     "ranger",
     importance = "impurity")
 
 # Workflow
-rf_wf <- workflows::workflow() %>%
-  workflows::add_recipe(rec) %>%
+rf_wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
   workflows::add_model(rf_spec)
 
 # Create Grid
-n_predictors <- recipes::prep(rec) %>%
-  recipes::juice() %>%
-  dplyr::select(-fantasyPoints_lag) %>%
+n_predictors <- recipes::prep(rec) |>
+  recipes::juice() |>
+  dplyr::select(-fantasyPoints_lag) |>
   ncol()
 
 # Dynamically define ranges based on data
-rf_params <- hardhat::extract_parameter_set_dials(rf_spec) %>%
+rf_params <- hardhat::extract_parameter_set_dials(rf_spec) |>
   dials:::update.parameters(
     mtry = dials::mtry(range = c(1L, n_predictors)),
     min_n = dials::min_n(range = c(2L, 10L))
@@ -2159,7 +2159,7 @@ final_model <- workflows::fit(
   data = data_train_qb)
 
 # View Feature Importance
-rf_fit <- final_model %>% 
+rf_fit <- final_model |> 
   workflows::extract_fit_parsnip()
 
 rf_fit
@@ -2169,7 +2169,7 @@ ranger_obj <- rf_fit$fit
 ranger_obj$variable.importance
 
 # Predict on Test Data
-df <- data_test_qb %>%
+df <- data_test_qb |>
   mutate(pred = predict(final_model, new_data = data_test_qb)$.pred)
 
 # Evaluate Accuracy of Predictions
@@ -2185,11 +2185,11 @@ petersenlab::accuracyOverall(
 
 accuracyIndices_randomForest_train <- tune::collect_metrics(cv_results)
 
-rsquare_randomForest_train <- accuracyIndices_randomForest_train %>% 
-  filter(.metric == "rsq" & mtry == best_penalty$mtry & min_n == best_penalty$min_n) %>% 
-  select(mean) %>% 
-  pull() %>% 
-  as.numeric() %>% 
+rsquare_randomForest_train <- accuracyIndices_randomForest_train |> 
+  filter(.metric == "rsq" & mtry == best_penalty$mtry & min_n == best_penalty$min_n) |> 
+  select(mean) |> 
+  pull() |> 
+  as.numeric() |> 
   round(., 2)
 
 accuracyIndices_randomForest <- petersenlab::accuracyOverall(
@@ -2243,14 +2243,14 @@ ggplot(
 Below are the model predictions for next year's fantasy points:
 
 ```{r}
-newData_qb %>%
-  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) %>% 
+newData_qb |>
+  mutate(fantasyPoints_lag = predict(final_model, new_data = newData_qb)$.pred) |> 
   left_join(
     .,
-    nfl_playerIDs %>% select(gsis_id, name),
+    nfl_playerIDs |> select(gsis_id, name),
     by = "gsis_id"
-  ) %>% 
-  select(name, fantasyPoints_lag) %>% 
+  ) |> 
+  select(name, fantasyPoints_lag) |> 
   arrange(-fantasyPoints_lag)
 ```
 
@@ -2277,17 +2277,17 @@ Below, we fit longitudinal random forest models using the `LongituRF::MERF()` fu
 
 ```{r}
 smerf <- LongituRF::MERF(
-  X = data_train_qb %>% dplyr::select(season:att_br.rush) %>% as.matrix(), # predictors of the fixed effects
-  Y = data_train_qb[,c("fantasyPoints_lag")] %>% as.matrix(), # outcome variable
-  Z = data_train_qb %>% dplyr::mutate(constant = 1) %>% dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) %>% as.matrix(), # predictors of the random effects
-  id = data_train_qb[,c("gsis_id")] %>% as.matrix(), # player ID (for nesting)
-  time = data_train_qb[,c("ageCentered20")] %>% as.matrix(), # time variable
+  X = data_train_qb |> dplyr::select(season:att_br.rush) |> as.matrix(), # predictors of the fixed effects
+  Y = data_train_qb[,c("fantasyPoints_lag")] |> as.matrix(), # outcome variable
+  Z = data_train_qb |> dplyr::mutate(constant = 1) |> dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) |> as.matrix(), # predictors of the random effects
+  id = data_train_qb[,c("gsis_id")] |> as.matrix(), # player ID (for nesting)
+  time = data_train_qb[,c("ageCentered20")] |> as.matrix(), # time variable
   ntree = 500,
   sto = "BM")
 
 smerf$forest # the fitted random forest (obtained at the last iteration)
-smerf$random_effects %>% data.frame() # the predicted random effects for each player
-smerf$omega %>% data.frame() # the predicted stochastic processes
+smerf$random_effects |> data.frame() # the predicted random effects for each player
+smerf$omega |> data.frame() # the predicted stochastic processes
 smerf$OOB # OOB error at each iteration
 ```
 
@@ -2307,10 +2307,10 @@ Hopefully the package maintainer will help address the issue.
 # Predict on Test Data
 predict(
   smerf,
-  X = data_test_qb %>% dplyr::select(season:att_br.rush) %>% as.matrix(),
-  Z = data_train_qb %>% dplyr::mutate(constant = 1) %>% dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) %>% as.matrix(),
-  id = data_test_qb[,c("gsis_id")] %>% as.matrix(),
-  time = data_test_qb[,c("ageCentered20")] %>% as.matrix())
+  X = data_test_qb |> dplyr::select(season:att_br.rush) |> as.matrix(),
+  Z = data_train_qb |> dplyr::mutate(constant = 1) |> dplyr::select(constant, passing_yards, passing_tds, passing_interceptions, passing_epa, pacr) |> as.matrix(),
+  id = data_test_qb[,c("gsis_id")] |> as.matrix(),
+  time = data_test_qb[,c("ageCentered20")] |> as.matrix())
 ```
 
 ### Combining Gradient Tree Boosting with Mixed Models {#sec-treeBoosting}
@@ -2337,9 +2337,9 @@ data_train_qb_matrix[,"fantasyPoints_lag"][data_train_qb_matrix[,"fantasyPoints_
 ```{r}
 #| label: specify-predictors-machine-learning
 
-pred_vars_qb <- data_train_qb_matrix %>% 
-  as_tibble() %>% 
-  select(-fantasyPoints_lag, -fantasyPointsMC_lag, -ageCentered20, ageCentered20Quadratic) %>% # -gsis_id
+pred_vars_qb <- data_train_qb_matrix |> 
+  as_tibble() |> 
+  select(-fantasyPoints_lag, -fantasyPointsMC_lag, -ageCentered20, ageCentered20Quadratic) |> # -gsis_id
   names()
 
 pred_vars_qb_categorical <- "gsis_id" # to specify categorical predictors
@@ -2630,12 +2630,12 @@ newData_qb$fantasyPoints_lag <- pred_nextYear_qb$response_mean
 # Merge with player names
 newData_qb <- left_join(
   newData_qb,
-  nfl_playerIDs %>% select(gsis_id, name),
+  nfl_playerIDs |> select(gsis_id, name),
   by = "gsis_id"
 )
 
-newData_qb %>% 
-  arrange(-fantasyPoints_lag) %>% 
+newData_qb |> 
+  arrange(-fantasyPoints_lag) |> 
   select(name, fantasyPoints_lag, fantasyPoints)
 ```
 

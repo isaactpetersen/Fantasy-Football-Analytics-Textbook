@@ -207,10 +207,10 @@ Free Auction Draft Lineup Optimizer From Fantasy Football Analytics: <https://ap
 ```{r}
 #| code-fold: true
 
-fantasyPointsByPositionRank <- player_stats_seasonal %>% 
-  filter(position_group %in% c("QB","RB","WR","TE","K","DL","LB","DB")) %>% 
-  group_by(position_group, season) %>% 
-  arrange(position_group, season, -fantasyPoints) %>% 
+fantasyPointsByPositionRank <- player_stats_seasonal |> 
+  filter(position_group %in% c("QB","RB","WR","TE","K","DL","LB","DB")) |> 
+  group_by(position_group, season) |> 
+  arrange(position_group, season, -fantasyPoints) |> 
   mutate(positionRank = row_number())
 ```
 
@@ -224,7 +224,7 @@ A plot of fantasy points by end-of-season position rank and position is depicted
 #| code-fold: true
 
 ggplot(
-  data = fantasyPointsByPositionRank %>% filter(positionRank <= 200),
+  data = fantasyPointsByPositionRank |> filter(positionRank <= 200),
   mapping = aes(
     x = positionRank,
     y = fantasyPoints
@@ -257,7 +257,7 @@ In @fig-expectedPointsByPositionRank2, we overlay the smoothed best-fit line for
 palette_OkabeIto_black <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000")
 
 ggplot(
-  data = fantasyPointsByPositionRank %>% filter(positionRank <= 200),
+  data = fantasyPointsByPositionRank |> filter(positionRank <= 200),
   mapping = aes(
     x = positionRank,
     y = fantasyPoints,
@@ -291,7 +291,7 @@ In @fig-expectedPointsByPositionRank3, we limit the position rank to ranks less 
 #| code-fold: true
 
 ggplot(
-  data = fantasyPointsByPositionRank %>% filter(positionRank <= 30),
+  data = fantasyPointsByPositionRank |> filter(positionRank <= 30),
   mapping = aes(
     x = positionRank,
     y = fantasyPoints,
@@ -331,7 +331,7 @@ However, the style of gameplay has changed.
 #| code-fold: true
 
 ggplot(
-  data = fantasyPointsByPositionRank %>% filter(positionRank <= 30 & season >= 2020),
+  data = fantasyPointsByPositionRank |> filter(positionRank <= 30 & season >= 2020),
   mapping = aes(
     x = positionRank,
     y = fantasyPoints,
@@ -368,8 +368,8 @@ Quarterbacks continue to show the steepest dropoff after the top 10 or so player
 #| fig-alt: "Mean Fantasy Points of Top 10 Players at Each Position by Season."
 #| code-fold: true
 
-meanFantasyPointsTop10ByPosition <- fantasyPointsByPositionRank %>% 
-  filter(positionRank <= 10) %>% 
+meanFantasyPointsTop10ByPosition <- fantasyPointsByPositionRank |> 
+  filter(positionRank <= 10) |> 
   summarise(
     fantasyPoints = mean(fantasyPoints, na.rm = TRUE),
     .groups = "drop_last"
@@ -418,9 +418,9 @@ For a player's estimated cost, we use their [Average Auction Value](#sec-fantasy
 We first subset and prepare the data so we can perform the lineup optimization.
 
 ```{r}
-mostRecentProjections <- players_projections_seasonal_average_merged %>% 
-  filter(season == max(season, na.rm = TRUE)) %>% 
-  filter(pos %in% c("QB","RB","WR","TE","K","DST")) %>% 
+mostRecentProjections <- players_projections_seasonal_average_merged |> 
+  filter(season == max(season, na.rm = TRUE)) |> 
+  filter(pos %in% c("QB","RB","WR","TE","K","DST")) |> 
   filter(avg_type == "average")
 
 # Convert NAs for fantasy points to zero

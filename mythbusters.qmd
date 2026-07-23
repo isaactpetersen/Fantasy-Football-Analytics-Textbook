@@ -98,24 +98,24 @@ a) a fixed effect for whether the player is in a contract year
 #| code-fold: true
 
 # Subset to remove players without a year signed
-nfl_playerContracts_subset <- nfl_playerContracts %>% 
+nfl_playerContracts_subset <- nfl_playerContracts |> 
   dplyr::filter(!is.na(year_signed) & year_signed != 0)
 
 # Determine the contract year for a given contract
 nfl_playerContracts_subset$contractYear <- nfl_playerContracts_subset$year_signed + nfl_playerContracts_subset$years - 1
 
 # Arrange contracts by player and year_signed
-nfl_playerContracts_subset <- nfl_playerContracts_subset %>%
-  dplyr::group_by(player, position) %>% 
-  dplyr::arrange(player, position, -year_signed) %>% 
+nfl_playerContracts_subset <- nfl_playerContracts_subset |>
+  dplyr::group_by(player, position) |> 
+  dplyr::arrange(player, position, -year_signed) |> 
   dplyr::ungroup()
 
 # Determine if the player played in the original contract year
-nfl_playerContracts_subset <- nfl_playerContracts_subset %>%
-  dplyr::group_by(player, position) %>%
+nfl_playerContracts_subset <- nfl_playerContracts_subset |>
+  dplyr::group_by(player, position) |>
   dplyr::mutate(
-    next_contract_start = lag(year_signed)) %>%
-  dplyr::ungroup() %>%
+    next_contract_start = lag(year_signed)) |>
+  dplyr::ungroup() |>
   dplyr::mutate(
     played_in_contract_year = ifelse(
       is.na(next_contract_start) | contractYear < next_contract_start,
@@ -123,42 +123,42 @@ nfl_playerContracts_subset <- nfl_playerContracts_subset %>%
       FALSE))
 
 # Check individual players
-#nfl_playerContracts_subset %>% 
-#  dplyr::filter(player == "Aaron Rodgers") %>% 
+#nfl_playerContracts_subset |> 
+#  dplyr::filter(player == "Aaron Rodgers") |> 
 #  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)
 #
-#nfl_playerContracts_subset %>% 
-#  dplyr::filter(player %in% c("Jared Allen", "Aaron Rodgers")) %>% 
+#nfl_playerContracts_subset |> 
+#  dplyr::filter(player %in% c("Jared Allen", "Aaron Rodgers")) |> 
 #  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)
 
 # Subset data
-nfl_playerContractYears <- nfl_playerContracts_subset %>% 
-  dplyr::filter(played_in_contract_year == TRUE) %>% 
-  dplyr::filter(position %in% c("QB","RB","WR","TE")) %>% 
-  dplyr::select(player, position, team, contractYear) %>% 
-  dplyr::mutate(merge_name = nflreadr::clean_player_names(player, lowercase = TRUE)) %>% 
-  dplyr::rename(season = contractYear) %>% 
+nfl_playerContractYears <- nfl_playerContracts_subset |> 
+  dplyr::filter(played_in_contract_year == TRUE) |> 
+  dplyr::filter(position %in% c("QB","RB","WR","TE")) |> 
+  dplyr::select(player, position, team, contractYear) |> 
+  dplyr::mutate(merge_name = nflreadr::clean_player_names(player, lowercase = TRUE)) |> 
+  dplyr::rename(season = contractYear) |> 
   dplyr::mutate(contractYear = 1)
 
 # Merge with weekly and seasonal stats data
-player_stats_weekly_offense <- player_stats_weekly %>% 
-  dplyr::filter(position_group %in% c("QB","RB","WR","TE")) %>% 
+player_stats_weekly_offense <- player_stats_weekly |> 
+  dplyr::filter(position_group %in% c("QB","RB","WR","TE")) |> 
   dplyr::mutate(merge_name = nflreadr::clean_player_names(player_display_name, lowercase = TRUE))
-#nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal %>% 
+#nfl_actualStats_offense_seasonal <- nfl_actualStats_offense_seasonal |> 
 #  mutate(merge_name = nflreadr::clean_player_names(player_display_name, lowercase = TRUE))
 
 player_statsContracts_offense_weekly <- dplyr::full_join(
   player_stats_weekly_offense,
   nfl_playerContractYears,
   by = c("merge_name", "position_group" = "position", "season")
-) %>% 
+) |> 
   dplyr::filter(position_group %in% c("QB","RB","WR","TE"))
 
 #player_statsContracts_offense_seasonal <- full_join(
 #  player_stats_seasonal_offense,
 #  nfl_playerContractYears,
 #  by = c("merge_name", "position_group" = "position", "season")
-#) %>% 
+#) |> 
 #  filter(position_group %in% c("QB","RB","WR","TE"))
 
 player_statsContracts_offense_weekly$contractYear[which(is.na(player_statsContracts_offense_weekly$contractYear))] <- 0
@@ -174,20 +174,20 @@ player_statsContracts_offense_weekly$contractYear[which(is.na(player_statsContra
 #  levels = c(0, 1),
 #  labels = c("no", "yes"))
 
-player_statsContracts_offense_weekly <- player_statsContracts_offense_weekly %>% 
+player_statsContracts_offense_weekly <- player_statsContracts_offense_weekly |> 
   dplyr::arrange(merge_name, season, season_type, week)
 
-#player_statsContracts_offense_seasonal <- player_statsContracts_offense_seasonal %>% 
+#player_statsContracts_offense_seasonal <- player_statsContracts_offense_seasonal |> 
 #  arrange(merge_name, season)
 
-player_statsContractsSubset_offense_weekly <- player_statsContracts_offense_weekly %>% 
+player_statsContractsSubset_offense_weekly <- player_statsContracts_offense_weekly |> 
   dplyr::filter(season_type == "REG")
 
 #table(nfl_playerContracts$year_signed) # most contract data is available beginning in 2011
 
 # Calculate Per Game Totals
-player_statsContracts_seasonal <- player_statsContractsSubset_offense_weekly %>% 
-  dplyr::group_by(player_id, season) %>% 
+player_statsContracts_seasonal <- player_statsContractsSubset_offense_weekly |> 
+  dplyr::group_by(player_id, season) |> 
   dplyr::summarise(
     player_display_name = petersenlab::Mode(player_display_name),
     position_group = petersenlab::Mode(position_group),
@@ -202,7 +202,7 @@ player_statsContracts_seasonal <- player_statsContractsSubset_offense_weekly %>%
     contractYear = mean(contractYear, na.rm = TRUE),
     games = n(),
     .groups = "drop_last"
-  ) %>% 
+  ) |> 
   dplyr::mutate(
     player_id = as.factor(player_id),
     ypc = rushing_yards / carries,
@@ -228,11 +228,11 @@ First, we prepare the data by merging and performing additional processing:
 #| code-fold: true
 
 # Merge with QBR data
-nfl_espnQBR_weekly$merge_name <- paste(nfl_espnQBR_weekly$name_first, nfl_espnQBR_weekly$name_last, sep = " ") %>% 
+nfl_espnQBR_weekly$merge_name <- paste(nfl_espnQBR_weekly$name_first, nfl_espnQBR_weekly$name_last, sep = " ") |> 
   nflreadr::clean_player_names(., lowercase = TRUE)
 
-nfl_contractYearQBR_weekly <- nfl_playerContractYears %>% 
-  dplyr::filter(position == "QB") %>% 
+nfl_contractYearQBR_weekly <- nfl_playerContractYears |> 
+  dplyr::filter(position == "QB") |> 
   dplyr::full_join(
     .,
     nfl_espnQBR_weekly,
@@ -245,33 +245,33 @@ nfl_contractYearQBR_weekly$contractYear[which(is.na(nfl_contractYearQBR_weekly$c
 #  levels = c(0, 1),
 #  labels = c("no", "yes"))
 
-nfl_contractYearQBR_weekly <- nfl_contractYearQBR_weekly %>% 
+nfl_contractYearQBR_weekly <- nfl_contractYearQBR_weekly |> 
   dplyr::arrange(merge_name, season, season_type, game_week)
 
-nfl_contractYearQBRsubset_weekly <- nfl_contractYearQBR_weekly %>% 
-  dplyr::filter(season_type == "Regular") %>% 
-  dplyr::arrange(merge_name, season, season_type, game_week) %>% 
+nfl_contractYearQBRsubset_weekly <- nfl_contractYearQBR_weekly |> 
+  dplyr::filter(season_type == "Regular") |> 
+  dplyr::arrange(merge_name, season, season_type, game_week) |> 
   mutate(
     player = coalesce(player, name_display),
-    position = "QB") %>% 
-  group_by(merge_name, player_id) %>% 
+    position = "QB") |> 
+  group_by(merge_name, player_id) |> 
   fill(player, .direction = "downup")
 
 # Merge with age and experience
-nfl_contractYearQBRsubset_weekly <- player_statsContractsSubset_offense_weekly %>% 
-  dplyr::filter(position == "QB") %>% 
-  dplyr::select(merge_name, season, week, age, years_of_experience, fantasyPoints) %>% 
+nfl_contractYearQBRsubset_weekly <- player_statsContractsSubset_offense_weekly |> 
+  dplyr::filter(position == "QB") |> 
+  dplyr::select(merge_name, season, week, age, years_of_experience, fantasyPoints) |> 
   full_join(
     nfl_contractYearQBRsubset_weekly,
     by = c("merge_name","season", c("week" = "game_week"))
-  ) %>% select(player_id, season, week, player, everything()) %>% 
+  ) |> select(player_id, season, week, player, everything()) |> 
   arrange(player_id, season, week)
 
 #hist(nfl_contractYearQBRsubset_weekly$qb_plays) # players have at least 20 dropbacks per game
 
 # Calculate Per Game Totals
-nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>% 
-  dplyr::group_by(merge_name, season) %>% 
+nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly |> 
+  dplyr::group_by(merge_name, season) |> 
   dplyr::summarise(
     age = min(age, na.rm = TRUE),
     years_of_experience = min(years_of_experience, na.rm = TRUE),
@@ -283,7 +283,7 @@ nfl_contractYearQBR_seasonal <- nfl_contractYearQBRsubset_weekly %>%
     contractYear = mean(contractYear, na.rm = TRUE),
     games = n(),
     .groups = "drop_last"
-  ) %>% 
+  ) |> 
   dplyr::mutate(
     contractYear = factor(
       contractYear,
@@ -296,11 +296,11 @@ nfl_contractYearQBR_seasonal[sapply(nfl_contractYearQBR_seasonal, is.infinite)] 
 nfl_contractYearQBR_seasonal$ageCentered20 <- nfl_contractYearQBR_seasonal$age - 20
 nfl_contractYearQBR_seasonal$ageCentered20Quadratic <- nfl_contractYearQBR_seasonal$ageCentered20 ^ 2
 
-nfl_contractYearQBR_seasonal <- nfl_contractYearQBR_seasonal %>% 
-  group_by(merge_name) %>%
+nfl_contractYearQBR_seasonal <- nfl_contractYearQBR_seasonal |> 
+  group_by(merge_name) |>
   mutate(player_id = as.factor(as.character(cur_group_id())))
 
-nfl_contractYearQBRsubset_seasonal <- nfl_contractYearQBR_seasonal %>% 
+nfl_contractYearQBRsubset_seasonal <- nfl_contractYearQBR_seasonal |> 
   dplyr::filter(
     games >= 5, # keep only player-season combinations in which QBs played at least 5 games
     season >= 2011) # keep only seasons since 2011 (when most contract data are available)
@@ -421,7 +421,7 @@ emmeans::emmeans(mixedModelAge_fantasyPtsPass, "contractYear")
 ```{r}
 #| code-fold: true
 
-player_statsContractsRB_seasonal <- player_statsContracts_seasonal %>% 
+player_statsContractsRB_seasonal <- player_statsContracts_seasonal |> 
   dplyr::filter(
     position_group == "RB",
     games >= 5, # keep only player-season combinations in which QBs played at least 5 games
@@ -511,7 +511,7 @@ emmeans::emmeans(mixedModelAge_fantasyPtsRush, "contractYear")
 ```{r}
 #| code-fold: true
 
-player_statsContractsWRTE_seasonal <- player_statsContracts_seasonal %>% 
+player_statsContractsWRTE_seasonal <- player_statsContracts_seasonal |> 
   dplyr::filter(
     position_group %in% c("WR","TE"),
     games >= 5, # keep only player-season combinations in which QBs played at least 5 games
@@ -599,7 +599,7 @@ emmeans::emmeans(mixedModelAge_fantasyPtsReceiving, "contractYear")
 ### QB/RB/WR/TE {#sec-contractYearQBRBWRTE}
 
 ```{r}
-player_statsContractsQBRBWRTE_seasonal <- player_statsContracts_seasonal %>% 
+player_statsContractsQBRBWRTE_seasonal <- player_statsContracts_seasonal |> 
   dplyr::filter(
     position_group %in% c("QB","RB","WR","TE"),
     games >= 5, # keep only player-season combinations in which QBs played at least 5 games

@@ -317,8 +317,8 @@ To estimate multiple indices of center, spread, and shape of the data, you can u
 ```{r}
 psych::describe(player_stats_seasonal["fantasyPoints"])
 
-player_stats_seasonal %>% 
-  dplyr::select(age, years_of_experience, fantasyPoints) %>% 
+player_stats_seasonal |> 
+  dplyr::select(age, years_of_experience, fantasyPoints) |> 
   dplyr::summarise(across(
       everything(),
       .fns = list(
@@ -339,11 +339,11 @@ player_stats_seasonal %>%
         mode = ~ petersenlab::Mode(., multipleModes = "mean"),
         skewness = ~ psych::skew(., na.rm = TRUE),
         kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
-      .names = "{.col}.{.fn}")) %>%
+      .names = "{.col}.{.fn}")) |>
     tidyr::pivot_longer(
       cols = everything(),
       names_to = c("variable","index"),
-      names_sep = "\\.") %>% 
+      names_sep = "\\.") |> 
     tidyr::pivot_wider(
       names_from = index,
       values_from = value)
