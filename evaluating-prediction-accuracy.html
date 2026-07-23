@@ -881,12 +881,12 @@ Figure&nbsp;17.1
 <span class="header-section-number">17.1.4.1</span> Seasonal Projections</h4>
 <p>To evaluate the accuracy of projections, we must first merge projections with actual performance. Below, we merge seasonal projections with actual performance.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>player_stats_seasonal_subset <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>player_stats_seasonal_subset <span class="ot">&lt;-</span> player_stats_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id))</span>
 <span id="cb4-3"><a href="#cb4-3"></a></span>
-<span id="cb4-4"><a href="#cb4-4"></a>nfl_playerIDs_subset <span class="ot">&lt;-</span> nfl_playerIDs <span class="sc">%&gt;%</span> </span>
-<span id="cb4-5"><a href="#cb4-5"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(gsis_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-6"><a href="#cb4-6"></a>  <span class="fu">distinct</span>(gsis_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="co"># keep only rows that do not have duplicate values of gsis_id</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>nfl_playerIDs_subset <span class="ot">&lt;-</span> nfl_playerIDs <span class="sc">|&gt;</span> </span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(gsis_id)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="fu">distinct</span>(gsis_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="co"># keep only rows that do not have duplicate values of gsis_id</span></span>
 <span id="cb4-7"><a href="#cb4-7"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"team"</span>, <span class="st">"position"</span>, <span class="st">"height"</span>, <span class="st">"weight"</span>, <span class="st">"age"</span>)))</span>
 <span id="cb4-8"><a href="#cb4-8"></a></span>
 <span id="cb4-9"><a href="#cb4-9"></a>players_projectedPoints_seasonal_combined<span class="sc">$</span>season <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(players_projectedPoints_seasonal_combined<span class="sc">$</span>season)</span>
@@ -896,7 +896,7 @@ Figure&nbsp;17.1
 <span id="cb4-13"><a href="#cb4-13"></a>  player_stats_seasonal_subset,</span>
 <span id="cb4-14"><a href="#cb4-14"></a>  nfl_playerIDs_subset,</span>
 <span id="cb4-15"><a href="#cb4-15"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
-<span id="cb4-16"><a href="#cb4-16"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-16"><a href="#cb4-16"></a>) <span class="sc">|&gt;</span> </span>
 <span id="cb4-17"><a href="#cb4-17"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(mfl_id))</span>
 <span id="cb4-18"><a href="#cb4-18"></a></span>
 <span id="cb4-19"><a href="#cb4-19"></a>projectionsWithActuals_seasonal <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
@@ -908,12 +908,12 @@ Figure&nbsp;17.1
 <span id="cb4-25"><a href="#cb4-25"></a></span>
 <span id="cb4-26"><a href="#cb4-26"></a>crowdAveragedProjectionsWithActuals_seasonal <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
 <span id="cb4-27"><a href="#cb4-27"></a>  player_stats_seasonal_subset_IDs,</span>
-<span id="cb4-28"><a href="#cb4-28"></a>  players_projections_seasonal_average_merged <span class="sc">%&gt;%</span> <span class="fu">filter</span>(avg_type <span class="sc">==</span> <span class="st">"average"</span>),</span>
+<span id="cb4-28"><a href="#cb4-28"></a>  players_projections_seasonal_average_merged <span class="sc">|&gt;</span> <span class="fu">filter</span>(avg_type <span class="sc">==</span> <span class="st">"average"</span>),</span>
 <span id="cb4-29"><a href="#cb4-29"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"mfl_id"</span> <span class="ot">=</span> <span class="st">"id"</span>, <span class="st">"season"</span>),</span>
 <span id="cb4-30"><a href="#cb4-30"></a>  <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">"_proj"</span>),</span>
 <span id="cb4-31"><a href="#cb4-31"></a>)</span>
 <span id="cb4-32"><a href="#cb4-32"></a></span>
-<span id="cb4-33"><a href="#cb4-33"></a>projectionsWithActuals_seasonal <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb4-33"><a href="#cb4-33"></a>projectionsWithActuals_seasonal <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb4-34"><a href="#cb4-34"></a>  <span class="fu">unite</span>(</span>
 <span id="cb4-35"><a href="#cb4-35"></a>    <span class="st">"player_id_season"</span>,</span>
 <span id="cb4-36"><a href="#cb4-36"></a>    player_id,</span>
@@ -921,7 +921,7 @@ Figure&nbsp;17.1
 <span id="cb4-38"><a href="#cb4-38"></a>    <span class="at">remove =</span> <span class="cn">FALSE</span></span>
 <span id="cb4-39"><a href="#cb4-39"></a>  )</span>
 <span id="cb4-40"><a href="#cb4-40"></a></span>
-<span id="cb4-41"><a href="#cb4-41"></a>crowdAveragedProjectionsWithActuals_seasonal <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb4-41"><a href="#cb4-41"></a>crowdAveragedProjectionsWithActuals_seasonal <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb4-42"><a href="#cb4-42"></a>  <span class="fu">unite</span>(</span>
 <span id="cb4-43"><a href="#cb4-43"></a>    <span class="st">"player_id_season"</span>,</span>
 <span id="cb4-44"><a href="#cb4-44"></a>    player_id,</span>
@@ -932,10 +932,10 @@ Figure&nbsp;17.1
 </div>
 <p>Players in the <code>projectionsWithActuals_seasonal</code> object are (supposed to be) uniquely identified by <code>player_id</code>-<code>season</code>-<code>data_src</code>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">group_by</span>(player_id, season, data_src) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-4"><a href="#cb5-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">group_by</span>(player_id, season, data_src) <span class="sc">|&gt;</span> </span>
+<span id="cb5-4"><a href="#cb5-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb5-5"><a href="#cb5-5"></a>  <span class="fu">head</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
@@ -947,10 +947,10 @@ Figure&nbsp;17.1
 </div>
 <p>Players in the <code>crowdAveragedProjectionsWithActuals_seasonal</code> object are (supposed to be) uniquely identified by <code>player_id</code>-<code>season</code>-<code>avg_type</code>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-3"><a href="#cb6-3"></a>  <span class="fu">group_by</span>(player_id, season, avg_type) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-4"><a href="#cb6-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="fu">group_by</span>(player_id, season, avg_type) <span class="sc">|&gt;</span> </span>
+<span id="cb6-4"><a href="#cb6-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb6-5"><a href="#cb6-5"></a>  <span class="fu">head</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
@@ -969,57 +969,57 @@ Figure&nbsp;17.1
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>playersWithHighProjectedOrActualPoints <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb8-2"><a href="#cb8-2"></a>  <span class="fu">filter</span>(raw_points <span class="sc">&gt;</span> <span class="dv">100</span> <span class="sc">|</span> fantasyPoints <span class="sc">&gt;</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-3"><a href="#cb8-3"></a>  <span class="fu">select</span>(player_id_season) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>playersWithHighProjectedOrActualPoints <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2"></a>  <span class="fu">filter</span>(raw_points <span class="sc">&gt;</span> <span class="dv">100</span> <span class="sc">|</span> fantasyPoints <span class="sc">&gt;</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3"></a>  <span class="fu">select</span>(player_id_season) <span class="sc">|&gt;</span> </span>
 <span id="cb8-4"><a href="#cb8-4"></a>  <span class="fu">pull</span>()</span>
 <span id="cb8-5"><a href="#cb8-5"></a></span>
-<span id="cb8-6"><a href="#cb8-6"></a>projectionsWithActuals_seasonal_qb <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-6"><a href="#cb8-6"></a>projectionsWithActuals_seasonal_qb <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-7"><a href="#cb8-7"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"QB"</span>)</span>
 <span id="cb8-8"><a href="#cb8-8"></a></span>
-<span id="cb8-9"><a href="#cb8-9"></a>projectionsWithActuals_seasonal_rb <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-9"><a href="#cb8-9"></a>projectionsWithActuals_seasonal_rb <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-10"><a href="#cb8-10"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"RB"</span>)</span>
 <span id="cb8-11"><a href="#cb8-11"></a></span>
-<span id="cb8-12"><a href="#cb8-12"></a>projectionsWithActuals_seasonal_wr <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-12"><a href="#cb8-12"></a>projectionsWithActuals_seasonal_wr <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-13"><a href="#cb8-13"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"WR"</span>)</span>
 <span id="cb8-14"><a href="#cb8-14"></a></span>
-<span id="cb8-15"><a href="#cb8-15"></a>projectionsWithActuals_seasonal_te <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-15"><a href="#cb8-15"></a>projectionsWithActuals_seasonal_te <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-16"><a href="#cb8-16"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"TE"</span>)</span>
 <span id="cb8-17"><a href="#cb8-17"></a></span>
-<span id="cb8-18"><a href="#cb8-18"></a>projectionsWithActuals_seasonal_k <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-18"><a href="#cb8-18"></a>projectionsWithActuals_seasonal_k <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-19"><a href="#cb8-19"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"K"</span>)</span>
 <span id="cb8-20"><a href="#cb8-20"></a></span>
-<span id="cb8-21"><a href="#cb8-21"></a>projectionsWithActuals_seasonal_dl <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-21"><a href="#cb8-21"></a>projectionsWithActuals_seasonal_dl <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-22"><a href="#cb8-22"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DL"</span>)</span>
 <span id="cb8-23"><a href="#cb8-23"></a></span>
-<span id="cb8-24"><a href="#cb8-24"></a>projectionsWithActuals_seasonal_lb <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-24"><a href="#cb8-24"></a>projectionsWithActuals_seasonal_lb <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-25"><a href="#cb8-25"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"LB"</span>)</span>
 <span id="cb8-26"><a href="#cb8-26"></a></span>
-<span id="cb8-27"><a href="#cb8-27"></a>projectionsWithActuals_seasonal_db <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-27"><a href="#cb8-27"></a>projectionsWithActuals_seasonal_db <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-28"><a href="#cb8-28"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DB"</span>)</span>
 <span id="cb8-29"><a href="#cb8-29"></a></span>
-<span id="cb8-30"><a href="#cb8-30"></a>crowdAveragedProjectionsWithActuals_seasonal_qb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-30"><a href="#cb8-30"></a>crowdAveragedProjectionsWithActuals_seasonal_qb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-31"><a href="#cb8-31"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"QB"</span>)</span>
 <span id="cb8-32"><a href="#cb8-32"></a></span>
-<span id="cb8-33"><a href="#cb8-33"></a>crowdAveragedProjectionsWithActuals_seasonal_rb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-33"><a href="#cb8-33"></a>crowdAveragedProjectionsWithActuals_seasonal_rb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-34"><a href="#cb8-34"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"RB"</span>)</span>
 <span id="cb8-35"><a href="#cb8-35"></a></span>
-<span id="cb8-36"><a href="#cb8-36"></a>crowdAveragedProjectionsWithActuals_seasonal_wr <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-36"><a href="#cb8-36"></a>crowdAveragedProjectionsWithActuals_seasonal_wr <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-37"><a href="#cb8-37"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"WR"</span>)</span>
 <span id="cb8-38"><a href="#cb8-38"></a></span>
-<span id="cb8-39"><a href="#cb8-39"></a>crowdAveragedProjectionsWithActuals_seasonal_te <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-39"><a href="#cb8-39"></a>crowdAveragedProjectionsWithActuals_seasonal_te <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-40"><a href="#cb8-40"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"TE"</span>)</span>
 <span id="cb8-41"><a href="#cb8-41"></a></span>
-<span id="cb8-42"><a href="#cb8-42"></a>crowdAveragedProjectionsWithActuals_seasonal_k <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-42"><a href="#cb8-42"></a>crowdAveragedProjectionsWithActuals_seasonal_k <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-43"><a href="#cb8-43"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"K"</span>)</span>
 <span id="cb8-44"><a href="#cb8-44"></a></span>
-<span id="cb8-45"><a href="#cb8-45"></a>crowdAveragedProjectionsWithActuals_seasonal_dl <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-45"><a href="#cb8-45"></a>crowdAveragedProjectionsWithActuals_seasonal_dl <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-46"><a href="#cb8-46"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DL"</span>)</span>
 <span id="cb8-47"><a href="#cb8-47"></a></span>
-<span id="cb8-48"><a href="#cb8-48"></a>crowdAveragedProjectionsWithActuals_seasonal_lb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-48"><a href="#cb8-48"></a>crowdAveragedProjectionsWithActuals_seasonal_lb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-49"><a href="#cb8-49"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"LB"</span>)</span>
 <span id="cb8-50"><a href="#cb8-50"></a></span>
-<span id="cb8-51"><a href="#cb8-51"></a>crowdAveragedProjectionsWithActuals_seasonal_db <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
+<span id="cb8-51"><a href="#cb8-51"></a>crowdAveragedProjectionsWithActuals_seasonal_db <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
 <span id="cb8-52"><a href="#cb8-52"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DB"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
@@ -1027,12 +1027,12 @@ Figure&nbsp;17.1
 <span class="header-section-number">17.1.4.2</span> Weekly Projections</h4>
 <p>Below, we merge weekly projections with actual performance.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>player_stats_weekly_subset <span class="ot">&lt;-</span> player_stats_weekly <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>player_stats_weekly_subset <span class="ot">&lt;-</span> player_stats_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id))</span>
 <span id="cb9-3"><a href="#cb9-3"></a></span>
-<span id="cb9-4"><a href="#cb9-4"></a>nfl_playerIDs_subset <span class="ot">&lt;-</span> nfl_playerIDs <span class="sc">%&gt;%</span> </span>
-<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(gsis_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb9-6"><a href="#cb9-6"></a>  <span class="fu">distinct</span>(gsis_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="co"># keep only rows that do not have duplicate values of gsis_id</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>nfl_playerIDs_subset <span class="ot">&lt;-</span> nfl_playerIDs <span class="sc">|&gt;</span> </span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(gsis_id)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-6"><a href="#cb9-6"></a>  <span class="fu">distinct</span>(gsis_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="co"># keep only rows that do not have duplicate values of gsis_id</span></span>
 <span id="cb9-7"><a href="#cb9-7"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"team"</span>, <span class="st">"position"</span>, <span class="st">"height"</span>, <span class="st">"weight"</span>, <span class="st">"age"</span>)))</span>
 <span id="cb9-8"><a href="#cb9-8"></a></span>
 <span id="cb9-9"><a href="#cb9-9"></a>players_projectedPoints_weekly_combined<span class="sc">$</span>season <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(players_projectedPoints_weekly_combined<span class="sc">$</span>season)</span>
@@ -1042,7 +1042,7 @@ Figure&nbsp;17.1
 <span id="cb9-13"><a href="#cb9-13"></a>  player_stats_weekly_subset,</span>
 <span id="cb9-14"><a href="#cb9-14"></a>  nfl_playerIDs_subset,</span>
 <span id="cb9-15"><a href="#cb9-15"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"player_id"</span> <span class="ot">=</span> <span class="st">"gsis_id"</span>)</span>
-<span id="cb9-16"><a href="#cb9-16"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-16"><a href="#cb9-16"></a>) <span class="sc">|&gt;</span> </span>
 <span id="cb9-17"><a href="#cb9-17"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(mfl_id))</span>
 <span id="cb9-18"><a href="#cb9-18"></a></span>
 <span id="cb9-19"><a href="#cb9-19"></a>projectionsWithActuals_weekly <span class="ot">&lt;-</span> <span class="fu">full_join</span>(</span>
@@ -1059,7 +1059,7 @@ Figure&nbsp;17.1
 <span id="cb9-30"><a href="#cb9-30"></a>  <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">"_proj"</span>),</span>
 <span id="cb9-31"><a href="#cb9-31"></a>)</span>
 <span id="cb9-32"><a href="#cb9-32"></a></span>
-<span id="cb9-33"><a href="#cb9-33"></a>projectionsWithActuals_weekly <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb9-33"><a href="#cb9-33"></a>projectionsWithActuals_weekly <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb9-34"><a href="#cb9-34"></a>  <span class="fu">unite</span>(</span>
 <span id="cb9-35"><a href="#cb9-35"></a>    <span class="st">"player_id_season_week"</span>,</span>
 <span id="cb9-36"><a href="#cb9-36"></a>    player_id,</span>
@@ -1068,7 +1068,7 @@ Figure&nbsp;17.1
 <span id="cb9-39"><a href="#cb9-39"></a>    <span class="at">remove =</span> <span class="cn">FALSE</span></span>
 <span id="cb9-40"><a href="#cb9-40"></a>  )</span>
 <span id="cb9-41"><a href="#cb9-41"></a></span>
-<span id="cb9-42"><a href="#cb9-42"></a>crowdAveragedProjectionsWithActuals_weekly <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb9-42"><a href="#cb9-42"></a>crowdAveragedProjectionsWithActuals_weekly <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb9-43"><a href="#cb9-43"></a>  <span class="fu">unite</span>(</span>
 <span id="cb9-44"><a href="#cb9-44"></a>    <span class="st">"player_id_season_week"</span>,</span>
 <span id="cb9-45"><a href="#cb9-45"></a>    player_id,</span>
@@ -1080,10 +1080,10 @@ Figure&nbsp;17.1
 </div>
 <p>Players in the <code>projectionsWithActuals_weekly</code> object are (supposed to be) uniquely identified by <code>player_id</code>-<code>season</code>-<code>week</code>-<code>data_src</code>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb10-2"><a href="#cb10-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-3"><a href="#cb10-3"></a>  <span class="fu">group_by</span>(player_id, season, week, data_src) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-4"><a href="#cb10-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-3"><a href="#cb10-3"></a>  <span class="fu">group_by</span>(player_id, season, week, data_src) <span class="sc">|&gt;</span> </span>
+<span id="cb10-4"><a href="#cb10-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb10-5"><a href="#cb10-5"></a>  <span class="fu">head</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
@@ -1095,10 +1095,10 @@ Figure&nbsp;17.1
 </div>
 <p>Players in the <code>crowdAveragedProjectionsWithActuals_weekly</code> object are (supposed to be) uniquely identified by <code>player_id</code>-<code>season</code>-<code>week</code>-<code>avg_type</code>:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-3"><a href="#cb11-3"></a>  <span class="fu">group_by</span>(player_id, season, week, avg_type) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
+<span id="cb11-2"><a href="#cb11-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(player_id)) <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3"></a>  <span class="fu">group_by</span>(player_id, season, week, avg_type) <span class="sc">|&gt;</span> </span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb11-5"><a href="#cb11-5"></a>  <span class="fu">head</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
@@ -1117,57 +1117,57 @@ Figure&nbsp;17.1
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>playersWithHighProjectedOrActualPoints_weekly <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb13-2"><a href="#cb13-2"></a>  <span class="fu">filter</span>(raw_points <span class="sc">&gt;</span> <span class="dv">6</span> <span class="sc">|</span> fantasyPoints <span class="sc">&gt;</span> <span class="dv">6</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">select</span>(player_id_season_week) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>playersWithHighProjectedOrActualPoints_weekly <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2"></a>  <span class="fu">filter</span>(raw_points <span class="sc">&gt;</span> <span class="dv">6</span> <span class="sc">|</span> fantasyPoints <span class="sc">&gt;</span> <span class="dv">6</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">select</span>(player_id_season_week) <span class="sc">|&gt;</span> </span>
 <span id="cb13-4"><a href="#cb13-4"></a>  <span class="fu">pull</span>()</span>
 <span id="cb13-5"><a href="#cb13-5"></a></span>
-<span id="cb13-6"><a href="#cb13-6"></a>projectionsWithActuals_weekly_qb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-6"><a href="#cb13-6"></a>projectionsWithActuals_weekly_qb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-7"><a href="#cb13-7"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"QB"</span>)</span>
 <span id="cb13-8"><a href="#cb13-8"></a></span>
-<span id="cb13-9"><a href="#cb13-9"></a>projectionsWithActuals_weekly_rb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-9"><a href="#cb13-9"></a>projectionsWithActuals_weekly_rb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-10"><a href="#cb13-10"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"RB"</span>)</span>
 <span id="cb13-11"><a href="#cb13-11"></a></span>
-<span id="cb13-12"><a href="#cb13-12"></a>projectionsWithActuals_weekly_wr <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-12"><a href="#cb13-12"></a>projectionsWithActuals_weekly_wr <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-13"><a href="#cb13-13"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"WR"</span>)</span>
 <span id="cb13-14"><a href="#cb13-14"></a></span>
-<span id="cb13-15"><a href="#cb13-15"></a>projectionsWithActuals_weekly_te <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-15"><a href="#cb13-15"></a>projectionsWithActuals_weekly_te <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-16"><a href="#cb13-16"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"TE"</span>)</span>
 <span id="cb13-17"><a href="#cb13-17"></a></span>
-<span id="cb13-18"><a href="#cb13-18"></a>projectionsWithActuals_weekly_k <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-18"><a href="#cb13-18"></a>projectionsWithActuals_weekly_k <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-19"><a href="#cb13-19"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"K"</span>)</span>
 <span id="cb13-20"><a href="#cb13-20"></a></span>
-<span id="cb13-21"><a href="#cb13-21"></a>projectionsWithActuals_weekly_dl <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-21"><a href="#cb13-21"></a>projectionsWithActuals_weekly_dl <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-22"><a href="#cb13-22"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DL"</span>)</span>
 <span id="cb13-23"><a href="#cb13-23"></a></span>
-<span id="cb13-24"><a href="#cb13-24"></a>projectionsWithActuals_weekly_lb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-24"><a href="#cb13-24"></a>projectionsWithActuals_weekly_lb <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-25"><a href="#cb13-25"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"LB"</span>)</span>
 <span id="cb13-26"><a href="#cb13-26"></a></span>
-<span id="cb13-27"><a href="#cb13-27"></a>projectionsWithActuals_weekly_db <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-27"><a href="#cb13-27"></a>projectionsWithActuals_weekly_db <span class="ot">&lt;-</span> projectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-28"><a href="#cb13-28"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DB"</span>)</span>
 <span id="cb13-29"><a href="#cb13-29"></a></span>
-<span id="cb13-30"><a href="#cb13-30"></a>crowdAveragedProjectionsWithActuals_weekly_qb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-30"><a href="#cb13-30"></a>crowdAveragedProjectionsWithActuals_weekly_qb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-31"><a href="#cb13-31"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"QB"</span>)</span>
 <span id="cb13-32"><a href="#cb13-32"></a></span>
-<span id="cb13-33"><a href="#cb13-33"></a>crowdAveragedProjectionsWithActuals_weekly_rb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-33"><a href="#cb13-33"></a>crowdAveragedProjectionsWithActuals_weekly_rb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-34"><a href="#cb13-34"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"RB"</span>)</span>
 <span id="cb13-35"><a href="#cb13-35"></a></span>
-<span id="cb13-36"><a href="#cb13-36"></a>crowdAveragedProjectionsWithActuals_weekly_wr <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-36"><a href="#cb13-36"></a>crowdAveragedProjectionsWithActuals_weekly_wr <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-37"><a href="#cb13-37"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"WR"</span>)</span>
 <span id="cb13-38"><a href="#cb13-38"></a></span>
-<span id="cb13-39"><a href="#cb13-39"></a>crowdAveragedProjectionsWithActuals_weekly_te <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-39"><a href="#cb13-39"></a>crowdAveragedProjectionsWithActuals_weekly_te <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-40"><a href="#cb13-40"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"TE"</span>)</span>
 <span id="cb13-41"><a href="#cb13-41"></a></span>
-<span id="cb13-42"><a href="#cb13-42"></a>crowdAveragedProjectionsWithActuals_weekly_k <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-42"><a href="#cb13-42"></a>crowdAveragedProjectionsWithActuals_weekly_k <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-43"><a href="#cb13-43"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"K"</span>)</span>
 <span id="cb13-44"><a href="#cb13-44"></a></span>
-<span id="cb13-45"><a href="#cb13-45"></a>crowdAveragedProjectionsWithActuals_weekly_dl <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-45"><a href="#cb13-45"></a>crowdAveragedProjectionsWithActuals_weekly_dl <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-46"><a href="#cb13-46"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DL"</span>)</span>
 <span id="cb13-47"><a href="#cb13-47"></a></span>
-<span id="cb13-48"><a href="#cb13-48"></a>crowdAveragedProjectionsWithActuals_weekly_lb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-48"><a href="#cb13-48"></a>crowdAveragedProjectionsWithActuals_weekly_lb <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-49"><a href="#cb13-49"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"LB"</span>)</span>
 <span id="cb13-50"><a href="#cb13-50"></a></span>
-<span id="cb13-51"><a href="#cb13-51"></a>crowdAveragedProjectionsWithActuals_weekly_db <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">%&gt;%</span> </span>
+<span id="cb13-51"><a href="#cb13-51"></a>crowdAveragedProjectionsWithActuals_weekly_db <span class="ot">&lt;-</span> crowdAveragedProjectionsWithActuals_weekly <span class="sc">|&gt;</span> </span>
 <span id="cb13-52"><a href="#cb13-52"></a>  <span class="fu">filter</span>(position_group <span class="sc">==</span> <span class="st">"DB"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
@@ -1462,7 +1462,7 @@ Figure&nbsp;17.6: Chance Expectancies in Two-by-Two Confusion Matrix. BR = base 
 <span id="cb22-20"><a href="#cb22-20"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># exposition pipe magrittr::`%$%`</span></span>
 <span id="cb22-21"><a href="#cb22-21"></a>  <span class="fu">data.frame</span>(</span>
 <span id="cb22-22"><a href="#cb22-22"></a>    <span class="at">x =</span> x,</span>
-<span id="cb22-23"><a href="#cb22-23"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb22-23"><a href="#cb22-23"></a>    <span class="at">y =</span> y) <span class="sc">|&gt;</span></span>
 <span id="cb22-24"><a href="#cb22-24"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&gt;=</span> cutoff)</span>
 <span id="cb22-25"><a href="#cb22-25"></a></span>
 <span id="cb22-26"><a href="#cb22-26"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_FP"</span></span>
@@ -1474,7 +1474,7 @@ Figure&nbsp;17.6: Chance Expectancies in Two-by-Two Confusion Matrix. BR = base 
 <span id="cb22-32"><a href="#cb22-32"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># exposition pipe magrittr::`%$%`</span></span>
 <span id="cb22-33"><a href="#cb22-33"></a>  <span class="fu">data.frame</span>(</span>
 <span id="cb22-34"><a href="#cb22-34"></a>    <span class="at">x =</span> x,</span>
-<span id="cb22-35"><a href="#cb22-35"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb22-35"><a href="#cb22-35"></a>    <span class="at">y =</span> y) <span class="sc">|&gt;</span></span>
 <span id="cb22-36"><a href="#cb22-36"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&lt;</span> cutoff)</span>
 <span id="cb22-37"><a href="#cb22-37"></a></span>
 <span id="cb22-38"><a href="#cb22-38"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_FN"</span></span>
@@ -1573,7 +1573,7 @@ Figure&nbsp;17.8: Classifications Based on a Cutoff. Note that some true negativ
 <span id="cb24-7"><a href="#cb24-7"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># exposition pipe magrittr::`%$%`</span></span>
 <span id="cb24-8"><a href="#cb24-8"></a>  <span class="fu">data.frame</span>(</span>
 <span id="cb24-9"><a href="#cb24-9"></a>    <span class="at">x =</span> x,</span>
-<span id="cb24-10"><a href="#cb24-10"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb24-10"><a href="#cb24-10"></a>    <span class="at">y =</span> y) <span class="sc">|&gt;</span></span>
 <span id="cb24-11"><a href="#cb24-11"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&gt;=</span> cutoff)</span>
 <span id="cb24-12"><a href="#cb24-12"></a></span>
 <span id="cb24-13"><a href="#cb24-13"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_FP"</span></span>
@@ -1585,7 +1585,7 @@ Figure&nbsp;17.8: Classifications Based on a Cutoff. Note that some true negativ
 <span id="cb24-19"><a href="#cb24-19"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># exposition pipe magrittr::`%$%`</span></span>
 <span id="cb24-20"><a href="#cb24-20"></a>  <span class="fu">data.frame</span>(</span>
 <span id="cb24-21"><a href="#cb24-21"></a>    <span class="at">x =</span> x,</span>
-<span id="cb24-22"><a href="#cb24-22"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb24-22"><a href="#cb24-22"></a>    <span class="at">y =</span> y) <span class="sc">|&gt;</span></span>
 <span id="cb24-23"><a href="#cb24-23"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&lt;</span> cutoff)</span>
 <span id="cb24-24"><a href="#cb24-24"></a></span>
 <span id="cb24-25"><a href="#cb24-25"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_FN"</span></span>
@@ -1653,7 +1653,7 @@ Figure&nbsp;17.9: Classifications Based on Raising the Cutoff. Note that some tr
 <span id="cb25-7"><a href="#cb25-7"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># exposition pipe magrittr::`%$%`</span></span>
 <span id="cb25-8"><a href="#cb25-8"></a>  <span class="fu">data.frame</span>(</span>
 <span id="cb25-9"><a href="#cb25-9"></a>    <span class="at">x =</span> x,</span>
-<span id="cb25-10"><a href="#cb25-10"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb25-10"><a href="#cb25-10"></a>    <span class="at">y =</span> y) <span class="sc">|&gt;</span></span>
 <span id="cb25-11"><a href="#cb25-11"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&gt;=</span> cutoff)</span>
 <span id="cb25-12"><a href="#cb25-12"></a></span>
 <span id="cb25-13"><a href="#cb25-13"></a>hist_edible<span class="sc">$</span>type[hist_edible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"edible_FP"</span></span>
@@ -1665,7 +1665,7 @@ Figure&nbsp;17.9: Classifications Based on Raising the Cutoff. Note that some tr
 <span id="cb25-19"><a href="#cb25-19"></a>  <span class="at">to =</span> <span class="dv">150</span>) <span class="sc">%$%</span> <span class="co"># exposition pipe magrittr::`%$%`</span></span>
 <span id="cb25-20"><a href="#cb25-20"></a>  <span class="fu">data.frame</span>(</span>
 <span id="cb25-21"><a href="#cb25-21"></a>    <span class="at">x =</span> x,</span>
-<span id="cb25-22"><a href="#cb25-22"></a>    <span class="at">y =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb25-22"><a href="#cb25-22"></a>    <span class="at">y =</span> y) <span class="sc">|&gt;</span></span>
 <span id="cb25-23"><a href="#cb25-23"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> x <span class="sc">&lt;</span> cutoff)</span>
 <span id="cb25-24"><a href="#cb25-24"></a></span>
 <span id="cb25-25"><a href="#cb25-25"></a>hist_inedible<span class="sc">$</span>type[hist_inedible<span class="sc">$</span>area <span class="sc">==</span> <span class="cn">TRUE</span>] <span class="ot">&lt;-</span> <span class="st">"inedible_FN"</span></span>
@@ -1727,8 +1727,8 @@ Figure&nbsp;17.10: Classifications Based on Lowering the Cutoff. Note that some 
 <span class="header-section-number">17.6.8</span> Set a Cutoff/Threshold</h3>
 <p>For evaluating sensitivity, specificity, positive predictive value, negative predictive value, and the <a href="#sec-roc">receiver operating characteristic (ROC) curve</a>, we need to make a dichotomous decision/prediction. For this example, our goal is to predict which Running Backs or Wide Receivers will score 300 or more fantasy points. We will predict a player as scoring 300 or more fantasy points for a given projection source if that projection source projected the player to score 300 or more fantasy points. Thus, our cutoff or threshold is 300 or more projected points. The same player has multiple rows in the data file—one for each projection source.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>projectionsWithActuals_seasonal_subset <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb26-2"><a href="#cb26-2"></a>  <span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>projectionsWithActuals_seasonal_subset <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
+<span id="cb26-2"><a href="#cb26-2"></a>  <span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb26-3"><a href="#cb26-3"></a>  <span class="fu">filter</span>(season <span class="sc">==</span> <span class="dv">2024</span>)</span>
 <span id="cb26-4"><a href="#cb26-4"></a></span>
 <span id="cb26-5"><a href="#cb26-5"></a>projectionsWithActuals_seasonal_subset<span class="sc">$</span>prediction <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(projectionsWithActuals_seasonal_subset<span class="sc">$</span>raw_points <span class="sc">&gt;=</span> <span class="dv">300</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
@@ -1951,8 +1951,8 @@ Figure&nbsp;17.13: Receiver Operating Characteristic (ROC) Curves for Various Le
 <p>A confusion matrix (aka 2x2 accuracy table, cross-tabulation table, or contigency table) is a matrix for categorical data that presents the predicted outcome on one dimension and the actual outcome (truth) on the other dimension. If the predictions and outcomes are dichotomous, the confusion matrix is a 2x2 matrix with two rows and two columns that represent four possible predicted-actual combinations (<a href="#sec-decisionOutcomes">decision outcomes</a>). In such a case, the confusion matrix provides a tabular count of each type of accurate cases (<a href="#sec-truePositive">true positives</a> and <a href="#sec-trueNegative">true negatives</a>) versus the number of each type of error (<a href="#sec-falsePositive">false positives</a> and <a href="#sec-falseNegative">false negatives</a>), as shown in <a href="#fig-confusionMatrix" class="quarto-xref">Figure&nbsp;<span>17.2</span></a>. An example of a confusion matrix is in <a href="#fig-confusionMatrix1" class="quarto-xref">Figure&nbsp;<span>17.3</span></a>.</p>
 <p>Here is our 2x2 confusion matrix, predicting which Running Backs or Wide Receivers will score 300 or more fantasy points.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>projectionsWithActuals_seasonal_subset <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span> </span>
-<span id="cb35-2"><a href="#cb35-2"></a>  <span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>)) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>projectionsWithActuals_seasonal_subset <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span> </span>
+<span id="cb35-2"><a href="#cb35-2"></a>  <span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb35-3"><a href="#cb35-3"></a>  <span class="fu">filter</span>(season <span class="sc">==</span> <span class="dv">2024</span>)</span>
 <span id="cb35-4"><a href="#cb35-4"></a></span>
 <span id="cb35-5"><a href="#cb35-5"></a>projectionsWithActuals_seasonal_subset<span class="sc">$</span>prediction <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(projectionsWithActuals_seasonal_subset<span class="sc">$</span>raw_points <span class="sc">&gt;=</span> <span class="dv">300</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
@@ -2577,13 +2577,13 @@ Figure&nbsp;17.13: Receiver Operating Characteristic (ROC) Curves for Various Le
 <span id="cb49-15"><a href="#cb49-15"></a>  <span class="at">data =</span> projectionsWithActuals_seasonal)</span>
 <span id="cb49-16"><a href="#cb49-16"></a></span>
 <span id="cb49-17"><a href="#cb49-17"></a><span class="co"># Define Model</span></span>
-<span id="cb49-18"><a href="#cb49-18"></a>lm_spec <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb49-19"><a href="#cb49-19"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb49-18"><a href="#cb49-18"></a>lm_spec <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">|&gt;</span></span>
+<span id="cb49-19"><a href="#cb49-19"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb49-20"><a href="#cb49-20"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
 <span id="cb49-21"><a href="#cb49-21"></a></span>
 <span id="cb49-22"><a href="#cb49-22"></a><span class="co"># Workflow</span></span>
-<span id="cb49-23"><a href="#cb49-23"></a>lm_wf <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb49-24"><a href="#cb49-24"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(rec) <span class="sc">%&gt;%</span></span>
+<span id="cb49-23"><a href="#cb49-23"></a>lm_wf <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb49-24"><a href="#cb49-24"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(rec) <span class="sc">|&gt;</span></span>
 <span id="cb49-25"><a href="#cb49-25"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_spec)</span>
 <span id="cb49-26"><a href="#cb49-26"></a></span>
 <span id="cb49-27"><a href="#cb49-27"></a><span class="co"># Fit Model with Cross-Validation</span></span>
@@ -2604,8 +2604,8 @@ Figure&nbsp;17.13: Receiver Operating Characteristic (ROC) Curves for Various Le
 </div>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a><span class="co"># Fold-level R-squared</span></span>
-<span id="cb50-2"><a href="#cb50-2"></a>tune<span class="sc">::</span><span class="fu">collect_metrics</span>(cv_results, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb50-3"><a href="#cb50-3"></a>  <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"rsq"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb50-2"><a href="#cb50-2"></a>tune<span class="sc">::</span><span class="fu">collect_metrics</span>(cv_results, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb50-3"><a href="#cb50-3"></a>  <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"rsq"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb50-4"><a href="#cb50-4"></a>  <span class="fu">select</span>(id, .estimate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
@@ -2665,7 +2665,7 @@ Figure&nbsp;17.13: Receiver Operating Characteristic (ROC) Curves for Various Le
 <span id="cb52-18"><a href="#cb52-18"></a><span class="co"># Predict on test set</span></span>
 <span id="cb52-19"><a href="#cb52-19"></a>predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
 <span id="cb52-20"><a href="#cb52-20"></a>  training_model,</span>
-<span id="cb52-21"><a href="#cb52-21"></a>  <span class="at">new_data =</span> testing) <span class="sc">%&gt;%</span></span>
+<span id="cb52-21"><a href="#cb52-21"></a>  <span class="at">new_data =</span> testing) <span class="sc">|&gt;</span></span>
 <span id="cb52-22"><a href="#cb52-22"></a>  <span class="fu">bind_cols</span>(testing)</span>
 <span id="cb52-23"><a href="#cb52-23"></a></span>
 <span id="cb52-24"><a href="#cb52-24"></a><span class="co"># Predictive R-squared</span></span>
@@ -2925,17 +2925,17 @@ Figure&nbsp;17.15: Types of Miscalibration. From <span class="citation" data-cit
 <span class="header-section-number">17.11</span> Example of Predicting a Categorical outcome</h2>
 <p>Let’s consider an example of predicting a categorical outcome. For this example, let’s predict whether or not a Running Back rushes for 200 yards in a game. To predict that, we will use the number of rushing yards the player had in the previous game.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>player_stats_weekly_example <span class="ot">&lt;-</span> player_stats_weekly <span class="sc">%&gt;%</span> </span>
-<span id="cb55-2"><a href="#cb55-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb55-3"><a href="#cb55-3"></a>  <span class="fu">arrange</span>(player_id, season, week) <span class="sc">%&gt;%</span> </span>
-<span id="cb55-4"><a href="#cb55-4"></a>  <span class="fu">group_by</span>(player_id, season) <span class="sc">%&gt;%</span> </span>
-<span id="cb55-5"><a href="#cb55-5"></a>  <span class="fu">mutate</span>(<span class="at">rushing_yards_priorGame =</span> <span class="fu">lag</span>(rushing_yards)) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>player_stats_weekly_example <span class="ot">&lt;-</span> player_stats_weekly <span class="sc">|&gt;</span> </span>
+<span id="cb55-2"><a href="#cb55-2"></a>  <span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb55-3"><a href="#cb55-3"></a>  <span class="fu">arrange</span>(player_id, season, week) <span class="sc">|&gt;</span> </span>
+<span id="cb55-4"><a href="#cb55-4"></a>  <span class="fu">group_by</span>(player_id, season) <span class="sc">|&gt;</span> </span>
+<span id="cb55-5"><a href="#cb55-5"></a>  <span class="fu">mutate</span>(<span class="at">rushing_yards_priorGame =</span> <span class="fu">lag</span>(rushing_yards)) <span class="sc">|&gt;</span> </span>
 <span id="cb55-6"><a href="#cb55-6"></a>  <span class="fu">ungroup</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a>player_stats_weekly_example <span class="sc">%&gt;%</span> </span>
-<span id="cb56-2"><a href="#cb56-2"></a>  <span class="fu">select</span>(player_id, season, week, rushing_yards, rushing_yards_priorGame) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a>player_stats_weekly_example <span class="sc">|&gt;</span> </span>
+<span id="cb56-2"><a href="#cb56-2"></a>  <span class="fu">select</span>(player_id, season, week, rushing_yards, rushing_yards_priorGame) <span class="sc">|&gt;</span> </span>
 <span id="cb56-3"><a href="#cb56-3"></a>  <span class="fu">head</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output-display">
 <div data-pagedtable="false">
@@ -3217,10 +3217,10 @@ Figure&nbsp;17.16: Example Receiver Operating Characteristic (ROC) Curve.
 </div>
 <p>In the data object, each projection source has a row for each player and season. Thus, the <span class="math inline">\(R^2\)</span> may be higher for this aggregated object than it is for many of the individual sources. To calculate the accuracy by source, we could use the following code:</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1"></a>accuracy_by_source <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">%&gt;%</span></span>
-<span id="cb68-2"><a href="#cb68-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(data_src)) <span class="sc">%&gt;%</span> </span>
-<span id="cb68-3"><a href="#cb68-3"></a>  <span class="fu">filter</span>(data_src <span class="sc">!=</span> <span class="st">"FantasyPros"</span>) <span class="sc">%&gt;%</span> <span class="co"># remove crowd-averaged source; we compare to crowd average later</span></span>
-<span id="cb68-4"><a href="#cb68-4"></a>  <span class="fu">group_by</span>(data_src) <span class="sc">%&gt;%</span></span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1"></a>accuracy_by_source <span class="ot">&lt;-</span> projectionsWithActuals_seasonal <span class="sc">|&gt;</span></span>
+<span id="cb68-2"><a href="#cb68-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(data_src)) <span class="sc">|&gt;</span> </span>
+<span id="cb68-3"><a href="#cb68-3"></a>  <span class="fu">filter</span>(data_src <span class="sc">!=</span> <span class="st">"FantasyPros"</span>) <span class="sc">|&gt;</span> <span class="co"># remove crowd-averaged source; we compare to crowd average later</span></span>
+<span id="cb68-4"><a href="#cb68-4"></a>  <span class="fu">group_by</span>(data_src) <span class="sc">|&gt;</span></span>
 <span id="cb68-5"><a href="#cb68-5"></a>  <span class="fu">summarise</span>(</span>
 <span id="cb68-6"><a href="#cb68-6"></a>    <span class="at">accuracy =</span> <span class="fu">list</span>(</span>
 <span id="cb68-7"><a href="#cb68-7"></a>      <span class="fu">accuracyOverall</span>(</span>
@@ -6391,7 +6391,7 @@ loaded via a namespace (and not attached):
 [13] parallelly_1.48.0   htmlwidgets_1.6.4   plyr_1.8.9         
 [16] lifecycle_1.0.5     pkgconfig_2.0.3     Matrix_1.7-5       
 [19] R6_2.6.1            fastmap_1.2.0       rbibutils_2.4.1    
-[22] future_1.70.0       digest_0.6.39       colorspace_2.1-3   
+[22] future_1.75.0       digest_0.6.39       colorspace_2.1-3   
 [25] furrr_0.4.0         Hmisc_5.2-6         labeling_0.4.3     
 [28] timechange_0.4.0    mgcv_1.9-4          compiler_4.6.1     
 [31] withr_3.0.3         htmlTable_2.5.0     S7_0.2.2           
@@ -6411,7 +6411,7 @@ loaded via a namespace (and not attached):
 [73] DiceDesign_1.10     yaml_2.3.12         boot_1.3-32        
 [76] evaluate_1.0.5      codetools_0.2-20    cli_3.6.6          
 [79] rpart_4.1.27        xtable_1.8-8        Rdpack_2.6.6       
-[82] lavaan_0.7-2        mirai_2.7.1         Rcpp_1.1.2         
+[82] lavaan_0.7-2        mirai_2.7.2         Rcpp_1.1.2         
 [85] globals_0.19.1      nanonext_1.10.1     parallel_4.6.1     
 [88] gower_1.0.2         mclust_6.1.3        lme4_2.0-6         
 [91] listenv_1.0.0       mvtnorm_1.4-2       ipred_0.9-15       

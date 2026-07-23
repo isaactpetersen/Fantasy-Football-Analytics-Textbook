@@ -717,17 +717,17 @@ Figure&nbsp;27.1
 <p>It had been known for a long time that going for it on fourth down would frequently increase a team’s chances of winning. Despite that, historically, teams rarely went for it on fourth down and elected to punt or kick a field goal instead. It is curious that there was such a discrepancy between the decisions that would maximize teams’ winning percentage and the decisions coaches actually made. In many fourth down situations, by punting the ball, coaches actively and systematically made decisions that reduced their team’s chances of winning. One potential explanation for the discrepancy is because of coaches’ risk aversion. As noted in <a href="cognitive-bias.html#sec-cognitiveBiasesRiskAversion" class="quarto-xref"><span>Section 14.4.10</span></a>, when it is possible to experience either a gain or a loss from a decision, <a href="cognitive-bias.html#sec-cognitiveBiasesLossAversion">loss aversion bias</a> tends to lead people to make risk-averse decisions <span class="citation" data-cites="Kahneman2011">(<a href="references.html#ref-Kahneman2011" role="doc-biblioref">Kahneman, 2011</a>)</span>. According to this idea, in the case of failing to successfully convert on fourth down, coaches do not want to have to defend their decision to go for it to the media or the owner or general manager. That is, they may often play <em>not to lose</em>, rather than to win, in order to keep their job. However, in many cases, this is the wrong choice <span class="citation" data-cites="Moskowitz2011">(<a href="references.html#ref-Moskowitz2011" role="doc-biblioref">Moskowitz &amp; Wertheim, 2011</a>)</span>.</p>
 <p>Rates of going for it on fourth down in the NFL were low until 2017. After the 2017 season, rates of going for it on fourth down increased dramatically, as depicted in <a href="#fig-4thDownAttemptsByYear" class="quarto-xref">Figure&nbsp;<span>27.2</span></a>.</p>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>nfl_pbp4thDown <span class="ot">&lt;-</span> nfl_pbp <span class="sc">%&gt;%</span> </span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">filter</span>(down <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>nfl_pbp4thDown <span class="ot">&lt;-</span> nfl_pbp <span class="sc">|&gt;</span> </span>
+<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">filter</span>(down <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"no_play"</span>,<span class="st">"qb_kneel"</span>)))</span>
 <span id="cb3-4"><a href="#cb3-4"></a></span>
 <span id="cb3-5"><a href="#cb3-5"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
 <span id="cb3-6"><a href="#cb3-6"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt[<span class="fu">which</span>(nfl_pbp4thDown<span class="sc">$</span>play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"field_goal"</span>,<span class="st">"punt"</span>))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
 <span id="cb3-7"><a href="#cb3-7"></a>nfl_pbp4thDown<span class="sc">$</span>goForIt[<span class="fu">which</span>(nfl_pbp4thDown<span class="sc">$</span>play_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"pass"</span>,<span class="st">"run"</span>))] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
 <span id="cb3-8"><a href="#cb3-8"></a></span>
-<span id="cb3-9"><a href="#cb3-9"></a>nfl_pbp4thDownPlotData <span class="ot">&lt;-</span> nfl_pbp4thDown <span class="sc">%&gt;%</span> </span>
-<span id="cb3-10"><a href="#cb3-10"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(goForIt)) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-11"><a href="#cb3-11"></a>  <span class="fu">group_by</span>(season) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-9"><a href="#cb3-9"></a>nfl_pbp4thDownPlotData <span class="ot">&lt;-</span> nfl_pbp4thDown <span class="sc">|&gt;</span> </span>
+<span id="cb3-10"><a href="#cb3-10"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(goForIt)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="fu">group_by</span>(season) <span class="sc">|&gt;</span> </span>
 <span id="cb3-12"><a href="#cb3-12"></a>  <span class="fu">summarise</span>(</span>
 <span id="cb3-13"><a href="#cb3-13"></a>    <span class="at">goForItPct =</span> <span class="fu">mean</span>(goForIt, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb3-14"><a href="#cb3-14"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
@@ -801,11 +801,11 @@ Figure&nbsp;27.2: The Proportion of Fourth Downs That are Attempts to Go for it 
 <span id="cb4-9"><a href="#cb4-9"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"black"</span>)</span>
 <span id="cb4-10"><a href="#cb4-10"></a>)</span>
 <span id="cb4-11"><a href="#cb4-11"></a></span>
-<span id="cb4-12"><a href="#cb4-12"></a>nfl_4thdown <span class="sc">%&gt;%</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a>nfl_4thdown <span class="sc">|&gt;</span></span>
 <span id="cb4-13"><a href="#cb4-13"></a>  <span class="fu">filter</span>(</span>
 <span id="cb4-14"><a href="#cb4-14"></a>    vegas_wp <span class="sc">&gt;</span> .<span class="dv">2</span>,</span>
 <span id="cb4-15"><a href="#cb4-15"></a>    <span class="fu">between</span>(go_boost, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>),</span>
-<span id="cb4-16"><a href="#cb4-16"></a>    season <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2017</span>, <span class="dv">2021</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a>    season <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2017</span>, <span class="dv">2021</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb4-17"><a href="#cb4-17"></a>  <span class="fu">ggplot</span>(</span>
 <span id="cb4-18"><a href="#cb4-18"></a>    <span class="fu">aes</span>(</span>
 <span id="cb4-19"><a href="#cb4-19"></a>      <span class="at">x =</span> go_boost,</span>
