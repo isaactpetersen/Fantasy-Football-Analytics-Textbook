@@ -121,7 +121,32 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
     document.body.classList.add('hypothesis-enabled');
   });
 </script><link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
-<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 <meta property="og:title" content="2&nbsp; Intro to Football and Fantasy – Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R">
 <meta property="og:description" content="">
 <meta property="og:image" content="https://isaactpetersen.github.io/Fantasy-Football-Analytics-Textbook/images/open-graph.png">
@@ -558,6 +583,7 @@ gtag('config', 'G-C3SNF7Y0PJ', { 'anonymize_ip': true});
   <li><a href="#sec-footballGameplay" id="toc-sec-footballGameplay" class="nav-link" data-scroll-target="#sec-footballGameplay"><span class="header-section-number">2.1.4</span> The Gameplay</a></li>
   <li><a href="#sec-footballScoring" id="toc-sec-footballScoring" class="nav-link" data-scroll-target="#sec-footballScoring"><span class="header-section-number">2.1.5</span> The Scoring</a></li>
   <li><a href="#sec-footballGlossary" id="toc-sec-footballGlossary" class="nav-link" data-scroll-target="#sec-footballGlossary"><span class="header-section-number">2.1.6</span> Glossary of Terms</a></li>
+  <li><a href="#sec-footballAdvancedMetrics" id="toc-sec-footballAdvancedMetrics" class="nav-link" data-scroll-target="#sec-footballAdvancedMetrics"><span class="header-section-number">2.1.7</span> Advanced Metrics</a></li>
   </ul>
 </li>
   <li>
@@ -799,6 +825,48 @@ Figure&nbsp;2.3: A Diagram of a Football Field. The yard markers depict the dist
 <li>sack—when a Quarterback is tackled with the ball behind the line of scrimmage</li>
 <li>pass defended—when a defensive player knocks down the ball in the air so that the indended receiver cannot catch the ball</li>
 <li>safety—when the offense is tackled with the ball in their own end zone</li>
+</ul></section><section id="sec-footballAdvancedMetrics" class="level3" data-number="2.1.7"><h3 data-number="2.1.7" class="anchored" data-anchor-id="sec-footballAdvancedMetrics">
+<span class="header-section-number">2.1.7</span> Advanced Metrics</h3>
+<p>indices of <a href="player-evaluation.html#sec-skill">skill</a>:</p>
+<ul>
+<li>yards after the catch (YAC)—how many yards after the catch a player has</li>
+<li>broken tackles / missed tackles forced—the number of tackles a ball carrier or receiver causes defenders to miss</li>
+</ul>
+<p>indices of <a href="player-evaluation.html#sec-evalSituation">opportunity</a>:</p>
+<ul>
+<li>carries—the number of plays the player runs the ball</li>
+<li>routes run—the number of plays the player runs a route (i.e., an attempted pass pattern to receive a throw)</li>
+<li>targets—the number of plays the player is targeted on a pass attempt</li>
+<li>route participation—the percentage of passing plays (dropbacks) the team runs in which the player runs a route; <span class="math inline">\(\frac{\text{routes run}}{\text{dropback plays}}\)</span>
+</li>
+<li>targets per route run (TPRR; target rate)—targets divided by routes run (i.e., the percentage of times the player is targeted when running a route); <span class="math inline">\(\frac{\text{targets}}{\text{routes run}}\)</span>
+</li>
+<li>target share—the player’s number of targets divided by the team’s number of targets (i.e., the percentage of a team’s pass targets directed to the player); <span class="math inline">\(\frac{\text{player's targets}}{\text{team's targets}}\)</span>
+</li>
+<li>air yards (AY)—the total distance downfield from the line of scrimmage to the location of a target on all pass attempts (for a Quarterback) or targets (for a Wide Receiver/Tight End)
+<ul>
+<li>completed air yards (CAY)—the total distance downfield from the line of scrimmage to the location of a target on all completed pass attempts (for a Quarterback) or receptions (for a Wide Receiver/Tight End); <span class="math inline">\(\text{receiving yards} = \text{completed air yards} + \text{yards after the catch}\)</span>
+</li>
+<li>unrealized (or incomplete) air yards (UAY)—the total distance downfield from the line of scrimmage to the location of a target on all incomplete pass attempts (for a Quarterback) or incomplete targets (for a Wide Receiver/Tight End)</li>
+</ul>
+</li>
+<li>air yards share—the player’s air yards divided by the team’s air yards (i.e., the percent of a team’s air yards that target the player); <span class="math inline">\(\frac{\text{player's air yards}}{\text{team's air yards}}\)</span>
+</li>
+<li>average depth of target (ADOT)—the average distance downfield per target (i.e., average air-yard distance per target); <span class="math inline">\(\frac{\text{air yards}}{\text{targets}}\)</span>
+</li>
+</ul>
+<p>indices of <a href="player-evaluation.html#sec-evalHistoricalEfficiency">efficiency</a>:</p>
+<ul>
+<li>expected points added (EPA)—how much each play changes a team’s scoring outcome</li>
+<li>completion percentage over expected (CPOE)—how much higher (or lower) a player’s (e.g., Quarterback’s) completion percentage is relative to what would be expected based on the types and difficulties of passes they attempted (e.g., depth of throw, distance to sideline, proximity of defenders)</li>
+<li>rushing yards over expected per attempt (RYOE)—how many rushing yards a player (e.g., Running Back) gets compared to what the player would be expected to get based on the blocking and defensive context of the play (e.g., positioning)</li>
+<li>yards after catch over expected (YACOE)—how many yards after the catch a player generates compared to what would be expected based on the circumstances of the catch</li>
+<li>missed tackles forced rate—how often a player (e.g., Runnning Back) makes a defender miss divided by the number of touches the player gets; <span class="math inline">\(\frac{\text{missed tackles forced}}{\text{touches}}\)</span>
+</li>
+<li>opportunity share—a player’s carries plus targets divided by the team’s total number of carries and targets; <span class="math inline">\(\frac{\text{player's carries} + \text{player's targets}}{\text{team's carries} + \text{team's targets}}\)</span>
+</li>
+<li>yards per route run (YPRR)—receiving yards divided by routes run; <span class="math inline">\(\frac{\text{receiving yards}}{\text{routes run}}\)</span>
+</li>
 </ul></section></section><section id="sec-fantasyFootball" class="level2" data-number="2.2"><h2 data-number="2.2" class="anchored" data-anchor-id="sec-fantasyFootball">
 <span class="header-section-number">2.2</span> Fantasy Football</h2>
 <section id="sec-fantasyOverview" class="level3" data-number="2.2.1"><h3 data-number="2.2.1" class="anchored" data-anchor-id="sec-fantasyOverview">
