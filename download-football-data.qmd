@@ -69,6 +69,7 @@ load(file = "./data/nfl_advancedStatsPFR_weekly_raw.RData")
 load(file = "./data/nfl_playerContracts_raw.RData")
 load(file = "./data/nfl_ftnCharting_raw.RData")
 load(file = "./data/nfl_playerIDs_raw.RData")
+load(file = "./data/nfl_rankings_draft.RData")
 load(file = "./data/nfl_rankings_draft_raw.RData")
 load(file = "./data/nfl_rankings_weekly_raw.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly_raw.RData", fsep = ""))
@@ -112,6 +113,7 @@ load(file = "./data/nfl_advancedStatsPFR_weekly.RData")
 load(file = "./data/nfl_playerContracts.RData")
 load(file = "./data/nfl_ftnCharting.RData")
 load(file = "./data/nfl_playerIDs.RData")
+load(file = "./data/nfl_rankings.RData")
 load(file = "./data/nfl_rankings_draft.RData")
 load(file = "./data/nfl_rankings_weekly.RData")
 load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fantasy Football/Data/nfl_expectedFantasyPoints_weekly.RData", fsep = ""))
@@ -962,7 +964,7 @@ nfl_draftPicks |>
   head()
 ```
 
-Bo Jackson (1986, 1987) and Craig Erickson (1991, 1992) were both drafted twice because they refused to sign with the the first team that drafted them.
+Bo Jackson (1986, 1987), Mel Bratton (1988, 1989), and Craig Erickson (1991, 1992) were each drafted twice because they did not sign with the first team that drafted them.
 
 Here are the variable names:
 
@@ -2978,8 +2980,8 @@ You can download the data using the following syntax:
 ```{r}
 #| eval: false
 
-#nfl_rankings_raw <- progressr::with_progress( # currently throws error
-#  nflreadr::load_ff_rankings(type = "all"))
+nfl_rankings_raw <- progressr::with_progress( # currently throws error
+  nflreadr::load_ff_rankings(type = "all"))
 
 nfl_rankings_draft_raw <- progressr::with_progress(
   nflreadr::load_ff_rankings(type = "draft"))
@@ -2990,6 +2992,11 @@ nfl_rankings_weekly_raw <- progressr::with_progress(
 
 ```{r}
 #| eval: false
+
+save(
+  nfl_rankings_raw,
+  file = "./data/nfl_rankings_raw.RData"
+)
 
 save(
   nfl_rankings_draft_raw,
@@ -3005,12 +3012,58 @@ save(
 ```{r}
 #| include: false
 
+load(file = "./data/nfl_rankings_raw.RData")
 load(file = "./data/nfl_rankings_draft_raw.RData")
 load(file = "./data/nfl_rankings_weekly_raw.RData")
 ```
 
+The `nfl_rankings` object is in `player`-`page_type`-`fp_page`-`scrape_date` form.
+That is, each row should be uniquely identified by the player's `id`, `page_type`, `fp_page`, and `scrape_date`.
+Let's rearrange the data accordingly:
+
+```{r}
+nfl_rankings <- nfl_rankings_raw |> 
+  select(id, page_type, fp_page, scrape_date, player, pos, team, everything()) |> 
+  arrange(player, id, pos, page_type, fp_page, scrape_date)
+```
+
+Let's check for duplicate `player`-`page_type`-`fp_page`-`scrape_date` instances:
+
+```{r}
+nfl_rankings |> 
+  group_by(id, page_type, fp_page, scrape_date) |> 
+  filter(n() > 1) |> 
+  head()
+```
+
+Let's do some data cleanup:
+
+```{r}
+# Fill in missing values for a player in their duplicate instances, and then keep only the first of the duplicate instances
+nfl_rankings <- nfl_rankings |> 
+  group_by(id, page_type, fp_page, scrape_date) |> 
+  fill(everything(), .direction = "downup") |>
+  slice_head(n = 1) |> 
+  ungroup()
+```
+
+Let's check again for duplicate `player`-`page_type`-`fp_page`-`scrape_date` instances:
+
+```{r}
+nfl_rankings |> 
+  group_by(id, page_type, fp_page, scrape_date) |> 
+  filter(n() > 1) |> 
+  head()
+```
+
+Here are the variable names:
+
+```{r}
+names(nfl_rankings) |> as.data.frame()
+```
+
 The `nfl_rankings_draft` object is in `player`-`page_type` form.
-That is, each row should be uniquely identified by the player's `id`.
+That is, each row should be uniquely identified by the player's `id` and `page_type`.
 Let's rearrange the data accordingly:
 
 ```{r}
@@ -3026,6 +3079,12 @@ nfl_rankings_draft |>
   group_by(id, page_type) |> 
   filter(n() > 1) |> 
   head()
+```
+
+Here are the variable names:
+
+```{r}
+names(nfl_rankings_draft) |> as.data.frame()
 ```
 
 The `nfl_rankings_weekly` object is in `player`-`page` form.
@@ -3057,6 +3116,11 @@ names(nfl_rankings_weekly) |> as.data.frame()
 #| eval: false
 
 save(
+  nfl_rankings,
+  file = "./data/nfl_rankings.RData"
+)
+
+save(
   nfl_rankings_draft,
   file = "./data/nfl_rankings_draft.RData"
 )
@@ -3070,6 +3134,7 @@ save(
 ```{r}
 #| include: false
 
+load(file = "./data/nfl_rankings.RData")
 load(file = "./data/nfl_rankings_draft.RData")
 load(file = "./data/nfl_rankings_weekly.RData")
 ```
@@ -3396,28 +3461,30 @@ scoring_obj_default
 ```
 
 Now, modify the scoring settings to match your league settings.
-Below, we use the [scoring settings](https://support.nfl.com/hc/en-us/articles/4989179237404-Scoring) for fantasy leagues on [NFL.com](https://www.nfl.com), which happen to be point-per-reception leagues (i.e., PPR leagues):
+Below, we use the [scoring settings](https://support.espn.com/hc/en-us/articles/360003914032-Scoring-Formats) for fantasy leagues on [ESPN.com](https://www.espn.com):
 
 ```{r}
 scoring_obj <- scoring_obj_default
 
 # Offense
 scoring_obj$pass$pass_int <- -2
-scoring_obj$rec$rec <- 1
+#scoring_obj$rec$rec <- 1 # uncomment out if you have a PPR league
 scoring_obj$misc$fumbles_lost <- -2
 
 # Kickers
-scoring_obj$kick$fg_4049 <- 3
+scoring_obj$kick$fg_miss <- -1
 
 # Defense/Special Teams
+scoring_obj$dst$dst_blk <- 2
+
 scoring_obj$pts_bracket <- list(
-  list(threshold = 0, points = 10),
-  list(threshold = 6, points = 7),
-  list(threshold = 13, points = 4),
-  list(threshold = 20, points = 1),
+  list(threshold = 0, points = 5),
+  list(threshold = 6, points = 4),
+  list(threshold = 13, points = 3),
+  list(threshold = 17, points = 1),
   list(threshold = 27, points = 0),
-  list(threshold = 34, points = -1),
-  list(threshold = 99, points = -4)
+  list(threshold = 45, points = -3),
+  list(threshold = 99, points = -5)
 )
 ```
 
@@ -3558,10 +3625,10 @@ players_projections_weekly_average |>
 #| eval: false
 
 players_projections_seasonal_average <- players_projections_seasonal_average |> 
-  add_ecr() |> 
+  add_ecr() |> # comment out if throws an error
   add_adp() |> 
   add_aav() |>
-  add_uncertainty() |> 
+  add_uncertainty() |> # comment out if throws an error
   add_player_info()
 
 players_projections_weekly_average <- players_projections_weekly_average |> 
