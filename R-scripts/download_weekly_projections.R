@@ -32,21 +32,23 @@ scoring_obj <- scoring_obj_default
 
 ## Offense ----
 scoring_obj$pass$pass_int <- -2
-scoring_obj$rec$rec <- 1
+#scoring_obj$rec$rec <- 1
 scoring_obj$misc$fumbles_lost <- -2
 
 ## Kickers ----
-scoring_obj$kick$fg_4049 <- 3
+scoring_obj$kick$fg_miss <- -1
 
 ## Defense/Special Teams ----
+scoring_obj$dst$dst_blk <- 2
+
 scoring_obj$pts_bracket <- list(
-  list(threshold = 0, points = 10),
-  list(threshold = 6, points = 7),
-  list(threshold = 13, points = 4),
-  list(threshold = 20, points = 1),
+  list(threshold = 0, points = 5),
+  list(threshold = 6, points = 4),
+  list(threshold = 13, points = 3),
+  list(threshold = 17, points = 1),
   list(threshold = 27, points = 0),
-  list(threshold = 34, points = -1),
-  list(threshold = 99, points = -4)
+  list(threshold = 45, points = -3),
+  list(threshold = 99, points = -5)
 )
 
 # Calculate Projected Points ----
