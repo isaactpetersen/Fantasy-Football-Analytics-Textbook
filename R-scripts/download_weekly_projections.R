@@ -2,15 +2,15 @@
 
 # Specify Season and Week Number ----
 
-season <- 2025
-weekNumber <- 18
+season <- 2026
+weekNumber <- 2
 
 # Processing ----
 season <- as.character(season)
 weekNumber <- as.character(weekNumber)
 
 # Libraries ----
-library("ffanalytics")
+library("ffanalytics") # remotes::install_github("FantasyFootballAnalytics/ffanalytics")
 library("tidyverse")
 
 # Download Weekly Projections ----
