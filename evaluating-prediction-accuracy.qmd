@@ -76,22 +76,26 @@ To evaluate the accuracy of projections, we must first merge projections with ac
 Below, we merge seasonal projections with actual performance.
 
 ```{r}
-player_stats_seasonal_subset <- player_stats_seasonal |> 
+player_stats_seasonal_subset <- player_stats_seasonal |>
   filter(!is.na(player_id))
 
-nfl_playerIDs_subset <- nfl_playerIDs |> 
-  filter(!is.na(gsis_id)) |> 
+nfl_playerIDs_subset <- nfl_playerIDs |>
+  filter(!is.na(gsis_id)) |>
   distinct(gsis_id, .keep_all = TRUE) |> # keep only rows that do not have duplicate values of gsis_id
   select(-all_of(c("team", "position", "height", "weight", "age")))
 
-players_projectedPoints_seasonal_combined$season <- as.integer(players_projectedPoints_seasonal_combined$season)
-players_projections_seasonal_average_merged$season <- as.integer(players_projections_seasonal_average_merged$season)
+players_projectedPoints_seasonal_combined$season <- as.integer(
+  players_projectedPoints_seasonal_combined$season
+)
+players_projections_seasonal_average_merged$season <- as.integer(
+  players_projections_seasonal_average_merged$season
+)
 
 player_stats_seasonal_subset_IDs <- left_join(
   player_stats_seasonal_subset,
   nfl_playerIDs_subset,
   by = c("player_id" = "gsis_id")
-) |> 
+) |>
   filter(!is.na(mfl_id))
 
 projectionsWithActuals_seasonal <- full_join(
@@ -108,7 +112,7 @@ crowdAveragedProjectionsWithActuals_seasonal <- full_join(
   suffix = c("", "_proj"),
 )
 
-projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal |>
   unite(
     "player_id_season",
     player_id,
@@ -116,7 +120,7 @@ projectionsWithActuals_seasonal <- projectionsWithActuals_seasonal |>
     remove = FALSE
   )
 
-crowdAveragedProjectionsWithActuals_seasonal <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal <- crowdAveragedProjectionsWithActuals_seasonal |>
   unite(
     "player_id_season",
     player_id,
@@ -128,20 +132,20 @@ crowdAveragedProjectionsWithActuals_seasonal <- crowdAveragedProjectionsWithActu
 Players in the `projectionsWithActuals_seasonal` object are (supposed to be) uniquely identified by `player_id`-`season`-`data_src`:
 
 ```{r}
-projectionsWithActuals_seasonal |> 
-  filter(!is.na(player_id)) |> 
-  group_by(player_id, season, data_src) |> 
-  filter(n() > 1) |> 
+projectionsWithActuals_seasonal |>
+  filter(!is.na(player_id)) |>
+  group_by(player_id, season, data_src) |>
+  filter(n() > 1) |>
   head()
 ```
 
 Players in the `crowdAveragedProjectionsWithActuals_seasonal` object are (supposed to be) uniquely identified by `player_id`-`season`-`avg_type`:
 
 ```{r}
-crowdAveragedProjectionsWithActuals_seasonal |> 
-  filter(!is.na(player_id)) |> 
-  group_by(player_id, season, avg_type) |> 
-  filter(n() > 1) |> 
+crowdAveragedProjectionsWithActuals_seasonal |>
+  filter(!is.na(player_id)) |>
+  group_by(player_id, season, avg_type) |>
+  filter(n() > 1) |>
   head()
 ```
 
@@ -149,63 +153,64 @@ We save the data object for use in other chapters:
 
 ```{r}
 save(
-  projectionsWithActuals_seasonal, crowdAveragedProjectionsWithActuals_seasonal,
+  projectionsWithActuals_seasonal,
+  crowdAveragedProjectionsWithActuals_seasonal,
   file = "./data/projectionsWithActuals_seasonal.RData"
 )
 ```
 
 ```{r}
-playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal |> 
-  filter(raw_points > 100 | fantasyPoints > 100) |> 
-  select(player_id_season) |> 
+playersWithHighProjectedOrActualPoints <- projectionsWithActuals_seasonal |>
+  filter(raw_points > 100 | fantasyPoints > 100) |>
+  select(player_id_season) |>
   pull()
 
-projectionsWithActuals_seasonal_qb <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_qb <- projectionsWithActuals_seasonal |>
   filter(position_group == "QB")
 
-projectionsWithActuals_seasonal_rb <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_rb <- projectionsWithActuals_seasonal |>
   filter(position_group == "RB")
 
-projectionsWithActuals_seasonal_wr <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_wr <- projectionsWithActuals_seasonal |>
   filter(position_group == "WR")
 
-projectionsWithActuals_seasonal_te <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_te <- projectionsWithActuals_seasonal |>
   filter(position_group == "TE")
 
-projectionsWithActuals_seasonal_k <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_k <- projectionsWithActuals_seasonal |>
   filter(position == "K")
 
-projectionsWithActuals_seasonal_dl <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_dl <- projectionsWithActuals_seasonal |>
   filter(position_group == "DL")
 
-projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_lb <- projectionsWithActuals_seasonal |>
   filter(position_group == "LB")
 
-projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal |> 
+projectionsWithActuals_seasonal_db <- projectionsWithActuals_seasonal |>
   filter(position_group == "DB")
 
-crowdAveragedProjectionsWithActuals_seasonal_qb <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_qb <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position_group == "QB")
 
-crowdAveragedProjectionsWithActuals_seasonal_rb <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_rb <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position_group == "RB")
 
-crowdAveragedProjectionsWithActuals_seasonal_wr <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_wr <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position_group == "WR")
 
-crowdAveragedProjectionsWithActuals_seasonal_te <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_te <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position_group == "TE")
 
-crowdAveragedProjectionsWithActuals_seasonal_k <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_k <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position == "K")
 
-crowdAveragedProjectionsWithActuals_seasonal_dl <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_dl <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position_group == "DL")
 
-crowdAveragedProjectionsWithActuals_seasonal_lb <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_lb <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position_group == "LB")
 
-crowdAveragedProjectionsWithActuals_seasonal_db <- crowdAveragedProjectionsWithActuals_seasonal |> 
+crowdAveragedProjectionsWithActuals_seasonal_db <- crowdAveragedProjectionsWithActuals_seasonal |>
   filter(position_group == "DB")
 ```
 
@@ -214,22 +219,26 @@ crowdAveragedProjectionsWithActuals_seasonal_db <- crowdAveragedProjectionsWithA
 Below, we merge weekly projections with actual performance.
 
 ```{r}
-player_stats_weekly_subset <- player_stats_weekly |> 
+player_stats_weekly_subset <- player_stats_weekly |>
   filter(!is.na(player_id))
 
-nfl_playerIDs_subset <- nfl_playerIDs |> 
-  filter(!is.na(gsis_id)) |> 
+nfl_playerIDs_subset <- nfl_playerIDs |>
+  filter(!is.na(gsis_id)) |>
   distinct(gsis_id, .keep_all = TRUE) |> # keep only rows that do not have duplicate values of gsis_id
   select(-all_of(c("team", "position", "height", "weight", "age")))
 
-players_projectedPoints_weekly_combined$season <- as.integer(players_projectedPoints_weekly_combined$season)
-players_projections_weekly_average_merged$season <- as.integer(players_projections_weekly_average_merged$season)
+players_projectedPoints_weekly_combined$season <- as.integer(
+  players_projectedPoints_weekly_combined$season
+)
+players_projections_weekly_average_merged$season <- as.integer(
+  players_projections_weekly_average_merged$season
+)
 
 player_stats_weekly_subset_IDs <- left_join(
   player_stats_weekly_subset,
   nfl_playerIDs_subset,
   by = c("player_id" = "gsis_id")
-) |> 
+) |>
   filter(!is.na(mfl_id))
 
 projectionsWithActuals_weekly <- full_join(
@@ -246,7 +255,7 @@ crowdAveragedProjectionsWithActuals_weekly <- full_join(
   suffix = c("", "_proj"),
 )
 
-projectionsWithActuals_weekly <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly <- projectionsWithActuals_weekly |>
   unite(
     "player_id_season_week",
     player_id,
@@ -255,7 +264,7 @@ projectionsWithActuals_weekly <- projectionsWithActuals_weekly |>
     remove = FALSE
   )
 
-crowdAveragedProjectionsWithActuals_weekly <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly <- crowdAveragedProjectionsWithActuals_weekly |>
   unite(
     "player_id_season_week",
     player_id,
@@ -268,20 +277,20 @@ crowdAveragedProjectionsWithActuals_weekly <- crowdAveragedProjectionsWithActual
 Players in the `projectionsWithActuals_weekly` object are (supposed to be) uniquely identified by `player_id`-`season`-`week`-`data_src`:
 
 ```{r}
-projectionsWithActuals_weekly |> 
-  filter(!is.na(player_id)) |> 
-  group_by(player_id, season, week, data_src) |> 
-  filter(n() > 1) |> 
+projectionsWithActuals_weekly |>
+  filter(!is.na(player_id)) |>
+  group_by(player_id, season, week, data_src) |>
+  filter(n() > 1) |>
   head()
 ```
 
 Players in the `crowdAveragedProjectionsWithActuals_weekly` object are (supposed to be) uniquely identified by `player_id`-`season`-`week`-`avg_type`:
 
 ```{r}
-crowdAveragedProjectionsWithActuals_weekly |> 
-  filter(!is.na(player_id)) |> 
-  group_by(player_id, season, week, avg_type) |> 
-  filter(n() > 1) |> 
+crowdAveragedProjectionsWithActuals_weekly |>
+  filter(!is.na(player_id)) |>
+  group_by(player_id, season, week, avg_type) |>
+  filter(n() > 1) |>
   head()
 ```
 
@@ -289,63 +298,64 @@ We save the data object for use in other chapters:
 
 ```{r}
 save(
-  projectionsWithActuals_weekly, crowdAveragedProjectionsWithActuals_weekly,
+  projectionsWithActuals_weekly,
+  crowdAveragedProjectionsWithActuals_weekly,
   file = "./data/projectionsWithActuals_weekly.RData"
 )
 ```
 
 ```{r}
-playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly |> 
-  filter(raw_points > 6 | fantasyPoints > 6) |> 
-  select(player_id_season_week) |> 
+playersWithHighProjectedOrActualPoints_weekly <- projectionsWithActuals_weekly |>
+  filter(raw_points > 6 | fantasyPoints > 6) |>
+  select(player_id_season_week) |>
   pull()
 
-projectionsWithActuals_weekly_qb <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_qb <- projectionsWithActuals_weekly |>
   filter(position_group == "QB")
 
-projectionsWithActuals_weekly_rb <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_rb <- projectionsWithActuals_weekly |>
   filter(position_group == "RB")
 
-projectionsWithActuals_weekly_wr <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_wr <- projectionsWithActuals_weekly |>
   filter(position_group == "WR")
 
-projectionsWithActuals_weekly_te <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_te <- projectionsWithActuals_weekly |>
   filter(position_group == "TE")
 
-projectionsWithActuals_weekly_k <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_k <- projectionsWithActuals_weekly |>
   filter(position == "K")
 
-projectionsWithActuals_weekly_dl <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_dl <- projectionsWithActuals_weekly |>
   filter(position_group == "DL")
 
-projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_lb <- projectionsWithActuals_weekly |>
   filter(position_group == "LB")
 
-projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly |> 
+projectionsWithActuals_weekly_db <- projectionsWithActuals_weekly |>
   filter(position_group == "DB")
 
-crowdAveragedProjectionsWithActuals_weekly_qb <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_qb <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position_group == "QB")
 
-crowdAveragedProjectionsWithActuals_weekly_rb <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_rb <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position_group == "RB")
 
-crowdAveragedProjectionsWithActuals_weekly_wr <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_wr <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position_group == "WR")
 
-crowdAveragedProjectionsWithActuals_weekly_te <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_te <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position_group == "TE")
 
-crowdAveragedProjectionsWithActuals_weekly_k <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_k <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position == "K")
 
-crowdAveragedProjectionsWithActuals_weekly_dl <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_dl <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position_group == "DL")
 
-crowdAveragedProjectionsWithActuals_weekly_lb <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_lb <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position_group == "LB")
 
-crowdAveragedProjectionsWithActuals_weekly_db <- crowdAveragedProjectionsWithActuals_weekly |> 
+crowdAveragedProjectionsWithActuals_weekly_db <- crowdAveragedProjectionsWithActuals_weekly |>
   filter(position_group == "DB")
 ```
 
@@ -806,20 +816,25 @@ inedibleScores <- rnorm(sampleSize, 100, 15)
 edibleData <- data.frame(
   score = c(
     edibleScores,
-    inedibleScores),
+    inedibleScores
+  ),
   type = c(
     rep("edible", sampleSize),
-    rep("inedible", sampleSize)))
+    rep("inedible", sampleSize)
+  )
+)
 
 cutoff <- 75
 
 hist_edible <- density(
   edibleScores,
   from = 0,
-  to = 150) %$% # exposition pipe magrittr::`%$%`
+  to = 150
+) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) |>
+    y = y
+  ) |>
   mutate(area = x >= cutoff)
 
 hist_edible$type[hist_edible$area == TRUE] <- "edible_FP"
@@ -828,10 +843,12 @@ hist_edible$type[hist_edible$area == FALSE] <- "edible_TN"
 hist_inedible <- density(
   inedibleScores,
   from = 0,
-  to = 150) %$% # exposition pipe magrittr::`%$%`
+  to = 150
+) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) |>
+    y = y
+  ) |>
   mutate(area = x < cutoff)
 
 hist_inedible$type[hist_inedible$area == TRUE] <- "inedible_FN"
@@ -839,7 +856,8 @@ hist_inedible$type[hist_inedible$area == FALSE] <- "inedible_TP"
 
 density_data <- bind_rows(
   hist_edible,
-  hist_inedible)
+  hist_inedible
+)
 
 density_data$type <- factor(
   density_data$type,
@@ -847,25 +865,32 @@ density_data$type <- factor(
     "edible_TN",
     "inedible_TP",
     "edible_FP",
-    "inedible_FN"))
+    "inedible_FN"
+  )
+)
 
 ggplot(
   data = edibleData,
   aes(
     x = score,
     ymin = 0,
-    fill = type)) +
+    fill = type
+  )
+) +
   geom_density(alpha = .5) +
   scale_fill_manual(
     name = "Berry Type",
     values = c(
       viridis::viridis(2)[1],
-      viridis::viridis(2)[2])) +
+      viridis::viridis(2)[2]
+    )
+  ) +
   scale_y_continuous(name = "Frequency") +
   theme_bw() +
   theme(
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 ```
 
 @fig-classificationStandardCutoff depicts the distributions of scores by berry type with a cutoff.
@@ -889,7 +914,9 @@ ggplot(
     x = x,
     ymin = 0,
     ymax = y,
-    fill = type)) +
+    fill = type
+  )
+) +
   geom_ribbon(alpha = 1) +
   scale_fill_manual(
     name = "Berry Type",
@@ -897,20 +924,24 @@ ggplot(
       viridis::viridis(4)[4],
       viridis::viridis(4)[1],
       viridis::viridis(4)[3],
-      viridis::viridis(4)[2]),
-    breaks = c("edible_TN","inedible_TP","edible_FP","inedible_FN"),
-    labels = c("Edible: TN","Inedible: TP","Edible: FP","Inedible: FN")) +
+      viridis::viridis(4)[2]
+    ),
+    breaks = c("edible_TN", "inedible_TP", "edible_FP", "inedible_FN"),
+    labels = c("Edible: TN", "Inedible: TP", "Edible: FP", "Inedible: FN")
+  ) +
   geom_line(aes(y = y)) +
   geom_vline(
     xintercept = cutoff,
     color = "red",
-    linewidth = 2) +
+    linewidth = 2
+  ) +
   scale_x_continuous(name = "score") +
   scale_y_continuous(name = "Frequency") +
   theme_bw() +
   theme(
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 ```
 
 Based on our assessment goals, we might use a different selection ratio by changing the cutoff.
@@ -933,10 +964,12 @@ cutoff <- 85
 hist_edible <- density(
   edibleScores,
   from = 0,
-  to = 150) %$% # exposition pipe magrittr::`%$%`
+  to = 150
+) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) |>
+    y = y
+  ) |>
   mutate(area = x >= cutoff)
 
 hist_edible$type[hist_edible$area == TRUE] <- "edible_FP"
@@ -945,10 +978,12 @@ hist_edible$type[hist_edible$area == FALSE] <- "edible_TN"
 hist_inedible <- density(
   inedibleScores,
   from = 0,
-  to = 150) %$% # exposition pipe magrittr::`%$%`
+  to = 150
+) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) |>
+    y = y
+  ) |>
   mutate(area = x < cutoff)
 
 hist_inedible$type[hist_inedible$area == TRUE] <- "inedible_FN"
@@ -956,7 +991,8 @@ hist_inedible$type[hist_inedible$area == FALSE] <- "inedible_TP"
 
 density_data <- bind_rows(
   hist_edible,
-  hist_inedible)
+  hist_inedible
+)
 
 density_data$type <- factor(
   density_data$type,
@@ -964,7 +1000,9 @@ density_data$type <- factor(
     "edible_TN",
     "inedible_TP",
     "edible_FP",
-    "inedible_FN"))
+    "inedible_FN"
+  )
+)
 
 ggplot(
   data = density_data,
@@ -972,7 +1010,9 @@ ggplot(
     x = x,
     ymin = 0,
     ymax = y,
-    fill = type)) +
+    fill = type
+  )
+) +
   geom_ribbon(alpha = 1) +
   scale_fill_manual(
     name = "Berry Type",
@@ -980,20 +1020,24 @@ ggplot(
       viridis::viridis(4)[4],
       viridis::viridis(4)[1],
       viridis::viridis(4)[3],
-      viridis::viridis(4)[2]),
-    breaks = c("edible_TN","inedible_TP","edible_FP","inedible_FN"),
-    labels = c("Edible: TN","Inedible: TP","Edible: FP","Inedible: FN")) +
+      viridis::viridis(4)[2]
+    ),
+    breaks = c("edible_TN", "inedible_TP", "edible_FP", "inedible_FN"),
+    labels = c("Edible: TN", "Inedible: TP", "Edible: FP", "Inedible: FN")
+  ) +
   geom_line(aes(y = y)) +
   geom_vline(
     xintercept = cutoff,
     color = "red",
-    linewidth = 2) +
+    linewidth = 2
+  ) +
   scale_x_continuous(name = "score") +
   scale_y_continuous(name = "Frequency") +
   theme_bw() +
   theme(
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 ```
 
 @fig-classificationLowerCutoff depicts the distributions of scores by berry type when we lower the cutoff.
@@ -1015,10 +1059,12 @@ cutoff <- 65
 hist_edible <- density(
   edibleScores,
   from = 0,
-  to = 150) %$% # exposition pipe magrittr::`%$%`
+  to = 150
+) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) |>
+    y = y
+  ) |>
   mutate(area = x >= cutoff)
 
 hist_edible$type[hist_edible$area == TRUE] <- "edible_FP"
@@ -1027,10 +1073,12 @@ hist_edible$type[hist_edible$area == FALSE] <- "edible_TN"
 hist_inedible <- density(
   inedibleScores,
   from = 0,
-  to = 150) %$% # exposition pipe magrittr::`%$%`
+  to = 150
+) %$% # exposition pipe magrittr::`%$%`
   data.frame(
     x = x,
-    y = y) |>
+    y = y
+  ) |>
   mutate(area = x < cutoff)
 
 hist_inedible$type[hist_inedible$area == TRUE] <- "inedible_FN"
@@ -1038,7 +1086,8 @@ hist_inedible$type[hist_inedible$area == FALSE] <- "inedible_TP"
 
 density_data <- bind_rows(
   hist_edible,
-  hist_inedible)
+  hist_inedible
+)
 
 density_data$type <- factor(
   density_data$type,
@@ -1046,7 +1095,9 @@ density_data$type <- factor(
     "edible_TN",
     "inedible_TP",
     "edible_FP",
-    "inedible_FN"))
+    "inedible_FN"
+  )
+)
 
 ggplot(
   data = density_data,
@@ -1054,7 +1105,9 @@ ggplot(
     x = x,
     ymin = 0,
     ymax = y,
-    fill = type)) +
+    fill = type
+  )
+) +
   geom_ribbon(alpha = 1) +
   scale_fill_manual(
     name = "Berry Type",
@@ -1062,20 +1115,24 @@ ggplot(
       viridis::viridis(4)[4],
       viridis::viridis(4)[1],
       viridis::viridis(4)[3],
-      viridis::viridis(4)[2]),
-    breaks = c("edible_TN","inedible_TP","edible_FP","inedible_FN"),
-    labels = c("Edible: TN","Inedible: TP","Edible: FP","Inedible: FN")) +
+      viridis::viridis(4)[2]
+    ),
+    breaks = c("edible_TN", "inedible_TP", "edible_FP", "inedible_FN"),
+    labels = c("Edible: TN", "Inedible: TP", "Edible: FP", "Inedible: FN")
+  ) +
   geom_line(aes(y = y)) +
   geom_vline(
     xintercept = cutoff,
     color = "red",
-    linewidth = 2) +
+    linewidth = 2
+  ) +
   scale_x_continuous(name = "score") +
   scale_y_continuous(name = "Frequency") +
   theme_bw() +
   theme(
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 ```
 
 In sum, sensitivity and specificity differ based on the cutoff for classification.
@@ -1094,21 +1151,33 @@ Thus, our cutoff or threshold is 300 or more projected points.
 The same player has multiple rows in the data file—one for each projection source.
 
 ```{r}
-projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal |> 
-  filter(position_group %in% c("RB","WR")) |> 
+projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal |>
+  filter(position_group %in% c("RB", "WR")) |>
   filter(season == 2024)
 
-projectionsWithActuals_seasonal_subset$prediction <- ifelse(projectionsWithActuals_seasonal_subset$raw_points >= 300, 1, 0)
-projectionsWithActuals_seasonal_subset$truth <- ifelse(projectionsWithActuals_seasonal_subset$fantasyPoints >= 300, 1, 0)
+projectionsWithActuals_seasonal_subset$prediction <- ifelse(
+  projectionsWithActuals_seasonal_subset$raw_points >= 300,
+  1,
+  0
+)
+projectionsWithActuals_seasonal_subset$truth <- ifelse(
+  projectionsWithActuals_seasonal_subset$fantasyPoints >= 300,
+  1,
+  0
+)
 
 projectionsWithActuals_seasonal_subset$predictionFactor <- factor(
   projectionsWithActuals_seasonal_subset$prediction,
-  levels = c(1,0),
-  labels = c("Prediction: Will Score 300+ Points", "Prediction: Will Not Score 300+ Points"))
+  levels = c(1, 0),
+  labels = c(
+    "Prediction: Will Score 300+ Points",
+    "Prediction: Will Not Score 300+ Points"
+  )
+)
 
 projectionsWithActuals_seasonal_subset$truthFactor <- factor(
   projectionsWithActuals_seasonal_subset$truth,
-  levels = c(1,0),
+  levels = c(1, 0),
   labels = c("Truth: Scored 300+ Points", "Truth: Did Not Score 300+ Points")
 )
 
@@ -1169,9 +1238,11 @@ Then, we can draw lines or a curve to connect the points.
 plot(
   pROC::roc(
     truth ~ raw_points,
-    projectionsWithActuals_seasonal_subset),
+    projectionsWithActuals_seasonal_subset
+  ),
   legacy.axes = TRUE,
-  print.auc = TRUE)
+  print.auc = TRUE
+)
 ```
 
 @fig-aucExample depicts an ROC curve where a smoothed and fitted curve is drawn to connect the hit and false alarm rates, in predicting Running Backs and Wide Receivers who score 300 or more fantasy points.
@@ -1187,9 +1258,11 @@ plot(
   pROC::roc(
     truth ~ raw_points,
     projectionsWithActuals_seasonal_subset,
-    smooth = TRUE),
+    smooth = TRUE
+  ),
   legacy.axes = TRUE,
-  print.auc = TRUE)
+  print.auc = TRUE
+)
 ```
 
 ##### Area Under the ROC Curve {#sec-auc}
@@ -1232,72 +1305,84 @@ plot(
   pROC::roc(
     y ~ x,
     auc60,
-    smooth = TRUE),
+    smooth = TRUE
+  ),
   legacy.axes = TRUE,
   print.auc = TRUE,
   print.auc.x = .52,
   print.auc.y = .61,
-  print.auc.pattern = "%.2f")
+  print.auc.pattern = "%.2f"
+)
 
 plot(
   pROC::roc(
     y ~ x,
     auc70,
-    smooth = TRUE),
+    smooth = TRUE
+  ),
   legacy.axes = TRUE,
   print.auc = TRUE,
   print.auc.x = .6,
   print.auc.y = .67,
   print.auc.pattern = "%.2f",
-  add = TRUE)
+  add = TRUE
+)
 
 plot(
   pROC::roc(
     y ~ x,
     auc80,
-    smooth = TRUE),
+    smooth = TRUE
+  ),
   legacy.axes = TRUE,
   print.auc = TRUE,
   print.auc.x = .695,
   print.auc.y = .735,
   print.auc.pattern = "%.2f",
-  add = TRUE)
+  add = TRUE
+)
 
 plot(
   pROC::roc(
     y ~ x,
     auc90,
-    smooth = TRUE),
+    smooth = TRUE
+  ),
   legacy.axes = TRUE,
   print.auc = TRUE,
   print.auc.x = .805,
   print.auc.y = .815,
   print.auc.pattern = "%.2f",
-  add = TRUE)
+  add = TRUE
+)
 
 plot(
   pROC::roc(
     y ~ x,
     auc95,
-    smooth = TRUE),
+    smooth = TRUE
+  ),
   legacy.axes = TRUE,
   print.auc = TRUE,
   print.auc.x = .875,
   print.auc.y = .865,
   print.auc.pattern = "%.2f",
-  add = TRUE)
+  add = TRUE
+)
 
 plot(
   pROC::roc(
     y ~ x,
     auc99,
-    smooth = TRUE),
+    smooth = TRUE
+  ),
   legacy.axes = TRUE,
   print.auc = TRUE,
   print.auc.x = .94,
   print.auc.y = .94,
   print.auc.pattern = "%.2f",
-  add = TRUE)
+  add = TRUE
+)
 ```
 
 As an example, given an AUC of .75, this says that the overall score of an individual who has the characteristic in question will be higher 75% of the time than the overall score of an individual who does not have the characteristic.
@@ -1354,21 +1439,33 @@ An example of a confusion matrix is in @fig-confusionMatrix1.
 Here is our 2x2 confusion matrix, predicting which Running Backs or Wide Receivers will score 300 or more fantasy points.
 
 ```{r}
-projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal |> 
-  filter(position_group %in% c("RB","WR")) |> 
+projectionsWithActuals_seasonal_subset <- projectionsWithActuals_seasonal |>
+  filter(position_group %in% c("RB", "WR")) |>
   filter(season == 2024)
 
-projectionsWithActuals_seasonal_subset$prediction <- ifelse(projectionsWithActuals_seasonal_subset$raw_points >= 300, 1, 0)
-projectionsWithActuals_seasonal_subset$truth <- ifelse(projectionsWithActuals_seasonal_subset$fantasyPoints >= 300, 1, 0)
+projectionsWithActuals_seasonal_subset$prediction <- ifelse(
+  projectionsWithActuals_seasonal_subset$raw_points >= 300,
+  1,
+  0
+)
+projectionsWithActuals_seasonal_subset$truth <- ifelse(
+  projectionsWithActuals_seasonal_subset$fantasyPoints >= 300,
+  1,
+  0
+)
 
 projectionsWithActuals_seasonal_subset$predictionFactor <- factor(
   projectionsWithActuals_seasonal_subset$prediction,
-  levels = c(1,0),
-  labels = c("Prediction: Will Score 300+ Points", "Prediction: Will Not Score 300+ Points"))
+  levels = c(1, 0),
+  labels = c(
+    "Prediction: Will Score 300+ Points",
+    "Prediction: Will Not Score 300+ Points"
+  )
+)
 
 projectionsWithActuals_seasonal_subset$truthFactor <- factor(
   projectionsWithActuals_seasonal_subset$truth,
-  levels = c(1,0),
+  levels = c(1, 0),
   labels = c("Truth: Scored 300+ Points", "Truth: Did Not Score 300+ Points")
 )
 
@@ -1382,7 +1479,8 @@ table(projectionsWithActuals_seasonal_subset$truthFactor)
 ```{r}
 table(
   projectionsWithActuals_seasonal_subset$predictionFactor,
-  projectionsWithActuals_seasonal_subset$truthFactor)
+  projectionsWithActuals_seasonal_subset$truthFactor
+)
 ```
 
 ##### Number With Margins Added {#sec-confusionMatrix-numberMargins}
@@ -1390,7 +1488,8 @@ table(
 ```{r}
 addmargins(table(
   projectionsWithActuals_seasonal_subset$predictionFactor,
-  projectionsWithActuals_seasonal_subset$truthFactor))
+  projectionsWithActuals_seasonal_subset$truthFactor
+))
 ```
 
 ##### Proportions {#sec-confusionMatrix-numberMarginsProportions}
@@ -1398,7 +1497,8 @@ addmargins(table(
 ```{r}
 prop.table(table(
   projectionsWithActuals_seasonal_subset$predictionFactor,
-  projectionsWithActuals_seasonal_subset$truthFactor))
+  projectionsWithActuals_seasonal_subset$truthFactor
+))
 ```
 
 ##### Proportions With Margins Added {#sec-confusionMatrix-numberMarginsProportionsMargins}
@@ -1406,7 +1506,8 @@ prop.table(table(
 ```{r}
 addmargins(prop.table(table(
   projectionsWithActuals_seasonal_subset$predictionFactor,
-  projectionsWithActuals_seasonal_subset$truthFactor)))
+  projectionsWithActuals_seasonal_subset$truthFactor
+)))
 ```
 
 #### True Positives (TP) {#sec-truePositive}
@@ -1847,7 +1948,8 @@ The [`petersenlab`](https://cran.r-project.org/web/packages/petersenlab/index.ht
 
 petersenlab::optimalCutoff(
   predicted = projectionsWithActuals_seasonal_subset$raw_points,
-  actual = projectionsWithActuals_seasonal_subset$truth)
+  actual = projectionsWithActuals_seasonal_subset$truth
+)
 ```
 
 ```{r}
@@ -1855,13 +1957,14 @@ petersenlab::optimalCutoff(
 
 optimalCutoff <- petersenlab::optimalCutoff(
   predicted = projectionsWithActuals_seasonal_subset$raw_points,
-  actual = projectionsWithActuals_seasonal_subset$truth)
+  actual = projectionsWithActuals_seasonal_subset$truth
+)
 ```
 
 ```{r}
 #| echo: false
 
-for(i in 1:length(optimalCutoff)){
+for (i in 1:length(optimalCutoff)) {
   print(head(optimalCutoff[[i]]))
 }
 ```
@@ -2148,14 +2251,16 @@ set.seed(52242)
 folds_kFold <- rsample::group_vfold_cv(
   projectionsWithActuals_seasonal,
   group = player_id, # ensures all rows for a player are in the training set or all in the validation set for each fold
-  v = 10) # 10-fold cross-validation
+  v = 10
+) # 10-fold cross-validation
 
 folds <- folds_kFold
 
 # Define Recipe (Formula)
 rec <- recipes::recipe(
   fantasyPoints ~ raw_points, # use all predictors
-  data = projectionsWithActuals_seasonal)
+  data = projectionsWithActuals_seasonal
+)
 
 # Define Model
 lm_spec <- parsnip::linear_reg() |>
@@ -2194,7 +2299,8 @@ set.seed(52242)
 split <- rsample::group_initial_split(
   projectionsWithActuals_seasonal,
   group = player_id,
-  prop = 0.75)
+  prop = 0.75
+)
 
 # Fit model on training, evaluate on testing
 last_fit_results <- tune::last_fit(
@@ -2219,27 +2325,31 @@ set.seed(52242)
 split <- rsample::group_initial_split(
   projectionsWithActuals_seasonal,
   group = player_id,
-  prop = 0.75)
+  prop = 0.75
+)
 
 training <- rsample::training(split)
-testing  <- rsample::testing(split)
+testing <- rsample::testing(split)
 
 # Fit model on training set
 training_model <- parsnip::fit(
   lm_wf,
-  data = training)
+  data = training
+)
 
 # Predict on test set
 predictions <- predict(
   training_model,
-  new_data = testing) |>
+  new_data = testing
+) |>
   bind_cols(testing)
 
 # Predictive R-squared
 yardstick::rsq(
   predictions,
   truth = fantasyPoints,
-  estimate = .pred)
+  estimate = .pred
+)
 ```
 
 ### Discrimination {#sec-discriminationIndices}
@@ -2294,18 +2404,20 @@ exampleOutcomesWellCalibrated <- seq(from = 0, to = 1, by = .1)
 plot(
   examplePredictionsWellCalibrated,
   exampleOutcomesWellCalibrated,
-  xlim = c(0,1),
-  ylim = c(0,1),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
   xlab = "Predicted Probability",
   ylab = "Observed Proportion",
   bty = "l",
-  type = "n")
+  type = "n"
+)
 
 lines(
-  c(0,1),
-  c(0,1),
+  c(0, 1),
+  c(0, 1),
   lwd = 2,
-  col = "#377eb8")
+  col = "#377eb8"
+)
 
 points(
   examplePredictionsWellCalibrated,
@@ -2313,7 +2425,8 @@ points(
   cex = 1.5,
   col = "#e41a1c",
   lwd = 2,
-  type = "p")
+  type = "p"
+)
 ```
 
 The various types of general miscalibration are depicted in @fig-miscalibration:
@@ -2337,84 +2450,93 @@ underExtremity <- c(0, .05, .08, .11, .2, .5, .8, .89, .92, .95, 1)
 
 # Plot
 par(
-  mfrow = c(2,2),
-  mar = c(5,4,1,1) + 0.1) #margins: bottom, left, top, right
+  mfrow = c(2, 2),
+  mar = c(5, 4, 1, 1) + 0.1
+) #margins: bottom, left, top, right
 
 plot(
   examplePredictions,
   overExtremity,
-  xlim = c(0,1),
-  ylim = c(0,1),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
   main = "Overextremity",
   xlab = "Predicted Probability",
   ylab = "Observed Proportion",
   bty = "l",
   cex = 1.5,
   col = "#e41a1c",
-  type = "o")
+  type = "o"
+)
 
 lines(
-  c(0,1),
-  c(0,1),
+  c(0, 1),
+  c(0, 1),
   lwd = 2,
-  col = "#377eb8")
+  col = "#377eb8"
+)
 
 plot(
   examplePredictions,
   underExtremity,
-  xlim = c(0,1),
-  ylim = c(0,1),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
   main = "Underextremity",
   xlab = "Predicted Probability",
   ylab = "Observed Proportion",
   bty = "l",
   cex = 1.5,
   col = "#e41a1c",
-  type = "o")
+  type = "o"
+)
 
 lines(
-  c(0,1),
-  c(0,1),
+  c(0, 1),
+  c(0, 1),
   lwd = 2,
-  col = "#377eb8")
+  col = "#377eb8"
+)
 
 plot(
   examplePredictions,
   overPrediction,
-  xlim = c(0,1),
-  ylim = c(0,1),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
   main = "Overprediction",
   xlab = "Predicted Probability",
   ylab = "Observed Proportion",
   bty = "l",
   cex = 1.5,
   col = "#e41a1c",
-  type = "o")
+  type = "o"
+)
 
 lines(
-  c(0,1),
-  c(0,1),
+  c(0, 1),
+  c(0, 1),
   lwd = 2,
-  col = "#377eb8")
+  col = "#377eb8"
+)
 
 plot(
   examplePredictions,
   underPrediction,
-  xlim = c(0,1),
-  ylim = c(0,1),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
   main = "Underprediction",
   xlab = "Predicted Probability",
   ylab = "Observed Proportion",
   bty = "l",
   cex = 1.5,
   col = "#e41a1c",
-  type = "o")
+  type = "o"
+)
 
 lines(
-  c(0,1),
-  c(0,1),
+  c(0, 1),
+  c(0, 1),
   lwd = 2,
-  col = "#377eb8")
+  col = "#377eb8"
+)
 ```
 
 However, predictions could also be miscalibrated in more specific ways.
@@ -2554,17 +2676,17 @@ For this example, let's predict whether or not a Running Back rushes for 200 yar
 To predict that, we will use the number of rushing yards the player had in the previous game.
 
 ```{r}
-player_stats_weekly_example <- player_stats_weekly |> 
-  filter(position == "RB") |> 
-  arrange(player_id, season, week) |> 
-  group_by(player_id, season) |> 
-  mutate(rushing_yards_priorGame = lag(rushing_yards)) |> 
+player_stats_weekly_example <- player_stats_weekly |>
+  filter(position == "RB") |>
+  arrange(player_id, season, week) |>
+  group_by(player_id, season) |>
+  mutate(rushing_yards_priorGame = lag(rushing_yards)) |>
   ungroup()
 ```
 
 ```{r}
-player_stats_weekly_example |> 
-  select(player_id, season, week, rushing_yards, rushing_yards_priorGame) |> 
+player_stats_weekly_example |>
+  select(player_id, season, week, rushing_yards, rushing_yards_priorGame) |>
   head()
 ```
 
@@ -2615,7 +2737,8 @@ rocCurve <- pROC::roc(
   data = player_stats_weekly_example,
   response = rush_200_yds,
   predictor = rushing_yards_priorGame,
-  smooth = FALSE)
+  smooth = FALSE
+)
 ```
 
 Here is the area under the ROC curve (AUC):
@@ -2636,7 +2759,8 @@ par(pty = "s")
 plot(
   rocCurve,
   legacy.axes = TRUE,
-  print.auc = TRUE)
+  print.auc = TRUE
+)
 ```
 
 We can identify the cutoff that optimizes each of various accuracy estimates.
@@ -2644,7 +2768,8 @@ We can identify the cutoff that optimizes each of various accuracy estimates.
 ```{r}
 petersenlab::optimalCutoff(
   predicted = player_stats_weekly_example$rushing_yards_priorGame,
-  actual = player_stats_weekly_example$rush_200_yds)
+  actual = player_stats_weekly_example$rush_200_yds
+)
 ```
 
 ## Accuracy of Fantasy Projections {#sec-accuracyProjections}
@@ -2677,7 +2802,10 @@ accuracyIndices_seasonal_overall <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_overall <- round(accuracyIndices_seasonal_overall$rsquared, digits = 2)
+rsquare_seasonal_overall <- round(
+  accuracyIndices_seasonal_overall$rsquared,
+  digits = 2
+)
 me_seasonal_overall <- round(accuracyIndices_seasonal_overall$ME, digits = 2)
 mae_seasonal_overall <- round(accuracyIndices_seasonal_overall$MAE, digits = 2)
 ```
@@ -2688,7 +2816,7 @@ To calculate the accuracy by source, we could use the following code:
 
 ```{r}
 accuracy_by_source <- projectionsWithActuals_seasonal |>
-  filter(!is.na(data_src)) |> 
+  filter(!is.na(data_src)) |>
   filter(data_src != "FantasyPros") |> # remove crowd-averaged source; we compare to crowd average later
   group_by(data_src) |>
   summarise(
@@ -2738,13 +2866,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal$raw_points,
   y = projectionsWithActuals_seasonal$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -2754,41 +2884,48 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
     method = "loess",
     color = viridisLite::viridis(3)[3],
     fill = viridisLite::viridis(3)[1],
-    alpha = 0.7) + #95% confidence interval of LOESS model
+    alpha = 0.7
+  ) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -2796,8 +2933,14 @@ Here are the seasonal accuracy indexes for players across all positions, but onl
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -2806,14 +2949,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_overall_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$rsquared, digits = 2)
-me_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$ME, digits = 2)
-mae_seasonal_overall_subset <- round(accuracyIndices_seasonal_overall_subset$MAE, digits = 2)
+rsquare_seasonal_overall_subset <- round(
+  accuracyIndices_seasonal_overall_subset$rsquared,
+  digits = 2
+)
+me_seasonal_overall_subset <- round(
+  accuracyIndices_seasonal_overall_subset$ME,
+  digits = 2
+)
+mae_seasonal_overall_subset <- round(
+  accuracyIndices_seasonal_overall_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of all players (across all positions):
@@ -2835,17 +2993,32 @@ accuracyIndices_seasonal_overall_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_overall_crowd <- round(accuracyIndices_seasonal_overall_crowd$rsquared, digits = 2)
-me_seasonal_overall_crowd <- round(accuracyIndices_seasonal_overall_crowd$ME, digits = 2)
-mae_seasonal_overall_crowd <- round(accuracyIndices_seasonal_overall_crowd$MAE, digits = 2)
+rsquare_seasonal_overall_crowd <- round(
+  accuracyIndices_seasonal_overall_crowd$rsquared,
+  digits = 2
+)
+me_seasonal_overall_crowd <- round(
+  accuracyIndices_seasonal_overall_crowd$ME,
+  digits = 2
+)
+mae_seasonal_overall_crowd <- round(
+  accuracyIndices_seasonal_overall_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal$points[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -2854,14 +3027,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_overall_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal$points[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_overall_crowd_subset <- round(accuracyIndices_seasonal_overall_crowd_subset$rsquared, digits = 2)
-me_seasonal_overall_crowd_subset <- round(accuracyIndices_seasonal_overall_crowd_subset$ME, digits = 2)
-mae_seasonal_overall_crowd_subset <- round(accuracyIndices_seasonal_overall_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_overall_crowd_subset <- round(
+  accuracyIndices_seasonal_overall_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_overall_crowd_subset <- round(
+  accuracyIndices_seasonal_overall_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_overall_crowd_subset <- round(
+  accuracyIndices_seasonal_overall_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Quarterbacks {#sec-accuracyProjectionsSeasonalQB}
@@ -2904,13 +3092,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_qb$raw_points,
   y = projectionsWithActuals_seasonal_qb$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -2920,25 +3110,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_qb,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -2948,13 +3143,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Quarterbacks"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -2962,8 +3158,14 @@ Here are the seasonal accuracy indexes for only those Quarterbacks who had high 
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_qb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_qb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_qb$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_qb$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -2972,14 +3174,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_qb_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_qb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_qb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_qb$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_qb$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$rsquared, digits = 2)
-me_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$ME, digits = 2)
-mae_seasonal_qb_subset <- round(accuracyIndices_seasonal_qb_subset$MAE, digits = 2)
+rsquare_seasonal_qb_subset <- round(
+  accuracyIndices_seasonal_qb_subset$rsquared,
+  digits = 2
+)
+me_seasonal_qb_subset <- round(
+  accuracyIndices_seasonal_qb_subset$ME,
+  digits = 2
+)
+mae_seasonal_qb_subset <- round(
+  accuracyIndices_seasonal_qb_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Quarterbacks:
@@ -3001,17 +3218,29 @@ accuracyIndices_seasonal_qb_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_qb_crowd <- round(accuracyIndices_seasonal_qb_crowd$rsquared, digits = 2)
+rsquare_seasonal_qb_crowd <- round(
+  accuracyIndices_seasonal_qb_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_qb_crowd <- round(accuracyIndices_seasonal_qb_crowd$ME, digits = 2)
-mae_seasonal_qb_crowd <- round(accuracyIndices_seasonal_qb_crowd$MAE, digits = 2)
+mae_seasonal_qb_crowd <- round(
+  accuracyIndices_seasonal_qb_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of Quarterbacks, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3020,14 +3249,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_qb_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_qb$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_qb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_qb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_qb_crowd_subset <- round(accuracyIndices_seasonal_qb_crowd_subset$rsquared, digits = 2)
-me_seasonal_qb_crowd_subset <- round(accuracyIndices_seasonal_qb_crowd_subset$ME, digits = 2)
-mae_seasonal_qb_crowd_subset <- round(accuracyIndices_seasonal_qb_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_qb_crowd_subset <- round(
+  accuracyIndices_seasonal_qb_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_qb_crowd_subset <- round(
+  accuracyIndices_seasonal_qb_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_qb_crowd_subset <- round(
+  accuracyIndices_seasonal_qb_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Running Backs {#sec-accuracyProjectionsSeasonalRB}
@@ -3070,13 +3314,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_rb$raw_points,
   y = projectionsWithActuals_seasonal_rb$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -3086,25 +3332,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_rb,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -3114,13 +3365,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Running Backs"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -3128,8 +3380,14 @@ Here are the seasonal accuracy indexes for only those Running Backs who had high
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_rb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_rb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_rb$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_rb$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3138,14 +3396,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_rb_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_rb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_rb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_rb$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_rb$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$rsquared, digits = 2)
-me_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$ME, digits = 2)
-mae_seasonal_rb_subset <- round(accuracyIndices_seasonal_rb_subset$MAE, digits = 2)
+rsquare_seasonal_rb_subset <- round(
+  accuracyIndices_seasonal_rb_subset$rsquared,
+  digits = 2
+)
+me_seasonal_rb_subset <- round(
+  accuracyIndices_seasonal_rb_subset$ME,
+  digits = 2
+)
+mae_seasonal_rb_subset <- round(
+  accuracyIndices_seasonal_rb_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Running Backs:
@@ -3167,17 +3440,29 @@ accuracyIndices_seasonal_rb_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_rb_crowd <- round(accuracyIndices_seasonal_rb_crowd$rsquared, digits = 2)
+rsquare_seasonal_rb_crowd <- round(
+  accuracyIndices_seasonal_rb_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_rb_crowd <- round(accuracyIndices_seasonal_rb_crowd$ME, digits = 2)
-mae_seasonal_rb_crowd <- round(accuracyIndices_seasonal_rb_crowd$MAE, digits = 2)
+mae_seasonal_rb_crowd <- round(
+  accuracyIndices_seasonal_rb_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of Running Backs, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3186,14 +3471,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_rb_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_rb$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_rb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_rb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_rb_crowd_subset <- round(accuracyIndices_seasonal_rb_crowd_subset$rsquared, digits = 2)
-me_seasonal_rb_crowd_subset <- round(accuracyIndices_seasonal_rb_crowd_subset$ME, digits = 2)
-mae_seasonal_rb_crowd_subset <- round(accuracyIndices_seasonal_rb_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_rb_crowd_subset <- round(
+  accuracyIndices_seasonal_rb_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_rb_crowd_subset <- round(
+  accuracyIndices_seasonal_rb_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_rb_crowd_subset <- round(
+  accuracyIndices_seasonal_rb_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Wide Receivers {#sec-accuracyProjectionsSeasonalWR}
@@ -3236,13 +3536,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_wr$raw_points,
   y = projectionsWithActuals_seasonal_wr$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -3252,25 +3554,31 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_wr,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 100)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
-    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+    linetype = "dashed"
+  ) + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -3280,13 +3588,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Wide Receivers"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -3294,8 +3603,14 @@ Here are the seasonal accuracy indexes for only those Wide Receivers who had hig
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_wr$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_wr$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_wr$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_wr$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3304,14 +3619,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_wr_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_wr$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_wr$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_wr$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_wr$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$rsquared, digits = 2)
-me_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$ME, digits = 2)
-mae_seasonal_wr_subset <- round(accuracyIndices_seasonal_wr_subset$MAE, digits = 2)
+rsquare_seasonal_wr_subset <- round(
+  accuracyIndices_seasonal_wr_subset$rsquared,
+  digits = 2
+)
+me_seasonal_wr_subset <- round(
+  accuracyIndices_seasonal_wr_subset$ME,
+  digits = 2
+)
+mae_seasonal_wr_subset <- round(
+  accuracyIndices_seasonal_wr_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Wide Receivers:
@@ -3333,17 +3663,29 @@ accuracyIndices_seasonal_wr_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_wr_crowd <- round(accuracyIndices_seasonal_wr_crowd$rsquared, digits = 2)
+rsquare_seasonal_wr_crowd <- round(
+  accuracyIndices_seasonal_wr_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_wr_crowd <- round(accuracyIndices_seasonal_wr_crowd$ME, digits = 2)
-mae_seasonal_wr_crowd <- round(accuracyIndices_seasonal_wr_crowd$MAE, digits = 2)
+mae_seasonal_wr_crowd <- round(
+  accuracyIndices_seasonal_wr_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of Wide Receivers, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3352,14 +3694,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_wr_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_wr$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_wr$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_wr$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_wr_crowd_subset <- round(accuracyIndices_seasonal_wr_crowd_subset$rsquared, digits = 2)
-me_seasonal_wr_crowd_subset <- round(accuracyIndices_seasonal_wr_crowd_subset$ME, digits = 2)
-mae_seasonal_wr_crowd_subset <- round(accuracyIndices_seasonal_wr_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_wr_crowd_subset <- round(
+  accuracyIndices_seasonal_wr_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_wr_crowd_subset <- round(
+  accuracyIndices_seasonal_wr_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_wr_crowd_subset <- round(
+  accuracyIndices_seasonal_wr_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Tight Ends {#sec-accuracyProjectionsSeasonalTE}
@@ -3402,13 +3759,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_te$raw_points,
   y = projectionsWithActuals_seasonal_te$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -3418,41 +3777,50 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_te,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 50)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 50)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
-    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+    linetype = "dashed"
+  ) + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
-    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+    linetype = "dashed"
+  ) + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
     method = "loess",
     color = viridisLite::viridis(3)[3],
     fill = viridisLite::viridis(3)[1],
-    alpha = 0.7) + #95% confidence interval of LOESS model
+    alpha = 0.7
+  ) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Tight Ends"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -3460,8 +3828,14 @@ Here are the seasonal accuracy indexes for only those Tight Ends who had high pr
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_te$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_te$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_te$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_te$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3470,14 +3844,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_te_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_te$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_te$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_te$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_te$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$rsquared, digits = 2)
-me_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$ME, digits = 2)
-mae_seasonal_te_subset <- round(accuracyIndices_seasonal_te_subset$MAE, digits = 2)
+rsquare_seasonal_te_subset <- round(
+  accuracyIndices_seasonal_te_subset$rsquared,
+  digits = 2
+)
+me_seasonal_te_subset <- round(
+  accuracyIndices_seasonal_te_subset$ME,
+  digits = 2
+)
+mae_seasonal_te_subset <- round(
+  accuracyIndices_seasonal_te_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Tight Ends:
@@ -3499,17 +3888,29 @@ accuracyIndices_seasonal_te_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_te_crowd <- round(accuracyIndices_seasonal_te_crowd$rsquared, digits = 2)
+rsquare_seasonal_te_crowd <- round(
+  accuracyIndices_seasonal_te_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_te_crowd <- round(accuracyIndices_seasonal_te_crowd$ME, digits = 2)
-mae_seasonal_te_crowd <- round(accuracyIndices_seasonal_te_crowd$MAE, digits = 2)
+mae_seasonal_te_crowd <- round(
+  accuracyIndices_seasonal_te_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of Tight Ends, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3518,14 +3919,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_te_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_te$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_te$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_te$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_te_crowd_subset <- round(accuracyIndices_seasonal_te_crowd_subset$rsquared, digits = 2)
-me_seasonal_te_crowd_subset <- round(accuracyIndices_seasonal_te_crowd_subset$ME, digits = 2)
-mae_seasonal_te_crowd_subset <- round(accuracyIndices_seasonal_te_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_te_crowd_subset <- round(
+  accuracyIndices_seasonal_te_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_te_crowd_subset <- round(
+  accuracyIndices_seasonal_te_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_te_crowd_subset <- round(
+  accuracyIndices_seasonal_te_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Kickers {#sec-accuracyProjectionsSeasonalK}
@@ -3568,13 +3984,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_k$raw_points,
   y = projectionsWithActuals_seasonal_k$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -3584,41 +4002,50 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_k,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 50)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 50)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
-    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+    linetype = "dashed"
+  ) + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
-    linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
+    linetype = "dashed"
+  ) + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
     method = "loess",
     color = viridisLite::viridis(3)[3],
     fill = viridisLite::viridis(3)[1],
-    alpha = 0.7) + #95% confidence interval of LOESS model
+    alpha = 0.7
+  ) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Kickers"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -3626,8 +4053,14 @@ Here are the seasonal accuracy indexes for only those Kickers who had high proje
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_k$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_k$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_k$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_k$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3636,14 +4069,26 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_k_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_k$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_k$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_k$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_k$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$rsquared, digits = 2)
+rsquare_seasonal_k_subset <- round(
+  accuracyIndices_seasonal_k_subset$rsquared,
+  digits = 2
+)
 me_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$ME, digits = 2)
-mae_seasonal_k_subset <- round(accuracyIndices_seasonal_k_subset$MAE, digits = 2)
+mae_seasonal_k_subset <- round(
+  accuracyIndices_seasonal_k_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Kickers:
@@ -3665,7 +4110,10 @@ accuracyIndices_seasonal_k_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_k_crowd <- round(accuracyIndices_seasonal_k_crowd$rsquared, digits = 2)
+rsquare_seasonal_k_crowd <- round(
+  accuracyIndices_seasonal_k_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_k_crowd <- round(accuracyIndices_seasonal_k_crowd$ME, digits = 2)
 mae_seasonal_k_crowd <- round(accuracyIndices_seasonal_k_crowd$MAE, digits = 2)
 ```
@@ -3674,8 +4122,14 @@ Here are the seasonal accuracy indexes for crowd-averaged projections of Kickers
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3684,14 +4138,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_k_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_k$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_k$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_k$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_k_crowd_subset <- round(accuracyIndices_seasonal_k_crowd_subset$rsquared, digits = 2)
-me_seasonal_k_crowd_subset <- round(accuracyIndices_seasonal_k_crowd_subset$ME, digits = 2)
-mae_seasonal_k_crowd_subset <- round(accuracyIndices_seasonal_k_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_k_crowd_subset <- round(
+  accuracyIndices_seasonal_k_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_k_crowd_subset <- round(
+  accuracyIndices_seasonal_k_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_k_crowd_subset <- round(
+  accuracyIndices_seasonal_k_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Defensive Linemen {#sec-accuracyProjectionsSeasonalDL}
@@ -3734,13 +4203,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_dl$raw_points,
   y = projectionsWithActuals_seasonal_dl$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -3750,25 +4221,31 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_dl,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 20)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 20)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
-    linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
+    linetype = "dashed"
+  ) + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -3778,13 +4255,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Defensive Linemen"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -3792,8 +4270,14 @@ Here are the seasonal accuracy indexes for only those Defensive Linemen who had 
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_dl$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_dl$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_dl$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_dl$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3802,14 +4286,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_dl_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_dl$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_dl$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_dl$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_dl$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$rsquared, digits = 2)
-me_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$ME, digits = 2)
-mae_seasonal_dl_subset <- round(accuracyIndices_seasonal_dl_subset$MAE, digits = 2)
+rsquare_seasonal_dl_subset <- round(
+  accuracyIndices_seasonal_dl_subset$rsquared,
+  digits = 2
+)
+me_seasonal_dl_subset <- round(
+  accuracyIndices_seasonal_dl_subset$ME,
+  digits = 2
+)
+mae_seasonal_dl_subset <- round(
+  accuracyIndices_seasonal_dl_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Defensive Linemen:
@@ -3831,17 +4330,29 @@ accuracyIndices_seasonal_dl_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_dl_crowd <- round(accuracyIndices_seasonal_dl_crowd$rsquared, digits = 2)
+rsquare_seasonal_dl_crowd <- round(
+  accuracyIndices_seasonal_dl_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_dl_crowd <- round(accuracyIndices_seasonal_dl_crowd$ME, digits = 2)
-mae_seasonal_dl_crowd <- round(accuracyIndices_seasonal_dl_crowd$MAE, digits = 2)
+mae_seasonal_dl_crowd <- round(
+  accuracyIndices_seasonal_dl_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of Defensive Linemen, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3850,14 +4361,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_dl_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_dl$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_dl$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_dl$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_dl_crowd_subset <- round(accuracyIndices_seasonal_dl_crowd_subset$rsquared, digits = 2)
-me_seasonal_dl_crowd_subset <- round(accuracyIndices_seasonal_dl_crowd_subset$ME, digits = 2)
-mae_seasonal_dl_crowd_subset <- round(accuracyIndices_seasonal_dl_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_dl_crowd_subset <- round(
+  accuracyIndices_seasonal_dl_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_dl_crowd_subset <- round(
+  accuracyIndices_seasonal_dl_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_dl_crowd_subset <- round(
+  accuracyIndices_seasonal_dl_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Linebackers {#sec-accuracyProjectionsSeasonalLB}
@@ -3900,13 +4426,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_lb$raw_points,
   y = projectionsWithActuals_seasonal_lb$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -3916,25 +4444,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_lb,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 20)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 20)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -3944,13 +4477,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Linebackers"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -3958,8 +4492,14 @@ Here are the seasonal accuracy indexes for only those Linebackers who had high p
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_lb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_lb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_lb$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_lb$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -3968,14 +4508,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_lb_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_lb$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_lb$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_lb$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_lb$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$rsquared, digits = 2)
-me_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$ME, digits = 2)
-mae_seasonal_lb_subset <- round(accuracyIndices_seasonal_lb_subset$MAE, digits = 2)
+rsquare_seasonal_lb_subset <- round(
+  accuracyIndices_seasonal_lb_subset$rsquared,
+  digits = 2
+)
+me_seasonal_lb_subset <- round(
+  accuracyIndices_seasonal_lb_subset$ME,
+  digits = 2
+)
+mae_seasonal_lb_subset <- round(
+  accuracyIndices_seasonal_lb_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Linebackers:
@@ -3997,17 +4552,29 @@ accuracyIndices_seasonal_lb_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_lb_crowd <- round(accuracyIndices_seasonal_lb_crowd$rsquared, digits = 2)
+rsquare_seasonal_lb_crowd <- round(
+  accuracyIndices_seasonal_lb_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_lb_crowd <- round(accuracyIndices_seasonal_lb_crowd$ME, digits = 2)
-mae_seasonal_lb_crowd <- round(accuracyIndices_seasonal_lb_crowd$MAE, digits = 2)
+mae_seasonal_lb_crowd <- round(
+  accuracyIndices_seasonal_lb_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of Linebackers, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4016,14 +4583,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_lb_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_lb$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_lb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_lb$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_lb_crowd_subset <- round(accuracyIndices_seasonal_lb_crowd_subset$rsquared, digits = 2)
-me_seasonal_lb_crowd_subset <- round(accuracyIndices_seasonal_lb_crowd_subset$ME, digits = 2)
-mae_seasonal_lb_crowd_subset <- round(accuracyIndices_seasonal_lb_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_lb_crowd_subset <- round(
+  accuracyIndices_seasonal_lb_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_lb_crowd_subset <- round(
+  accuracyIndices_seasonal_lb_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_lb_crowd_subset <- round(
+  accuracyIndices_seasonal_lb_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Defensive Backs {#sec-accuracyProjectionsSeasonalDB}
@@ -4066,13 +4648,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_seasonal_db$raw_points,
   y = projectionsWithActuals_seasonal_db$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -4082,25 +4666,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_seasonal_db,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 20)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 20)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -4110,13 +4699,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of LOESS model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Seasonal Projections of Defensive Backs"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -4124,8 +4714,14 @@ Here are the seasonal accuracy indexes for only those Defensive Backs who had hi
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_db$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_db$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_db$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_db$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4134,14 +4730,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_db_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_seasonal_db$raw_points[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = projectionsWithActuals_seasonal_db$fantasyPoints[which(projectionsWithActuals_seasonal$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = projectionsWithActuals_seasonal_db$raw_points[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = projectionsWithActuals_seasonal_db$fantasyPoints[which(
+    projectionsWithActuals_seasonal$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$rsquared, digits = 2)
-me_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$ME, digits = 2)
-mae_seasonal_db_subset <- round(accuracyIndices_seasonal_db_subset$MAE, digits = 2)
+rsquare_seasonal_db_subset <- round(
+  accuracyIndices_seasonal_db_subset$rsquared,
+  digits = 2
+)
+me_seasonal_db_subset <- round(
+  accuracyIndices_seasonal_db_subset$ME,
+  digits = 2
+)
+mae_seasonal_db_subset <- round(
+  accuracyIndices_seasonal_db_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections for Defensive Backs:
@@ -4163,17 +4774,29 @@ accuracyIndices_seasonal_db_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_db_crowd <- round(accuracyIndices_seasonal_db_crowd$rsquared, digits = 2)
+rsquare_seasonal_db_crowd <- round(
+  accuracyIndices_seasonal_db_crowd$rsquared,
+  digits = 2
+)
 me_seasonal_db_crowd <- round(accuracyIndices_seasonal_db_crowd$ME, digits = 2)
-mae_seasonal_db_crowd <- round(accuracyIndices_seasonal_db_crowd$MAE, digits = 2)
+mae_seasonal_db_crowd <- round(
+  accuracyIndices_seasonal_db_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the seasonal accuracy indexes for crowd-averaged projections of Defensive Backs, but only among those who had high projected or actual points (i.e., players who had more than 100 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4182,14 +4805,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_seasonal_db_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
-  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in% playersWithHighProjectedOrActualPoints)],
+  predicted = crowdAveragedProjectionsWithActuals_seasonal_db$points[which(
+    crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
+  actual = crowdAveragedProjectionsWithActuals_seasonal_db$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_seasonal_db$player_id_season %in%
+      playersWithHighProjectedOrActualPoints
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_seasonal_db_crowd_subset <- round(accuracyIndices_seasonal_db_crowd_subset$rsquared, digits = 2)
-me_seasonal_db_crowd_subset <- round(accuracyIndices_seasonal_db_crowd_subset$ME, digits = 2)
-mae_seasonal_db_crowd_subset <- round(accuracyIndices_seasonal_db_crowd_subset$MAE, digits = 2)
+rsquare_seasonal_db_crowd_subset <- round(
+  accuracyIndices_seasonal_db_crowd_subset$rsquared,
+  digits = 2
+)
+me_seasonal_db_crowd_subset <- round(
+  accuracyIndices_seasonal_db_crowd_subset$ME,
+  digits = 2
+)
+mae_seasonal_db_crowd_subset <- round(
+  accuracyIndices_seasonal_db_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 ### Weekly Projections {#sec-accuracyProjectionsWeekly}
@@ -4215,7 +4853,10 @@ accuracyIndices_weekly_overall <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_overall <- round(accuracyIndices_weekly_overall$rsquared, digits = 2)
+rsquare_weekly_overall <- round(
+  accuracyIndices_weekly_overall$rsquared,
+  digits = 2
+)
 me_weekly_overall <- round(accuracyIndices_weekly_overall$ME, digits = 2)
 mae_weekly_overall <- round(accuracyIndices_weekly_overall$MAE, digits = 2)
 ```
@@ -4234,13 +4875,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly$raw_points,
   y = projectionsWithActuals_weekly$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -4250,25 +4893,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -4278,13 +4926,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -4292,8 +4941,14 @@ Here are the weekly accuracy indexes for players across all positions, but only 
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4302,14 +4957,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_overall_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$rsquared, digits = 2)
-me_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$ME, digits = 2)
-mae_weekly_overall_subset <- round(accuracyIndices_weekly_overall_subset$MAE, digits = 2)
+rsquare_weekly_overall_subset <- round(
+  accuracyIndices_weekly_overall_subset$rsquared,
+  digits = 2
+)
+me_weekly_overall_subset <- round(
+  accuracyIndices_weekly_overall_subset$ME,
+  digits = 2
+)
+mae_weekly_overall_subset <- round(
+  accuracyIndices_weekly_overall_subset$MAE,
+  digits = 2
+)
 ```
 
 Here are the weekly accuracy indexes for crowd-averaged projections of all players (across all positions):
@@ -4331,17 +5001,32 @@ accuracyIndices_weekly_overall_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_overall_crowd <- round(accuracyIndices_weekly_overall_crowd$rsquared, digits = 2)
-me_weekly_overall_crowd <- round(accuracyIndices_weekly_overall_crowd$ME, digits = 2)
-mae_weekly_overall_crowd <- round(accuracyIndices_weekly_overall_crowd$MAE, digits = 2)
+rsquare_weekly_overall_crowd <- round(
+  accuracyIndices_weekly_overall_crowd$rsquared,
+  digits = 2
+)
+me_weekly_overall_crowd <- round(
+  accuracyIndices_weekly_overall_crowd$ME,
+  digits = 2
+)
+mae_weekly_overall_crowd <- round(
+  accuracyIndices_weekly_overall_crowd$MAE,
+  digits = 2
+)
 ```
 
 Here are the weekly accuracy indexes for crowd-averaged projections of players across all positions, but only among those who had high projected or actual points (i.e., players who had more than 6 projected or actual points; the players that are most important to differentiate between):
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly$points[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly$points[which(
+    crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4350,14 +5035,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_overall_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly$points[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly$points[which(
+    crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_overall_crowd_subset <- round(accuracyIndices_weekly_overall_crowd_subset$rsquared, digits = 2)
-me_weekly_overall_crowd_subset <- round(accuracyIndices_weekly_overall_crowd_subset$ME, digits = 2)
-mae_weekly_overall_crowd_subset <- round(accuracyIndices_weekly_overall_crowd_subset$MAE, digits = 2)
+rsquare_weekly_overall_crowd_subset <- round(
+  accuracyIndices_weekly_overall_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_overall_crowd_subset <- round(
+  accuracyIndices_weekly_overall_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_overall_crowd_subset <- round(
+  accuracyIndices_weekly_overall_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Quarterbacks {#sec-accuracyProjectionsWeeklyQB}
@@ -4400,13 +5100,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_qb$raw_points,
   y = projectionsWithActuals_weekly_qb$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -4416,25 +5118,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_qb,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -4444,13 +5151,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Quarterbacks"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -4458,8 +5166,14 @@ Here are the weekly accuracy indexes for only those Quarterbacks who had high pr
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_qb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_qb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_qb$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_qb$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4468,12 +5182,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_qb_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_qb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_qb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_qb$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_qb$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$rsquared, digits = 2)
+rsquare_weekly_qb_subset <- round(
+  accuracyIndices_weekly_qb_subset$rsquared,
+  digits = 2
+)
 me_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$ME, digits = 2)
 mae_weekly_qb_subset <- round(accuracyIndices_weekly_qb_subset$MAE, digits = 2)
 ```
@@ -4497,7 +5220,10 @@ accuracyIndices_weekly_qb_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_qb_crowd <- round(accuracyIndices_weekly_qb_crowd$rsquared, digits = 2)
+rsquare_weekly_qb_crowd <- round(
+  accuracyIndices_weekly_qb_crowd$rsquared,
+  digits = 2
+)
 me_weekly_qb_crowd <- round(accuracyIndices_weekly_qb_crowd$ME, digits = 2)
 mae_weekly_qb_crowd <- round(accuracyIndices_weekly_qb_crowd$MAE, digits = 2)
 ```
@@ -4506,8 +5232,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Quarterba
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4516,14 +5248,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_qb_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_qb$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_qb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_qb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_qb_crowd_subset <- round(accuracyIndices_weekly_qb_crowd_subset$rsquared, digits = 2)
-me_weekly_qb_crowd_subset <- round(accuracyIndices_weekly_qb_crowd_subset$ME, digits = 2)
-mae_weekly_qb_crowd_subset <- round(accuracyIndices_weekly_qb_crowd_subset$MAE, digits = 2)
+rsquare_weekly_qb_crowd_subset <- round(
+  accuracyIndices_weekly_qb_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_qb_crowd_subset <- round(
+  accuracyIndices_weekly_qb_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_qb_crowd_subset <- round(
+  accuracyIndices_weekly_qb_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Running Backs {#sec-accuracyProjectionsWeeklyRB}
@@ -4566,13 +5313,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_rb$raw_points,
   y = projectionsWithActuals_weekly_rb$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -4582,25 +5331,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_rb,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -4610,13 +5364,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Running Backs"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -4624,8 +5379,14 @@ Here are the weekly accuracy indexes for only those Running Backs who had high p
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_rb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_rb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_rb$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_rb$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4634,12 +5395,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_rb_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_rb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_rb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_rb$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_rb$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$rsquared, digits = 2)
+rsquare_weekly_rb_subset <- round(
+  accuracyIndices_weekly_rb_subset$rsquared,
+  digits = 2
+)
 me_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$ME, digits = 2)
 mae_weekly_rb_subset <- round(accuracyIndices_weekly_rb_subset$MAE, digits = 2)
 ```
@@ -4663,7 +5433,10 @@ accuracyIndices_weekly_rb_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_rb_crowd <- round(accuracyIndices_weekly_rb_crowd$rsquared, digits = 2)
+rsquare_weekly_rb_crowd <- round(
+  accuracyIndices_weekly_rb_crowd$rsquared,
+  digits = 2
+)
 me_weekly_rb_crowd <- round(accuracyIndices_weekly_rb_crowd$ME, digits = 2)
 mae_weekly_rb_crowd <- round(accuracyIndices_weekly_rb_crowd$MAE, digits = 2)
 ```
@@ -4672,8 +5445,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Running B
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4682,14 +5461,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_rb_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_rb$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_rb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_rb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_rb_crowd_subset <- round(accuracyIndices_weekly_rb_crowd_subset$rsquared, digits = 2)
-me_weekly_rb_crowd_subset <- round(accuracyIndices_weekly_rb_crowd_subset$ME, digits = 2)
-mae_weekly_rb_crowd_subset <- round(accuracyIndices_weekly_rb_crowd_subset$MAE, digits = 2)
+rsquare_weekly_rb_crowd_subset <- round(
+  accuracyIndices_weekly_rb_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_rb_crowd_subset <- round(
+  accuracyIndices_weekly_rb_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_rb_crowd_subset <- round(
+  accuracyIndices_weekly_rb_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Wide Receivers {#sec-accuracyProjectionsWeeklyWR}
@@ -4733,13 +5527,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_wr$raw_points,
   y = projectionsWithActuals_weekly_wr$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -4749,25 +5545,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_wr,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -4777,13 +5578,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Wide Receivers"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -4791,8 +5593,14 @@ Here are the weekly accuracy indexes for only those Wide Receivers who had high 
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_wr$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_wr$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_wr$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_wr$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4801,12 +5609,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_wr_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_wr$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_wr$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_wr$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_wr$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$rsquared, digits = 2)
+rsquare_weekly_wr_subset <- round(
+  accuracyIndices_weekly_wr_subset$rsquared,
+  digits = 2
+)
 me_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$ME, digits = 2)
 mae_weekly_wr_subset <- round(accuracyIndices_weekly_wr_subset$MAE, digits = 2)
 ```
@@ -4830,7 +5647,10 @@ accuracyIndices_weekly_wr_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_wr_crowd <- round(accuracyIndices_weekly_wr_crowd$rsquared, digits = 2)
+rsquare_weekly_wr_crowd <- round(
+  accuracyIndices_weekly_wr_crowd$rsquared,
+  digits = 2
+)
 me_weekly_wr_crowd <- round(accuracyIndices_weekly_wr_crowd$ME, digits = 2)
 mae_weekly_wr_crowd <- round(accuracyIndices_weekly_wr_crowd$MAE, digits = 2)
 ```
@@ -4839,8 +5659,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Wide Rece
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4849,14 +5675,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_wr_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_wr$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_wr$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_wr$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_wr_crowd_subset <- round(accuracyIndices_weekly_wr_crowd_subset$rsquared, digits = 2)
-me_weekly_wr_crowd_subset <- round(accuracyIndices_weekly_wr_crowd_subset$ME, digits = 2)
-mae_weekly_wr_crowd_subset <- round(accuracyIndices_weekly_wr_crowd_subset$MAE, digits = 2)
+rsquare_weekly_wr_crowd_subset <- round(
+  accuracyIndices_weekly_wr_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_wr_crowd_subset <- round(
+  accuracyIndices_weekly_wr_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_wr_crowd_subset <- round(
+  accuracyIndices_weekly_wr_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Tight Ends {#sec-accuracyProjectionsWeeklyTE}
@@ -4899,13 +5740,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_te$raw_points,
   y = projectionsWithActuals_weekly_te$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -4915,25 +5758,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_te,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -4943,13 +5791,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Tight Ends"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -4957,8 +5806,14 @@ Here are the weekly accuracy indexes for only those Tight Ends who had high proj
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_te$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_te$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_te$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_te$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -4967,12 +5822,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_te_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_te$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_te$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_te$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_te$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$rsquared, digits = 2)
+rsquare_weekly_te_subset <- round(
+  accuracyIndices_weekly_te_subset$rsquared,
+  digits = 2
+)
 me_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$ME, digits = 2)
 mae_weekly_te_subset <- round(accuracyIndices_weekly_te_subset$MAE, digits = 2)
 ```
@@ -4996,7 +5860,10 @@ accuracyIndices_weekly_te_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_te_crowd <- round(accuracyIndices_weekly_te_crowd$rsquared, digits = 2)
+rsquare_weekly_te_crowd <- round(
+  accuracyIndices_weekly_te_crowd$rsquared,
+  digits = 2
+)
 me_weekly_te_crowd <- round(accuracyIndices_weekly_te_crowd$ME, digits = 2)
 mae_weekly_te_crowd <- round(accuracyIndices_weekly_te_crowd$MAE, digits = 2)
 ```
@@ -5005,8 +5872,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Tight End
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5015,14 +5888,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_te_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_te$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_te$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_te$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_te_crowd_subset <- round(accuracyIndices_weekly_te_crowd_subset$rsquared, digits = 2)
-me_weekly_te_crowd_subset <- round(accuracyIndices_weekly_te_crowd_subset$ME, digits = 2)
-mae_weekly_te_crowd_subset <- round(accuracyIndices_weekly_te_crowd_subset$MAE, digits = 2)
+rsquare_weekly_te_crowd_subset <- round(
+  accuracyIndices_weekly_te_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_te_crowd_subset <- round(
+  accuracyIndices_weekly_te_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_te_crowd_subset <- round(
+  accuracyIndices_weekly_te_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Kickers {#sec-accuracyProjectionsWeeklyK}
@@ -5065,13 +5953,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_k$raw_points,
   y = projectionsWithActuals_weekly_k$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -5081,25 +5971,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_k,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -5109,13 +6004,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Kickers"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -5123,8 +6019,14 @@ Here are the weekly accuracy indexes for only those Kickers who had high project
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_k$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_k$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_k$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_k$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5133,12 +6035,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_k_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_k$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_k$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_k$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_k$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$rsquared, digits = 2)
+rsquare_weekly_k_subset <- round(
+  accuracyIndices_weekly_k_subset$rsquared,
+  digits = 2
+)
 me_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$ME, digits = 2)
 mae_weekly_k_subset <- round(accuracyIndices_weekly_k_subset$MAE, digits = 2)
 ```
@@ -5162,7 +6073,10 @@ accuracyIndices_weekly_k_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_k_crowd <- round(accuracyIndices_weekly_k_crowd$rsquared, digits = 2)
+rsquare_weekly_k_crowd <- round(
+  accuracyIndices_weekly_k_crowd$rsquared,
+  digits = 2
+)
 me_weekly_k_crowd <- round(accuracyIndices_weekly_k_crowd$ME, digits = 2)
 mae_weekly_k_crowd <- round(accuracyIndices_weekly_k_crowd$MAE, digits = 2)
 ```
@@ -5171,8 +6085,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Kickers, 
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5181,14 +6101,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_k_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_k$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_k$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_k$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_k_crowd_subset <- round(accuracyIndices_weekly_k_crowd_subset$rsquared, digits = 2)
-me_weekly_k_crowd_subset <- round(accuracyIndices_weekly_k_crowd_subset$ME, digits = 2)
-mae_weekly_k_crowd_subset <- round(accuracyIndices_weekly_k_crowd_subset$MAE, digits = 2)
+rsquare_weekly_k_crowd_subset <- round(
+  accuracyIndices_weekly_k_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_k_crowd_subset <- round(
+  accuracyIndices_weekly_k_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_k_crowd_subset <- round(
+  accuracyIndices_weekly_k_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Defensive Linemen {#sec-accuracyProjectionsWeeklyDL}
@@ -5231,13 +6166,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_dl$raw_points,
   y = projectionsWithActuals_weekly_dl$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -5247,25 +6184,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_dl,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -5275,13 +6217,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Defensive Linemen"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -5289,8 +6232,14 @@ Here are the weekly accuracy indexes for only those Defensive Linemen who had hi
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_dl$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_dl$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_dl$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_dl$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5299,12 +6248,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_dl_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_dl$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_dl$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_dl$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_dl$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$rsquared, digits = 2)
+rsquare_weekly_dl_subset <- round(
+  accuracyIndices_weekly_dl_subset$rsquared,
+  digits = 2
+)
 me_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$ME, digits = 2)
 mae_weekly_dl_subset <- round(accuracyIndices_weekly_dl_subset$MAE, digits = 2)
 ```
@@ -5328,7 +6286,10 @@ accuracyIndices_weekly_dl_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_dl_crowd <- round(accuracyIndices_weekly_dl_crowd$rsquared, digits = 2)
+rsquare_weekly_dl_crowd <- round(
+  accuracyIndices_weekly_dl_crowd$rsquared,
+  digits = 2
+)
 me_weekly_dl_crowd <- round(accuracyIndices_weekly_dl_crowd$ME, digits = 2)
 mae_weekly_dl_crowd <- round(accuracyIndices_weekly_dl_crowd$MAE, digits = 2)
 ```
@@ -5337,8 +6298,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Defensive
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5347,14 +6314,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_dl_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_dl$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_dl$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_dl$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_dl_crowd_subset <- round(accuracyIndices_weekly_dl_crowd_subset$rsquared, digits = 2)
-me_weekly_dl_crowd_subset <- round(accuracyIndices_weekly_dl_crowd_subset$ME, digits = 2)
-mae_weekly_dl_crowd_subset <- round(accuracyIndices_weekly_dl_crowd_subset$MAE, digits = 2)
+rsquare_weekly_dl_crowd_subset <- round(
+  accuracyIndices_weekly_dl_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_dl_crowd_subset <- round(
+  accuracyIndices_weekly_dl_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_dl_crowd_subset <- round(
+  accuracyIndices_weekly_dl_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Linebackers {#sec-accuracyProjectionsWeeklyLB}
@@ -5397,13 +6379,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_lb$raw_points,
   y = projectionsWithActuals_weekly_lb$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -5413,25 +6397,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_lb,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -5441,13 +6430,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Linebackers"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -5455,8 +6445,14 @@ Here are the weekly accuracy indexes for only those Linebackers who had high pro
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_lb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_lb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_lb$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_lb$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5465,12 +6461,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_lb_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_lb$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_lb$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_lb$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_lb$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$rsquared, digits = 2)
+rsquare_weekly_lb_subset <- round(
+  accuracyIndices_weekly_lb_subset$rsquared,
+  digits = 2
+)
 me_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$ME, digits = 2)
 mae_weekly_lb_subset <- round(accuracyIndices_weekly_lb_subset$MAE, digits = 2)
 ```
@@ -5494,7 +6499,10 @@ accuracyIndices_weekly_lb_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_lb_crowd <- round(accuracyIndices_weekly_lb_crowd$rsquared, digits = 2)
+rsquare_weekly_lb_crowd <- round(
+  accuracyIndices_weekly_lb_crowd$rsquared,
+  digits = 2
+)
 me_weekly_lb_crowd <- round(accuracyIndices_weekly_lb_crowd$ME, digits = 2)
 mae_weekly_lb_crowd <- round(accuracyIndices_weekly_lb_crowd$MAE, digits = 2)
 ```
@@ -5503,8 +6511,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Linebacke
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5513,14 +6527,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_lb_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_lb$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_lb$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_lb$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_lb_crowd_subset <- round(accuracyIndices_weekly_lb_crowd_subset$rsquared, digits = 2)
-me_weekly_lb_crowd_subset <- round(accuracyIndices_weekly_lb_crowd_subset$ME, digits = 2)
-mae_weekly_lb_crowd_subset <- round(accuracyIndices_weekly_lb_crowd_subset$MAE, digits = 2)
+rsquare_weekly_lb_crowd_subset <- round(
+  accuracyIndices_weekly_lb_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_lb_crowd_subset <- round(
+  accuracyIndices_weekly_lb_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_lb_crowd_subset <- round(
+  accuracyIndices_weekly_lb_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 #### Defensive Backs {#sec-accuracyProjectionsWeeklyDB}
@@ -5563,13 +6592,15 @@ calibrationLoessModel <- msir::loess.sd(
   x = projectionsWithActuals_weekly_db$raw_points,
   y = projectionsWithActuals_weekly_db$fantasyPoints,
   nsigma = qnorm(.975),
-  na.action = "na.exclude")
+  na.action = "na.exclude"
+)
 
 calibrationLoessPredictionInterval <- data.frame(
   x = calibrationLoessModel$x,
   y = calibrationLoessModel$y,
   lower = calibrationLoessModel$lower,
-  upper = calibrationLoessModel$upper)
+  upper = calibrationLoessModel$upper
+)
 
 plotRangeMin <- min(calibrationLoessModel$lower, na.rm = TRUE)
 
@@ -5579,25 +6610,30 @@ ggplot2::ggplot(
   data = projectionsWithActuals_weekly_db,
   aes(
     x = raw_points,
-    y = fantasyPoints)) + 
+    y = fantasyPoints
+  )
+) +
   coord_cartesian(
     xlim = c(0, plotRangeMax),
     ylim = c(plotRangeMin, plotRangeMax),
-    expand = FALSE) +
+    expand = FALSE
+  ) +
   scale_x_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   scale_y_continuous(breaks = seq(0, plotRangeMax, by = 5)) +
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = lower),
+      y = lower
+    ),
     color = "red",
     linetype = "dashed") + #Lower estimate of 95% prediction interval of linear model
   geom_line(
     data = calibrationLoessPredictionInterval,
     aes(
       x = x,
-      y = upper),
+      y = upper
+    ),
     color = "red",
     linetype = "dashed") + #Upper estimate of 95% prediction interval of linear model
   geom_smooth(
@@ -5607,13 +6643,14 @@ ggplot2::ggplot(
     alpha = 0.7) + #95% confidence interval of GAM model
   geom_abline(
     slope = 1,
-    intercept = 0) +
+    intercept = 0
+  ) +
   labs(
     x = "Projected Fantasy Points",
     y = "Actual Fantasy Points",
     title = "Calibration Plot for Weekly Projections of Defensive Backs"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
 
@@ -5621,8 +6658,14 @@ Here are the weekly accuracy indexes for only those Defensive Backs who had high
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_db$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_db$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_db$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_db$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5631,12 +6674,21 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_db_subset <- petersenlab::accuracyOverall(
-  predicted = projectionsWithActuals_weekly_db$raw_points[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = projectionsWithActuals_weekly_db$fantasyPoints[which(projectionsWithActuals_weekly$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = projectionsWithActuals_weekly_db$raw_points[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = projectionsWithActuals_weekly_db$fantasyPoints[which(
+    projectionsWithActuals_weekly$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$rsquared, digits = 2)
+rsquare_weekly_db_subset <- round(
+  accuracyIndices_weekly_db_subset$rsquared,
+  digits = 2
+)
 me_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$ME, digits = 2)
 mae_weekly_db_subset <- round(accuracyIndices_weekly_db_subset$MAE, digits = 2)
 ```
@@ -5660,7 +6712,10 @@ accuracyIndices_weekly_db_crowd <- petersenlab::accuracyOverall(
   dropUndefined = TRUE
 )
 
-rsquare_weekly_db_crowd <- round(accuracyIndices_weekly_db_crowd$rsquared, digits = 2)
+rsquare_weekly_db_crowd <- round(
+  accuracyIndices_weekly_db_crowd$rsquared,
+  digits = 2
+)
 me_weekly_db_crowd <- round(accuracyIndices_weekly_db_crowd$ME, digits = 2)
 mae_weekly_db_crowd <- round(accuracyIndices_weekly_db_crowd$MAE, digits = 2)
 ```
@@ -5669,8 +6724,14 @@ Here are the weekly accuracy indexes for crowd-averaged projections of Defensive
 
 ```{r}
 petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 ```
@@ -5679,14 +6740,29 @@ petersenlab::accuracyOverall(
 #| include: false
 
 accuracyIndices_weekly_db_crowd_subset <- petersenlab::accuracyOverall(
-  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
-  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints[which(crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in% playersWithHighProjectedOrActualPoints_weekly)],
+  predicted = crowdAveragedProjectionsWithActuals_weekly_db$points[which(
+    crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
+  actual = crowdAveragedProjectionsWithActuals_weekly_db$fantasyPoints[which(
+    crowdAveragedProjectionsWithActuals_weekly_db$player_id_season_week %in%
+      playersWithHighProjectedOrActualPoints_weekly
+  )],
   dropUndefined = TRUE
 )
 
-rsquare_weekly_db_crowd_subset <- round(accuracyIndices_weekly_db_crowd_subset$rsquared, digits = 2)
-me_weekly_db_crowd_subset <- round(accuracyIndices_weekly_db_crowd_subset$ME, digits = 2)
-mae_weekly_db_crowd_subset <- round(accuracyIndices_weekly_db_crowd_subset$MAE, digits = 2)
+rsquare_weekly_db_crowd_subset <- round(
+  accuracyIndices_weekly_db_crowd_subset$rsquared,
+  digits = 2
+)
+me_weekly_db_crowd_subset <- round(
+  accuracyIndices_weekly_db_crowd_subset$ME,
+  digits = 2
+)
+mae_weekly_db_crowd_subset <- round(
+  accuracyIndices_weekly_db_crowd_subset$MAE,
+  digits = 2
+)
 ```
 
 ### Summarizing the Accuracy By Position {#sec-predictionAccuracyByPosition}
@@ -5705,7 +6781,7 @@ seasonalAccuracy <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_seasonal_overall,
     rsquare_seasonal_qb,
@@ -5752,7 +6828,7 @@ seasonalAccuracy_subset <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_seasonal_overall_subset,
     rsquare_seasonal_qb_subset,
@@ -5799,7 +6875,7 @@ seasonalAccuracy_crowd <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_seasonal_overall_crowd,
     rsquare_seasonal_qb_crowd,
@@ -5846,7 +6922,7 @@ seasonalAccuracy_crowd_subset <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_seasonal_overall_crowd_subset,
     rsquare_seasonal_qb_crowd_subset,
@@ -5893,7 +6969,7 @@ weeklyAccuracy <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_weekly_overall,
     rsquare_weekly_qb,
@@ -5940,7 +7016,7 @@ weeklyAccuracy_subset <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_weekly_overall_subset,
     rsquare_weekly_qb_subset,
@@ -5987,7 +7063,7 @@ weeklyAccuracy_crowd <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_weekly_overall_crowd,
     rsquare_weekly_qb_crowd,
@@ -6034,7 +7110,7 @@ weeklyAccuracy_crowd_subset <- data.frame(
     "Defensive Linemen",
     "Linebackers",
     "Defensive Backs"
-  ), 
+  ),
   rsquared = c(
     rsquare_weekly_overall_crowd_subset,
     rsquare_weekly_qb_crowd_subset,
@@ -6080,8 +7156,9 @@ We summarize the accuracy of seasonal projections by position in Tables [-@tbl-s
 
 knitr::kable(
   seasonalAccuracy,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 ```{r}
@@ -6091,8 +7168,9 @@ knitr::kable(
 
 knitr::kable(
   seasonalAccuracy_subset,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 We summarize the accuracy of crowd-averaged seasonal projections by position in Tables [-@tbl-seasonalCrowdAccuracyByPosition] and [-@tbl-seasonalCrowdAccuracyByPositionSubset].
@@ -6104,8 +7182,9 @@ We summarize the accuracy of crowd-averaged seasonal projections by position in 
 
 knitr::kable(
   seasonalAccuracy_crowd,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 ```{r}
@@ -6115,8 +7194,9 @@ knitr::kable(
 
 knitr::kable(
   seasonalAccuracy_crowd_subset,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 We summarize the accuracy of weekly projections by position in Tables [-@tbl-weeeklyAccuracyByPosition] and [-@tbl-weeklyAccuracyByPositionSubset].
@@ -6128,8 +7208,9 @@ We summarize the accuracy of weekly projections by position in Tables [-@tbl-wee
 
 knitr::kable(
   weeklyAccuracy,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 ```{r}
@@ -6139,8 +7220,9 @@ knitr::kable(
 
 knitr::kable(
   weeklyAccuracy_subset,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 We summarize the accuracy of crowd-averaged seasonal projections by position in Tables [-@tbl-weeklyCrowdAccuracyByPosition] and [-@tbl-weeklyCrowdAccuracyByPositionSubset].
@@ -6152,8 +7234,9 @@ We summarize the accuracy of crowd-averaged seasonal projections by position in 
 
 knitr::kable(
   weeklyAccuracy_crowd,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 ```{r}
@@ -6163,8 +7246,9 @@ knitr::kable(
 
 knitr::kable(
   weeklyAccuracy_crowd_subset,
-  col.names = c("Position","$R^2$","Mean Error","Mean Absolute Error"),
-  booktabs = TRUE)
+  col.names = c("Position", "$R^2$", "Mean Error", "Mean Absolute Error"),
+  booktabs = TRUE
+)
 ```
 
 In general, projections showed moderate accuracy in predicting players' fantasy performance.
