@@ -142,17 +142,21 @@ After the 2017 season, rates of going for it on fourth down increased dramatical
 #| fig-cap: "The Proportion of Fourth Downs That are Attempts to Go for it (Rather Than Punts or Field Goals)."
 #| fig-alt: "The Proportion of Fourth Downs That are Attempts to Go for it (Rather Than Punts or Field Goals)."
 
-nfl_pbp4thDown <- nfl_pbp |> 
-  filter(down == 4) |> 
-  filter(!(play_type %in% c("no_play","qb_kneel")))
+nfl_pbp4thDown <- nfl_pbp |>
+  filter(down == 4) |>
+  filter(!(play_type %in% c("no_play", "qb_kneel")))
 
 nfl_pbp4thDown$goForIt <- NA
-nfl_pbp4thDown$goForIt[which(nfl_pbp4thDown$play_type %in% c("field_goal","punt"))] <- 0
-nfl_pbp4thDown$goForIt[which(nfl_pbp4thDown$play_type %in% c("pass","run"))] <- 1
+nfl_pbp4thDown$goForIt[which(
+  nfl_pbp4thDown$play_type %in% c("field_goal", "punt")
+)] <- 0
+nfl_pbp4thDown$goForIt[which(
+  nfl_pbp4thDown$play_type %in% c("pass", "run")
+)] <- 1
 
-nfl_pbp4thDownPlotData <- nfl_pbp4thDown |> 
-  filter(!is.na(goForIt)) |> 
-  group_by(season) |> 
+nfl_pbp4thDownPlotData <- nfl_pbp4thDown |>
+  filter(!is.na(goForIt)) |>
+  group_by(season) |>
   summarise(
     goForItPct = mean(goForIt, na.rm = TRUE),
     n = n(),
@@ -164,15 +168,19 @@ ggplot2::ggplot(
   data = nfl_pbp4thDownPlotData,
   ggplot2::aes(
     x = season,
-    y = goForItPct)) +
+    y = goForItPct
+  )
+) +
   geom_point() +
   geom_line() +
   geom_ribbon(
     aes(
       y = goForItPct,
-      ymin = goForItPct - qnorm(0.975)*se,
-      ymax = goForItPct + qnorm(0.975)*se),
-    alpha = 0.2) +
+      ymin = goForItPct - qnorm(0.975) * se,
+      ymax = goForItPct + qnorm(0.975) * se
+    ),
+    alpha = 0.2
+  ) +
   scale_y_continuous(
     limits = c(0, NA)
   ) +
@@ -195,13 +203,15 @@ ggplot2::ggplot(
     color = "blue",
     linewidth = 1.5,
     alpha = 0.6,
-    arrow = arrow()) +
+    arrow = arrow()
+  ) +
   annotate(
     "text",
     x = 2015,
     y = 0.07,
     label = "Rapid increases in 4th down\nattempts after the 2017 season",
-    hjust = 0.5) # center
+    hjust = 0.5
+  ) # center
 ```
 
 As depicted in the @fig-goForItPercentageByWinProbChange [which was adapted from a [figure by Ben Baldwin](https://www.nfl4th.com/articles/4th-down-research.html); @R-nfl4th; archived at <https://perma.cc/S5D8-3NCU>], teams went for it on fourth down nearly twice as often in 2021 compared to 2017, when their win probability was at least 20% (given the current situation at the start of the given play) and they would increase their win probability by going for it.
@@ -216,7 +226,8 @@ We use the `ggtext` package [@R-ggtext] to annotate text:
 text_df <- tibble(
   label = c(
     "NFL coaches<br>in <span style='color:#00BFC4'>**2021**</span>",
-    "NFL coaches<br>in <span style='color:#F8766D'>**2017**</span>"),
+    "NFL coaches<br>in <span style='color:#F8766D'>**2017**</span>"
+  ),
   x = c(5, 7),
   y = c(87.5, 22.5),
   angle = c(10, 10),
@@ -227,12 +238,15 @@ nfl_4thdown |>
   filter(
     vegas_wp > .2,
     between(go_boost, -10, 10),
-    season %in% c(2017, 2021)) |>
+    season %in% c(2017, 2021)
+  ) |>
   ggplot(
     aes(
       x = go_boost,
       y = go,
-      color = as.factor(season))) + 
+      color = as.factor(season)
+    )
+  ) +
   geom_vline(xintercept = 0) +
   stat_smooth(
     method = "gam",
@@ -240,70 +254,86 @@ nfl_4thdown |>
     formula = y ~ s(x, bs = "cs", k = 10),
     show.legend = FALSE,
     se = FALSE,
-    linewidth = 4) +
+    linewidth = 4
+  ) +
   # this is just to get the plot to draw the full 0 to 100 range
   geom_hline(
     yintercept = 100,
-    alpha = 0) +
+    alpha = 0
+  ) +
   geom_hline(
     yintercept = 0,
-    alpha = 0) +
+    alpha = 0
+  ) +
   ggtext::geom_richtext(
     data = text_df,
     aes(
       x,
       y,
       label = label,
-      angle = angle),
+      angle = angle
+    ),
     color = "black",
     fill = NA,
     label.color = NA,
-    size = 5) + 
+    size = 5
+  ) +
   theme_classic() +
   labs(
     x = "Gain in win probability by going for it",
     y = "Go-for-it percentage",
     subtitle = "4th down decisions in 2021 versus 2017, win prob. > 20%",
-    title = glue::glue("How <span style='color:red'>math</span> is changing football")) +
+    title = glue::glue(
+      "How <span style='color:red'>math</span> is changing football"
+    )
+  ) +
   theme(
     legend.position = "none",
     plot.title = element_markdown(
       size = 22,
-      hjust = 0.5),
+      hjust = 0.5
+    ),
     plot.subtitle = element_markdown(
       size = 13.5,
-      hjust = 0.5),
+      hjust = 0.5
+    ),
     axis.title.x = element_text(
       size = 14,
-      face = "bold"),
+      face = "bold"
+    ),
     axis.title.y = element_text(
       size = 14,
       face = "bold",
       angle = 0, # horizontal y-axis title
-      vjust = 0.5)
+      vjust = 0.5
+    )
   ) +
   scale_y_continuous(
     breaks = scales::pretty_breaks(n = 4),
     limits = c(0, 100),
-    expand = c(0, 0)) +
+    expand = c(0, 0)
+  ) +
   scale_x_continuous(
     breaks = scales::pretty_breaks(n = 10),
     limits = c(-10, 10),
-    expand = c(0, 0)) +
+    expand = c(0, 0)
+  ) +
   annotate(
     "text",
     x = -1.5,
     y = 70,
     label = "Should\nkick",
     color = "black",
-    size = 5) +
+    size = 5
+  ) +
   annotate(
     "text",
     x = 1.75,
     y = 70,
     label = "Should\ngo for it",
     color = "black",
-    size = 5) +
+    size = 5
+  ) +
   annotate(
     "segment",
     x = -.1,
@@ -312,7 +342,8 @@ nfl_4thdown |>
     yend = 80,
     arrow = arrow(length = unit(0.05, "npc")),
     color = "black",
-    linewidth = 2) +
+    linewidth = 2
+  ) +
   annotate(
     "segment",
     x = .1,
@@ -321,7 +352,8 @@ nfl_4thdown |>
     yend = 80,
     arrow = arrow(length = unit(0.05, "npc")),
     color = "black",
-    linewidth = 2)
+    linewidth = 2
+  )
 ```
 
 NFL teams were later to implement analytics into their decision making than even teams at lower levels of the sport.
