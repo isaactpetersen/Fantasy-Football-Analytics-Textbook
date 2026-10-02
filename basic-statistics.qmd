@@ -139,8 +139,10 @@ weighted.mean(
   weights = sample( # randomly generate weights (could specify them manually)
     x = 1:3,
     size = length(player_stats_seasonal$fantasyPoints),
-    replace = TRUE),
-  na.rm = TRUE)
+    replace = TRUE
+  ),
+  na.rm = TRUE
+)
 ```
 
 - weighted median (`petersenlab::wthdquantile()`):
@@ -151,8 +153,10 @@ petersenlab::wthdquantile(
   w = sample( # randomly generate weights (could specify them manually)
     x = 1:3,
     size = length(player_stats_seasonal$fantasyPoints),
-    replace = TRUE),
-  probs = 0.5)
+    replace = TRUE
+  ),
+  probs = 0.5
+)
 ```
 
 ### Spread {#sec-descriptiveStatisticsSpread}
@@ -233,7 +237,8 @@ var(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```{r}
 range(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 
-max(player_stats_seasonal$fantasyPoints, na.rm = TRUE) - min(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+max(player_stats_seasonal$fantasyPoints, na.rm = TRUE) -
+  min(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
 - minimum (`base::min()`) and maximum (`base::max()`):
@@ -257,8 +262,10 @@ petersenlab::wthdquantile(
   w = sample( # randomly generate weights (could specify them manually)
     x = 1:3,
     size = length(player_stats_seasonal$fantasyPoints),
-    replace = TRUE),
-  probs = c(0.10, 0.90))
+    replace = TRUE
+  ),
+  probs = c(0.10, 0.90)
+)
 ```
 
 - interquartile range (IQR; `stats::IQR()`):
@@ -276,7 +283,8 @@ mad(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 - coefficient of variation:
 
 ```{r}
-sd(player_stats_seasonal$fantasyPoints, na.rm = TRUE) / mean(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
+sd(player_stats_seasonal$fantasyPoints, na.rm = TRUE) /
+  mean(player_stats_seasonal$fantasyPoints, na.rm = TRUE)
 ```
 
 ### Shape {#sec-descriptiveStatisticsShape}
@@ -317,36 +325,40 @@ To estimate multiple indices of center, spread, and shape of the data, you can u
 ```{r}
 psych::describe(player_stats_seasonal["fantasyPoints"])
 
-player_stats_seasonal |> 
-  dplyr::select(age, years_of_experience, fantasyPoints) |> 
+player_stats_seasonal |>
+  dplyr::select(age, years_of_experience, fantasyPoints) |>
   dplyr::summarise(across(
-      everything(),
-      .fns = list(
-        n = ~ length(na.omit(.)),
-        missingness = ~ mean(is.na(.)) * 100,
-        M = ~ mean(., na.rm = TRUE),
-        SD = ~ sd(., na.rm = TRUE),
-        min = ~ min(., na.rm = TRUE),
-        max = ~ max(., na.rm = TRUE),
-        q10 = ~ quantile(., .10, na.rm = TRUE), # 10th quantile
-        q90 = ~ quantile(., .90, na.rm = TRUE), # 90th quantile
-        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
-        IQR = ~ IQR(., na.rm = TRUE),
-        MAD = ~ mad(., na.rm = TRUE),
-        CV = ~ sd(., na.rm = TRUE) / mean(., na.rm = TRUE),
-        median = ~ median(., na.rm = TRUE),
-        pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
-        mode = ~ petersenlab::Mode(., multipleModes = "mean"),
-        skewness = ~ psych::skew(., na.rm = TRUE),
-        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
-      .names = "{.col}.{.fn}")) |>
-    tidyr::pivot_longer(
-      cols = everything(),
-      names_to = c("variable","index"),
-      names_sep = "\\.") |> 
-    tidyr::pivot_wider(
-      names_from = index,
-      values_from = value)
+    everything(),
+    .fns = list(
+      n = ~ length(na.omit(.)),
+      missingness = ~ mean(is.na(.)) * 100,
+      M = ~ mean(., na.rm = TRUE),
+      SD = ~ sd(., na.rm = TRUE),
+      min = ~ min(., na.rm = TRUE),
+      max = ~ max(., na.rm = TRUE),
+      q10 = ~ quantile(., .10, na.rm = TRUE), # 10th quantile
+      q90 = ~ quantile(., .90, na.rm = TRUE), # 90th quantile
+      range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
+      IQR = ~ IQR(., na.rm = TRUE),
+      MAD = ~ mad(., na.rm = TRUE),
+      CV = ~ sd(., na.rm = TRUE) / mean(., na.rm = TRUE),
+      median = ~ median(., na.rm = TRUE),
+      pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
+      mode = ~ petersenlab::Mode(., multipleModes = "mean"),
+      skewness = ~ psych::skew(., na.rm = TRUE),
+      kurtosis = ~ psych::kurtosi(., na.rm = TRUE)
+    ),
+    .names = "{.col}.{.fn}"
+  )) |>
+  tidyr::pivot_longer(
+    cols = everything(),
+    names_to = c("variable", "index"),
+    names_sep = "\\."
+  ) |>
+  tidyr::pivot_wider(
+    names_from = index,
+    values_from = value
+  )
 ```
 
 ::: {.content-visible when-format="html"}
@@ -421,15 +433,11 @@ The area under a normal curve within one standard deviation of the mean is depic
 
 x <- seq(-4, 4, length = 200)
 y <- dnorm(x, mean = 0, sd = 1)
-plot(x, y, type = "l",
-     xlab = "z Score",
-     ylab = "Normal Density")
+plot(x, y, type = "l", xlab = "z Score", ylab = "Normal Density")
 
 x <- seq(stdDeviations * -1, stdDeviations, length = 100)
 y <- dnorm(x, mean = 0, sd = 1)
-polygon(c(stdDeviations * -1, x, stdDeviations),
-        c(0, y, 0),
-        col = "blue")
+polygon(c(stdDeviations * -1, x, stdDeviations), c(0, y, 0), col = "blue")
 ```
 
 The area under a normal curve within two standard deviations of the mean is calculated below:
@@ -450,15 +458,11 @@ The area under a normal curve within two standard deviations of the mean is depi
 
 x <- seq(-4, 4, length = 200)
 y <- dnorm(x, mean = 0, sd = 1)
-plot(x, y, type = "l",
-     xlab = "z Score",
-     ylab = "Normal Density")
+plot(x, y, type = "l", xlab = "z Score", ylab = "Normal Density")
 
 x <- seq(stdDeviations * -1, stdDeviations, length = 100)
 y <- dnorm(x, mean = 0, sd = 1)
-polygon(c(stdDeviations * -1, x, stdDeviations),
-        c(0, y, 0),
-        col = "blue")
+polygon(c(stdDeviations * -1, x, stdDeviations), c(0, y, 0), col = "blue")
 ```
 
 The area under a normal curve within three standard deviations of the mean is calculated below:
@@ -479,15 +483,11 @@ The area under a normal curve within three standard deviations of the mean is de
 
 x <- seq(-4, 4, length = 200)
 y <- dnorm(x, mean = 0, sd = 1)
-plot(x, y, type = "l",
-     xlab = "z Score",
-     ylab = "Normal Density")
+plot(x, y, type = "l", xlab = "z Score", ylab = "Normal Density")
 
 x <- seq(stdDeviations * -1, stdDeviations, length = 100)
 y <- dnorm(x, mean = 0, sd = 1)
-polygon(c(stdDeviations * -1, x, stdDeviations),
-        c(0, y, 0),
-        col = "blue")
+polygon(c(stdDeviations * -1, x, stdDeviations), c(0, y, 0), col = "blue")
 ```
 
 If you want to determine the *z* score associated with a particular percentile in a normal distribution, you can use the `stats::qnorm()` function.
@@ -599,12 +599,18 @@ nObserved <- 1000
 nPopulation <- 1000000
 
 observedGroups <- data.frame(
-  score = c(rnorm(nObserved, mean = 47, sd = 3), rnorm(nObserved, mean = 52, sd = 3)),
+  score = c(
+    rnorm(nObserved, mean = 47, sd = 3),
+    rnorm(nObserved, mean = 52, sd = 3)
+  ),
   group = as.factor(c(rep("Group 1", nObserved), rep("Group 2", nObserved)))
 )
 
 populationGroups <- data.frame(
-  score = c(rnorm(nPopulation, mean = 50, sd = 3.03), rnorm(nPopulation, mean = 50, sd = 3)),
+  score = c(
+    rnorm(nPopulation, mean = 50, sd = 3.03),
+    rnorm(nPopulation, mean = 50, sd = 3)
+  ),
   group = as.factor(c(rep("Group 1", nPopulation), rep("Group 2", nPopulation)))
 )
 
@@ -618,16 +624,25 @@ ggplot2::ggplot(
 ) +
   geom_density(alpha = 0.5) +
   scale_color_manual(values = c("red", "blue")) +
-  scale_fill_manual(values = c("red","blue")) +
-  geom_vline(xintercept = mean(observedGroups$score[which(observedGroups$group == "Group 1")])) +
-  geom_vline(xintercept = mean(observedGroups$score[which(observedGroups$group == "Group 2")])) +
+  scale_fill_manual(values = c("red", "blue")) +
+  geom_vline(
+    xintercept = mean(observedGroups$score[which(
+      observedGroups$group == "Group 1"
+    )])
+  ) +
+  geom_vline(
+    xintercept = mean(observedGroups$score[which(
+      observedGroups$group == "Group 2"
+    )])
+  ) +
   ggplot2::labs(
     x = "Score",
     y = "Frequency",
     title = "What is the probability my data would look like this..."
   ) +
   ggplot2::theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   ggplot2::theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
@@ -641,7 +656,8 @@ ggplot2::ggplot(
     legend.justification.left = "top",
     legend.justification.bottom = "right",
     legend.justification.inside = c(1, 1),
-    legend.location = "plot")
+    legend.location = "plot"
+  )
 
 ggplot2::ggplot(
   data = populationGroups,
@@ -653,16 +669,25 @@ ggplot2::ggplot(
 ) +
   geom_density(alpha = 0.5) +
   scale_color_manual(values = c("red", "blue")) +
-  scale_fill_manual(values = c("red","blue")) +
-  geom_vline(xintercept = mean(populationGroups$score[which(populationGroups$group == "Group 1")])) +
-  geom_vline(xintercept = mean(populationGroups$score[which(populationGroups$group == "Group 2")])) +
+  scale_fill_manual(values = c("red", "blue")) +
+  geom_vline(
+    xintercept = mean(populationGroups$score[which(
+      populationGroups$group == "Group 1"
+    )])
+  ) +
+  geom_vline(
+    xintercept = mean(populationGroups$score[which(
+      populationGroups$group == "Group 2"
+    )])
+  ) +
   ggplot2::labs(
     x = "Score",
     y = "Frequency",
     title = "...if in the population, the groups were really this:"
   ) +
   ggplot2::theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   ggplot2::theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
@@ -676,7 +701,8 @@ ggplot2::ggplot(
     legend.justification.left = "top",
     legend.justification.bottom = "right",
     legend.justification.inside = c(1, 1),
-    legend.location = "plot")
+    legend.location = "plot"
+  )
 ```
 
 :::
@@ -697,12 +723,18 @@ nObserved <- 1000
 nPopulation <- 1000000
 
 observedGroups <- data.frame(
-  score = c(rnorm(nObserved, mean = 47, sd = 3), rnorm(nObserved, mean = 52, sd = 3)),
+  score = c(
+    rnorm(nObserved, mean = 47, sd = 3),
+    rnorm(nObserved, mean = 52, sd = 3)
+  ),
   group = as.factor(c(rep("Group 1", nObserved), rep("Group 2", nObserved)))
 )
 
 populationGroups <- data.frame(
-  score = c(rnorm(nPopulation, mean = 50, sd = 3.03), rnorm(nPopulation, mean = 50, sd = 3)),
+  score = c(
+    rnorm(nPopulation, mean = 50, sd = 3.03),
+    rnorm(nPopulation, mean = 50, sd = 3)
+  ),
   group = as.factor(c(rep("Group 1", nPopulation), rep("Group 2", nPopulation)))
 )
 
@@ -716,16 +748,25 @@ ggplot2::ggplot(
 ) +
   geom_density(alpha = 0.5) +
   scale_color_manual(values = c("red", "blue")) +
-  scale_fill_manual(values = c("red","blue")) +
-  geom_vline(xintercept = mean(observedGroups$score[which(observedGroups$group == "Group 1")])) +
-  geom_vline(xintercept = mean(observedGroups$score[which(observedGroups$group == "Group 2")])) +
+  scale_fill_manual(values = c("red", "blue")) +
+  geom_vline(
+    xintercept = mean(observedGroups$score[which(
+      observedGroups$group == "Group 1"
+    )])
+  ) +
+  geom_vline(
+    xintercept = mean(observedGroups$score[which(
+      observedGroups$group == "Group 2"
+    )])
+  ) +
   ggplot2::labs(
     x = "Score",
     y = "Frequency",
     title = "What is the probability my data would look like this..."
   ) +
   ggplot2::theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   ggplot2::theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
@@ -739,7 +780,8 @@ ggplot2::ggplot(
     legend.justification.left = "top",
     legend.justification.bottom = "right",
     legend.justification.inside = c(1, 1),
-    legend.location = "plot")
+    legend.location = "plot"
+  )
 
 ggplot2::ggplot(
   data = populationGroups,
@@ -751,16 +793,25 @@ ggplot2::ggplot(
 ) +
   geom_density(alpha = 0.5) +
   scale_color_manual(values = c("red", "blue")) +
-  scale_fill_manual(values = c("red","blue")) +
-  geom_vline(xintercept = mean(populationGroups$score[which(populationGroups$group == "Group 1")])) +
-  geom_vline(xintercept = mean(populationGroups$score[which(populationGroups$group == "Group 2")])) +
+  scale_fill_manual(values = c("red", "blue")) +
+  geom_vline(
+    xintercept = mean(populationGroups$score[which(
+      populationGroups$group == "Group 1"
+    )])
+  ) +
+  geom_vline(
+    xintercept = mean(populationGroups$score[which(
+      populationGroups$group == "Group 2"
+    )])
+  ) +
   ggplot2::labs(
     x = "Score",
     y = "Frequency",
     title = "...if in the population, the groups were really this:"
   ) +
   ggplot2::theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   ggplot2::theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
@@ -774,7 +825,8 @@ ggplot2::ggplot(
     legend.justification.left = "top",
     legend.justification.bottom = "right",
     legend.justification.inside = c(1, 1),
-    legend.location = "plot")
+    legend.location = "plot"
+  )
 ```
 
 :::
@@ -801,7 +853,10 @@ observedCorrelation <- 0.9
 
 correlations <- data.frame(criterion = rnorm(2000))
 correlations$sample <- NA
-correlations$sample[1:100] <- complement(correlations$criterion[1:100], observedCorrelation)
+correlations$sample[1:100] <- complement(
+  correlations$criterion[1:100],
+  observedCorrelation
+)
 correlations$population <- complement(correlations$criterion, 0)
 
 ggplot2::ggplot(
@@ -814,7 +869,7 @@ ggplot2::ggplot(
   geom_point() +
   geom_smooth(method = "lm") +
   scale_x_continuous(
-    limits = c(-3.5,3)
+    limits = c(-3.5, 3)
   ) +
   annotate(
     x = 0,
@@ -822,20 +877,23 @@ ggplot2::ggplot(
     label = paste("italic(r) != ", 0, sep = ""),
     parse = TRUE,
     geom = "text",
-    size = 7) + 
+    size = 7
+  ) +
   labs(
     x = "Predictor Variable",
     y = "Outcome Variable",
     title = "What is the probability my data would look like this..."
   ) +
   theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 
 ggplot2::ggplot(
   data = correlations,
@@ -847,9 +905,10 @@ ggplot2::ggplot(
   geom_point() +
   geom_smooth(
     method = "lm",
-    se = FALSE) +
+    se = FALSE
+  ) +
   scale_x_continuous(
-    limits = c(-2.5,2.5)
+    limits = c(-2.5, 2.5)
   ) +
   annotate(
     x = 0,
@@ -857,20 +916,23 @@ ggplot2::ggplot(
     label = paste("italic(r) == '", "0.00", "'", sep = ""),
     parse = TRUE,
     geom = "text",
-    size = 7) + 
+    size = 7
+  ) +
   labs(
     x = "Predictor Variable",
     y = "Outcome Variable",
     title = "...if in the population, the association was really this:"
   ) +
   theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 ```
 
 :::
@@ -891,7 +953,10 @@ observedCorrelation <- 0.9
 
 correlations <- data.frame(criterion = rnorm(2000))
 correlations$sample <- NA
-correlations$sample[1:100] <- complement(correlations$criterion[1:100], observedCorrelation)
+correlations$sample[1:100] <- complement(
+  correlations$criterion[1:100],
+  observedCorrelation
+)
 correlations$population <- complement(correlations$criterion, 0)
 
 ggplot2::ggplot(
@@ -904,7 +969,7 @@ ggplot2::ggplot(
   geom_point() +
   geom_smooth(method = "lm") +
   scale_x_continuous(
-    limits = c(-3.5,3)
+    limits = c(-3.5, 3)
   ) +
   annotate(
     x = 0,
@@ -912,20 +977,23 @@ ggplot2::ggplot(
     label = paste("italic(r) != ", 0, sep = ""),
     parse = TRUE,
     geom = "text",
-    size = 7) + 
+    size = 7
+  ) +
   labs(
     x = "Predictor Variable",
     y = "Outcome Variable",
     title = "What is the probability my data would look like this..."
   ) +
   theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 
 ggplot2::ggplot(
   data = correlations,
@@ -937,9 +1005,10 @@ ggplot2::ggplot(
   geom_point() +
   geom_smooth(
     method = "lm",
-    se = FALSE) +
+    se = FALSE
+  ) +
   scale_x_continuous(
-    limits = c(-2.5,2.5)
+    limits = c(-2.5, 2.5)
   ) +
   annotate(
     x = 0,
@@ -947,20 +1016,23 @@ ggplot2::ggplot(
     label = paste("italic(r) == '", "0.00", "'", sep = ""),
     parse = TRUE,
     geom = "text",
-    size = 7) + 
+    size = 7
+  ) +
   labs(
     x = "Predictor Variable",
     y = "Outcome Variable",
     title = "...if in the population, the association was really this:"
   ) +
   theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   theme(
     legend.title = element_blank(),
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank())
+    axis.ticks.y = element_blank()
+  )
 ```
 
 :::
@@ -1029,20 +1101,20 @@ A plot of statistical power is in @fig-nhst, as adapted from @Magnusson2013 (arc
 #| fig-alt: "Statistical Power (Adapted from Kristoffer Magnusson: <https://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics>; archived at <https://perma.cc/FG3J-85L6>). The dashed line represents the critical value or threshold."
 #| code-fold: true
 
-m1 <- 0  # mu H0
+m1 <- 0 # mu H0
 sd1 <- 1.5 # sigma H0
 m2 <- 3.5 # mu HA
 sd2 <- 1.5 # sigma HA
- 
-z_crit <- qnorm(1-(0.05/2), m1, sd1)
- 
+
+z_crit <- qnorm(1 - (0.05 / 2), m1, sd1)
+
 # set length of tails
-min1 <- m1-sd1*4
-max1 <- m1+sd1*4
-min2 <- m2-sd2*4
-max2 <- m2+sd2*4
+min1 <- m1 - sd1 * 4
+max1 <- m1 + sd1 * 4
+min2 <- m2 - sd2 * 4
+max2 <- m2 + sd2 * 4
 # create x sequence
-x <- seq(min(min1,min2), max(max1, max2), .01)
+x <- seq(min(min1, min2), max(max1, max2), .01)
 # generate normal dist #1
 y1 <- dnorm(x, m1, sd1)
 # put in data frame
@@ -1051,29 +1123,29 @@ df1 <- data.frame("x" = x, "y" = y1)
 y2 <- dnorm(x, m2, sd2)
 # put in data frame
 df2 <- data.frame("x" = x, "y" = y2)
- 
+
 # Alpha polygon
-y.poly <- pmin(y1,y2)
-poly1 <- data.frame(x=x, y=y.poly)
+y.poly <- pmin(y1, y2)
+poly1 <- data.frame(x = x, y = y.poly)
 poly1 <- poly1[poly1$x >= z_crit, ]
-poly1 <- rbind(poly1, c(z_crit, 0))  # add lower-left corner
- 
+poly1 <- rbind(poly1, c(z_crit, 0)) # add lower-left corner
+
 # Beta polygon
 poly2 <- df2
-poly2 <- poly2[poly2$x <= z_crit,]
-poly2 <- rbind(poly2, c(z_crit, 0))  # add lower-left corner
- 
+poly2 <- poly2[poly2$x <= z_crit, ]
+poly2 <- rbind(poly2, c(z_crit, 0)) # add lower-left corner
+
 # power polygon; 1-beta
 poly3 <- df2
-poly3 <- poly3[poly3$x >= z_crit,]
-poly3 <- rbind(poly3, c(z_crit, 0))  # add lower-left corner
- 
+poly3 <- poly3[poly3$x >= z_crit, ]
+poly3 <- rbind(poly3, c(z_crit, 0)) # add lower-left corner
+
 # combine polygons
 poly1$id <- 3 # alpha, give it the highest number to make it the top layer
 poly2$id <- 2 # beta
 poly3$id <- 1 # power; 1 - beta
 poly <- rbind(poly1, poly2, poly3)
-poly$id <- factor(poly$id,  labels = c("power", "beta", "alpha"))
+poly$id <- factor(poly$id, labels = c("power", "beta", "alpha"))
 
 # plot with ggplot2
 ggplot(
@@ -1082,10 +1154,13 @@ ggplot(
     x,
     y,
     fill = id,
-    group = id)) +
+    group = id
+  )
+) +
   geom_polygon(
     show.legend = FALSE,
-    alpha = I(8/10)) +
+    alpha = I(8 / 10)
+  ) +
   # add line for treatment group
   geom_line(
     data = df1,
@@ -1094,30 +1169,37 @@ ggplot(
       y,
       color = "H0",
       group = NULL,
-      fill = NULL),
+      fill = NULL
+    ),
     linewidth = 1.5,
-    show.legend = FALSE) + 
+    show.legend = FALSE
+  ) +
   # add line for treatment group. These lines could be combined into one dataframe.
   geom_line(
     data = df2,
     aes(
       color = "HA",
       group = NULL,
-      fill = NULL),
+      fill = NULL
+    ),
     linewidth = 1.5,
-    show.legend = FALSE) +
+    show.legend = FALSE
+  ) +
   # add vlines for z_crit
   geom_vline(
     xintercept = z_crit,
     linewidth = 1,
-    linetype = "dashed") +
+    linetype = "dashed"
+  ) +
   # change colors
   scale_color_manual(
     "Group",
-    values = c("HA" = "#981e0b", "H0" = "black")) +
+    values = c("HA" = "#981e0b", "H0" = "black")
+  ) +
   scale_fill_manual(
     "test",
-    values = c("alpha" = "#0d6374", "beta" = "#be805e", "power"="#7cecee")) +
+    values = c("alpha" = "#0d6374", "beta" = "#be805e", "power" = "#7cecee")
+  ) +
   # beta arrow
   annotate(
     "segment",
@@ -1126,14 +1208,16 @@ ggplot(
     xend = 1.3,
     yend = 0.01,
     arrow = grid::arrow(length = unit(0.3, "cm")),
-    linewidth = 1) +
+    linewidth = 1
+  ) +
   annotate(
     "text",
     label = "beta",
     x = 0,
     y = 0.05,
     parse = TRUE,
-    size = 8) +
+    size = 8
+  ) +
   # alpha arrow
   annotate(
     "segment",
@@ -1142,14 +1226,16 @@ ggplot(
     xend = 3.4,
     yend = 0.01,
     arrow = grid::arrow(length = unit(0.3, "cm")),
-    linewidth = 1) +
+    linewidth = 1
+  ) +
   annotate(
     "text",
     label = "frac(alpha,2)",
     x = 4.2,
     y = 0.05,
     parse = TRUE,
-    size = 8) +
+    size = 8
+  ) +
   # power arrow
   annotate(
     "segment",
@@ -1158,14 +1244,16 @@ ggplot(
     xend = 4.5,
     yend = 0.15,
     arrow = grid::arrow(length = unit(0.3, "cm")),
-    linewidth = 1) +
+    linewidth = 1
+  ) +
   annotate(
     "text",
     label = "1 - beta ~ '(power)'",
     x = 6.1,
     y = 0.21,
     parse = TRUE,
-    size = 8) + 
+    size = 8
+  ) +
   # H_0 title
   annotate(
     "text",
@@ -1173,7 +1261,8 @@ ggplot(
     x = m1,
     y = 0.28,
     parse = TRUE,
-    size = 8) +
+    size = 8
+  ) +
   # H_a title
   annotate(
     "text",
@@ -1181,7 +1270,8 @@ ggplot(
     x = m2,
     y = 0.28,
     parse = TRUE,
-    size = 8) +
+    size = 8
+  ) +
   ggtitle("Statistical Power") +
   # remove some elements
   theme(
@@ -1196,7 +1286,8 @@ ggplot(
     axis.ticks = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    plot.title = element_text(size = 22))
+    plot.title = element_text(size = 22)
+  )
 ```
 
 Interactive visualizations by Kristoffer Magnusson on *p*-values and null-hypothesis significance testing are below:
@@ -1669,7 +1760,7 @@ qt(1 - alpha, df_oneSampleTtest)
 Two-tailed test (`stats::qt()`):
 
 ```{r}
-qt(1 - alpha/2, df_oneSampleTtest)
+qt(1 - alpha / 2, df_oneSampleTtest)
 ```
 
 #### Independent-Samples *t*-Test {#sec-statisticalTestsCriticalValueIndependentSamplesTtest}
@@ -1695,7 +1786,7 @@ qt(1 - alpha, df_independentSamplesTtest)
 Two-tailed test (`stats::qt()`):
 
 ```{r}
-qt(1 - alpha/2, df_independentSamplesTtest)
+qt(1 - alpha / 2, df_independentSamplesTtest)
 ```
 
 #### Paired-Samples *t*-Test {#sec-statisticalTestsCriticalValuePairedSamplesTtest}
@@ -1721,7 +1812,7 @@ qt(1 - alpha, df_pairedSamplesTtest)
 Two-tailed test (`stats::qt()`):
 
 ```{r}
-qt(1 - alpha/2, df_pairedSamplesTtest)
+qt(1 - alpha / 2, df_pairedSamplesTtest)
 ```
 
 #### One-Way ANOVA {#sec-statisticalTestsCriticalValueOneWayANOVA}
@@ -1751,7 +1842,7 @@ qf(1 - alpha, df_betweenOneWayANOVA, df_withinOneWayANOVA)
 Two-tailed test (`stats::qf()`):
 
 ```{r}
-qf(1 - alpha/2, df_betweenOneWayANOVA, df_withinOneWayANOVA)
+qf(1 - alpha / 2, df_betweenOneWayANOVA, df_withinOneWayANOVA)
 ```
 
 #### Factorial ANOVA {#sec-statisticalTestsCriticalValueFactorialANOVA}
@@ -1797,19 +1888,19 @@ qf(1 - alpha, df_interaction, df_error)
 Factor A (two-tailed test; `stats::qf()`):
 
 ```{r}
-qf(1 - alpha/2, df_factorA, df_error)
+qf(1 - alpha / 2, df_factorA, df_error)
 ```
 
 Factor B (two-tailed test; `stats::qf()`):
 
 ```{r}
-qf(1 - alpha/2, df_factorB, df_error)
+qf(1 - alpha / 2, df_factorB, df_error)
 ```
 
 Interaction (two-tailed test; `stats::qf()`):
 
 ```{r}
-qf(1 - alpha/2, df_interaction, df_error)
+qf(1 - alpha / 2, df_interaction, df_error)
 ```
 
 #### Repeated Measures ANOVA {#sec-statisticalTestsCriticalValueRMANOVA}
@@ -1839,7 +1930,7 @@ qf(1 - alpha, df1_RMANOVA, df2_RMANOVA)
 Two-tailed test (`stats::qf()`):
 
 ```{r}
-qf(1 - alpha/2, df1_RMANOVA, df2_RMANOVA)
+qf(1 - alpha / 2, df1_RMANOVA, df2_RMANOVA)
 ```
 
 #### Correlation {#sec-statisticalTestsCriticalValueCorrelation}
@@ -1865,7 +1956,7 @@ qt(1 - alpha, df_correlation)
 Two-tailed test (`stats::qt()`):
 
 ```{r}
-qt(1 - alpha/2, df_correlation)
+qt(1 - alpha / 2, df_correlation)
 ```
 
 #### Multiple Regression {#sec-statisticalTestsCriticalValueMultipleRegression}
@@ -1895,7 +1986,7 @@ qf(1 - alpha, df1_regression, df2_regression)
 Two-tailed test (`stats::qf()`):
 
 ```{r}
-qf(1 - alpha/2, df1_regression, df2_regression)
+qf(1 - alpha / 2, df1_regression, df2_regression)
 ```
 
 #### Chi-Square Goodness-of-Fit Test {#sec-statisticalTestsCriticalValueChiSquareGOF}
@@ -1921,7 +2012,7 @@ qchisq(1 - alpha, df_chisquareGOF)
 Two-tailed test (`stats::qchisq()`):
 
 ```{r}
-qchisq(1 - alpha/2, df_chisquareGOF)
+qchisq(1 - alpha / 2, df_chisquareGOF)
 ```
 
 #### Chi-Square Test for Association {#sec-statisticalTestsCriticalValueChiSquareAssociation}
@@ -1947,7 +2038,7 @@ qchisq(1 - alpha, df_chisquareAssociation)
 Two-tailed test (`stats::qchisq()`):
 
 ```{r}
-qchisq(1 - alpha/2, df_chisquareAssociation)
+qchisq(1 - alpha / 2, df_chisquareAssociation)
 ```
 
 ### Statistical Power {#sec-statisticalPower}
@@ -1987,7 +2078,8 @@ pwr::pwr.t.test(
   d = effectSize_d,
   sig.level = alpha,
   type = "one.sample",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for sample size needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -1998,7 +2090,8 @@ pwr::pwr.t.test(
   d = effectSize_d,
   sig.level = alpha,
   type = "one.sample",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2009,7 +2102,8 @@ pwr::pwr.t.test(
   n = N,
   sig.level = alpha,
   type = "one.sample",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 #### Independent-Samples *t*-Test {#sec-statisticalPowerIndependentSamplesTtest}
@@ -2024,7 +2118,8 @@ pwr::pwr.t.test(
   d = effectSize_d,
   sig.level = alpha,
   type = "two.sample",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2035,7 +2130,8 @@ pwr::pwr.t.test(
   d = effectSize_d,
   sig.level = alpha,
   type = "two.sample",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2046,7 +2142,8 @@ pwr::pwr.t.test(
   n = N,
   sig.level = alpha,
   type = "two.sample",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 ##### Unbalanced Group Sizes {#sec-statisticalPowerIndependentSamplesTtestUnbalanced}
@@ -2059,7 +2156,8 @@ pwr::pwr.t2n.test(
   n2 = nGroup2,
   d = effectSize_d,
   sig.level = alpha,
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2070,7 +2168,8 @@ pwr::pwr.t2n.test(
   n1 = nGroup1,
   d = effectSize_d,
   sig.level = alpha,
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2081,7 +2180,8 @@ pwr::pwr.t2n.test(
   n1 = nGroup1,
   n2 = nGroup2,
   sig.level = alpha,
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 #### Paired-Samples *t*-Test {#sec-statisticalPowerPairedSamplesTtest}
@@ -2094,7 +2194,8 @@ pwr::pwr.t.test(
   d = effectSize_d,
   sig.level = alpha,
   type = "paired",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2105,7 +2206,8 @@ pwr::pwr.t.test(
   d = effectSize_d,
   sig.level = alpha,
   type = "paired",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2116,7 +2218,8 @@ pwr::pwr.t.test(
   n = N,
   sig.level = alpha,
   type = "paired",
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 #### One-Way ANOVA {#sec-statisticalPowerOneWayANOVA}
@@ -2128,7 +2231,8 @@ pwr::pwr.anova.test(
   n = N,
   f = effectSize_f,
   sig.level = alpha,
-  k = numGroups)
+  k = numGroups
+)
 ```
 
 Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.anova.test()`):
@@ -2138,7 +2242,8 @@ pwr::pwr.anova.test(
   power = power,
   f = effectSize_f,
   sig.level = alpha,
-  k = numGroups)
+  k = numGroups
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance); `pwr::pwr.anova.test()`):
@@ -2148,7 +2253,8 @@ pwr::pwr.anova.test(
   power = power,
   n = N,
   sig.level = alpha,
-  k = numGroups)
+  k = numGroups
+)
 ```
 
 ##### Simulation {#sec-statisticalPowerOneWayANOVAsimulation}
@@ -2166,8 +2272,8 @@ First, we set up the design matrix using the `SimDesign::createDesign()` functio
 Design <- SimDesign::createDesign(
   nGroup1 = c(10),
   nGroup2 = c(25, 50, 100),
-  f       = c(.10, .25, .40), # small, medium, large effect sizes
-  alpha   = 0.05
+  f = c(.10, .25, .40), # small, medium, large effect sizes
+  alpha = 0.05
 )
 ```
 
@@ -2181,15 +2287,14 @@ Generate <- function(condition, fixed_objects = NULL) {
     # Means for each group
     mean1 <- 0
     mean2 <- f * sqrt((nGroup1 + nGroup2) / 2)
-    
+
     # Generate data
     group1 <- rnorm(nGroup1, mean = mean1, sd = 1)
     group2 <- rnorm(nGroup2, mean = mean2, sd = 1)
-    
+
     data.frame(
       value = c(group1, group2),
-      group = factor(rep(c("Group1", "Group2"), 
-                         c(nGroup1, nGroup2)))
+      group = factor(rep(c("Group1", "Group2"), c(nGroup1, nGroup2)))
     )
   })
 }
@@ -2203,9 +2308,9 @@ Third, we set up the `Analyse()` function:
 Analyse <- function(condition, dat, fixed_objects = NULL) {
   aov_result <- aov(value ~ group, data = dat)
   p_value <- summary(aov_result)[[1]][["Pr(>F)"]][1]
-  
+
   data.frame(
-    p_value  = p_value,
+    p_value = p_value,
     rejectH0 = as.numeric(p_value < condition$alpha)
   )
 }
@@ -2219,7 +2324,7 @@ Fourth, we set up the `Summarise()` function:
 Summarise <- function(condition, results, fixed_objects = NULL) {
   # Estimated power = proportion of rejections
   Power <- mean(results$rejectH0)
-  
+
   data.frame(Power = Power)
 }
 ```
@@ -2232,11 +2337,11 @@ Fifth, we run the simulation using the `SimDesign::runSimulation()` function:
 #| output: false
 
 monteCarloSim_results <- SimDesign::runSimulation(
-  design       = Design,
+  design = Design,
   replications = 1000,
-  generate     = Generate,
-  analyse      = Analyse,
-  summarise    = Summarise,
+  generate = Generate,
+  analyse = Analyse,
+  summarise = Summarise,
   seed = genSeeds(Design, iseed = 52242), # for reproducibility
   parallel = TRUE # for faster (parallel) processing
 )
@@ -2263,19 +2368,22 @@ pwr::pwr.anova.test(
   n = N,
   f = effectSize_f,
   sig.level = alpha,
-  k = numLevelsFactorA)
+  k = numLevelsFactorA
+)
 
 pwr::pwr.anova.test(
   n = N,
   f = effectSize_f,
   sig.level = alpha,
-  k = numLevelsFactorB)
+  k = numLevelsFactorB
+)
 
 pwr::pwr.anova.test(
   n = N,
   f = effectSize_f,
   sig.level = alpha,
-  k = numLevelsFactorA + numLevelsFactorB)
+  k = numLevelsFactorA + numLevelsFactorB
+)
 ```
 
 Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2285,19 +2393,22 @@ pwr::pwr.anova.test(
   power = power,
   f = effectSize_f,
   sig.level = alpha,
-  k = numLevelsFactorA)
+  k = numLevelsFactorA
+)
 
 pwr::pwr.anova.test(
   power = power,
   f = effectSize_f,
   sig.level = alpha,
-  k = numLevelsFactorB)
+  k = numLevelsFactorB
+)
 
 pwr::pwr.anova.test(
   power = power,
   f = effectSize_f,
   sig.level = alpha,
-  k = numLevelsFactorA + numLevelsFactorB)
+  k = numLevelsFactorA + numLevelsFactorB
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2307,19 +2418,22 @@ pwr::pwr.anova.test(
   power = power,
   n = N,
   sig.level = alpha,
-  k = numLevelsFactorA)
+  k = numLevelsFactorA
+)
 
 pwr::pwr.anova.test(
   power = power,
   n = N,
   sig.level = alpha,
-  k = numLevelsFactorB)
+  k = numLevelsFactorB
+)
 
 pwr::pwr.anova.test(
   power = power,
   n = N,
   sig.level = alpha,
-  k = numLevelsFactorA + numLevelsFactorB)
+  k = numLevelsFactorA + numLevelsFactorB
+)
 ```
 
 #### Repeated Measures ANOVA {#sec-statisticalPowerRepeatedMeasuresANOVA}
@@ -2333,7 +2447,8 @@ WebPower::wp.rmanova(
   nm = numMeasurements,
   f = effectSize_f,
   alpha = alpha,
-  type = 0)
+  type = 0
+)
 
 WebPower::wp.rmanova(
   n = N,
@@ -2341,7 +2456,8 @@ WebPower::wp.rmanova(
   nm = numMeasurements,
   f = effectSize_f,
   alpha = alpha,
-  type = 1)
+  type = 1
+)
 
 WebPower::wp.rmanova(
   n = N,
@@ -2349,7 +2465,8 @@ WebPower::wp.rmanova(
   nm = numMeasurements,
   f = effectSize_f,
   alpha = alpha,
-  type = 2)
+  type = 2
+)
 ```
 
 Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2361,7 +2478,8 @@ WebPower::wp.rmanova(
   nm = numMeasurements,
   f = effectSize_f,
   alpha = alpha,
-  type = 0)
+  type = 0
+)
 
 WebPower::wp.rmanova(
   power = power,
@@ -2369,7 +2487,8 @@ WebPower::wp.rmanova(
   nm = numMeasurements,
   f = effectSize_f,
   alpha = alpha,
-  type = 1)
+  type = 1
+)
 
 WebPower::wp.rmanova(
   power = power,
@@ -2377,7 +2496,8 @@ WebPower::wp.rmanova(
   nm = numMeasurements,
   f = effectSize_f,
   alpha = alpha,
-  type = 2)
+  type = 2
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2389,7 +2509,8 @@ WebPower::wp.rmanova(
   ng = numGroups,
   nm = numMeasurements,
   alpha = alpha,
-  type = 0)
+  type = 0
+)
 
 WebPower::wp.rmanova(
   power = power,
@@ -2397,7 +2518,8 @@ WebPower::wp.rmanova(
   ng = numGroups,
   nm = numMeasurements,
   alpha = alpha,
-  type = 1)
+  type = 1
+)
 
 WebPower::wp.rmanova(
   power = power,
@@ -2405,7 +2527,8 @@ WebPower::wp.rmanova(
   ng = numGroups,
   nm = numMeasurements,
   alpha = alpha,
-  type = 2)
+  type = 2
+)
 ```
 
 #### Correlation {#sec-statisticalPowerCorrelation}
@@ -2417,7 +2540,8 @@ pwr::pwr.r.test(
   n = N,
   r = effectSize_r,
   sig.level = alpha,
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for sample size per group needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2427,7 +2551,8 @@ pwr::pwr.r.test(
   power = power,
   r = effectSize_r,
   sig.level = alpha,
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size per group, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2437,7 +2562,8 @@ pwr::pwr.r.test(
   power = power,
   n = N,
   sig.level = alpha,
-  alternative = "two.sided")
+  alternative = "two.sided"
+)
 ```
 
 #### Multiple Regression {#sec-statisticalPowerMultipleRegression}
@@ -2449,14 +2575,16 @@ pwr::pwr.f2.test(
   f2 = effectSize_fSquared,
   sig.level = alpha,
   u = numPredictors,
-  v = N - numPredictors - 1)
+  v = N - numPredictors - 1
+)
 
 pwrss::pwrss.t.reg(
   n = N,
   beta1 = effectSize_beta,
   k = numPredictors,
   alpha = alpha,
-  alternative = "not equal")
+  alternative = "not equal"
+)
 ```
 
 Solving for sample size needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance))—$v = N - \text{numberOfPredictors} - 1$; thus, $N = v + \text{numberOfPredictors} + 1$:
@@ -2466,7 +2594,8 @@ multipleRegressionSampleSizeModel <- pwr::pwr.f2.test(
   power = power,
   f2 = effectSize_fSquared,
   sig.level = alpha,
-  u = numPredictors)
+  u = numPredictors
+)
 
 multipleRegressionSampleSizeModel
 
@@ -2479,7 +2608,8 @@ pwrss::pwrss.t.reg(
   beta1 = effectSize_beta,
   k = numPredictors,
   alpha = alpha,
-  alternative = "not equal")
+  alternative = "not equal"
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2489,7 +2619,8 @@ pwr::pwr.f2.test(
   power = power,
   sig.level = alpha,
   u = numPredictors,
-  v = N - numPredictors - 1)
+  v = N - numPredictors - 1
+)
 ```
 
 #### Chi-Square Goodness-of-Fit Test {#sec-statisticalPowerChiSquareGOF}
@@ -2501,7 +2632,8 @@ pwr::pwr.chisq.test(
   N = N,
   w = effectSize_omega,
   df = numCategories - 1,
-  sig.level = alpha)
+  sig.level = alpha
+)
 ```
 
 Solving for sample size needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2511,7 +2643,8 @@ pwr::pwr.chisq.test(
   power = power,
   w = effectSize_omega,
   df = numCategories - 1,
-  sig.level = alpha)
+  sig.level = alpha
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2521,7 +2654,8 @@ pwr::pwr.chisq.test(
   power = power,
   N = N,
   df = numCategories - 1,
-  sig.level = alpha)
+  sig.level = alpha
+)
 ```
 
 #### Chi-Square Test for Association {#sec-statisticalPowerChiSquareAssociation}
@@ -2532,8 +2666,9 @@ Solving for statistical power achieved (given [effect size](#sec-practicalSignif
 pwr::pwr.chisq.test(
   N = N,
   w = effectSize_omega,
-  df = (numRows - 1)*(numColumns - 1),
-  sig.level = alpha)
+  df = (numRows - 1) * (numColumns - 1),
+  sig.level = alpha
+)
 ```
 
 Solving for sample size needed (given [effect size](#sec-practicalSignificance), power, and [alpha level](#sec-statisticalSignificance)):
@@ -2542,8 +2677,9 @@ Solving for sample size needed (given [effect size](#sec-practicalSignificance),
 pwr::pwr.chisq.test(
   power = power,
   w = effectSize_omega,
-  df = (numRows - 1)*(numColumns - 1),
-  sig.level = alpha)
+  df = (numRows - 1) * (numColumns - 1),
+  sig.level = alpha
+)
 ```
 
 Solving for the minimum detectable [effect size](#sec-practicalSignificance) (given sample size, power, and [alpha level](#sec-statisticalSignificance)):
@@ -2552,8 +2688,9 @@ Solving for the minimum detectable [effect size](#sec-practicalSignificance) (gi
 pwr::pwr.chisq.test(
   power = power,
   N = N,
-  df = (numRows - 1)*(numColumns - 1),
-  sig.level = alpha)
+  df = (numRows - 1) * (numColumns - 1),
+  sig.level = alpha
+)
 ```
 
 #### Multilevel Modeling {#sec-statisticalPowerMultilevelModeling}
