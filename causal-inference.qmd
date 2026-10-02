@@ -300,9 +300,11 @@ Examples of various causal diagrams that could explain why `X` is associated wit
 #| fig-cap: "Causal Diagram (Directed Acyclic Graph) Depicting `X` Causing `Y`."
 #| fig-alt: "Causal Diagram (Directed Acyclic Graph) Depicting `X` Causing `Y`."
 
-XCausesY <- dagitty::dagitty("dag{
+XCausesY <- dagitty::dagitty(
+  "dag{
   X -> Y
-}")
+}"
+)
 
 plot(dagitty::graphLayout(XCausesY))
 
@@ -329,9 +331,11 @@ ggdag::ggdag(XCausesY_alt) + theme_dag_blank()
 #| fig-cap: "Causal Diagram (Directed Acyclic Graph) Depicting Reverse Causation: `Y` Causing `X`."
 #| fig-alt: "Causal Diagram (Directed Acyclic Graph) Depicting Reverse Causation: `Y` Causing `X`."
 
-YCausesX <- dagitty::dagitty("dag{
+YCausesX <- dagitty::dagitty(
+  "dag{
   Y -> X
-}")
+}"
+)
 
 plot(dagitty::graphLayout(YCausesX))
 
@@ -358,11 +362,13 @@ ggdag::ggdag(YCausesX_alt) + theme_dag_blank()
 #| fig-cap: "Causal Diagram (Directed Acyclic Graph) Depicting a Third Variable Confound, `Z`, Causing `X` and `Y`, Thus Explaining Why `X` and `Y` are associated."
 #| fig-alt: "Causal Diagram (Directed Acyclic Graph) Depicting a Third Variable Confound, `Z`, Causing `X` and `Y`, Thus Explaining Why `X` and `Y` are associated."
 
-ZCausesXandY <- dagitty::dagitty("dag{
+ZCausesXandY <- dagitty::dagitty(
+  "dag{
   Z -> Y
   Z -> X
   X <-> Y
-}")
+}"
+)
 
 plot(dagitty::graphLayout(ZCausesXandY))
 ```
@@ -377,7 +383,7 @@ Here is an alternative way of specifying the same diagram (more similar to `lava
 ZCausesXandY_alt <- ggdag::dagify(
   X ~ Z,
   Y ~ Z,
-  X ~~ Y
+  X ~ ~Y
 )
 
 #plot(ZCausesXandY_alt) # this creates the same plot as above
@@ -391,13 +397,15 @@ Consider another example in @fig-dag:
 #| fig-cap: "Causal Diagram (Directed Acyclic Graph)."
 #| fig-alt: "Causal Diagram (Directed Acyclic Graph)."
 
-mediationDag <- dagitty::dagitty("dag{
+mediationDag <- dagitty::dagitty(
+  "dag{
   X -> M1
   X -> M2
   M1 -> Y
   M2 -> Y
   M1 <-> M2
-}")
+}"
+)
 
 plot(dagitty::graphLayout(mediationDag))
 ```
@@ -409,7 +417,8 @@ dagitty::adjustmentSets(
   mediationDag,
   exposure = "M1",
   outcome = "Y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 In this example, `X` influences `Y` via `M1` and `M2` (i.e., multiple mediators), and `M1` is also associated with `M2`.
@@ -431,7 +440,7 @@ mediationDag_alt <- ggdag::dagify(
   M2 ~ X,
   Y ~ M1,
   Y ~ M2,
-  M1 ~~ M2
+  M1 ~ ~M2
 )
 
 #plot(mediationDag_alt) # this creates the same plot as above
@@ -464,12 +473,14 @@ An example of confounding is depicted in @fig-counfounding:
 confounding <- ggdag::confounder_triangle(
   x = "Player Endurance",
   y = "Field Goals Made",
-  z = "Stadium Altitude")
+  z = "Stadium Altitude"
+)
 
 confounding |>
   ggdag(
     text = FALSE,
-    use_labels = "label") + 
+    use_labels = "label"
+  ) +
   theme_dag_blank()
 ```
 
@@ -485,7 +496,8 @@ dagitty::adjustmentSets(
   confounding,
   exposure = "x",
   outcome = "y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 The output indicates that, to obtain an unbiased estimate of the causal association between two variables, it is necessary to control for any confounding [@Lederer2019].
@@ -526,12 +538,14 @@ An example of full mediation is depicted in @fig-fullMediation:
 full_mediation <- ggdag::mediation_triangle(
   x = "Coaching Quality",
   y = "Fantasy Points",
-  m = "Player Preparation")
+  m = "Player Preparation"
+)
 
 full_mediation |>
   ggdag(
     text = FALSE,
-    use_labels = "label") + 
+    use_labels = "label"
+  ) +
   theme_dag_blank()
 ```
 
@@ -548,7 +562,8 @@ dagitty::adjustmentSets(
   full_mediation,
   exposure = "x",
   outcome = "y",
-  effect = "direct")
+  effect = "direct"
+)
 ```
 
 The output indicates that, to obtain an unbiased estimate of the *direct* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., the effect that is *not* mediated through intermediate processes), it is necessary to control for player preparation (`M`).
@@ -558,7 +573,8 @@ dagitty::adjustmentSets(
   full_mediation,
   exposure = "x",
   outcome = "y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 However, to obtain an unbiased estimate of the *total* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important *not* to control for player preparation (`M`).
@@ -577,12 +593,14 @@ partial_mediation <- ggdag::mediation_triangle(
   x = "Coaching Quality",
   y = "Fantasy Points",
   m = "Player Preparation",
-  x_y_associated = TRUE)
+  x_y_associated = TRUE
+)
 
 partial_mediation |>
   ggdag(
     text = FALSE,
-    use_labels = "label") + 
+    use_labels = "label"
+  ) +
   theme_dag_blank()
 ```
 
@@ -601,7 +619,8 @@ dagitty::adjustmentSets(
   partial_mediation,
   exposure = "x",
   outcome = "y",
-  effect = "direct")
+  effect = "direct"
+)
 ```
 
 As with [full mediation](#sec-causalDiagramMediationPartial), the output indicates that, to obtain an unbiased estimate of the *direct* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., the effect that is *not* mediated through intermediate processes), it is necessary to control for player preparation (`M`).
@@ -611,7 +630,8 @@ dagitty::adjustmentSets(
   partial_mediation,
   exposure = "x",
   outcome = "y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 However, as with [full mediation](#sec-causalDiagramMediationPartial), to obtain an unbiased estimate of the *total* causal association between coaching quality (`X`) and fantasy points (`Y`) (i.e., including the portion of the effect that is mediated through intermediate processes), it is important *not* to control for player preparation (`M`).
@@ -631,12 +651,14 @@ Consider the example in @fig-dagDescendant:
 #| fig-cap: "Causal Diagram (Directed Acyclic Graph) Example of Ancestor (Mediation) and Descendant of Y."
 #| fig-alt: "Causal Diagram (Directed Acyclic Graph) Example of Ancestor (Mediation) and Descendant of Y."
 
-descendentDag <- dagitty::dagitty("dag{
+descendentDag <- dagitty::dagitty(
+  "dag{
   X -> M
   M -> Y
   X -> Y
   Y -> Z
-}")
+}"
+)
 
 #plot(dagitty::graphLayout(descendentDag))
 ggdag::ggdag(descendentDag) + theme_dag_blank()
@@ -653,13 +675,15 @@ dagitty::adjustmentSets(
   descendentDag,
   exposure = "X",
   outcome = "Y",
-  effect = "direct")
+  effect = "direct"
+)
 
 dagitty::adjustmentSets(
   descendentDag,
   exposure = "X",
   outcome = "Y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 As indicated above, one should not control for the descendant of the outcome variable; thus, one should not control for `Z` when examining the association between `X` or `M` and `Y`.
@@ -678,12 +702,14 @@ An example collision is depicted in Figures [-@fig-colliderBias1] and [-@fig-col
 colliderBias1 <- ggdag::collider_triangle(
   x = "Diet",
   y = "Coaching Strategy",
-  m = "Injury Status")
+  m = "Injury Status"
+)
 
-colliderBias1 |> 
+colliderBias1 |>
   ggdag(
     text = FALSE,
-    use_labels = "label") + 
+    use_labels = "label"
+  ) +
   theme_dag_blank()
 ```
 
@@ -698,7 +724,8 @@ dagitty::adjustmentSets(
   colliderBias1,
   exposure = "x",
   outcome = "y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 As the output indicates, we should not control for the collider when examining the association between the two causes of the collider.
@@ -717,12 +744,14 @@ colliderBias2 <- ggdag::collider_triangle(
   x = "Coaching Quality",
   y = "Player Preparation",
   m = "Fantasy Points",
-  x_y_associated = TRUE)
+  x_y_associated = TRUE
+)
 
-colliderBias2 |> 
+colliderBias2 |>
   ggdag(
     text = FALSE,
-    use_labels = "label") + 
+    use_labels = "label"
+  ) +
   theme_dag_blank()
 ```
 
@@ -737,7 +766,8 @@ dagitty::adjustmentSets(
   colliderBias2,
   exposure = "x",
   outcome = "y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 Again, it would be important not to control for the collider, fantasy points (`M`), when examining the association between coaching quality (`X`) and player preparation (`Y`).
@@ -760,12 +790,14 @@ mBias <- ggdag::m_bias(
   y = "Fantasy Points",
   a = "Team Record",
   b = "Coaching Quality",
-  m = "Fan Attendance at Game")
+  m = "Fan Attendance at Game"
+)
 
-mBias |> 
+mBias |>
   ggdag(
     text = FALSE,
-    use_labels = "label") + 
+    use_labels = "label"
+  ) +
   theme_dag_blank()
 ```
 
@@ -783,7 +815,8 @@ dagitty::adjustmentSets(
   mBias,
   exposure = "x",
   outcome = "y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 It is important not to control for the [collider](#sec-colliderBias) (fan attendance).
@@ -824,12 +857,14 @@ butterflyBias <- ggdag::butterfly_bias(
   y = "Fantasy Points",
   a = "Diet",
   b = "Coaching Quality",
-  m = "Mental Health")
+  m = "Mental Health"
+)
 
-butterflyBias |> 
+butterflyBias |>
   ggdag(
     text = FALSE,
-    use_labels = "label") + 
+    use_labels = "label"
+  ) +
   theme_dag_blank()
 ```
 
@@ -847,7 +882,8 @@ dagitty::adjustmentSets(
   butterflyBias,
   exposure = "x",
   outcome = "y",
-  effect = "total")
+  effect = "total"
+)
 ```
 
 When dealing with a [collider](#sec-colliderBias) that is also a [confound](#sec-causalDiagramConfounding), controlling for either set, `B` and `M` or `A` and `M`, will provide an unbiased estimate of the association between `X` and `Y`.
