@@ -96,21 +96,25 @@ Adapted from: <https://rc2e.com/timeseriesanalysis> [@Long2019\; archived at <ht
 ### Create the Time Series Objects {#sec-createTimeSeriesObjects}
 
 ```{r}
-weeklyFantasyPoints_tomBrady <- player_stats_weekly |> 
+weeklyFantasyPoints_tomBrady <- player_stats_weekly |>
   filter(
-    player_id == "00-0019596" | player_display_name == "Tom Brady")
+    player_id == "00-0019596" | player_display_name == "Tom Brady"
+  )
 
-weeklyFantasyPoints_peytonManning <- player_stats_weekly |> 
+weeklyFantasyPoints_peytonManning <- player_stats_weekly |>
   filter(
-    player_id == "00-0010346" | player_display_name == "Peyton Manning")
+    player_id == "00-0010346" | player_display_name == "Peyton Manning"
+  )
 
 ts_tomBrady <- xts::xts(
   x = weeklyFantasyPoints_tomBrady["fantasyPoints"],
-  order.by = weeklyFantasyPoints_tomBrady$gameday)
+  order.by = weeklyFantasyPoints_tomBrady$gameday
+)
 
 ts_peytonManning <- xts::xts(
   x = weeklyFantasyPoints_peytonManning["fantasyPoints"],
-  order.by = weeklyFantasyPoints_peytonManning$gameday)
+  order.by = weeklyFantasyPoints_peytonManning$gameday
+)
 
 ts_tomBrady
 ts_peytonManning
@@ -120,7 +124,7 @@ ts_combined <- merge(
   ts_peytonManning
 )
 
-names(ts_combined) <- c("Tom Brady","Peyton Manning")
+names(ts_combined) <- c("Tom Brady", "Peyton Manning")
 ```
 
 ### Plot the Time Series {#sec-plotTimeSeries}
@@ -132,7 +136,8 @@ names(ts_combined) <- c("Tom Brady","Peyton Manning")
 
 plot(
   ts_tomBrady,
-  main = "Tom Brady's Fantasy Points by Game")
+  main = "Tom Brady's Fantasy Points by Game"
+)
 ```
 
 ```{r}
@@ -144,7 +149,8 @@ plot(
   ts_combined,
   legend,
   legend.loc = "topright",
-  main = "Fantasy Points by Game")
+  main = "Fantasy Points by Game"
+)
 ```
 
 ### Rolling Mean/Median {#sec-rollingMeanMedian}
@@ -152,11 +158,13 @@ plot(
 ```{r}
 zoo::rollmean(
   x = ts_tomBrady,
-  k = 5)
+  k = 5
+)
 
 zoo::rollmedian(
   x = ts_tomBrady,
-  k = 5)
+  k = 5
+)
 ```
 
 ### Autocorrelation {#sec-autoCorrelation}
@@ -195,7 +203,8 @@ We can generate a plot of an ARIMA model using the `stats::arima()` function.
 
 arima_tomBrady <- arima(
   ts_tomBrady,
-  order = c(5, 1, 4))
+  order = c(5, 1, 4)
+)
 
 summary(arima_tomBrady)
 confint(arima_tomBrady)
@@ -210,7 +219,8 @@ forecast::checkresiduals(arima_tomBrady)
 arima_tomBrady_removeNonSigTerms <- arima(
   ts_tomBrady,
   order = c(5, 1, 4),
-  fixed = c(NA, NA, 0, NA, NA, NA, NA, NA, NA))
+  fixed = c(NA, NA, 0, NA, NA, NA, NA, NA, NA)
+)
 
 summary(arima_tomBrady_removeNonSigTerms)
 confint(arima_tomBrady_removeNonSigTerms)
@@ -224,7 +234,8 @@ forecast::checkresiduals(arima_tomBrady_removeNonSigTerms)
 
 arima_peytonManning <- arima(
   ts_peytonManning,
-  order = c(1, 0, 1))
+  order = c(1, 0, 1)
+)
 
 summary(arima_peytonManning)
 confint(arima_peytonManning)
@@ -238,11 +249,13 @@ We can generate model forecasts from the ARIMA model using the `forecast::foreca
 ```{r}
 forecast_tomBrady <- forecast::forecast(
   arima_tomBrady,
-  level = c(80, 95)) # 80% and 95% confidence intervals
+  level = c(80, 95)
+) # 80% and 95% confidence intervals
 
 forecast_peytonManning <- forecast::forecast(
   arima_peytonManning,
-  level = c(80, 95)) # 80% and 95% confidence intervals
+  level = c(80, 95)
+) # 80% and 95% confidence intervals
 
 forecast_tomBrady
 forecast_peytonManning
@@ -257,7 +270,7 @@ We can plot the model forecasts using the `forecast::autoplot()` function.
 #| fig-cap: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
 #| fig-alt: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
 
-forecast::autoplot(forecast_tomBrady) + 
+forecast::autoplot(forecast_tomBrady) +
   labs(
     x = "Game Number",
     y = "Fantasy Points",
@@ -272,7 +285,7 @@ forecast::autoplot(forecast_tomBrady) +
 #| fig-cap: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
 #| fig-alt: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Autoregressive Integrated Moving Average (ARIMA) Model."
 
-forecast::autoplot(forecast_peytonManning) + 
+forecast::autoplot(forecast_peytonManning) +
   labs(
     x = "Game Number",
     y = "Fantasy Points",
@@ -320,11 +333,13 @@ We can generate model forecasts from the ARIMA model using the `forecast::foreca
 ```{r}
 forecastETS_tomBrady <- forecast::forecast(
   ets_tomBrady,
-  level = c(80, 95)) # 80% and 95% confidence intervals
+  level = c(80, 95)
+) # 80% and 95% confidence intervals
 
 forecastETS_peytonManning <- forecast::forecast(
   ets_peytonManning,
-  level = c(80, 95)) # 80% and 95% confidence intervals
+  level = c(80, 95)
+) # 80% and 95% confidence intervals
 
 forecastETS_tomBrady
 forecastETS_peytonManning
@@ -339,7 +354,7 @@ We can plot the model forecasts using the `forecast::autoplot()` function.
 #| fig-cap: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
 #| fig-alt: "Tom Brady's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
 
-forecast::autoplot(forecastETS_tomBrady) + 
+forecast::autoplot(forecastETS_tomBrady) +
   labs(
     x = "Game Number",
     y = "Fantasy Points",
@@ -354,7 +369,7 @@ forecast::autoplot(forecastETS_tomBrady) +
 #| fig-cap: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
 #| fig-alt: "Peyton Manning's Historical and Projected Fantasy Points by Game Based on Exponential Smoothing."
 
-forecast::autoplot(forecastETS_peytonManning) + 
+forecast::autoplot(forecastETS_peytonManning) +
   labs(
     x = "Game Number",
     y = "Fantasy Points",
@@ -371,13 +386,21 @@ The Bayesian longitudinal mixed models were estimated in @sec-fantasyPointsByAge
 ### Prepare New Data Object {#sec-timeSeriesBayesianNewData}
 
 ```{r}
-player_stats_seasonal_offense_subset <- player_stats_seasonal |> 
-  dplyr::filter(position_group %in% c("QB","RB","WR","TE") | position %in% c("K"))
+player_stats_seasonal_offense_subset <- player_stats_seasonal |>
+  dplyr::filter(
+    position_group %in% c("QB", "RB", "WR", "TE") | position %in% c("K")
+  )
 
-player_stats_seasonal_offense_subset$position[which(player_stats_seasonal_offense_subset$position == "HB")] <- "RB"
+player_stats_seasonal_offense_subset$position[which(
+  player_stats_seasonal_offense_subset$position == "HB"
+)] <- "RB"
 
-player_stats_seasonal_offense_subset$player_idFactor <- factor(player_stats_seasonal_offense_subset$player_id)
-player_stats_seasonal_offense_subset$positionFactor <- factor(player_stats_seasonal_offense_subset$position)
+player_stats_seasonal_offense_subset$player_idFactor <- factor(
+  player_stats_seasonal_offense_subset$player_id
+)
+player_stats_seasonal_offense_subset$positionFactor <- factor(
+  player_stats_seasonal_offense_subset$position
+)
 ```
 
 ```{r}
@@ -388,40 +411,81 @@ player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subset |
     !is.na(positionFactor),
     !is.na(ageCentered20),
     !is.na(ageCentered20Quadratic),
-    !is.na(years_of_experience))
+    !is.na(years_of_experience)
+  )
 
-player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC |> 
-  filter(player_id %in% bayesianMixedModelFit$data$player_idFactor) |> 
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC |>
+  filter(player_id %in% bayesianMixedModelFit$data$player_idFactor) |>
   mutate(positionFactor = droplevels(positionFactor))
 
 player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC |>
-  group_by(player_id) |> 
-  group_modify(~ add_row(.x, season = max(player_stats_seasonal_offense_subsetCC$season) + 1)) |> 
-  fill(player_display_name, player_idFactor, position, position_group, positionFactor, team, .direction = "downup") |> 
+  group_by(player_id) |>
+  group_modify(
+    ~ add_row(
+      .x,
+      season = max(player_stats_seasonal_offense_subsetCC$season) + 1
+    )
+  ) |>
+  fill(
+    player_display_name,
+    player_idFactor,
+    position,
+    position_group,
+    positionFactor,
+    team,
+    .direction = "downup"
+  ) |>
   ungroup()
 
-player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC |> 
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC |>
   left_join(
-    player_stats_seasonal_offense_subsetCC |> 
-      filter(season == max(player_stats_seasonal_offense_subsetCC$season) - 1) |> 
-      select(player_id, age_lastYear = age, years_of_experience_lastYear = years_of_experience),
-    by = "player_id") |>
+    player_stats_seasonal_offense_subsetCC |>
+      filter(
+        season == max(player_stats_seasonal_offense_subsetCC$season) - 1
+      ) |>
+      select(
+        player_id,
+        age_lastYear = age,
+        years_of_experience_lastYear = years_of_experience
+      ),
+    by = "player_id"
+  ) |>
   mutate(
-    age = if_else(season == max(player_stats_seasonal_offense_subsetCC$season), age_lastYear + 1, age), # increment age by 1
+    age = if_else(
+      season == max(player_stats_seasonal_offense_subsetCC$season),
+      age_lastYear + 1,
+      age
+    ), # increment age by 1
     ageCentered20 = age - 20,
-    years_of_experience = if_else(season == max(player_stats_seasonal_offense_subsetCC$season), years_of_experience_lastYear + 1, years_of_experience)) # increment experience by 1
+    years_of_experience = if_else(
+      season == max(player_stats_seasonal_offense_subsetCC$season),
+      years_of_experience_lastYear + 1,
+      years_of_experience
+    )
+  ) # increment experience by 1
 
-activePlayers <- unique(player_stats_seasonal_offense_subsetCC[c("player_id","season")]) |> 
-  filter(season == max(player_stats_seasonal_offense_subsetCC$season) - 1) |> 
-  select(player_id) |> 
+activePlayers <- unique(player_stats_seasonal_offense_subsetCC[c(
+  "player_id",
+  "season"
+)]) |>
+  filter(season == max(player_stats_seasonal_offense_subsetCC$season) - 1) |>
+  select(player_id) |>
   pull()
 
-inactivePlayers <- player_stats_seasonal_offense_subsetCC$player_id[which(player_stats_seasonal_offense_subsetCC$player_id %ni% activePlayers)]
+inactivePlayers <- player_stats_seasonal_offense_subsetCC$player_id[which(
+  player_stats_seasonal_offense_subsetCC$player_id %ni% activePlayers
+)]
 
-player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC |> 
-  filter(player_id %in% activePlayers | (player_id %in% inactivePlayers & season < max(player_stats_seasonal_offense_subsetCC$season) - 1)) |> 
+player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC |>
+  filter(
+    player_id %in%
+      activePlayers |
+      (player_id %in%
+        inactivePlayers &
+        season < max(player_stats_seasonal_offense_subsetCC$season) - 1)
+  ) |>
   mutate(
-    player_idFactor = droplevels(player_idFactor) 
+    player_idFactor = droplevels(player_idFactor)
   )
 ```
 
@@ -431,30 +495,42 @@ player_stats_seasonal_offense_subsetCC <- player_stats_seasonal_offense_subsetCC
 player_stats_seasonal_offense_subsetCC$fantasyPoints_bayesian <- predict(
   bayesianMixedModelFit,
   newdata = player_stats_seasonal_offense_subsetCC
-)[,"Estimate"]
+)[, "Estimate"]
 ```
 
 ### Table of Next Season Predictions {#sec-timeSeriesBayesianNextSeasonPredictions}
 
 ```{r}
-player_stats_seasonal_offense_subsetCC |> 
-  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "QB") |>
-  arrange(-fantasyPoints_bayesian) |> 
+player_stats_seasonal_offense_subsetCC |>
+  filter(
+    season == max(player_stats_seasonal_offense_subsetCC$season),
+    position == "QB"
+  ) |>
+  arrange(-fantasyPoints_bayesian) |>
   select(player_display_name, fantasyPoints_bayesian)
 
-player_stats_seasonal_offense_subsetCC |> 
-  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "RB") |>
-  arrange(-fantasyPoints_bayesian) |> 
+player_stats_seasonal_offense_subsetCC |>
+  filter(
+    season == max(player_stats_seasonal_offense_subsetCC$season),
+    position == "RB"
+  ) |>
+  arrange(-fantasyPoints_bayesian) |>
   select(player_display_name, fantasyPoints_bayesian)
 
-player_stats_seasonal_offense_subsetCC |> 
-  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "WR") |>
-  arrange(-fantasyPoints_bayesian) |> 
+player_stats_seasonal_offense_subsetCC |>
+  filter(
+    season == max(player_stats_seasonal_offense_subsetCC$season),
+    position == "WR"
+  ) |>
+  arrange(-fantasyPoints_bayesian) |>
   select(player_display_name, fantasyPoints_bayesian)
 
-player_stats_seasonal_offense_subsetCC |> 
-  filter(season == max(player_stats_seasonal_offense_subsetCC$season), position == "TE") |>
-  arrange(-fantasyPoints_bayesian) |> 
+player_stats_seasonal_offense_subsetCC |>
+  filter(
+    season == max(player_stats_seasonal_offense_subsetCC$season),
+    position == "TE"
+  ) |>
+  arrange(-fantasyPoints_bayesian) |>
   select(player_display_name, fantasyPoints_bayesian)
 ```
 
@@ -473,7 +549,9 @@ plot_individualFantasyPointsByAgeQB <- ggplot(
   mapping = aes(
     x = round(age, 2),
     y = round(fantasyPoints_bayesian, 2),
-    group = player_id)) +
+    group = player_id
+  )
+) +
   geom_smooth(
     aes(
       x = age,
@@ -483,7 +561,8 @@ plot_individualFantasyPointsByAgeQB <- ggplot(
     ),
     se = FALSE,
     linewidth = 0.5,
-    color = "black") +
+    color = "black"
+  ) +
   geom_point(
     aes(
       x = age,
@@ -503,7 +582,7 @@ plot_individualFantasyPointsByAgeQB <- ggplot(
 
 plotly::ggplotly(
   plot_individualFantasyPointsByAgeQB,
-  tooltip = c("age","fantasyPoints_bayesian","text","label")
+  tooltip = c("age", "fantasyPoints_bayesian", "text", "label")
 )
 ```
 
@@ -520,7 +599,9 @@ plot_individualFantasyPointsByAgeRB <- ggplot(
   mapping = aes(
     x = age,
     y = fantasyPoints_bayesian,
-    group = player_id)) +
+    group = player_id
+  )
+) +
   geom_smooth(
     aes(
       x = age,
@@ -530,7 +611,8 @@ plot_individualFantasyPointsByAgeRB <- ggplot(
     ),
     se = FALSE,
     linewidth = 0.5,
-    color = "black") +
+    color = "black"
+  ) +
   geom_point(
     aes(
       x = age,
@@ -550,7 +632,7 @@ plot_individualFantasyPointsByAgeRB <- ggplot(
 
 plotly::ggplotly(
   plot_individualFantasyPointsByAgeRB,
-  tooltip = c("age","fantasyPoints_bayesian","text","label")
+  tooltip = c("age", "fantasyPoints_bayesian", "text", "label")
 )
 ```
 
@@ -567,7 +649,9 @@ plot_individualFantasyPointsByAgeWR <- ggplot(
   mapping = aes(
     x = age,
     y = fantasyPoints_bayesian,
-    group = player_id)) +
+    group = player_id
+  )
+) +
   geom_smooth(
     aes(
       x = age,
@@ -577,7 +661,8 @@ plot_individualFantasyPointsByAgeWR <- ggplot(
     ),
     se = FALSE,
     linewidth = 0.5,
-    color = "black") +
+    color = "black"
+  ) +
   geom_point(
     aes(
       x = age,
@@ -597,7 +682,7 @@ plot_individualFantasyPointsByAgeWR <- ggplot(
 
 plotly::ggplotly(
   plot_individualFantasyPointsByAgeWR,
-  tooltip = c("age","fantasyPoints_bayesian","text","label")
+  tooltip = c("age", "fantasyPoints_bayesian", "text", "label")
 )
 ```
 
@@ -614,7 +699,9 @@ plot_individualFantasyPointsByAgeTE <- ggplot(
   mapping = aes(
     x = age,
     y = fantasyPoints_bayesian,
-    group = player_id)) +
+    group = player_id
+  )
+) +
   geom_smooth(
     aes(
       x = age,
@@ -624,7 +711,8 @@ plot_individualFantasyPointsByAgeTE <- ggplot(
     ),
     se = FALSE,
     linewidth = 0.5,
-    color = "black") +
+    color = "black"
+  ) +
   geom_point(
     aes(
       x = age,
@@ -644,7 +732,7 @@ plot_individualFantasyPointsByAgeTE <- ggplot(
 
 plotly::ggplotly(
   plot_individualFantasyPointsByAgeTE,
-  tooltip = c("age","fantasyPoints_bayesian","text","label")
+  tooltip = c("age", "fantasyPoints_bayesian", "text", "label")
 )
 ```
 
