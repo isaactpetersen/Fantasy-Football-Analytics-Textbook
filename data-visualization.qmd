@@ -121,14 +121,14 @@ An example figure that applies these principles of data visualization is in @fig
 confidenceLevel <- .95 # for 95% confidence interval
 
 player_stats_seasonal_offense_summary <- player_stats_seasonal |>
-  filter(position_group %in% c("QB","RB","WR","TE")) |> 
+  filter(position_group %in% c("QB", "RB", "WR", "TE")) |>
   group_by(position_group) |>
   summarise(
     n = sum(!is.na(fantasyPoints)),
     mean = mean(fantasyPoints, na.rm = TRUE),
     sd = sd(fantasyPoints, na.rm = TRUE)
   ) |>
-  mutate(se = sd/sqrt(n)) |>
+  mutate(se = sd / sqrt(n)) |>
   mutate(
     ci_lower = mean - qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se,
     ci_upper = mean + qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se,
@@ -138,30 +138,33 @@ player_stats_seasonal_offense_summary <- player_stats_seasonal |>
       "RB" ~ "Running Back",
       "WR" ~ "Wide Receiver",
       "TE" ~ "Tight End"
-      )
+    )
   )
 
 ggplot2::ggplot(
   data = player_stats_seasonal_offense_summary |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = positionLabel,
     y = mean,
     fill = positionLabel
-    )
+  )
 ) +
   geom_bar(
-    stat = "identity") +
+    stat = "identity"
+  ) +
   geom_errorbar(
     aes(
       ymin = ci_lower,
-      ymax = ci_upper),
+      ymax = ci_upper
+    ),
     width = 0.2,
     color = "black"
   ) +
   gghighlight::gghighlight(
     positionLabel == "Quarterback",
-    label_key = positionLabel) +
+    label_key = positionLabel
+  ) +
   labs(
     x = "Position",
     y = "Fantasy Points",
@@ -176,14 +179,16 @@ ggplot2::ggplot(
     color = "blue",
     linewidth = 1.5,
     alpha = 0.6,
-    arrow = arrow()) +
+    arrow = arrow()
+  ) +
   annotate(
     "text",
     x = 2.75,
     y = 75,
     label = "Tight Ends score fewer fantasy\npoints than other positions",
-    hjust = 0) + # left-justify
-  theme_classic() + 
+    hjust = 0
+  ) + # left-justify
+  theme_classic() +
   theme(legend.position = "none") +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
@@ -236,7 +241,8 @@ You can see a pie chart of colors using the `graphics::pie()` function:
 
 pie(
   rep(1, 8),
-  col = palette_OkabeIto)
+  col = palette_OkabeIto
+)
 ```
 
 ```{r}
@@ -246,7 +252,8 @@ pie(
 
 pie(
   rep(1, 8),
-  col = palette_OkabeIto_black)
+  col = palette_OkabeIto_black
+)
 ```
 
 ## `ggplot2` Syntax {#sec-ggplot2Syntax}
@@ -340,10 +347,11 @@ The colors to use in the `fill` and `color` parameters can be specified by name 
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_histogram(
     color = "black",
@@ -366,10 +374,11 @@ However, you can use any color by specifying its HEX code, as in @fig-colorByHEX
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_histogram(
     color = "#000000",
@@ -386,9 +395,10 @@ You can use any color by specifying its values in red-green-blue (RGB) color spa
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
-    x = fantasyPoints)
+    x = fantasyPoints
+  )
 ) +
   geom_histogram(
     color = rgb(
@@ -415,10 +425,11 @@ We can allow the colors to differ by group by specifying the `fill` parameter in
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_density(
     color = "black",
@@ -435,10 +446,11 @@ We can specify multiple colors manually using the `ggplot2::scale_fill_manual()`
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_density(
     color = "black",
@@ -449,8 +461,9 @@ ggplot2::ggplot(
       "QB" = "red", # or could use hex, rgb, etc.
       "RB" = "blue", # or could use hex, rgb, etc.
       "WR" = "green", # or could use hex, rgb, etc.
-      "TE" = "yellow") # or could use hex, rgb, etc.
-    )
+      "TE" = "yellow"
+    ) # or could use hex, rgb, etc.
+  )
 ```
 
 We can also specify the colors using a palette, such as by the ColorBrewer palette using the `ggplot2::scale_fill_brewer()` function (as in @fig-multipleColorsByPaletteColorBrewer) or the viridis palette using the `ggplot2::scale_fill_viridis_d()` function (as in @fig-multipleColorsByPaletteViridis).
@@ -462,10 +475,11 @@ We can also specify the colors using a palette, such as by the ColorBrewer palet
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_density(
     color = "black",
@@ -481,10 +495,11 @@ ggplot2::ggplot(
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_density(
     color = "black",
@@ -510,7 +525,8 @@ ggplot2::ggplot(
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    group = player_display_name)
+    group = player_display_name
+  )
 ) +
   geom_line(
     linetype = "dashed"
@@ -526,11 +542,12 @@ We can allow the line type to differ by group by specifying the `linetype` param
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+    filter(player_display_name %in% c("Tom Brady", "Peyton Manning")),
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    linetype = player_display_name)
+    linetype = player_display_name
+  )
 ) +
   geom_line()
 ```
@@ -544,19 +561,21 @@ We can specify the line types manually using the `ggplot2::scale_linetype_manual
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+    filter(player_display_name %in% c("Tom Brady", "Peyton Manning")),
   mapping = aes(
     x = season,
     y = fantasyPoints,
     group = player_display_name,
-    linetype = player_display_name)
+    linetype = player_display_name
+  )
 ) +
   geom_line() +
   scale_linetype_manual(
     values = c(
       "Tom Brady" = "solid",
-      "Peyton Manning" = "dashed")
+      "Peyton Manning" = "dashed"
     )
+  )
 ```
 
 ### Line Width {#sec-ggplot2SyntaxLineWidth}
@@ -574,7 +593,8 @@ ggplot2::ggplot(
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    group = player_display_name)
+    group = player_display_name
+  )
 ) +
   geom_line(
     linewidth = 4
@@ -605,7 +625,8 @@ ggplot2::ggplot(
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    group = player_display_name)
+    group = player_display_name
+  )
 ) +
   geom_point(
     shape = 2
@@ -621,11 +642,12 @@ We can allow the point shape to differ by group by specifying the `shape` parame
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+    filter(player_display_name %in% c("Tom Brady", "Peyton Manning")),
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    shape = player_display_name)
+    shape = player_display_name
+  )
 ) +
   geom_point()
 ```
@@ -639,18 +661,20 @@ We can specify the point shape manually using the `ggplot2::scale_shape_manual()
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(player_display_name %in% c("Tom Brady","Peyton Manning")),
+    filter(player_display_name %in% c("Tom Brady", "Peyton Manning")),
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    shape = player_display_name)
+    shape = player_display_name
+  )
 ) +
   geom_point() +
   scale_shape_manual(
     values = c(
       "Tom Brady" = 1,
-      "Peyton Manning" = 3)
+      "Peyton Manning" = 3
     )
+  )
 ```
 
 ### Size of Points and Text {#sec-ggplot2SyntaxSize}
@@ -668,7 +692,8 @@ ggplot2::ggplot(
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    group = player_display_name)
+    group = player_display_name
+  )
 ) +
   geom_point(
     size = 2 # size of points
@@ -691,14 +716,15 @@ ggplot2::ggplot(
   mapping = aes(
     x = season,
     y = fantasyPoints,
-    group = player_display_name)
+    group = player_display_name
+  )
 ) +
   geom_point() +
   theme(
     axis.title.x = element_text(size = 30), # font size for x-axis title
     axis.title.y = element_text(size = 30), # font size for y-axis title
-    axis.text.x  = element_text(size = 12), # font size for x-axis labels
-    axis.text.y  = element_text(size = 12)  # font size for y-axis labels
+    axis.text.x = element_text(size = 12), # font size for x-axis labels
+    axis.text.y = element_text(size = 12) # font size for y-axis labels
   )
 ```
 
@@ -717,9 +743,10 @@ A histogram of fantasy points is depicted in @fig-histogram.
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
-    x = fantasyPoints)
+    x = fantasyPoints
+  )
 ) +
   geom_histogram(
     color = "#000000",
@@ -745,10 +772,11 @@ A histogram of fantasy points is depicted in @fig-density.
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_density(alpha = 0.7) + # add transparency
   labs(
@@ -772,9 +800,10 @@ A density plot of fantasy points with a histogram and rug plot is depicted in @f
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
-    x = fantasyPoints)
+    x = fantasyPoints
+  )
 ) +
   geom_histogram(
     aes(y = after_stat(density)),
@@ -809,9 +838,10 @@ binWidth <- 15
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
-    x = fantasyPoints)
+    x = fantasyPoints
+  )
 ) +
   geom_histogram(
     color = "#000000",
@@ -853,11 +883,12 @@ A box-and-whisker plot of fantasy points is depicted in @fig-boxAndWhisker.
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = position_group,
     y = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_boxplot(staplewidth = 0.25) +
   labs(
@@ -865,10 +896,11 @@ ggplot2::ggplot(
     y = "Fantasy Points",
     title = "Box-and-Whisker Plot of Fantasy Points by Position"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(
     legend.position = "none",
-    axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+    axis.title.y = element_text(angle = 0, vjust = 0.5)
+  ) # horizontal y-axis title
 ```
 
 ### Violin Plot {#sec-violinPlot}
@@ -882,11 +914,12 @@ A violin plot of fantasy points is depicted in @fig-violin.
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = position_group,
     y = fantasyPoints,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   geom_violin(
     quantiles = c(0.25, 0.5, 0.75),
@@ -898,10 +931,11 @@ ggplot2::ggplot(
     title = "Violin Plot of Fantasy Points by Position",
     subtitle = "Lines represent the 25th, 50th, and 75th quantiles"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(
     legend.position = "none",
-    axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+    axis.title.y = element_text(angle = 0, vjust = 0.5)
+  ) # horizontal y-axis title
 ```
 
 ### Ridgeline Plot {#sec-ridgelinePlot}
@@ -915,12 +949,13 @@ A ridgeline plot of fantasy points is depicted in @fig-ridgeline1 using the `ggr
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
     y = position_group,
     group = position_group,
-    fill = position_group)
+    fill = position_group
+  )
 ) +
   ggridges::geom_density_ridges(
     rel_min_height = 0.0085, # remove trailing tails
@@ -930,10 +965,11 @@ ggplot2::ggplot(
     y = "Position",
     title = "Ridgeline Plot of Fantasy Points by Position"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(
     legend.position = "none",
-    axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
+    axis.title.y = element_text(angle = 0, vjust = 0.5)
+  ) # horizontal y-axis title
 ```
 
 We can add lines at the quartiles, as depicted in @fig-ridgeline2.
@@ -945,12 +981,13 @@ We can add lines at the quartiles, as depicted in @fig-ridgeline2.
 
 ggplot2::ggplot(
   data = player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = fantasyPoints,
     y = position_group,
     group = position_group,
-    fill = factor(after_stat(quantile)))
+    fill = factor(after_stat(quantile))
+  )
 ) +
   ggridges::stat_density_ridges(
     rel_min_height = 0.0085, # remove trailing tails
@@ -959,7 +996,7 @@ ggplot2::ggplot(
     quantiles = 4,
     quantile_lines = TRUE
   ) +
-   scale_fill_viridis_d() + # use viridis color scheme
+  scale_fill_viridis_d() + # use viridis color scheme
   labs(
     x = "Fantasy Points",
     y = "Position",
@@ -979,7 +1016,7 @@ First, we prepare the data:
 
 ```{r}
 # Subset Data
-rb_seasonal <- player_stats_seasonal |> 
+rb_seasonal <- player_stats_seasonal |>
   filter(position_group == "RB")
 ```
 
@@ -1013,7 +1050,9 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() # add points for scatterplot
 ```
 
@@ -1030,7 +1069,9 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth(method = "lm") # add linear best-fit line
 ```
@@ -1046,7 +1087,9 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth(
     method = "lm",
@@ -1064,7 +1107,9 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth(method = "loess") # add smooth best-fit (LOESS) line
 ```
@@ -1080,7 +1125,9 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth() # add GAM best-fit line; same as specifying method = "gam"
 ```
@@ -1098,7 +1145,9 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth() +
   coord_cartesian(
@@ -1126,13 +1175,16 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth() +
   coord_cartesian(
-    xlim = c(20,40),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(20, 40),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   scale_x_continuous(
     breaks = seq(from = 20, to = 40, by = 5)
   ) +
@@ -1160,13 +1212,16 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth() +
   coord_cartesian(
-    xlim = c(20,40),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(20, 40),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   scale_x_continuous(
     breaks = seq(from = 20, to = 40, by = 5)
   ) +
@@ -1194,13 +1249,16 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth() +
   coord_cartesian(
-    xlim = c(20,40),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(20, 40),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   scale_x_continuous(
     breaks = seq(from = 20, to = 40, by = 5)
   ) +
@@ -1231,16 +1289,19 @@ plot_ypcByPlayerAge <- ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point(
     aes(
       text = player_display_name, # add player name for mouse over tooltip
       label = season)) + # add season for mouse over tooltip
   geom_smooth() +
   coord_cartesian(
-    xlim = c(20,40),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(20, 40),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   scale_x_continuous(
     breaks = seq(from = 20, to = 40, by = 5)
   ) +
@@ -1271,16 +1332,19 @@ plot_ypcByPlayerAge <- ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point(
     aes(
       text = player_display_name, # add player name for mouse over tooltip
       label = season)) + # add season for mouse over tooltip
   geom_smooth() +
   coord_cartesian(
-    xlim = c(20,40),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(20, 40),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   scale_x_continuous(
     breaks = seq(from = 20, to = 40, by = 5)
   ) +
@@ -1313,15 +1377,19 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_yards)) +
+    y = rushing_yards
+  )
+) +
   geom_point() +
   geom_smooth() +
   geom_rug(
     color = "#800000",
-    alpha = 0.2) +
+    alpha = 0.2
+  ) +
   coord_cartesian(
-    xlim = c(20,40),
-    ylim = c(0,NA)) +
+    xlim = c(20, 40),
+    ylim = c(0, NA)
+  ) +
   scale_x_continuous(
     breaks = seq(from = 20, to = 40, by = 5)
   ) +
@@ -1348,7 +1416,8 @@ We can also add a marginal density/histogram, as in @fig-scatterplot13 using the
 
 ggExtra::ggMarginal(
   plot_ypcByPlayerAge,
-  type = "densigram")
+  type = "densigram"
+)
 ```
 
 Or we can create the plots manually, as in @fig-scatterplot14 using the `patchwork` package [@R-patchwork]:
@@ -1361,10 +1430,13 @@ Or we can create the plots manually, as in @fig-scatterplot14 using the `patchwo
 dens1 <- ggplot2::ggplot(
   data = rb_seasonal,
   aes(
-    x = age)) +
+    x = age
+  )
+) +
   coord_cartesian(
-    xlim = c(20,40),
-    expand = FALSE) +
+    xlim = c(20, 40),
+    expand = FALSE
+  ) +
   geom_histogram(
     aes(y = after_stat(density)),
     color = "#000000",
@@ -1380,7 +1452,9 @@ dens1 <- ggplot2::ggplot(
 dens2 <- ggplot2::ggplot(
   data = rb_seasonal,
   aes(
-    x = rushing_yards)) +
+    x = rushing_yards
+  )
+) +
   geom_histogram(
     aes(y = after_stat(density)),
     color = "#000000",
@@ -1394,12 +1468,16 @@ dens2 <- ggplot2::ggplot(
   theme_void() +
   coord_flip(
     ylim = c(0, NA),
-    expand = FALSE)
+    expand = FALSE
+  )
 
-dens1 + patchwork::plot_spacer() + plot_ypcByPlayerAge + dens2 + 
+dens1 +
+  patchwork::plot_spacer() +
+  plot_ypcByPlayerAge +
+  dens2 +
   patchwork::plot_layout(
-    ncol = 2, 
-    nrow = 2, 
+    ncol = 2,
+    nrow = 2,
     widths = c(4, 1),
     heights = c(1, 4)
   )
@@ -1420,7 +1498,7 @@ ggplot2::ggplot(
   mapping = aes(
     x = season,
     y = fantasyPoints
-    )
+  )
 ) +
   geom_line(
     linewidth = 1.5,
@@ -1445,19 +1523,21 @@ We use the `gghighlight` package [@R-gghighlight] to highlight particular elemen
 #| fig-alt: "Line Chart with Highlighting."
 
 ggplot2::ggplot(
-  data = player_stats_seasonal |> 
+  data = player_stats_seasonal |>
     filter(position_group %in% c("QB")),
   mapping = aes(
     x = season,
     y = fantasyPoints,
     group = player_id,
-    color = player_display_name)
+    color = player_display_name
+  )
 ) +
   geom_line(linewidth = 2) +
   gghighlight::gghighlight(
     player_display_name == "Tom Brady",
     label_key = player_display_name,
-    unhighlighted_params = list(linewidth = 0.5)) +
+    unhighlighted_params = list(linewidth = 0.5)
+  ) +
   labs(
     x = "Season",
     y = "Fantasy Points",
@@ -1476,14 +1556,14 @@ To create a bar plot, we first compute summary statistics:
 confidenceLevel <- .95 # for 95% confidence interval
 
 player_stats_seasonal_offense_summary <- player_stats_seasonal |>
-    filter(position_group %in% c("QB","RB","WR","TE")) |> 
+  filter(position_group %in% c("QB", "RB", "WR", "TE")) |>
   group_by(position_group) |>
-  summarise( 
+  summarise(
     n = sum(!is.na(fantasyPoints)),
     mean = mean(fantasyPoints, na.rm = TRUE),
     sd = sd(fantasyPoints, na.rm = TRUE)
   ) |>
-  mutate(se = sd/sqrt(n)) |>
+  mutate(se = sd / sqrt(n)) |>
   mutate(
     ci_lower = mean - qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se,
     ci_upper = mean + qt(p = 1 - (1 - confidenceLevel) / 2, df = n - 1) * se
@@ -1512,16 +1592,17 @@ ggplot2::ggplot(
     x = position_group,
     y = mean,
     fill = position_group
-    )
+  )
 ) +
   geom_bar(
-    stat = "identity") +
+    stat = "identity"
+  ) +
   labs(
     x = "Position",
     y = "Fantasy Points",
     title = "Bar Plot of Fantasy Points by Position"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(legend.position = "none") +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
@@ -1537,19 +1618,21 @@ Based on the summary statistics in @tbl-summaryStats, we create a bar plot with 
 
 ggplot2::ggplot(
   data = player_stats_seasonal_offense_summary |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = position_group,
     y = mean,
     fill = position_group
-    )
+  )
 ) +
   geom_bar(
-    stat = "identity") +
+    stat = "identity"
+  ) +
   geom_errorbar(
     aes(
       ymin = ci_lower,
-      ymax = ci_upper),
+      ymax = ci_upper
+    ),
     width = 0.2,
     color = "black"
   ) +
@@ -1558,7 +1641,7 @@ ggplot2::ggplot(
     y = "Fantasy Points",
     title = "Bar Plot of Fantasy Points by Position"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(legend.position = "none") +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
@@ -1574,20 +1657,22 @@ We can also modify the color scheme, as in @fig-barPlotColorScheme
 
 ggplot2::ggplot(
   data = player_stats_seasonal_offense_summary |>
-    filter(position_group %in% c("QB","RB","WR","TE")),
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   mapping = aes(
     x = position_group,
     y = mean,
     fill = position_group
-    )
+  )
 ) +
   geom_bar(
-    stat = "identity") +
+    stat = "identity"
+  ) +
   scale_fill_brewer(palette = "Dark2") +
   geom_errorbar(
     aes(
       ymin = ci_lower,
-      ymax = ci_upper),
+      ymax = ci_upper
+    ),
     width = 0.2,
     color = "black"
   ) +
@@ -1596,7 +1681,7 @@ ggplot2::ggplot(
     y = "Fantasy Points",
     title = "Bar Plot of Fantasy Points by Position"
   ) +
-  theme_classic() + 
+  theme_classic() +
   theme(legend.position = "none") +
   theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) # horizontal y-axis title
 ```
@@ -1609,16 +1694,19 @@ ggplot2::ggplot(
 #| fig-alt: "Faceted Scatterplot."
 
 ggplot2::ggplot(
-  data = player_stats_seasonal |> 
-    filter(position_group %in% c("QB","RB","WR","TE")),
+  data = player_stats_seasonal |>
+    filter(position_group %in% c("QB", "RB", "WR", "TE")),
   aes(
     x = age,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point() +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA), # set limits of y-axis
-    expand = FALSE) + # don't add space between axes and data
+    ylim = c(0, NA), # set limits of y-axis
+    expand = FALSE
+  ) + # don't add space between axes and data
   labs(
     x = "Player's Age (years)",
     y = "Fantasy Points (Season)",
@@ -1636,29 +1724,32 @@ ggplot2::ggplot(
 
 ```{r}
 # Prepare Data
-rushing_attempts <- nfl_pbp |> 
-  dplyr::filter(season_type == "REG") |> 
+rushing_attempts <- nfl_pbp |>
+  dplyr::filter(season_type == "REG") |>
   dplyr::filter(
     rush == 1,
     rush_attempt == 1,
     qb_scramble == 0,
     qb_dropback == 0,
-    !is.na(rushing_yards))
+    !is.na(rushing_yards)
+  )
 
-rb_yardsPerCarry <- rushing_attempts |> 
-  dplyr::group_by(rusher_id, season) |> 
+rb_yardsPerCarry <- rushing_attempts |>
+  dplyr::group_by(rusher_id, season) |>
   dplyr::summarise(
     ypc = mean(rushing_yards, na.rm = TRUE),
     rush_attempts = n(),
-    .groups = "drop") |> 
-  dplyr::ungroup() |> 
+    .groups = "drop"
+  ) |>
+  dplyr::ungroup() |>
   dplyr::left_join(
     player_stats_seasonal,
     by = c("rusher_id" = "player_id", "season")
-  ) |> 
+  ) |>
   dplyr::filter(
     position_group == "RB",
-    rush_attempts >= 50)
+    rush_attempts >= 50
+  )
 ```
 
 ##### Rushing Yards Per Carry {#sec-plotYPCbyAge}
@@ -1676,11 +1767,15 @@ plot_ypcByPlayerAge2 <- ggplot2::ggplot(
   data = rb_yardsPerCarry,
   aes(
     x = age,
-    y = ypc)) +
+    y = ypc
+  )
+) +
   geom_point(
     aes(
       text = player_display_name,
-      label = season)) +
+      label = season
+    )
+  ) +
   geom_smooth() +
   labs(
     x = "Running Back's Age (years)",
@@ -1708,11 +1803,15 @@ ggplot2::ggplot(
   data = rb_yardsPerCarry,
   aes(
     x = age,
-    y = ypc)) +
+    y = ypc
+  )
+) +
   geom_point(
     aes(
       text = player_display_name,
-      label = season)) +
+      label = season
+    )
+  ) +
   geom_smooth() +
   labs(
     x = "Running Back's Age (years)",
@@ -1740,11 +1839,15 @@ plot_rushEPAbyPlayerAge <- ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_epa)) +
+    y = rushing_epa
+  )
+) +
   geom_point(
     aes(
       text = player_display_name,
-      label = season)) +
+      label = season
+    )
+  ) +
   geom_smooth() +
   labs(
     x = "Running Back's Age (years)",
@@ -1771,11 +1874,15 @@ ggplot2::ggplot(
   data = rb_seasonal,
   aes(
     x = age,
-    y = rushing_epa)) +
+    y = rushing_epa
+  )
+) +
   geom_point(
     aes(
       text = player_display_name,
-      label = season)) +
+      label = season
+    )
+  ) +
   geom_smooth() +
   labs(
     x = "Running Back's Age (years)",
@@ -1794,10 +1901,11 @@ ggplot2::ggplot(
 Expected points added (EPA) per play by the team with possession.
 
 ```{r}
-pbp_regularSeason <- nfl_pbp |> 
+pbp_regularSeason <- nfl_pbp |>
   dplyr::filter(
     season == 2026,
-    season_type == "REG") |>
+    season_type == "REG"
+  ) |>
   dplyr::filter(!is.na(posteam) & (rush == 1 | pass == 1))
 
 epa_offense <- pbp_regularSeason |>
@@ -1811,7 +1919,8 @@ epa_defense <- pbp_regularSeason |>
 epa_combined <- epa_offense |>
   dplyr::inner_join(
     epa_defense,
-    by = "team")
+    by = "team"
+  )
 ```
 
 Defensive EPA per play during the 2026 NFL season is depicted as a function of offensive EPA per play in @fig-plotDefOffEPA using the `nflplotR` package [@R-nflplotR].
@@ -1825,16 +1934,22 @@ ggplot2::ggplot(
   data = epa_combined,
   aes(
     x = off_epa,
-    y = def_epa)) +
+    y = def_epa
+  )
+) +
   nflplotR::geom_mean_lines(
     aes(
       x0 = off_epa,
-      y0 = def_epa)) +
+      y0 = def_epa
+    )
+  ) +
   nflplotR::geom_nfl_logos(
     aes(
-      team_abbr = team),
-      width = 0.065,
-      alpha = 0.7) +
+      team_abbr = team
+    ),
+    width = 0.065,
+    alpha = 0.7
+  ) +
   labs(
     x = "Offense EPA/play",
     y = "Defense EPA/play",
