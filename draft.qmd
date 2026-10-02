@@ -207,10 +207,12 @@ Free Auction Draft Lineup Optimizer From Fantasy Football Analytics: <https://ap
 ```{r}
 #| code-fold: true
 
-fantasyPointsByPositionRank <- player_stats_seasonal |> 
-  filter(position_group %in% c("QB","RB","WR","TE","K","DL","LB","DB")) |> 
-  group_by(position_group, season) |> 
-  arrange(position_group, season, -fantasyPoints) |> 
+fantasyPointsByPositionRank <- player_stats_seasonal |>
+  filter(
+    position_group %in% c("QB", "RB", "WR", "TE", "K", "DL", "LB", "DB")
+  ) |>
+  group_by(position_group, season) |>
+  arrange(position_group, season, -fantasyPoints) |>
   mutate(positionRank = row_number())
 ```
 
@@ -229,14 +231,15 @@ ggplot(
     x = positionRank,
     y = fantasyPoints
   )
-) + 
+) +
   geom_point(
     alpha = 0.03
   ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) + # don't add space between axes and data
+    ylim = c(0, NA),
+    expand = FALSE
+  ) + # don't add space between axes and data
   labs(
     x = "End-of-Season Position Rank",
     y = "Fantasy Points (Season)",
@@ -254,7 +257,16 @@ In @fig-expectedPointsByPositionRank2, we overlay the smoothed best-fit line for
 #| fig-alt: "Fantasy Points by End-of-Season Position Rank and Position."
 #| code-fold: true
 
-palette_OkabeIto_black <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000")
+palette_OkabeIto_black <- c(
+  "#E69F00",
+  "#56B4E9",
+  "#009E73",
+  "#F0E442",
+  "#0072B2",
+  "#D55E00",
+  "#CC79A7",
+  "#000000"
+)
 
 ggplot(
   data = fantasyPointsByPositionRank |> filter(positionRank <= 200),
@@ -263,13 +275,15 @@ ggplot(
     y = fantasyPoints,
     color = position_group
   )
-) + 
+) +
   geom_smooth(
     linewidth = 1.5,
-    se = FALSE) +
+    se = FALSE
+  ) +
   coord_cartesian(
-    ylim = c(0,NA), # set limits of y-axis
-    expand = FALSE) + # don't add space between axes and data
+    ylim = c(0, NA), # set limits of y-axis
+    expand = FALSE
+  ) + # don't add space between axes and data
   scale_color_manual(
     values = palette_OkabeIto_black
   ) +
@@ -297,13 +311,15 @@ ggplot(
     y = fantasyPoints,
     color = position_group
   )
-) + 
+) +
   geom_smooth(
     linewidth = 1.5,
-    se = FALSE) +
+    se = FALSE
+  ) +
   coord_cartesian(
-    ylim = c(0,425), # set limits of y-axis
-    expand = FALSE) + # don't add space between axes and data
+    ylim = c(0, 425), # set limits of y-axis
+    expand = FALSE
+  ) + # don't add space between axes and data
   scale_color_manual(
     values = palette_OkabeIto_black
   ) +
@@ -331,19 +347,22 @@ However, the style of gameplay has changed.
 #| code-fold: true
 
 ggplot(
-  data = fantasyPointsByPositionRank |> filter(positionRank <= 30 & season >= 2020),
+  data = fantasyPointsByPositionRank |>
+    filter(positionRank <= 30 & season >= 2020),
   mapping = aes(
     x = positionRank,
     y = fantasyPoints,
     color = position_group
   )
-) + 
+) +
   geom_smooth(
     linewidth = 1.5,
-    se = FALSE) +
+    se = FALSE
+  ) +
   coord_cartesian(
-    ylim = c(0,425), # set limits of y-axis
-    expand = FALSE) + # don't add space between axes and data
+    ylim = c(0, 425), # set limits of y-axis
+    expand = FALSE
+  ) + # don't add space between axes and data
   scale_color_manual(
     values = palette_OkabeIto_black
   ) +
@@ -368,8 +387,8 @@ Quarterbacks continue to show the steepest dropoff after the top 10 or so player
 #| fig-alt: "Mean Fantasy Points of Top 10 Players at Each Position by Season."
 #| code-fold: true
 
-meanFantasyPointsTop10ByPosition <- fantasyPointsByPositionRank |> 
-  filter(positionRank <= 10) |> 
+meanFantasyPointsTop10ByPosition <- fantasyPointsByPositionRank |>
+  filter(positionRank <= 10) |>
   summarise(
     fantasyPoints = mean(fantasyPoints, na.rm = TRUE),
     .groups = "drop_last"
@@ -382,12 +401,14 @@ ggplot(
     y = fantasyPoints,
     color = position_group
   )
-) + 
+) +
   geom_line(
-    linewidth = 1.5) +
+    linewidth = 1.5
+  ) +
   coord_cartesian(
-    ylim = c(0,425), # set limits of y-axis
-    expand = FALSE) + # don't add space between axes and data
+    ylim = c(0, 425), # set limits of y-axis
+    expand = FALSE
+  ) + # don't add space between axes and data
   scale_color_manual(
     values = palette_OkabeIto_black
   ) +
@@ -418,9 +439,9 @@ For a player's estimated cost, we use their [Average Auction Value](#sec-fantasy
 We first subset and prepare the data so we can perform the lineup optimization.
 
 ```{r}
-mostRecentProjections <- players_projections_seasonal_average_merged |> 
-  filter(season == max(season, na.rm = TRUE)) |> 
-  filter(pos %in% c("QB","RB","WR","TE","K","DST")) |> 
+mostRecentProjections <- players_projections_seasonal_average_merged |>
+  filter(season == max(season, na.rm = TRUE)) |>
+  filter(pos %in% c("QB", "RB", "WR", "TE", "K", "DST")) |>
   filter(avg_type == "average")
 
 # Convert NAs for fantasy points to zero
@@ -432,7 +453,10 @@ mostRecentProjections$aav[which(is.na(mostRecentProjections$aav))] <- 1
 # Round up AAV to nearest integer
 mostRecentProjections$cost <- ceiling(mostRecentProjections$aav)
 
-mostRecentProjections$name <- paste(mostRecentProjections$first_name, mostRecentProjections$last_name)
+mostRecentProjections$name <- paste(
+  mostRecentProjections$first_name,
+  mostRecentProjections$last_name
+)
 ```
 
 Next, we set up the constraints.
@@ -461,15 +485,16 @@ var.types <- rep("B", num.players)
 
 # the constraints
 A <- rbind(
-  as.numeric(mostRecentProjections$pos == "QB"),                # num QB
-  as.numeric(mostRecentProjections$pos == "RB"),                # num RB
-  as.numeric(mostRecentProjections$pos == "WR"),                # num WR
-  as.numeric(mostRecentProjections$pos == "TE"),                # num TE
-  as.numeric(mostRecentProjections$pos == "K"),                 # num K
-  as.numeric(mostRecentProjections$pos == "DST"),               # num DST
-  as.numeric(mostRecentProjections$pos %in% c("RB","WR","TE")), # num flex
+  as.numeric(mostRecentProjections$pos == "QB"), # num QB
+  as.numeric(mostRecentProjections$pos == "RB"), # num RB
+  as.numeric(mostRecentProjections$pos == "WR"), # num WR
+  as.numeric(mostRecentProjections$pos == "TE"), # num TE
+  as.numeric(mostRecentProjections$pos == "K"), # num K
+  as.numeric(mostRecentProjections$pos == "DST"), # num DST
+  as.numeric(mostRecentProjections$pos %in% c("RB", "WR", "TE")), # num flex
   total_players,
-  mostRecentProjections$cost)                                   # player cost
+  mostRecentProjections$cost
+) # player cost
 
 dir <- c(
   "==",
@@ -480,18 +505,20 @@ dir <- c(
   "==",
   "==",
   "==",
-  "<=")
+  "<="
+)
 
 b <- c(
-  1,   # 1 QB
-  2,   # at least 2 RBs
-  2,   # at least 2 WRs
-  1,   # at least 1 TE
-  1,   # 1 K
-  1,   # 1 DST
-  6,   # 1 RB/WR/TE flex (i.e., 6 total RB/WR/TEs)
-  9,   # 9 total players
-  200) # salary cap of $200
+  1, # 1 QB
+  2, # at least 2 RBs
+  2, # at least 2 WRs
+  1, # at least 1 TE
+  1, # 1 K
+  1, # 1 DST
+  6, # 1 RB/WR/TE flex (i.e., 6 total RB/WR/TEs)
+  9, # 9 total players
+  200
+) # salary cap of $200
 ```
 
 The optimizer thus seeks to identify the lineup with the most projected points that meets the above constraints (within a salary cap of $200).
@@ -504,7 +531,8 @@ sol <- Rglpk::Rglpk_solve_LP(
   dir = dir,
   rhs = b,
   types = var.types,
-  max = TRUE)
+  max = TRUE
+)
 ```
 
 Here is the solution obtained by the solver:
@@ -534,7 +562,10 @@ sol$solution
 Here is the optimal lineup that maximized the sum of projected points within the salary cap:
 
 ```{r}
-mostRecentProjections[which(sol$solution == 1), c("name","pos","cost","points")]
+mostRecentProjections[
+  which(sol$solution == 1),
+  c("name", "pos", "cost", "points")
+]
 ```
 
 For a web application that includes a lineup optimizer for selecting the optimal lineup for [auction drafts](#sec-draftAuction) and for DFS leagues, see the Fantasy Football Analytics web application: <https://apps.fantasyfootballanalytics.net>.
