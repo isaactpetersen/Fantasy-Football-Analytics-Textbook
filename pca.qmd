@@ -38,8 +38,17 @@ We created the `player_stats_weekly.RData` object in @sec-calculatePlayerAge.
 ```{r}
 dataMerged <- full_join(
   player_stats_weekly,
-  nfl_nextGenStats_weekly |> select(-any_of(c("player_display_name","completions","attempts","receptions","targets"))),
-  by = c("player_id" = "player_gsis_id","season","season_type","week"),
+  nfl_nextGenStats_weekly |>
+    select(
+      -any_of(c(
+        "player_display_name",
+        "completions",
+        "attempts",
+        "receptions",
+        "targets"
+      ))
+    ),
+  by = c("player_id" = "player_gsis_id", "season", "season_type", "week"),
 )
 ```
 
@@ -47,16 +56,40 @@ dataMerged <- full_join(
 
 ```{r}
 pcaVars <- c(
-  "completions","attempts","passing_yards","passing_tds","passing_interceptions",
-  "sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
-  "passing_air_yards","passing_yards_after_catch","passing_first_downs",
-  "passing_epa","passing_cpoe","passing_2pt_conversions","pacr","pass_40_yds",
-  "pass_inc","pass_comp_pct","fumbles","two_pts",
-  "avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
-  "avg_air_yards_differential","aggressiveness","max_completed_air_distance",
-  "avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
-  "expected_completion_percentage","completion_percentage_above_expectation",
-  "avg_air_distance","max_air_distance")
+  "completions",
+  "attempts",
+  "passing_yards",
+  "passing_tds",
+  "passing_interceptions",
+  "sacks_suffered",
+  "sack_yards_lost",
+  "sack_fumbles",
+  "sack_fumbles_lost",
+  "passing_air_yards",
+  "passing_yards_after_catch",
+  "passing_first_downs",
+  "passing_epa",
+  "passing_cpoe",
+  "passing_2pt_conversions",
+  "pacr",
+  "pass_40_yds",
+  "pass_inc",
+  "pass_comp_pct",
+  "fumbles",
+  "two_pts",
+  "avg_time_to_throw",
+  "avg_completed_air_yards",
+  "avg_intended_air_yards",
+  "avg_air_yards_differential",
+  "aggressiveness",
+  "max_completed_air_distance",
+  "avg_air_yards_to_sticks",
+  "passer_rating", #,"completion_percentage"
+  "expected_completion_percentage",
+  "completion_percentage_above_expectation",
+  "avg_air_distance",
+  "max_air_distance"
+)
 ```
 
 #### Standardize Variables {#sec-pcaPrepareDataStandardize}
@@ -198,8 +231,10 @@ We generated the scree plot in @fig-pcaScreePlot2 using the `nFactors::nScree()`
 screeDataPCA <- nFactors::nScree(
   x = cor(
     dataForPCA[pcaVars],
-    use = "pairwise.complete.obs"),
-  model = "components")
+    use = "pairwise.complete.obs"
+  ),
+  model = "components"
+)
 
 nFactors::plotnScree(screeDataPCA)
 ```
@@ -215,7 +250,8 @@ The optimal number of components based on the VSS criterion is three components.
 psych::vss(
   dataForPCA[pcaVars],
   rotate = "oblimin",
-  fm = "pc")
+  fm = "pc"
+)
 ```
 
 ```{r}
@@ -226,54 +262,64 @@ psych::vss(
 psych::nfactors(
   dataForPCA[pcaVars],
   rotate = "oblimin",
-  fm = "pc")
+  fm = "pc"
+)
 ```
 
 ```{r}
 pca1ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 1,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca2ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 2,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca3ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 3,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca4ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 4,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca5ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 5,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca6ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 6,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca7ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 7,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca8ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 8,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 pca9ComponentOblique <- psych::principal(
   dataForPCA[pcaVars],
   nfactors = 9,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 ```
 
 ```{r}
@@ -303,41 +349,62 @@ Here are the variables that had a standardized component loading of 0.4 or great
 
 ```{r}
 component1vars <- c(
-  "completions","attempts","passing_yards","passing_tds","passing_interceptions",
-  "sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
-  "passing_air_yards","passing_yards_after_catch","passing_first_downs",
+  "completions",
+  "attempts",
+  "passing_yards",
+  "passing_tds",
+  "passing_interceptions",
+  "sacks_suffered",
+  "sack_yards_lost",
+  "sack_fumbles",
+  "sack_fumbles_lost",
+  "passing_air_yards",
+  "passing_yards_after_catch",
+  "passing_first_downs",
   #"passing_epa","passing_cpoe","passing_2pt_conversions","pacr","pass_40_yds",
-  "pass_inc","fumbles")#,"two_pts","pass_comp_pct",
-  #"avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
-  #"avg_air_yards_differential","aggressiveness","max_completed_air_distance",
-  #"avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
-  #"expected_completion_percentage","completion_percentage_above_expectation",
-  #"avg_air_distance","max_air_distance")
+  "pass_inc",
+  "fumbles"
+) #,"two_pts","pass_comp_pct",
+#"avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
+#"avg_air_yards_differential","aggressiveness","max_completed_air_distance",
+#"avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
+#"expected_completion_percentage","completion_percentage_above_expectation",
+#"avg_air_distance","max_air_distance")
 
 component2vars <- c(
   #"completions","attempts","passing_yards","passing_tds","passing_interceptions",
   #"sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
-  "passing_air_yards",#"passing_yards_after_catch","passing_first_downs",
-  "pacr",#"passing_epa","passing_cpoe","passing_2pt_conversions","pass_40_yds",
+  "passing_air_yards", #"passing_yards_after_catch","passing_first_downs",
+  "pacr", #"passing_epa","passing_cpoe","passing_2pt_conversions","pass_40_yds",
   #"pass_inc","pass_comp_pct","fumbles","two_pts",
-  "avg_completed_air_yards","avg_intended_air_yards",#"avg_time_to_throw",
-  "aggressiveness","max_completed_air_distance",#"avg_air_yards_differential",
-  "avg_air_yards_to_sticks",#"passer_rating", #,"completion_percentage"
-  "expected_completion_percentage",#"completion_percentage_above_expectation",
-  "avg_air_distance","max_air_distance")
+  "avg_completed_air_yards",
+  "avg_intended_air_yards", #"avg_time_to_throw",
+  "aggressiveness",
+  "max_completed_air_distance", #"avg_air_yards_differential",
+  "avg_air_yards_to_sticks", #"passer_rating", #,"completion_percentage"
+  "expected_completion_percentage", #"completion_percentage_above_expectation",
+  "avg_air_distance",
+  "max_air_distance"
+)
 
 component3vars <- c(
-  "passing_tds",#"completions","attempts","passing_yards","passing_interceptions",
+  "passing_tds", #"completions","attempts","passing_yards","passing_interceptions",
   #"sacks_suffered","sack_yards_lost","sack_fumbles","sack_fumbles_lost",
   #"passing_air_yards","passing_yards_after_catch","passing_first_downs",
-  "passing_epa","passing_cpoe","pass_40_yds",#"passing_2pt_conversions","pacr",
-  "pass_comp_pct",#"fumbles","two_pts","pass_inc",
-  "avg_air_yards_differential","max_completed_air_distance",
-  "avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
+  "passing_epa",
+  "passing_cpoe",
+  "pass_40_yds", #"passing_2pt_conversions","pacr",
+  "pass_comp_pct", #"fumbles","two_pts","pass_inc",
+  "avg_air_yards_differential",
+  "max_completed_air_distance",
+  "avg_time_to_throw",
+  "avg_completed_air_yards",
+  "avg_intended_air_yards",
   #"aggressiveness",
-  "passer_rating",#"avg_air_yards_to_sticks", #,"completion_percentage"
-  "completion_percentage_above_expectation")#,"expected_completion_percentage",
-  #"avg_air_distance","max_air_distance")
+  "passer_rating", #"avg_air_yards_to_sticks", #,"completion_percentage"
+  "completion_percentage_above_expectation"
+) #,"expected_completion_percentage",
+#"avg_air_distance","max_air_distance")
 ```
 
 The variables that loaded most strongly onto component 1 appear to reflect Quarterback usage: completions, incompletions, passing attempts, passing yards, passing touchdowns, interceptions thrown, fumbles, times sacked, sack yards lost ("reversed"—i.e., negatively associated with the component), sack fumbles, sack fumbles lost, passing air yards (total horizontal distance the ball travels on all pass attempts), passing yards after the catch, and first downs gained by passing.
@@ -355,68 +422,68 @@ Thus, we label component 3 as "Performance".
 Below are component scores from the PCA for the first six players:
 
 ```{r}
-pca3ComponentOblique$scores |> 
-  na.omit() |> 
+pca3ComponentOblique$scores |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and weeks that showed the highest levels of Quarterback "Usage":
 
 ```{r}
-dataMergedWithPCA |> 
-  arrange(-PC1) |> 
-  select(player_display_name, season, week, PC1, all_of(component1vars)) |> 
-  na.omit() |> 
+dataMergedWithPCA |>
+  arrange(-PC1) |>
+  select(player_display_name, season, week, PC1, all_of(component1vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and weeks that showed the lowest levels of Quarterback "Usage":
 
 ```{r}
-dataMergedWithPCA |> 
-  arrange(PC1) |> 
-  select(player_display_name, season, week, PC1, all_of(component1vars)) |> 
-  na.omit() |> 
+dataMergedWithPCA |>
+  arrange(PC1) |>
+  select(player_display_name, season, week, PC1, all_of(component1vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and weeks that showed the highest levels of Quarterback "Aggressiveness":
 
 ```{r}
-dataMergedWithPCA |> 
-  arrange(-PC2) |> 
-  select(player_display_name, season, week, PC2, all_of(component2vars)) |> 
-  na.omit() |> 
+dataMergedWithPCA |>
+  arrange(-PC2) |>
+  select(player_display_name, season, week, PC2, all_of(component2vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and weeks that showed the lowest levels of Quarterback "Aggressiveness":
 
 ```{r}
-dataMergedWithPCA |> 
-  arrange(PC2) |> 
-  select(player_display_name, season, week, PC2, all_of(component2vars)) |> 
-  na.omit() |> 
+dataMergedWithPCA |>
+  arrange(PC2) |>
+  select(player_display_name, season, week, PC2, all_of(component2vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and weeks that showed the highest levels of Quarterback "Performance":
 
 ```{r}
-dataMergedWithPCA |> 
-  arrange(-PC3) |> 
-  select(player_display_name, season, week, PC3, all_of(component3vars)) |> 
-  na.omit() |> 
+dataMergedWithPCA |>
+  arrange(-PC3) |>
+  select(player_display_name, season, week, PC3, all_of(component3vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and weeks that showed the lowest levels of Quarterback "Performance":
 
 ```{r}
-dataMergedWithPCA |> 
-  arrange(PC3) |> 
-  select(player_display_name, season, week, PC3, all_of(component3vars)) |> 
-  na.omit() |> 
+dataMergedWithPCA |>
+  arrange(PC3) |>
+  select(player_display_name, season, week, PC3, all_of(component3vars)) |>
+  na.omit() |>
   head()
 ```
 
