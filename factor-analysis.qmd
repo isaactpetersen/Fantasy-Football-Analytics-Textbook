@@ -58,7 +58,7 @@ We created the `player_stats_weekly.RData` and `player_stats_seasonal.RData` obj
 #### Season-Averages {#sec-factorAnalysisPrepareDataSeasonAvg}
 
 ```{r}
-player_stats_seasonal_avgPerGame <- player_stats_seasonal |> 
+player_stats_seasonal_avgPerGame <- player_stats_seasonal |>
   mutate(
     completionsPerGame = completions / games,
     attemptsPerGame = attempts / games,
@@ -82,14 +82,26 @@ player_stats_seasonal_avgPerGame <- player_stats_seasonal |>
     fumblesPerGame = fumbles / games
   )
 
-nfl_nextGenStats_seasonal <- nfl_nextGenStats_weekly |> 
-  filter(season_type == "REG") |> 
-  select(-any_of(c("week","season_type","player_display_name","player_position","team_abbr","player_first_name","player_last_name","player_jersey_number","player_short_name"))) |> 
-  group_by(player_gsis_id, season) |> 
+nfl_nextGenStats_seasonal <- nfl_nextGenStats_weekly |>
+  filter(season_type == "REG") |>
+  select(
+    -any_of(c(
+      "week",
+      "season_type",
+      "player_display_name",
+      "player_position",
+      "team_abbr",
+      "player_first_name",
+      "player_last_name",
+      "player_jersey_number",
+      "player_short_name"
+    ))
+  ) |>
+  group_by(player_gsis_id, season) |>
   summarise(
-    across(everything(),
-      ~ mean(.x, na.rm = TRUE)),
-    .groups = "drop")
+    across(everything(), ~ mean(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
 ```
 
 #### Merge Data {#sec-factorAnalysisPrepareDataMerge}
@@ -97,8 +109,17 @@ nfl_nextGenStats_seasonal <- nfl_nextGenStats_weekly |>
 ```{r}
 dataMerged <- full_join(
   player_stats_seasonal_avgPerGame |> select(-any_of("week")),
-  nfl_nextGenStats_seasonal |> select(-any_of(c("player_display_name","completions","attempts","receptions","targets"))),
-  by = c("player_id" = "player_gsis_id","season"),
+  nfl_nextGenStats_seasonal |>
+    select(
+      -any_of(c(
+        "player_display_name",
+        "completions",
+        "attempts",
+        "receptions",
+        "targets"
+      ))
+    ),
+  by = c("player_id" = "player_gsis_id", "season"),
 )
 ```
 
@@ -108,33 +129,69 @@ dataMerged <- full_join(
 #| include: false
 
 c(
-  "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame","passing_interceptionsPerGame",
-  "sacks_sufferedPerGame","sack_yards_lostPerGame","sack_fumblesPerGame","sack_fumbles_lostPerGame",
-  "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame",
-  "passing_epa","passing_cpoe","passing_2pt_conversionsPerGame","pacr","pass_40_ydsPerGame",
-  "pass_incPerGame","pass_comp_pct","fumblesPerGame", #"two_pts",
-  "avg_time_to_throw","avg_completed_air_yards","avg_intended_air_yards",
-  "avg_air_yards_differential","aggressiveness","max_completed_air_distance",
-  "avg_air_yards_to_sticks","passer_rating", #,"completion_percentage"
-  "expected_completion_percentage","completion_percentage_above_expectation",
-  "avg_air_distance","max_air_distance")
+  "completionsPerGame",
+  "attemptsPerGame",
+  "passing_yardsPerGame",
+  "passing_tdsPerGame",
+  "passing_interceptionsPerGame",
+  "sacks_sufferedPerGame",
+  "sack_yards_lostPerGame",
+  "sack_fumblesPerGame",
+  "sack_fumbles_lostPerGame",
+  "passing_air_yardsPerGame",
+  "passing_yards_after_catchPerGame",
+  "passing_first_downsPerGame",
+  "passing_epa",
+  "passing_cpoe",
+  "passing_2pt_conversionsPerGame",
+  "pacr",
+  "pass_40_ydsPerGame",
+  "pass_incPerGame",
+  "pass_comp_pct",
+  "fumblesPerGame", #"two_pts",
+  "avg_time_to_throw",
+  "avg_completed_air_yards",
+  "avg_intended_air_yards",
+  "avg_air_yards_differential",
+  "aggressiveness",
+  "max_completed_air_distance",
+  "avg_air_yards_to_sticks",
+  "passer_rating", #,"completion_percentage"
+  "expected_completion_percentage",
+  "completion_percentage_above_expectation",
+  "avg_air_distance",
+  "max_air_distance"
+)
 ```
 
 ```{r}
 faVars <- c(
- "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame",
- "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame",
- "avg_completed_air_yards","avg_intended_air_yards","aggressiveness","max_completed_air_distance",
- "avg_air_distance","max_air_distance","avg_air_yards_to_sticks","passing_cpoe","pass_comp_pct",
- "passer_rating","completion_percentage_above_expectation"
+  "completionsPerGame",
+  "attemptsPerGame",
+  "passing_yardsPerGame",
+  "passing_tdsPerGame",
+  "passing_air_yardsPerGame",
+  "passing_yards_after_catchPerGame",
+  "passing_first_downsPerGame",
+  "avg_completed_air_yards",
+  "avg_intended_air_yards",
+  "aggressiveness",
+  "max_completed_air_distance",
+  "avg_air_distance",
+  "max_air_distance",
+  "avg_air_yards_to_sticks",
+  "passing_cpoe",
+  "pass_comp_pct",
+  "passer_rating",
+  "completion_percentage_above_expectation"
 )
 ```
 
 #### Subset Data {#sec-pcaPrepareDataSubset}
 
 ```{r}
-dataMerged_subset <- dataMerged |> 
-  filter(!is.na(player_id)) |> 
+dataMerged_subset <- dataMerged |>
+  filter(!is.na(player_id)) |>
   filter(position == "QB")
 ```
 
@@ -590,7 +647,9 @@ cor_tidy <- cor_mat |>
   rownames_to_column("var1") |>
   pivot_longer(-var1, names_to = "var2", values_to = "correlation") |>
   filter(var1 != var2) |> # remove self-correlations
-  mutate(pair = pmap_chr(list(var1, var2), ~ paste(sort(c(...)), collapse = "___"))) |> 
+  mutate(
+    pair = pmap_chr(list(var1, var2), ~ paste(sort(c(...)), collapse = "___"))
+  ) |>
   distinct(pair, .keep_all = TRUE) # remove duplicate pairs (symmetry)
 
 high_corrs <- cor_tidy |>
@@ -655,9 +714,11 @@ We generated the scree plot in @fig-efaScreePlot2 using the `nFactors::nScree()`
 screeDataEFA <- nFactors::nScree(
   x = cov(
     dataForFA[faVars],
-    use = "pairwise.complete.obs"),
+    use = "pairwise.complete.obs"
+  ),
   cor = FALSE,
-  model = "factors")
+  model = "factors"
+)
 
 nFactors::plotnScree(screeDataEFA)
 ```
@@ -674,7 +735,8 @@ Depending on the criterion, the optimal number of factors extracted varies betwe
 psych::vss(
   dataForFA[faVars],
   rotate = "oblimin",
-  fm = "minres") # errors out when using "mle"
+  fm = "minres"
+) # errors out when using "mle"
 ```
 
 ```{r}
@@ -685,7 +747,8 @@ psych::vss(
 psych::nfactors(
   dataForFA[faVars],
   rotate = "oblimin",
-  fm = "minres") # errors out when using "ml"
+  fm = "minres"
+) # errors out when using "ml"
 ```
 
 We fit EFA models using the `lavaan::efa()` function of the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
@@ -730,7 +793,8 @@ lavaanPlot::lavaanPlot(
   efa_fit$nf3,
   coefs = TRUE,
   #covs = TRUE,
-  stand = TRUE)
+  stand = TRUE
+)
 ```
 
 To make the plot interactive for editing, you can use the `lavaangui::plot_lavaan()` function of the `lavaangui` package [@R-lavaangui; @Karch2025_packages]:
@@ -786,25 +850,40 @@ summary(
   efa3factor_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 ```{r}
 lavaan::fitMeasures(
   efa3factor_fit,
   fit_measures = c(
-    "chisq", "df", "pvalue",
-    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq",
+    "df",
+    "pvalue",
+    "chisq.scaled",
+    "df.scaled",
+    "pvalue.scaled",
     "chisq.scaling.factor",
-    "baseline.chisq","baseline.df","baseline.pvalue",
-    "rmsea", "cfi", "tli", "srmr",
-    "rmsea.robust", "cfi.robust", "tli.robust"))
+    "baseline.chisq",
+    "baseline.df",
+    "baseline.pvalue",
+    "rmsea",
+    "cfi",
+    "tli",
+    "srmr",
+    "rmsea.robust",
+    "cfi.robust",
+    "tli.robust"
+  )
+)
 ```
 
 ```{r}
 lavaan::residuals(
   efa3factor_fit,
-  type = "cor")
+  type = "cor"
+)
 ```
 
 We can examine the model modification indices to identify parameters that, if estimated, would substantially improve model fit.
@@ -816,7 +895,8 @@ Based on the modification indices, we will add several correlated residuals to t
 ```{r}
 lavaan::modificationindices(
   efa3factor_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 ```
 
 Below are factor scores from the model for the first six players:
@@ -838,7 +918,8 @@ lavaanPlot::lavaanPlot(
   efa3factor_fit,
   coefs = TRUE,
   covs = TRUE,
-  stand = TRUE)
+  stand = TRUE
+)
 ```
 
 To make the plot interactive for editing, you can use the `lavaangui::plot_lavaan()` function of the `lavaangui` package [@R-lavaangui; @Karch2025_packages]:
@@ -900,7 +981,8 @@ summary(
   efa3factorModified_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 The model fits substantially better (though not perfectly) with the additional correlated residuals.
@@ -910,24 +992,39 @@ Below are the model fit indices:
 lavaan::fitMeasures(
   efa3factorModified_fit,
   fit_measures = c(
-    "chisq", "df", "pvalue",
-    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq",
+    "df",
+    "pvalue",
+    "chisq.scaled",
+    "df.scaled",
+    "pvalue.scaled",
     "chisq.scaling.factor",
-    "baseline.chisq","baseline.df","baseline.pvalue",
-    "rmsea", "cfi", "tli", "srmr",
-    "rmsea.robust", "cfi.robust", "tli.robust"))
+    "baseline.chisq",
+    "baseline.df",
+    "baseline.pvalue",
+    "rmsea",
+    "cfi",
+    "tli",
+    "srmr",
+    "rmsea.robust",
+    "cfi.robust",
+    "tli.robust"
+  )
+)
 ```
 
 ```{r}
 lavaan::residuals(
   efa3factorModified_fit,
-  type = "cor")
+  type = "cor"
+)
 ```
 
 ```{r}
 lavaan::modificationindices(
   efa3factorModified_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 ```
 
 Below are factor scores from the model for the first six players:
@@ -951,7 +1048,8 @@ lavaanPlot::lavaanPlot(
   efa3factorModified_fit,
   coefs = TRUE,
   #covs = TRUE,
-  stand = TRUE)
+  stand = TRUE
+)
 ```
 
 ```{r}
@@ -979,15 +1077,31 @@ Here are the variables that had a standardized loading greater than 0.3 on each 
 
 ```{r}
 factor1vars <- c(
-  "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame",
-  "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame")
+  "completionsPerGame",
+  "attemptsPerGame",
+  "passing_yardsPerGame",
+  "passing_tdsPerGame",
+  "passing_air_yardsPerGame",
+  "passing_yards_after_catchPerGame",
+  "passing_first_downsPerGame"
+)
 
 factor2vars <- c(
-  "avg_completed_air_yards","avg_intended_air_yards","aggressiveness","max_completed_air_distance",
-  "avg_air_distance","max_air_distance","avg_air_yards_to_sticks")
+  "avg_completed_air_yards",
+  "avg_intended_air_yards",
+  "aggressiveness",
+  "max_completed_air_distance",
+  "avg_air_distance",
+  "max_air_distance",
+  "avg_air_yards_to_sticks"
+)
 
 factor3vars <- c(
-  "passing_cpoe","pass_comp_pct","passer_rating","completion_percentage_above_expectation")
+  "passing_cpoe",
+  "pass_comp_pct",
+  "passer_rating",
+  "completion_percentage_above_expectation"
+)
 ```
 
 The variables that loaded most strongly onto factor 1 appear to reflect Quarterback usage: completions per game, passing attempts per game, passing yards per game, passing touchdowns per game, passing air yards (total horizontal distance the ball travels on all pass attempts) per game, passing yards after the catch per game, and first downs gained per game by passing.
@@ -1005,82 +1119,82 @@ Thus, we label component 3 as "Performance".
 Here are the players and seasons that showed the highest levels of Quarterback "Usage":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(-F1) |> 
-  select(player_display_name, season, F1, all_of(factor1vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(-F1) |>
+  select(player_display_name, season, F1, all_of(factor1vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the lowest levels of Quarterback "Usage":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(F1) |> 
-  select(player_display_name, season, F1, all_of(factor1vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(F1) |>
+  select(player_display_name, season, F1, all_of(factor1vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the highest levels of Quarterback "Aggressiveness":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(-F2) |> 
-  select(player_display_name, season, F2, all_of(factor2vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(-F2) |>
+  select(player_display_name, season, F2, all_of(factor2vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the lowest levels of Quarterback "Aggressiveness":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(F2) |> 
-  select(player_display_name, season, F2, all_of(factor2vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(F2) |>
+  select(player_display_name, season, F2, all_of(factor2vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the highest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(-F3) |> 
-  select(player_display_name, season, games, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(-F3) |>
+  select(player_display_name, season, games, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
 If we restrict it to Quarterbacks who played at least 10 games in the season, here are the players and seasons that showed the highest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(-F3) |> 
-  filter(games >= 10) |> 
-  select(player_display_name, season, games, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(-F3) |>
+  filter(games >= 10) |>
+  select(player_display_name, season, games, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the lowest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(F3) |> 
-  select(player_display_name, season, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(F3) |>
+  select(player_display_name, season, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
 If we restrict it to Quarterbacks who played at least 10 games in the season, here are the players and seasons that showed the lowest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_efa |> 
-  arrange(F3) |> 
-  filter(games >= 10) |> 
-  select(player_display_name, season, games, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_efa |>
+  arrange(F3) |>
+  filter(games >= 10) |>
+  select(player_display_name, season, games, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
@@ -1093,7 +1207,8 @@ dataForFA_efa |>
 psych::principal(
   dataForFA_standardized[faVars],
   nfactors = 3,
-  rotate = "oblimin")
+  rotate = "oblimin"
+)
 
 '
  #Factor loadings
@@ -1132,11 +1247,13 @@ summary(
   factor1_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 
 lavaan::modificationindices(
   factor1_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 
 factor2_syntax <- '
  # Factor loadings
@@ -1165,11 +1282,13 @@ summary(
   factor2_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 
 lavaan::modificationindices(
   factor2_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 
 factor3_syntax <- '
  #Factor loadings
@@ -1191,11 +1310,13 @@ summary(
   factor3_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 
 lavaan::modificationindices(
   factor3_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 ```
 
 We fit CFA models using the `lavaan::cfa()` function of the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
@@ -1234,7 +1355,8 @@ summary(
   cfa1factor_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 The one-factor model did not fit well according to the fit indices:
@@ -1243,24 +1365,39 @@ The one-factor model did not fit well according to the fit indices:
 lavaan::fitMeasures(
   cfa1factor_fit,
   fit_measures = c(
-    "chisq", "df", "pvalue",
-    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq",
+    "df",
+    "pvalue",
+    "chisq.scaled",
+    "df.scaled",
+    "pvalue.scaled",
     "chisq.scaling.factor",
-    "baseline.chisq","baseline.df","baseline.pvalue",
-    "rmsea", "cfi", "tli", "srmr",
-    "rmsea.robust", "cfi.robust", "tli.robust"))
+    "baseline.chisq",
+    "baseline.df",
+    "baseline.pvalue",
+    "rmsea",
+    "cfi",
+    "tli",
+    "srmr",
+    "rmsea.robust",
+    "cfi.robust",
+    "tli.robust"
+  )
+)
 ```
 
 ```{r}
 lavaan::residuals(
   cfa1factor_fit,
-  type = "cor")
+  type = "cor"
+)
 ```
 
 ```{r}
 lavaan::modificationindices(
   cfa1factor_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 ```
 
 Below are factor scores from the model for the first six players:
@@ -1282,7 +1419,8 @@ lavaanPlot::lavaanPlot(
   cfa1factor_fit,
   coefs = TRUE,
   #covs = TRUE,
-  stand = TRUE)
+  stand = TRUE
+)
 ```
 
 ```{r}
@@ -1325,7 +1463,8 @@ summary(
   cfa2factor_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 The two-factor model did not fit well according to the fit indices:
@@ -1334,24 +1473,39 @@ The two-factor model did not fit well according to the fit indices:
 lavaan::fitMeasures(
   cfa2factor_fit,
   fit_measures = c(
-    "chisq", "df", "pvalue",
-    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq",
+    "df",
+    "pvalue",
+    "chisq.scaled",
+    "df.scaled",
+    "pvalue.scaled",
     "chisq.scaling.factor",
-    "baseline.chisq","baseline.df","baseline.pvalue",
-    "rmsea", "cfi", "tli", "srmr",
-    "rmsea.robust", "cfi.robust", "tli.robust"))
+    "baseline.chisq",
+    "baseline.df",
+    "baseline.pvalue",
+    "rmsea",
+    "cfi",
+    "tli",
+    "srmr",
+    "rmsea.robust",
+    "cfi.robust",
+    "tli.robust"
+  )
+)
 ```
 
 ```{r}
 lavaan::residuals(
   cfa2factor_fit,
-  type = "cor")
+  type = "cor"
+)
 ```
 
 ```{r}
 lavaan::modificationindices(
   cfa2factor_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 ```
 
 Below are factor scores from the model for the first six players:
@@ -1373,7 +1527,8 @@ lavaanPlot::lavaanPlot(
   cfa2factor_fit,
   coefs = TRUE,
   covs = TRUE,
-  stand = TRUE)
+  stand = TRUE
+)
 ```
 
 ```{r}
@@ -1427,7 +1582,8 @@ summary(
   cfa3factor_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 The three-factor model did not fit well according to fit indices:
@@ -1435,12 +1591,25 @@ The three-factor model did not fit well according to fit indices:
 lavaan::fitMeasures(
   cfa3factor_fit,
   fit_measures = c(
-    "chisq", "df", "pvalue",
-    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq",
+    "df",
+    "pvalue",
+    "chisq.scaled",
+    "df.scaled",
+    "pvalue.scaled",
     "chisq.scaling.factor",
-    "baseline.chisq","baseline.df","baseline.pvalue",
-    "rmsea", "cfi", "tli", "srmr",
-    "rmsea.robust", "cfi.robust", "tli.robust"))
+    "baseline.chisq",
+    "baseline.df",
+    "baseline.pvalue",
+    "rmsea",
+    "cfi",
+    "tli",
+    "srmr",
+    "rmsea.robust",
+    "cfi.robust",
+    "tli.robust"
+  )
+)
 ```
 
 However, we know that the three-factor model fit improved considerably when accounting for correlated residuals.
@@ -1449,7 +1618,8 @@ So, we plan to examine modification indices to see if we can account for covaria
 ```{r}
 lavaan::residuals(
   cfa3factor_fit,
-  type = "cor")
+  type = "cor"
+)
 ```
 
 Below are the modification indices, suggesting potential model modifications that would improve model fit such as correlated residuals and cross-loadings.
@@ -1457,7 +1627,8 @@ Below are the modification indices, suggesting potential model modifications tha
 ```{r}
 lavaan::modificationindices(
   cfa3factor_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 ```
 
 Below are factor scores from the model for the first six players:
@@ -1479,7 +1650,8 @@ lavaanPlot::lavaanPlot(
   cfa3factor_fit,
   coefs = TRUE,
   covs = TRUE,
-  stand = TRUE)
+  stand = TRUE
+)
 ```
 
 ```{r}
@@ -1562,7 +1734,8 @@ summary(
   cfa3factorModified_fit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 The three-factor model with correlated residuals fit was acceptable according to CFI and TLI.
@@ -1572,24 +1745,39 @@ The model fit was subpar for RMSEA and SRMR.
 lavaan::fitMeasures(
   cfa3factorModified_fit,
   fit_measures = c(
-    "chisq", "df", "pvalue",
-    "chisq.scaled", "df.scaled", "pvalue.scaled",
+    "chisq",
+    "df",
+    "pvalue",
+    "chisq.scaled",
+    "df.scaled",
+    "pvalue.scaled",
     "chisq.scaling.factor",
-    "baseline.chisq","baseline.df","baseline.pvalue",
-    "rmsea", "cfi", "tli", "srmr",
-    "rmsea.robust", "cfi.robust", "tli.robust"))
+    "baseline.chisq",
+    "baseline.df",
+    "baseline.pvalue",
+    "rmsea",
+    "cfi",
+    "tli",
+    "srmr",
+    "rmsea.robust",
+    "cfi.robust",
+    "tli.robust"
+  )
+)
 ```
 
 ```{r}
 lavaan::residuals(
   cfa3factorModified_fit,
-  type = "cor")
+  type = "cor"
+)
 ```
 
 ```{r}
 lavaan::modificationindices(
   cfa3factorModified_fit,
-  sort = TRUE)
+  sort = TRUE
+)
 ```
 
 Below are factor scores from the model for the first six players:
@@ -1613,7 +1801,8 @@ lavaanPlot::lavaanPlot(
   cfa3factorModified_fit,
   coefs = TRUE,
   #covs = TRUE,
-  stand = TRUE)
+  stand = TRUE
+)
 ```
 
 ```{r}
@@ -1633,15 +1822,31 @@ Here are the variables that loaded onto each of the factors:
 
 ```{r}
 factor1vars <- c(
-  "completionsPerGame","attemptsPerGame","passing_yardsPerGame","passing_tdsPerGame",
-  "passing_air_yardsPerGame","passing_yards_after_catchPerGame","passing_first_downsPerGame")
+  "completionsPerGame",
+  "attemptsPerGame",
+  "passing_yardsPerGame",
+  "passing_tdsPerGame",
+  "passing_air_yardsPerGame",
+  "passing_yards_after_catchPerGame",
+  "passing_first_downsPerGame"
+)
 
 factor2vars <- c(
-  "avg_completed_air_yards","avg_intended_air_yards","aggressiveness","max_completed_air_distance",
-  "avg_air_distance","max_air_distance","avg_air_yards_to_sticks")
+  "avg_completed_air_yards",
+  "avg_intended_air_yards",
+  "aggressiveness",
+  "max_completed_air_distance",
+  "avg_air_distance",
+  "max_air_distance",
+  "avg_air_yards_to_sticks"
+)
 
 factor3vars <- c(
-  "passing_cpoe","pass_comp_pct","passer_rating","completion_percentage_above_expectation")
+  "passing_cpoe",
+  "pass_comp_pct",
+  "passer_rating",
+  "completion_percentage_above_expectation"
+)
 ```
 
 The variables that loaded most strongly onto factor 1 appear to reflect Quarterback usage: completions per game, passing attempts per game, passing yards per game, passing touchdowns per game, passing air yards (total horizontal distance the ball travels on all pass attempts) per game, passing yards after the catch per game, and first downs gained per game by passing.
@@ -1659,82 +1864,82 @@ Thus, we label component 3 as "Performance".
 Here are the players and seasons that showed the highest levels of Quarterback "Usage":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(-F1) |> 
-  select(player_display_name, season, F1, all_of(factor1vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(-F1) |>
+  select(player_display_name, season, F1, all_of(factor1vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the lowest levels of Quarterback "Usage":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(F1) |> 
-  select(player_display_name, season, F1, all_of(factor1vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(F1) |>
+  select(player_display_name, season, F1, all_of(factor1vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the highest levels of Quarterback "Aggressiveness":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(-F2) |> 
-  select(player_display_name, season, F2, all_of(factor2vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(-F2) |>
+  select(player_display_name, season, F2, all_of(factor2vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the lowest levels of Quarterback "Aggressiveness":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(F2) |> 
-  select(player_display_name, season, F2, all_of(factor2vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(F2) |>
+  select(player_display_name, season, F2, all_of(factor2vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the highest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(-F3) |> 
-  select(player_display_name, season, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(-F3) |>
+  select(player_display_name, season, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
 If we restrict it to Quarterbacks who played at least 10 games in the season, here are the players and seasons that showed the highest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(-F3) |> 
-  filter(games >= 10) |> 
-  select(player_display_name, season, games, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(-F3) |>
+  filter(games >= 10) |>
+  select(player_display_name, season, games, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
 Here are the players and seasons that showed the lowest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(F3) |> 
-  select(player_display_name, season, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(F3) |>
+  select(player_display_name, season, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
 If we restrict it to Quarterbacks who played at least 10 games in the season, here are the players and seasons that showed the lowest levels of Quarterback "Performance":
 
 ```{r}
-dataForFA_cfa |> 
-  arrange(F3) |> 
-  filter(games >= 10) |> 
-  select(player_display_name, season, games, F3, all_of(factor3vars)) |> 
-  na.omit() |> 
+dataForFA_cfa |>
+  arrange(F3) |>
+  filter(games >= 10) |>
+  select(player_display_name, season, games, F3, all_of(factor3vars)) |>
+  na.omit() |>
   head()
 ```
 
