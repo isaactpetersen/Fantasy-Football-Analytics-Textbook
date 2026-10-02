@@ -746,126 +746,145 @@ window.Quarto = {
 </ol>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-label="1"></a><span class="co"># Subset to remove players without a year signed</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-label="2"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts <span class="sc">|&gt;</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-label="2"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts <span class="sc">|&gt;</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-label="3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(year_signed) <span class="sc">&amp;</span> year_signed <span class="sc">!=</span> <span class="dv">0</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-label="4"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-label="5"></a><span class="co"># Determine the contract year for a given contract</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-label="6"></a>nfl_playerContracts_subset<span class="sc">$</span>contractYear <span class="ot">&lt;-</span> nfl_playerContracts_subset<span class="sc">$</span>year_signed <span class="sc">+</span> nfl_playerContracts_subset<span class="sc">$</span>years <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-label="7"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-label="8"></a><span class="co"># Arrange contracts by player and year_signed</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-label="9"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">|&gt;</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-label="10"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player, position) <span class="sc">|&gt;</span> </span>
-<span id="cb4-11"><a href="#cb4-11" aria-label="11"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(player, position, <span class="sc">-</span>year_signed) <span class="sc">|&gt;</span> </span>
-<span id="cb4-12"><a href="#cb4-12" aria-label="12"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span>
-<span id="cb4-13"><a href="#cb4-13" aria-label="13"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-label="14"></a><span class="co"># Determine if the player played in the original contract year</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-label="15"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">|&gt;</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-label="16"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player, position) <span class="sc">|&gt;</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-label="17"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb4-18"><a href="#cb4-18" aria-label="18"></a>    <span class="at">next_contract_start =</span> <span class="fu">lag</span>(year_signed)) <span class="sc">|&gt;</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-label="19"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-label="20"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb4-21"><a href="#cb4-21" aria-label="21"></a>    <span class="at">played_in_contract_year =</span> <span class="fu">ifelse</span>(</span>
-<span id="cb4-22"><a href="#cb4-22" aria-label="22"></a>      <span class="fu">is.na</span>(next_contract_start) <span class="sc">|</span> contractYear <span class="sc">&lt;</span> next_contract_start,</span>
-<span id="cb4-23"><a href="#cb4-23" aria-label="23"></a>      <span class="cn">TRUE</span>,</span>
-<span id="cb4-24"><a href="#cb4-24" aria-label="24"></a>      <span class="cn">FALSE</span>))</span>
-<span id="cb4-25"><a href="#cb4-25" aria-label="25"></a></span>
-<span id="cb4-26"><a href="#cb4-26" aria-label="26"></a><span class="co"># Check individual players</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-label="27"></a><span class="co">#nfl_playerContracts_subset |&gt; </span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-label="28"></a><span class="co">#  dplyr::filter(player == "Aaron Rodgers") |&gt; </span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-label="29"></a><span class="co">#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-label="30"></a><span class="co">#</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-label="31"></a><span class="co">#nfl_playerContracts_subset |&gt; </span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-label="32"></a><span class="co">#  dplyr::filter(player %in% c("Jared Allen", "Aaron Rodgers")) |&gt; </span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-label="33"></a><span class="co">#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-label="34"></a></span>
-<span id="cb4-35"><a href="#cb4-35" aria-label="35"></a><span class="co"># Subset data</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-label="36"></a>nfl_playerContractYears <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">|&gt;</span> </span>
-<span id="cb4-37"><a href="#cb4-37" aria-label="37"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(played_in_contract_year <span class="sc">==</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb4-38"><a href="#cb4-38" aria-label="38"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb4-39"><a href="#cb4-39" aria-label="39"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player, position, team, contractYear) <span class="sc">|&gt;</span> </span>
-<span id="cb4-40"><a href="#cb4-40" aria-label="40"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">merge_name =</span> nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(player, <span class="at">lowercase =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb4-41"><a href="#cb4-41" aria-label="41"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">season =</span> contractYear) <span class="sc">|&gt;</span> </span>
-<span id="cb4-42"><a href="#cb4-42" aria-label="42"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">contractYear =</span> <span class="dv">1</span>)</span>
-<span id="cb4-43"><a href="#cb4-43" aria-label="43"></a></span>
-<span id="cb4-44"><a href="#cb4-44" aria-label="44"></a><span class="co"># Merge with weekly and seasonal stats data</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-label="45"></a>player_stats_weekly_offense <span class="ot">&lt;-</span> player_stats_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb4-46"><a href="#cb4-46" aria-label="46"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb4-47"><a href="#cb4-47" aria-label="47"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">merge_name =</span> nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(player_display_name, <span class="at">lowercase =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb4-48"><a href="#cb4-48" aria-label="48"></a><span class="co">#nfl_actualStats_offense_seasonal &lt;- nfl_actualStats_offense_seasonal |&gt; </span></span>
-<span id="cb4-49"><a href="#cb4-49" aria-label="49"></a><span class="co">#  mutate(merge_name = nflreadr::clean_player_names(player_display_name, lowercase = TRUE))</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-label="6"></a>nfl_playerContracts_subset<span class="sc">$</span>contractYear <span class="ot">&lt;-</span> nfl_playerContracts_subset<span class="sc">$</span>year_signed <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-label="7"></a>  nfl_playerContracts_subset<span class="sc">$</span>years <span class="sc">-</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-label="8"></a>  <span class="dv">1</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-label="9"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-label="10"></a><span class="co"># Arrange contracts by player and year_signed</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-label="11"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">|&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-label="12"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player, position) <span class="sc">|&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-label="13"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(player, position, <span class="sc">-</span>year_signed) <span class="sc">|&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-label="14"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span>
+<span id="cb4-15"><a href="#cb4-15" aria-label="15"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-label="16"></a><span class="co"># Determine if the player played in the original contract year</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-label="17"></a>nfl_playerContracts_subset <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">|&gt;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-label="18"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player, position) <span class="sc">|&gt;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-label="19"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb4-20"><a href="#cb4-20" aria-label="20"></a>    <span class="at">next_contract_start =</span> <span class="fu">lag</span>(year_signed)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-label="21"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-label="22"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-label="23"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb4-24"><a href="#cb4-24" aria-label="24"></a>    <span class="at">played_in_contract_year =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb4-25"><a href="#cb4-25" aria-label="25"></a>      <span class="fu">is.na</span>(next_contract_start) <span class="sc">|</span> contractYear <span class="sc">&lt;</span> next_contract_start,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-label="26"></a>      <span class="cn">TRUE</span>,</span>
+<span id="cb4-27"><a href="#cb4-27" aria-label="27"></a>      <span class="cn">FALSE</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-label="28"></a>    )</span>
+<span id="cb4-29"><a href="#cb4-29" aria-label="29"></a>  )</span>
+<span id="cb4-30"><a href="#cb4-30" aria-label="30"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-label="31"></a><span class="co"># Check individual players</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-label="32"></a><span class="co">#nfl_playerContracts_subset |&gt;</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-label="33"></a><span class="co">#  dplyr::filter(player == "Aaron Rodgers") |&gt;</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-label="34"></a><span class="co">#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-label="35"></a><span class="co">#</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-label="36"></a><span class="co">#nfl_playerContracts_subset |&gt;</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-label="37"></a><span class="co">#  dplyr::filter(player %in% c("Jared Allen", "Aaron Rodgers")) |&gt;</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-label="38"></a><span class="co">#  dplyr::select(player:years, contractYear, next_contract_start, played_in_contract_year)</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-label="39"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-label="40"></a><span class="co"># Subset data</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-label="41"></a>nfl_playerContractYears <span class="ot">&lt;-</span> nfl_playerContracts_subset <span class="sc">|&gt;</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-label="42"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(played_in_contract_year <span class="sc">==</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-label="43"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>, <span class="st">"RB"</span>, <span class="st">"WR"</span>, <span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-label="44"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(player, position, team, contractYear) <span class="sc">|&gt;</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-label="45"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb4-46"><a href="#cb4-46" aria-label="46"></a>    <span class="at">merge_name =</span> nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(player, <span class="at">lowercase =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-47"><a href="#cb4-47" aria-label="47"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-label="48"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">season =</span> contractYear) <span class="sc">|&gt;</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-label="49"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">contractYear =</span> <span class="dv">1</span>)</span>
 <span id="cb4-50"><a href="#cb4-50" aria-label="50"></a></span>
-<span id="cb4-51"><a href="#cb4-51" aria-label="51"></a>player_statsContracts_offense_weekly <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
-<span id="cb4-52"><a href="#cb4-52" aria-label="52"></a>  player_stats_weekly_offense,</span>
-<span id="cb4-53"><a href="#cb4-53" aria-label="53"></a>  nfl_playerContractYears,</span>
-<span id="cb4-54"><a href="#cb4-54" aria-label="54"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>, <span class="st">"position_group"</span> <span class="ot">=</span> <span class="st">"position"</span>, <span class="st">"season"</span>)</span>
-<span id="cb4-55"><a href="#cb4-55" aria-label="55"></a>) <span class="sc">|&gt;</span> </span>
-<span id="cb4-56"><a href="#cb4-56" aria-label="56"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>))</span>
-<span id="cb4-57"><a href="#cb4-57" aria-label="57"></a></span>
-<span id="cb4-58"><a href="#cb4-58" aria-label="58"></a><span class="co">#player_statsContracts_offense_seasonal &lt;- full_join(</span></span>
-<span id="cb4-59"><a href="#cb4-59" aria-label="59"></a><span class="co">#  player_stats_seasonal_offense,</span></span>
-<span id="cb4-60"><a href="#cb4-60" aria-label="60"></a><span class="co">#  nfl_playerContractYears,</span></span>
-<span id="cb4-61"><a href="#cb4-61" aria-label="61"></a><span class="co">#  by = c("merge_name", "position_group" = "position", "season")</span></span>
-<span id="cb4-62"><a href="#cb4-62" aria-label="62"></a><span class="co">#) |&gt; </span></span>
-<span id="cb4-63"><a href="#cb4-63" aria-label="63"></a><span class="co">#  filter(position_group %in% c("QB","RB","WR","TE"))</span></span>
-<span id="cb4-64"><a href="#cb4-64" aria-label="64"></a></span>
-<span id="cb4-65"><a href="#cb4-65" aria-label="65"></a>player_statsContracts_offense_weekly<span class="sc">$</span>contractYear[<span class="fu">which</span>(<span class="fu">is.na</span>(player_statsContracts_offense_weekly<span class="sc">$</span>contractYear))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb4-66"><a href="#cb4-66" aria-label="66"></a><span class="co">#player_statsContracts_offense_seasonal$contractYear[which(is.na(player_statsContracts_offense_seasonal$contractYear))] &lt;- 0</span></span>
-<span id="cb4-67"><a href="#cb4-67" aria-label="67"></a></span>
-<span id="cb4-68"><a href="#cb4-68" aria-label="68"></a><span class="co">#player_statsContracts_offense_weekly$contractYear &lt;- factor(</span></span>
-<span id="cb4-69"><a href="#cb4-69" aria-label="69"></a><span class="co">#  player_statsContracts_offense_weekly$contractYear,</span></span>
-<span id="cb4-70"><a href="#cb4-70" aria-label="70"></a><span class="co">#  levels = c(0, 1),</span></span>
-<span id="cb4-71"><a href="#cb4-71" aria-label="71"></a><span class="co">#  labels = c("no", "yes"))</span></span>
-<span id="cb4-72"><a href="#cb4-72" aria-label="72"></a></span>
-<span id="cb4-73"><a href="#cb4-73" aria-label="73"></a><span class="co">#player_statsContracts_offense_seasonal$contractYear &lt;- factor(</span></span>
-<span id="cb4-74"><a href="#cb4-74" aria-label="74"></a><span class="co">#  player_statsContracts_offense_seasonal$contractYear,</span></span>
-<span id="cb4-75"><a href="#cb4-75" aria-label="75"></a><span class="co">#  levels = c(0, 1),</span></span>
-<span id="cb4-76"><a href="#cb4-76" aria-label="76"></a><span class="co">#  labels = c("no", "yes"))</span></span>
-<span id="cb4-77"><a href="#cb4-77" aria-label="77"></a></span>
-<span id="cb4-78"><a href="#cb4-78" aria-label="78"></a>player_statsContracts_offense_weekly <span class="ot">&lt;-</span> player_statsContracts_offense_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb4-79"><a href="#cb4-79" aria-label="79"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, week)</span>
-<span id="cb4-80"><a href="#cb4-80" aria-label="80"></a></span>
-<span id="cb4-81"><a href="#cb4-81" aria-label="81"></a><span class="co">#player_statsContracts_offense_seasonal &lt;- player_statsContracts_offense_seasonal |&gt; </span></span>
-<span id="cb4-82"><a href="#cb4-82" aria-label="82"></a><span class="co">#  arrange(merge_name, season)</span></span>
-<span id="cb4-83"><a href="#cb4-83" aria-label="83"></a></span>
-<span id="cb4-84"><a href="#cb4-84" aria-label="84"></a>player_statsContractsSubset_offense_weekly <span class="ot">&lt;-</span> player_statsContracts_offense_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb4-85"><a href="#cb4-85" aria-label="85"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"REG"</span>)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-label="51"></a><span class="co"># Merge with weekly and seasonal stats data</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-label="52"></a>player_stats_weekly_offense <span class="ot">&lt;-</span> player_stats_weekly <span class="sc">|&gt;</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-label="53"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>, <span class="st">"RB"</span>, <span class="st">"WR"</span>, <span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-label="54"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb4-55"><a href="#cb4-55" aria-label="55"></a>    <span class="at">merge_name =</span> nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(</span>
+<span id="cb4-56"><a href="#cb4-56" aria-label="56"></a>      player_display_name,</span>
+<span id="cb4-57"><a href="#cb4-57" aria-label="57"></a>      <span class="at">lowercase =</span> <span class="cn">TRUE</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-label="58"></a>    )</span>
+<span id="cb4-59"><a href="#cb4-59" aria-label="59"></a>  )</span>
+<span id="cb4-60"><a href="#cb4-60" aria-label="60"></a><span class="co">#nfl_actualStats_offense_seasonal &lt;- nfl_actualStats_offense_seasonal |&gt;</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-label="61"></a><span class="co">#  mutate(merge_name = nflreadr::clean_player_names(player_display_name, lowercase = TRUE))</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-label="62"></a></span>
+<span id="cb4-63"><a href="#cb4-63" aria-label="63"></a>player_statsContracts_offense_weekly <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb4-64"><a href="#cb4-64" aria-label="64"></a>  player_stats_weekly_offense,</span>
+<span id="cb4-65"><a href="#cb4-65" aria-label="65"></a>  nfl_playerContractYears,</span>
+<span id="cb4-66"><a href="#cb4-66" aria-label="66"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>, <span class="st">"position_group"</span> <span class="ot">=</span> <span class="st">"position"</span>, <span class="st">"season"</span>)</span>
+<span id="cb4-67"><a href="#cb4-67" aria-label="67"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-label="68"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>, <span class="st">"RB"</span>, <span class="st">"WR"</span>, <span class="st">"TE"</span>))</span>
+<span id="cb4-69"><a href="#cb4-69" aria-label="69"></a></span>
+<span id="cb4-70"><a href="#cb4-70" aria-label="70"></a><span class="co">#player_statsContracts_offense_seasonal &lt;- full_join(</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-label="71"></a><span class="co">#  player_stats_seasonal_offense,</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-label="72"></a><span class="co">#  nfl_playerContractYears,</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-label="73"></a><span class="co">#  by = c("merge_name", "position_group" = "position", "season")</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-label="74"></a><span class="co">#) |&gt;</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-label="75"></a><span class="co">#  filter(position_group %in% c("QB","RB","WR","TE"))</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-label="76"></a></span>
+<span id="cb4-77"><a href="#cb4-77" aria-label="77"></a>player_statsContracts_offense_weekly<span class="sc">$</span>contractYear[<span class="fu">which</span>(<span class="fu">is.na</span>(</span>
+<span id="cb4-78"><a href="#cb4-78" aria-label="78"></a>  player_statsContracts_offense_weekly<span class="sc">$</span>contractYear</span>
+<span id="cb4-79"><a href="#cb4-79" aria-label="79"></a>))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-label="80"></a><span class="co">#player_statsContracts_offense_seasonal$contractYear[which(is.na(player_statsContracts_offense_seasonal$contractYear))] &lt;- 0</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-label="81"></a></span>
+<span id="cb4-82"><a href="#cb4-82" aria-label="82"></a><span class="co">#player_statsContracts_offense_weekly$contractYear &lt;- factor(</span></span>
+<span id="cb4-83"><a href="#cb4-83" aria-label="83"></a><span class="co">#  player_statsContracts_offense_weekly$contractYear,</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-label="84"></a><span class="co">#  levels = c(0, 1),</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-label="85"></a><span class="co">#  labels = c("no", "yes"))</span></span>
 <span id="cb4-86"><a href="#cb4-86" aria-label="86"></a></span>
-<span id="cb4-87"><a href="#cb4-87" aria-label="87"></a><span class="co">#table(nfl_playerContracts$year_signed) # most contract data is available beginning in 2011</span></span>
-<span id="cb4-88"><a href="#cb4-88" aria-label="88"></a></span>
-<span id="cb4-89"><a href="#cb4-89" aria-label="89"></a><span class="co"># Calculate Per Game Totals</span></span>
-<span id="cb4-90"><a href="#cb4-90" aria-label="90"></a>player_statsContracts_seasonal <span class="ot">&lt;-</span> player_statsContractsSubset_offense_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb4-91"><a href="#cb4-91" aria-label="91"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player_id, season) <span class="sc">|&gt;</span> </span>
-<span id="cb4-92"><a href="#cb4-92" aria-label="92"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
-<span id="cb4-93"><a href="#cb4-93" aria-label="93"></a>    <span class="at">player_display_name =</span> petersenlab<span class="sc">::</span><span class="fu">Mode</span>(player_display_name),</span>
-<span id="cb4-94"><a href="#cb4-94" aria-label="94"></a>    <span class="at">position_group =</span> petersenlab<span class="sc">::</span><span class="fu">Mode</span>(position_group),</span>
-<span id="cb4-95"><a href="#cb4-95" aria-label="95"></a>    <span class="at">age =</span> <span class="fu">min</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb4-96"><a href="#cb4-96" aria-label="96"></a>    <span class="at">years_of_experience =</span> <span class="fu">min</span>(years_of_experience, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb4-97"><a href="#cb4-97" aria-label="97"></a>    <span class="at">rushing_yards =</span> <span class="fu">sum</span>(rushing_yards, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
-<span id="cb4-98"><a href="#cb4-98" aria-label="98"></a>    <span class="at">carries =</span> <span class="fu">sum</span>(carries, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
-<span id="cb4-99"><a href="#cb4-99" aria-label="99"></a>    <span class="at">rushing_epa =</span> <span class="fu">mean</span>(rushing_epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb4-100"><a href="#cb4-100" aria-label="100"></a>    <span class="at">receiving_yards =</span> <span class="fu">mean</span>(receiving_yards, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb4-101"><a href="#cb4-101" aria-label="101"></a>    <span class="at">receiving_epa =</span> <span class="fu">mean</span>(receiving_epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb4-102"><a href="#cb4-102" aria-label="102"></a>    <span class="at">fantasyPoints =</span> <span class="fu">sum</span>(fantasyPoints, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
-<span id="cb4-103"><a href="#cb4-103" aria-label="103"></a>    <span class="at">contractYear =</span> <span class="fu">mean</span>(contractYear, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb4-104"><a href="#cb4-104" aria-label="104"></a>    <span class="at">games =</span> <span class="fu">n</span>(),</span>
-<span id="cb4-105"><a href="#cb4-105" aria-label="105"></a>    <span class="at">.groups =</span> <span class="st">"drop_last"</span></span>
-<span id="cb4-106"><a href="#cb4-106" aria-label="106"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb4-107"><a href="#cb4-107" aria-label="107"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb4-108"><a href="#cb4-108" aria-label="108"></a>    <span class="at">player_id =</span> <span class="fu">as.factor</span>(player_id),</span>
-<span id="cb4-109"><a href="#cb4-109" aria-label="109"></a>    <span class="at">ypc =</span> rushing_yards <span class="sc">/</span> carries,</span>
-<span id="cb4-110"><a href="#cb4-110" aria-label="110"></a>    <span class="at">contractYear =</span> <span class="fu">factor</span>(</span>
-<span id="cb4-111"><a href="#cb4-111" aria-label="111"></a>      contractYear,</span>
-<span id="cb4-112"><a href="#cb4-112" aria-label="112"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb4-113"><a href="#cb4-113" aria-label="113"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)</span>
-<span id="cb4-114"><a href="#cb4-114" aria-label="114"></a>    ))</span>
-<span id="cb4-115"><a href="#cb4-115" aria-label="115"></a></span>
-<span id="cb4-116"><a href="#cb4-116" aria-label="116"></a>player_statsContracts_seasonal[<span class="fu">sapply</span>(player_statsContracts_seasonal, is.infinite)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb4-117"><a href="#cb4-117" aria-label="117"></a></span>
-<span id="cb4-118"><a href="#cb4-118" aria-label="118"></a>player_statsContracts_seasonal<span class="sc">$</span>ageCentered20 <span class="ot">&lt;-</span> player_statsContracts_seasonal<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">20</span></span>
-<span id="cb4-119"><a href="#cb4-119" aria-label="119"></a>player_statsContracts_seasonal<span class="sc">$</span>ageCentered20Quadratic <span class="ot">&lt;-</span> player_statsContracts_seasonal<span class="sc">$</span>ageCentered20 <span class="sc">^</span> <span class="dv">2</span></span>
-<span id="cb4-120"><a href="#cb4-120" aria-label="120"></a></span>
-<span id="cb4-121"><a href="#cb4-121" aria-label="121"></a><span class="co"># Merge with seasonal fantasy points data</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-87"><a href="#cb4-87" aria-label="87"></a><span class="co">#player_statsContracts_offense_seasonal$contractYear &lt;- factor(</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-label="88"></a><span class="co">#  player_statsContracts_offense_seasonal$contractYear,</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-label="89"></a><span class="co">#  levels = c(0, 1),</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-label="90"></a><span class="co">#  labels = c("no", "yes"))</span></span>
+<span id="cb4-91"><a href="#cb4-91" aria-label="91"></a></span>
+<span id="cb4-92"><a href="#cb4-92" aria-label="92"></a>player_statsContracts_offense_weekly <span class="ot">&lt;-</span> player_statsContracts_offense_weekly <span class="sc">|&gt;</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-label="93"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, week)</span>
+<span id="cb4-94"><a href="#cb4-94" aria-label="94"></a></span>
+<span id="cb4-95"><a href="#cb4-95" aria-label="95"></a><span class="co">#player_statsContracts_offense_seasonal &lt;- player_statsContracts_offense_seasonal |&gt;</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-label="96"></a><span class="co">#  arrange(merge_name, season)</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-label="97"></a></span>
+<span id="cb4-98"><a href="#cb4-98" aria-label="98"></a>player_statsContractsSubset_offense_weekly <span class="ot">&lt;-</span> player_statsContracts_offense_weekly <span class="sc">|&gt;</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-label="99"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"REG"</span>)</span>
+<span id="cb4-100"><a href="#cb4-100" aria-label="100"></a></span>
+<span id="cb4-101"><a href="#cb4-101" aria-label="101"></a><span class="co">#table(nfl_playerContracts$year_signed) # most contract data is available beginning in 2011</span></span>
+<span id="cb4-102"><a href="#cb4-102" aria-label="102"></a></span>
+<span id="cb4-103"><a href="#cb4-103" aria-label="103"></a><span class="co"># Calculate Per Game Totals</span></span>
+<span id="cb4-104"><a href="#cb4-104" aria-label="104"></a>player_statsContracts_seasonal <span class="ot">&lt;-</span> player_statsContractsSubset_offense_weekly <span class="sc">|&gt;</span></span>
+<span id="cb4-105"><a href="#cb4-105" aria-label="105"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player_id, season) <span class="sc">|&gt;</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-label="106"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb4-107"><a href="#cb4-107" aria-label="107"></a>    <span class="at">player_display_name =</span> petersenlab<span class="sc">::</span><span class="fu">Mode</span>(player_display_name),</span>
+<span id="cb4-108"><a href="#cb4-108" aria-label="108"></a>    <span class="at">position_group =</span> petersenlab<span class="sc">::</span><span class="fu">Mode</span>(position_group),</span>
+<span id="cb4-109"><a href="#cb4-109" aria-label="109"></a>    <span class="at">age =</span> <span class="fu">min</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-110"><a href="#cb4-110" aria-label="110"></a>    <span class="at">years_of_experience =</span> <span class="fu">min</span>(years_of_experience, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-111"><a href="#cb4-111" aria-label="111"></a>    <span class="at">rushing_yards =</span> <span class="fu">sum</span>(rushing_yards, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb4-112"><a href="#cb4-112" aria-label="112"></a>    <span class="at">carries =</span> <span class="fu">sum</span>(carries, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-label="113"></a>    <span class="at">rushing_epa =</span> <span class="fu">mean</span>(rushing_epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-114"><a href="#cb4-114" aria-label="114"></a>    <span class="at">receiving_yards =</span> <span class="fu">mean</span>(receiving_yards, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-115"><a href="#cb4-115" aria-label="115"></a>    <span class="at">receiving_epa =</span> <span class="fu">mean</span>(receiving_epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-116"><a href="#cb4-116" aria-label="116"></a>    <span class="at">fantasyPoints =</span> <span class="fu">sum</span>(fantasyPoints, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb4-117"><a href="#cb4-117" aria-label="117"></a>    <span class="at">contractYear =</span> <span class="fu">mean</span>(contractYear, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-118"><a href="#cb4-118" aria-label="118"></a>    <span class="at">games =</span> <span class="fu">n</span>(),</span>
+<span id="cb4-119"><a href="#cb4-119" aria-label="119"></a>    <span class="at">.groups =</span> <span class="st">"drop_last"</span></span>
+<span id="cb4-120"><a href="#cb4-120" aria-label="120"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-121"><a href="#cb4-121" aria-label="121"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb4-122"><a href="#cb4-122" aria-label="122"></a>    <span class="at">player_id =</span> <span class="fu">as.factor</span>(player_id),</span>
+<span id="cb4-123"><a href="#cb4-123" aria-label="123"></a>    <span class="at">ypc =</span> rushing_yards <span class="sc">/</span> carries,</span>
+<span id="cb4-124"><a href="#cb4-124" aria-label="124"></a>    <span class="at">contractYear =</span> <span class="fu">factor</span>(</span>
+<span id="cb4-125"><a href="#cb4-125" aria-label="125"></a>      contractYear,</span>
+<span id="cb4-126"><a href="#cb4-126" aria-label="126"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb4-127"><a href="#cb4-127" aria-label="127"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)</span>
+<span id="cb4-128"><a href="#cb4-128" aria-label="128"></a>    )</span>
+<span id="cb4-129"><a href="#cb4-129" aria-label="129"></a>  )</span>
+<span id="cb4-130"><a href="#cb4-130" aria-label="130"></a></span>
+<span id="cb4-131"><a href="#cb4-131" aria-label="131"></a>player_statsContracts_seasonal[<span class="fu">sapply</span>(</span>
+<span id="cb4-132"><a href="#cb4-132" aria-label="132"></a>  player_statsContracts_seasonal,</span>
+<span id="cb4-133"><a href="#cb4-133" aria-label="133"></a>  is.infinite</span>
+<span id="cb4-134"><a href="#cb4-134" aria-label="134"></a>)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb4-135"><a href="#cb4-135" aria-label="135"></a></span>
+<span id="cb4-136"><a href="#cb4-136" aria-label="136"></a>player_statsContracts_seasonal<span class="sc">$</span>ageCentered20 <span class="ot">&lt;-</span> player_statsContracts_seasonal<span class="sc">$</span>age <span class="sc">-</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-label="137"></a>  <span class="dv">20</span></span>
+<span id="cb4-138"><a href="#cb4-138" aria-label="138"></a>player_statsContracts_seasonal<span class="sc">$</span>ageCentered20Quadratic <span class="ot">&lt;-</span> player_statsContracts_seasonal<span class="sc">$</span>ageCentered20<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-139"><a href="#cb4-139" aria-label="139"></a></span>
+<span id="cb4-140"><a href="#cb4-140" aria-label="140"></a><span class="co"># Merge with seasonal fantasy points data</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <section id="sec-contractYearQB" class="level3" data-number="18.2.1"><h3 data-number="18.2.1" class="anchored" data-anchor-id="sec-contractYearQB">
@@ -873,81 +892,101 @@ window.Quarto = {
 <p>First, we prepare the data by merging and performing additional processing:</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-label="1"></a><span class="co"># Merge with QBR data</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-label="2"></a>nfl_espnQBR_weekly<span class="sc">$</span>merge_name <span class="ot">&lt;-</span> <span class="fu">paste</span>(nfl_espnQBR_weekly<span class="sc">$</span>name_first, nfl_espnQBR_weekly<span class="sc">$</span>name_last, <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-label="3"></a>  nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(<span class="at">lowercase =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-label="4"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-label="5"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_playerContractYears <span class="sc">|&gt;</span> </span>
-<span id="cb5-6"><a href="#cb5-6" aria-label="6"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-7"><a href="#cb5-7" aria-label="7"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
-<span id="cb5-8"><a href="#cb5-8" aria-label="8"></a>    nfl_espnQBR_weekly,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-label="9"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>,<span class="st">"team"</span>,<span class="st">"season"</span>)</span>
-<span id="cb5-10"><a href="#cb5-10" aria-label="10"></a>  )</span>
-<span id="cb5-11"><a href="#cb5-11" aria-label="11"></a></span>
-<span id="cb5-12"><a href="#cb5-12" aria-label="12"></a>nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear[<span class="fu">which</span>(<span class="fu">is.na</span>(nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-label="13"></a><span class="co">#nfl_contractYearQBR_weekly$contractYear &lt;- factor(</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-label="14"></a><span class="co">#  nfl_contractYearQBR_weekly$contractYear,</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-label="15"></a><span class="co">#  levels = c(0, 1),</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-label="16"></a><span class="co">#  labels = c("no", "yes"))</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-label="17"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-label="18"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb5-19"><a href="#cb5-19" aria-label="19"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, game_week)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-label="20"></a></span>
-<span id="cb5-21"><a href="#cb5-21" aria-label="21"></a>nfl_contractYearQBRsubset_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb5-22"><a href="#cb5-22" aria-label="22"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"Regular"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-23"><a href="#cb5-23" aria-label="23"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, game_week) <span class="sc">|&gt;</span> </span>
-<span id="cb5-24"><a href="#cb5-24" aria-label="24"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-25"><a href="#cb5-25" aria-label="25"></a>    <span class="at">player =</span> <span class="fu">coalesce</span>(player, name_display),</span>
-<span id="cb5-26"><a href="#cb5-26" aria-label="26"></a>    <span class="at">position =</span> <span class="st">"QB"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-27"><a href="#cb5-27" aria-label="27"></a>  <span class="fu">group_by</span>(merge_name, player_id) <span class="sc">|&gt;</span> </span>
-<span id="cb5-28"><a href="#cb5-28" aria-label="28"></a>  <span class="fu">fill</span>(player, <span class="at">.direction =</span> <span class="st">"downup"</span>)</span>
-<span id="cb5-29"><a href="#cb5-29" aria-label="29"></a></span>
-<span id="cb5-30"><a href="#cb5-30" aria-label="30"></a><span class="co"># Merge with age and experience</span></span>
-<span id="cb5-31"><a href="#cb5-31" aria-label="31"></a>nfl_contractYearQBRsubset_weekly <span class="ot">&lt;-</span> player_statsContractsSubset_offense_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb5-32"><a href="#cb5-32" aria-label="32"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-33"><a href="#cb5-33" aria-label="33"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(merge_name, season, week, age, years_of_experience, fantasyPoints) <span class="sc">|&gt;</span> </span>
-<span id="cb5-34"><a href="#cb5-34" aria-label="34"></a>  <span class="fu">full_join</span>(</span>
-<span id="cb5-35"><a href="#cb5-35" aria-label="35"></a>    nfl_contractYearQBRsubset_weekly,</span>
-<span id="cb5-36"><a href="#cb5-36" aria-label="36"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>,<span class="st">"season"</span>, <span class="fu">c</span>(<span class="st">"week"</span> <span class="ot">=</span> <span class="st">"game_week"</span>))</span>
-<span id="cb5-37"><a href="#cb5-37" aria-label="37"></a>  ) <span class="sc">|&gt;</span> <span class="fu">select</span>(player_id, season, week, player, <span class="fu">everything</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb5-38"><a href="#cb5-38" aria-label="38"></a>  <span class="fu">arrange</span>(player_id, season, week)</span>
-<span id="cb5-39"><a href="#cb5-39" aria-label="39"></a></span>
-<span id="cb5-40"><a href="#cb5-40" aria-label="40"></a><span class="co">#hist(nfl_contractYearQBRsubset_weekly$qb_plays) # players have at least 20 dropbacks per game</span></span>
-<span id="cb5-41"><a href="#cb5-41" aria-label="41"></a></span>
-<span id="cb5-42"><a href="#cb5-42" aria-label="42"></a><span class="co"># Calculate Per Game Totals</span></span>
-<span id="cb5-43"><a href="#cb5-43" aria-label="43"></a>nfl_contractYearQBR_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBRsubset_weekly <span class="sc">|&gt;</span> </span>
-<span id="cb5-44"><a href="#cb5-44" aria-label="44"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(merge_name, season) <span class="sc">|&gt;</span> </span>
-<span id="cb5-45"><a href="#cb5-45" aria-label="45"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
-<span id="cb5-46"><a href="#cb5-46" aria-label="46"></a>    <span class="at">age =</span> <span class="fu">min</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-47"><a href="#cb5-47" aria-label="47"></a>    <span class="at">years_of_experience =</span> <span class="fu">min</span>(years_of_experience, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-48"><a href="#cb5-48" aria-label="48"></a>    <span class="at">qbr =</span> <span class="fu">mean</span>(qbr_total, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-49"><a href="#cb5-49" aria-label="49"></a>    <span class="at">pts_added =</span> <span class="fu">mean</span>(pts_added, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-50"><a href="#cb5-50" aria-label="50"></a>    <span class="at">epa_pass =</span> <span class="fu">mean</span>(pass, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-51"><a href="#cb5-51" aria-label="51"></a>    <span class="at">qb_plays =</span> <span class="fu">sum</span>(qb_plays, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
-<span id="cb5-52"><a href="#cb5-52" aria-label="52"></a>    <span class="at">fantasyPoints =</span> <span class="fu">sum</span>(fantasyPoints, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
-<span id="cb5-53"><a href="#cb5-53" aria-label="53"></a>    <span class="at">contractYear =</span> <span class="fu">mean</span>(contractYear, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-54"><a href="#cb5-54" aria-label="54"></a>    <span class="at">games =</span> <span class="fu">n</span>(),</span>
-<span id="cb5-55"><a href="#cb5-55" aria-label="55"></a>    <span class="at">.groups =</span> <span class="st">"drop_last"</span></span>
-<span id="cb5-56"><a href="#cb5-56" aria-label="56"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb5-57"><a href="#cb5-57" aria-label="57"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb5-58"><a href="#cb5-58" aria-label="58"></a>    <span class="at">contractYear =</span> <span class="fu">factor</span>(</span>
-<span id="cb5-59"><a href="#cb5-59" aria-label="59"></a>      contractYear,</span>
-<span id="cb5-60"><a href="#cb5-60" aria-label="60"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb5-61"><a href="#cb5-61" aria-label="61"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)</span>
-<span id="cb5-62"><a href="#cb5-62" aria-label="62"></a>    ))</span>
-<span id="cb5-63"><a href="#cb5-63" aria-label="63"></a></span>
-<span id="cb5-64"><a href="#cb5-64" aria-label="64"></a>nfl_contractYearQBR_seasonal[<span class="fu">sapply</span>(nfl_contractYearQBR_seasonal, is.infinite)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb5-65"><a href="#cb5-65" aria-label="65"></a></span>
-<span id="cb5-66"><a href="#cb5-66" aria-label="66"></a>nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20 <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">20</span></span>
-<span id="cb5-67"><a href="#cb5-67" aria-label="67"></a>nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20Quadratic <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20 <span class="sc">^</span> <span class="dv">2</span></span>
-<span id="cb5-68"><a href="#cb5-68" aria-label="68"></a></span>
-<span id="cb5-69"><a href="#cb5-69" aria-label="69"></a>nfl_contractYearQBR_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal <span class="sc">|&gt;</span> </span>
-<span id="cb5-70"><a href="#cb5-70" aria-label="70"></a>  <span class="fu">group_by</span>(merge_name) <span class="sc">|&gt;</span></span>
-<span id="cb5-71"><a href="#cb5-71" aria-label="71"></a>  <span class="fu">mutate</span>(<span class="at">player_id =</span> <span class="fu">as.factor</span>(<span class="fu">as.character</span>(<span class="fu">cur_group_id</span>())))</span>
-<span id="cb5-72"><a href="#cb5-72" aria-label="72"></a></span>
-<span id="cb5-73"><a href="#cb5-73" aria-label="73"></a>nfl_contractYearQBRsubset_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal <span class="sc">|&gt;</span> </span>
-<span id="cb5-74"><a href="#cb5-74" aria-label="74"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
-<span id="cb5-75"><a href="#cb5-75" aria-label="75"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
-<span id="cb5-76"><a href="#cb5-76" aria-label="76"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-2"><a href="#cb5-2" aria-label="2"></a>nfl_espnQBR_weekly<span class="sc">$</span>merge_name <span class="ot">&lt;-</span> <span class="fu">paste</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-label="3"></a>  nfl_espnQBR_weekly<span class="sc">$</span>name_first,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-label="4"></a>  nfl_espnQBR_weekly<span class="sc">$</span>name_last,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-label="5"></a>  <span class="at">sep =</span> <span class="st">" "</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-label="6"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-label="7"></a>  nflreadr<span class="sc">::</span><span class="fu">clean_player_names</span>(<span class="at">lowercase =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-label="8"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-label="9"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_playerContractYears <span class="sc">|&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-label="10"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-label="11"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(</span>
+<span id="cb5-12"><a href="#cb5-12" aria-label="12"></a>    nfl_espnQBR_weekly,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-label="13"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>, <span class="st">"team"</span>, <span class="st">"season"</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-label="14"></a>  )</span>
+<span id="cb5-15"><a href="#cb5-15" aria-label="15"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-label="16"></a>nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear[<span class="fu">which</span>(<span class="fu">is.na</span>(</span>
+<span id="cb5-17"><a href="#cb5-17" aria-label="17"></a>  nfl_contractYearQBR_weekly<span class="sc">$</span>contractYear</span>
+<span id="cb5-18"><a href="#cb5-18" aria-label="18"></a>))] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-label="19"></a><span class="co">#nfl_contractYearQBR_weekly$contractYear &lt;- factor(</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-label="20"></a><span class="co">#  nfl_contractYearQBR_weekly$contractYear,</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-label="21"></a><span class="co">#  levels = c(0, 1),</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-label="22"></a><span class="co">#  labels = c("no", "yes"))</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-label="23"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-label="24"></a>nfl_contractYearQBR_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">|&gt;</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-label="25"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, game_week)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-label="26"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-label="27"></a>nfl_contractYearQBRsubset_weekly <span class="ot">&lt;-</span> nfl_contractYearQBR_weekly <span class="sc">|&gt;</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-label="28"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"Regular"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-label="29"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(merge_name, season, season_type, game_week) <span class="sc">|&gt;</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-label="30"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-31"><a href="#cb5-31" aria-label="31"></a>    <span class="at">player =</span> <span class="fu">coalesce</span>(player, name_display),</span>
+<span id="cb5-32"><a href="#cb5-32" aria-label="32"></a>    <span class="at">position =</span> <span class="st">"QB"</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-label="33"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-label="34"></a>  <span class="fu">group_by</span>(merge_name, player_id) <span class="sc">|&gt;</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-label="35"></a>  <span class="fu">fill</span>(player, <span class="at">.direction =</span> <span class="st">"downup"</span>)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-label="36"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-label="37"></a><span class="co"># Merge with age and experience</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-label="38"></a>nfl_contractYearQBRsubset_weekly <span class="ot">&lt;-</span> player_statsContractsSubset_offense_weekly <span class="sc">|&gt;</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-label="39"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-label="40"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb5-41"><a href="#cb5-41" aria-label="41"></a>    merge_name,</span>
+<span id="cb5-42"><a href="#cb5-42" aria-label="42"></a>    season,</span>
+<span id="cb5-43"><a href="#cb5-43" aria-label="43"></a>    week,</span>
+<span id="cb5-44"><a href="#cb5-44" aria-label="44"></a>    age,</span>
+<span id="cb5-45"><a href="#cb5-45" aria-label="45"></a>    years_of_experience,</span>
+<span id="cb5-46"><a href="#cb5-46" aria-label="46"></a>    fantasyPoints</span>
+<span id="cb5-47"><a href="#cb5-47" aria-label="47"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-label="48"></a>  <span class="fu">full_join</span>(</span>
+<span id="cb5-49"><a href="#cb5-49" aria-label="49"></a>    nfl_contractYearQBRsubset_weekly,</span>
+<span id="cb5-50"><a href="#cb5-50" aria-label="50"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"merge_name"</span>, <span class="st">"season"</span>, <span class="fu">c</span>(<span class="st">"week"</span> <span class="ot">=</span> <span class="st">"game_week"</span>))</span>
+<span id="cb5-51"><a href="#cb5-51" aria-label="51"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-label="52"></a>  <span class="fu">select</span>(player_id, season, week, player, <span class="fu">everything</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-label="53"></a>  <span class="fu">arrange</span>(player_id, season, week)</span>
+<span id="cb5-54"><a href="#cb5-54" aria-label="54"></a></span>
+<span id="cb5-55"><a href="#cb5-55" aria-label="55"></a><span class="co">#hist(nfl_contractYearQBRsubset_weekly$qb_plays) # players have at least 20 dropbacks per game</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-label="56"></a></span>
+<span id="cb5-57"><a href="#cb5-57" aria-label="57"></a><span class="co"># Calculate Per Game Totals</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-label="58"></a>nfl_contractYearQBR_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBRsubset_weekly <span class="sc">|&gt;</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-label="59"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(merge_name, season) <span class="sc">|&gt;</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-label="60"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb5-61"><a href="#cb5-61" aria-label="61"></a>    <span class="at">age =</span> <span class="fu">min</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-62"><a href="#cb5-62" aria-label="62"></a>    <span class="at">years_of_experience =</span> <span class="fu">min</span>(years_of_experience, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-63"><a href="#cb5-63" aria-label="63"></a>    <span class="at">qbr =</span> <span class="fu">mean</span>(qbr_total, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-64"><a href="#cb5-64" aria-label="64"></a>    <span class="at">pts_added =</span> <span class="fu">mean</span>(pts_added, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-65"><a href="#cb5-65" aria-label="65"></a>    <span class="at">epa_pass =</span> <span class="fu">mean</span>(pass, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-66"><a href="#cb5-66" aria-label="66"></a>    <span class="at">qb_plays =</span> <span class="fu">sum</span>(qb_plays, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-label="67"></a>    <span class="at">fantasyPoints =</span> <span class="fu">sum</span>(fantasyPoints, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co"># season total</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-label="68"></a>    <span class="at">contractYear =</span> <span class="fu">mean</span>(contractYear, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-69"><a href="#cb5-69" aria-label="69"></a>    <span class="at">games =</span> <span class="fu">n</span>(),</span>
+<span id="cb5-70"><a href="#cb5-70" aria-label="70"></a>    <span class="at">.groups =</span> <span class="st">"drop_last"</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-label="71"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-label="72"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb5-73"><a href="#cb5-73" aria-label="73"></a>    <span class="at">contractYear =</span> <span class="fu">factor</span>(</span>
+<span id="cb5-74"><a href="#cb5-74" aria-label="74"></a>      contractYear,</span>
+<span id="cb5-75"><a href="#cb5-75" aria-label="75"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb5-76"><a href="#cb5-76" aria-label="76"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)</span>
+<span id="cb5-77"><a href="#cb5-77" aria-label="77"></a>    )</span>
+<span id="cb5-78"><a href="#cb5-78" aria-label="78"></a>  )</span>
+<span id="cb5-79"><a href="#cb5-79" aria-label="79"></a></span>
+<span id="cb5-80"><a href="#cb5-80" aria-label="80"></a>nfl_contractYearQBR_seasonal[<span class="fu">sapply</span>(</span>
+<span id="cb5-81"><a href="#cb5-81" aria-label="81"></a>  nfl_contractYearQBR_seasonal,</span>
+<span id="cb5-82"><a href="#cb5-82" aria-label="82"></a>  is.infinite</span>
+<span id="cb5-83"><a href="#cb5-83" aria-label="83"></a>)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-label="84"></a></span>
+<span id="cb5-85"><a href="#cb5-85" aria-label="85"></a>nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20 <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal<span class="sc">$</span>age <span class="sc">-</span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-label="86"></a>  <span class="dv">20</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-label="87"></a>nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20Quadratic <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal<span class="sc">$</span>ageCentered20<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-label="88"></a></span>
+<span id="cb5-89"><a href="#cb5-89" aria-label="89"></a>nfl_contractYearQBR_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal <span class="sc">|&gt;</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-label="90"></a>  <span class="fu">group_by</span>(merge_name) <span class="sc">|&gt;</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-label="91"></a>  <span class="fu">mutate</span>(<span class="at">player_id =</span> <span class="fu">as.factor</span>(<span class="fu">as.character</span>(<span class="fu">cur_group_id</span>())))</span>
+<span id="cb5-92"><a href="#cb5-92" aria-label="92"></a></span>
+<span id="cb5-93"><a href="#cb5-93" aria-label="93"></a>nfl_contractYearQBRsubset_seasonal <span class="ot">&lt;-</span> nfl_contractYearQBR_seasonal <span class="sc">|&gt;</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-label="94"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb5-95"><a href="#cb5-95" aria-label="95"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
+<span id="cb5-96"><a href="#cb5-96" aria-label="96"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Then, we analyze the data.</p>
@@ -1009,12 +1048,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-label="1"></a>mixedModelAge_qbr <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-label="2"></a>  qbr <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb12-3"><a href="#cb12-3" aria-label="3"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-label="5"></a>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-label="6"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_qbr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-2"><a href="#cb12-2" aria-label="2"></a>  qbr <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-label="7"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-label="9"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-label="10"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_qbr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1031,18 +1074,18 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   149.4679 12.2257        
+ player_id (Intercept)   149.4669 12.2257        
            ageCentered20   0.7425  0.8617  -0.54 
- Residual                193.8631 13.9235        
+ Residual                193.8632 13.9235        
 Number of obs: 1186, groups:  player_id, 271
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)              39.56846    2.20016  246.27624  17.984  &lt; 2e-16 ***
-contractYearyes          -0.50459    1.17248 1049.29003  -0.430   0.6670    
-ageCentered20             0.28897    0.62750  355.64317   0.461   0.6454    
-ageCentered20Quadratic   -0.08953    0.02217  178.29214  -4.038 7.99e-05 ***
-years_of_experience       1.52470    0.51847  333.39933   2.941   0.0035 ** 
+(Intercept)              39.56847    2.20015  246.27636  17.984  &lt; 2e-16 ***
+contractYearyes          -0.50460    1.17248 1049.28996  -0.430   0.6670    
+ageCentered20             0.28897    0.62750  355.64282   0.461   0.6454    
+ageCentered20Quadratic   -0.08953    0.02217  178.29145  -4.038 7.99e-05 ***
+years_of_experience       1.52469    0.51847  333.39962   2.941   0.0035 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1128,12 +1171,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-label="1"></a>mixedModelAge_ptsAdded <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb24-2"><a href="#cb24-2" aria-label="2"></a>  pts_added <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb24-3"><a href="#cb24-3" aria-label="3"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
-<span id="cb24-4"><a href="#cb24-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-label="5"></a>)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-label="6"></a></span>
-<span id="cb24-7"><a href="#cb24-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_ptsAdded)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb24-2"><a href="#cb24-2" aria-label="2"></a>  pts_added <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb24-7"><a href="#cb24-7" aria-label="7"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-label="9"></a>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-label="10"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_ptsAdded)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1159,7 +1206,7 @@ Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
 (Intercept)            -1.540e+00  3.309e-01  2.339e+02  -4.654 5.45e-06 ***
 contractYearyes        -1.832e-01  1.717e-01  1.038e+03  -1.067 0.286066    
-ageCentered20           2.813e-02  9.314e-02  3.455e+02   0.302 0.762812    
+ageCentered20           2.813e-02  9.314e-02  3.455e+02   0.302 0.762813    
 ageCentered20Quadratic -1.204e-02  3.275e-03  1.685e+02  -3.676 0.000318 ***
 years_of_experience     2.341e-01  7.604e-02  3.202e+02   3.078 0.002263 ** 
 ---
@@ -1247,12 +1294,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-label="1"></a>mixedModelAge_epaPass <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb36-2"><a href="#cb36-2" aria-label="2"></a>  epa_pass <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> player_id), <span class="co"># removed random slopes to address convergence issue</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-label="3"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
-<span id="cb36-4"><a href="#cb36-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb36-5"><a href="#cb36-5" aria-label="5"></a>)</span>
-<span id="cb36-6"><a href="#cb36-6" aria-label="6"></a></span>
-<span id="cb36-7"><a href="#cb36-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_epaPass)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb36-2"><a href="#cb36-2" aria-label="2"></a>  epa_pass <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">|</span> player_id), <span class="co"># removed random slopes to address convergence issue</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-label="7"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-label="9"></a>)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-label="10"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_epaPass)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1365,12 +1416,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-label="1"></a>mixedModelAge_fantasyPtsPass <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb48-2"><a href="#cb48-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> player_id), <span class="co"># removed random slopes to address convergence issue</span></span>
-<span id="cb48-3"><a href="#cb48-3" aria-label="3"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
-<span id="cb48-4"><a href="#cb48-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb48-5"><a href="#cb48-5" aria-label="5"></a>)</span>
-<span id="cb48-6"><a href="#cb48-6" aria-label="6"></a></span>
-<span id="cb48-7"><a href="#cb48-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_fantasyPtsPass)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb48-2"><a href="#cb48-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">|</span> player_id), <span class="co"># removed random slopes to address convergence issue</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-label="7"></a>  <span class="at">data =</span> nfl_contractYearQBR_seasonal,</span>
+<span id="cb48-8"><a href="#cb48-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-label="9"></a>)</span>
+<span id="cb48-10"><a href="#cb48-10" aria-label="10"></a></span>
+<span id="cb48-11"><a href="#cb48-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_fantasyPtsPass)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1429,11 +1484,12 @@ Confidence level used: 0.95 </code></pre>
 </section></section><section id="sec-contractYearRB" class="level3" data-number="18.2.2"><h3 data-number="18.2.2" class="anchored" data-anchor-id="sec-contractYearRB">
 <span class="header-section-number">18.2.2</span> RB</h3>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-label="1"></a>player_statsContractsRB_seasonal <span class="ot">&lt;-</span> player_statsContracts_seasonal <span class="sc">|&gt;</span> </span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-label="1"></a>player_statsContractsRB_seasonal <span class="ot">&lt;-</span> player_statsContracts_seasonal <span class="sc">|&gt;</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-label="2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
 <span id="cb54-3"><a href="#cb54-3" aria-label="3"></a>    position_group <span class="sc">==</span> <span class="st">"RB"</span>,</span>
 <span id="cb54-4"><a href="#cb54-4" aria-label="4"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
-<span id="cb54-5"><a href="#cb54-5" aria-label="5"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb54-5"><a href="#cb54-5" aria-label="5"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-label="6"></a>  ) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <section id="sec-contractYearRB-YPC" class="level4" data-number="18.2.2.1"><h4 data-number="18.2.2.1" class="anchored" data-anchor-id="sec-contractYearRB-YPC">
@@ -1494,12 +1550,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-label="1"></a>mixedModelAge_ypc <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb61-2"><a href="#cb61-2" aria-label="2"></a>  ypc <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb61-3"><a href="#cb61-3" aria-label="3"></a>  <span class="at">data =</span> player_statsContractsRB_seasonal,</span>
-<span id="cb61-4"><a href="#cb61-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb61-5"><a href="#cb61-5" aria-label="5"></a>)</span>
-<span id="cb61-6"><a href="#cb61-6" aria-label="6"></a></span>
-<span id="cb61-7"><a href="#cb61-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_ypc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb61-2"><a href="#cb61-2" aria-label="2"></a>  ypc <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb61-6"><a href="#cb61-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb61-7"><a href="#cb61-7" aria-label="7"></a>  <span class="at">data =</span> player_statsContractsRB_seasonal,</span>
+<span id="cb61-8"><a href="#cb61-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb61-9"><a href="#cb61-9" aria-label="9"></a>)</span>
+<span id="cb61-10"><a href="#cb61-10" aria-label="10"></a></span>
+<span id="cb61-11"><a href="#cb61-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_ypc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1613,12 +1673,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-label="1"></a>mixedModelAge_epaRush <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb73-2"><a href="#cb73-2" aria-label="2"></a>  rushing_epa <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb73-3"><a href="#cb73-3" aria-label="3"></a>  <span class="at">data =</span> player_statsContractsRB_seasonal,</span>
-<span id="cb73-4"><a href="#cb73-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb73-5"><a href="#cb73-5" aria-label="5"></a>)</span>
-<span id="cb73-6"><a href="#cb73-6" aria-label="6"></a></span>
-<span id="cb73-7"><a href="#cb73-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_epaRush)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb73-2"><a href="#cb73-2" aria-label="2"></a>  rushing_epa <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb73-3"><a href="#cb73-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb73-4"><a href="#cb73-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb73-5"><a href="#cb73-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb73-6"><a href="#cb73-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb73-7"><a href="#cb73-7" aria-label="7"></a>  <span class="at">data =</span> player_statsContractsRB_seasonal,</span>
+<span id="cb73-8"><a href="#cb73-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb73-9"><a href="#cb73-9" aria-label="9"></a>)</span>
+<span id="cb73-10"><a href="#cb73-10" aria-label="10"></a></span>
+<span id="cb73-11"><a href="#cb73-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_epaRush)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1635,7 +1699,7 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   0.236648 0.48646        
+ player_id (Intercept)   0.236649 0.48647        
            ageCentered20 0.003396 0.05827  -0.76 
  Residual                0.934249 0.96657        
 Number of obs: 1870, groups:  player_id, 560
@@ -1732,12 +1796,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb85"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-label="1"></a>mixedModelAge_fantasyPtsRush <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb85-2"><a href="#cb85-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb85-3"><a href="#cb85-3" aria-label="3"></a>  <span class="at">data =</span> player_statsContractsRB_seasonal,</span>
-<span id="cb85-4"><a href="#cb85-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb85-5"><a href="#cb85-5" aria-label="5"></a>)</span>
-<span id="cb85-6"><a href="#cb85-6" aria-label="6"></a></span>
-<span id="cb85-7"><a href="#cb85-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_fantasyPtsRush)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb85-2"><a href="#cb85-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb85-3"><a href="#cb85-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb85-4"><a href="#cb85-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb85-5"><a href="#cb85-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb85-6"><a href="#cb85-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb85-7"><a href="#cb85-7" aria-label="7"></a>  <span class="at">data =</span> player_statsContractsRB_seasonal,</span>
+<span id="cb85-8"><a href="#cb85-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb85-9"><a href="#cb85-9" aria-label="9"></a>)</span>
+<span id="cb85-10"><a href="#cb85-10" aria-label="10"></a></span>
+<span id="cb85-11"><a href="#cb85-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_fantasyPtsRush)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1755,18 +1823,18 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   4263.04  65.292         
+ player_id (Intercept)   4263.03  65.292         
            ageCentered20   39.38   6.275   -0.74 
- Residual                1813.92  42.590         
+ Residual                1813.93  42.590         
 Number of obs: 1973, groups:  player_id, 577
 
 Fixed effects:
                         Estimate Std. Error        df t value Pr(&gt;|t|)    
-(Intercept)              58.6423     6.8397  772.5161   8.574  &lt; 2e-16 ***
+(Intercept)              58.6423     6.8397  772.5162   8.574  &lt; 2e-16 ***
 contractYearyes         -10.4358     2.8749 1686.3435  -3.630 0.000292 ***
-ageCentered20            -2.3643     2.3713 1049.2987  -0.997 0.318980    
-ageCentered20Quadratic   -1.0239     0.1466  607.5040  -6.985 7.49e-12 ***
-years_of_experience      15.4261     1.6765  738.3767   9.201  &lt; 2e-16 ***
+ageCentered20            -2.3643     2.3713 1049.2986  -0.997 0.318979    
+ageCentered20Quadratic   -1.0239     0.1466  607.5037  -6.985 7.49e-12 ***
+years_of_experience      15.4261     1.6765  738.3768   9.201  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1797,11 +1865,12 @@ Confidence level used: 0.95 </code></pre>
 </section></section><section id="sec-contractYearWRTE" class="level3" data-number="18.2.3"><h3 data-number="18.2.3" class="anchored" data-anchor-id="sec-contractYearWRTE">
 <span class="header-section-number">18.2.3</span> WR/TE</h3>
 <div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb91"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-label="1"></a>player_statsContractsWRTE_seasonal <span class="ot">&lt;-</span> player_statsContracts_seasonal <span class="sc">|&gt;</span> </span>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb91"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-label="1"></a>player_statsContractsWRTE_seasonal <span class="ot">&lt;-</span> player_statsContracts_seasonal <span class="sc">|&gt;</span></span>
 <span id="cb91-2"><a href="#cb91-2" aria-label="2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
-<span id="cb91-3"><a href="#cb91-3" aria-label="3"></a>    position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>,<span class="st">"TE"</span>),</span>
+<span id="cb91-3"><a href="#cb91-3" aria-label="3"></a>    position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>),</span>
 <span id="cb91-4"><a href="#cb91-4" aria-label="4"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
-<span id="cb91-5"><a href="#cb91-5" aria-label="5"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb91-5"><a href="#cb91-5" aria-label="5"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span></span>
+<span id="cb91-6"><a href="#cb91-6" aria-label="6"></a>  ) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <section id="sec-contractYearWRTE-ReceivingYards" class="level4" data-number="18.2.3.1"><h4 data-number="18.2.3.1" class="anchored" data-anchor-id="sec-contractYearWRTE-ReceivingYards">
@@ -1836,7 +1905,7 @@ Number of obs: 4146, groups:  player_id, 1146
 
 Fixed effects:
                  Estimate Std. Error        df t value Pr(&gt;|t|)    
-(Intercept)       24.9202     0.5698 1375.5667  43.734  &lt; 2e-16 ***
+(Intercept)       24.9202     0.5698 1375.5668  43.734  &lt; 2e-16 ***
 contractYearyes   -4.2752     0.5274 3524.9605  -8.106 7.14e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -1862,12 +1931,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-label="1"></a>mixedModelAge_receivingYards <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb98-2"><a href="#cb98-2" aria-label="2"></a>  receiving_yards <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb98-3"><a href="#cb98-3" aria-label="3"></a>  <span class="at">data =</span> player_statsContractsWRTE_seasonal,</span>
-<span id="cb98-4"><a href="#cb98-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb98-5"><a href="#cb98-5" aria-label="5"></a>)</span>
-<span id="cb98-6"><a href="#cb98-6" aria-label="6"></a></span>
-<span id="cb98-7"><a href="#cb98-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_receivingYards)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb98-2"><a href="#cb98-2" aria-label="2"></a>  receiving_yards <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb98-3"><a href="#cb98-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb98-4"><a href="#cb98-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb98-5"><a href="#cb98-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb98-6"><a href="#cb98-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb98-7"><a href="#cb98-7" aria-label="7"></a>  <span class="at">data =</span> player_statsContractsWRTE_seasonal,</span>
+<span id="cb98-8"><a href="#cb98-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb98-9"><a href="#cb98-9" aria-label="9"></a>)</span>
+<span id="cb98-10"><a href="#cb98-10" aria-label="10"></a></span>
+<span id="cb98-11"><a href="#cb98-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_receivingYards)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -1892,11 +1965,11 @@ Number of obs: 4146, groups:  player_id, 1146
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)              14.49275    1.45972 1618.24324   9.928  &lt; 2e-16 ***
+(Intercept)              14.49275    1.45972 1618.24317   9.928  &lt; 2e-16 ***
 contractYearyes          -3.17620    0.51635 3284.86822  -6.151 8.61e-10 ***
-ageCentered20             1.50128    0.50311 2307.11988   2.984  0.00288 ** 
-ageCentered20Quadratic   -0.46762    0.02552 1766.33108 -18.323  &lt; 2e-16 ***
-years_of_experience       4.91082    0.39735 1400.69086  12.359  &lt; 2e-16 ***
+ageCentered20             1.50128    0.50311 2307.12056   2.984  0.00288 ** 
+ageCentered20Quadratic   -0.46762    0.02552 1766.33024 -18.323  &lt; 2e-16 ***
+years_of_experience       4.91082    0.39735 1400.69138  12.359  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1982,12 +2055,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb110"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-label="1"></a>mixedModelAge_epaReceiving <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb110-2"><a href="#cb110-2" aria-label="2"></a>  receiving_epa <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb110-3"><a href="#cb110-3" aria-label="3"></a>  <span class="at">data =</span> player_statsContractsWRTE_seasonal,</span>
-<span id="cb110-4"><a href="#cb110-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb110-5"><a href="#cb110-5" aria-label="5"></a>)</span>
-<span id="cb110-6"><a href="#cb110-6" aria-label="6"></a></span>
-<span id="cb110-7"><a href="#cb110-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_epaReceiving)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb110-2"><a href="#cb110-2" aria-label="2"></a>  receiving_epa <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb110-3"><a href="#cb110-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb110-4"><a href="#cb110-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb110-5"><a href="#cb110-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb110-6"><a href="#cb110-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb110-7"><a href="#cb110-7" aria-label="7"></a>  <span class="at">data =</span> player_statsContractsWRTE_seasonal,</span>
+<span id="cb110-8"><a href="#cb110-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb110-9"><a href="#cb110-9" aria-label="9"></a>)</span>
+<span id="cb110-10"><a href="#cb110-10" aria-label="10"></a></span>
+<span id="cb110-11"><a href="#cb110-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_epaReceiving)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -2005,7 +2082,7 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   0.955306 0.97740        
+ player_id (Intercept)   0.955305 0.97740        
            ageCentered20 0.006654 0.08157  -0.70 
  Residual                1.240787 1.11391        
 Number of obs: 4065, groups:  player_id, 1126
@@ -2014,7 +2091,7 @@ Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
 (Intercept)             3.615e-01  9.962e-02  1.230e+03   3.629 0.000296 ***
 contractYearyes        -1.643e-01  4.563e-02  3.767e+03  -3.601 0.000321 ***
-ageCentered20           2.227e-02  3.253e-02  1.404e+03   0.685 0.493558    
+ageCentered20           2.227e-02  3.253e-02  1.404e+03   0.685 0.493555    
 ageCentered20Quadratic -1.106e-02  1.841e-03  5.636e+02  -6.010 3.33e-09 ***
 years_of_experience     1.535e-01  2.286e-02  1.285e+03   6.713 2.86e-11 ***
 ---
@@ -2102,12 +2179,16 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb122"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-label="1"></a>mixedModelAge_fantasyPtsReceiving <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb122-2"><a href="#cb122-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb122-3"><a href="#cb122-3" aria-label="3"></a>  <span class="at">data =</span> player_statsContractsWRTE_seasonal,</span>
-<span id="cb122-4"><a href="#cb122-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb122-5"><a href="#cb122-5" aria-label="5"></a>)</span>
-<span id="cb122-6"><a href="#cb122-6" aria-label="6"></a></span>
-<span id="cb122-7"><a href="#cb122-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_fantasyPtsReceiving)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb122-2"><a href="#cb122-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb122-3"><a href="#cb122-3" aria-label="3"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb122-4"><a href="#cb122-4" aria-label="4"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb122-5"><a href="#cb122-5" aria-label="5"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb122-6"><a href="#cb122-6" aria-label="6"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb122-7"><a href="#cb122-7" aria-label="7"></a>  <span class="at">data =</span> player_statsContractsWRTE_seasonal,</span>
+<span id="cb122-8"><a href="#cb122-8" aria-label="8"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb122-9"><a href="#cb122-9" aria-label="9"></a>)</span>
+<span id="cb122-10"><a href="#cb122-10" aria-label="10"></a></span>
+<span id="cb122-11"><a href="#cb122-11" aria-label="11"></a><span class="fu">summary</span>(mixedModelAge_fantasyPtsReceiving)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -2132,11 +2213,11 @@ Number of obs: 4146, groups:  player_id, 1146
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)              30.92264    3.43910 1579.07353   8.992  &lt; 2e-16 ***
-contractYearyes          -7.32187    1.30535 3479.25302  -5.609 2.19e-08 ***
-ageCentered20             1.92954    1.16055 2233.04055   1.663   0.0965 .  
-ageCentered20Quadratic   -0.91016    0.06143 1374.85864 -14.815  &lt; 2e-16 ***
-years_of_experience      10.53521    0.87748 1362.34123  12.006  &lt; 2e-16 ***
+(Intercept)              30.92265    3.43909 1579.07395   8.992  &lt; 2e-16 ***
+contractYearyes          -7.32187    1.30535 3479.25298  -5.609 2.19e-08 ***
+ageCentered20             1.92954    1.16055 2233.04071   1.663   0.0965 .  
+ageCentered20Quadratic   -0.91016    0.06143 1374.85900 -14.815  &lt; 2e-16 ***
+years_of_experience      10.53521    0.87748 1362.34115  12.006  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -2167,9 +2248,9 @@ Confidence level used: 0.95 </code></pre>
 </section></section><section id="sec-contractYearQBRBWRTE" class="level3" data-number="18.2.4"><h3 data-number="18.2.4" class="anchored" data-anchor-id="sec-contractYearQBRBWRTE">
 <span class="header-section-number">18.2.4</span> QB/RB/WR/TE</h3>
 <div class="cell">
-<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb128"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-label="1"></a>player_statsContractsQBRBWRTE_seasonal <span class="ot">&lt;-</span> player_statsContracts_seasonal <span class="sc">|&gt;</span> </span>
+<details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb128"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-label="1"></a>player_statsContractsQBRBWRTE_seasonal <span class="ot">&lt;-</span> player_statsContracts_seasonal <span class="sc">|&gt;</span></span>
 <span id="cb128-2"><a href="#cb128-2" aria-label="2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
-<span id="cb128-3"><a href="#cb128-3" aria-label="3"></a>    position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>,<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>),</span>
+<span id="cb128-3"><a href="#cb128-3" aria-label="3"></a>    position_group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"QB"</span>, <span class="st">"RB"</span>, <span class="st">"WR"</span>, <span class="st">"TE"</span>),</span>
 <span id="cb128-4"><a href="#cb128-4" aria-label="4"></a>    games <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="co"># keep only player-season combinations in which QBs played at least 5 games</span></span>
 <span id="cb128-5"><a href="#cb128-5" aria-label="5"></a>    season <span class="sc">&gt;=</span> <span class="dv">2011</span>) <span class="co"># keep only seasons since 2011 (when most contract data are available)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
@@ -2239,12 +2320,17 @@ Degrees-of-freedom method: kenward-roger
 Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb135"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-label="1"></a>mixedModelAge_fantasyPts <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(</span>
-<span id="cb135-2"><a href="#cb135-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span> position_group <span class="sc">+</span> ageCentered20 <span class="sc">+</span> ageCentered20Quadratic <span class="sc">+</span> years_of_experience <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
-<span id="cb135-3"><a href="#cb135-3" aria-label="3"></a>  <span class="at">data =</span> player_statsContractsQBRBWRTE_seasonal,</span>
-<span id="cb135-4"><a href="#cb135-4" aria-label="4"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
-<span id="cb135-5"><a href="#cb135-5" aria-label="5"></a>)</span>
-<span id="cb135-6"><a href="#cb135-6" aria-label="6"></a></span>
-<span id="cb135-7"><a href="#cb135-7" aria-label="7"></a><span class="fu">summary</span>(mixedModelAge_fantasyPts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb135-2"><a href="#cb135-2" aria-label="2"></a>  fantasyPoints <span class="sc">~</span> contractYear <span class="sc">+</span></span>
+<span id="cb135-3"><a href="#cb135-3" aria-label="3"></a>    position_group <span class="sc">+</span></span>
+<span id="cb135-4"><a href="#cb135-4" aria-label="4"></a>    ageCentered20 <span class="sc">+</span></span>
+<span id="cb135-5"><a href="#cb135-5" aria-label="5"></a>    ageCentered20Quadratic <span class="sc">+</span></span>
+<span id="cb135-6"><a href="#cb135-6" aria-label="6"></a>    years_of_experience <span class="sc">+</span></span>
+<span id="cb135-7"><a href="#cb135-7" aria-label="7"></a>    (<span class="dv">1</span> <span class="sc">+</span> ageCentered20 <span class="sc">|</span> player_id),</span>
+<span id="cb135-8"><a href="#cb135-8" aria-label="8"></a>  <span class="at">data =</span> player_statsContractsQBRBWRTE_seasonal,</span>
+<span id="cb135-9"><a href="#cb135-9" aria-label="9"></a>  <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optimizer =</span> <span class="st">"bobyqa"</span>)</span>
+<span id="cb135-10"><a href="#cb135-10" aria-label="10"></a>)</span>
+<span id="cb135-11"><a href="#cb135-11" aria-label="11"></a></span>
+<span id="cb135-12"><a href="#cb135-12" aria-label="12"></a><span class="fu">summary</span>(mixedModelAge_fantasyPts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -2269,14 +2355,14 @@ Number of obs: 6816, groups:  player_id, 1898
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)             135.86006    5.03863 3053.85793  26.964  &lt; 2e-16 ***
-contractYearyes          -9.68928    1.36446 5817.88676  -7.101 1.38e-12 ***
-position_groupRB        -80.60227    4.50068 1957.69449 -17.909  &lt; 2e-16 ***
-position_groupTE       -108.43652    4.72268 1905.41624 -22.961  &lt; 2e-16 ***
-position_groupWR        -92.31773    4.36877 1949.16076 -21.131  &lt; 2e-16 ***
-ageCentered20            -1.20662    1.09148 3405.82521  -1.105    0.269    
-ageCentered20Quadratic   -0.89417    0.05601 2019.27197 -15.966  &lt; 2e-16 ***
-years_of_experience      13.25415    0.86621 2376.66228  15.301  &lt; 2e-16 ***
+(Intercept)             135.86006    5.03863 3053.85830  26.964  &lt; 2e-16 ***
+contractYearyes          -9.68928    1.36446 5817.88670  -7.101 1.38e-12 ***
+position_groupRB        -80.60227    4.50068 1957.69476 -17.909  &lt; 2e-16 ***
+position_groupTE       -108.43652    4.72268 1905.41648 -22.961  &lt; 2e-16 ***
+position_groupWR        -92.31773    4.36877 1949.16102 -21.131  &lt; 2e-16 ***
+ageCentered20            -1.20662    1.09148 3405.82504  -1.105    0.269    
+ageCentered20Quadratic   -0.89417    0.05601 2019.27013 -15.966  &lt; 2e-16 ***
+years_of_experience      13.25415    0.86621 2376.66276  15.301  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -2351,7 +2437,7 @@ loaded via a namespace (and not attached):
 [13] quadprog_1.5-8      pkgconfig_2.0.3     fastmap_1.2.0      
 [16] backports_1.5.1     pbivnorm_0.6.0      rmarkdown_2.32     
 [19] tzdb_0.5.0          nloptr_2.2.1        xfun_0.61          
-[22] cachem_1.1.0        jsonlite_2.0.0      psych_2.6.5        
+[22] cachem_1.1.0        jsonlite_2.0.0      psych_2.6.9        
 [25] broom_1.0.13        parallel_4.6.1      lavaan_0.7-2       
 [28] cluster_2.1.8.2     R6_2.6.1            stringi_1.8.9      
 [31] RColorBrewer_1.1-3  boot_1.3-32         rpart_4.1.27       
