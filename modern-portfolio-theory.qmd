@@ -138,71 +138,106 @@ We determine QB1, RB1, RB2, WR1, WR2, WR3, TE1, and K1 for each combination of t
 
 ```{r}
 # Identify the QB1, RB1, RB2, WR1, WR2, WR3, TE1, and K1 for each team-season combination
-qb1ByTeamSeasonPosition <- player_stats_seasonal |> 
-  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) |> 
-  filter(position_group %in% c("QB")) |> 
-  group_by(team, season, position_group) |> 
-  arrange(-fantasyPoints) |> 
+qb1ByTeamSeasonPosition <- player_stats_seasonal |>
+  filter(
+    !is.na(player_id) &
+      !is.na(team) &
+      !is.na(season) &
+      !is.na(position_group) &
+      !is.na(fantasyPoints)
+  ) |>
+  filter(position_group %in% c("QB")) |>
+  group_by(team, season, position_group) |>
+  arrange(-fantasyPoints) |>
   slice_max(
     fantasyPoints,
-    with_ties = FALSE) |>
-  ungroup() |> 
-  arrange(season, team, position_group) |> 
-  select(team, season, position_group, player_id) |> 
+    with_ties = FALSE
+  ) |>
+  ungroup() |>
+  arrange(season, team, position_group) |>
+  select(team, season, position_group, player_id) |>
   mutate(position = "QB1")
 
-rbsByTeamSeasonPosition <- player_stats_seasonal |> 
-  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) |> 
-  filter(position_group %in% c("RB")) |> 
-  group_by(team, season, position_group) |> 
-  arrange(-fantasyPoints) |> 
+rbsByTeamSeasonPosition <- player_stats_seasonal |>
+  filter(
+    !is.na(player_id) &
+      !is.na(team) &
+      !is.na(season) &
+      !is.na(position_group) &
+      !is.na(fantasyPoints)
+  ) |>
+  filter(position_group %in% c("RB")) |>
+  group_by(team, season, position_group) |>
+  arrange(-fantasyPoints) |>
   slice_max(
     fantasyPoints,
     n = 2,
-    with_ties = FALSE) |> 
-  mutate(position = paste0("RB", row_number())) |> 
-  ungroup() |> 
-  arrange(season, team, position_group) |> 
+    with_ties = FALSE
+  ) |>
+  mutate(position = paste0("RB", row_number())) |>
+  ungroup() |>
+  arrange(season, team, position_group) |>
   select(team, season, position_group, player_id, position)
 
-wrsByTeamSeasonPosition <- player_stats_seasonal |> 
-  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) |> 
-  filter(position_group %in% c("WR")) |> 
-  group_by(team, season, position_group) |> 
-  arrange(-fantasyPoints) |> 
+wrsByTeamSeasonPosition <- player_stats_seasonal |>
+  filter(
+    !is.na(player_id) &
+      !is.na(team) &
+      !is.na(season) &
+      !is.na(position_group) &
+      !is.na(fantasyPoints)
+  ) |>
+  filter(position_group %in% c("WR")) |>
+  group_by(team, season, position_group) |>
+  arrange(-fantasyPoints) |>
   slice_max(
     fantasyPoints,
     n = 3,
-    with_ties = FALSE) |> 
-  mutate(position = paste0("WR", row_number())) |> 
-  ungroup() |> 
-  arrange(season, team, position_group) |> 
+    with_ties = FALSE
+  ) |>
+  mutate(position = paste0("WR", row_number())) |>
+  ungroup() |>
+  arrange(season, team, position_group) |>
   select(team, season, position_group, player_id, position)
 
-te1ByTeamSeasonPosition <- player_stats_seasonal |> 
-  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) |> 
-  filter(position_group %in% c("TE")) |> 
-  group_by(team, season, position_group) |> 
-  arrange(-fantasyPoints) |> 
+te1ByTeamSeasonPosition <- player_stats_seasonal |>
+  filter(
+    !is.na(player_id) &
+      !is.na(team) &
+      !is.na(season) &
+      !is.na(position_group) &
+      !is.na(fantasyPoints)
+  ) |>
+  filter(position_group %in% c("TE")) |>
+  group_by(team, season, position_group) |>
+  arrange(-fantasyPoints) |>
   slice_max(
     fantasyPoints,
-    with_ties = FALSE) |>
-  ungroup() |> 
-  arrange(season, team, position_group) |> 
-  select(team, season, position_group, player_id) |> 
+    with_ties = FALSE
+  ) |>
+  ungroup() |>
+  arrange(season, team, position_group) |>
+  select(team, season, position_group, player_id) |>
   mutate(position = "TE1")
 
-k1ByTeamSeasonPosition <- player_stats_seasonal |> 
-  filter(!is.na(player_id) & !is.na(team) & !is.na(season) & !is.na(position_group) & !is.na(fantasyPoints)) |> 
-  filter(position_group %in% c("K")) |> 
-  group_by(team, season, position_group) |> 
-  arrange(-fantasyPoints) |> 
+k1ByTeamSeasonPosition <- player_stats_seasonal |>
+  filter(
+    !is.na(player_id) &
+      !is.na(team) &
+      !is.na(season) &
+      !is.na(position_group) &
+      !is.na(fantasyPoints)
+  ) |>
+  filter(position_group %in% c("K")) |>
+  group_by(team, season, position_group) |>
+  arrange(-fantasyPoints) |>
   slice_max(
     fantasyPoints,
-    with_ties = FALSE) |>
-  ungroup() |> 
-  arrange(season, team, position_group) |> 
-  select(team, season, position_group, player_id) |> 
+    with_ties = FALSE
+  ) |>
+  ungroup() |>
+  arrange(season, team, position_group) |>
+  select(team, season, position_group, player_id) |>
   mutate(position = "K1")
 
 topRankedPlayersByTeamSeasonPosition <- dplyr::bind_rows(
@@ -215,8 +250,9 @@ topRankedPlayersByTeamSeasonPosition <- dplyr::bind_rows(
 
 fantasyPointsForTopRankedPlayers_weekly <- dplyr::left_join(
   topRankedPlayersByTeamSeasonPosition,
-  player_stats_weekly |> select(team, season, week, player_id, fantasyPoints, game_id),
-  by = c("team","season","player_id")
+  player_stats_weekly |>
+    select(team, season, week, player_id, fantasyPoints, game_id),
+  by = c("team", "season", "player_id")
 )
 
 # add game_id to dst data
@@ -238,20 +274,22 @@ dst_with_game_away <- nfl_actualFantasyPoints_dst_weekly |>
 # Combine the two (one will have NA for game_id, the other will have the match)
 dst_with_game_id <- dplyr::bind_rows(
   dst_with_game_home,
-  dst_with_game_away) |>
+  dst_with_game_away
+) |>
   filter(!is.na(game_id)) # keep only matched rows
 
-dst_with_game_id_subset <- dst_with_game_id |> 
+dst_with_game_id_subset <- dst_with_game_id |>
   select(team, season, week, fantasyPoints, game_id) |>
   mutate(
     position = "DST",
-    position_group = "DST")
+    position_group = "DST"
+  )
 
 fantasyPointsSameTeam_weekly <- dplyr::bind_rows(
   fantasyPointsForTopRankedPlayers_weekly,
   dst_with_game_id_subset
-) |> 
-  select(-player_id) |> 
+) |>
+  select(-player_id) |>
   filter(!is.na(game_id))
 
 fantasyPointsOpponent_weekly <- fantasyPointsSameTeam_weekly |>
@@ -262,7 +300,8 @@ fantasyPointsOpponent_weekly <- fantasyPointsSameTeam_weekly |>
 
 fantasyPointsCombined_weekly <- fantasyPointsSameTeam_weekly |>
   inner_join(
-    fantasyPointsOpponent_weekly |> select(game_id, opp_team, position, opp_fantasyPoints),
+    fantasyPointsOpponent_weekly |>
+      select(game_id, opp_team, position, opp_fantasyPoints),
     by = c("game_id", "position")
   ) |>
   filter(team != opp_team) # exclude matching to own team
@@ -272,7 +311,8 @@ team_points_wide <- fantasyPointsCombined_weekly |>
   select(team, season, week, position, fantasyPoints) |>
   tidyr::pivot_wider(
     names_from = position,
-    values_from = fantasyPoints)
+    values_from = fantasyPoints
+  )
 
 # Pivot to wide format for opponent positions
 opp_points_wide <- fantasyPointsCombined_weekly |>
@@ -280,7 +320,8 @@ opp_points_wide <- fantasyPointsCombined_weekly |>
   tidyr::pivot_wider(
     names_from = position,
     values_from = opp_fantasyPoints,
-    names_prefix = "opp_")
+    names_prefix = "opp_"
+  )
 
 # Join both so each row has team and opponent positions side by side
 combined_points_wide <- dplyr::left_join(
@@ -295,7 +336,8 @@ Here is a correlation matrix of players' weekly performance across positions wit
 ```{r}
 cor(
   combined_points_wide |> select(QB1:opp_DST),
-  use = "pairwise.complete.obs") |> 
+  use = "pairwise.complete.obs"
+) |>
   round(2)
 ```
 
@@ -309,7 +351,8 @@ In @fig-correlationMatrixPlot, we depict a correlation matrix plot using the `GG
 GGally::ggcorr(
   combined_points_wide |> select(QB1:opp_DST),
   label = TRUE,
-  label_size = 3)
+  label_size = 3
+)
 ```
 
 ## The Efficient Frontier of a Stock Portfolio {#sec-efficientFrontier}
@@ -332,15 +375,16 @@ We download historical stock prices using the `quantmod` package [@R-quantmod]:
 
 ```{r}
 symbols <- c(
-  "AAPL",  # Apple
-  "MSFT",  # Microsoft
+  "AAPL", # Apple
+  "MSFT", # Microsoft
   "GOOGL", # Google
-  "AMZN",  # Amazon
-  "META",  # Meta/Facebook
-  "V",     # Visa
-  "DIS",   # Disney
-  "NKE",   # Nike
-  "TSLA")  # Tesla
+  "AMZN", # Amazon
+  "META", # Meta/Facebook
+  "V", # Visa
+  "DIS", # Disney
+  "NKE", # Nike
+  "TSLA"
+) # Tesla
 
 quantmod::getSymbols(symbols)
 ```
@@ -355,12 +399,16 @@ prices <- do.call(
   merge,
   lapply(
     symbols,
-    function(sym) quantmod::Cl(get(sym))))
+    function(sym) quantmod::Cl(get(sym))
+  )
+)
 
 returns <- na.omit(
   TTR::ROC(
     prices,
-    type = "discrete"))
+    type = "discrete"
+  )
+)
 
 returns_ts <- timeSeries::as.timeSeries(returns)
 ```
@@ -368,9 +416,9 @@ returns_ts <- timeSeries::as.timeSeries(returns)
 ```{r}
 #| eval: false
 
-minYear <- format(as.Date(row.names(returns_ts)), "%Y") |> 
-  na.omit |> 
-  as.integer |> 
+minYear <- format(as.Date(row.names(returns_ts)), "%Y") |>
+  na.omit |>
+  as.integer |>
   min()
 ```
 
@@ -392,7 +440,8 @@ We determine the efficient frontier using the `fPortfolio::portfolioFrontier()` 
 ```{r}
 efficientFrontier <- fPortfolio::portfolioFrontier(
   returns_ts,
-  spec = portfolioSpec)
+  spec = portfolioSpec
+)
 
 efficientFrontier
 ```
@@ -419,20 +468,23 @@ options(scipen = 999)
 plot(
   efficientFrontier,
   which = c(
-    1,  # efficient frontier
-    3,  # tangency portfolio
-    4), # risk/return of individual assets
+    1, # efficient frontier
+    3, # tangency portfolio
+    4
+  ), # risk/return of individual assets
   control = list(
     xlim = xlim,
     ylim = ylim
-  ))
+  )
+)
 
 # Add text labels for individual assets
 points(
   asset_sd,
   asset_means,
   col = "red",
-  pch = 19)
+  pch = 19
+)
 
 text(
   asset_sd,
@@ -440,7 +492,8 @@ text(
   labels = symbols,
   pos = 4,
   cex = 0.8,
-  col = "black")
+  col = "black"
+)
 ```
 
 ### Identify the Optimal Weights {#sec-portfolioOptimalWeights}
@@ -455,7 +508,8 @@ We identify the tangency portfolio using the `fPortfolio::tangencyPortfolio()` f
 # Find the tangency portfolio (portfolio with the highest Sharpe ratio)
 tangencyPortfolio <- fPortfolio::tangencyPortfolio(
   data = returns_ts,
-  spec = portfolioSpec)
+  spec = portfolioSpec
+)
 ```
 
 We extract the optimal weights for each asset at the tangency portfolio using the `fPortfolio::getWeights()` function.
@@ -489,18 +543,22 @@ for (risk in targetRisks) {
   # Create a portfolio optimization specification with the target risk
   portfolioSpec <- fPortfolio::portfolioSpec()
   fPortfolio::setTargetRisk(portfolioSpec) <- risk
-  
+
   # Solve for the maximum return at this target risk
   optimal_portfolio <- fPortfolio::maxreturnPortfolio(
     returns_ts,
-    spec = portfolioSpec)
-  
+    spec = portfolioSpec
+  )
+
   # Store the optimal portfolio
   optimalPortfolios[[as.character(risk)]] <- optimal_portfolio
-  
+
   # Store the optimal portfolio weights with risk level
   optimal_weights <- fPortfolio::getWeights(optimal_portfolio)
-  optimalWeights_list[[as.character(risk)]] <- c(RiskLevel = risk, optimal_weights)
+  optimalWeights_list[[as.character(risk)]] <- c(
+    RiskLevel = risk,
+    optimal_weights
+  )
 }
 
 optimalWeightsByRisk <- dplyr::bind_rows(optimalWeights_list)
@@ -521,25 +579,25 @@ We can examine the efficient frontier of fantasy performance based on the mean a
 ```{r}
 all_proj <- dplyr::bind_rows(players_projectedPoints_seasonal)
 
-all_proj <- all_proj |> 
+all_proj <- all_proj |>
   rename(projectedPoints = raw_points)
 ```
 
 ```{r}
-all_proj_summary <- all_proj |> 
-  group_by(id) |> 
+all_proj_summary <- all_proj |>
+  group_by(id) |>
   summarise(
     mean = mean(projectedPoints, na.rm = TRUE),
     sd = sd(projectedPoints, na.rm = TRUE),
     var = var(projectedPoints, na.rm = TRUE)
   )
 
-all_proj_summary <- all_proj_summary |> 
+all_proj_summary <- all_proj_summary |>
   left_join(
-    nfl_playerIDs[,c("mfl_id","name","merge_name","position","team")],
+    nfl_playerIDs[, c("mfl_id", "name", "merge_name", "position", "team")],
     by = c("id" = "mfl_id")
-  ) |> 
-  select(name, team, position, everything()) |> 
+  ) |>
+  select(name, team, position, everything()) |>
   arrange(-mean)
 ```
 
@@ -568,16 +626,21 @@ plot_projectedPointsMeanVsSD <- ggplot2::ggplot(
   data = all_proj_summary,
   aes(
     x = sd,
-    y = mean)) +
+    y = mean
+  )
+) +
   geom_point(
     aes(
       text = name, # add player name for mouse over tooltip
-      label = position)) + # add season for mouse over tooltip
+      label = position
+    )
+  ) + # add season for mouse over tooltip
   #geom_smooth() +
   coord_cartesian(
-    xlim = c(0,NA),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(0, NA),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Standard Deviation of Player's Projected Fantasy Points (Season) Across Sources",
     y = "Mean of Player's Projected Fantasy Points (Season) Across Sources",
@@ -603,16 +666,21 @@ ggplot2::ggplot(
   data = all_proj_summary,
   aes(
     x = sd,
-    y = mean)) +
+    y = mean
+  )
+) +
   geom_point(
     aes(
       text = name, # add player name for mouse over tooltip
-      label = position)) + # add season for mouse over tooltip
+      label = position
+    )
+  ) + # add season for mouse over tooltip
   #geom_smooth() +
   coord_cartesian(
-    xlim = c(0,NA),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(0, NA),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Standard Deviation of Player's Projected Fantasy Points (Season) Across Sources",
     y = "Mean of Player's Projected Fantasy Points (Season) Across Sources",
@@ -656,28 +724,28 @@ An example variance-covariance matrix of players' performance is in @sec-efficie
 #| eval: false
 #| include: false
 
-all_proj_summary |> 
-  filter(position == "QB" & mean > 300) |> 
+all_proj_summary |>
+  filter(position == "QB" & mean > 300) |>
   arrange(-sd)
 
-all_proj_summary |> 
-  filter(position == "QB" & mean > 150) |> 
+all_proj_summary |>
+  filter(position == "QB" & mean > 150) |>
   arrange(sd)
 
-all_proj_summary |> 
-  filter(position == "RB" & mean > 200) |> 
+all_proj_summary |>
+  filter(position == "RB" & mean > 200) |>
   arrange(-sd)
 
-all_proj_summary |> 
-  filter(position == "RB" & mean > 100) |> 
+all_proj_summary |>
+  filter(position == "RB" & mean > 100) |>
   arrange(sd)
 
-all_proj_summary |> 
-  filter(position == "WR" & mean > 200) |> 
+all_proj_summary |>
+  filter(position == "WR" & mean > 200) |>
   arrange(-sd)
 
-all_proj_summary |> 
-  filter(position == "WR" & mean > 100) |> 
+all_proj_summary |>
+  filter(position == "WR" & mean > 100) |>
   arrange(sd)
 ```
 
@@ -699,32 +767,83 @@ qbRbWr_projections <- data.frame(
 )
 
 qbRbWr_projections$qb_mean <- c(
-  all_proj_summary$mean[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[1])],
-  all_proj_summary$mean[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[2])])
+  all_proj_summary$mean[which(
+    all_proj_summary$position == "QB" &
+      all_proj_summary$name == qbRbWr_projections$qb_name[1]
+  )],
+  all_proj_summary$mean[which(
+    all_proj_summary$position == "QB" &
+      all_proj_summary$name == qbRbWr_projections$qb_name[2]
+  )]
+)
 
 qbRbWr_projections$qb_sd <- c(
-  all_proj_summary$sd[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[1])],
-  all_proj_summary$sd[which(all_proj_summary$position == "QB" & all_proj_summary$name == qbRbWr_projections$qb_name[2])])
+  all_proj_summary$sd[which(
+    all_proj_summary$position == "QB" &
+      all_proj_summary$name == qbRbWr_projections$qb_name[1]
+  )],
+  all_proj_summary$sd[which(
+    all_proj_summary$position == "QB" &
+      all_proj_summary$name == qbRbWr_projections$qb_name[2]
+  )]
+)
 
 qbRbWr_projections$rb_mean <- c(
-  all_proj_summary$mean[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[1])],
-  all_proj_summary$mean[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[2])])
+  all_proj_summary$mean[which(
+    all_proj_summary$position == "RB" &
+      all_proj_summary$name == qbRbWr_projections$rb_name[1]
+  )],
+  all_proj_summary$mean[which(
+    all_proj_summary$position == "RB" &
+      all_proj_summary$name == qbRbWr_projections$rb_name[2]
+  )]
+)
 
 qbRbWr_projections$rb_sd <- c(
-  all_proj_summary$sd[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[1])],
-  all_proj_summary$sd[which(all_proj_summary$position == "RB" & all_proj_summary$name == qbRbWr_projections$rb_name[2])])
+  all_proj_summary$sd[which(
+    all_proj_summary$position == "RB" &
+      all_proj_summary$name == qbRbWr_projections$rb_name[1]
+  )],
+  all_proj_summary$sd[which(
+    all_proj_summary$position == "RB" &
+      all_proj_summary$name == qbRbWr_projections$rb_name[2]
+  )]
+)
 
 qbRbWr_projections$wr_mean <- c(
-  all_proj_summary$mean[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[1])],
-  all_proj_summary$mean[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[2])])
+  all_proj_summary$mean[which(
+    all_proj_summary$position == "WR" &
+      all_proj_summary$name == qbRbWr_projections$wr_name[1]
+  )],
+  all_proj_summary$mean[which(
+    all_proj_summary$position == "WR" &
+      all_proj_summary$name == qbRbWr_projections$wr_name[2]
+  )]
+)
 
 qbRbWr_projections$wr_sd <- c(
-  all_proj_summary$sd[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[1])],
-  all_proj_summary$sd[which(all_proj_summary$position == "WR" & all_proj_summary$name == qbRbWr_projections$wr_name[2])])
+  all_proj_summary$sd[which(
+    all_proj_summary$position == "WR" &
+      all_proj_summary$name == qbRbWr_projections$wr_name[1]
+  )],
+  all_proj_summary$sd[which(
+    all_proj_summary$position == "WR" &
+      all_proj_summary$name == qbRbWr_projections$wr_name[2]
+  )]
+)
 
-qbRbWr_projections$qb_lastName <- sapply(strsplit(qbRbWr_projections$qb_name, " "), function(x) tail(x, 1))
-qbRbWr_projections$rb_lastName <- sapply(strsplit(qbRbWr_projections$rb_name, " "), function(x) tail(x, 1))
-qbRbWr_projections$wr_lastName <- sapply(strsplit(qbRbWr_projections$wr_name, " "), function(x) tail(x, 1))
+qbRbWr_projections$qb_lastName <- sapply(
+  strsplit(qbRbWr_projections$qb_name, " "),
+  function(x) tail(x, 1)
+)
+qbRbWr_projections$rb_lastName <- sapply(
+  strsplit(qbRbWr_projections$rb_name, " "),
+  function(x) tail(x, 1)
+)
+qbRbWr_projections$wr_lastName <- sapply(
+  strsplit(qbRbWr_projections$wr_name, " "),
+  function(x) tail(x, 1)
+)
 
 team_projections <- data.frame(
   team = apply(hiLo_permutations, 1, paste0, collapse = ""),
@@ -748,32 +867,92 @@ team_projections <- data.frame(
   wr_sd = NA
 )
 
-team_projections$qb_name[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_name[which(qbRbWr_projections$condition == "Hi")]
-team_projections$qb_name[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_name[which(qbRbWr_projections$condition == "Lo")]
-team_projections$qb_lastName[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_lastName[which(qbRbWr_projections$condition == "Hi")]
-team_projections$qb_lastName[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_lastName[which(qbRbWr_projections$condition == "Lo")]
-team_projections$qb_mean[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_mean[which(qbRbWr_projections$condition == "Hi")]
-team_projections$qb_mean[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_mean[which(qbRbWr_projections$condition == "Lo")]
-team_projections$qb_sd[which(team_projections$qb == "Hi")] <- qbRbWr_projections$qb_sd[which(qbRbWr_projections$condition == "Hi")]
-team_projections$qb_sd[which(team_projections$qb == "Lo")] <- qbRbWr_projections$qb_sd[which(qbRbWr_projections$condition == "Lo")]
+team_projections$qb_name[which(
+  team_projections$qb == "Hi"
+)] <- qbRbWr_projections$qb_name[which(qbRbWr_projections$condition == "Hi")]
+team_projections$qb_name[which(
+  team_projections$qb == "Lo"
+)] <- qbRbWr_projections$qb_name[which(qbRbWr_projections$condition == "Lo")]
+team_projections$qb_lastName[which(
+  team_projections$qb == "Hi"
+)] <- qbRbWr_projections$qb_lastName[which(
+  qbRbWr_projections$condition == "Hi"
+)]
+team_projections$qb_lastName[which(
+  team_projections$qb == "Lo"
+)] <- qbRbWr_projections$qb_lastName[which(
+  qbRbWr_projections$condition == "Lo"
+)]
+team_projections$qb_mean[which(
+  team_projections$qb == "Hi"
+)] <- qbRbWr_projections$qb_mean[which(qbRbWr_projections$condition == "Hi")]
+team_projections$qb_mean[which(
+  team_projections$qb == "Lo"
+)] <- qbRbWr_projections$qb_mean[which(qbRbWr_projections$condition == "Lo")]
+team_projections$qb_sd[which(
+  team_projections$qb == "Hi"
+)] <- qbRbWr_projections$qb_sd[which(qbRbWr_projections$condition == "Hi")]
+team_projections$qb_sd[which(
+  team_projections$qb == "Lo"
+)] <- qbRbWr_projections$qb_sd[which(qbRbWr_projections$condition == "Lo")]
 
-team_projections$rb_name[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_name[which(qbRbWr_projections$condition == "Hi")]
-team_projections$rb_name[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_name[which(qbRbWr_projections$condition == "Lo")]
-team_projections$rb_lastName[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_lastName[which(qbRbWr_projections$condition == "Hi")]
-team_projections$rb_lastName[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_lastName[which(qbRbWr_projections$condition == "Lo")]
-team_projections$rb_mean[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_mean[which(qbRbWr_projections$condition == "Hi")]
-team_projections$rb_mean[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_mean[which(qbRbWr_projections$condition == "Lo")]
-team_projections$rb_sd[which(team_projections$rb == "Hi")] <- qbRbWr_projections$rb_sd[which(qbRbWr_projections$condition == "Hi")]
-team_projections$rb_sd[which(team_projections$rb == "Lo")] <- qbRbWr_projections$rb_sd[which(qbRbWr_projections$condition == "Lo")]
+team_projections$rb_name[which(
+  team_projections$rb == "Hi"
+)] <- qbRbWr_projections$rb_name[which(qbRbWr_projections$condition == "Hi")]
+team_projections$rb_name[which(
+  team_projections$rb == "Lo"
+)] <- qbRbWr_projections$rb_name[which(qbRbWr_projections$condition == "Lo")]
+team_projections$rb_lastName[which(
+  team_projections$rb == "Hi"
+)] <- qbRbWr_projections$rb_lastName[which(
+  qbRbWr_projections$condition == "Hi"
+)]
+team_projections$rb_lastName[which(
+  team_projections$rb == "Lo"
+)] <- qbRbWr_projections$rb_lastName[which(
+  qbRbWr_projections$condition == "Lo"
+)]
+team_projections$rb_mean[which(
+  team_projections$rb == "Hi"
+)] <- qbRbWr_projections$rb_mean[which(qbRbWr_projections$condition == "Hi")]
+team_projections$rb_mean[which(
+  team_projections$rb == "Lo"
+)] <- qbRbWr_projections$rb_mean[which(qbRbWr_projections$condition == "Lo")]
+team_projections$rb_sd[which(
+  team_projections$rb == "Hi"
+)] <- qbRbWr_projections$rb_sd[which(qbRbWr_projections$condition == "Hi")]
+team_projections$rb_sd[which(
+  team_projections$rb == "Lo"
+)] <- qbRbWr_projections$rb_sd[which(qbRbWr_projections$condition == "Lo")]
 
-team_projections$wr_name[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_name[which(qbRbWr_projections$condition == "Hi")]
-team_projections$wr_name[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_name[which(qbRbWr_projections$condition == "Lo")]
-team_projections$wr_lastName[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_lastName[which(qbRbWr_projections$condition == "Hi")]
-team_projections$wr_lastName[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_lastName[which(qbRbWr_projections$condition == "Lo")]
-team_projections$wr_mean[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_mean[which(qbRbWr_projections$condition == "Hi")]
-team_projections$wr_mean[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_mean[which(qbRbWr_projections$condition == "Lo")]
-team_projections$wr_sd[which(team_projections$wr == "Hi")] <- qbRbWr_projections$wr_sd[which(qbRbWr_projections$condition == "Hi")]
-team_projections$wr_sd[which(team_projections$wr == "Lo")] <- qbRbWr_projections$wr_sd[which(qbRbWr_projections$condition == "Lo")]
+team_projections$wr_name[which(
+  team_projections$wr == "Hi"
+)] <- qbRbWr_projections$wr_name[which(qbRbWr_projections$condition == "Hi")]
+team_projections$wr_name[which(
+  team_projections$wr == "Lo"
+)] <- qbRbWr_projections$wr_name[which(qbRbWr_projections$condition == "Lo")]
+team_projections$wr_lastName[which(
+  team_projections$wr == "Hi"
+)] <- qbRbWr_projections$wr_lastName[which(
+  qbRbWr_projections$condition == "Hi"
+)]
+team_projections$wr_lastName[which(
+  team_projections$wr == "Lo"
+)] <- qbRbWr_projections$wr_lastName[which(
+  qbRbWr_projections$condition == "Lo"
+)]
+team_projections$wr_mean[which(
+  team_projections$wr == "Hi"
+)] <- qbRbWr_projections$wr_mean[which(qbRbWr_projections$condition == "Hi")]
+team_projections$wr_mean[which(
+  team_projections$wr == "Lo"
+)] <- qbRbWr_projections$wr_mean[which(qbRbWr_projections$condition == "Lo")]
+team_projections$wr_sd[which(
+  team_projections$wr == "Hi"
+)] <- qbRbWr_projections$wr_sd[which(qbRbWr_projections$condition == "Hi")]
+team_projections$wr_sd[which(
+  team_projections$wr == "Lo"
+)] <- qbRbWr_projections$wr_sd[which(qbRbWr_projections$condition == "Lo")]
 
 team_projections$team_name <- apply(
   team_projections[, c("qb_lastName", "rb_lastName", "wr_lastName")],
@@ -782,8 +961,16 @@ team_projections$team_name <- apply(
   collapse = "/"
 )
 
-team_projections$team_mean <- rowSums(team_projections[,c("qb_mean","rb_mean","wr_mean")])
-team_projections$team_sd <- rowSums(team_projections[,c("qb_sd","rb_sd","wr_sd")])
+team_projections$team_mean <- rowSums(team_projections[, c(
+  "qb_mean",
+  "rb_mean",
+  "wr_mean"
+)])
+team_projections$team_sd <- rowSums(team_projections[, c(
+  "qb_sd",
+  "rb_sd",
+  "wr_sd"
+)])
 ```
 
 In @fig-teamPortfolio1, we depict the combined mean of projected fantasy points for a Quarterback/Running Back/Wide Receiver combination as a function of the standard deviation of their projected fantasy points across sources.
@@ -798,7 +985,9 @@ ggplot2::ggplot(
   aes(
     x = team_sd,
     y = team_mean,
-    label = team_name)) +
+    label = team_name
+  )
+) +
   geom_point() +
   ggrepel::geom_text_repel() +
   labs(
@@ -812,10 +1001,10 @@ ggplot2::ggplot(
 Now let's generate the efficient frontier across all players.
 
 ```{r}
-all_proj_summary_noNA <- all_proj_summary |> 
+all_proj_summary_noNA <- all_proj_summary |>
   filter(!is.na(id) & !is.na(mean) & !is.na(var))
 
-all_proj_summary_noNA_removeZeroVar <- all_proj_summary_noNA |> 
+all_proj_summary_noNA_removeZeroVar <- all_proj_summary_noNA |>
   filter(var > 0)
 ```
 
@@ -828,14 +1017,17 @@ const_cor <- function(rho, numAssets) {
   C
 }
 
-varCovMatrix <- diag(all_proj_summary_noNA_removeZeroVar$sd) %*% const_cor(0, nrow(all_proj_summary_noNA_removeZeroVar)) %*% diag(all_proj_summary_noNA_removeZeroVar$sd) # create a variance-covariance matrix assuming assets/players are uncorrelated
+varCovMatrix <- diag(all_proj_summary_noNA_removeZeroVar$sd) %*%
+  const_cor(0, nrow(all_proj_summary_noNA_removeZeroVar)) %*%
+  diag(all_proj_summary_noNA_removeZeroVar$sd) # create a variance-covariance matrix assuming assets/players are uncorrelated
 
 efficientFrontierData <- NMOF::mvFrontier(
   all_proj_summary_noNA_removeZeroVar$mean,
   varCovMatrix,
   wmin = 0,
   wmax = 1,
-  n = 50)
+  n = 50
+)
 ```
 
 When you evaluate all possible combinations of players, you can obtain the expected returns and standard deviations for each player combination.
@@ -856,7 +1048,8 @@ plot(
   type = "o",
   xlab = "Standard Deviation of Projected Fantasy Points Across Sources",
   ylab = "Projected Fantasy Points",
-  main = "Efficient Frontier of Projected Fantasy Points Across Sources")
+  main = "Efficient Frontier of Projected Fantasy Points Across Sources"
+)
 ```
 
 ### Based on Historical Game-to-Game Variability {#sec-efficientFrontierFantasyProjectionsGameToGameVariability}
@@ -864,23 +1057,23 @@ plot(
 We can also examine the efficient frontier of fantasy performance based on the mean and variability of players' historical (actual) week-to-week fantasy points [@Hitchings2012\; archived at <https://perma.cc/JQ6G-KSRT>].
 
 ```{r}
-player_stats_weekly_recent <- player_stats_weekly |> 
+player_stats_weekly_recent <- player_stats_weekly |>
   filter(season == max(season))
 
-player_stats_weekly_recent_summary <- player_stats_weekly_recent |> 
-  group_by(player_id) |> 
+player_stats_weekly_recent_summary <- player_stats_weekly_recent |>
+  group_by(player_id) |>
   summarise(
     mean = mean(fantasyPoints, na.rm = TRUE),
     sd = sd(fantasyPoints, na.rm = TRUE),
     var = var(fantasyPoints, na.rm = TRUE)
   )
 
-player_stats_weekly_recent_summary <- player_stats_weekly_recent_summary |> 
+player_stats_weekly_recent_summary <- player_stats_weekly_recent_summary |>
   left_join(
-    nfl_playerIDs[,c("gsis_id","name","merge_name","position","team")],
+    nfl_playerIDs[, c("gsis_id", "name", "merge_name", "position", "team")],
     by = c("player_id" = "gsis_id")
-  ) |> 
-  select(name, team, position, everything()) |> 
+  ) |>
+  select(name, team, position, everything()) |>
   arrange(-mean)
 ```
 
@@ -894,8 +1087,8 @@ cor.test(
 Here is the code to generate the variance-covariance matrix of players' performance (it is very large because there are many players):
 
 ```{r}
-dataForVarCovMatrix <- player_stats_weekly_recent |> 
-  select(player_id, week, fantasyPoints) |> 
+dataForVarCovMatrix <- player_stats_weekly_recent |>
+  select(player_id, week, fantasyPoints) |>
   pivot_wider(
     names_from = player_id,
     values_from = fantasyPoints
@@ -907,7 +1100,8 @@ dataForVarCovMatrix <- player_stats_weekly_recent |>
 
 cov(
   dataForVarCovMatrix,
-  use = "pairwise.complete.obs")
+  use = "pairwise.complete.obs"
+)
 ```
 
 ::: {.content-visible when-format="html:js"}
@@ -923,16 +1117,21 @@ plot_fantasyPointsMeanVsSD <- ggplot2::ggplot(
   data = player_stats_weekly_recent_summary,
   aes(
     x = sd,
-    y = mean)) +
+    y = mean
+  )
+) +
   geom_point(
     aes(
       text = name, # add player name for mouse over tooltip
-      label = position)) + # add season for mouse over tooltip
+      label = position
+    )
+  ) + # add season for mouse over tooltip
   #geom_smooth() +
   coord_cartesian(
-    xlim = c(0,NA),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(0, NA),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Standard Deviation of Player's Fantasy Points From Week-to-Week",
     y = "Mean of Player's Fantasy Points Across Weeks",
@@ -958,16 +1157,21 @@ ggplot2::ggplot(
   data = player_stats_weekly_recent_summary,
   aes(
     x = sd,
-    y = mean)) +
+    y = mean
+  )
+) +
   geom_point(
     aes(
       text = name, # add player name for mouse over tooltip
-      label = position)) + # add season for mouse over tooltip
+      label = position
+    )
+  ) + # add season for mouse over tooltip
   #geom_smooth() +
   coord_cartesian(
-    xlim = c(0,NA),
-    ylim = c(0,NA),
-    expand = FALSE) +
+    xlim = c(0, NA),
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Standard Deviation of Player's Fantasy Points From Week-to-Week",
     y = "Mean of Player's Fantasy Points Across Weeks",
@@ -985,28 +1189,28 @@ Below is code for obtaining the expected returns and risk for various combinatio
 #| eval: false
 #| include: false
 
-player_stats_weekly_recent_summary |> 
-  filter(position == "QB" & mean > 20) |> 
+player_stats_weekly_recent_summary |>
+  filter(position == "QB" & mean > 20) |>
   arrange(-sd)
 
-player_stats_weekly_recent_summary |> 
-  filter(position == "QB" & mean > 10) |> 
+player_stats_weekly_recent_summary |>
+  filter(position == "QB" & mean > 10) |>
   arrange(sd)
 
-player_stats_weekly_recent_summary |> 
-  filter(position == "RB" & mean > 17) |> 
+player_stats_weekly_recent_summary |>
+  filter(position == "RB" & mean > 17) |>
   arrange(-sd)
 
-player_stats_weekly_recent_summary |> 
-  filter(position == "RB" & mean > 10) |> 
+player_stats_weekly_recent_summary |>
+  filter(position == "RB" & mean > 10) |>
   arrange(sd)
 
-player_stats_weekly_recent_summary |> 
-  filter(position == "WR" & mean > 17) |> 
+player_stats_weekly_recent_summary |>
+  filter(position == "WR" & mean > 17) |>
   arrange(-sd)
 
-player_stats_weekly_recent_summary |> 
-  filter(position == "WR" & mean > 10) |> 
+player_stats_weekly_recent_summary |>
+  filter(position == "WR" & mean > 10) |>
   arrange(sd)
 ```
 
@@ -1021,32 +1225,83 @@ qbRbWr_projections2 <- data.frame(
 )
 
 qbRbWr_projections2$qb_mean <- c(
-  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[1])],
-  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[2])])
+  player_stats_weekly_recent_summary$mean[which(
+    player_stats_weekly_recent_summary$position == "QB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[1]
+  )],
+  player_stats_weekly_recent_summary$mean[which(
+    player_stats_weekly_recent_summary$position == "QB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[2]
+  )]
+)
 
 qbRbWr_projections2$qb_sd <- c(
-  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[1])],
-  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "QB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[2])])
+  player_stats_weekly_recent_summary$sd[which(
+    player_stats_weekly_recent_summary$position == "QB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[1]
+  )],
+  player_stats_weekly_recent_summary$sd[which(
+    player_stats_weekly_recent_summary$position == "QB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$qb_name[2]
+  )]
+)
 
 qbRbWr_projections2$rb_mean <- c(
-  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[1])],
-  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[2])])
+  player_stats_weekly_recent_summary$mean[which(
+    player_stats_weekly_recent_summary$position == "RB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[1]
+  )],
+  player_stats_weekly_recent_summary$mean[which(
+    player_stats_weekly_recent_summary$position == "RB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[2]
+  )]
+)
 
 qbRbWr_projections2$rb_sd <- c(
-  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[1])],
-  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "RB" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[2])])
+  player_stats_weekly_recent_summary$sd[which(
+    player_stats_weekly_recent_summary$position == "RB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[1]
+  )],
+  player_stats_weekly_recent_summary$sd[which(
+    player_stats_weekly_recent_summary$position == "RB" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$rb_name[2]
+  )]
+)
 
 qbRbWr_projections2$wr_mean <- c(
-  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[1])],
-  player_stats_weekly_recent_summary$mean[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[2])])
+  player_stats_weekly_recent_summary$mean[which(
+    player_stats_weekly_recent_summary$position == "WR" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[1]
+  )],
+  player_stats_weekly_recent_summary$mean[which(
+    player_stats_weekly_recent_summary$position == "WR" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[2]
+  )]
+)
 
 qbRbWr_projections2$wr_sd <- c(
-  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[1])],
-  player_stats_weekly_recent_summary$sd[which(player_stats_weekly_recent_summary$position == "WR" & player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[2])])
+  player_stats_weekly_recent_summary$sd[which(
+    player_stats_weekly_recent_summary$position == "WR" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[1]
+  )],
+  player_stats_weekly_recent_summary$sd[which(
+    player_stats_weekly_recent_summary$position == "WR" &
+      player_stats_weekly_recent_summary$name == qbRbWr_projections2$wr_name[2]
+  )]
+)
 
-qbRbWr_projections2$qb_lastName <- sapply(strsplit(qbRbWr_projections2$qb_name, " "), function(x) tail(x, 1))
-qbRbWr_projections2$rb_lastName <- sapply(strsplit(qbRbWr_projections2$rb_name, " "), function(x) tail(x, 1))
-qbRbWr_projections2$wr_lastName <- sapply(strsplit(qbRbWr_projections2$wr_name, " "), function(x) tail(x, 1))
+qbRbWr_projections2$qb_lastName <- sapply(
+  strsplit(qbRbWr_projections2$qb_name, " "),
+  function(x) tail(x, 1)
+)
+qbRbWr_projections2$rb_lastName <- sapply(
+  strsplit(qbRbWr_projections2$rb_name, " "),
+  function(x) tail(x, 1)
+)
+qbRbWr_projections2$wr_lastName <- sapply(
+  strsplit(qbRbWr_projections2$wr_name, " "),
+  function(x) tail(x, 1)
+)
 
 team_projections2 <- data.frame(
   team = apply(hiLo_permutations, 1, paste0, collapse = ""),
@@ -1070,32 +1325,92 @@ team_projections2 <- data.frame(
   wr_sd = NA
 )
 
-team_projections2$qb_name[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_name[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$qb_name[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_name[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$qb_lastName[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_lastName[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$qb_lastName[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_lastName[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$qb_mean[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_mean[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$qb_mean[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_mean[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$qb_sd[which(team_projections2$qb == "Hi")] <- qbRbWr_projections2$qb_sd[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$qb_sd[which(team_projections2$qb == "Lo")] <- qbRbWr_projections2$qb_sd[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$qb_name[which(
+  team_projections2$qb == "Hi"
+)] <- qbRbWr_projections2$qb_name[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$qb_name[which(
+  team_projections2$qb == "Lo"
+)] <- qbRbWr_projections2$qb_name[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$qb_lastName[which(
+  team_projections2$qb == "Hi"
+)] <- qbRbWr_projections2$qb_lastName[which(
+  qbRbWr_projections2$condition == "Hi"
+)]
+team_projections2$qb_lastName[which(
+  team_projections2$qb == "Lo"
+)] <- qbRbWr_projections2$qb_lastName[which(
+  qbRbWr_projections2$condition == "Lo"
+)]
+team_projections2$qb_mean[which(
+  team_projections2$qb == "Hi"
+)] <- qbRbWr_projections2$qb_mean[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$qb_mean[which(
+  team_projections2$qb == "Lo"
+)] <- qbRbWr_projections2$qb_mean[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$qb_sd[which(
+  team_projections2$qb == "Hi"
+)] <- qbRbWr_projections2$qb_sd[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$qb_sd[which(
+  team_projections2$qb == "Lo"
+)] <- qbRbWr_projections2$qb_sd[which(qbRbWr_projections2$condition == "Lo")]
 
-team_projections2$rb_name[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_name[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$rb_name[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_name[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$rb_lastName[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_lastName[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$rb_lastName[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_lastName[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$rb_mean[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_mean[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$rb_mean[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_mean[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$rb_sd[which(team_projections2$rb == "Hi")] <- qbRbWr_projections2$rb_sd[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$rb_sd[which(team_projections2$rb == "Lo")] <- qbRbWr_projections2$rb_sd[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$rb_name[which(
+  team_projections2$rb == "Hi"
+)] <- qbRbWr_projections2$rb_name[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$rb_name[which(
+  team_projections2$rb == "Lo"
+)] <- qbRbWr_projections2$rb_name[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$rb_lastName[which(
+  team_projections2$rb == "Hi"
+)] <- qbRbWr_projections2$rb_lastName[which(
+  qbRbWr_projections2$condition == "Hi"
+)]
+team_projections2$rb_lastName[which(
+  team_projections2$rb == "Lo"
+)] <- qbRbWr_projections2$rb_lastName[which(
+  qbRbWr_projections2$condition == "Lo"
+)]
+team_projections2$rb_mean[which(
+  team_projections2$rb == "Hi"
+)] <- qbRbWr_projections2$rb_mean[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$rb_mean[which(
+  team_projections2$rb == "Lo"
+)] <- qbRbWr_projections2$rb_mean[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$rb_sd[which(
+  team_projections2$rb == "Hi"
+)] <- qbRbWr_projections2$rb_sd[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$rb_sd[which(
+  team_projections2$rb == "Lo"
+)] <- qbRbWr_projections2$rb_sd[which(qbRbWr_projections2$condition == "Lo")]
 
-team_projections2$wr_name[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_name[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$wr_name[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_name[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$wr_lastName[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_lastName[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$wr_lastName[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_lastName[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$wr_mean[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_mean[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$wr_mean[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_mean[which(qbRbWr_projections2$condition == "Lo")]
-team_projections2$wr_sd[which(team_projections2$wr == "Hi")] <- qbRbWr_projections2$wr_sd[which(qbRbWr_projections2$condition == "Hi")]
-team_projections2$wr_sd[which(team_projections2$wr == "Lo")] <- qbRbWr_projections2$wr_sd[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$wr_name[which(
+  team_projections2$wr == "Hi"
+)] <- qbRbWr_projections2$wr_name[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$wr_name[which(
+  team_projections2$wr == "Lo"
+)] <- qbRbWr_projections2$wr_name[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$wr_lastName[which(
+  team_projections2$wr == "Hi"
+)] <- qbRbWr_projections2$wr_lastName[which(
+  qbRbWr_projections2$condition == "Hi"
+)]
+team_projections2$wr_lastName[which(
+  team_projections2$wr == "Lo"
+)] <- qbRbWr_projections2$wr_lastName[which(
+  qbRbWr_projections2$condition == "Lo"
+)]
+team_projections2$wr_mean[which(
+  team_projections2$wr == "Hi"
+)] <- qbRbWr_projections2$wr_mean[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$wr_mean[which(
+  team_projections2$wr == "Lo"
+)] <- qbRbWr_projections2$wr_mean[which(qbRbWr_projections2$condition == "Lo")]
+team_projections2$wr_sd[which(
+  team_projections2$wr == "Hi"
+)] <- qbRbWr_projections2$wr_sd[which(qbRbWr_projections2$condition == "Hi")]
+team_projections2$wr_sd[which(
+  team_projections2$wr == "Lo"
+)] <- qbRbWr_projections2$wr_sd[which(qbRbWr_projections2$condition == "Lo")]
 
 team_projections2$team_name <- apply(
   team_projections2[, c("qb_lastName", "rb_lastName", "wr_lastName")],
@@ -1104,8 +1419,16 @@ team_projections2$team_name <- apply(
   collapse = "/"
 )
 
-team_projections2$team_mean <- rowSums(team_projections2[,c("qb_mean","rb_mean","wr_mean")])
-team_projections2$team_sd <- rowSums(team_projections2[,c("qb_sd","rb_sd","wr_sd")])
+team_projections2$team_mean <- rowSums(team_projections2[, c(
+  "qb_mean",
+  "rb_mean",
+  "wr_mean"
+)])
+team_projections2$team_sd <- rowSums(team_projections2[, c(
+  "qb_sd",
+  "rb_sd",
+  "wr_sd"
+)])
 ```
 
 In @fig-teamPortfolio2, we depict the combined mean of historical fantasy points for a Quarterback/Running Back/Wide Receiver combination as a function of the historical standard deviation of their fantasy points across games.
@@ -1120,7 +1443,9 @@ ggplot2::ggplot(
   aes(
     x = team_sd,
     y = team_mean,
-    label = team_name)) +
+    label = team_name
+  )
+) +
   geom_point() +
   ggrepel::geom_text_repel() +
   labs(
@@ -1134,24 +1459,29 @@ ggplot2::ggplot(
 Now let's generate the efficient frontier across all players.
 
 ```{r}
-player_stats_weekly_recent_summary_noNA <- player_stats_weekly_recent_summary |> 
+player_stats_weekly_recent_summary_noNA <- player_stats_weekly_recent_summary |>
   filter(!is.na(player_id) & !is.na(mean) & !is.na(var))
 
-player_stats_weekly_recent_summary_noNA_removeZeroVar <- player_stats_weekly_recent_summary_noNA |> 
+player_stats_weekly_recent_summary_noNA_removeZeroVar <- player_stats_weekly_recent_summary_noNA |>
   filter(var > 0)
 ```
 
 Below, we use the `NMOF::mvFrontier()` function from the `NMOF` package [@R-NMOF; @Gilli2019_packages; @Schumann20112024_packages] to compute the efficient frontier.
 
 ```{r}
-varCovMatrix2 <- diag(player_stats_weekly_recent_summary_noNA_removeZeroVar$sd) %*% const_cor(0, nrow(player_stats_weekly_recent_summary_noNA_removeZeroVar)) %*% diag(player_stats_weekly_recent_summary_noNA_removeZeroVar$sd) # create a variance-covariance matrix assuming assets/players are uncorrelated
+varCovMatrix2 <- diag(
+  player_stats_weekly_recent_summary_noNA_removeZeroVar$sd
+) %*%
+  const_cor(0, nrow(player_stats_weekly_recent_summary_noNA_removeZeroVar)) %*%
+  diag(player_stats_weekly_recent_summary_noNA_removeZeroVar$sd) # create a variance-covariance matrix assuming assets/players are uncorrelated
 
 efficientFrontierData2 <- NMOF::mvFrontier(
   player_stats_weekly_recent_summary_noNA_removeZeroVar$mean,
   varCovMatrix2,
   wmin = 0,
   wmax = 1,
-  n = 50)
+  n = 50
+)
 ```
 
 The efficient frontier of fantasy points across weeks is in @fig-efficientFrontierAcrossWeeks.
@@ -1169,7 +1499,8 @@ plot(
   type = "o",
   xlab = "Standard Deviation of Fantasy Points Across Weeks",
   ylab = "Weekly Fantasy Points",
-  main = "Efficient Frontier of Fantasy Points Across Weeks")
+  main = "Efficient Frontier of Fantasy Points Across Weeks"
+)
 ```
 
 In these examples, we have computed the efficient frontier across *all* players.
