@@ -88,7 +88,8 @@ regression$predictor <- regression$predictor + abs(min(regression$predictor))
 
 lm(
   outcome ~ predictor,
-  data = regression)
+  data = regression
+)
 
 ggplot2::ggplot(
   data = regression,
@@ -102,16 +103,17 @@ ggplot2::ggplot(
     method = "lm",
     linewidth = 2,
     se = FALSE,
-    fullrange = TRUE) +
+    fullrange = TRUE
+  ) +
   scale_x_continuous(
-    lim = c(0,8),
+    lim = c(0, 8),
     breaks = seq(from = 0, to = 8, by = 2),
-    expand = c(0,0)
+    expand = c(0, 0)
   ) +
   scale_y_continuous(
-    lim = c(0,8),
+    lim = c(0, 8),
     breaks = seq(from = 0, to = 8, by = 2),
-    expand = c(0,0)
+    expand = c(0, 0)
   ) +
   labs(
     x = "Predictor Variable",
@@ -119,7 +121,8 @@ ggplot2::ggplot(
     title = "Regression Best-Fit Line"
   ) +
   theme_classic(
-    base_size = 16) +
+    base_size = 16
+  ) +
   theme(legend.title = element_blank())
 
 ggsave("./images/regression.pdf", width = 6, height = 6)
@@ -229,7 +232,10 @@ linearRegression <- lm(
 
 summary(linearRegression)
 
-print(effectsize::standardize_parameters(linearRegression, method = "refit"), digits = 2)
+print(
+  effectsize::standardize_parameters(linearRegression, method = "refit"),
+  digits = 2
+)
 ```
 
 ### Logistic Regression {#sec-multipleRegressionLogistic}
@@ -241,11 +247,12 @@ To calculate the model $R^2$, we use the `performance::r2()` function of the `pe
 #| label: logistic-regression
 
 newdata <- player_stats_weekly |>
-  mutate( # create a binary variable to be used as the outcome variable
+  mutate(
+    # create a binary variable to be used as the outcome variable
     receiving_td = case_when(
       is.na(receiving_tds) ~ NA_real_, # keep NA
-      receiving_tds >= 1   ~ 1,
-      receiving_tds == 0   ~ 0
+      receiving_tds >= 1 ~ 1,
+      receiving_tds == 0 ~ 0
     )
   )
 
@@ -258,12 +265,16 @@ logisticRegression <- glm(
 
 summary(logisticRegression)
 performance::r2(logisticRegression)
-print(effectsize::standardize_parameters(logisticRegression, method = "refit"), digits = 2)
+print(
+  effectsize::standardize_parameters(logisticRegression, method = "refit"),
+  digits = 2
+)
 
 broom::tidy(
   logisticRegression,
   exponentiate = TRUE,
-  conf.int = TRUE)
+  conf.int = TRUE
+)
 ```
 
 ### Ordinal Regression {#sec-multipleRegressionOrdinal}
@@ -285,12 +296,16 @@ ordinalRegression <- ordinal::clm(
 
 summary(ordinalRegression)
 performance::r2(ordinalRegression)
-print(effectsize::standardize_parameters(ordinalRegression, method = "refit"), digits = 2)
+print(
+  effectsize::standardize_parameters(ordinalRegression, method = "refit"),
+  digits = 2
+)
 
 broom::tidy(
   ordinalRegression,
   exponentiate = TRUE,
-  conf.int = TRUE)
+  conf.int = TRUE
+)
 ```
 
 ### Poisson Regression {#sec-multipleRegressionPoisson}
@@ -309,12 +324,16 @@ poissonRegression <- glm(
 
 summary(poissonRegression)
 performance::r2(poissonRegression)
-print(effectsize::standardize_parameters(poissonRegression, method = "refit"), digits = 2)
+print(
+  effectsize::standardize_parameters(poissonRegression, method = "refit"),
+  digits = 2
+)
 
 broom::tidy(
   poissonRegression,
   exponentiate = TRUE,
-  conf.int = TRUE)
+  conf.int = TRUE
+)
 ```
 
 ### Negative Binomial Regression {#sec-multipleRegressionNegativeBinomial}
@@ -333,12 +352,19 @@ negativeBinomialRegression <- MASS::glm.nb(
 
 summary(negativeBinomialRegression)
 performance::r2(negativeBinomialRegression)
-print(effectsize::standardize_parameters(negativeBinomialRegression, method = "refit"), digits = 2)
+print(
+  effectsize::standardize_parameters(
+    negativeBinomialRegression,
+    method = "refit"
+  ),
+  digits = 2
+)
 
 broom::tidy(
   negativeBinomialRegression,
   exponentiate = TRUE,
-  conf.int = TRUE)
+  conf.int = TRUE
+)
 ```
 
 ### Beta Regression {#sec-multipleRegressionBeta}
@@ -378,7 +404,8 @@ betaRegression <- brms::brm(
 
 save(
   betaRegression,
-  file = "./data/betaRegression.RData")
+  file = "./data/betaRegression.RData"
+)
 ```
 
 ```{r}
@@ -391,7 +418,7 @@ load(file = file.path(path, "/OneDrive - University of Iowa/Teaching/Courses/Fan
 ```{r}
 #| include: false
 
-load(file = "./data/betaRegression.RData") 
+load(file = "./data/betaRegression.RData")
 ```
 
 ```{r}
@@ -457,50 +484,59 @@ sampleSize <- 1000
 quadraticX <- runif(
   sampleSize,
   min = -4,
-  max = 4)
+  max = 4
+)
 linearY <- quadraticX + rnorm(sampleSize, mean = 0, sd = 0.5)
-quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
+quadraticY <- quadraticX^2 + rnorm(sampleSize)
 quadraticData <- cbind(quadraticX, quadraticY) |>
   data.frame() |>
   arrange(quadraticX)
 
 quadraticModel <- lm(
-  quadraticY ~ quadraticX + I(quadraticX ^ 2),
-  data = quadraticData)
+  quadraticY ~ quadraticX + I(quadraticX^2),
+  data = quadraticData
+)
 
 quadraticNewData <- data.frame(
   quadraticX = seq(
     from = min(quadraticData$quadraticX),
     to = max(quadraticData$quadraticY),
-    length.out = sampleSize))
+    length.out = sampleSize
+  )
+)
 
 quadraticNewData$quadraticY <- predict(
   quadraticModel,
-  newdata = quadraticNewData)
+  newdata = quadraticNewData
+)
 
 plot(
   x = quadraticX,
   y = linearY,
   xlab = "",
   ylab = "",
-  main = "Linear Association")
+  main = "Linear Association"
+)
 
 abline(
   lm(linearY ~ quadraticX),
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 
 plot(
   x = quadraticData$quadraticX,
   y = quadraticData$quadraticY,
   xlab = "",
   ylab = "",
-  main = "Nonlinear Association")
+  main = "Nonlinear Association"
+)
 
 lines(
   quadraticNewData$quadraticY ~ quadraticNewData$quadraticX,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 ```
 
 :::
@@ -521,50 +557,59 @@ sampleSize <- 1000
 quadraticX <- runif(
   sampleSize,
   min = -4,
-  max = 4)
+  max = 4
+)
 linearY <- quadraticX + rnorm(sampleSize, mean = 0, sd = 0.5)
-quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
+quadraticY <- quadraticX^2 + rnorm(sampleSize)
 quadraticData <- cbind(quadraticX, quadraticY) |>
   data.frame |>
   arrange(quadraticX)
 
 quadraticModel <- lm(
-  quadraticY ~ quadraticX + I(quadraticX ^ 2),
-  data = quadraticData)
+  quadraticY ~ quadraticX + I(quadraticX^2),
+  data = quadraticData
+)
 
 quadraticNewData <- data.frame(
   quadraticX = seq(
     from = min(quadraticData$quadraticX),
     to = max(quadraticData$quadraticY),
-    length.out = sampleSize))
+    length.out = sampleSize
+  )
+)
 
 quadraticNewData$quadraticY <- predict(
   quadraticModel,
-  newdata = quadraticNewData)
+  newdata = quadraticNewData
+)
 
 plot(
   x = quadraticX,
   y = linearY,
   xlab = "",
   ylab = "",
-  main = "Linear Association")
+  main = "Linear Association"
+)
 
 abline(
   lm(linearY ~ quadraticX),
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 
 plot(
   x = quadraticData$quadraticX,
   y = quadraticData$quadraticY,
   xlab = "",
   ylab = "",
-  main = "Nonlinear Association")
+  main = "Nonlinear Association"
+)
 
 lines(
   quadraticNewData$quadraticY ~ quadraticNewData$quadraticX,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 ```
 
 :::
@@ -612,7 +657,7 @@ fitted2 <- fitted(fit2)
 
 # 3. Bow-tie-shaped heteroscedasticity
 x3 <- runif(sampleSize, 0, 10)
-sd3 <- abs(x3 - 5) + 0.5  # variance smallest in middle, higher on edges
+sd3 <- abs(x3 - 5) + 0.5 # variance smallest in middle, higher on edges
 y3 <- 3 + 2 * x3 + rnorm(sampleSize, mean = 0, sd = sd3)
 fit3 <- lm(y3 ~ x3)
 res3 <- resid(fit3)
@@ -620,7 +665,7 @@ fitted3 <- fitted(fit3)
 
 # 4. Diamond-shaped heteroscedasticity
 x4 <- runif(sampleSize, 0, 10)
-sd4 <- -abs(x4 - 5) + 5.5  # inverted bow-tie
+sd4 <- -abs(x4 - 5) + 5.5 # inverted bow-tie
 y4 <- 3 + 2 * x4 + rnorm(sampleSize, mean = 0, sd = sd4)
 fit4 <- lm(y4 ~ x4)
 res4 <- resid(fit4)
@@ -635,24 +680,25 @@ sample_triangle <- function(n, v1, v2, v3) {
   is_flip <- u + v > 1
   u[is_flip] <- 1 - u[is_flip]
   v[is_flip] <- 1 - v[is_flip]
-  
+
   x <- (1 - u - v) * v1[1] + u * v2[1] + v * v3[1]
   y <- (1 - u - v) * v1[2] + u * v2[2] + v * v3[2]
-  
+
   cbind(x, y)
 }
 
 # Triangle vertices
-v1 <- c(0, height)  # top left
+v1 <- c(0, height) # top left
 v2 <- c(10, height) # top right
-v3 <- c(5, 0)       # bottom center
+v3 <- c(5, 0) # bottom center
 
 # Sample points inside triangle
 tri_points <- sample_triangle(
   sampleSize,
   v1,
   v2,
-  v3)
+  v3
+)
 
 # Extract x and residuals
 x5 <- tri_points[, 1]
@@ -672,60 +718,70 @@ plot(
   res1,
   main = "Homoscedasticity",
   xlab = "Fitted value",
-  ylab = "Residual")
+  ylab = "Residual"
+)
 
 abline(
   h = 0,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 
 plot(
   fitted2,
   res2,
   main = "Fan-Shaped Heteroscedasticity",
   xlab = "Fitted value",
-  ylab = "Residual")
+  ylab = "Residual"
+)
 
 abline(
   h = 0,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 
 plot(
   fitted3,
   res3,
   main = "Bow-Tie-Shaped Heteroscedasticity",
   xlab = "Fitted value",
-  ylab = "Residual")
+  ylab = "Residual"
+)
 
 abline(
   h = 0,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 
 plot(
   fitted4,
   res4,
   main = "Diamond-Shaped Heteroscedasticity",
   xlab = "Fitted value",
-  ylab = "Residual")
+  ylab = "Residual"
+)
 
 abline(
   h = 0,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 
 plot(
   fitted5,
   res5,
   main = "Triangle-Shaped Heteroscedasticity",
   xlab = "Fitted value",
-  ylab = "Residual")
+  ylab = "Residual"
+)
 
 abline(
   h = 0,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 ```
 
 If there is heteroscedasticity, it may be necessary to transform the [outcome variable](#sec-correlationalStudy) to be more normally distributed.
@@ -776,96 +832,116 @@ sampleSize <- 10000
 distribution_normal <- rnorm(
   sampleSize,
   mean = 0,
-  sd = 1)
+  sd = 1
+)
 
 distribution_bimodal <- c(
   rnorm(
-    sampleSize/2,
+    sampleSize / 2,
     mean = -2,
-    sd = 1),
+    sd = 1
+  ),
   rnorm(
-    sampleSize/2,
+    sampleSize / 2,
     mean = 2,
-    sd = 1))
+    sd = 1
+  )
+)
 
 distribution_negativeSkew <- -rlnorm(
   sampleSize,
   meanlog = 0,
-  sdlog = 1)
+  sdlog = 1
+)
 
 distribution_positiveSkew <- rlnorm(
   sampleSize,
   meanlog = 0,
-  sdlog = 1)
+  sdlog = 1
+)
 
 distribution_lightTailed <- runif(
   sampleSize,
   min = -2,
-  max = 2)
+  max = 2
+)
 
 distribution_heavyTailed <- rt(
   sampleSize,
-  df = 2)
+  df = 2
+)
 
 hist(
   distribution_normal,
   main = "Normal Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_normal,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_bimodal,
   main = "Bimodal Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_bimodal,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_negativeSkew,
   main = "Negatively Skewed Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_negativeSkew,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_positiveSkew,
   main = "Positively Skewed Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_positiveSkew,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_lightTailed,
   main = "Platykurtic (Light Tailed) Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_lightTailed,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_heavyTailed,
   main = "Leptokurtic (Heavy Tailed) Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_heavyTailed,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 ```
 
 :::
@@ -887,96 +963,116 @@ sampleSize <- 10000
 distribution_normal <- rnorm(
   sampleSize,
   mean = 0,
-  sd = 1)
+  sd = 1
+)
 
 distribution_bimodal <- c(
   rnorm(
-    sampleSize/2,
+    sampleSize / 2,
     mean = -2,
-    sd = 1),
+    sd = 1
+  ),
   rnorm(
-    sampleSize/2,
+    sampleSize / 2,
     mean = 2,
-    sd = 1))
+    sd = 1
+  )
+)
 
 distribution_negativeSkew <- -rlnorm(
   sampleSize,
   meanlog = 0,
-  sdlog = 1)
+  sdlog = 1
+)
 
 distribution_positiveSkew <- rlnorm(
   sampleSize,
   meanlog = 0,
-  sdlog = 1)
+  sdlog = 1
+)
 
 distribution_lightTailed <- runif(
   sampleSize,
   min = -2,
-  max = 2)
+  max = 2
+)
 
 distribution_heavyTailed <- rt(
   sampleSize,
-  df = 2)
+  df = 2
+)
 
 hist(
   distribution_normal,
   main = "Normal Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_normal,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_bimodal,
   main = "Bimodal Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_bimodal,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_negativeSkew,
   main = "Negatively Skewed Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_negativeSkew,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_positiveSkew,
   main = "Positively Skewed Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_positiveSkew,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_lightTailed,
   main = "Platykurtic (Light Tailed) Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_lightTailed,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 
 hist(
   distribution_heavyTailed,
   main = "Leptokurtic (Heavy Tailed) Distribution",
-  col = "#0099F8")
+  col = "#0099F8"
+)
 
 car::qqPlot(
   distribution_heavyTailed,
   main = "QQ Plot",
-  id = FALSE)
+  id = FALSE
+)
 ```
 
 :::
@@ -1013,16 +1109,19 @@ Consider the following example (adapted from @PetersenPrinciplesPsychAssessment)
 
 regression1 <- data.frame(
   "y" = c(7, 13, 29, 10),
-  "x1" = c(1, 2, 7, 2))
+  "x1" = c(1, 2, 7, 2)
+)
 
 regression2 <- data.frame(
   "y" = c(7, 13, 29, 10),
   "x1" = c(1, 2, 7, 2),
-  "x2" = c(3, 5, 1, 2))
+  "x2" = c(3, 5, 1, 2)
+)
 
 regression1_model <- lm(
   y ~ x1,
-  data = regression1)
+  data = regression1
+)
 
 regression1_intercept <- apa(regression1_model$coefficients[[1]], decimals = 2)
 regression1_slope <- apa(regression1_model$coefficients[[2]], decimals = 2)
@@ -1042,8 +1141,9 @@ regression2_rsquare <- apa(summary(regression2_model)$r.squared, decimals = 2)
 
 knitr::kable(
   regression1,
-  col.names = c("y","x1"),
-  booktabs = TRUE)
+  col.names = c("y", "x1"),
+  booktabs = TRUE
+)
 ```
 
 Using the data, the best fitting regression model is: $y =$ `{r} regression1_intercept` $+$ `{r} regression1_slope` $\cdot x_1$.
@@ -1059,8 +1159,9 @@ Now consider the following example where you add a second [predictor variable](#
 
 knitr::kable(
   regression2,
-  col.names = c("y","x1","x2"),
-  booktabs = TRUE)
+  col.names = c("y", "x1", "x2"),
+  booktabs = TRUE
+)
 ```
 
 With the second [predictor variable](#sec-correlationalStudy), the best fitting regression model is: $y =$ `{r} regression2_intercept` + `{r} regression2_slope1` $\cdot x_1 +$ `{r} regression2_slope2` $\cdot x_2$.
@@ -1130,56 +1231,67 @@ set.seed(52242)
 
 sampleSize <- 200
 quadraticX <- rnorm(sampleSize)
-quadraticY <- quadraticX ^ 2 + rnorm(sampleSize)
+quadraticY <- quadraticX^2 + rnorm(sampleSize)
 quadraticData <- cbind(quadraticX, quadraticY) |>
   data.frame() |>
   arrange(quadraticX)
 
 quadraticModel <- lm(
-  quadraticY ~ quadraticX + I(quadraticX ^ 2),
-  data = quadraticData)
+  quadraticY ~ quadraticX + I(quadraticX^2),
+  data = quadraticData
+)
 
 quadraticNewData <- data.frame(
   quadraticX = seq(
     from = min(quadraticData$quadraticX),
     to = max(quadraticData$quadraticY),
-    length.out = sampleSize))
+    length.out = sampleSize
+  )
+)
 
 quadraticNewData$quadraticY <- predict(
   quadraticModel,
-  newdata = quadraticNewData)
+  newdata = quadraticNewData
+)
 
 loessFit <- loess(
   quadraticY ~ quadraticX,
   data = quadraticData,
   span = 0.01,
-  degree = 1)
+  degree = 1
+)
 
 loessNewData <- data.frame(
   quadraticX = seq(
     from = min(quadraticData$quadraticX),
     to = max(quadraticData$quadraticY),
-    length.out = sampleSize))
+    length.out = sampleSize
+  )
+)
 
 quadraticNewData$loessY <- predict(
   loessFit,
-  newdata = quadraticNewData)
+  newdata = quadraticNewData
+)
 
 plot(
   x = quadraticData$quadraticX,
   y = quadraticData$quadraticY,
   xlab = "",
-  ylab = "")
+  ylab = ""
+)
 
 lines(
   quadraticNewData$quadraticY ~ quadraticNewData$quadraticX,
   lwd = 2,
-  col = "blue")
+  col = "blue"
+)
 
 lines(
   quadraticNewData$loessY ~ quadraticNewData$quadraticX,
   lwd = 2,
-  col = "red")
+  col = "red"
+)
 ```
 
 ## Covariates {#sec-covariates}
@@ -1215,33 +1327,37 @@ We have only a few [predictors](#sec-correlationalStudy) and our sample size is 
 Let's first examine [descriptive statistics](#sec-descriptiveStatistics) of the [predictor](#sec-correlationalStudy) and [outcome](#sec-correlationalStudy) variables.
 
 ```{r}
-player_stats_seasonal |> 
-  dplyr::select(fantasyPoints, age, height, weight, target_share) |> 
+player_stats_seasonal |>
+  dplyr::select(fantasyPoints, age, height, weight, target_share) |>
   dplyr::summarise(across(
-      everything(),
-      .fns = list(
-        n = ~ length(na.omit(.)),
-        missingness = ~ mean(is.na(.)) * 100,
-        M = ~ mean(., na.rm = TRUE),
-        SD = ~ sd(., na.rm = TRUE),
-        min = ~ min(., na.rm = TRUE),
-        max = ~ max(., na.rm = TRUE),
-        range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
-        IQR = ~ IQR(., na.rm = TRUE),
-        MAD = ~ mad(., na.rm = TRUE),
-        median = ~ median(., na.rm = TRUE),
-        pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
-        mode = ~ petersenlab::Mode(., multipleModes = "mean"),
-        skewness = ~ psych::skew(., na.rm = TRUE),
-        kurtosis = ~ psych::kurtosi(., na.rm = TRUE)),
-      .names = "{.col}.{.fn}")) |>
-    tidyr::pivot_longer(
-      cols = everything(),
-      names_to = c("variable","index"),
-      names_sep = "\\.") |> 
-    tidyr::pivot_wider(
-      names_from = index,
-      values_from = value)
+    everything(),
+    .fns = list(
+      n = ~ length(na.omit(.)),
+      missingness = ~ mean(is.na(.)) * 100,
+      M = ~ mean(., na.rm = TRUE),
+      SD = ~ sd(., na.rm = TRUE),
+      min = ~ min(., na.rm = TRUE),
+      max = ~ max(., na.rm = TRUE),
+      range = ~ max(., na.rm = TRUE) - min(., na.rm = TRUE),
+      IQR = ~ IQR(., na.rm = TRUE),
+      MAD = ~ mad(., na.rm = TRUE),
+      median = ~ median(., na.rm = TRUE),
+      pseudomedian = ~ DescTools::HodgesLehmann(., na.rm = TRUE),
+      mode = ~ petersenlab::Mode(., multipleModes = "mean"),
+      skewness = ~ psych::skew(., na.rm = TRUE),
+      kurtosis = ~ psych::kurtosi(., na.rm = TRUE)
+    ),
+    .names = "{.col}.{.fn}"
+  )) |>
+  tidyr::pivot_longer(
+    cols = everything(),
+    names_to = c("variable", "index"),
+    names_sep = "\\."
+  ) |>
+  tidyr::pivot_wider(
+    names_from = index,
+    values_from = value
+  )
 ```
 
 Let's also examine the distributions of the variables using a [density plot](#sec-ridgelinePlot), as depicted in @fig-densityPlotMultipleRegressionVars.
@@ -1262,7 +1378,8 @@ ggplot2::ggplot(
   data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
-    x = fantasyPoints)
+    x = fantasyPoints
+  )
 ) +
   geom_histogram(
     aes(y = after_stat(density)),
@@ -1287,7 +1404,8 @@ ggplot2::ggplot(
   data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
-    x = age)
+    x = age
+  )
 ) +
   geom_histogram(
     aes(y = after_stat(density)),
@@ -1312,7 +1430,8 @@ ggplot2::ggplot(
   data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
-    x = height)
+    x = height
+  )
 ) +
   geom_histogram(
     aes(y = after_stat(density)),
@@ -1337,7 +1456,8 @@ ggplot2::ggplot(
   data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
-    x = weight)
+    x = weight
+  )
 ) +
   geom_histogram(
     aes(y = after_stat(density)),
@@ -1362,7 +1482,8 @@ ggplot2::ggplot(
   data = player_stats_seasonal |>
     filter(position_group %in% c("WR")),
   mapping = aes(
-    x = target_share)
+    x = target_share
+  )
 ) +
   geom_histogram(
     aes(y = after_stat(density)),
@@ -1405,15 +1526,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = age,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Player Age (Years)",
     y = "Fantasy Points (Season)",
@@ -1426,15 +1551,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = height,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Player Height (Inches)",
     y = "Fantasy Points (Season)",
@@ -1447,15 +1576,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = weight,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Player Weight (Pounds)",
     y = "Fantasy Points (Season)",
@@ -1468,15 +1601,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = target_share,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Target Share",
     y = "Fantasy Points (Season)",
@@ -1501,15 +1638,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = age,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Player Age (Years)",
     y = "Fantasy Points (Season)",
@@ -1522,15 +1663,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = height,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Player Height (Inches)",
     y = "Fantasy Points (Season)",
@@ -1543,15 +1688,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = weight,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Player Weight (Pounds)",
     y = "Fantasy Points (Season)",
@@ -1564,15 +1713,19 @@ ggplot2::ggplot(
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   aes(
     x = target_share,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_point(alpha = 0.05) +
   geom_smooth(
     method = "lm",
-    color = "black") +
+    color = "black"
+  ) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Target Share",
     y = "Fantasy Points (Season)",
@@ -1651,21 +1804,30 @@ $$ {#eq-linearRegressionModelSubstitute}
 If we want to obtain standardized regression coefficients, we can use the `effectsize::standardize_parameters()` function of the `effectsize` package [@R-effectsize; @BenShachar2020_packages].
 
 ```{r}
-print(effectsize::standardize_parameters(linearRegressionModel, method = "basic"), digits = 2)
+print(
+  effectsize::standardize_parameters(linearRegressionModel, method = "basic"),
+  digits = 2
+)
 ```
 
 Or, we can standardize the [outcome variable](#sec-correlationalStudy) and each [predictor variable](#sec-correlationalStudy) using the `base::scale()` function:
 
 ```{r}
 linearRegressionModelStandardized <- lm(
-  scale(fantasyPoints) ~ scale(age) + scale(height) + scale(weight) + scale(target_share),
+  scale(fantasyPoints) ~ scale(age) +
+    scale(height) +
+    scale(weight) +
+    scale(target_share),
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
 summary(linearRegressionModelStandardized)
 
-print(effectsize::standardize_parameters(linearRegressionModel, method = "refit"), digits = 2)
+print(
+  effectsize::standardize_parameters(linearRegressionModel, method = "refit"),
+  digits = 2
+)
 ```
 
 Target share has a large [effect size](#sec-practicalSignificance).
@@ -1675,7 +1837,14 @@ Now let's consider whether any of the terms show curvilinear associations with f
 
 ```{r}
 quadraticTermsRegressionModel <- lm(
-  fantasyPoints ~ age + I(age^2) + height + I(height^2) + weight + I(weight^2) + target_share + I(target_share^2),
+  fantasyPoints ~ age +
+    I(age^2) +
+    height +
+    I(height^2) +
+    weight +
+    I(weight^2) +
+    target_share +
+    I(target_share^2),
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
@@ -1701,19 +1870,38 @@ Only target share (not height or weight) shows a significant association, includ
 Here are the standardized coefficients:
 
 ```{r}
-print(effectsize::standardize_parameters(quadraticTermsRegressionModel, method = "basic"), digits = 2)
+print(
+  effectsize::standardize_parameters(
+    quadraticTermsRegressionModel,
+    method = "basic"
+  ),
+  digits = 2
+)
 ```
 
 ```{r}
 quadraticTermsRegressionModelStandardized <- lm(
-  scale(fantasyPoints) ~ scale(age) + scale(I(age^2)) + scale(height) + scale(I(height^2)) + scale(weight) + scale(I(weight^2)) + scale(target_share) + scale(I(target_share^2)),
+  scale(fantasyPoints) ~ scale(age) +
+    scale(I(age^2)) +
+    scale(height) +
+    scale(I(height^2)) +
+    scale(weight) +
+    scale(I(weight^2)) +
+    scale(target_share) +
+    scale(I(target_share^2)),
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
 
 summary(quadraticTermsRegressionModelStandardized)
 
-print(effectsize::standardize_parameters(quadraticTermsRegressionModel, method = "refit"), digits = 2)
+print(
+  effectsize::standardize_parameters(
+    quadraticTermsRegressionModel,
+    method = "refit"
+  ),
+  digits = 2
+)
 ```
 
 ### Squared Semi-Partial Correlation ($sr^2$) {#sec-multipleRegressionSquaredSemiPartialCorrelation}
@@ -1733,20 +1921,22 @@ Below we conduct a commonality analysis using the `yhat::calc.yhat()`, `yhat::co
 yhat::calc.yhat(linearRegressionModel)
 
 apsOut <- yhat::aps(
-  dataMatrix = player_stats_seasonal |> 
-    filter(position %in% c("WR")) |> 
+  dataMatrix = player_stats_seasonal |>
+    filter(position %in% c("WR")) |>
     select(fantasyPoints, age, height, weight, target_share),
   dv = "fantasyPoints",
-  ivlist = list("age", "height", "weight", "target_share"))
+  ivlist = list("age", "height", "weight", "target_share")
+)
 
 yhat::commonality(apsOut)
 
 commonalityAnalysis <- yhat::commonalityCoefficients(
-  dataMatrix = player_stats_seasonal |> 
-    filter(position %in% c("WR")) |> 
+  dataMatrix = player_stats_seasonal |>
+    filter(position %in% c("WR")) |>
     select(fantasyPoints, age, height, weight, target_share),
   dv = "fantasyPoints",
-  ivlist = list("age", "height", "weight", "target_share"))
+  ivlist = list("age", "height", "weight", "target_share")
+)
 
 commonalityAnalysis
 ```
@@ -1782,11 +1972,13 @@ To visualize the regression coefficients, we can use the `broom::tidy()` functio
 ```{r}
 quadraticTermsRegressionModel_tidy <- broom::tidy(
   quadraticTermsRegressionModel,
-  conf.int = TRUE)
+  conf.int = TRUE
+)
 
 quadraticTermsRegressionModelStandardized_tidy <- broom::tidy(
   quadraticTermsRegressionModelStandardized,
-  conf.int = TRUE)
+  conf.int = TRUE
+)
 ```
 
 ```{r}
@@ -1798,18 +1990,23 @@ ggplot2::ggplot(
   data = quadraticTermsRegressionModel_tidy,
   aes(
     x = term,
-    y = estimate)) +
+    y = estimate
+  )
+) +
   geom_point() +
   geom_errorbar(
     aes(
       ymin = conf.low,
-      ymax = conf.high),
-    width = 0.2) +
+      ymax = conf.high
+    ),
+    width = 0.2
+  ) +
   coord_flip() + # flip axes for readability
   labs(
     title = "Regression Coefficients with 95% CI",
     x = "Predictor",
-    y = "Coefficient Estimate") +
+    y = "Coefficient Estimate"
+  ) +
   theme_minimal()
 ```
 
@@ -1822,18 +2019,23 @@ ggplot2::ggplot(
   data = quadraticTermsRegressionModelStandardized_tidy,
   aes(
     x = term,
-    y = estimate)) +
+    y = estimate
+  )
+) +
   geom_point() +
   geom_errorbar(
     aes(
       ymin = conf.low,
-      ymax = conf.high),
-    width = 0.2) +
+      ymax = conf.high
+    ),
+    width = 0.2
+  ) +
   coord_flip() + # flip axes for readability
   labs(
     title = "Standardized Regression Coefficients with 95% CI",
     x = "Predictor",
-    y = "Standardized Coefficient Estimate") +
+    y = "Standardized Coefficient Estimate"
+  ) +
   theme_minimal()
 ```
 
@@ -1844,15 +2046,34 @@ If we wanted to visualize the shape of the model-implied association between tar
 ```{r}
 newdata <- data.frame(
   target_share = seq(
-    from = min(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")], na.rm = TRUE),
-    to = max(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")], na.rm = TRUE),
+    from = min(
+      player_stats_seasonal$target_share[which(
+        player_stats_seasonal$position == "WR"
+      )],
+      na.rm = TRUE
+    ),
+    to = max(
+      player_stats_seasonal$target_share[which(
+        player_stats_seasonal$position == "WR"
+      )],
+      na.rm = TRUE
+    ),
     length.out = 1000
   )
 )
 
-newdata$age <- mean(player_stats_seasonal$age[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
-newdata$height <- mean(player_stats_seasonal$height[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
-newdata$weight <- mean(player_stats_seasonal$weight[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
+newdata$age <- mean(
+  player_stats_seasonal$age[which(player_stats_seasonal$position == "WR")],
+  na.rm = TRUE
+)
+newdata$height <- mean(
+  player_stats_seasonal$height[which(player_stats_seasonal$position == "WR")],
+  na.rm = TRUE
+)
+newdata$weight <- mean(
+  player_stats_seasonal$weight[which(player_stats_seasonal$position == "WR")],
+  na.rm = TRUE
+)
 ```
 
 ```{r}
@@ -1873,11 +2094,14 @@ ggplot2::ggplot(
   data = newdata,
   aes(
     x = target_share,
-    y = fantasyPoints)) +
+    y = fantasyPoints
+  )
+) +
   geom_smooth() +
   coord_cartesian(
-    ylim = c(0,NA),
-    expand = FALSE) +
+    ylim = c(0, NA),
+    expand = FALSE
+  ) +
   labs(
     x = "Target Share",
     y = "Fantasy Points (Season)",
@@ -1937,7 +2161,15 @@ beta6 <- coef(quadraticTermsRegressionModel)[["I(weight^2)"]]
 beta7 <- coef(quadraticTermsRegressionModel)[["target_share"]]
 beta8 <- coef(quadraticTermsRegressionModel)[["I(target_share^2)"]]
 
-predictedFantasyPoints <- beta0 + beta1*age + beta2*(age^2) + beta3*height + beta4*(height^2) + beta5*weight + beta6*(weight^2) + beta7*target_share + beta8*(target_share^2)
+predictedFantasyPoints <- beta0 +
+  beta1 * age +
+  beta2 * (age^2) +
+  beta3 * height +
+  beta4 * (height^2) +
+  beta5 * weight +
+  beta6 * (weight^2) +
+  beta7 * target_share +
+  beta8 * (target_share^2)
 predictedFantasyPoints
 ```
 
@@ -1982,7 +2214,8 @@ For evaluating linearity, we would expect minimal bend/curvature in the lines.
 car::marginalModelPlots(
   quadraticTermsRegressionModel,
   sd = TRUE,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 ```{r}
@@ -1992,7 +2225,8 @@ car::marginalModelPlots(
 
 car::avPlots(
   quadraticTermsRegressionModel,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 ```{r}
@@ -2003,7 +2237,8 @@ car::avPlots(
 car::crPlots(
   quadraticTermsRegressionModel,
   sd = TRUE,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 The marginal model plots (@fig-marginalModelPlots), residual plots (@fig-residualPlots), and  component-plus-residual plots (@fig-componentPlusResidualPlots) suggest that the nonlinearity of the association between target share and fantasy points may not be fully captured by the quadratic term.
@@ -2019,8 +2254,11 @@ The histogram for the raw `target_shares` variable is in @fig-histogramTargetSha
 #| fig-alt: "Histogram of Target Share."
 
 hist(
-  player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")],
-  main = "Histogram of Target Share")
+  player_stats_seasonal$target_share[which(
+    player_stats_seasonal$position == "WR"
+  )],
+  main = "Histogram of Target Share"
+)
 ```
 
 The variable shows a strong positive skew.
@@ -2033,15 +2271,27 @@ The histogram of the log-transformed variable is in @fig-histogramTargetSharesTr
 #| fig-alt: "Histogram of Target Share, Transformed."
 
 hist(
-  log(player_stats_seasonal$target_share[which(player_stats_seasonal$position == "WR")] + 1),
-  main = "Histogram of Target Share (Log Transformed)")
+  log(
+    player_stats_seasonal$target_share[which(
+      player_stats_seasonal$position == "WR"
+    )] +
+      1
+  ),
+  main = "Histogram of Target Share (Log Transformed)"
+)
 ```
 
 Now we can re-fit the model with the log-transformed variable.
 
 ```{r}
 linearRegressionModel_logTargetShare <- lm(
-  fantasyPoints ~ age + I(age^2) + height + I(height^2) + weight + I(weight^2) + I(log(target_share + 1)),
+  fantasyPoints ~ age +
+    I(age^2) +
+    height +
+    I(height^2) +
+    weight +
+    I(weight^2) +
+    I(log(target_share + 1)),
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
@@ -2059,7 +2309,8 @@ Target share shows a more linear association with fantasy points after log-trans
 car::marginalModelPlots(
   linearRegressionModel_logTargetShare,
   sd = TRUE,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 ```{r}
@@ -2069,7 +2320,8 @@ car::marginalModelPlots(
 
 car::avPlots(
   linearRegressionModel_logTargetShare,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 ```{r}
@@ -2079,7 +2331,8 @@ car::avPlots(
 
 car::crPlots(
   linearRegressionModel_logTargetShare,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 When creating a residual plot, the `car` package [@Fox2019_packages; @R-car] also provides a test of the nonlinearity of each [predictor](#sec-correlationalStudy).
@@ -2091,7 +2344,8 @@ When creating a residual plot, the `car` package [@Fox2019_packages; @R-car] als
 
 car::residualPlots(
   linearRegressionModel_logTargetShare,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 #### Homoscedasticity {#sec-multipleRegressionExamplesAddressingAssumptionsHomoscedasticity}
@@ -2106,7 +2360,8 @@ In a residual plot, you want a constant spread of residuals versus fitted values
 
 car::residualPlots(
   quadraticTermsRegressionModel,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 In a spread-level plot, you want a flat (zero) slope—you do not want a positive or negative slope.
@@ -2118,7 +2373,8 @@ In a spread-level plot, you want a flat (zero) slope—you do not want a positiv
 
 car::spreadLevelPlot(
   quadraticTermsRegressionModel,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 In this example, the residuals appear to increase as a function of the fitted values.
@@ -2132,14 +2388,19 @@ The histogram for raw fantasy points is in @fig-histogramFantasyPoints.
 #| fig-alt: "Histogram of Fantasy Points (Among Wide Receivers)."
 
 hist(
-  player_stats_seasonal$fantasyPoints[which(player_stats_seasonal$position == "WR")],
-  main = "Histogram of Fantasy Points")
+  player_stats_seasonal$fantasyPoints[which(
+    player_stats_seasonal$position == "WR"
+  )],
+  main = "Histogram of Fantasy Points"
+)
 ```
 
 We can apply a transformation to the [outcome variable](#sec-correlationalStudy) to generate a more normally distributed variable using the `bestNormalize::bestNormalize()` function of the `bestNormalize` package [@R-bestNormalize; @Peterson2021_packages; @Peterson2020_packages].
 
 ```{r}
-bnTransformed <- bestNormalize::bestNormalize(player_stats_seasonal$fantasyPoints)
+bnTransformed <- bestNormalize::bestNormalize(
+  player_stats_seasonal$fantasyPoints
+)
 ```
 
 Here are the transformation results—in this case, the best-fitting transformation is an ordered quantile (ORQ) normalization transformation:
@@ -2157,7 +2418,8 @@ player_stats_seasonal$fantasyPoints_transformed <- predict(bnTransformed)
 original <- predict(
   bnTransformed,
   newdata = player_stats_seasonal$fantasyPoints_transformed,
-  inverse = TRUE)
+  inverse = TRUE
+)
 ```
 
 The histogram of the transformed variable is in @fig-histogramFantasyPointsTransformed.
@@ -2168,8 +2430,11 @@ The histogram of the transformed variable is in @fig-histogramFantasyPointsTrans
 #| fig-alt: "Histogram of Fantasy Points (Among Wide Receivers), Transformed."
 
 hist(
-  player_stats_seasonal$fantasyPoints_transformed[which(player_stats_seasonal$position == "WR")],
-  main = "Histogram of Fantasy Points (Transformed)")
+  player_stats_seasonal$fantasyPoints_transformed[which(
+    player_stats_seasonal$position == "WR"
+  )],
+  main = "Histogram of Fantasy Points (Transformed)"
+)
 ```
 
 Now we can refit the model.
@@ -2193,7 +2458,8 @@ The residual plot is in @fig-residualPlotsOutcomeTransformed.
 
 car::residualPlots(
   linearRegressionModel_outcomeTransformed,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 The spread-level plot is in @fig-spreadLevelPlotOutcomeTransformed.
@@ -2205,7 +2471,8 @@ The spread-level plot is in @fig-spreadLevelPlotOutcomeTransformed.
 
 car::spreadLevelPlot(
   linearRegressionModel_outcomeTransformed,
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 The residuals show more constant variance after transforming the [outcome variable](#sec-correlationalStudy).
@@ -2218,7 +2485,8 @@ To do this, we can estimate the intraclass correlation coefficient (ICC) from a 
 ```{r}
 mixedModel <- lmer(
   fantasyPoints_transformed ~ 1 + (1 | player_id),
-  data = player_stats_seasonal)
+  data = player_stats_seasonal
+)
 
 performance::icc(mixedModel)
 ```
@@ -2239,7 +2507,8 @@ If the residuals are normally distributed, they should stay close to the diagona
 car::qqPlot(
   linearRegressionModel_outcomeTransformed,
   main = "QQ Plot",
-  id = TRUE)
+  id = TRUE
+)
 ```
 
 
@@ -2249,7 +2518,8 @@ car::qqPlot(
 #| fig-alt: "Residual Plots After Transformation of Fantasy Points."
 
 petersenlab::ppPlot(
-  linearRegressionModel_outcomeTransformed)
+  linearRegressionModel_outcomeTransformed
+)
 ```
 
 ## Multicollinearity {#sec-multipleRegressionMulticollinearity}
@@ -2273,7 +2543,8 @@ Consider the following example adapted from @PetersenPrinciplesPsychAssessment w
 regression3 <- data.frame(
   "y" = c(9, 11, 17, 3, 21, 13),
   "x1" = c(2, 3, 4, 1, 5, 3.5),
-  "x2" = c(4, 6, 8, 2, 10, 7))
+  "x2" = c(4, 6, 8, 2, 10, 7)
+)
 ```
 
 ```{r}
@@ -2283,8 +2554,9 @@ regression3 <- data.frame(
 
 knitr::kable(
   regression3,
-  col.names = c("y","x1","x2"),
-  booktabs = TRUE)
+  col.names = c("y", "x1", "x2"),
+  booktabs = TRUE
+)
 ```
 
 The second [predictor variable](#sec-correlationalStudy) is not very good—it is exactly twice the value of the first [predictor variable](#sec-correlationalStudy); thus, the two [predictor variables](#sec-correlationalStudy) are perfectly correlated (i.e., $r = 1.0$).
@@ -2348,10 +2620,12 @@ Pairwise deletion (also called available case analysis) uses all available data 
 We can estimate a regression model that uses pairwise deletion using the `lavaan` package [@Rosseel2012_packages; @R-lavaan].
 
 ```{r}
-player_stats_seasonal$target_share_log <- log(player_stats_seasonal$target_share + 1)
+player_stats_seasonal$target_share_log <- log(
+  player_stats_seasonal$target_share + 1
+)
 
-modelData <- player_stats_seasonal |> 
-  filter(position %in% c("WR")) |> 
+modelData <- player_stats_seasonal |>
+  filter(position %in% c("WR")) |>
   select(fantasyPoints_transformed, age, height, weight, target_share_log)
 
 numObs <- sum(complete.cases(modelData))
@@ -2374,7 +2648,8 @@ pairwiseRegression_fit <- lavaan::lavaan(
 summary(
   pairwiseRegression_fit,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 ### Multiple Imputation {#sec-multipleRegressionMultipleImputation}
@@ -2387,20 +2662,36 @@ We can multiply impute data using the `mice` package [@vanBuuren2011_packages; @
 ```{r}
 numImputations <- 5
 
-dataToImpute <- player_stats_seasonal |> 
-  filter(position %in% c("WR")) |> 
-  select(player_id, position, where(is.numeric)) |> 
+dataToImpute <- player_stats_seasonal |>
+  filter(position %in% c("WR")) |>
+  select(player_id, position, where(is.numeric)) |>
   select(
-    player_id:games, carries:wopr, fantasy_points, fantasy_points_ppr,
-    rush_40_yds, rec_40_yds, fumbles, two_pts, return_yds,
-    rush_100_yds:draft_round, height:target_share_log) |> 
+    player_id:games,
+    carries:wopr,
+    fantasy_points,
+    fantasy_points_ppr,
+    rush_40_yds,
+    rec_40_yds,
+    fumbles,
+    two_pts,
+    return_yds,
+    rush_100_yds:draft_round,
+    height:target_share_log
+  ) |>
   select(-c(fantasy_points_ppr, ageCentered20, target_share_log)) # drop collinear variables
 
-predictors <- c("targets","receiving_yards","receiving_air_yards","receiving_yards_after_catch","receiving_first_downs","racr")
+predictors <- c(
+  "targets",
+  "receiving_yards",
+  "receiving_air_yards",
+  "receiving_yards_after_catch",
+  "receiving_first_downs",
+  "racr"
+)
 
 dataToImpute$player_id_integer <- as.integer(as.factor(dataToImpute$player_id))
 
-varsToImpute <- c("age","height","weight","target_share")
+varsToImpute <- c("age", "height", "weight", "target_share")
 Y <- varsToImpute
 ```
 
@@ -2450,7 +2741,8 @@ imp <- mice::mice(
   predictorMatrix = pred,
   m = numImputations,
   maxit = 5, # generally use 100 maximum iterations; this example uses 5 for speed
-  seed = 52242)
+  seed = 52242
+)
 ```
 
 Below are some imputation diagnostics.
@@ -2471,7 +2763,7 @@ A density plot is in @fig-miDensityPlot.
 #| fig-cap: "Density plot from multiple imputation."
 #| fig-alt: "Density plot from multiple imputation."
 
-densityplot(imp, ~ target_share)
+densityplot(imp, ~target_share)
 ```
 
 The imputated data does not match well the distribution of the observed data.
@@ -2483,13 +2775,15 @@ Now, let's do some post-processing:
 imp_long <- mice::complete(
   imp,
   action = "long",
-  include = TRUE)
+  include = TRUE
+)
 
 imp_long$target_share_log <- log(imp_long$target_share + 1)
 
 imp_long$fantasyPoints_transformed <- predict(
   bnTransformed,
-  newdata = imp_long[["fantasyPoints"]])
+  newdata = imp_long[["fantasyPoints"]]
+)
 
 imp_mids <- mice::as.mids(imp_long)
 ```
@@ -2500,8 +2794,9 @@ Now let's estimate multiple regression with the multiply imputed data:
 imp_regression <- with(
   imp_mids,
   lm(
-    fantasyPoints_transformed ~ age + height + weight + target_share_log)
+    fantasyPoints_transformed ~ age + height + weight + target_share_log
   )
+)
 
 mice::pool(imp_regression)
 
@@ -2531,7 +2826,8 @@ fimlRegression_fit <- lavaan::sem(
 summary(
   fimlRegression_fit,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 ## Addressing Non-Independence of Observations {#sec-multipleRegressionNonIndependence}
@@ -2545,16 +2841,22 @@ In @sec-mixedModels, we discuss [mixed model](#sec-mixedModels) approaches that 
 Below, we demonstrate how to account for non-independence of observations using cluster-robust standard errors with the `rms` package [@R-rms].
 
 ```{r}
-player_stats_seasonal_subset <- player_stats_seasonal |> 
-  filter(!is.na(player_id)) |> 
+player_stats_seasonal_subset <- player_stats_seasonal |>
+  filter(!is.na(player_id)) |>
   filter(position %in% c("WR"))
 
-regressionWithClusterVariable <- rms::robcov(rms::ols(
-  fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
-  data = player_stats_seasonal_subset,
-  x = TRUE,
-  y = TRUE),
-  cluster = player_stats_seasonal_subset$player_id) #account for nested data within player
+regressionWithClusterVariable <- rms::robcov(
+  rms::ols(
+    fantasyPoints_transformed ~ age +
+      height +
+      weight +
+      I(log(target_share + 1)),
+    data = player_stats_seasonal_subset,
+    x = TRUE,
+    y = TRUE
+  ),
+  cluster = player_stats_seasonal_subset$player_id
+) #account for nested data within player
 
 regressionWithClusterVariable
 performance::r2(regressionWithClusterVariable)
@@ -2628,7 +2930,8 @@ boot_coefs <- boot_models |>
 # Percentile confidence intervals
 percentile_intervals <- rsample::int_pctl(
   .data = boot_models,
-  statistics = coef_info)
+  statistics = coef_info
+)
 
 # Bias-corrected and accelerated confidence intervals
 bca_intervals <- rsample::int_bca(
@@ -2651,29 +2954,37 @@ The distributions of the regression coefficients across boostraps are depicted i
 
 ggplot(
   data = boot_coefs,
-  aes(x = estimate)) +
+  aes(x = estimate)
+) +
   geom_histogram(
     fill = "gray80",
-    color = "black") +
+    color = "black"
+  ) +
   facet_wrap(
-    ~ term,
-    scales = "free") +
+    ~term,
+    scales = "free"
+  ) +
   geom_vline(
     data = percentile_intervals,
     aes(
-      xintercept = .lower),
+      xintercept = .lower
+    ),
     col = "blue",
-    linetype = "dashed") +
+    linetype = "dashed"
+  ) +
   geom_vline(
     data = percentile_intervals,
     aes(
-      xintercept = .upper),
+      xintercept = .upper
+    ),
     col = "blue",
-    linetype = "dashed") +
+    linetype = "dashed"
+  ) +
   labs(
     title = "Bootstrap Distributions of Coefficients",
     x = "Coefficient Estimate",
-    y = "Count") +
+    y = "Count"
+  ) +
   theme_classic()
 ```
 
@@ -2690,21 +3001,32 @@ First, we mean-center the [predictors](#sec-correlationalStudy).
 In this case, we center the [predictors](#sec-correlationalStudy) around the mean of height and weight for Wide Receivers:
 
 ```{r}
-player_stats_seasonal$height_centered <- player_stats_seasonal$height - mean(player_stats_seasonal$height[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
-player_stats_seasonal$weight_centered <- player_stats_seasonal$weight - mean(player_stats_seasonal$weight[which(player_stats_seasonal$position == "WR")], na.rm = TRUE)
+player_stats_seasonal$height_centered <- player_stats_seasonal$height -
+  mean(
+    player_stats_seasonal$height[which(player_stats_seasonal$position == "WR")],
+    na.rm = TRUE
+  )
+player_stats_seasonal$weight_centered <- player_stats_seasonal$weight -
+  mean(
+    player_stats_seasonal$weight[which(player_stats_seasonal$position == "WR")],
+    na.rm = TRUE
+  )
 ```
 
 Then, we compute the interaction term as the multiplication of the two centered [predictors](#sec-correlationalStudy):
 
 ```{r}
-player_stats_seasonal$heightXweight <- player_stats_seasonal$height_centered * player_stats_seasonal$weight_centered
+player_stats_seasonal$heightXweight <- player_stats_seasonal$height_centered *
+  player_stats_seasonal$weight_centered
 ```
 
 Then, we fit the moderated multiple regression model:
 
 ```{r}
 moderationModel <- lm(
-  fantasyPoints_transformed ~ height_centered + weight_centered + height_centered:weight_centered,
+  fantasyPoints_transformed ~ height_centered +
+    weight_centered +
+    height_centered:weight_centered,
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   na.action = "na.exclude"
 )
@@ -2737,7 +3059,8 @@ We create an interaction plot (@fig-interactionPlot) and Johnson-Neyman plot (@f
 interactions::interact_plot(
   moderationModel,
   pred = height_centered,
-  modx = weight_centered)
+  modx = weight_centered
+)
 ```
 
 ```{r}
@@ -2749,7 +3072,8 @@ interactions::johnson_neyman(
   moderationModel,
   pred = height_centered,
   modx = weight_centered,
-  alpha = .05)
+  alpha = .05
+)
 ```
 
 Here is a simple slopes analysis:
@@ -2759,7 +3083,8 @@ interactions::sim_slopes(
   moderationModel,
   pred = height_centered,
   modx = weight_centered,
-  johnson_neyman = FALSE)
+  johnson_neyman = FALSE
+)
 ```
 
 ## Mediation {#sec-multipleRegressionMediation}
@@ -2827,7 +3152,8 @@ mediationFit <- lavaan::sem(
   iseed = 52242, # for reproducibility
   missing = "ML",
   estimator = "ML",
-  fixed_x = FALSE)
+  fixed_x = FALSE
+)
 ```
 
 Here are the model results:
@@ -2837,7 +3163,8 @@ summary(
   mediationFit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 We can also estimate a model with multiple hypothesized [mediators](#sec-mediation):
@@ -2878,7 +3205,8 @@ multipleMediatorFit <- lavaan::sem(
   iseed = 52242, # for reproducibility
   missing = "ML",
   estimator = "ML",
-  fixed_x = FALSE)
+  fixed_x = FALSE
+)
 ```
 
 Here are the model results:
@@ -2888,7 +3216,8 @@ summary(
   multipleMediatorFit,
   fit_measures = TRUE,
   standardized = TRUE,
-  rsquare = TRUE)
+  rsquare = TRUE
+)
 ```
 
 ## Bayesian Multiple Regression {#sec-multipleRegressionBayesian}
@@ -2897,7 +3226,10 @@ summary(
 #| output: false
 
 bayesianMultipleRegressionModel <- brm(
-  formula = fantasyPoints_transformed ~ age + height + weight + I(log(target_share + 1)),
+  formula = fantasyPoints_transformed ~ age +
+    height +
+    weight +
+    I(log(target_share + 1)),
   data = player_stats_seasonal |> filter(position %in% c("WR")),
   family = gaussian()
 )
