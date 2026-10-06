@@ -2974,6 +2974,7 @@ Figure&nbsp;17.15: Types of Miscalibration. From <span class="citation" data-cit
 <li><a href="#sec-rootMeanSquaredError">root mean squared error</a></li>
 </ul>
 <p>With a plot of the predictions on the x-axis, and the outcomes on the y-axis (i.e., a <a href="#sec-calibrationPlot">calibration plot</a>), <a href="#sec-calibration">calibration</a> can be examined graphically as the extent to which the best-fit regression line has an intercept (alpha) close to zero and a slope (beta) close to one <span class="citation" data-cites="Steyerberg2014 Stevens2020">(<a href="references.html#ref-Stevens2020" role="doc-biblioref">Stevens &amp; Poppe, 2020</a>; <a href="references.html#ref-Steyerberg2014" role="doc-biblioref">Steyerberg &amp; Vergouwe, 2014</a>)</span>. The intercept is also called “calibration-in-the-large”, whereas “calibration-in-the-small” refers to the extent to which the predicted values match the observed values at a specific predicted value (e.g., when the weather forecaster says that there is a 10% chance of rain, does it actually rain 10% of the time?). For predictions to be well <a href="#sec-calibration">calibrated</a>, the intercept should be close to zero and the slope should be close to one. If the slope is close to one but the intercept is not close to zero (or the intercept is close to zero but the slope is not close to one), the predictions would not be considered well <a href="#sec-calibration">calibrated</a>. The 95% confidence interval of the observed value, across all values of the predicted values, should include the diagonal reference line whose intercept is zero and whose slope is one. Gold-standard recommendations include examining the predicted values in relation to the observed values using locally estimated scatterplot smoothing (LOESS) <span class="citation" data-cites="Austin2014">(<a href="references.html#ref-Austin2014" role="doc-biblioref">Austin &amp; Steyerberg, 2014</a>)</span>, such as in <a href="#fig-calibrationPlotSeasonalOverall" class="quarto-xref">Figure&nbsp;<span>17.17</span></a>. We can examine whether the LOESS-based 95% confidence interval of the observed value at every level of the predicted values includes the diagonal reference line (i.e., the actual observed value).</p>
+<p>A confidence interval depicts the uncertainty around a population estimate—in this case, the estimate of the population average of actual fantasy points as a function of projected points. The confidence interval becomes narrower as more observations are added—because we have less uncertainty of the population estimate. In our calibration plots, we leverage multiple years of data and many observations; thus, the confidence interval is fairly narrow, especially in the range of projected fantasy points where most players are projected. By contrast, a <em>prediction</em> interval depicts the uncertainty around an individual future observation. For instance, based on our LOESS model, a 95% prediction interval depicts the range of actual fantasy points within which 95% of individual points are expected to fall, at a given level of projected points. Thus, a prediction interval tends to be wider than a confidence interval and, unlike a confidence interval, does not necessarily become narrower as more observations are added. In our calibration plots, we depict both the 95% confidence interval and the 95% prediction interval.</p>
 </section></section></section><section id="sec-integratingAccuracy" class="level2" data-number="17.8"><h2 data-number="17.8" class="anchored" data-anchor-id="sec-integratingAccuracy">
 <span class="header-section-number">17.8</span> Integrating the Accuracy Indices</h2>
 <p>After computing the accuracy indices of <a href="#sec-discrimination">discrimination</a> and (2) <a href="#sec-calibration">calibration</a>, it is then the task to integrate the indices to determine (a) which are the most accurate predictions for the given goals, and (b) whether additional improvements and refinements to the predictions need to be made. Each of the accuracy indices is computed differently and thus reward (and penalize) predictive (in)accuracy differently. Sometimes, the the accuracy indices will paint a consistent picture regarding which predictions are the most accurate. Other times, the accuracy indices may disagree about which predictions are most accurate.</p>
@@ -3521,12 +3522,12 @@ F-statistic: 1.15e+04 on 1 and 9524 DF,  p-value: &lt; 0.00000000000000022</code
 <span id="cb73-47"><a href="#cb73-47" aria-label="47"></a>    ),</span>
 <span id="cb73-48"><a href="#cb73-48" aria-label="48"></a>    <span class="at">color =</span> <span class="st">"red"</span>,</span>
 <span id="cb73-49"><a href="#cb73-49" aria-label="49"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
-<span id="cb73-50"><a href="#cb73-50" aria-label="50"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb73-50"><a href="#cb73-50" aria-label="50"></a>  <span class="fu">geom_smooth</span>( </span>
 <span id="cb73-51"><a href="#cb73-51" aria-label="51"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb73-52"><a href="#cb73-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb73-53"><a href="#cb73-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb73-52"><a href="#cb73-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb73-53"><a href="#cb73-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
 <span id="cb73-54"><a href="#cb73-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span></span>
-<span id="cb73-55"><a href="#cb73-55" aria-label="55"></a>  ) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb73-55"><a href="#cb73-55" aria-label="55"></a>  ) <span class="sc">+</span></span>
 <span id="cb73-56"><a href="#cb73-56" aria-label="56"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb73-57"><a href="#cb73-57" aria-label="57"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb73-58"><a href="#cb73-58" aria-label="58"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -3676,9 +3677,9 @@ Figure&nbsp;17.17: Calibration Plot for Seasonal Projections. The diagonal black
 <span id="cb78-49"><a href="#cb78-49" aria-label="49"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb78-50"><a href="#cb78-50" aria-label="50"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb78-51"><a href="#cb78-51" aria-label="51"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb78-52"><a href="#cb78-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb78-53"><a href="#cb78-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
-<span id="cb78-54"><a href="#cb78-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb78-52"><a href="#cb78-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb78-53"><a href="#cb78-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb78-54"><a href="#cb78-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
 <span id="cb78-55"><a href="#cb78-55" aria-label="55"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb78-56"><a href="#cb78-56" aria-label="56"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb78-57"><a href="#cb78-57" aria-label="57"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -3828,9 +3829,9 @@ Figure&nbsp;17.18: Calibration Plot for Seasonal Projections of Quarterbacks. Th
 <span id="cb83-49"><a href="#cb83-49" aria-label="49"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb83-50"><a href="#cb83-50" aria-label="50"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb83-51"><a href="#cb83-51" aria-label="51"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb83-52"><a href="#cb83-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb83-53"><a href="#cb83-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
-<span id="cb83-54"><a href="#cb83-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb83-52"><a href="#cb83-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb83-53"><a href="#cb83-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb83-54"><a href="#cb83-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
 <span id="cb83-55"><a href="#cb83-55" aria-label="55"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb83-56"><a href="#cb83-56" aria-label="56"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb83-57"><a href="#cb83-57" aria-label="57"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -3981,9 +3982,9 @@ Figure&nbsp;17.19: Calibration Plot for Seasonal Projections of Running Backs. T
 <span id="cb88-50"><a href="#cb88-50" aria-label="50"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb88-51"><a href="#cb88-51" aria-label="51"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb88-52"><a href="#cb88-52" aria-label="52"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb88-53"><a href="#cb88-53" aria-label="53"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb88-54"><a href="#cb88-54" aria-label="54"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
-<span id="cb88-55"><a href="#cb88-55" aria-label="55"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb88-53"><a href="#cb88-53" aria-label="53"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb88-54"><a href="#cb88-54" aria-label="54"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb88-55"><a href="#cb88-55" aria-label="55"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
 <span id="cb88-56"><a href="#cb88-56" aria-label="56"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb88-57"><a href="#cb88-57" aria-label="57"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb88-58"><a href="#cb88-58" aria-label="58"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -4135,10 +4136,10 @@ Figure&nbsp;17.20: Calibration Plot for Seasonal Projections of Wide Receivers. 
 <span id="cb93-51"><a href="#cb93-51" aria-label="51"></a>  ) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb93-52"><a href="#cb93-52" aria-label="52"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb93-53"><a href="#cb93-53" aria-label="53"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb93-54"><a href="#cb93-54" aria-label="54"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb93-55"><a href="#cb93-55" aria-label="55"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb93-54"><a href="#cb93-54" aria-label="54"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb93-55"><a href="#cb93-55" aria-label="55"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
 <span id="cb93-56"><a href="#cb93-56" aria-label="56"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span></span>
-<span id="cb93-57"><a href="#cb93-57" aria-label="57"></a>  ) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb93-57"><a href="#cb93-57" aria-label="57"></a>  ) <span class="sc">+</span></span>
 <span id="cb93-58"><a href="#cb93-58" aria-label="58"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb93-59"><a href="#cb93-59" aria-label="59"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb93-60"><a href="#cb93-60" aria-label="60"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -4290,10 +4291,10 @@ Figure&nbsp;17.21: Calibration Plot for Seasonal Projections of Tight Ends. The 
 <span id="cb98-51"><a href="#cb98-51" aria-label="51"></a>  ) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb98-52"><a href="#cb98-52" aria-label="52"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb98-53"><a href="#cb98-53" aria-label="53"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb98-54"><a href="#cb98-54" aria-label="54"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb98-55"><a href="#cb98-55" aria-label="55"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
+<span id="cb98-54"><a href="#cb98-54" aria-label="54"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb98-55"><a href="#cb98-55" aria-label="55"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
 <span id="cb98-56"><a href="#cb98-56" aria-label="56"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span></span>
-<span id="cb98-57"><a href="#cb98-57" aria-label="57"></a>  ) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb98-57"><a href="#cb98-57" aria-label="57"></a>  ) <span class="sc">+</span> </span>
 <span id="cb98-58"><a href="#cb98-58" aria-label="58"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb98-59"><a href="#cb98-59" aria-label="59"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb98-60"><a href="#cb98-60" aria-label="60"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -4444,9 +4445,9 @@ Figure&nbsp;17.22: Calibration Plot for Seasonal Projections of Kickers. The dia
 <span id="cb103-50"><a href="#cb103-50" aria-label="50"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb103-51"><a href="#cb103-51" aria-label="51"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb103-52"><a href="#cb103-52" aria-label="52"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb103-53"><a href="#cb103-53" aria-label="53"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb103-54"><a href="#cb103-54" aria-label="54"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
-<span id="cb103-55"><a href="#cb103-55" aria-label="55"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb103-53"><a href="#cb103-53" aria-label="53"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb103-54"><a href="#cb103-54" aria-label="54"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb103-55"><a href="#cb103-55" aria-label="55"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
 <span id="cb103-56"><a href="#cb103-56" aria-label="56"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb103-57"><a href="#cb103-57" aria-label="57"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb103-58"><a href="#cb103-58" aria-label="58"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -4596,9 +4597,9 @@ Figure&nbsp;17.23: Calibration Plot for Seasonal Projections of Defensive Lineme
 <span id="cb108-49"><a href="#cb108-49" aria-label="49"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb108-50"><a href="#cb108-50" aria-label="50"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb108-51"><a href="#cb108-51" aria-label="51"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb108-52"><a href="#cb108-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb108-53"><a href="#cb108-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
-<span id="cb108-54"><a href="#cb108-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb108-52"><a href="#cb108-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb108-53"><a href="#cb108-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb108-54"><a href="#cb108-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
 <span id="cb108-55"><a href="#cb108-55" aria-label="55"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb108-56"><a href="#cb108-56" aria-label="56"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb108-57"><a href="#cb108-57" aria-label="57"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -4748,9 +4749,9 @@ Figure&nbsp;17.24: Calibration Plot for Seasonal Projections of Linebackers. The
 <span id="cb113-49"><a href="#cb113-49" aria-label="49"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> <span class="co">#Upper estimate of 95% prediction interval of linear model</span></span>
 <span id="cb113-50"><a href="#cb113-50" aria-label="50"></a>  <span class="fu">geom_smooth</span>(</span>
 <span id="cb113-51"><a href="#cb113-51" aria-label="51"></a>    <span class="at">method =</span> <span class="st">"loess"</span>,</span>
-<span id="cb113-52"><a href="#cb113-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>],</span>
-<span id="cb113-53"><a href="#cb113-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>],</span>
-<span id="cb113-54"><a href="#cb113-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb113-52"><a href="#cb113-52" aria-label="52"></a>    <span class="at">color =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">3</span>], <span class="co">#point estimate</span></span>
+<span id="cb113-53"><a href="#cb113-53" aria-label="53"></a>    <span class="at">fill =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">3</span>)[<span class="dv">1</span>], <span class="co">#95% confidence interval of LOESS model</span></span>
+<span id="cb113-54"><a href="#cb113-54" aria-label="54"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
 <span id="cb113-55"><a href="#cb113-55" aria-label="55"></a>  <span class="fu">geom_abline</span>(</span>
 <span id="cb113-56"><a href="#cb113-56" aria-label="56"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
 <span id="cb113-57"><a href="#cb113-57" aria-label="57"></a>    <span class="at">intercept =</span> <span class="dv">0</span></span>
@@ -6895,7 +6896,7 @@ loaded via a namespace (and not attached):
 [37] base64enc_0.1-6     timechange_0.4.0    Matrix_1.7-5       
 [40] splines_4.6.1       nnet_7.3-20         tidyselect_1.2.1   
 [43] rstudioapi_0.19.0   yaml_2.3.12         timeDate_4052.112  
-[46] codetools_0.2-20    listenv_1.0.0       lattice_0.22-9     
+[46] codetools_0.2-20    listenv_1.1.0       lattice_0.22-9     
 [49] plyr_1.8.9          withr_3.0.3         S7_0.2.2           
 [52] evaluate_1.0.5      foreign_0.8-91      future_1.76.0      
 [55] survival_3.8-6      mclust_6.1.3        pillar_1.11.1      
