@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US"><head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta charset="UTF-8">
+<meta name="generator" content="quarto-1.11.9">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Isaac T. Petersen">
 <meta name="dcterms.date" content="today">
@@ -94,21 +93,22 @@ div.csl-indent {
 <link href="./images/logo.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e21500bb30e7ce080c64316834ee3be8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-09606243866072c1aa00d3ff38fff5fe.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e21500bb30e7ce080c64316834ee3be8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b1528b1cba7e9f63f59baa7408a6f56.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-3db608c3aac2db220582703da11e8ac9.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b1528b1cba7e9f63f59baa7408a6f56.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/quarto-axe/axe.min.js"></script>
 <script src="site_libs/quarto-axe/axe-check.js" type="module"></script>
 <script id="quarto-axe-checker-options" type="text/plain">dHJ1ZQ==</script>
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d4fc3b60078faf9e9c18e00ca1394b6b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-f7321ad1667c049aefb9e1184140e1f0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d4fc3b60078faf9e9c18e00ca1394b6b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-47e9a19b65dd343b82e4c06b93f3d7a3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5b2f680930e10a37e64b03abf11bcd8c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-47e9a19b65dd343b82e4c06b93f3d7a3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -189,7 +189,7 @@ window.Quarto = {
 <meta name="twitter:description" content="">
 <meta name="twitter:card" content="summary">
 </head>
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -212,6 +212,7 @@ window.Quarto = {
       for (let i=0; i < toggles.length; i++) {
         const toggle = toggles[i];
         if (toggle) {
+          toggle.setAttribute("aria-checked", alternate ? "true" : "false");
           if (alternate) {
             toggle.classList.add("alternate");
           } else {
@@ -241,13 +242,19 @@ window.Quarto = {
       manageTransitions('#quarto-margin-sidebar .nav-link', true);
       // Switch the toggles
       setColorSchemeToggle(alternate)
-      // Hack to workaround the fact that safari doesn't
-      // properly recolor the scrollbar when toggling (#1455)
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455).
+    // Not run on load: stylesheets are set before first paint there, and
+    // scrolling would undo the scroll to a URL fragment (#14973).
+    // The one pixel nudge keeps the reader where they were.
+    const refreshSafariScrollbar = () => {
       if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
         manageTransitions("body", false);
-        window.scrollTo(0, 1);
+        const scrollY = window.scrollY;
+        window.scrollTo(0, scrollY > 0 ? scrollY - 1 : 1);
         setTimeout(() => {
-          window.scrollTo(0, 0);
+          window.scrollTo(0, scrollY);
           manageTransitions("body", true);
         }, 40);
       }
@@ -341,6 +348,7 @@ window.Quarto = {
       // Read the current dark / light value
       let toAlternate = !hasAlternateSentinel();
       toggleColorMode(toAlternate);
+      refreshSafariScrollbar();
       setStyleSentinel(toAlternate);
       toggleGiscusIfUsed(toAlternate, darkModeDefault);
       window.dispatchEvent(new Event('resize'));
@@ -354,12 +362,12 @@ window.Quarto = {
   </script>
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav" aria-label="Toolbar"><div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./mythbusters.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./mythbusters.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Mythbusters: Putting Fantasy Football Beliefs/Anecdotes to the Test</span></a></li></ol></nav>
+        <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -367,7 +375,7 @@ window.Quarto = {
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto" aria-label="Site"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Fantasy Football Analytics: Statistics, Prediction, and Empiricism Using R</a> 
         <div class="sidebar-tools-main tools-wide">
@@ -376,26 +384,26 @@ window.Quarto = {
       <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
 <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
               <i class="bi bi-twitter pe-1"></i>
             Twitter
             </a>
           </li>
           <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
               <i class="bi bi-facebook pe-1"></i>
             Facebook
             </a>
           </li>
           <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=%7Curl%7C">
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
               <i class="bi bi-linkedin pe-1"></i>
             LinkedIn
             </a>
           </li>
       </ul>
 </div>
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <button type="button" role="switch" aria-checked="false" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="bi"></i></button>
   <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
   <div class="quarto-reader-toggle-btn">
   <i class="bi"></i>
@@ -590,7 +598,7 @@ window.Quarto = {
 </nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
 <li>
@@ -642,7 +650,7 @@ window.Quarto = {
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/edit/main/mythbusters.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/blob/main/mythbusters.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/isaactpetersen/Fantasy-Football-Analytics-Textbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><div class="alert alert-info hints-alert">
+<main class="content" id="quarto-document-content" tabindex="-1"><div class="alert alert-info hints-alert">
   <div class="hints-icon">
     <i class="fa fa-comments-o"></i>
   </div>
@@ -1075,18 +1083,18 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   149.4669 12.2257        
+ player_id (Intercept)   149.4679 12.2257        
            ageCentered20   0.7425  0.8617  -0.54 
- Residual                193.8632 13.9235        
+ Residual                193.8631 13.9235        
 Number of obs: 1186, groups:  player_id, 271
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)              39.56847    2.20015  246.27636  17.984  &lt; 2e-16 ***
-contractYearyes          -0.50460    1.17248 1049.28996  -0.430   0.6670    
-ageCentered20             0.28897    0.62750  355.64282   0.461   0.6454    
-ageCentered20Quadratic   -0.08953    0.02217  178.29145  -4.038 7.99e-05 ***
-years_of_experience       1.52469    0.51847  333.39962   2.941   0.0035 ** 
+(Intercept)              39.56846    2.20016  246.27624  17.984  &lt; 2e-16 ***
+contractYearyes          -0.50459    1.17248 1049.29003  -0.430   0.6670    
+ageCentered20             0.28897    0.62750  355.64317   0.461   0.6454    
+ageCentered20Quadratic   -0.08953    0.02217  178.29214  -4.038 7.99e-05 ***
+years_of_experience       1.52470    0.51847  333.39933   2.941   0.0035 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1207,7 +1215,7 @@ Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
 (Intercept)            -1.540e+00  3.309e-01  2.339e+02  -4.654 5.45e-06 ***
 contractYearyes        -1.832e-01  1.717e-01  1.038e+03  -1.067 0.286066    
-ageCentered20           2.813e-02  9.314e-02  3.455e+02   0.302 0.762813    
+ageCentered20           2.813e-02  9.314e-02  3.455e+02   0.302 0.762812    
 ageCentered20Quadratic -1.204e-02  3.275e-03  1.685e+02  -3.676 0.000318 ***
 years_of_experience     2.341e-01  7.604e-02  3.202e+02   3.078 0.002263 ** 
 ---
@@ -1700,7 +1708,7 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   0.236649 0.48647        
+ player_id (Intercept)   0.236648 0.48646        
            ageCentered20 0.003396 0.05827  -0.76 
  Residual                0.934249 0.96657        
 Number of obs: 1870, groups:  player_id, 560
@@ -1824,18 +1832,18 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   4263.03  65.292         
+ player_id (Intercept)   4263.04  65.292         
            ageCentered20   39.38   6.275   -0.74 
- Residual                1813.93  42.590         
+ Residual                1813.92  42.590         
 Number of obs: 1973, groups:  player_id, 577
 
 Fixed effects:
                         Estimate Std. Error        df t value Pr(&gt;|t|)    
-(Intercept)              58.6423     6.8397  772.5162   8.574  &lt; 2e-16 ***
+(Intercept)              58.6423     6.8397  772.5161   8.574  &lt; 2e-16 ***
 contractYearyes         -10.4358     2.8749 1686.3435  -3.630 0.000292 ***
-ageCentered20            -2.3643     2.3713 1049.2986  -0.997 0.318979    
-ageCentered20Quadratic   -1.0239     0.1466  607.5037  -6.985 7.49e-12 ***
-years_of_experience      15.4261     1.6765  738.3768   9.201  &lt; 2e-16 ***
+ageCentered20            -2.3643     2.3713 1049.2987  -0.997 0.318980    
+ageCentered20Quadratic   -1.0239     0.1466  607.5040  -6.985 7.49e-12 ***
+years_of_experience      15.4261     1.6765  738.3767   9.201  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1906,7 +1914,7 @@ Number of obs: 4146, groups:  player_id, 1146
 
 Fixed effects:
                  Estimate Std. Error        df t value Pr(&gt;|t|)    
-(Intercept)       24.9202     0.5698 1375.5668  43.734  &lt; 2e-16 ***
+(Intercept)       24.9202     0.5698 1375.5667  43.734  &lt; 2e-16 ***
 contractYearyes   -4.2752     0.5274 3524.9605  -8.106 7.14e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -1966,11 +1974,11 @@ Number of obs: 4146, groups:  player_id, 1146
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)              14.49275    1.45972 1618.24317   9.928  &lt; 2e-16 ***
+(Intercept)              14.49275    1.45972 1618.24324   9.928  &lt; 2e-16 ***
 contractYearyes          -3.17620    0.51635 3284.86822  -6.151 8.61e-10 ***
-ageCentered20             1.50128    0.50311 2307.12056   2.984  0.00288 ** 
-ageCentered20Quadratic   -0.46762    0.02552 1766.33024 -18.323  &lt; 2e-16 ***
-years_of_experience       4.91082    0.39735 1400.69138  12.359  &lt; 2e-16 ***
+ageCentered20             1.50128    0.50311 2307.11988   2.984  0.00288 ** 
+ageCentered20Quadratic   -0.46762    0.02552 1766.33108 -18.323  &lt; 2e-16 ***
+years_of_experience       4.91082    0.39735 1400.69086  12.359  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -2083,7 +2091,7 @@ Scaled residuals:
 
 Random effects:
  Groups    Name          Variance Std.Dev. Corr  
- player_id (Intercept)   0.955305 0.97740        
+ player_id (Intercept)   0.955306 0.97740        
            ageCentered20 0.006654 0.08157  -0.70 
  Residual                1.240787 1.11391        
 Number of obs: 4065, groups:  player_id, 1126
@@ -2092,7 +2100,7 @@ Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
 (Intercept)             3.615e-01  9.962e-02  1.230e+03   3.629 0.000296 ***
 contractYearyes        -1.643e-01  4.563e-02  3.767e+03  -3.601 0.000321 ***
-ageCentered20           2.227e-02  3.253e-02  1.404e+03   0.685 0.493555    
+ageCentered20           2.227e-02  3.253e-02  1.404e+03   0.685 0.493558    
 ageCentered20Quadratic -1.106e-02  1.841e-03  5.636e+02  -6.010 3.33e-09 ***
 years_of_experience     1.535e-01  2.286e-02  1.285e+03   6.713 2.86e-11 ***
 ---
@@ -2214,11 +2222,11 @@ Number of obs: 4146, groups:  player_id, 1146
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)              30.92265    3.43909 1579.07395   8.992  &lt; 2e-16 ***
-contractYearyes          -7.32187    1.30535 3479.25298  -5.609 2.19e-08 ***
-ageCentered20             1.92954    1.16055 2233.04071   1.663   0.0965 .  
-ageCentered20Quadratic   -0.91016    0.06143 1374.85900 -14.815  &lt; 2e-16 ***
-years_of_experience      10.53521    0.87748 1362.34115  12.006  &lt; 2e-16 ***
+(Intercept)              30.92264    3.43910 1579.07353   8.992  &lt; 2e-16 ***
+contractYearyes          -7.32187    1.30535 3479.25302  -5.609 2.19e-08 ***
+ageCentered20             1.92954    1.16055 2233.04055   1.663   0.0965 .  
+ageCentered20Quadratic   -0.91016    0.06143 1374.85864 -14.815  &lt; 2e-16 ***
+years_of_experience      10.53521    0.87748 1362.34123  12.006  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -2356,14 +2364,14 @@ Number of obs: 6816, groups:  player_id, 1898
 
 Fixed effects:
                          Estimate Std. Error         df t value Pr(&gt;|t|)    
-(Intercept)             135.86006    5.03863 3053.85830  26.964  &lt; 2e-16 ***
-contractYearyes          -9.68928    1.36446 5817.88670  -7.101 1.38e-12 ***
-position_groupRB        -80.60227    4.50068 1957.69476 -17.909  &lt; 2e-16 ***
-position_groupTE       -108.43652    4.72268 1905.41648 -22.961  &lt; 2e-16 ***
-position_groupWR        -92.31773    4.36877 1949.16102 -21.131  &lt; 2e-16 ***
-ageCentered20            -1.20662    1.09148 3405.82504  -1.105    0.269    
-ageCentered20Quadratic   -0.89417    0.05601 2019.27013 -15.966  &lt; 2e-16 ***
-years_of_experience      13.25415    0.86621 2376.66276  15.301  &lt; 2e-16 ***
+(Intercept)             135.86006    5.03863 3053.85793  26.964  &lt; 2e-16 ***
+contractYearyes          -9.68928    1.36446 5817.88676  -7.101 1.38e-12 ***
+position_groupRB        -80.60227    4.50068 1957.69449 -17.909  &lt; 2e-16 ***
+position_groupTE       -108.43652    4.72268 1905.41624 -22.961  &lt; 2e-16 ***
+position_groupWR        -92.31773    4.36877 1949.16076 -21.131  &lt; 2e-16 ***
+ageCentered20            -1.20662    1.09148 3405.82521  -1.105    0.269    
+ageCentered20Quadratic   -0.89417    0.05601 2019.27197 -15.966  &lt; 2e-16 ***
+years_of_experience      13.25415    0.86621 2376.66228  15.301  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -2403,13 +2411,13 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details open="" class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-label="1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
-<pre><code>R version 4.6.1 (2026-06-24)
+<pre><code>R version 4.6.2 (2026-10-29)
 Platform: x86_64-pc-linux-gnu
-Running under: Ubuntu 24.04.5 LTS
+Running under: Ubuntu 26.04.1 LTS
 
 Matrix products: default
 BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
 
 locale:
  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
@@ -2427,40 +2435,40 @@ other attached packages:
  [1] lubridate_1.9.5    forcats_1.0.1      stringr_1.6.0      dplyr_1.2.1       
  [5] purrr_1.2.2        readr_2.2.0        tidyr_1.3.2        tibble_3.3.1      
  [9] ggplot2_4.0.3      tidyverse_2.0.0    emmeans_2.0.4      performance_0.19.0
-[13] lmerTest_3.2-1     lme4_2.1-0         Matrix_1.7-5       nflreadr_1.5.1    
+[13] lmerTest_3.2-1     lme4_2.1-0         Matrix_1.7-6       nflreadr_1.5.1    
 [17] petersenlab_1.2.4 
 
 loaded via a namespace (and not attached):
  [1] Rdpack_2.6.6        DBI_1.3.0           mnormt_2.1.2       
  [4] gridExtra_2.3.1     sandwich_3.1-3      rlang_1.3.0        
  [7] magrittr_2.0.5      multcomp_1.4-32     otel_0.2.0         
-[10] compiler_4.6.1      vctrs_0.7.3         reshape2_1.4.5     
+[10] compiler_4.6.2      vctrs_0.7.3         reshape2_1.4.5     
 [13] quadprog_1.5-8      pkgconfig_2.0.3     fastmap_1.2.0      
 [16] backports_1.5.1     pbivnorm_0.6.0      rmarkdown_2.32     
 [19] tzdb_0.5.0          nloptr_2.2.1        xfun_0.62          
 [22] cachem_1.1.0        jsonlite_2.0.0      psych_2.6.9        
-[25] broom_1.0.13        parallel_4.6.1      lavaan_0.7-3       
-[28] cluster_2.1.8.2     R6_2.6.1            stringi_1.8.9      
+[25] broom_1.0.13        parallel_4.6.2      lavaan_0.7-3       
+[28] cluster_2.1.8.3     R6_2.6.1            stringi_1.8.9      
 [31] RColorBrewer_1.1-3  boot_1.3-32         rpart_4.1.27       
 [34] numDeriv_2016.8-1.1 estimability_2.0.0  Rcpp_1.1.2         
 [37] knitr_1.52          zoo_1.9-1           base64enc_0.1-6    
-[40] splines_4.6.1       nnet_7.3-20         timechange_0.4.0   
+[40] splines_4.6.2       nnet_7.3-21         timechange_0.4.0   
 [43] tidyselect_1.2.1    rstudioapi_0.19.0   yaml_2.3.12        
-[46] codetools_0.2-20    lattice_0.22-9      plyr_1.8.9         
+[46] codetools_0.2-20    lattice_0.23-1      plyr_1.8.9         
 [49] withr_3.0.3         S7_0.2.2            coda_0.19-4.1      
-[52] evaluate_1.0.5      foreign_0.8-91      survival_3.8-6     
-[55] pillar_1.11.1       checkmate_2.3.4     stats4_4.6.1       
-[58] reformulas_0.4.4    insight_1.6.1       generics_0.1.4     
+[52] evaluate_1.0.5      foreign_0.8-92      survival_3.8-12    
+[55] pillar_1.11.1       checkmate_2.3.4     stats4_4.6.2       
+[58] reformulas_0.4.4    insight_1.7.0       generics_0.1.4     
 [61] mix_1.0-13          hms_1.1.4           scales_1.4.0       
 [64] minqa_1.2.8         xtable_1.8-8        glue_1.8.1         
-[67] Hmisc_5.3-0         tools_4.6.1         data.table_1.18.6.1
-[70] mvtnorm_1.4-2       grid_4.6.1          mitools_2.7        
-[73] rbibutils_2.4.1     colorspace_2.1-4    nlme_3.1-169       
+[67] Hmisc_5.3-0         tools_4.6.2         data.table_1.18.6.1
+[70] mvtnorm_1.4-2       grid_4.6.2          mitools_2.7        
+[73] rbibutils_2.4.1     colorspace_2.1-4    nlme_3.1-171       
 [76] htmlTable_2.5.0     Formula_1.2-6       cli_3.6.6          
 [79] viridisLite_0.4.3   gtable_0.3.6        digest_0.6.39      
 [82] pbkrtest_0.5.5      TH.data_1.1-5       htmlwidgets_1.6.4  
 [85] farver_2.1.2        memoise_2.0.1       htmltools_0.5.9    
-[88] lifecycle_1.0.5     MASS_7.3-65        </code></pre>
+[88] lifecycle_1.0.5     MASS_7.3-66        </code></pre>
 </div>
 </div>
 
@@ -2498,15 +2506,50 @@ The online version of this book will remain open access. If you want to know whe
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
     if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-      const a = window.document.createElement('a');
-      a.classList.add('top-right');
-      a.classList.add('quarto-color-scheme-toggle');
-      a.href = "";
-      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const toggle = window.document.createElement('button');
+      toggle.type = "button";
+      toggle.setAttribute("role", "switch");
+      toggle.setAttribute("aria-checked", "false");
+      toggle.classList.add('top-right');
+      toggle.classList.add('quarto-color-scheme-toggle');
+      toggle.setAttribute("aria-label", "Toggle dark mode");
+      toggle.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
       const i = window.document.createElement("i");
       i.classList.add('bi');
-      a.appendChild(i);
-      window.document.body.appendChild(a);
+      toggle.appendChild(i);
+      // Put the toggle in a landmark of its own, so that landmark navigation
+      // can reach it.
+      //
+      // The container is always a fresh direct child of body, and the toggle is
+      // never moved into page furniture that the theme or the author controls.
+      // The toggle is positioned against the page, so any ancestor that
+      // establishes a containing block captures it: a positioned element or a
+      // grid for position: absolute, and transform, filter, will-change or
+      // contain for position: fixed. A direct child of body has none of these
+      // to inherit, and the shift when one appears is silent and visual.
+      //
+      // ARIA says a document should have at most one banner, and axe reports a
+      // duplicate whether or not the banners carry distinct labels. So use a
+      // header when the page has no banner yet, and a named region otherwise.
+      //
+      // A header is a banner wherever it sits, unless it is inside sectioning
+      // content, so this cannot just look at the children of body: a custom
+      // page layout wraps the title block header in a plain div. An explicit
+      // role="banner" always counts.
+      const sectioning = 'article, aside, main, nav, section, [role="article"], [role="complementary"], [role="main"], [role="navigation"], [role="region"]';
+      const hasBanner = Array.from(
+        window.document.querySelectorAll('header:not([role]), [role="banner"]')
+      ).some(function(el) {
+        return el.hasAttribute("role") || el.closest(sectioning) === null;
+      });
+      const container = window.document.createElement(hasBanner ? "div" : "header");
+      if (hasBanner) {
+        container.setAttribute("role", "region");
+        container.setAttribute("aria-label", "Toggle dark mode");
+      }
+      container.classList.add('quarto-color-scheme-toggle-container');
+      container.appendChild(toggle);
+      window.document.body.appendChild(container);
     }
     setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
@@ -2581,11 +2624,30 @@ The online version of this book will remain open access. If you want to know whe
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
         var filterRegex = new RegExp("https:\/\/isaactpetersen\.github\.io\/Fantasy-Football-Analytics-Textbook");
+      const newWindowLabel = "(opens in a new tab)";
+      const newWindowNoteId = "quarto-ext-newwindow-label";
+      // Links reference one hidden label through aria-describedby, so the
+      // announcement never changes their accessible name.
+      var describeNewWindow = (link) => {
+        if (!window.document.getElementById(newWindowNoteId)) {
+          var newWindowNote = window.document.createElement("span");
+          newWindowNote.id = newWindowNoteId;
+          newWindowNote.hidden = true;
+          newWindowNote.textContent = newWindowLabel;
+          window.document.body.appendChild(newWindowNote);
+        }
+        var describedBy = (link.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+        if (!describedBy.includes(newWindowNoteId)) {
+          describedBy.push(newWindowNoteId);
+          link.setAttribute("aria-describedby", describedBy.join(" "));
+        }
+      }
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
       // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
       for (var i=0; i<links.length; i++) {
         const link = links[i];
         if (!isInternal(link.href)) {
@@ -2599,8 +2661,70 @@ The online version of this book will remain open access. If you want to know whe
             if (link.getAttribute("rel") === null) {
               link.setAttribute("rel", "noopener");
             }
+            describeNewWindow(link);
+          if (!link.classList.contains('no-external-icon')) {
+          }
         }
       }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
       const config = {
         allowHTML: true,
@@ -2614,6 +2738,7 @@ The online version of this book will remain open access. If you want to know whe
         interactiveBorder: 10,
         theme: 'quarto',
         placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
       };
       if (contentFn) {
         config.content = contentFn;
@@ -2776,44 +2901,54 @@ The online version of this book will remain open access. If you want to know whe
           const lineIds = lines.map((line) => {
             return targetCell + "-" + line;
           })
-          let top = null;
-          let height = null;
-          let parent = null;
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
           if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
             }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
             }
+            placeBand(gutterDiv, el, lastEl);
             selectedAnnoteEl = annoteEl;
           }
         };
@@ -2911,6 +3046,8 @@ The online version of this book will remain open access. If you want to know whe
       }
     }
   });
+  </script><script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
   </script><input type="hidden" id="giscus-base-theme" value="light"><input type="hidden" id="giscus-alt-theme" value="dark"><script>
   function loadGiscus() {
     // Function to get the theme based on body class
@@ -2940,7 +3077,7 @@ The online version of this book will remain open access. If you want to know whe
     document.getElementById("quarto-content").appendChild(script);
   }
   loadGiscus();
-</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+</script><nav class="page-navigation" aria-label="Page"><div class="nav-page nav-page-previous">
       <a href="./evaluating-prediction-accuracy.html" class="pagination-link" aria-label="Evaluation of Prediction/Forecasting Accuracy">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Evaluation of Prediction/Forecasting Accuracy</span></span>
       </a>          
